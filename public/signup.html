@@ -256,8 +256,10 @@ pwInput.addEventListener('input', () => {
   meterLb.textContent = 'Strength: ' + STRENGTH[s].t;
 });
 
+let submitting = false;
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
+  if (submitting) return;
   clearAlert();
   const username = document.getElementById('username').value.trim();
   const email    = document.getElementById('email').value.trim();
@@ -272,6 +274,7 @@ form.addEventListener('submit', async (e) => {
     return;
   }
 
+  submitting = true;
   btn.disabled = true; btn.textContent = 'Creating account…';
   try {
     const r = await fetch('/api/auth/signup', {
@@ -285,7 +288,10 @@ form.addEventListener('submit', async (e) => {
     setTimeout(() => { window.location.href = '/'; }, 500);
   } catch (err) {
     showAlert(err.message || 'Signup failed.');
-    btn.disabled = false; btn.textContent = 'Create account →';
+    setTimeout(() => {
+      submitting = false;
+      btn.disabled = false; btn.textContent = 'Create account →';
+    }, 2000);
   }
 });
 </script>

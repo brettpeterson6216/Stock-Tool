@@ -167,7 +167,19 @@ api.post('/auth/signup', async (req, res) => {
     if (byEmail.rows.length) return res.status(409).json({ error: 'An account with that email already exists.' });
 
     const hash = await bcrypt.hash(password, BCRYPT_ROUNDS);
-    const ins  = await db.execute({ sql: 'INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)', args: [username, email, hash] });
+    let ins;
+    try {
+      ins = await db.execute({ sql: 'INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)', args: [username, email, hash] });
+    } catch (dbErr) {
+      const msg = (dbErr.message || '').toLowerCase();
+      if (msg.includes('unique') && msg.includes('username'))
+        return res.status(409).json({ error: 'That username is already taken.' });
+      if (msg.includes('unique') && msg.includes('email'))
+        return res.status(409).json({ error: 'An account with that email already exists.' });
+      if (msg.includes('unique'))
+        return res.status(409).json({ error: 'That username or email is already taken.' });
+      throw dbErr;
+    }
     const userId = Number(ins.lastInsertRowid);
 
     const userRow = await db.execute({ sql: 'SELECT id, username, email, created_at FROM users WHERE id = ?', args: [userId] });
