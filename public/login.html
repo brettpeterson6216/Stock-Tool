@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Log in — StockVision Pro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#F7F4EE; --cream2:#F0EDE5; --cream3:#E8E4DA;
+  --ink:#0E0E0E; --ink2:#2A2A2A; --ink3:#3A3A3A; --ink4:#666; --ink5:#999;
+  --gold:#C89B3C; --gold-l:#F0D9A0; --gold-d:#8A6A20;
+  --green:#1A7A4A; --red:#B83030;
+  --border:rgba(14,14,14,0.08); --border2:rgba(14,14,14,0.14); --border3:rgba(14,14,14,0.22);
+  --card:#FFFEFB; --panel:#FDFAF4;
+  --shadow:0 2px 16px rgba(0,0,0,0.07); --shadow-lg:0 8px 40px rgba(0,0,0,0.09);
+  --r:4px; --r2:8px; --r3:12px;
+  --serif:'DM Serif Display', serif; --sans:'DM Sans', sans-serif; --mono:'DM Mono', monospace;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  font-family:var(--sans); background:var(--cream); color:var(--ink);
+  min-height:100vh; display:flex; flex-direction:column;
+}
+
+/* nav */
+nav{
+  height:64px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 3.5rem; border-bottom:1px solid var(--border2);
+  background:rgba(247,244,238,0.94); backdrop-filter:blur(16px);
+}
+.nav-logo{
+  font-family:var(--serif); font-size:1.3rem; letter-spacing:-0.01em;
+  color:var(--ink); text-decoration:none;
+  display:flex; align-items:center; gap:10px;
+}
+.logo-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);}
+.nav-right{font-size:.85rem;color:var(--ink4);}
+.nav-right a{color:var(--ink); text-decoration:none; font-weight:500; margin-left:.4rem;}
+.nav-right a:hover{color:var(--gold-d);}
+
+/* layout */
+main{
+  flex:1; display:flex; align-items:center; justify-content:center;
+  padding:3rem 1.5rem;
+  background:
+    radial-gradient(ellipse 600px 400px at 30% 30%, rgba(200,155,60,0.08), transparent),
+    radial-gradient(ellipse 500px 300px at 80% 70%, rgba(200,155,60,0.05), transparent),
+    var(--cream);
+}
+
+/* card */
+.auth-card{
+  width:100%; max-width:440px;
+  background:var(--card); border:1px solid var(--border2);
+  border-radius:var(--r3); padding:2.5rem 2.25rem;
+  box-shadow:var(--shadow-lg);
+}
+.auth-eyebrow{
+  font-family:var(--mono); font-size:.7rem; color:var(--gold-d);
+  text-transform:uppercase; letter-spacing:0.18em; margin-bottom:.7rem;
+}
+.auth-title{
+  font-family:var(--serif); font-size:2rem; line-height:1.15;
+  letter-spacing:-0.015em; margin-bottom:.4rem;
+}
+.auth-title em{font-style:italic; color:var(--gold-d);}
+.auth-sub{
+  font-size:.92rem; color:var(--ink4); margin-bottom:1.75rem;
+}
+
+/* form */
+.field{margin-bottom:1rem;}
+.field label{
+  display:block; font-size:.78rem; font-weight:500; color:var(--ink3);
+  margin-bottom:.4rem; letter-spacing:0.01em;
+}
+.field input{
+  width:100%; padding:.75rem .9rem;
+  font-family:var(--sans); font-size:.95rem; color:var(--ink);
+  background:var(--panel); border:1px solid var(--border2);
+  border-radius:var(--r2); transition:border-color .18s, background .18s;
+}
+.field input:focus{
+  outline:none; border-color:var(--gold);
+  background:var(--card);
+  box-shadow:0 0 0 3px rgba(200,155,60,0.12);
+}
+.field-hint{
+  font-size:.72rem; color:var(--ink5); margin-top:.35rem;
+}
+
+.row-between{
+  display:flex; align-items:center; justify-content:space-between;
+  margin:.4rem 0 1.25rem;
+}
+.row-between a{
+  font-size:.8rem; color:var(--ink4); text-decoration:none;
+}
+.row-between a:hover{color:var(--gold-d); text-decoration:underline;}
+
+.btn-primary{
+  width:100%; padding:.85rem 1rem;
+  background:var(--ink); color:var(--cream);
+  border:none; border-radius:var(--r2);
+  font-family:var(--sans); font-size:.95rem; font-weight:500;
+  cursor:pointer; transition:background .18s;
+}
+.btn-primary:hover{background:var(--ink2);}
+.btn-primary:disabled{background:var(--ink5); cursor:not-allowed;}
+
+.divider{
+  display:flex; align-items:center; gap:.75rem;
+  margin:1.5rem 0; color:var(--ink5); font-size:.72rem;
+  text-transform:uppercase; letter-spacing:0.12em;
+}
+.divider::before,.divider::after{
+  content:""; flex:1; height:1px; background:var(--border2);
+}
+
+.alt-line{
+  text-align:center; font-size:.88rem; color:var(--ink4);
+}
+.alt-line a{
+  color:var(--ink); text-decoration:none; font-weight:500;
+  border-bottom:1px solid var(--gold);
+}
+.alt-line a:hover{color:var(--gold-d);}
+
+/* alerts */
+.alert{
+  display:none; padding:.7rem .85rem; border-radius:var(--r2);
+  font-size:.85rem; margin-bottom:1rem; line-height:1.4;
+}
+.alert.show{display:block;}
+.alert-error{background:rgba(184,48,48,0.08); color:var(--red); border:1px solid rgba(184,48,48,0.2);}
+.alert-success{background:rgba(26,122,74,0.08); color:var(--green); border:1px solid rgba(26,122,74,0.2);}
+
+/* security note */
+.sec-note{
+  margin-top:1.5rem; padding:.75rem .9rem;
+  background:var(--cream2); border-left:3px solid var(--gold);
+  border-radius:var(--r);
+  font-size:.75rem; color:var(--ink4); line-height:1.5;
+}
+.sec-note strong{color:var(--ink2); font-weight:500;}
+
+footer{
+  padding:1.5rem 3.5rem; border-top:1px solid var(--border);
+  font-size:.75rem; color:var(--ink5);
+  display:flex; justify-content:space-between; align-items:center;
+}
+
+@media (max-width:560px){
+  nav,footer{padding-left:1.25rem; padding-right:1.25rem;}
+  .auth-card{padding:2rem 1.5rem;}
+  .auth-title{font-size:1.7rem;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="/"><span class="logo-dot"></span>StockVision Pro</a>
+  <div class="nav-right">
+    New here? <a href="/signup">Create an account</a>
+  </div>
+</nav>
+
+<main>
+  <div class="auth-card">
+    <div class="auth-eyebrow">Welcome back</div>
+    <h1 class="auth-title">Sign in to <em>StockVision</em>.</h1>
+    <p class="auth-sub">Use your username or email to access live data, projections, and your saved tools.</p>
+
+    <div id="alert" class="alert"></div>
+
+    <form id="login-form" autocomplete="on" novalidate>
+      <div class="field">
+        <label for="identifier">Username or email</label>
+        <input id="identifier" name="identifier" type="text"
+               autocomplete="username" required autofocus
+               placeholder="you@example.com or yourhandle">
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password"
+               autocomplete="current-password" required
+               placeholder="••••••••">
+      </div>
+      <div class="row-between">
+        <span></span>
+        <a href="#" onclick="event.preventDefault(); alert('Password reset is coming soon.')">Forgot password?</a>
+      </div>
+
+      <button id="submit-btn" class="btn-primary" type="submit">Log in →</button>
+    </form>
+
+    <div class="divider">or</div>
+    <div class="alt-line">
+      Don't have an account? <a href="/signup">Sign up free</a>
+    </div>
+
+    <div class="sec-note">
+      <strong>Your password is encrypted.</strong> We hash it with bcrypt (12 rounds) before saving — even we can't read it.
+    </div>
+  </div>
+</main>
+
+<footer>
+  <span>© <span id="year"></span> StockVision Pro</span>
+  <span style="font-family:var(--mono); letter-spacing:.05em;">SECURE LOGIN · TLS-READY</span>
+</footer>
+
+<script>
+document.getElementById('year').textContent = new Date().getFullYear();
+
+const form    = document.getElementById('login-form');
+const alertEl = document.getElementById('alert');
+const btn     = document.getElementById('submit-btn');
+
+function showAlert(msg, kind){
+  alertEl.className = 'alert show alert-' + (kind || 'error');
+  alertEl.textContent = msg;
+}
+function clearAlert(){ alertEl.className = 'alert'; alertEl.textContent = ''; }
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  clearAlert();
+  const identifier = document.getElementById('identifier').value.trim();
+  const password   = document.getElementById('password').value;
+  if (!identifier || !password){
+    showAlert('Please enter your username/email and password.');
+    return;
+  }
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  try {
+    const r = await fetch('/api/auth/login', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ identifier, password }),
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || 'Login failed.');
+    showAlert('Signed in. Redirecting…', 'success');
+    setTimeout(() => { window.location.href = '/'; }, 400);
+  } catch (err) {
+    showAlert(err.message || 'Login failed.');
+    btn.disabled = false; btn.textContent = 'Log in →';
+  }
+});
+</script>
+
+</body>
+</html>
