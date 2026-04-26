@@ -33,29 +33,25 @@ const db = createClient({
 
 // ---- DB setup (runs once on startup) ----
 async function initDb() {
-  await db.executeMultiple(`
-    PRAGMA journal_mode = WAL;
-    PRAGMA foreign_keys = ON;
-
+  await db.execute(`
     CREATE TABLE IF NOT EXISTS users (
       id            INTEGER PRIMARY KEY AUTOINCREMENT,
       username      TEXT    UNIQUE NOT NULL,
       email         TEXT    UNIQUE NOT NULL,
       password_hash TEXT    NOT NULL,
       created_at    TEXT    NOT NULL DEFAULT (datetime('now'))
-    );
-
-    CREATE INDEX IF NOT EXISTS idx_users_email    ON users(email);
-    CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
-
+    )
+  `);
+  await db.execute(`CREATE INDEX IF NOT EXISTS idx_users_email    ON users(email)`);
+  await db.execute(`CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)`);
+  await db.execute(`
     CREATE TABLE IF NOT EXISTS sessions (
       sid     TEXT PRIMARY KEY,
       expires INTEGER NOT NULL,
       data    TEXT NOT NULL
-    );
-
-    CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions(expires);
+    )
   `);
+  await db.execute(`CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions(expires)`);
   console.log('Database initialised');
 }
 
