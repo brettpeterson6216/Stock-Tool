@@ -1,9 +1,8 @@
 // ============================================================
 //  StockVision Pro -- Auth server
-//  Free stack -- PURE JAVASCRIPT, no native compile required:
-//    Node.js (built-in node:sqlite -- requires Node >= 22)
-//    Express
-//    bcryptjs   (password hashing, 12 rounds)
+//  Database: Turso (free hosted libSQL / SQLite)
+//    @libsql/client  (async API)
+//    bcryptjs        (password hashing, 12 rounds)
 //    express-session
 //
 //  Passwords are NEVER stored in plaintext. They are hashed
@@ -14,96 +13,95 @@
 require('dotenv').config();
 
 const path      = require('path');
-const fs        = require('fs');
 const express   = require('express');
 const session   = require('express-session');
 const bcrypt    = require('bcryptjs');
 const helmet    = require('helmet');
 const rateLimit = require('express-rate-limit');
-const { DatabaseSync } = require('node:sqlite');
+const { createClient } = require('@libsql/client');
 
 const PORT           = process.env.PORT || 3000;
 const SESSION_SECRET = process.env.SESSION_SECRET || 'change-me-in-production-please';
-const FINNHUB_KEY    = process.env.FINNHUB_KEY || 'd7n43rpr01qppri3flo0d7n43rpr01qppri3flog';
+const FINNHUB_KEY    = process.env.FINNHUB_KEY    || 'd7n43rpr01qppri3flo0d7n43rpr01qppri3flog';
 const BCRYPT_ROUNDS  = 12;
-const DB_DIR         = path.join(__dirname, 'data');
-const DB_FILE        = path.join(DB_DIR, 'app.db');
 
-// ---- ensure data dir exists ----
-if (!fs.existsSync(DB_DIR)) fs.mkdirSync(DB_DIR, { recursive: true });
+// ---- Turso client ----
+const db = createClient({
+  url:       process.env.TURSO_URL       || 'file:local.db',
+  authToken: process.env.TURSO_AUTH_TOKEN || undefined,
+});
 
-// ---- DB setup ----
-const db = new DatabaseSync(DB_FILE);
-db.exec('PRAGMA journal_mode = WAL');
-db.exec('PRAGMA foreign_keys = ON');
+// ---- DB setup (runs once on startup) ----
+async function initDb() {
+  await db.executeMultiple(`
+    PRAGMA journal_mode = WAL;
+    PRAGMA foreign_keys = ON;
 
-db.exec(`
-  CREATE TABLE IF NOT EXISTS users (
-    id            INTEGER PRIMARY KEY AUTOINCREMENT,
-    username      TEXT    UNIQUE NOT NULL,
-    email         TEXT    UNIQUE NOT NULL,
-    password_hash TEXT    NOT NULL,
-    created_at    TEXT    NOT NULL DEFAULT (datetime('now'))
-  );
-`);
-db.exec('CREATE INDEX IF NOT EXISTS idx_users_email    ON users(email);');
-db.exec('CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);');
+    CREATE TABLE IF NOT EXISTS users (
+      id            INTEGER PRIMARY KEY AUTOINCREMENT,
+      username      TEXT    UNIQUE NOT NULL,
+      email         TEXT    UNIQUE NOT NULL,
+      password_hash TEXT    NOT NULL,
+      created_at    TEXT    NOT NULL DEFAULT (datetime('now'))
+    );
 
-const userStmts = {
-  findByLogin:    db.prepare('SELECT id, username, email, password_hash FROM users WHERE username = ? OR email = ? LIMIT 1'),
-  findByUsername: db.prepare('SELECT id FROM users WHERE username = ? LIMIT 1'),
-  findByEmail:    db.prepare('SELECT id FROM users WHERE email    = ? LIMIT 1'),
-  insertUser:     db.prepare('INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)'),
-  getUserById:    db.prepare('SELECT id, username, email, created_at FROM users WHERE id = ?'),
-};
+    CREATE INDEX IF NOT EXISTS idx_users_email    ON users(email);
+    CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+
+    CREATE TABLE IF NOT EXISTS sessions (
+      sid     TEXT PRIMARY KEY,
+      expires INTEGER NOT NULL,
+      data    TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions(expires);
+  `);
+  console.log('Database initialised');
+}
 
 // ============================================================
-//  Tiny SQLite-backed session store (no extra dependency)
+//  Async SQLite-backed session store for Turso
 // ============================================================
-db.exec(`
-  CREATE TABLE IF NOT EXISTS sessions (
-    sid     TEXT PRIMARY KEY,
-    expires INTEGER NOT NULL,
-    data    TEXT NOT NULL
-  );
-`);
-db.exec('CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions(expires);');
-
-const sessStmts = {
-  get:     db.prepare('SELECT data, expires FROM sessions WHERE sid = ?'),
-  set:     db.prepare('INSERT INTO sessions (sid, expires, data) VALUES (?, ?, ?) ON CONFLICT(sid) DO UPDATE SET expires = excluded.expires, data = excluded.data'),
-  destroy: db.prepare('DELETE FROM sessions WHERE sid = ?'),
-  cleanup: db.prepare('DELETE FROM sessions WHERE expires < ?'),
-};
-
-class SqliteStore extends session.Store {
+class TursoStore extends session.Store {
   get(sid, cb) {
-    try {
-      const row = sessStmts.get.get(sid);
-      if (!row) return cb(null, null);
-      if (Number(row.expires) < Date.now()) {
-        sessStmts.destroy.run(sid);
-        return cb(null, null);
-      }
-      cb(null, JSON.parse(row.data));
-    } catch (e) { cb(e); }
+    db.execute({ sql: 'SELECT data, expires FROM sessions WHERE sid = ?', args: [sid] })
+      .then(res => {
+        const row = res.rows[0];
+        if (!row) return cb(null, null);
+        if (Number(row.expires) < Date.now()) {
+          db.execute({ sql: 'DELETE FROM sessions WHERE sid = ?', args: [sid] }).catch(() => {});
+          return cb(null, null);
+        }
+        try { cb(null, JSON.parse(row.data)); } catch (e) { cb(e); }
+      })
+      .catch(cb);
   }
+
   set(sid, sess, cb) {
-    try {
-      const expires = sess.cookie && sess.cookie.expires
-        ? new Date(sess.cookie.expires).getTime()
-        : Date.now() + 7 * 24 * 60 * 60 * 1000;
-      sessStmts.set.run(sid, expires, JSON.stringify(sess));
-      cb && cb(null);
-    } catch (e) { cb && cb(e); }
+    const expires = sess.cookie && sess.cookie.expires
+      ? new Date(sess.cookie.expires).getTime()
+      : Date.now() + 7 * 24 * 60 * 60 * 1000;
+    db.execute({
+      sql:  'INSERT INTO sessions (sid, expires, data) VALUES (?, ?, ?) ON CONFLICT(sid) DO UPDATE SET expires = excluded.expires, data = excluded.data',
+      args: [sid, expires, JSON.stringify(sess)],
+    })
+      .then(() => cb && cb(null))
+      .catch(e => cb && cb(e));
   }
+
   destroy(sid, cb) {
-    try { sessStmts.destroy.run(sid); cb && cb(null); }
-    catch (e) { cb && cb(e); }
+    db.execute({ sql: 'DELETE FROM sessions WHERE sid = ?', args: [sid] })
+      .then(() => cb && cb(null))
+      .catch(e => cb && cb(e));
   }
+
   touch(sid, sess, cb) { this.set(sid, sess, cb); }
 }
-setInterval(() => { try { sessStmts.cleanup.run(Date.now()); } catch (_) {} }, 60 * 60 * 1000);
+
+// Cleanup expired sessions every hour
+setInterval(() => {
+  db.execute({ sql: 'DELETE FROM sessions WHERE expires < ?', args: [Date.now()] }).catch(() => {});
+}, 60 * 60 * 1000);
 
 // ---- App ----
 const app = express();
@@ -113,7 +111,7 @@ app.use(express.json({ limit: '64kb' }));
 app.use(express.urlencoded({ extended: false, limit: '64kb' }));
 
 app.use(session({
-  store: new SqliteStore(),
+  store: new TursoStore(),
   name: 'svp.sid',
   secret: SESSION_SECRET,
   resave: false,
@@ -166,18 +164,19 @@ api.post('/auth/signup', async (req, res) => {
     const errors = validateSignup({ username, email, password });
     if (errors.length) return res.status(400).json({ error: errors.join(' ') });
 
-    if (userStmts.findByUsername.get(username))
-      return res.status(409).json({ error: 'That username is already taken.' });
-    if (userStmts.findByEmail.get(email))
-      return res.status(409).json({ error: 'An account with that email already exists.' });
+    const byUser  = await db.execute({ sql: 'SELECT id FROM users WHERE username = ? LIMIT 1', args: [username] });
+    if (byUser.rows.length) return res.status(409).json({ error: 'That username is already taken.' });
+
+    const byEmail = await db.execute({ sql: 'SELECT id FROM users WHERE email = ? LIMIT 1', args: [email] });
+    if (byEmail.rows.length) return res.status(409).json({ error: 'An account with that email already exists.' });
 
     const hash = await bcrypt.hash(password, BCRYPT_ROUNDS);
-    const info = userStmts.insertUser.run(username, email, hash);
-    const userId = Number(info.lastInsertRowid);
+    const ins  = await db.execute({ sql: 'INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)', args: [username, email, hash] });
+    const userId = Number(ins.lastInsertRowid);
 
+    const userRow = await db.execute({ sql: 'SELECT id, username, email, created_at FROM users WHERE id = ?', args: [userId] });
     req.session.userId = userId;
-    const user = userStmts.getUserById.get(userId);
-    return res.status(201).json({ user });
+    return res.status(201).json({ user: userRow.rows[0] || null });
   } catch (err) {
     console.error('signup error:', err);
     return res.status(500).json({ error: 'Could not create account.' });
@@ -193,16 +192,15 @@ api.post('/auth/login', async (req, res) => {
       return res.status(400).json({ error: 'Please enter your username/email and password.' });
 
     const lookup = identifier.includes('@') ? identifier.toLowerCase() : identifier;
-    const row = userStmts.findByLogin.get(lookup, lookup);
+    const result = await db.execute({ sql: 'SELECT id, username, email, password_hash FROM users WHERE username = ? OR email = ? LIMIT 1', args: [lookup, lookup] });
+    const row = result.rows[0];
     if (!row) return res.status(401).json({ error: 'Invalid credentials.' });
 
     const ok = await bcrypt.compare(password, row.password_hash);
     if (!ok) return res.status(401).json({ error: 'Invalid credentials.' });
 
     req.session.userId = Number(row.id);
-    return res.json({
-      user: { id: Number(row.id), username: row.username, email: row.email },
-    });
+    return res.json({ user: { id: Number(row.id), username: row.username, email: row.email } });
   } catch (err) {
     console.error('login error:', err);
     return res.status(500).json({ error: 'Login failed.' });
@@ -216,10 +214,14 @@ api.post('/auth/logout', (req, res) => {
   });
 });
 
-api.get('/auth/me', (req, res) => {
+api.get('/auth/me', async (req, res) => {
   if (!req.session.userId) return res.json({ user: null });
-  const user = userStmts.getUserById.get(req.session.userId);
-  return res.json({ user: user || null });
+  try {
+    const result = await db.execute({ sql: 'SELECT id, username, email, created_at FROM users WHERE id = ?', args: [req.session.userId] });
+    return res.json({ user: result.rows[0] || null });
+  } catch (err) {
+    return res.json({ user: null });
+  }
 });
 
 app.use('/api', api);
@@ -312,7 +314,12 @@ app.use(express.static(path.join(__dirname), { index: false }));
 
 app.use((req, res) => res.status(404).send('Not found'));
 
-app.listen(PORT, () => {
-  console.log('StockVision Pro server running at http://localhost:' + PORT);
-  console.log('DB: ' + DB_FILE);
+// ---- Start ----
+initDb().then(() => {
+  app.listen(PORT, () => {
+    console.log('StockVision Pro running at http://localhost:' + PORT);
+  });
+}).catch(err => {
+  console.error('Failed to initialise database:', err);
+  process.exit(1);
 });
