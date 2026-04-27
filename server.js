@@ -1,5 +1,5 @@
 // ============================================================
-//  StockVision Pro -- Auth server
+//  Implied Lens -- Auth server
 //  Database: Turso (free hosted libSQL / SQLite)
 //    @libsql/client  (async API)
 //    bcryptjs        (password hashing, 12 rounds)
@@ -19,11 +19,18 @@ const bcrypt    = require('bcryptjs');
 const helmet    = require('helmet');
 const rateLimit = require('express-rate-limit');
 const { createClient } = require('@libsql/client');
+const Stripe = require('stripe');
 
-const PORT           = process.env.PORT || 3000;
-const SESSION_SECRET = process.env.SESSION_SECRET || 'change-me-in-production-please';
-const FINNHUB_KEY    = process.env.FINNHUB_KEY    || 'd7n43rpr01qppri3flo0d7n43rpr01qppri3flog';
-const BCRYPT_ROUNDS  = 12;
+const PORT                 = process.env.PORT || 3000;
+const SESSION_SECRET       = process.env.SESSION_SECRET || 'change-me-in-production-please';
+const FINNHUB_KEY          = process.env.FINNHUB_KEY    || 'd7n43rpr01qppri3flo0d7n43rpr01qppri3flog';
+const BCRYPT_ROUNDS        = 12;
+const STRIPE_SECRET_KEY    = process.env.STRIPE_SECRET_KEY    || '';
+const STRIPE_WEBHOOK_SECRET= process.env.STRIPE_WEBHOOK_SECRET|| '';
+const STRIPE_PRICE_MONTHLY = process.env.STRIPE_PRICE_MONTHLY || '';
+const STRIPE_PRICE_ANNUAL  = process.env.STRIPE_PRICE_ANNUAL  || '';
+const APP_URL              = process.env.APP_URL || 'http://localhost:' + (process.env.PORT || 3000);
+const stripe               = STRIPE_SECRET_KEY ? Stripe(STRIPE_SECRET_KEY) : null;
 
 // ---- Turso client ----
 const db = createClient({
@@ -52,7 +59,26 @@ async function initDb() {
     )
   `);
   await db.execute(`CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions(expires)`);
+
+  // Add plan columns if they don't exist yet (ALTER TABLE has no IF NOT EXISTS in SQLite)
+  const planCols = [
+    "plan TEXT NOT NULL DEFAULT 'free'",
+    'trial_ends_at TEXT',
+    'stripe_customer_id TEXT',
+    'stripe_subscription_id TEXT',
+  ];
+  for (const col of planCols) {
+    try { await db.execute('ALTER TABLE users ADD COLUMN ' + col); } catch (_) {}
+  }
+
   console.log('Database initialised');
+}
+
+// ---- Plan helper ----
+function getEffectivePlan(user) {
+  if (user.plan === 'pro') return 'pro';
+  if (user.plan === 'trial' && user.trial_ends_at && new Date(user.trial_ends_at) > new Date()) return 'trial';
+  return 'free';
 }
 
 // ============================================================
@@ -103,12 +129,12 @@ setInterval(() => {
 const app = express();
 app.set('trust proxy', 1);
 app.use(helmet({ contentSecurityPolicy: false }));
-app.use(express.json({ limit: '64kb' }));
+app.use(express.json({ limit: '64kb', verify: (req, _res, buf) => { req.rawBody = buf; } }));
 app.use(express.urlencoded({ extended: false, limit: '64kb' }));
 
 app.use(session({
   store: new TursoStore(),
-  name: 'svp.sid',
+  name: 'il.sid',
   secret: SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
@@ -217,7 +243,7 @@ api.post('/auth/login', async (req, res) => {
 
 api.post('/auth/logout', (req, res) => {
   req.session.destroy(() => {
-    res.clearCookie('svp.sid');
+    res.clearCookie('il.sid');
     res.json({ ok: true });
   });
 });
@@ -225,14 +251,119 @@ api.post('/auth/logout', (req, res) => {
 api.get('/auth/me', async (req, res) => {
   if (!req.session.userId) return res.json({ user: null });
   try {
-    const result = await db.execute({ sql: 'SELECT id, username, email, created_at FROM users WHERE id = ?', args: [req.session.userId] });
-    return res.json({ user: result.rows[0] || null });
+    const result = await db.execute({
+      sql: 'SELECT id, username, email, created_at, plan, trial_ends_at FROM users WHERE id = ?',
+      args: [req.session.userId],
+    });
+    const user = result.rows[0] || null;
+    if (user) user.effectivePlan = getEffectivePlan(user);
+    return res.json({ user });
   } catch (err) {
     return res.json({ user: null });
   }
 });
 
 app.use('/api', api);
+
+// ============================================================
+//  Stripe -- checkout + webhook
+// ============================================================
+app.post('/api/stripe/create-checkout', async (req, res) => {
+  if (!stripe) return res.status(503).json({ error: 'Payments not configured yet.' });
+  if (!req.session.userId) return res.status(401).json({ error: 'Login required.' });
+
+  const priceId = req.body.annual ? STRIPE_PRICE_ANNUAL : STRIPE_PRICE_MONTHLY;
+  if (!priceId) return res.status(503).json({ error: 'Price not configured.' });
+
+  try {
+    const userRow = await db.execute({
+      sql: 'SELECT id, email, stripe_customer_id FROM users WHERE id = ?',
+      args: [req.session.userId],
+    });
+    const user = userRow.rows[0];
+    if (!user) return res.status(404).json({ error: 'User not found.' });
+
+    const params = {
+      mode: 'subscription',
+      payment_method_types: ['card'],
+      line_items: [{ price: priceId, quantity: 1 }],
+      subscription_data: { trial_period_days: 14 },
+      success_url: APP_URL + '/?upgraded=1',
+      cancel_url: APP_URL + '/',
+      metadata: { userId: String(req.session.userId) },
+    };
+    if (user.stripe_customer_id) {
+      params.customer = user.stripe_customer_id;
+    } else {
+      params.customer_email = user.email;
+    }
+
+    const session = await stripe.checkout.sessions.create(params);
+    res.json({ url: session.url });
+  } catch (err) {
+    console.error('Stripe checkout error:', err);
+    res.status(500).json({ error: 'Could not create checkout session.' });
+  }
+});
+
+app.post('/api/stripe/webhook', async (req, res) => {
+  if (!stripe) return res.status(503).send('Not configured');
+  const sig = req.headers['stripe-signature'];
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(req.rawBody, sig, STRIPE_WEBHOOK_SECRET);
+  } catch (err) {
+    console.error('Webhook signature error:', err.message);
+    return res.status(400).send('Webhook error: ' + err.message);
+  }
+
+  try {
+    switch (event.type) {
+      case 'checkout.session.completed': {
+        const sess = event.data.object;
+        const userId = sess.metadata && sess.metadata.userId;
+        if (!userId || !sess.subscription) break;
+        const sub = await stripe.subscriptions.retrieve(sess.subscription);
+        const plan = sub.status === 'trialing' ? 'trial' : 'pro';
+        const trialEnd = sub.trial_end ? new Date(sub.trial_end * 1000).toISOString() : null;
+        await db.execute({
+          sql: 'UPDATE users SET plan=?, trial_ends_at=?, stripe_customer_id=?, stripe_subscription_id=? WHERE id=?',
+          args: [plan, trialEnd, sess.customer, sess.subscription, userId],
+        });
+        break;
+      }
+      case 'customer.subscription.updated': {
+        const sub = event.data.object;
+        const r = await db.execute({ sql: 'SELECT id FROM users WHERE stripe_customer_id=?', args: [sub.customer] });
+        if (!r.rows.length) break;
+        let plan = 'free';
+        if (sub.status === 'active') plan = 'pro';
+        else if (sub.status === 'trialing') plan = 'trial';
+        const trialEnd = sub.trial_end ? new Date(sub.trial_end * 1000).toISOString() : null;
+        await db.execute({ sql: 'UPDATE users SET plan=?, trial_ends_at=? WHERE id=?', args: [plan, trialEnd, r.rows[0].id] });
+        break;
+      }
+      case 'customer.subscription.deleted': {
+        const sub = event.data.object;
+        const r = await db.execute({ sql: 'SELECT id FROM users WHERE stripe_customer_id=?', args: [sub.customer] });
+        if (!r.rows.length) break;
+        await db.execute({ sql: "UPDATE users SET plan='free', trial_ends_at=NULL WHERE id=?", args: [r.rows[0].id] });
+        break;
+      }
+      case 'invoice.payment_failed': {
+        const inv = event.data.object;
+        const r = await db.execute({ sql: 'SELECT id FROM users WHERE stripe_customer_id=?', args: [inv.customer] });
+        if (!r.rows.length) break;
+        await db.execute({ sql: "UPDATE users SET plan='free' WHERE id=?", args: [r.rows[0].id] });
+        break;
+      }
+    }
+  } catch (err) {
+    console.error('Webhook handler error:', err);
+  }
+
+  res.json({ received: true });
+});
 
 // ============================================================
 //  Finnhub proxy -- news
@@ -325,7 +456,7 @@ app.use((req, res) => res.status(404).send('Not found'));
 // ---- Start ----
 initDb().then(() => {
   app.listen(PORT, () => {
-    console.log('StockVision Pro running at http://localhost:' + PORT);
+    console.log('Implied Lens running at http://localhost:' + PORT);
   });
 }).catch(err => {
   console.error('Failed to initialise database:', err);

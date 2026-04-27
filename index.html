@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>StockVision Pro — Institutional-Grade Stock Analysis Platform</title>
+<title>Implied Lens — Institutional-Grade Stock Analysis Platform</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
@@ -637,7 +637,7 @@ footer { background:#080808; padding:3rem 2rem; }
 
 <!-- ══════════ NAV ══════════ -->
 <nav>
-  <a class="nav-logo" href="#"><span class="logo-dot"></span>StockVision Pro</a>
+  <a class="nav-logo" href="#"><span class="logo-dot"></span>Implied<em style="font-style:italic;color:var(--gold-d);">Lens</em></a>
   <div class="nav-links">
     <a href="#tool">Live Tool</a>
     <a href="#features">Features</a>
@@ -649,31 +649,68 @@ footer { background:#080808; padding:3rem 2rem; }
     <a class="btn-nav-outline" id="nav-login" href="/login">Log in</a>
     <a class="btn-nav" id="nav-signup" href="/signup">Start Free Trial</a>
     <span id="nav-user" style="display:none; font-size:.85rem; color:var(--ink3);"></span>
+    <a class="btn-nav" id="nav-upgrade" href="#" style="display:none; background:var(--gold-d); font-size:.8rem; padding:.4rem 1rem;">Upgrade to Pro</a>
     <a class="btn-nav-outline" id="nav-logout" href="#" style="display:none;">Log out</a>
   </div>
   <script>
   // ---- Auth-aware nav (talks to /api/auth/me + /api/auth/logout) ----
   (async () => {
-    const $login  = document.getElementById('nav-login');
-    const $signup = document.getElementById('nav-signup');
-    const $user   = document.getElementById('nav-user');
-    const $logout = document.getElementById('nav-logout');
+    const $login   = document.getElementById('nav-login');
+    const $signup  = document.getElementById('nav-signup');
+    const $user    = document.getElementById('nav-user');
+    const $logout  = document.getElementById('nav-logout');
+    const $upgrade = document.getElementById('nav-upgrade');
     try {
       const r = await fetch('/api/auth/me', { credentials: 'same-origin' });
       const { user } = await r.json();
       if (user) {
-        $login.style.display = 'none';
+        $login.style.display  = 'none';
         $signup.style.display = 'none';
-        $user.style.display = 'inline';
-        $user.textContent = 'Hi, ' + user.username;
+        $user.style.display   = 'inline';
         $logout.style.display = 'inline-block';
+
+        // Store plan state globally
+        if (typeof S !== 'undefined') {
+          S.userPlan    = user.effectivePlan || 'free';
+          S.trialEndsAt = user.trial_ends_at || null;
+        }
+
+        if (user.effectivePlan === 'pro') {
+          $user.textContent = user.username + ' ✦ Pro';
+          $user.style.color = 'var(--gold-d)';
+        } else if (user.effectivePlan === 'trial') {
+          const days = user.trial_ends_at
+            ? Math.max(0, Math.ceil((new Date(user.trial_ends_at) - Date.now()) / 86400000))
+            : 14;
+          $user.textContent = user.username + ' · Trial (' + days + 'd left)';
+          if ($upgrade) $upgrade.style.display = 'inline-block';
+        } else {
+          $user.textContent = user.username;
+          if ($upgrade) $upgrade.style.display = 'inline-block';
+        }
+
+        // Show upgrade CTA if not pro
+        if (user.effectivePlan !== 'pro' && $upgrade) {
+          $upgrade.style.display = 'inline-block';
+        }
+
+        if (typeof decorateProTabs !== 'undefined') decorateProTabs();
+
+        // Auto-show upgrade success toast
+        if (window.location.search.includes('upgraded=1')) {
+          if (typeof toast !== 'undefined') toast('Welcome to Pro! All features unlocked.', 'ok');
+          history.replaceState(null, '', '/');
+        }
       }
-    } catch (_) { /* server not running — fall back to default nav */ }
+    } catch (_) { /* server not running */ }
     $logout.addEventListener('click', async (e) => {
       e.preventDefault();
       await fetch('/api/auth/logout', { method:'POST', credentials:'same-origin' });
       window.location.href = '/login';
     });
+    if ($upgrade) {
+      $upgrade.addEventListener('click', (e) => { e.preventDefault(); showUpgradeModal(); });
+    }
   })();
   </script>
 </nav>
@@ -720,7 +757,7 @@ footer { background:#080808; padding:3rem 2rem; }
               <div class="chrome-dot chrome-y"></div>
               <div class="chrome-dot chrome-g"></div>
             </div>
-            <span class="tool-name">StockVision Pro — Market Analyzer</span>
+            <span class="tool-name">Implied Lens — Market Analyzer</span>
           </div>
           <span class="tool-live-badge">● LIVE</span>
         </div>
@@ -730,7 +767,7 @@ footer { background:#080808; padding:3rem 2rem; }
           <button class="tool-tab" data-tab="compare" onclick="switchTab('compare',this)">Compare</button>
           <button class="tool-tab" data-tab="projection" onclick="switchTab('projection',this)">Projection Model</button>
           <button class="tool-tab" data-tab="dcf" onclick="switchTab('dcf',this)">DCF Valuation</button>
-          <button class="tool-tab" data-tab="screener" onclick="switchTab('screener',this); loadScreener()">Screener</button>
+          <button class="tool-tab" data-tab="screener" onclick="switchTab('screener',this); if(isPro()) loadScreener()">Screener</button>
           <button class="tool-tab" data-tab="alerts" onclick="switchTab('alerts',this)">Price Alerts</button>
           <button class="tool-tab" data-tab="reports" onclick="switchTab('reports',this)">PDF Reports</button>
         </div>
@@ -997,7 +1034,7 @@ footer { background:#080808; padding:3rem 2rem; }
             <div style="margin-top:1rem;font-size:.7rem;color:rgba(247,244,238,.2);line-height:1.6;">This is an EPS-based simplified DCF, not a free-cash-flow model. Results are for educational purposes only — not investment advice.</div>
           </div>
 
-          <div class="tool-disclaimer">⚠ StockVision Pro provides market data and modeling tools for informational and educational purposes only. Projections are hypothetical models — not investment advice. Past performance does not guarantee future results. Always consult a licensed financial advisor before investing.</div>
+          <div class="tool-disclaimer">⚠ Implied Lens provides market data and modeling tools for informational and educational purposes only. Projections are hypothetical models — not investment advice. Past performance does not guarantee future results. Always consult a licensed financial advisor before investing.</div>
         </div><!-- /tool-body -->
       </div><!-- /tool-shell -->
     </div>
@@ -1089,7 +1126,8 @@ footer { background:#080808; padding:3rem 2rem; }
         <div class="pricing-card featured">
           <div class="pricing-pop">Most Popular</div>
           <div class="pricing-tier">Pro</div>
-          <div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">29</span><span class="p-per">/month</span></div>
+          <div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">7.99</span><span class="p-per">/month</span></div>
+          <p class="p-desc" style="font-size:.8rem;margin-bottom:.25rem;opacity:.7;">or $60/year — save 37%</p>
           <p class="p-desc">For serious investors who research and track positions every day.</p>
           <ul class="p-features">
             <li>Unlimited stock analyses</li>
@@ -1098,12 +1136,10 @@ footer { background:#080808; padding:3rem 2rem; }
             <li>4-stock side-by-side comparison</li>
             <li>Performance & radar charts</li>
             <li>Full stock screener</li>
-            <li>Price & signal alerts (email)</li>
             <li>PDF report export</li>
-            <li>Unlimited watchlist</li>
             <li>Risk & volatility dashboard</li>
           </ul>
-          <button class="btn-plan btn-plan-gold" onclick="openModal()">Start 14-day free trial</button>
+          <button class="btn-plan btn-plan-gold" onclick="showUpgradeModal()">Start 14-day free trial →</button>
         </div>
         <div class="pricing-card">
           <div class="pricing-tier">Team</div>
@@ -1132,7 +1168,7 @@ footer { background:#080808; padding:3rem 2rem; }
       <div class="testi-grid">
         <div class="testi-card">
           <div class="testi-stars">★★★★★</div>
-          <p class="testi-q">"I used to spend hours building spreadsheets for every stock I researched. StockVision Pro does in 30 seconds what took me an afternoon. The 3-scenario projection is exactly how I think about positions."</p>
+          <p class="testi-q">"I used to spend hours building spreadsheets for every stock I researched. Implied Lens does in 30 seconds what took me an afternoon. The 3-scenario projection is exactly how I think about positions."</p>
           <div class="testi-author"><div class="t-avatar">MR</div><div><div class="t-name">Marcus R.</div><div class="t-title">Self-directed investor, 12 years</div></div></div>
         </div>
         <div class="testi-card">
@@ -1165,7 +1201,7 @@ footer { background:#080808; padding:3rem 2rem; }
   <!-- FOOTER -->
   <footer>
     <div class="footer-inner">
-      <div class="f-logo">StockVision Pro</div>
+      <div class="f-logo">Implied<em style="font-style:italic;color:var(--gold-d);">Lens</em></div>
       <div class="f-links">
         <a href="#">Privacy Policy</a>
         <a href="#">Terms of Service</a>
@@ -1173,32 +1209,55 @@ footer { background:#080808; padding:3rem 2rem; }
         <a href="#">Contact</a>
         <a href="#">Blog</a>
       </div>
-      <div class="f-copy">© 2025 StockVision Pro. Not financial advice.</div>
+      <div class="f-copy">© 2026 Implied Lens. Not financial advice.</div>
     </div>
   </footer>
 
 </div><!-- /page-home -->
 
 <!-- ══════════ UPGRADE MODAL ══════════ -->
+<!-- Legacy modal (kept for openModal() calls) -->
 <div class="modal-bg" id="modal-bg" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <button class="modal-close" onclick="closeModal()">✕</button>
-    <h3>Start your Pro trial</h3>
-    <p>Get full access to DCF modeling, advanced projections, the stock screener, PDF exports, alerts, and unlimited analyses. 14-day free trial — cancel anytime.</p>
-    <div class="plans">
-      <div class="plan-opt sel" onclick="selectPlan(this)">
-        <div class="plan-opt-name">Pro</div>
-        <div class="plan-opt-price">$29<span class="plan-opt-per">/mo</span></div>
-        <div style="font-size:.72rem;color:var(--ink4);margin-top:4px;">For individual investors</div>
+    <h3>Upgrade to Pro</h3>
+    <p>Get full access to all Pro features with a 14-day free trial.</p>
+    <button class="btn-modal-cta" onclick="closeModal(); showUpgradeModal();">See plans →</button>
+  </div>
+</div>
+
+<!-- Upgrade modal -->
+<div class="modal-bg" id="upgrade-modal-bg" onclick="if(event.target===this)closeUpgradeModal()">
+  <div class="modal" style="max-width:480px;">
+    <button class="modal-close" onclick="closeUpgradeModal()">✕</button>
+    <div style="font-family:var(--mono);font-size:.68rem;color:var(--gold-d);text-transform:uppercase;letter-spacing:.14em;margin-bottom:.5rem;">Pro Plan</div>
+    <h3 style="font-family:var(--serif);font-size:1.6rem;letter-spacing:-.01em;margin-bottom:.5rem;">Unlock <em style="color:var(--gold-d);font-style:italic;">all</em> the tools.</h3>
+    <p style="font-size:.9rem;color:var(--ink4);margin-bottom:1.5rem;">14-day free trial. No charge until day 15. Cancel anytime.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1.25rem;">
+      <div id="plan-monthly" class="plan-opt sel" onclick="selectUpgradePlan('monthly')" style="cursor:pointer;">
+        <div class="plan-opt-name">Monthly</div>
+        <div class="plan-opt-price">$7.99<span class="plan-opt-per">/mo</span></div>
+        <div style="font-size:.72rem;color:var(--ink5);margin-top:4px;">Billed monthly</div>
       </div>
-      <div class="plan-opt" onclick="selectPlan(this)">
-        <div class="plan-opt-name">Team</div>
-        <div class="plan-opt-price">$79<span class="plan-opt-per">/mo</span></div>
-        <div style="font-size:.72rem;color:var(--ink4);margin-top:4px;">Up to 5 team members</div>
+      <div id="plan-annual" class="plan-opt" onclick="selectUpgradePlan('annual')" style="cursor:pointer;">
+        <div class="plan-opt-name">Annual <span style="font-size:.65rem;background:var(--gold);color:#fff;border-radius:3px;padding:1px 5px;">SAVE 37%</span></div>
+        <div class="plan-opt-price">$5.00<span class="plan-opt-per">/mo</span></div>
+        <div style="font-size:.72rem;color:var(--ink5);margin-top:4px;">$60 billed yearly</div>
       </div>
     </div>
-    <button class="btn-modal-cta">Start Free 14-Day Trial →</button>
-    <div class="modal-note">No credit card required for trial. Cancel before day 14 and you won't be charged.</div>
+
+    <ul style="list-style:none;margin-bottom:1.25rem;display:grid;grid-template-columns:1fr 1fr;gap:.3rem .75rem;">
+      <li style="font-size:.82rem;color:var(--ink3);">✓ DCF Valuation model</li>
+      <li style="font-size:.82rem;color:var(--ink3);">✓ Advanced Projection</li>
+      <li style="font-size:.82rem;color:var(--ink3);">✓ Stock Screener</li>
+      <li style="font-size:.82rem;color:var(--ink3);">✓ PDF Report export</li>
+      <li style="font-size:.82rem;color:var(--ink3);">✓ 4-stock comparison</li>
+      <li style="font-size:.82rem;color:var(--ink3);">✓ Risk dashboard</li>
+    </ul>
+
+    <button id="upgrade-cta-btn" class="btn-modal-cta" onclick="handleUpgradeClick()">Start 14-day free trial →</button>
+    <div class="modal-note" style="margin-top:.75rem;">Card required to hold trial. You won't be charged until day 15.</div>
   </div>
 </div>
 
@@ -1246,21 +1305,63 @@ const S = {
   inds: { ma50: true, ma200: false, bb: false },
   screenerData: null,
   screenerSort: { col: 'marketCap', dir: -1 },
+  userPlan: 'free',   // 'free' | 'trial' | 'pro'
+  trialEndsAt: null,
 };
 const PROXY = 'https://api.allorigins.win/raw?url=';
 const COLORS = ['#C89B3C','#4a9fd4','#4ade80','#f87171'];
+const PRO_TABS = ['projection','dcf','screener','reports'];
 
 /* ══════════════════════════════════════════════════════
    TABS
 ══════════════════════════════════════════════════════ */
+function isPro() { return S.userPlan === 'pro' || S.userPlan === 'trial'; }
+
 function switchTab(id, btn) {
+  if (PRO_TABS.includes(id) && !isPro()) {
+    showUpgradeModal(); return;
+  }
   document.querySelectorAll('.tool-tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.tab-pane').forEach(p=>p.style.display='none');
   btn.classList.add('active');
   document.getElementById('tab-'+id).style.display='block';
 }
-function switchTabLocked(id, btn) {
-  switchTab(id, btn);
+function switchTabLocked(id, btn) { switchTab(id, btn); }
+
+function showUpgradeModal() { document.getElementById('upgrade-modal-bg').classList.add('show'); }
+function closeUpgradeModal() { document.getElementById('upgrade-modal-bg').classList.remove('show'); }
+
+async function startTrial(annual) {
+  try {
+    const r = await fetch('/api/stripe/create-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({ annual: !!annual }),
+    });
+    const data = await r.json();
+    if (!r.ok) { toast(data.error || 'Could not start checkout.', 'err'); return; }
+    window.location.href = data.url;
+  } catch (e) {
+    toast('Something went wrong. Please try again.', 'err');
+  }
+}
+
+// Decorate pro tabs with a lock badge
+function decorateProTabs() {
+  document.querySelectorAll('.tool-tab').forEach(btn => {
+    const id = btn.getAttribute('data-tab');
+    if (PRO_TABS.includes(id) && !isPro() && !btn.querySelector('.tab-lock')) {
+      const lock = document.createElement('span');
+      lock.className = 'tab-lock';
+      lock.textContent = ' 🔒';
+      btn.appendChild(lock);
+    }
+    if (isPro()) {
+      const lock = btn.querySelector('.tab-lock');
+      if (lock) lock.remove();
+    }
+  });
 }
 
 /* ══════════════════════════════════════════════════════
@@ -1269,6 +1370,19 @@ function switchTabLocked(id, btn) {
 function openModal() { document.getElementById('modal-bg').classList.add('show'); }
 function closeModal() { document.getElementById('modal-bg').classList.remove('show'); }
 function selectPlan(el) { document.querySelectorAll('.plan-opt').forEach(p=>p.classList.remove('sel')); el.classList.add('sel'); }
+
+let _upgradePlan = 'monthly';
+function selectUpgradePlan(plan) {
+  _upgradePlan = plan;
+  document.getElementById('plan-monthly').classList.toggle('sel', plan === 'monthly');
+  document.getElementById('plan-annual').classList.toggle('sel', plan === 'annual');
+}
+async function handleUpgradeClick() {
+  const btn = document.getElementById('upgrade-cta-btn');
+  btn.disabled = true; btn.textContent = 'Redirecting to checkout…';
+  await startTrial(_upgradePlan === 'annual');
+  btn.disabled = false; btn.textContent = 'Start 14-day free trial →';
+}
 
 /* ══════════════════════════════════════════════════════
    TOAST
@@ -1849,7 +1963,7 @@ function exportPDF() {
   if(!S.ticker){ toast('Load a stock first','red'); return; }
   checkReportReady();
   var title=document.title;
-  document.title=S.ticker+' Analysis -- StockVision Pro';
+  document.title=S.ticker+' Analysis -- Implied Lens';
   window.print();
   document.title=title;
 }
@@ -1929,6 +2043,9 @@ document.querySelectorAll('.tool-tab').forEach(function(btn){
     if(btn.dataset.tab==='reports') setTimeout(checkReportReady,50);
   });
 });
+
+// Apply pro tab decorations on load (plan state populated by nav auth script)
+setTimeout(decorateProTabs, 500);
 </script>
 </body>
 </html>
