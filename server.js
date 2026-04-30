@@ -225,10 +225,10 @@ api.post("/auth/login", async (req, res) => {
     const lookup = identifier.includes("@") ? identifier.toLowerCase() : identifier;
     const result = await db.execute({ sql: "SELECT id, username, email, password_hash FROM users WHERE username = ? OR email = ? LIMIT 1", args: [lookup, lookup] });
     const row = result.rows[0];
-    if (!row) return res.status(401).json({ error: "Invalid credentials." });
+    if (!row) return res.status(401).json({ error: "No account found with that username or email." });
 
     const ok = await bcrypt.compare(password, row.password_hash);
-    if (!ok) return res.status(401).json({ error: "Invalid credentials." });
+    if (!ok) return res.status(401).json({ error: "Incorrect password." });
 
     req.session.userId = Number(row.id);
     return res.json({ user: { id: Number(row.id), username: row.username, email: row.email } });
