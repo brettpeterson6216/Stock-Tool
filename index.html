@@ -2013,4 +2013,76 @@ function renderScreenerTable(stocks) {
   }).join('');
 }
 
+
 /* =====================================================
+   RISK PANEL
+===================================================== */
+function renderRiskPanel(closes, meta) {
+  const el = document.getElementById('risk-content');
+  if (!el || !closes || closes.length < 20) return;
+
+  // Daily returns
+  const returns = [];
+  for (let i = 1; i < closes.length; i++) {
+    if (closes[i-1] > 0) returns.push((closes[i] - closes[i-1]) / closes[i-1] * 100);
+  }
+  if (!returns.length) return;
+
+  // Metrics
+  const mean   = returns.reduce((a,b) => a+b, 0) / returns.length;
+  const variance = returns.reduce((a,b) => a + Math.pow(b - mean, 2), 0) / returns.length;
+  const stdDev = Math.sqrt(variance);
+  const annualVol = (stdDev * Math.sqrt(252)).toFixed(1);
+  const sharpe  = stdDev > 0 ? ((mean * 252) / (stdDev * Math.sqrt(252))).toFixed(2) : '--';
+  const maxDD   = (() => {
+    let peak = closes[0], dd = 0;
+    for (const c of closes) { if (c > peak) peak = c; dd = Math.min(dd, (c - peak) / peak * 100); }
+    return dd.toFixed(1);
+  })();
+  const beta    = meta.beta ? Number(meta.beta).toFixed(2) : '--';
+  const sortedR = [...returns].sort((a,b) => a - b);
+  const var95   = sortedR[Math.floor(sortedR.length * 0.05)]?.toFixed(2) || '--';
+
+  const col = v => parseFloat(v) >= 0 ? '#4ade80' : '#f87171';
+  const ratingScore = [parseFloat(annualVol) < 25, parseFloat(maxDD) > -20, parseFloat(sharpe) > 0.5].filter(Boolean).length;
+  const rating = ['High Risk','Moderate Risk','Moderate','Low–Moderate Risk'][ratingScore] || 'Moderate';
+  const ratingColor = ['#f87171','#C89B3C','#C89B3C','#4ade80'][ratingScore] || '#C89B3C';
+
+  el.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+      <div class="risk-stat"><div class="risk-stat-label">Annual Volatility</div><div class="risk-stat-val" style="color:${col(-parseFloat(annualVol))}">${annualVol}%</div></div>
+      <div class="risk-stat"><div class="risk-stat-label">Beta</div><div class="risk-stat-val">${beta}</div></div>
+      <div class="risk-stat"><div class="risk-stat-label">Max Drawdown</div><div class="risk-stat-val" style="color:#f87171">${maxDD}%</div></div>
+      <div class="risk-stat"><div class="risk-stat-label">Sharpe (est.)</div><div class="risk-stat-val" style="color:${col(parseFloat(sharpe))}">${sharpe}</div></div>
+      <div class="risk-stat"><div class="risk-stat-label">1-Day VaR (95%)</div><div class="risk-stat-val" style="color:#f87171">${var95}%</div></div>
+      <div class="risk-stat"><div class="risk-stat-label">Risk Rating</div><div class="risk-stat-val" style="color:${ratingColor}">${rating}</div></div>
+    </div>`;
+}
+
+/* =====================================================
+   NEWS
+===================================================== */
+async function renderNews(ticker, name) {
+  const el = document.getElementById('news-items');
+  if (!el) return;
+  el.innerHTML = '<div style="color:rgba(247,244,238,.3);font-size:.78rem;">Loading news…</div>';
+  try {
+    const res  = await fetch('/api/news/' + ticker, { credentials: 'same-origin' });
+    const data = await res.json();
+    if (!Array.isArray(data) || !data.length) {
+      el.innerHTML = '<div style="color:rgba(247,244,238,.3);font-size:.78rem;">No recent news found.</div>';
+      return;
+    }
+    el.innerHTML = data.slice(0, 6).map(item => `
+      <a class="news-item" href="${item.url}" target="_blank" rel="noopener">
+        <div class="news-headline">${item.headline || 'No title'}</div>
+        <div class="news-meta">${item.source || ''} · ${item.datetime ? new Date(item.datetime * 1000).toLocaleDateString() : ''}</div>
+      </a>`).join('');
+  } catch(e) {
+    el.innerHTML = '<div style="color:rgba(247,244,238,.3);font-size:.78rem;">News unavailable.</div>';
+  }
+}
+
+</script>
+</body>
+</html>
