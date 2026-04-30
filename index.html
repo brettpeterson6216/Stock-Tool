@@ -715,6 +715,12 @@ footer { background:#080808; padding:3rem 2rem; }
           if (pricingSection) pricingSection.style.display = 'none';
           if (proBanner)      proBanner.style.display = 'block';
 
+          // Update bottom CTA strip for pro/trial users
+          const ctaMain  = document.getElementById('cta-btn-main');
+          const ctaPlans = document.getElementById('cta-btn-plans');
+          if (ctaMain)  { ctaMain.textContent = 'Open Pro tool →'; ctaMain.href = '#tool'; }
+          if (ctaPlans) { ctaPlans.style.display = 'none'; }
+
           // Fill in days remaining
           if (user.trial_ends_at) {
             const days = Math.max(0, Math.ceil((new Date(user.trial_ends_at) - Date.now()) / 86400000));
@@ -1140,7 +1146,7 @@ footer { background:#080808; padding:3rem 2rem; }
       <div style="font-family:var(--mono); font-size:.7rem; color:var(--gold-d); text-transform:uppercase; letter-spacing:.18em; margin-bottom:.75rem;">Your plan</div>
       <h2 id="pro-banner-title" style="font-family:var(--serif); font-size:2rem; margin-bottom:.5rem;">You&rsquo;re on <em style="font-style:italic; color:var(--gold-d);">Pro Trial</em>.</h2>
       <p id="pro-banner-sub" style="color:var(--ink4); font-size:.95rem; margin-bottom:1.5rem;">All Pro features are unlocked. Your trial ends in <strong id="pro-banner-days">14</strong> days.</p>
-      <a href="https://billing.stripe.com/p/login/test_00g000000000000" target="_blank" style="display:inline-block; padding:.75rem 1.75rem; background:var(--ink); color:var(--cream); border-radius:var(--r2); font-weight:500; text-decoration:none; font-size:.9rem;">Manage subscription →</a>
+      <a href="/api/stripe/portal" target="_blank" style="display:inline-block; padding:.75rem 1.75rem; background:var(--ink); color:var(--cream); border-radius:var(--r2); font-weight:500; text-decoration:none; font-size:.9rem;">Manage subscription →</a>
     </div>
   </div>
 
@@ -1227,14 +1233,14 @@ footer { background:#080808; padding:3rem 2rem; }
   </section>
 
   <!-- CTA -->
-  <section class="cta-strip">
+  <section class="cta-strip" id="cta-strip">
     <div class="container">
       <span class="sec-label" style="color:var(--gold);">Get started today</span>
       <h2 class="sec-h2">Stop guessing. Start projecting.</h2>
       <p>Join thousands of investors who run data-driven analysis before every trade. Free plan available — no credit card required.</p>
       <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
-        <a href="#tool" class="btn-primary" style="background:var(--gold);color:var(--ink);">Try free live tool ↓</a>
-        <a href="#pricing" class="btn-secondary" style="border-color:rgba(247,244,238,.2);color:var(--cream);">View all plans</a>
+        <a href="#tool" class="btn-primary" id="cta-btn-main" style="background:var(--gold);color:var(--ink);">Try free live tool ↓</a>
+        <a href="#pricing" class="btn-secondary" id="cta-btn-plans" style="border-color:rgba(247,244,238,.2);color:var(--cream);">View all plans</a>
       </div>
     </div>
   </section>

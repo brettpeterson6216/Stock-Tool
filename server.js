@@ -488,6 +488,30 @@ api.post('/auth/reset-password', async (req, res) => {
 });
 
 // ============================================================
+//  Stripe billing portal
+// ============================================================
+app.get('/api/stripe/portal', async (req, res) => {
+  if (!stripe) return res.status(503).json({ error: 'Payments not configured.' });
+  if (!req.session.userId) return res.redirect('/login');
+  try {
+    const r = await db.execute({
+      sql: 'SELECT stripe_customer_id FROM users WHERE id = ?',
+      args: [req.session.userId],
+    });
+    const customerId = r.rows[0]?.stripe_customer_id;
+    if (!customerId) return res.redirect('/#pricing');
+    const session = await stripe.billingPortal.sessions.create({
+      customer:   customerId,
+      return_url: APP_URL + '/',
+    });
+    res.redirect(session.url);
+  } catch (err) {
+    console.error('portal error:', err);
+    res.redirect('/#pricing');
+  }
+});
+
+// ============================================================
 //  Yahoo Finance proxy (avoids CORS issues on client)
 // ============================================================
 app.get('/api/quote/:ticker', async (req, res) => {
