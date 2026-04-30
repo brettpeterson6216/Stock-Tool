@@ -683,14 +683,13 @@ footer { background:#080808; padding:3rem 2rem; }
             ? Math.max(0, Math.ceil((new Date(user.trial_ends_at) - Date.now()) / 86400000))
             : 14;
           $user.textContent = user.username + ' · Trial (' + days + 'd left)';
-          if ($upgrade) $upgrade.style.display = 'inline-block';
         } else {
           $user.textContent = user.username;
           if ($upgrade) $upgrade.style.display = 'inline-block';
         }
 
-        // Show upgrade CTA if not pro
-        if (user.effectivePlan !== 'pro' && $upgrade) {
+        // Show upgrade CTA only for free users
+        if (user.effectivePlan === 'free' && $upgrade) {
           $upgrade.style.display = 'inline-block';
         }
 
@@ -1938,114 +1937,3 @@ function renderScreenerTable(stocks) {
 }
 
 /* =====================================================
-   PDF REPORT EXPORT
-===================================================== */
-function checkReportReady() {
-  var noStock=document.getElementById('report-no-stock');
-  var ready=document.getElementById('report-ready');
-  if(!noStock||!ready) return;
-  if(S.ticker && S.data){
-    noStock.style.display='none';
-    ready.style.display='block';
-    var meta=S.data.meta;
-    var price=meta.regularMarketPrice||0;
-    document.getElementById('report-summary').innerHTML=
-      '<strong style="color:var(--cream);">'+(meta.longName||S.ticker)+' ('+S.ticker+')</strong><br>'
-      +'Price: $'+price.toFixed(2)+' - Exchange: '+(meta.exchangeName||'--')+'<br>'
-      +'Includes: Price chart, RSI, MACD, Volume, Returns, Projection, Risk panel<br>'
-      +'Generated: '+new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
-  } else {
-    noStock.style.display='block';
-    ready.style.display='none';
-  }
-}
-function exportPDF() {
-  if(!S.ticker){ toast('Load a stock first','red'); return; }
-  checkReportReady();
-  var title=document.title;
-  document.title=S.ticker+' Analysis -- Implied Lens';
-  window.print();
-  document.title=title;
-}
-
-/* =====================================================
-   RISK PANEL (inline in Analyze tab)
-===================================================== */
-function renderRiskPanel(closes,meta) {
-  var el=document.getElementById('risk-content');
-  if(!el||!closes.length) return;
-  var returns=closes.map(function(v,i){return i===0?0:(v-closes[i-1])/closes[i-1]*100;});
-  var vol=Math.sqrt(returns.reduce(function(a,b){return a+b*b;},0)/returns.length)*Math.sqrt(252)*100;
-  var price=meta.regularMarketPrice||closes[closes.length-1];
-  var h52=meta.fiftyTwoWeekHigh||price;
-  var distFromHigh=(price-h52)/h52*100;
-  var rsiVals=rsi(closes);
-  var rsiNow=rsiVals[rsiVals.length-1]||50;
-  var avgVol=meta.averageDailyVolume3Month||1;
-  var todayVol=meta.regularMarketVolume||avgVol;
-  var volSurge=todayVol/avgVol;
-  var peak=closes[0], maxDD=0;
-  closes.forEach(function(c){if(c>peak)peak=c;var dd=(c-peak)/peak*100;if(dd<maxDD)maxDD=dd;});
-  var items=[
-    {name:'Annualized Volatility',val:vol.toFixed(1)+'%',pct:Math.min(vol/80*100,100),lvl:vol>40?'risk-high':vol>20?'risk-mid':'risk-low'},
-    {name:'Distance from 52W High',val:distFromHigh.toFixed(1)+'%',pct:Math.min(Math.abs(distFromHigh)/50*100,100),lvl:distFromHigh<-30?'risk-high':distFromHigh<-10?'risk-mid':'risk-low'},
-    {name:'RSI Level',val:rsiNow.toFixed(1)+' -- '+(rsiNow>70?'Overbought':rsiNow<30?'Oversold':'Neutral'),pct:rsiNow,lvl:rsiNow>75||rsiNow<25?'risk-high':rsiNow>60||rsiNow<40?'risk-mid':'risk-low'},
-    {name:'Volume vs 3M Avg',val:volSurge.toFixed(2)+'x avg',pct:Math.min(volSurge/3*100,100),lvl:volSurge>2?'risk-high':volSurge>1.4?'risk-mid':'risk-low'},
-    {name:'Max Drawdown (period)',val:maxDD.toFixed(1)+'%',pct:Math.min(Math.abs(maxDD)/60*100,100),lvl:maxDD<-30?'risk-high':maxDD<-15?'risk-mid':'risk-low'},
-  ];
-  el.innerHTML=items.map(function(r){
-    return '<div class="risk-item">'
-      +'<div class="risk-top"><span class="risk-name">'+r.name+'</span><span class="risk-val">'+r.val+'</span></div>'
-      +'<div class="risk-bar '+r.lvl+'"><div class="risk-fill" style="width:'+r.pct.toFixed(0)+'%"></div></div>'
-      +'</div>';
-  }).join('');
-}
-
-/* =====================================================
-   NEWS (Finnhub via server proxy)
-===================================================== */
-async function renderNews(ticker,name) {
-  var el=document.getElementById('news-items');
-  el.innerHTML='<div class="loading-bar" style="min-height:60px;"><div class="spinner"></div> Loading news...</div>';
-  try {
-    var r=await fetch('/api/news/'+ticker);
-    var items=await r.json();
-    if(!Array.isArray(items)||!items.length) throw new Error('no news');
-    el.innerHTML=items.slice(0,6).map(function(item){
-      var age=Math.round((Date.now()-item.datetime*1000)/3600000);
-      var t=age<1?'just now':age<24?(age+'h ago'):Math.round(age/24)+'d ago';
-      return '<div class="news-item">'
-        +'<div class="news-dot"></div>'
-        +'<div class="news-text"><a href="'+item.url+'" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">'+item.headline+'</a></div>'
-        +'<div class="news-time">'+t+'</div>'
-        +'</div>';
-    }).join('');
-  } catch(e) {
-    var fallback=[
-      {t:'Analysts update price targets for '+name+' ahead of earnings',time:'--'},
-      {t:ticker+' options volume spikes -- institutional activity detected',time:'--'},
-      {t:name+' announces new strategic partnership to accelerate growth',time:'--'},
-      {t:'Sector rotation puts '+ticker+' in focus as macro conditions shift',time:'--'},
-    ];
-    el.innerHTML=fallback.map(function(i){return '<div class="news-item"><div class="news-dot"></div><div class="news-text">'+i.t+'</div><div class="news-time">'+i.time+'</div></div>';}).join('');
-  }
-}
-
-/* =====================================================
-   INIT
-===================================================== */
-document.getElementById('main-ticker').addEventListener('keydown',function(e){if(e.key==='Enter')fetchAndRender();});
-['cmp1','cmp2','cmp3','cmp4'].forEach(function(id){
-  document.getElementById(id).addEventListener('keydown',function(e){if(e.key==='Enter')runCompare();});
-});
-document.querySelectorAll('.tool-tab').forEach(function(btn){
-  btn.addEventListener('click',function(){
-    if(btn.dataset.tab==='reports') setTimeout(checkReportReady,50);
-  });
-});
-
-// Apply pro tab decorations on load (plan state populated by nav auth script)
-setTimeout(decorateProTabs, 500);
-</script>
-</body>
-</html>

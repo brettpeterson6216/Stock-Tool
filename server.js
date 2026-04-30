@@ -423,6 +423,25 @@ app.get("/api/screener", async (req, res) => {
   }
 });
 
+
+// ============================================================
+//  Temporary debug endpoint -- remove before go-live
+// ============================================================
+app.get('/api/debug/me', async (req, res) => {
+  if (!req.session.userId) return res.json({ error: 'not logged in' });
+  try {
+    const result = await db.execute({
+      sql: 'SELECT id, username, email, plan, trial_ends_at, stripe_customer_id, stripe_subscription_id FROM users WHERE id = ?',
+      args: [req.session.userId],
+    });
+    const user = result.rows[0] || null;
+    if (user) user.effectivePlan = getEffectivePlan(user);
+    return res.json(user);
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 // ============================================================
 //  Pages
 // ============================================================
