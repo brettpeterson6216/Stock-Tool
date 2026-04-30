@@ -632,6 +632,7 @@ footer { background:#080808; padding:3rem 2rem; }
   .cmp-inputs { flex-direction:column; }
 }
 </style>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='16' fill='%23C89B3C'/><circle cx='16' cy='16' r='8' fill='%23F7F4EE'/></svg>">
 </head>
 <body>
 
@@ -1315,6 +1316,30 @@ const PRO_TABS = ['projection','dcf','screener','reports'];
    TABS
 ══════════════════════════════════════════════════════ */
 function isPro() { return S.userPlan === 'pro' || S.userPlan === 'trial'; }
+
+function checkReportReady() {
+  const noStock = document.getElementById('report-no-stock');
+  const ready   = document.getElementById('report-ready');
+  const check   = document.getElementById('report-check');
+  if (check) check.style.display = 'none';
+  if (!S.ticker || !S.data) {
+    if (noStock) noStock.style.display = 'block';
+    if (ready)   ready.style.display   = 'none';
+    return;
+  }
+  if (noStock) noStock.style.display = 'none';
+  if (ready)   ready.style.display   = 'block';
+  const meta = S.data.meta || {};
+  const summary = document.getElementById('report-summary');
+  if (summary) {
+    summary.innerHTML =
+      '<strong style="color:rgba(247,244,238,.85);">' + S.ticker + '</strong> — ' +
+      (meta.longName || S.ticker) + '<br>' +
+      'Price: $' + (meta.regularMarketPrice || '—') +
+      ' &nbsp;|&nbsp; Exchange: ' + (meta.fullExchangeName || '—') + '<br>' +
+      'Includes: Price chart · Key metrics · RSI/MACD · Projection · Risk panel';
+  }
+}
 
 function switchTab(id, btn) {
   if (PRO_TABS.includes(id) && !isPro()) {
