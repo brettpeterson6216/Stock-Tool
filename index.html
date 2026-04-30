@@ -696,6 +696,11 @@ footer { background:#080808; padding:3rem 2rem; }
 
         if (typeof decorateProTabs !== 'undefined') decorateProTabs();
 
+        // Hide PRO feature badges for paying/trial members
+        if (typeof isPro === 'function' && isPro()) {
+          document.querySelectorAll('.feat-pro').forEach(el => el.style.display = 'none');
+        }
+
         // Update hero + pricing section for logged-in pro/trial users
         if (typeof isPro === 'function' && isPro()) {
           // Hero
@@ -1473,11 +1478,11 @@ function toast(msg, type='') {
    FETCH
 ══════════════════════════════════════════════════════ */
 async function yahooFetch(ticker, range='1y') {
-  const url=`https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=${range}&includePrePost=false`;
-  const r=await fetch(PROXY+encodeURIComponent(url));
-  if(!r.ok) throw new Error('fetch failed');
-  const d=await r.json();
-  if(!d.chart?.result?.[0]) throw new Error('no data');
+  // Use our own server proxy to avoid CORS restrictions
+  const r = await fetch(`/api/quote/${encodeURIComponent(ticker)}?range=${range}`, { credentials: 'same-origin' });
+  if (!r.ok) throw new Error('fetch failed: ' + r.status);
+  const d = await r.json();
+  if (!d.chart?.result?.[0]) throw new Error('No data returned for ' + ticker);
   return d.chart.result[0];
 }
 

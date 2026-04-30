@@ -488,6 +488,29 @@ api.post('/auth/reset-password', async (req, res) => {
 });
 
 // ============================================================
+//  Yahoo Finance proxy (avoids CORS issues on client)
+// ============================================================
+app.get('/api/quote/:ticker', async (req, res) => {
+  try {
+    const ticker = req.params.ticker.toUpperCase();
+    const range  = (req.query.range || '1y').replace(/[^a-z0-9]/gi, '');
+    const url    = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=${range}&includePrePost=false`;
+    const r = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'application/json',
+      }
+    });
+    if (!r.ok) return res.status(r.status).json({ error: 'Yahoo Finance returned ' + r.status });
+    const data = await r.json();
+    res.json(data);
+  } catch (e) {
+    console.error('quote proxy error:', e.message);
+    res.status(500).json({ error: 'Failed to fetch quote data.' });
+  }
+});
+
+// ============================================================
 //  Pages
 // ============================================================
 function requireAuth(req, res, next) {
