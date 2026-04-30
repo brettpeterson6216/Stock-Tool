@@ -1015,9 +1015,7 @@ footer { background:#080808; padding:3rem 2rem; }
                 <button class="btn-run" onclick="exportPDF()" style="max-width:280px;">📄 Export PDF Report →</button>
                 <div style="margin-top:.75rem;font-size:.72rem;color:rgba(247,244,238,.25);">Opens a print dialog — choose "Save as PDF" in your browser's print panel.</div>
               </div>
-              <div id="report-check" style="display:block;">
-                <script>setTimeout(checkReportReady, 500);</script>
-              </div>
+              <div id="report-check" style="display:none;"></div>
             </div>
           </div>
 
@@ -1354,6 +1352,22 @@ const PRO_TABS = ['projection','dcf','screener','reports'];
    TABS
 ══════════════════════════════════════════════════════ */
 function isPro() { return S.userPlan === 'pro' || S.userPlan === 'trial'; }
+
+
+function exportPDF() {
+  if (!S.ticker) { toast('Load a stock first.', 'err'); return; }
+  // Expand all sections so they appear in print
+  document.querySelectorAll('.tab-pane').forEach(p => p.setAttribute('data-print-hidden', p.style.display));
+  document.querySelectorAll('.tab-pane').forEach(p => p.style.display = 'block');
+  window.print();
+  // Restore after print dialog closes
+  setTimeout(() => {
+    document.querySelectorAll('.tab-pane').forEach(p => {
+      const orig = p.getAttribute('data-print-hidden');
+      if (orig !== null) { p.style.display = orig; p.removeAttribute('data-print-hidden'); }
+    });
+  }, 1000);
+}
 
 function checkReportReady() {
   const noStock = document.getElementById('report-no-stock');
