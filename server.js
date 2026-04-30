@@ -4,10 +4,7 @@
 //    @libsql/client  (async API)
 //    bcryptjs        (password hashing, 12 rounds)
 //    express-session
-//
-//  Passwords are NEVER stored in plaintext. They are hashed
-//  with bcrypt (12 rounds) before insert. The DB stores only
-//  the one-way hash, which cannot be reversed.
+//    stripe
 // ============================================================
 
 require('dotenv').config();
@@ -60,7 +57,7 @@ async function initDb() {
   `);
   await db.execute(`CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions(expires)`);
 
-  // Add plan columns if they don't exist yet (ALTER TABLE has no IF NOT EXISTS in SQLite)
+  // Add plan columns if they don't exist yet
   const planCols = [
     "plan TEXT NOT NULL DEFAULT 'free'",
     'trial_ends_at TEXT',
