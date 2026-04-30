@@ -696,20 +696,31 @@ footer { background:#080808; padding:3rem 2rem; }
 
         if (typeof decorateProTabs !== 'undefined') decorateProTabs();
 
-        // Update hero + pricing CTAs for logged-in pro/trial users
-        if (isPro && isPro()) {
+        // Update hero + pricing section for logged-in pro/trial users
+        if (typeof isPro === 'function' && isPro()) {
+          // Hero
           const heroMain = document.getElementById('hero-cta-main');
           const heroSec  = document.getElementById('hero-cta-secondary');
-          const pricingBtn = document.getElementById('pricing-pro-btn');
-          if (heroMain) { heroMain.textContent = 'Open live tool ↓'; }
-          if (heroSec)  { heroSec.style.display = 'none'; }
-          if (pricingBtn) {
-            pricingBtn.textContent = "✓ You're on Pro Trial";
-            pricingBtn.style.background = 'var(--green)';
-            pricingBtn.style.borderColor = 'var(--green)';
-            pricingBtn.style.color = '#fff';
-            pricingBtn.onclick = null;
-            pricingBtn.style.cursor = 'default';
+          if (heroMain) heroMain.textContent = 'Open live tool ↓';
+          if (heroSec)  heroSec.style.display = 'none';
+
+          // Swap pricing section for pro banner
+          const pricingSection = document.getElementById('pricing');
+          const proBanner      = document.getElementById('pro-member-banner');
+          if (pricingSection) pricingSection.style.display = 'none';
+          if (proBanner)      proBanner.style.display = 'block';
+
+          // Fill in days remaining
+          if (user.trial_ends_at) {
+            const days = Math.max(0, Math.ceil((new Date(user.trial_ends_at) - Date.now()) / 86400000));
+            const daysEl = document.getElementById('pro-banner-days');
+            if (daysEl) daysEl.textContent = days;
+          }
+          if (user.effectivePlan === 'pro') {
+            const title = document.getElementById('pro-banner-title');
+            const sub   = document.getElementById('pro-banner-sub');
+            if (title) title.innerHTML = 'You're on <em style="font-style:italic;color:var(--gold-d);">Pro</em>.';
+            if (sub)   sub.textContent = 'All Pro features are active. Thank you for subscribing.';
           }
         }
 
@@ -1120,7 +1131,17 @@ footer { background:#080808; padding:3rem 2rem; }
   </section>
 
   <!-- PRICING -->
-  <section id="pricing">
+  <!-- Pro member banner (shown instead of pricing cards for trial/pro users) -->
+  <div id="pro-member-banner" style="display:none; background:var(--card); border-top:1px solid var(--border2); border-bottom:1px solid var(--border2); padding:3rem 2rem; text-align:center;">
+    <div style="max-width:560px; margin:0 auto;">
+      <div style="font-family:var(--mono); font-size:.7rem; color:var(--gold-d); text-transform:uppercase; letter-spacing:.18em; margin-bottom:.75rem;">Your plan</div>
+      <h2 id="pro-banner-title" style="font-family:var(--serif); font-size:2rem; margin-bottom:.5rem;">You&rsquo;re on <em style="font-style:italic; color:var(--gold-d);">Pro Trial</em>.</h2>
+      <p id="pro-banner-sub" style="color:var(--ink4); font-size:.95rem; margin-bottom:1.5rem;">All Pro features are unlocked. Your trial ends in <strong id="pro-banner-days">14</strong> days.</p>
+      <a href="https://billing.stripe.com/p/login/test_00g000000000000" target="_blank" style="display:inline-block; padding:.75rem 1.75rem; background:var(--ink); color:var(--cream); border-radius:var(--r2); font-weight:500; text-decoration:none; font-size:.9rem;">Manage subscription →</a>
+    </div>
+  </div>
+
+  <section id="pricing" style="">
     <div class="container">
       <span class="sec-label">Simple, honest pricing</span>
       <h2 class="sec-h2">Start free. Upgrade when you're ready.</h2>

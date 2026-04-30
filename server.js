@@ -68,6 +68,16 @@ async function initDb() {
     try { await db.execute("ALTER TABLE users ADD COLUMN " + col); } catch (_) {}
   }
 
+  // Password reset tokens
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS reset_tokens (
+      token      TEXT PRIMARY KEY,
+      user_id    INTEGER NOT NULL,
+      expires_at INTEGER NOT NULL,
+      used       INTEGER NOT NULL DEFAULT 0
+    )
+  `);
+
   console.log("Database initialised");
 }
 
@@ -425,20 +435,55 @@ app.get("/api/screener", async (req, res) => {
 
 
 // ============================================================
-//  Temporary debug endpoint -- remove before go-live
+//  Password reset
 // ============================================================
-app.get('/api/debug/me', async (req, res) => {
-  if (!req.session.userId) return res.json({ error: 'not logged in' });
+const crypto = require('crypto');
+
+api.post('/auth/forgot-password', async (req, res) => {
+  const email = String(req.body.email || '').trim().toLowerCase();
+  if (!email) return res.status(400).json({ error: 'Email is required.' });
   try {
-    const result = await db.execute({
-      sql: 'SELECT id, username, email, plan, trial_ends_at, stripe_customer_id, stripe_subscription_id FROM users WHERE id = ?',
-      args: [req.session.userId],
+    const result = await db.execute({ sql: 'SELECT id FROM users WHERE email = ?', args: [email] });
+    // Always return success to prevent email enumeration
+    if (!result.rows.length) return res.json({ ok: true });
+
+    const token   = crypto.randomBytes(32).toString('hex');
+    const expires = Date.now() + 60 * 60 * 1000; // 1 hour
+    await db.execute({
+      sql:  'INSERT INTO reset_tokens (token, user_id, expires_at) VALUES (?, ?, ?)',
+      args: [token, result.rows[0].id, expires],
     });
-    const user = result.rows[0] || null;
-    if (user) user.effectivePlan = getEffectivePlan(user);
-    return res.json(user);
+    const resetUrl = APP_URL + '/reset-password?token=' + token;
+    // TODO: Send email with resetUrl. For now, log it so you can find it in Render logs.
+    console.log('PASSWORD RESET LINK for', email, ':', resetUrl);
+    return res.json({ ok: true });
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    console.error('forgot-password error:', err);
+    return res.status(500).json({ error: 'Something went wrong.' });
+  }
+});
+
+api.post('/auth/reset-password', async (req, res) => {
+  const { token, password } = req.body;
+  if (!token || !password || password.length < 8)
+    return res.status(400).json({ error: 'Invalid request.' });
+  try {
+    const r = await db.execute({
+      sql:  'SELECT user_id, expires_at, used FROM reset_tokens WHERE token = ?',
+      args: [token],
+    });
+    const row = r.rows[0];
+    if (!row)                         return res.status(400).json({ error: 'Invalid or expired link.' });
+    if (row.used)                     return res.status(400).json({ error: 'This link has already been used.' });
+    if (Number(row.expires_at) < Date.now()) return res.status(400).json({ error: 'This link has expired. Please request a new one.' });
+
+    const hash = await bcrypt.hash(password, BCRYPT_ROUNDS);
+    await db.execute({ sql: 'UPDATE users SET password_hash = ? WHERE id = ?', args: [hash, row.user_id] });
+    await db.execute({ sql: 'UPDATE reset_tokens SET used = 1 WHERE token = ?', args: [token] });
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error('reset-password error:', err);
+    return res.status(500).json({ error: 'Could not reset password.' });
   }
 });
 
@@ -455,6 +500,9 @@ app.get(["/login", "/login.html"], (req, res) =>
 );
 app.get(["/signup", "/signup.html", "/register"], (req, res) =>
   res.sendFile(path.join(__dirname, "public", "signup.html"))
+);
+app.get(["/reset-password", "/reset-password.html"], (req, res) =>
+  res.sendFile(path.join(__dirname, "public", "reset-password.html"))
 );
 
 app.get("/", requireAuth, (req, res) =>
