@@ -696,6 +696,23 @@ footer { background:#080808; padding:3rem 2rem; }
 
         if (typeof decorateProTabs !== 'undefined') decorateProTabs();
 
+        // Update hero + pricing CTAs for logged-in pro/trial users
+        if (isPro && isPro()) {
+          const heroMain = document.getElementById('hero-cta-main');
+          const heroSec  = document.getElementById('hero-cta-secondary');
+          const pricingBtn = document.getElementById('pricing-pro-btn');
+          if (heroMain) { heroMain.textContent = 'Open live tool ↓'; }
+          if (heroSec)  { heroSec.style.display = 'none'; }
+          if (pricingBtn) {
+            pricingBtn.textContent = '✓ You're on Pro Trial';
+            pricingBtn.style.background = 'var(--green)';
+            pricingBtn.style.borderColor = 'var(--green)';
+            pricingBtn.style.color = '#fff';
+            pricingBtn.onclick = null;
+            pricingBtn.style.cursor = 'default';
+          }
+        }
+
         // Auto-show upgrade success toast
         if (window.location.search.includes('upgraded=1')) {
           if (typeof toast !== 'undefined') toast('Welcome to Pro! All features unlocked.', 'ok');
@@ -725,8 +742,8 @@ footer { background:#080808; padding:3rem 2rem; }
     <h1 class="hero-h1 fu2">Run <em>institutional-grade</em> projections on any stock.</h1>
     <p class="hero-sub fu3">Live prices · DCF valuation · Technical indicators · Side-by-side comparison · Scenario modeling. Everything professional analysts use — in one platform.</p>
     <div class="hero-ctas fu4">
-      <a href="#tool" class="btn-primary">Try the free tool ↓</a>
-      <a href="#pricing" class="btn-secondary">See pricing</a>
+      <a href="#tool" class="btn-primary" id="hero-cta-main">Try the free tool ↓</a>
+      <a href="#pricing" class="btn-secondary" id="hero-cta-secondary">See pricing</a>
     </div>
     <div class="hero-stats fu4">
       <div class="hero-stat"><span class="h-stat-num">50,000+</span><span class="h-stat-lbl">Stocks Covered</span></div>
@@ -1139,7 +1156,7 @@ footer { background:#080808; padding:3rem 2rem; }
             <li>PDF report export</li>
             <li>Risk & volatility dashboard</li>
           </ul>
-          <button class="btn-plan btn-plan-gold" onclick="showUpgradeModal()">Start 14-day free trial →</button>
+          <button class="btn-plan btn-plan-gold" id="pricing-pro-btn" onclick="showUpgradeModal()">Start 14-day free trial →</button>
         </div>
         <div class="pricing-card">
           <div class="pricing-tier">Team</div>
