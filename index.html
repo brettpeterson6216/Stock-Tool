@@ -636,10 +636,8 @@ footer { background:#080808; padding:3rem 2rem; }
 <nav>
   <a class="nav-logo" href="#"><span class="logo-dot"></span>Implied<em style="font-style:italic;color:var(--gold-d);">Lens</em></a>
   <div class="nav-links">
-    <a href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">Home</a>
-    <a href="#tool">Live Tool</a>
-    <a href="#features">Features</a>
-    <a href="#pricing">Pricing</a>
+    <a href='#' id='nav-home' onclick="showView('home');return false;">Home</a>
+    <a href='#' id='nav-livetool' onclick="showView('tool');return false;">Live Tool</a>
   </div>
   <div class="nav-right" id="nav-right">
     <span class="nav-live">Live Data</span>
@@ -650,6 +648,28 @@ footer { background:#080808; padding:3rem 2rem; }
     <a class="btn-nav-outline" id="nav-logout" href="#" style="display:none;">Log out</a>
   </div>
   <script>
+  // ── View switcher ──
+  function showView(view) {
+    const home = document.getElementById('view-home');
+    const tool = document.getElementById('view-tool');
+    const navTool = document.getElementById('nav-livetool');
+    if (view === 'tool') {
+      if (home) home.style.display = 'none';
+      if (tool) tool.style.display = 'block';
+      if (navTool) navTool.style.color = 'var(--gold-d)';
+      window.scrollTo(0, 0);
+      history.replaceState(null, '', '/?view=tool');
+    } else {
+      if (tool) tool.style.display = 'none';
+      if (home) home.style.display = 'block';
+      if (navTool) navTool.style.color = '';
+      window.scrollTo(0, 0);
+      history.replaceState(null, '', '/');
+    }
+  }
+  // On hard load: respect ?view=tool in URL
+  if (window.location.search.includes('view=tool')) showView('tool');
+
   // ---- Auth-aware nav (talks to /api/auth/me + /api/auth/logout) ----
   (async () => {
     const $login   = document.getElementById('nav-login');
@@ -692,6 +712,11 @@ footer { background:#080808; padding:3rem 2rem; }
 
         if (typeof decorateProTabs !== 'undefined') decorateProTabs();
 
+        // Logged-in users go straight to tool view unless they explicitly came home
+        if (!window.location.search.includes('view=home')) {
+          showView('tool');
+        }
+
         // Hide PRO feature badges for paying/trial members
         if (typeof isPro === 'function' && isPro()) {
           document.querySelectorAll('.feat-pro').forEach(el => el.style.display = 'none');
@@ -702,7 +727,7 @@ footer { background:#080808; padding:3rem 2rem; }
           // Hero
           const heroMain = document.getElementById('hero-cta-main');
           const heroSec  = document.getElementById('hero-cta-secondary');
-          if (heroMain) heroMain.textContent = 'Open live tool ↓';
+          if (heroMain) { heroMain.textContent = 'Open live tool →'; heroMain.removeAttribute('onclick'); heroMain.href='#'; heroMain.onclick=function(e){e.preventDefault();showView('tool');}; }
           if (heroSec)  heroSec.style.display = 'none';
 
           // Swap pricing section for pro banner
@@ -750,8 +775,8 @@ footer { background:#080808; padding:3rem 2rem; }
   </script>
 </nav>
 
-<!-- ══════════ PAGE: HOME ══════════ -->
-<div id="page-home" class="page active">
+<!-- ══════════ VIEW: HOME ══════════ -->
+<div id="view-home">
 
   <!-- HERO -->
   <section class="hero">
@@ -760,7 +785,7 @@ footer { background:#080808; padding:3rem 2rem; }
     <h1 class="hero-h1 fu2">Run <em>institutional-grade</em> projections on any stock.</h1>
     <p class="hero-sub fu3">Live prices · DCF valuation · Technical indicators · Side-by-side comparison · Scenario modeling. Everything professional analysts use — in one platform.</p>
     <div class="hero-ctas fu4">
-      <a href="#tool" class="btn-primary" id="hero-cta-main">Try the free tool ↓</a>
+      <a href='#features' class='btn-primary' id='hero-cta-main' onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'});return false;">What's inside ↓</a>
       <a href="#pricing" class="btn-secondary" id="hero-cta-secondary">See pricing</a>
     </div>
     <div class="hero-stats fu4">
@@ -777,6 +802,155 @@ footer { background:#080808; padding:3rem 2rem; }
     </div>
   </section>
 
+
+  <!-- FEATURES -->
+  <section id="features">
+    <div class="container">
+      <span class="sec-label">What's inside</span>
+      <h2 class="sec-h2">Everything analysts use, built for individual investors.</h2>
+      <p class="sec-sub">Professional-grade tools packaged into a platform anyone can run in under a minute — no spreadsheets, no finance degree required.</p>
+      <div class="features-bento">
+        <div class="feat-card">
+          <div class="feat-icon">📡</div>
+          <h3>Live Market Data</h3>
+          <p>Real-time price, volume, market cap, 52-week range, and exchange data for any publicly traded company globally.</p>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">📊</div>
+          <h3>8 Interactive Charts</h3>
+          <p>Price with MA/Bollinger overlays, RSI, MACD histogram, volume, daily returns distribution, projection, performance, and radar.</p>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">🧮</div>
+          <h3>DCF Valuation Model</h3>
+          <p>Full discounted cash flow analysis with two-stage growth, custom WACC, terminal value, and margin of safety output.</p>
+          <div class="feat-pro">PRO</div>
+        </div>
+        <div class="feat-card feat-card-wide">
+          <div class="feat-icon">⚖️</div>
+          <h3>Side-by-Side Stock Comparison</h3>
+          <p>Load up to 4 tickers and compare every key metric in a structured table with best/worst highlighting — plus a normalized performance chart and fundamental radar. Instantly see how companies stack up on price, valuation, growth, and risk.</p>
+          <div class="feat-pro">PRO — 3–4 stocks + charts</div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">🎯</div>
+          <h3>3-Scenario Projection</h3>
+          <p>Model bear, base, and bull cases with custom growth rates, margin assumptions, exit P/E, and CAGR per year.</p>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">🔍</div>
+          <h3>Stock Screener</h3>
+          <p>Filter 50,000+ stocks by P/E, P/B, dividend yield, market cap, sector, RSI, and 1-year performance to find opportunities.</p>
+          <div class="feat-pro">PRO</div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">🔔</div>
+          <h3>Price & Signal Alerts</h3>
+          <p>Set price target, RSI, and moving average crossover alerts. Get email notifications the moment conditions are triggered.</p>
+          <div class="feat-pro">PRO</div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">📄</div>
+          <h3>PDF Report Export</h3>
+          <p>Generate clean, professional PDF analysis reports — complete with charts, projections, and documented assumptions — ready to share.</p>
+          <div class="feat-pro">PRO</div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">📋</div>
+          <h3>Portfolio Watchlist</h3>
+          <p>Track any number of stocks with live prices, daily change, and one-click access to full analysis from a personalized watchlist.</p>
+          <div class="feat-pro">PRO</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <!-- Pro member banner (shown instead of pricing cards for trial/pro users) -->
+  <div id="pro-member-banner" style="display:none; background:var(--card); border-top:1px solid var(--border2); border-bottom:1px solid var(--border2); padding:3rem 2rem; text-align:center;">
+    <div style="max-width:560px; margin:0 auto;">
+      <div style="font-family:var(--mono); font-size:.7rem; color:var(--gold-d); text-transform:uppercase; letter-spacing:.18em; margin-bottom:.75rem;">Your plan</div>
+      <h2 id="pro-banner-title" style="font-family:var(--serif); font-size:2rem; margin-bottom:.5rem;">You&rsquo;re on <em style="font-style:italic; color:var(--gold-d);">Pro Trial</em>.</h2>
+      <p id="pro-banner-sub" style="color:var(--ink4); font-size:.95rem; margin-bottom:1.5rem;">All Pro features are unlocked. Your trial ends in <strong id="pro-banner-days">14</strong> days.</p>
+      <a href="/api/stripe/portal" target="_blank" style="display:inline-block; padding:.75rem 1.75rem; background:var(--ink); color:var(--cream); border-radius:var(--r2); font-weight:500; text-decoration:none; font-size:.9rem;">Manage subscription →</a>
+    </div>
+  </div>
+
+  <section id="pricing" style="">
+    <div class="container">
+      <span class="sec-label">Simple, honest pricing</span>
+      <h2 class="sec-h2">Start free. Upgrade when you're ready.</h2>
+      <p class="sec-sub">No Bloomberg fees. No hidden paywalls. Professional tools at a price that makes sense for individual investors and small teams.</p>
+      <div class="pricing-grid">
+        <div class="pricing-card">
+          <div class="pricing-tier">Starter</div>
+          <div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">0</span><span class="p-per">/month</span></div>
+          <p class="p-desc">For curious investors exploring the platform with no commitment.</p>
+          <ul class="p-features">
+            <li>5 stock analyses per day</li>
+            <li>Live price & key metrics</li>
+            <li>Price chart with MA overlays</li>
+            <li>RSI & MACD indicators</li>
+            <li>3-scenario projection model</li>
+            <li>2-stock comparison table</li>
+          </ul>
+          <button class="btn-plan btn-plan-dark" onclick="openModal()">Get started free</button>
+        </div>
+        <div class="pricing-card featured">
+          <div class="pricing-pop">Most Popular</div>
+          <div class="pricing-tier">Pro</div>
+          <div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">7.99</span><span class="p-per">/month</span></div>
+          <p class="p-desc" style="font-size:.8rem;margin-bottom:.25rem;opacity:.7;">or $60/year — save 37%</p>
+          <p class="p-desc">For serious investors who research and track positions every day.</p>
+          <ul class="p-features">
+            <li>Unlimited stock analyses</li>
+            <li>DCF intrinsic value model</li>
+            <li>Advanced projection (6 inputs)</li>
+            <li>4-stock side-by-side comparison</li>
+            <li>Performance & radar charts</li>
+            <li>Full stock screener</li>
+            <li>PDF report export</li>
+            <li>Risk & volatility dashboard</li>
+          </ul>
+          <button class="btn-plan btn-plan-gold" id="pricing-pro-btn" onclick="showUpgradeModal()">Start 14-day free trial →</button>
+        </div>
+        <div class="pricing-card">
+          <div class="pricing-tier">Team</div>
+          <div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">79</span><span class="p-per">/month</span></div>
+          <p class="p-desc">For investment clubs, RIAs, and small funds collaborating on research.</p>
+          <ul class="p-features">
+            <li>Everything in Pro</li>
+            <li>Up to 5 team members</li>
+            <li>Shared watchlists</li>
+            <li>White-label PDF reports</li>
+            <li>API access (500 calls/day)</li>
+            <li>Slack & email integrations</li>
+            <li>Dedicated support</li>
+          </ul>
+          <button class="btn-plan btn-plan-dark" onclick="openModal()">Start team trial</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- CTA -->
+  <section class="cta-strip" id="cta-strip">
+    <div class="container">
+      <span class="sec-label" style="color:var(--gold);">Get started today</span>
+      <h2 class="sec-h2">Stop guessing. Start projecting.</h2>
+      <p>Join thousands of investors who run data-driven analysis before every trade. Free plan available — no credit card required.</p>
+      <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+        <a href="#tool" class="btn-primary" id="cta-btn-main" style="background:var(--gold);color:var(--ink);">Try free live tool ↓</a>
+        <a href="#pricing" class="btn-secondary" id="cta-btn-plans" style="border-color:rgba(247,244,238,.2);color:var(--cream);">View all plans</a>
+      </div>
+    </div>
+  </section>
+
+</div><!-- /view-home -->
+
+<!-- ══════════ VIEW: LIVE TOOL ══════════ -->
+<div id="view-tool" style="display:none; min-height:100vh; background:var(--ink); color:var(--cream);">
   <!-- LIVE TOOL SECTION -->
   <section class="tool-section" id="tool">
     <div class="container">
@@ -1064,151 +1238,13 @@ footer { background:#080808; padding:3rem 2rem; }
     </div>
   </section>
 
-  <!-- FEATURES -->
-  <section id="features">
-    <div class="container">
-      <span class="sec-label">What's inside</span>
-      <h2 class="sec-h2">Everything analysts use, built for individual investors.</h2>
-      <p class="sec-sub">Professional-grade tools packaged into a platform anyone can run in under a minute — no spreadsheets, no finance degree required.</p>
-      <div class="features-bento">
-        <div class="feat-card">
-          <div class="feat-icon">📡</div>
-          <h3>Live Market Data</h3>
-          <p>Real-time price, volume, market cap, 52-week range, and exchange data for any publicly traded company globally.</p>
-        </div>
-        <div class="feat-card">
-          <div class="feat-icon">📊</div>
-          <h3>8 Interactive Charts</h3>
-          <p>Price with MA/Bollinger overlays, RSI, MACD histogram, volume, daily returns distribution, projection, performance, and radar.</p>
-        </div>
-        <div class="feat-card">
-          <div class="feat-icon">🧮</div>
-          <h3>DCF Valuation Model</h3>
-          <p>Full discounted cash flow analysis with two-stage growth, custom WACC, terminal value, and margin of safety output.</p>
-          <div class="feat-pro">PRO</div>
-        </div>
-        <div class="feat-card feat-card-wide">
-          <div class="feat-icon">⚖️</div>
-          <h3>Side-by-Side Stock Comparison</h3>
-          <p>Load up to 4 tickers and compare every key metric in a structured table with best/worst highlighting — plus a normalized performance chart and fundamental radar. Instantly see how companies stack up on price, valuation, growth, and risk.</p>
-          <div class="feat-pro">PRO — 3–4 stocks + charts</div>
-        </div>
-        <div class="feat-card">
-          <div class="feat-icon">🎯</div>
-          <h3>3-Scenario Projection</h3>
-          <p>Model bear, base, and bull cases with custom growth rates, margin assumptions, exit P/E, and CAGR per year.</p>
-        </div>
-        <div class="feat-card">
-          <div class="feat-icon">🔍</div>
-          <h3>Stock Screener</h3>
-          <p>Filter 50,000+ stocks by P/E, P/B, dividend yield, market cap, sector, RSI, and 1-year performance to find opportunities.</p>
-          <div class="feat-pro">PRO</div>
-        </div>
-        <div class="feat-card">
-          <div class="feat-icon">🔔</div>
-          <h3>Price & Signal Alerts</h3>
-          <p>Set price target, RSI, and moving average crossover alerts. Get email notifications the moment conditions are triggered.</p>
-          <div class="feat-pro">PRO</div>
-        </div>
-        <div class="feat-card">
-          <div class="feat-icon">📄</div>
-          <h3>PDF Report Export</h3>
-          <p>Generate clean, professional PDF analysis reports — complete with charts, projections, and documented assumptions — ready to share.</p>
-          <div class="feat-pro">PRO</div>
-        </div>
-        <div class="feat-card">
-          <div class="feat-icon">📋</div>
-          <h3>Portfolio Watchlist</h3>
-          <p>Track any number of stocks with live prices, daily change, and one-click access to full analysis from a personalized watchlist.</p>
-          <div class="feat-pro">PRO</div>
-        </div>
-      </div>
-    </div>
-  </section>
+  <footer style="background:#111; border-top:1px solid rgba(255,255,255,.07); padding:1.25rem 3.5rem; font-size:.75rem; color:rgba(247,244,238,.3); display:flex; justify-content:space-between;">
+    <span>© 2026 Implied Lens. Not financial advice.</span>
+    <a href="#" onclick="showView('home');return false;" style="color:rgba(247,244,238,.4); text-decoration:none;">← Back to home</a>
+  </footer>
+</div>
 
-  <!-- PRICING -->
-  <!-- Pro member banner (shown instead of pricing cards for trial/pro users) -->
-  <div id="pro-member-banner" style="display:none; background:var(--card); border-top:1px solid var(--border2); border-bottom:1px solid var(--border2); padding:3rem 2rem; text-align:center;">
-    <div style="max-width:560px; margin:0 auto;">
-      <div style="font-family:var(--mono); font-size:.7rem; color:var(--gold-d); text-transform:uppercase; letter-spacing:.18em; margin-bottom:.75rem;">Your plan</div>
-      <h2 id="pro-banner-title" style="font-family:var(--serif); font-size:2rem; margin-bottom:.5rem;">You&rsquo;re on <em style="font-style:italic; color:var(--gold-d);">Pro Trial</em>.</h2>
-      <p id="pro-banner-sub" style="color:var(--ink4); font-size:.95rem; margin-bottom:1.5rem;">All Pro features are unlocked. Your trial ends in <strong id="pro-banner-days">14</strong> days.</p>
-      <a href="/api/stripe/portal" target="_blank" style="display:inline-block; padding:.75rem 1.75rem; background:var(--ink); color:var(--cream); border-radius:var(--r2); font-weight:500; text-decoration:none; font-size:.9rem;">Manage subscription →</a>
-    </div>
-  </div>
-
-  <section id="pricing" style="">
-    <div class="container">
-      <span class="sec-label">Simple, honest pricing</span>
-      <h2 class="sec-h2">Start free. Upgrade when you're ready.</h2>
-      <p class="sec-sub">No Bloomberg fees. No hidden paywalls. Professional tools at a price that makes sense for individual investors and small teams.</p>
-      <div class="pricing-grid">
-        <div class="pricing-card">
-          <div class="pricing-tier">Starter</div>
-          <div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">0</span><span class="p-per">/month</span></div>
-          <p class="p-desc">For curious investors exploring the platform with no commitment.</p>
-          <ul class="p-features">
-            <li>5 stock analyses per day</li>
-            <li>Live price & key metrics</li>
-            <li>Price chart with MA overlays</li>
-            <li>RSI & MACD indicators</li>
-            <li>3-scenario projection model</li>
-            <li>2-stock comparison table</li>
-          </ul>
-          <button class="btn-plan btn-plan-dark" onclick="openModal()">Get started free</button>
-        </div>
-        <div class="pricing-card featured">
-          <div class="pricing-pop">Most Popular</div>
-          <div class="pricing-tier">Pro</div>
-          <div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">7.99</span><span class="p-per">/month</span></div>
-          <p class="p-desc" style="font-size:.8rem;margin-bottom:.25rem;opacity:.7;">or $60/year — save 37%</p>
-          <p class="p-desc">For serious investors who research and track positions every day.</p>
-          <ul class="p-features">
-            <li>Unlimited stock analyses</li>
-            <li>DCF intrinsic value model</li>
-            <li>Advanced projection (6 inputs)</li>
-            <li>4-stock side-by-side comparison</li>
-            <li>Performance & radar charts</li>
-            <li>Full stock screener</li>
-            <li>PDF report export</li>
-            <li>Risk & volatility dashboard</li>
-          </ul>
-          <button class="btn-plan btn-plan-gold" id="pricing-pro-btn" onclick="showUpgradeModal()">Start 14-day free trial →</button>
-        </div>
-        <div class="pricing-card">
-          <div class="pricing-tier">Team</div>
-          <div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">79</span><span class="p-per">/month</span></div>
-          <p class="p-desc">For investment clubs, RIAs, and small funds collaborating on research.</p>
-          <ul class="p-features">
-            <li>Everything in Pro</li>
-            <li>Up to 5 team members</li>
-            <li>Shared watchlists</li>
-            <li>White-label PDF reports</li>
-            <li>API access (500 calls/day)</li>
-            <li>Slack & email integrations</li>
-            <li>Dedicated support</li>
-          </ul>
-          <button class="btn-plan btn-plan-dark" onclick="openModal()">Start team trial</button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-
-  <!-- CTA -->
-  <section class="cta-strip" id="cta-strip">
-    <div class="container">
-      <span class="sec-label" style="color:var(--gold);">Get started today</span>
-      <h2 class="sec-h2">Stop guessing. Start projecting.</h2>
-      <p>Join thousands of investors who run data-driven analysis before every trade. Free plan available — no credit card required.</p>
-      <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
-        <a href="#tool" class="btn-primary" id="cta-btn-main" style="background:var(--gold);color:var(--ink);">Try free live tool ↓</a>
-        <a href="#pricing" class="btn-secondary" id="cta-btn-plans" style="border-color:rgba(247,244,238,.2);color:var(--cream);">View all plans</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- FOOTER -->
+<!-- FOOTER (home view) -->
   <footer>
     <div class="footer-inner">
       <div class="f-logo">Implied<em style="font-style:italic;color:var(--gold-d);">Lens</em></div>
