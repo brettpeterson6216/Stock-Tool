@@ -635,9 +635,20 @@ footer { background:#080808; padding:3rem 2rem; }
 <!-- ══════════ NAV ══════════ -->
 <nav>
   <a class="nav-logo" href="#"><span class="logo-dot"></span>Implied<em style="font-style:italic;color:var(--gold-d);">Lens</em></a>
-  <div class="nav-links">
-    <a href='#' id='nav-home' onclick="showView('home');return false;">Home</a>
-    <a href='#' id='nav-livetool' onclick="showView('tool');return false;">Live Tool</a>
+  <div class="nav-links" id="nav-links">
+    <a href='#' id='nav-home' class="nav-tab active-tab" onclick="navGoTo('home');return false;">Home</a>
+    <a href='#' class="nav-tab" data-tool="analyze"    onclick="navGoTo('analyze');return false;">📊 Analyze</a>
+    <a href='#' class="nav-tab" data-tool="financials" onclick="navGoTo('financials');return false;">💰 Financials</a>
+    <a href='#' class="nav-tab" data-tool="advmetrics" onclick="navGoTo('advmetrics');return false;">📐 Adv. Metrics</a>
+    <a href='#' class="nav-tab" data-tool="earnings"   onclick="navGoTo('earnings');return false;">📣 Earnings</a>
+    <a href='#' class="nav-tab" data-tool="secfilings" onclick="navGoTo('secfilings');return false;">📋 SEC Filings</a>
+    <a href='#' class="nav-tab" data-tool="compare"    onclick="navGoTo('compare');return false;">⚖️ Compare</a>
+    <a href='#' class="nav-tab" data-tool="projection" onclick="navGoTo('projection');return false;">📈 Projection</a>
+    <a href='#' class="nav-tab" data-tool="dcf"        onclick="navGoTo('dcf');return false;">🧮 DCF</a>
+    <a href='#' class="nav-tab" data-tool="screener"   onclick="navGoTo('screener');return false;">🔍 Screener</a>
+    <a href='#' class="nav-tab" data-tool="reports"    onclick="navGoTo('reports');return false;">📄 Reports</a>
+    <a href='#' class="nav-tab" data-tool="education"  onclick="navGoTo('education');return false;">📚 Education</a>
+    <a href='#' class="nav-tab" data-tool="adveducation" onclick="navGoTo('adveducation');return false;">🎓 Adv. Education</a>
   </div>
   <div class="nav-right" id="nav-right">
     <span class="nav-live">Live Data</span>
@@ -648,25 +659,45 @@ footer { background:#080808; padding:3rem 2rem; }
     <a class="btn-nav-outline" id="nav-logout" href="#" style="display:none;">Log out</a>
   </div>
   <script>
-  // ── View switcher ──
+  // ── View + nav controller ──
   function showView(view) {
     const home = document.getElementById('view-home');
     const tool = document.getElementById('view-tool');
-    const navTool = document.getElementById('nav-livetool');
     if (view === 'tool') {
       if (home) home.style.display = 'none';
       if (tool) tool.style.display = 'block';
-      if (navTool) navTool.style.color = 'var(--gold-d)';
-      window.scrollTo(0, 0);
       history.replaceState(null, '', '/?view=tool');
     } else {
       if (tool) tool.style.display = 'none';
       if (home) home.style.display = 'block';
-      if (navTool) navTool.style.color = '';
-      window.scrollTo(0, 0);
       history.replaceState(null, '', '/');
     }
+    setActiveNavTab(view === 'tool' ? null : 'home');
   }
+
+  function setActiveNavTab(toolId) {
+    document.querySelectorAll('.nav-tab').forEach(a => a.classList.remove('active-tab'));
+    if (toolId === 'home') {
+      const el = document.getElementById('nav-home');
+      if (el) el.classList.add('active-tab');
+    } else if (toolId) {
+      const el = document.querySelector('.nav-tab[data-tool="'+toolId+'"]');
+      if (el) el.classList.add('active-tab');
+    }
+  }
+
+  function navGoTo(id) {
+    if (id === 'home') { showView('home'); return; }
+    showView('tool');
+    setActiveNavTab(id);
+    window.scrollTo(0,0);
+    openSection(id, true);
+    setTimeout(() => {
+      const el = document.getElementById('sec-' + id);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 80);
+  }
+
   // On hard load: respect ?view=tool in URL
   if (window.location.search.includes('view=tool')) showView('tool');
 
@@ -715,6 +746,7 @@ footer { background:#080808; padding:3rem 2rem; }
         // Logged-in users go straight to tool view unless they explicitly came home
         if (!window.location.search.includes('view=home')) {
           showView('tool');
+          setActiveNavTab(null);
         }
 
         // Hide PRO feature badges for paying/trial members
@@ -727,7 +759,7 @@ footer { background:#080808; padding:3rem 2rem; }
           // Hero
           const heroMain = document.getElementById('hero-cta-main');
           const heroSec  = document.getElementById('hero-cta-secondary');
-          if (heroMain) { heroMain.textContent = 'Open live tool →'; heroMain.removeAttribute('onclick'); heroMain.href='#'; heroMain.onclick=function(e){e.preventDefault();showView('tool');}; }
+          if (heroMain) { heroMain.textContent = 'Open live tool →'; heroMain.removeAttribute('onclick'); heroMain.href='#'; heroMain.onclick=function(e){e.preventDefault();navGoTo('analyze');}; }
           if (heroSec)  heroSec.style.display = 'none';
 
           // Swap pricing section for pro banner
@@ -959,10 +991,7 @@ footer { background:#080808; padding:3rem 2rem; }
       <p class="sec-sub">Enter any stock ticker. Get live price data, technical charts, and a full forward projection model instantly.</p>
 
       <div class="tool-shell">
-        <div class="tool-titlebar">
-          <div class="tool-titlebar-left">
-            <div class="tool-chrome-dots">
-              <div class="chrome-dot chrome-r"></div>
+        
               <div class="chrome-dot chrome-y"></div>
               <div class="chrome-dot chrome-g"></div>
             </div>
@@ -971,26 +1000,16 @@ footer { background:#080808; padding:3rem 2rem; }
           <span class="tool-live-badge">● LIVE</span>
         </div>
 
-        <div class="tool-tabs">
-          <button class="tool-tab active" data-tab="analyze" onclick="switchTab('analyze',this)">📊 Analyze</button>
-          <button class="tool-tab" data-tab="financials" onclick="switchTab('financials',this)">💰 Financials</button>
-          <button class="tool-tab" data-tab="advmetrics" onclick="switchTab('advmetrics',this)">📐 Adv. Metrics</button>
-          <button class="tool-tab" data-tab="earnings" onclick="switchTab('earnings',this)">📣 Earnings</button>
-          <button class="tool-tab" data-tab="secfilings" onclick="switchTab('secfilings',this)">📋 SEC Filings</button>
-          <button class="tool-tab" data-tab="compare" onclick="switchTab('compare',this)">⚖️ Compare</button>
-          <button class="tool-tab" data-tab="projection" onclick="switchTab('projection',this)">📈 Projection</button>
-          <button class="tool-tab" data-tab="dcf" onclick="switchTab('dcf',this)">🧮 DCF</button>
-          <button class="tool-tab" data-tab="screener" onclick="switchTab('screener',this); if(isPro()) loadScreener()">🔍 Screener</button>
-          <button class="tool-tab" data-tab="reports" onclick="switchTab('reports',this)">📄 Reports</button>
-          <button class="tool-tab" data-tab="education" onclick="switchTab('education',this)">📚 Education</button>
-          <button class="tool-tab" data-tab="adveducation" onclick="switchTab('adveducation',this)">🎓 Adv. Education</button>
-        </div>
 
-        <div class="tool-body">
+        <div class="tool-accordion">
 
-          <!-- ── TAB: ANALYZE ── -->
-          <div id="tab-analyze" class="tab-pane">
-            <div class="search-row">
+          <div class="acc-section open" id="sec-analyze">
+            <div class="acc-header" onclick="toggleSection('analyze')">
+              <span class="acc-title">📊 Analyze</span>
+              <span class="acc-chevron">›</span>
+            </div>
+            <div class="acc-body" id="body-analyze" >
+<div class="search-row">
               <input class="ticker-input" id="main-ticker" type="text" placeholder="Enter ticker symbol (e.g. AAPL, TSLA, NVDA, SPY)">
               <button class="btn-search" id="search-btn" onclick="fetchAndRender()">Analyze →</button>
             </div>
@@ -1127,121 +1146,16 @@ footer { background:#080808; padding:3rem 2rem; }
           </div><!-- /tab-analyze -->
 
           <!-- ── TAB: COMPARE (partially locked) ── -->
-          <div id="tab-compare" class="tab-pane" style="display:none;">
-            <div style="margin-bottom:1rem;">
-              <div style="font-size:.82rem;color:rgba(247,244,238,.5);margin-bottom:1.25rem;">Compare 2 stocks free. Load 3–4 stocks and access the performance chart &amp; radar with <span style="color:var(--gold);">Pro</span>.</div>
-              <div class="cmp-inputs">
-                <div class="cmp-ig"><label>Stock 1</label><input class="ticker-input" id="cmp1" placeholder="e.g. AAPL" style="text-transform:uppercase;"></div>
-                <div class="cmp-ig"><label>Stock 2</label><input class="ticker-input" id="cmp2" placeholder="e.g. MSFT" style="text-transform:uppercase;"></div>
-                <div class="cmp-ig"><label>Stock 3 <span style="font-size:.72rem;color:rgba(247,244,238,.3);">(optional)</span></label><input class="ticker-input" id="cmp3" placeholder="e.g. GOOGL" style="text-transform:uppercase;"></div>
-                <div class="cmp-ig"><label>Stock 4 <span style="font-size:.72rem;color:rgba(247,244,238,.3);">(optional)</span></label><input class="ticker-input" id="cmp4" placeholder="e.g. AMZN" style="text-transform:uppercase;"></div>
-                <button class="btn-search" onclick="runCompare()" style="align-self:flex-end;height:40px;">Compare →</button>
-              </div>
-              <div class="loading-bar" id="cmp-loading" style="display:none;"><div class="spinner"></div> Loading comparison data…</div>
-              <div id="cmp-results" style="display:none;">
-                <div class="cmp-table-wrap"><table class="cmp-table" id="cmp-table"></table></div>
-                <div class="g2" style="margin-top:14px;">
-                  <div><div class="chart-header"><div class="chart-title">Normalized Performance (1Y)</div></div><div class="h200"><canvas id="cmp-perf-chart"></canvas></div></div>
-                  <div><div class="chart-header"><div class="chart-title">Fundamental Radar</div></div><div class="h200"><canvas id="cmp-radar-chart"></canvas></div></div>
-                </div>
-              </div>
-            </div>
-          </div><!-- /tab-compare -->
-
-          <!-- ── TAB: SCREENER ── -->
-          <div id="tab-screener" class="tab-pane" style="display:none;">
-            <div class="scr-filters">
-              <div class="scr-filter-group"><label>Max P/E <span id="scr-pe-val">50x</span></label><input type="range" class="scr-slider" id="scr-pe" min="5" max="200" value="50" oninput="document.getElementById('scr-pe-val').textContent=this.value+'x';applyScreener()"></div>
-              <div class="scr-filter-group"><label>Max P/B <span id="scr-pb-val">20x</span></label><input type="range" class="scr-slider" id="scr-pb" min="0" max="50" value="20" oninput="document.getElementById('scr-pb-val').textContent=this.value+'x';applyScreener()"></div>
-              <div class="scr-filter-group"><label>Min Div Yield <span id="scr-div-val">0%</span></label><input type="range" class="scr-slider" id="scr-div" min="0" max="10" value="0" step="0.5" oninput="document.getElementById('scr-div-val').textContent=this.value+'%';applyScreener()"></div>
-              <div class="scr-filter-group"><label>Min Mkt Cap <span id="scr-cap-val">$0B</span></label><input type="range" class="scr-slider" id="scr-cap" min="0" max="500" value="0" step="10" oninput="document.getElementById('scr-cap-val').textContent='$'+this.value+'B';applyScreener()"></div>
-              <div class="scr-filter-group"><label>Min 1Y Return <span id="scr-ret-val">−50%</span></label><input type="range" class="scr-slider" id="scr-ret" min="-50" max="200" value="-50" oninput="document.getElementById('scr-ret-val').textContent=this.value+'%';applyScreener()"></div>
-            </div>
-            <div class="loading-bar" id="scr-loading" style="display:none;"><div class="spinner"></div> Loading market data…</div>
-            <div class="scr-table-wrap">
-              <table class="scr-table" id="scr-table">
-                <thead><tr>
-                  <th style="text-align:left;" onclick="sortScreener('ticker')">Stock ↕</th>
-                  <th onclick="sortScreener('price')">Price ↕</th>
-                  <th onclick="sortScreener('change1D')">Day ↕</th>
-                  <th onclick="sortScreener('change1Y')">1Y Chg ↕</th>
-                  <th onclick="sortScreener('marketCap')">Mkt Cap ↕</th>
-                  <th onclick="sortScreener('pe')">P/E ↕</th>
-                  <th onclick="sortScreener('pb')">P/B ↕</th>
-                  <th onclick="sortScreener('dividendYield')">Div Yield ↕</th>
-                  <th onclick="sortScreener('beta')">Beta ↕</th>
-                </tr></thead>
-                <tbody id="scr-body"><tr><td colspan="9" style="text-align:center;color:rgba(247,244,238,.3);padding:2rem;">Click the Screener tab to load data</td></tr></tbody>
-              </table>
             </div>
           </div>
 
-          <!-- ── TAB: ALERTS ── -->
-
-          <!-- ── TAB: REPORTS ── -->
-          <div id="tab-reports" class="tab-pane" style="display:none;">
-            <div style="padding:1.25rem 0;">
-              <div style="font-size:.82rem;color:rgba(247,244,238,.5);margin-bottom:1.25rem;">Generate a print-ready PDF of your current stock analysis — including all charts, metrics, and projections.</div>
-              <div id="report-no-stock" style="display:none;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:var(--r2);padding:1.5rem;text-align:center;color:rgba(247,244,238,.4);font-size:.85rem;">
-                Load a stock from the <strong style="color:var(--gold);">📊 Analyze</strong> tab first, then come back here to export your report.
-              </div>
-              <div id="report-ready" style="display:none;">
-                <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:var(--r2);padding:1.25rem;margin-bottom:1rem;">
-                  <div style="font-family:var(--mono);font-size:.75rem;color:rgba(247,244,238,.35);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.5rem;">Report contents</div>
-                  <div id="report-summary" style="font-size:.88rem;color:rgba(247,244,238,.65);line-height:1.8;"></div>
-                </div>
-                <button class="btn-run" onclick="exportPDF()" style="max-width:280px;">📄 Export PDF Report →</button>
-                <div style="margin-top:.75rem;font-size:.72rem;color:rgba(247,244,238,.25);">Opens a print dialog — choose "Save as PDF" in your browser's print panel.</div>
-              </div>
-              <div id="report-check" style="display:none;"></div>
+          <div class="acc-section" id="sec-financials">
+            <div class="acc-header" onclick="toggleSection('financials')">
+              <span class="acc-title">💰 Financials <span class="acc-pro-badge">PRO</span></span>
+              <span class="acc-chevron">›</span>
             </div>
-          </div>
-
-          <!-- DCF / Projection tabs (locked) -->
-          <div id="tab-projection" class="tab-pane" style="display:none;">
-            <div style="font-size:.82rem;color:rgba(247,244,238,.5);margin-bottom:1.25rem;">Advanced model with separate inputs per scenario. Load a stock first to auto-fill current price.</div>
-            <div class="proj-controls" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr));">
-              <div><label class="fc-label">Time Horizon</label>
-                <select class="fc-select" id="adv-years"><option value="1">1 Year</option><option value="2">2 Years</option><option value="3">3 Years</option><option value="5" selected>5 Years</option><option value="10">10 Years</option></select>
-              </div>
-              <div><label class="fc-label">Current Price ($)</label><input class="fc-input" type="number" id="adv-price" value="100" step="0.01"></div>
-              <div><label class="fc-label">Dividend Yield (%)</label><input class="fc-input" type="number" id="adv-div" value="0.5" step="0.1"></div>
-              <div style="grid-column:1/-1;border-top:1px solid rgba(255,255,255,.07);padding-top:.75rem;margin-top:.25rem;font-family:var(--mono);font-size:.65rem;color:rgba(247,244,238,.3);text-transform:uppercase;letter-spacing:.07em;">Bear / Base / Bull Inputs</div>
-              <div><label class="fc-label">Bear Growth (%/yr)</label><input class="fc-input" type="number" id="adv-g-bear" value="3" step="0.5"></div>
-              <div><label class="fc-label">Base Growth (%/yr)</label><input class="fc-input" type="number" id="adv-g-base" value="12" step="0.5"></div>
-              <div><label class="fc-label">Bull Growth (%/yr)</label><input class="fc-input" type="number" id="adv-g-bull" value="25" step="0.5"></div>
-              <div><label class="fc-label">Bear Exit P/E</label><input class="fc-input" type="number" id="adv-pe-bear" value="18" step="1"></div>
-              <div><label class="fc-label">Base Exit P/E</label><input class="fc-input" type="number" id="adv-pe-base" value="25" step="1"></div>
-              <div><label class="fc-label">Bull Exit P/E</label><input class="fc-input" type="number" id="adv-pe-bull" value="35" step="1"></div>
-              <div><label class="fc-label">Current P/E</label><input class="fc-input" type="number" id="adv-pe-now" value="25" step="1"></div>
-            </div>
-            <button class="btn-run" onclick="runAdvancedProjection()">Run Advanced Projection →</button>
-            <div id="adv-proj-results" style="display:none;">
-              <div class="scenario-row" id="adv-scenario-cards" style="margin-top:1.25rem;"></div>
-              <div class="h200" style="margin-top:14px;"><canvas id="adv-proj-chart"></canvas></div>
-              <div id="adv-irr-table" style="margin-top:14px;"></div>
-            </div>
-          </div>
-
-          <div id="tab-dcf" class="tab-pane" style="display:none;">
-            <div style="font-size:.82rem;color:rgba(247,244,238,.5);margin-bottom:1.25rem;">10-year two-stage discounted cash flow model. Enter the stock's EPS and your assumptions below.</div>
-            <div class="proj-controls">
-              <div><label class="fc-label">Current EPS ($)</label><input class="fc-input" type="number" id="dcf-eps" value="5.20" step="0.01"></div>
-              <div><label class="fc-label">Growth Yr 1–5 (%)</label><input class="fc-input" type="number" id="dcf-g1" value="15" step="0.5"></div>
-              <div><label class="fc-label">Growth Yr 6–10 (%)</label><input class="fc-input" type="number" id="dcf-g2" value="8" step="0.5"></div>
-              <div><label class="fc-label">Terminal Growth (%)</label><input class="fc-input" type="number" id="dcf-tg" value="3" step="0.1"></div>
-              <div><label class="fc-label">WACC (%)</label><input class="fc-input" type="number" id="dcf-wacc" value="10" step="0.1"></div>
-              <div><label class="fc-label">Current Price ($) <span style="color:rgba(247,244,238,.3);font-size:.58rem;">optional</span></label><input class="fc-input" type="number" id="dcf-price" value="" step="0.01" placeholder="Auto-fills from Analyze"></div>
-            </div>
-            <button class="btn-run" onclick="runDCF()">Calculate Intrinsic Value →</button>
-            <div id="dcf-output" style="margin-top:1.25rem;"></div>
-            <div style="margin-top:1rem;font-size:.7rem;color:rgba(247,244,238,.2);line-height:1.6;">This is an EPS-based simplified DCF, not a free-cash-flow model. Results are for educational purposes only — not investment advice.</div>
-          </div>
-
-
-          <!-- ── TAB: FINANCIALS ── -->
-          <div id="tab-financials" class="tab-pane" style="display:none;">
-            <div style="font-size:.82rem;color:rgba(247,244,238,.5);margin-bottom:1.25rem;">Annual income statement, balance sheet, and cash flow for the last 4 years.</div>
+            <div class="acc-body" id="body-financials" style="display:none;">
+<div style="font-size:.82rem;color:rgba(247,244,238,.5);margin-bottom:1.25rem;">Annual income statement, balance sheet, and cash flow for the last 4 years.</div>
             <div id="fin-loading" style="color:rgba(247,244,238,.3);font-size:.82rem;display:none;">Loading financials…</div>
             <div id="fin-error" style="color:#f87171;font-size:.82rem;display:none;"></div>
             <div id="fin-content" style="display:none;">
@@ -1258,8 +1172,16 @@ footer { background:#080808; padding:3rem 2rem; }
           </div>
 
           <!-- ── TAB: ADVANCED METRICS ── -->
-          <div id="tab-advmetrics" class="tab-pane" style="display:none;">
-            <div style="font-size:.82rem;color:rgba(247,244,238,.5);margin-bottom:1.25rem;">Deep fundamental metrics: valuation multiples, margins, returns, and leverage.</div>
+            </div>
+          </div>
+
+          <div class="acc-section" id="sec-advmetrics">
+            <div class="acc-header" onclick="toggleSection('advmetrics')">
+              <span class="acc-title">📐 Adv. Metrics <span class="acc-pro-badge">PRO</span></span>
+              <span class="acc-chevron">›</span>
+            </div>
+            <div class="acc-body" id="body-advmetrics" style="display:none;">
+<div style="font-size:.82rem;color:rgba(247,244,238,.5);margin-bottom:1.25rem;">Deep fundamental metrics: valuation multiples, margins, returns, and leverage.</div>
             <div id="advm-loading" style="color:rgba(247,244,238,.3);font-size:.82rem;display:none;">Loading metrics…</div>
             <div id="advm-error" style="color:#f87171;font-size:.82rem;display:none;"></div>
             <div id="advm-content"></div>
@@ -1267,8 +1189,16 @@ footer { background:#080808; padding:3rem 2rem; }
           </div>
 
           <!-- ── TAB: EARNINGS ── -->
-          <div id="tab-earnings" class="tab-pane" style="display:none;">
-            <div style="font-size:.82rem;color:rgba(247,244,238,.5);margin-bottom:1.25rem;">EPS estimates vs. actual results and earnings surprise history.</div>
+            </div>
+          </div>
+
+          <div class="acc-section" id="sec-earnings">
+            <div class="acc-header" onclick="toggleSection('earnings')">
+              <span class="acc-title">📣 Earnings</span>
+              <span class="acc-chevron">›</span>
+            </div>
+            <div class="acc-body" id="body-earnings" style="display:none;">
+<div style="font-size:.82rem;color:rgba(247,244,238,.5);margin-bottom:1.25rem;">EPS estimates vs. actual results and earnings surprise history.</div>
             <div id="earn-loading" style="color:rgba(247,244,238,.3);font-size:.82rem;display:none;">Loading earnings…</div>
             <div id="earn-error" style="color:#f87171;font-size:.82rem;display:none;"></div>
             <div id="earn-content"></div>
@@ -1276,8 +1206,16 @@ footer { background:#080808; padding:3rem 2rem; }
           </div>
 
           <!-- ── TAB: SEC FILINGS ── -->
-          <div id="tab-secfilings" class="tab-pane" style="display:none;">
-            <div style="font-size:.82rem;color:rgba(247,244,238,.5);margin-bottom:1.25rem;">Official SEC filings sourced directly from EDGAR.</div>
+            </div>
+          </div>
+
+          <div class="acc-section" id="sec-secfilings">
+            <div class="acc-header" onclick="toggleSection('secfilings')">
+              <span class="acc-title">📋 SEC Filings</span>
+              <span class="acc-chevron">›</span>
+            </div>
+            <div class="acc-body" id="body-secfilings" style="display:none;">
+<div style="font-size:.82rem;color:rgba(247,244,238,.5);margin-bottom:1.25rem;">Official SEC filings sourced directly from EDGAR.</div>
             <div id="sec-nostock" style="color:rgba(247,244,238,.35);font-size:.85rem;">Search for a stock in the Analyze tab first.</div>
             <div id="sec-content" style="display:none;">
               <div style="display:grid;gap:.75rem;">
@@ -1307,8 +1245,168 @@ footer { background:#080808; padding:3rem 2rem; }
           </div>
 
           <!-- ── TAB: EDUCATION ── -->
-          <div id="tab-education" class="tab-pane" style="display:none;">
-            <div style="font-size:.82rem;color:rgba(247,244,238,.5);margin-bottom:1.5rem;">Core concepts every investor should know.</div>
+            </div>
+          </div>
+
+          <div class="acc-section" id="sec-compare">
+            <div class="acc-header" onclick="toggleSection('compare')">
+              <span class="acc-title">⚖️ Compare <span class="acc-pro-badge">PRO</span></span>
+              <span class="acc-chevron">›</span>
+            </div>
+            <div class="acc-body" id="body-compare" style="display:none;">
+<div style="margin-bottom:1rem;">
+              <div style="font-size:.82rem;color:rgba(247,244,238,.5);margin-bottom:1.25rem;">Compare 2 stocks free. Load 3–4 stocks and access the performance chart &amp; radar with <span style="color:var(--gold);">Pro</span>.</div>
+              <div class="cmp-inputs">
+                <div class="cmp-ig"><label>Stock 1</label><input class="ticker-input" id="cmp1" placeholder="e.g. AAPL" style="text-transform:uppercase;"></div>
+                <div class="cmp-ig"><label>Stock 2</label><input class="ticker-input" id="cmp2" placeholder="e.g. MSFT" style="text-transform:uppercase;"></div>
+                <div class="cmp-ig"><label>Stock 3 <span style="font-size:.72rem;color:rgba(247,244,238,.3);">(optional)</span></label><input class="ticker-input" id="cmp3" placeholder="e.g. GOOGL" style="text-transform:uppercase;"></div>
+                <div class="cmp-ig"><label>Stock 4 <span style="font-size:.72rem;color:rgba(247,244,238,.3);">(optional)</span></label><input class="ticker-input" id="cmp4" placeholder="e.g. AMZN" style="text-transform:uppercase;"></div>
+                <button class="btn-search" onclick="runCompare()" style="align-self:flex-end;height:40px;">Compare →</button>
+              </div>
+              <div class="loading-bar" id="cmp-loading" style="display:none;"><div class="spinner"></div> Loading comparison data…</div>
+              <div id="cmp-results" style="display:none;">
+                <div class="cmp-table-wrap"><table class="cmp-table" id="cmp-table"></table></div>
+                <div class="g2" style="margin-top:14px;">
+                  <div><div class="chart-header"><div class="chart-title">Normalized Performance (1Y)</div></div><div class="h200"><canvas id="cmp-perf-chart"></canvas></div></div>
+                  <div><div class="chart-header"><div class="chart-title">Fundamental Radar</div></div><div class="h200"><canvas id="cmp-radar-chart"></canvas></div></div>
+                </div>
+              </div>
+            </div>
+          </div><!-- /tab-compare -->
+
+          <!-- ── TAB: SCREENER ── -->
+            </div>
+          </div>
+
+          <div class="acc-section" id="sec-projection">
+            <div class="acc-header" onclick="toggleSection('projection')">
+              <span class="acc-title">📈 Projection <span class="acc-pro-badge">PRO</span></span>
+              <span class="acc-chevron">›</span>
+            </div>
+            <div class="acc-body" id="body-projection" style="display:none;">
+<div style="font-size:.82rem;color:rgba(247,244,238,.5);margin-bottom:1.25rem;">Advanced model with separate inputs per scenario. Load a stock first to auto-fill current price.</div>
+            <div class="proj-controls" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr));">
+              <div><label class="fc-label">Time Horizon</label>
+                <select class="fc-select" id="adv-years"><option value="1">1 Year</option><option value="2">2 Years</option><option value="3">3 Years</option><option value="5" selected>5 Years</option><option value="10">10 Years</option></select>
+              </div>
+              <div><label class="fc-label">Current Price ($)</label><input class="fc-input" type="number" id="adv-price" value="100" step="0.01"></div>
+              <div><label class="fc-label">Dividend Yield (%)</label><input class="fc-input" type="number" id="adv-div" value="0.5" step="0.1"></div>
+              <div style="grid-column:1/-1;border-top:1px solid rgba(255,255,255,.07);padding-top:.75rem;margin-top:.25rem;font-family:var(--mono);font-size:.65rem;color:rgba(247,244,238,.3);text-transform:uppercase;letter-spacing:.07em;">Bear / Base / Bull Inputs</div>
+              <div><label class="fc-label">Bear Growth (%/yr)</label><input class="fc-input" type="number" id="adv-g-bear" value="3" step="0.5"></div>
+              <div><label class="fc-label">Base Growth (%/yr)</label><input class="fc-input" type="number" id="adv-g-base" value="12" step="0.5"></div>
+              <div><label class="fc-label">Bull Growth (%/yr)</label><input class="fc-input" type="number" id="adv-g-bull" value="25" step="0.5"></div>
+              <div><label class="fc-label">Bear Exit P/E</label><input class="fc-input" type="number" id="adv-pe-bear" value="18" step="1"></div>
+              <div><label class="fc-label">Base Exit P/E</label><input class="fc-input" type="number" id="adv-pe-base" value="25" step="1"></div>
+              <div><label class="fc-label">Bull Exit P/E</label><input class="fc-input" type="number" id="adv-pe-bull" value="35" step="1"></div>
+              <div><label class="fc-label">Current P/E</label><input class="fc-input" type="number" id="adv-pe-now" value="25" step="1"></div>
+            </div>
+            <button class="btn-run" onclick="runAdvancedProjection()">Run Advanced Projection →</button>
+            <div id="adv-proj-results" style="display:none;">
+              <div class="scenario-row" id="adv-scenario-cards" style="margin-top:1.25rem;"></div>
+              <div class="h200" style="margin-top:14px;"><canvas id="adv-proj-chart"></canvas></div>
+              <div id="adv-irr-table" style="margin-top:14px;"></div>
+            </div>
+          </div>
+            </div>
+          </div>
+
+          <div class="acc-section" id="sec-dcf">
+            <div class="acc-header" onclick="toggleSection('dcf')">
+              <span class="acc-title">🧮 DCF <span class="acc-pro-badge">PRO</span></span>
+              <span class="acc-chevron">›</span>
+            </div>
+            <div class="acc-body" id="body-dcf" style="display:none;">
+<div style="font-size:.82rem;color:rgba(247,244,238,.5);margin-bottom:1.25rem;">10-year two-stage discounted cash flow model. Enter the stock's EPS and your assumptions below.</div>
+            <div class="proj-controls">
+              <div><label class="fc-label">Current EPS ($)</label><input class="fc-input" type="number" id="dcf-eps" value="5.20" step="0.01"></div>
+              <div><label class="fc-label">Growth Yr 1–5 (%)</label><input class="fc-input" type="number" id="dcf-g1" value="15" step="0.5"></div>
+              <div><label class="fc-label">Growth Yr 6–10 (%)</label><input class="fc-input" type="number" id="dcf-g2" value="8" step="0.5"></div>
+              <div><label class="fc-label">Terminal Growth (%)</label><input class="fc-input" type="number" id="dcf-tg" value="3" step="0.1"></div>
+              <div><label class="fc-label">WACC (%)</label><input class="fc-input" type="number" id="dcf-wacc" value="10" step="0.1"></div>
+              <div><label class="fc-label">Current Price ($) <span style="color:rgba(247,244,238,.3);font-size:.58rem;">optional</span></label><input class="fc-input" type="number" id="dcf-price" value="" step="0.01" placeholder="Auto-fills from Analyze"></div>
+            </div>
+            <button class="btn-run" onclick="runDCF()">Calculate Intrinsic Value →</button>
+            <div id="dcf-output" style="margin-top:1.25rem;"></div>
+            <div style="margin-top:1rem;font-size:.7rem;color:rgba(247,244,238,.2);line-height:1.6;">This is an EPS-based simplified DCF, not a free-cash-flow model. Results are for educational purposes only — not investment advice.</div>
+          </div>
+
+
+          <!-- ── TAB: FINANCIALS ── -->
+            </div>
+          </div>
+
+          <div class="acc-section" id="sec-screener">
+            <div class="acc-header" onclick="toggleSection('screener')">
+              <span class="acc-title">🔍 Screener <span class="acc-pro-badge">PRO</span></span>
+              <span class="acc-chevron">›</span>
+            </div>
+            <div class="acc-body" id="body-screener" style="display:none;">
+<div class="scr-filters">
+              <div class="scr-filter-group"><label>Max P/E <span id="scr-pe-val">50x</span></label><input type="range" class="scr-slider" id="scr-pe" min="5" max="200" value="50" oninput="document.getElementById('scr-pe-val').textContent=this.value+'x';applyScreener()"></div>
+              <div class="scr-filter-group"><label>Max P/B <span id="scr-pb-val">20x</span></label><input type="range" class="scr-slider" id="scr-pb" min="0" max="50" value="20" oninput="document.getElementById('scr-pb-val').textContent=this.value+'x';applyScreener()"></div>
+              <div class="scr-filter-group"><label>Min Div Yield <span id="scr-div-val">0%</span></label><input type="range" class="scr-slider" id="scr-div" min="0" max="10" value="0" step="0.5" oninput="document.getElementById('scr-div-val').textContent=this.value+'%';applyScreener()"></div>
+              <div class="scr-filter-group"><label>Min Mkt Cap <span id="scr-cap-val">$0B</span></label><input type="range" class="scr-slider" id="scr-cap" min="0" max="500" value="0" step="10" oninput="document.getElementById('scr-cap-val').textContent='$'+this.value+'B';applyScreener()"></div>
+              <div class="scr-filter-group"><label>Min 1Y Return <span id="scr-ret-val">−50%</span></label><input type="range" class="scr-slider" id="scr-ret" min="-50" max="200" value="-50" oninput="document.getElementById('scr-ret-val').textContent=this.value+'%';applyScreener()"></div>
+            </div>
+            <div class="loading-bar" id="scr-loading" style="display:none;"><div class="spinner"></div> Loading market data…</div>
+            <div class="scr-table-wrap">
+              <table class="scr-table" id="scr-table">
+                <thead><tr>
+                  <th style="text-align:left;" onclick="sortScreener('ticker')">Stock ↕</th>
+                  <th onclick="sortScreener('price')">Price ↕</th>
+                  <th onclick="sortScreener('change1D')">Day ↕</th>
+                  <th onclick="sortScreener('change1Y')">1Y Chg ↕</th>
+                  <th onclick="sortScreener('marketCap')">Mkt Cap ↕</th>
+                  <th onclick="sortScreener('pe')">P/E ↕</th>
+                  <th onclick="sortScreener('pb')">P/B ↕</th>
+                  <th onclick="sortScreener('dividendYield')">Div Yield ↕</th>
+                  <th onclick="sortScreener('beta')">Beta ↕</th>
+                </tr></thead>
+                <tbody id="scr-body"><tr><td colspan="9" style="text-align:center;color:rgba(247,244,238,.3);padding:2rem;">Click the Screener tab to load data</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- ── TAB: ALERTS ── -->
+
+          <!-- ── TAB: REPORTS ── -->
+            </div>
+          </div>
+
+          <div class="acc-section" id="sec-reports">
+            <div class="acc-header" onclick="toggleSection('reports')">
+              <span class="acc-title">📄 Reports <span class="acc-pro-badge">PRO</span></span>
+              <span class="acc-chevron">›</span>
+            </div>
+            <div class="acc-body" id="body-reports" style="display:none;">
+<div style="padding:1.25rem 0;">
+              <div style="font-size:.82rem;color:rgba(247,244,238,.5);margin-bottom:1.25rem;">Generate a print-ready PDF of your current stock analysis — including all charts, metrics, and projections.</div>
+              <div id="report-no-stock" style="display:none;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:var(--r2);padding:1.5rem;text-align:center;color:rgba(247,244,238,.4);font-size:.85rem;">
+                Load a stock from the <strong style="color:var(--gold);">📊 Analyze</strong> tab first, then come back here to export your report.
+              </div>
+              <div id="report-ready" style="display:none;">
+                <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:var(--r2);padding:1.25rem;margin-bottom:1rem;">
+                  <div style="font-family:var(--mono);font-size:.75rem;color:rgba(247,244,238,.35);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.5rem;">Report contents</div>
+                  <div id="report-summary" style="font-size:.88rem;color:rgba(247,244,238,.65);line-height:1.8;"></div>
+                </div>
+                <button class="btn-run" onclick="exportPDF()" style="max-width:280px;">📄 Export PDF Report →</button>
+                <div style="margin-top:.75rem;font-size:.72rem;color:rgba(247,244,238,.25);">Opens a print dialog — choose "Save as PDF" in your browser's print panel.</div>
+              </div>
+              <div id="report-check" style="display:none;"></div>
+            </div>
+          </div>
+
+          <!-- DCF / Projection tabs (locked) -->
+            </div>
+          </div>
+
+          <div class="acc-section" id="sec-education">
+            <div class="acc-header" onclick="toggleSection('education')">
+              <span class="acc-title">📚 Education</span>
+              <span class="acc-chevron">›</span>
+            </div>
+            <div class="acc-body" id="body-education" style="display:none;">
+<div style="font-size:.82rem;color:rgba(247,244,238,.5);margin-bottom:1.5rem;">Core concepts every investor should know.</div>
             <div style="display:grid;gap:.85rem;">
               <div class="edu-card">
                 <div class="edu-title">📊 Price-to-Earnings (P/E) Ratio</div>
@@ -1353,8 +1451,16 @@ footer { background:#080808; padding:3rem 2rem; }
           </div>
 
           <!-- ── TAB: ADVANCED EDUCATION ── -->
-          <div id="tab-adveducation" class="tab-pane" style="display:none;">
-            <div style="font-size:.82rem;color:rgba(247,244,238,.5);margin-bottom:1.5rem;">Advanced valuation and analysis methods used by professional investors.</div>
+            </div>
+          </div>
+
+          <div class="acc-section" id="sec-adveducation">
+            <div class="acc-header" onclick="toggleSection('adveducation')">
+              <span class="acc-title">🎓 Adv. Education <span class="acc-pro-badge">PRO</span></span>
+              <span class="acc-chevron">›</span>
+            </div>
+            <div class="acc-body" id="body-adveducation" style="display:none;">
+<div style="font-size:.82rem;color:rgba(247,244,238,.5);margin-bottom:1.5rem;">Advanced valuation and analysis methods used by professional investors.</div>
             <div style="display:grid;gap:.85rem;">
               <div class="edu-card">
                 <div class="edu-title">🧮 Discounted Cash Flow (DCF) Valuation</div>
@@ -1395,16 +1501,18 @@ footer { background:#080808; padding:3rem 2rem; }
               </div>
             </div>
           </div>
+            </div>
+          </div>
 
           <div class="tool-disclaimer">⚠ Implied Lens provides market data and modeling tools for informational and educational purposes only. Projections are hypothetical models — not investment advice. Past performance does not guarantee future results. Always consult a licensed financial advisor before investing.</div>
-        </div><!-- /tool-body -->
+        </div><!-- /tool-accordion -->
       </div><!-- /tool-shell -->
     </div>
   </section>
 
   <footer style="background:#111; border-top:1px solid rgba(255,255,255,.07); padding:1.25rem 3.5rem; font-size:.75rem; color:rgba(247,244,238,.3); display:flex; justify-content:space-between;">
     <span>© 2026 Implied Lens. Not financial advice.</span>
-    <a href="#" onclick="showView('home');return false;" style="color:rgba(247,244,238,.4); text-decoration:none;">← Back to home</a>
+    <a href="#" onclick="navGoTo('home');return false;" style="color:rgba(247,244,238,.4); text-decoration:none;">← Back to home</a>
   </footer>
 </div>
 
@@ -1475,6 +1583,67 @@ footer { background:#080808; padding:3rem 2rem; }
 <div class="toast" id="toast"></div>
 
 <style>
+
+
+/* ═══════ ACCORDION TOOL LAYOUT ═══════ */
+.tool-accordion { display:flex; flex-direction:column; gap:0; }
+
+.acc-section { border-bottom:1px solid rgba(255,255,255,.06); }
+.acc-section:first-child { border-top:1px solid rgba(255,255,255,.06); }
+
+.acc-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:1rem 1.5rem; cursor:pointer; user-select:none;
+  background:rgba(255,255,255,.015);
+  transition:background .15s;
+}
+.acc-header:hover { background:rgba(200,155,60,.06); }
+.acc-section.open > .acc-header { background:rgba(200,155,60,.04); }
+
+.acc-title {
+  font-family:var(--mono); font-size:.8rem; font-weight:500;
+  color:rgba(247,244,238,.75); letter-spacing:.04em;
+  display:flex; align-items:center; gap:.5rem;
+}
+.acc-section.open > .acc-header .acc-title { color:rgba(247,244,238,.95); }
+
+.acc-pro-badge {
+  font-size:.58rem; font-weight:700; letter-spacing:.1em;
+  padding:1px 6px; border-radius:3px;
+  background:rgba(200,155,60,.18); color:var(--gold-d);
+  border:1px solid rgba(200,155,60,.25);
+}
+
+.acc-chevron {
+  font-size:1.1rem; color:rgba(247,244,238,.25);
+  transform:rotate(0deg); transition:transform .2s;
+  line-height:1;
+}
+.acc-section.open > .acc-header .acc-chevron { transform:rotate(90deg); color:var(--gold-d); }
+
+.acc-body {
+  padding:1.5rem 1.5rem 2rem;
+  border-top:1px solid rgba(255,255,255,.04);
+}
+
+/* ═══════ NAV TAB STYLES ═══════ */
+.nav-links {
+  overflow-x:auto; scrollbar-width:none;
+  flex-wrap:nowrap !important;
+  gap:0 !important;
+}
+.nav-links::-webkit-scrollbar { display:none; }
+
+a.nav-tab {
+  font-size:.78rem; white-space:nowrap;
+  padding:.35rem .7rem; border-radius:5px;
+  color:rgba(14,14,14,.55) !important;
+  transition:color .15s, background .15s;
+  text-decoration:none !important;
+}
+a.nav-tab:hover { color:var(--ink) !important; background:rgba(200,155,60,.07); }
+a.nav-tab.active-tab { color:var(--gold-d) !important; font-weight:600; background:rgba(200,155,60,.08); }
+
 
 /* ── Financials table ── */
 .fin-table { width:100%; border-collapse:collapse; font-size:.78rem; }
@@ -1574,12 +1743,56 @@ const S = {
 };
 const PROXY = 'https://api.allorigins.win/raw?url=';
 const COLORS = ['#C89B3C','#4a9fd4','#4ade80','#f87171'];
-const PRO_TABS = ['financials','advmetrics','projection','dcf','screener','reports','adveducation'];
+const PRO_SECTIONS = ['financials','advmetrics','projection','dcf','screener','reports','adveducation'];
+
+function isPro() { return S.userPlan === 'pro' || S.userPlan === 'trial'; }
+
+// ── Accordion open/close ──
+function openSection(id, skipProCheck) {
+  if (!skipProCheck && PRO_SECTIONS.includes(id) && !isPro()) {
+    showUpgradeModal(); return;
+  }
+  const sec = document.getElementById('sec-' + id);
+  const bod = document.getElementById('body-' + id);
+  if (!sec || !bod) return;
+  sec.classList.add('open');
+  bod.style.display = 'block';
+  // Auto-load data tabs
+  const t = S.ticker;
+  if      (id === 'financials')  { if(t) loadFinancials(t); }
+  else if (id === 'advmetrics')  { if(t) loadAdvMetrics(t); }
+  else if (id === 'earnings')    { if(t) loadEarnings(t); }
+  else if (id === 'secfilings')  { if(t) loadSecFilings(t); }
+  else if (id === 'screener')    { if(isPro()) loadScreener(); }
+  else if (id === 'reports')     { setTimeout(checkReportReady, 100); }
+}
+
+function closeSection(id) {
+  const sec = document.getElementById('sec-' + id);
+  const bod = document.getElementById('body-' + id);
+  if (!sec || !bod) return;
+  sec.classList.remove('open');
+  bod.style.display = 'none';
+}
+
+function toggleSection(id) {
+  const sec = document.getElementById('sec-' + id);
+  if (!sec) return;
+  if (sec.classList.contains('open')) {
+    closeSection(id);
+  } else {
+    openSection(id);
+  }
+}
+
+// Keep switchTab as alias so any legacy calls don't break
+function switchTab(id, btn) {
+  openSection(id);
+}
 
 /* ══════════════════════════════════════════════════════
    TABS
 ══════════════════════════════════════════════════════ */
-function isPro() { return S.userPlan === 'pro' || S.userPlan === 'trial'; }
 
 
 function exportPDF() {
@@ -1621,22 +1834,7 @@ function checkReportReady() {
   }
 }
 
-function switchTab(id, btn) {
-  if (PRO_TABS.includes(id) && !isPro()) {
-    showUpgradeModal(); return;
-  }
-  document.querySelectorAll('.tool-tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.tab-pane').forEach(p=>p.style.display='none');
-  btn.classList.add('active');
-  document.getElementById('tab-'+id).style.display='block';
-  // Auto-load data tabs when opened
-  const t = S.ticker;
-  if      (id === 'financials')  loadFinancials(t);
-  else if (id === 'advmetrics')  loadAdvMetrics(t);
-  else if (id === 'earnings')    loadEarnings(t);
-  else if (id === 'secfilings')  loadSecFilings(t);
-}
-function switchTabLocked(id, btn) { switchTab(id, btn); }
+// switchTab → now handled by toggleSection/openSection above
 
 function showUpgradeModal() { document.getElementById('upgrade-modal-bg').classList.add('show'); }
 function closeUpgradeModal() { document.getElementById('upgrade-modal-bg').classList.remove('show'); }
@@ -1657,15 +1855,21 @@ async function startTrial(annual) {
   }
 }
 
-// Decorate pro tabs with a lock badge
+// Decorate pro sections with lock indicator in nav tabs
 function decorateProTabs() {
-  document.querySelectorAll('.tool-tab').forEach(btn => {
-    const id = btn.getAttribute('data-tab');
-    if (PRO_TABS.includes(id) && !isPro() && !btn.querySelector('.tab-lock')) {
+  if (isPro()) {
+    // Remove all pro badges from nav for paying users
+    document.querySelectorAll('.acc-pro-badge').forEach(el => el.style.display = 'none');
+    return;
+  }
+  // Add lock to nav items for pro sections
+  document.querySelectorAll('a.nav-tab[data-tool]').forEach(a => {
+    const id = a.getAttribute('data-tool');
+    if (PRO_SECTIONS.includes(id) && !a.querySelector('.tab-lock')) {
       const lock = document.createElement('span');
       lock.className = 'tab-lock';
       lock.textContent = ' 🔒';
-      btn.appendChild(lock);
+      a.appendChild(lock);
     }
     if (isPro()) {
       const lock = btn.querySelector('.tab-lock');

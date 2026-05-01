@@ -536,22 +536,76 @@ app.get('/api/quote/:ticker', async (req, res) => {
 
 
 // ============================================================
+//  Yahoo Finance crumb cache  (required for quoteSummary v10)
+// ============================================================
+let _yfCrumb   = null;
+let _yfCookies = null;
+let _yfCrumbAt = 0;
+const YF_CRUMB_TTL = 25 * 60 * 1000; // refresh every 25 min
+
+async function getYahooCrumb() {
+  if (_yfCrumb && (Date.now() - _yfCrumbAt) < YF_CRUMB_TTL) return { crumb: _yfCrumb, cookies: _yfCookies };
+  try {
+    // Step 1 — accept the consent cookie
+    const consent = await fetch('https://fc.yahoo.com/', {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36', 'Accept': '*/*' },
+      redirect: 'follow',
+    });
+    const rawCookies = consent.headers.getSetCookie ? consent.headers.getSetCookie() : [];
+    const cookieStr  = rawCookies.map(c => c.split(';')[0]).join('; ');
+
+    // Step 2 — fetch crumb
+    const crumbRes = await fetch('https://query1.finance.yahoo.com/v1/test/getcrumb', {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': '*/*',
+        'Cookie': cookieStr,
+      },
+    });
+    const crumb = (await crumbRes.text()).trim();
+    if (!crumb || crumb.includes('<')) throw new Error('bad crumb: ' + crumb.slice(0, 40));
+    _yfCrumb   = crumb;
+    _yfCookies = cookieStr;
+    _yfCrumbAt = Date.now();
+    console.log('Yahoo crumb refreshed:', crumb.slice(0, 8) + '...');
+    return { crumb, cookies: cookieStr };
+  } catch (e) {
+    console.error('getYahooCrumb failed:', e.message);
+    return { crumb: null, cookies: null };
+  }
+}
+
+// ============================================================
 //  Financials proxy  (Yahoo Finance quoteSummary)
 // ============================================================
 app.get('/api/financials/:ticker', async (req, res) => {
   try {
-    const ticker = req.params.ticker.toUpperCase();
+    const ticker  = req.params.ticker.toUpperCase();
     const modules = 'incomeStatementHistory,balanceSheetHistory,cashflowStatementHistory,defaultKeyStatistics,financialData';
-    const url = `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${ticker}?modules=${modules}`;
-    const r = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept': 'application/json',
+    const { crumb, cookies } = await getYahooCrumb();
+    const crumbParam = crumb ? `&crumb=${encodeURIComponent(crumb)}` : '';
+    const url = `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${ticker}?modules=${modules}${crumbParam}`;
+    const headers = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Accept': 'application/json',
+    };
+    if (cookies) headers['Cookie'] = cookies;
+    const r = await fetch(url, { headers });
+    if (!r.ok) {
+      // If 401, force crumb refresh and retry once
+      if (r.status === 401) {
+        _yfCrumb = null; _yfCookies = null; _yfCrumbAt = 0;
+        const { crumb: c2, cookies: k2 } = await getYahooCrumb();
+        const url2 = `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${ticker}?modules=${modules}${c2 ? '&crumb='+encodeURIComponent(c2) : ''}`;
+        const h2 = { ...headers };
+        if (k2) h2['Cookie'] = k2;
+        const r2 = await fetch(url2, { headers: h2 });
+        if (!r2.ok) return res.status(r2.status).json({ error: 'Yahoo returned ' + r2.status + ' (after crumb retry)' });
+        return res.json(await r2.json());
       }
-    });
-    if (!r.ok) return res.status(r.status).json({ error: 'Yahoo returned ' + r.status });
-    const data = await r.json();
-    res.json(data);
+      return res.status(r.status).json({ error: 'Yahoo returned ' + r.status });
+    }
+    res.json(await r.json());
   } catch (e) {
     console.error('financials proxy error:', e.message);
     res.status(500).json({ error: 'Failed to fetch financials.' });
