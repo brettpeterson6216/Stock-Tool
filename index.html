@@ -633,7 +633,7 @@ footer { background:#080808; padding:3rem 2rem; }
 <body>
 
 <!-- ══════════ NAV ══════════ -->
-<nav>
+<nav id="main-nav" data-view="home">
   <a class="nav-logo" href="#"><span class="logo-dot"></span>Implied<em style="font-style:italic;color:var(--gold-d);">Lens</em></a>
   <div class="nav-links" id="nav-links">
     <a href='#' id='nav-home' class="nav-tab active-tab" onclick="navGoTo('home');return false;">Home</a>
@@ -667,10 +667,12 @@ footer { background:#080808; padding:3rem 2rem; }
       if (home) home.style.display = 'none';
       if (tool) tool.style.display = 'block';
       history.replaceState(null, '', '/?view=tool');
+      const nav = document.getElementById('main-nav'); if(nav) nav.setAttribute('data-view','tool');
     } else {
       if (tool) tool.style.display = 'none';
       if (home) home.style.display = 'block';
       history.replaceState(null, '', '/');
+      const nav2 = document.getElementById('main-nav'); if(nav2) nav2.setAttribute('data-view','home');
     }
     setActiveNavTab(view === 'tool' ? null : 'home');
   }
@@ -983,25 +985,8 @@ footer { background:#080808; padding:3rem 2rem; }
 
 <!-- ══════════ VIEW: LIVE TOOL ══════════ -->
 <div id="view-tool" style="display:none; min-height:100vh; background:var(--ink); color:var(--cream);">
-  <!-- LIVE TOOL SECTION -->
-  <section class="tool-section" id="tool">
-    <div class="container">
-      <span class="sec-label">Live Demo — No Signup Required</span>
-      <h2 class="sec-h2">Pull real data. Run your projection.</h2>
-      <p class="sec-sub">Enter any stock ticker. Get live price data, technical charts, and a full forward projection model instantly.</p>
-
-      <div class="tool-shell">
-        
-              <div class="chrome-dot chrome-y"></div>
-              <div class="chrome-dot chrome-g"></div>
-            </div>
-            <span class="tool-name">Implied Lens — Market Analyzer</span>
-          </div>
-          <span class="tool-live-badge">● LIVE</span>
-        </div>
-
-
-        <div class="tool-accordion">
+  <div class="tool-accordion-wrap">
+    <div class="tool-accordion">
 
           <div class="acc-section open" id="sec-analyze">
             <div class="acc-header" onclick="toggleSection('analyze')">
@@ -1505,15 +1490,13 @@ footer { background:#080808; padding:3rem 2rem; }
           </div>
 
           <div class="tool-disclaimer">⚠ Implied Lens provides market data and modeling tools for informational and educational purposes only. Projections are hypothetical models — not investment advice. Past performance does not guarantee future results. Always consult a licensed financial advisor before investing.</div>
-        </div><!-- /tool-accordion -->
-      </div><!-- /tool-shell -->
-    </div>
-  </section>
+    </div><!-- /tool-accordion -->
+  </div><!-- /tool-accordion-wrap -->
 
-  <footer style="background:#111; border-top:1px solid rgba(255,255,255,.07); padding:1.25rem 3.5rem; font-size:.75rem; color:rgba(247,244,238,.3); display:flex; justify-content:space-between;">
+  <div style="background:#111; border-top:1px solid rgba(255,255,255,.07); padding:1.25rem 2rem; font-size:.75rem; color:rgba(247,244,238,.3); display:flex; justify-content:space-between; align-items:center;">
     <span>© 2026 Implied Lens. Not financial advice.</span>
     <a href="#" onclick="navGoTo('home');return false;" style="color:rgba(247,244,238,.4); text-decoration:none;">← Back to home</a>
-  </footer>
+  </div>
 </div>
 
 <!-- FOOTER (home view) -->
@@ -1584,6 +1567,17 @@ footer { background:#080808; padding:3rem 2rem; }
 
 <style>
 
+
+
+/* ── Tool tabs hidden on home page ── */
+#main-nav[data-view="home"] .nav-tab[data-tool] { display: none; }
+
+/* ── Tool accordion wrapper ── */
+.tool-accordion-wrap {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1.5rem 1.5rem 3rem;
+}
 
 /* ═══════ ACCORDION TOOL LAYOUT ═══════ */
 .tool-accordion { display:flex; flex-direction:column; gap:0; }
