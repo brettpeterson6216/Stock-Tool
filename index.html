@@ -60,45 +60,98 @@ button { cursor:pointer; font-family:var(--sans); }
 /* ═══════════════════════════════ NAV ═══════════════════════════════ */
 nav {
   position:fixed; top:0; left:0; right:0; z-index:500;
-  height:64px; display:flex; align-items:center; justify-content:space-between;
-  padding:0 3.5rem;
-  background:rgba(247,244,238,0.94); backdrop-filter:blur(16px);
+  height:56px; display:flex; align-items:center;
+  padding:0 1.5rem;
+  background:rgba(247,244,238,0.96); backdrop-filter:blur(16px);
   border-bottom:1px solid var(--border2);
+  gap:0;
 }
 .nav-logo {
-  font-family:var(--serif); font-size:1.3rem; letter-spacing:-0.01em;
+  font-family:var(--serif); font-size:1.2rem; letter-spacing:-0.01em;
   color:var(--ink); text-decoration:none;
-  display:flex; align-items:center; gap:10px;
+  display:flex; align-items:center; gap:8px;
+  flex-shrink:0; padding-right:1.1rem;
+  border-right:1px solid var(--border2);
+  margin-right:.25rem;
+  white-space:nowrap;
 }
-.logo-dot { width:8px; height:8px; border-radius:50%; background:var(--gold); flex-shrink:0; }
-.nav-links { display:flex; align-items:center; gap:2.25rem; }
+.logo-dot { width:7px; height:7px; border-radius:50%; background:var(--gold); flex-shrink:0; }
+.nav-links { display:flex; align-items:center; }
 .nav-links a {
   font-size:0.875rem; font-weight:400; color:var(--ink3);
   text-decoration:none; transition:color .18s;
 }
 .nav-links a:hover { color:var(--ink); }
-.nav-right { display:flex; align-items:center; gap:1rem; }
+.nav-right { display:flex; align-items:center; gap:.6rem; flex-shrink:0; margin-left:auto; padding-left:.75rem; }
 .nav-live {
-  display:flex; align-items:center; gap:6px;
-  font-size:0.72rem; font-weight:500; color:var(--green);
-  letter-spacing:0.04em; text-transform:uppercase;
+  display:flex; align-items:center; gap:5px;
+  font-size:.62rem; font-weight:600; color:var(--green);
+  letter-spacing:.07em; text-transform:uppercase;
+  white-space:nowrap; padding:.25rem .55rem;
+  border:1px solid rgba(34,197,94,.25); border-radius:4px;
+  background:rgba(34,197,94,.06);
 }
-.nav-live::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--green); animation:blink 2s infinite; }
+.nav-live::before { content:''; width:5px; height:5px; border-radius:50%; background:var(--green); animation:blink 2s infinite; flex-shrink:0; }
 @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:.3;} }
 .btn-nav {
   background:var(--ink); color:var(--cream);
-  border:none; padding:.5rem 1.25rem;
-  border-radius:var(--r); font-size:.875rem; font-weight:500;
+  border:none; padding:.4rem 1rem;
+  border-radius:var(--r); font-size:.82rem; font-weight:500;
   transition:background .18s; text-decoration:none; display:inline-block;
+  white-space:nowrap;
 }
 .btn-nav:hover { background:var(--ink2); }
 .btn-nav-outline {
   background:transparent; color:var(--ink);
-  border:1px solid var(--border3); padding:.5rem 1.25rem;
-  border-radius:var(--r); font-size:.875rem; font-weight:400;
+  border:1px solid var(--border3); padding:.4rem 1rem;
+  border-radius:var(--r); font-size:.82rem; font-weight:400;
   transition:all .18s; text-decoration:none; display:inline-block;
+  white-space:nowrap;
 }
 .btn-nav-outline:hover { background:var(--cream3); }
+
+/* ── Account dropdown ── */
+.nav-acct-wrap { position:relative; }
+.nav-acct-btn {
+  display:flex; align-items:center; gap:.45rem;
+  background:transparent; border:1px solid var(--border2);
+  border-radius:6px; padding:.32rem .7rem;
+  font-family:var(--sans); font-size:.78rem; font-weight:500; color:var(--ink2);
+  cursor:pointer; transition:background .15s, border-color .15s;
+  white-space:nowrap;
+}
+.nav-acct-btn:hover { background:var(--cream3); border-color:var(--border3); }
+.nav-acct-badge {
+  font-size:.6rem; font-weight:700; padding:1px 5px; border-radius:3px;
+  background:rgba(200,155,60,.15); color:var(--gold-d);
+  border:1px solid rgba(200,155,60,.3); letter-spacing:.06em;
+}
+.nav-acct-badge.trial { background:rgba(200,155,60,.1); color:var(--gold-d); }
+.nav-acct-chevron { font-size:.65rem; color:var(--ink3); transition:transform .15s; }
+.nav-acct-wrap.open .nav-acct-chevron { transform:rotate(180deg); }
+.nav-acct-menu {
+  display:none; position:absolute; top:calc(100% + 6px); right:0;
+  min-width:220px; background:var(--cream);
+  border:1px solid var(--border2); border-radius:8px;
+  box-shadow:0 8px 28px rgba(0,0,0,.13);
+  overflow:hidden; z-index:600;
+}
+.nav-acct-wrap.open .nav-acct-menu { display:block; }
+.nav-acct-header {
+  padding:.75rem 1rem .6rem;
+  border-bottom:1px solid var(--border2);
+  background:rgba(0,0,0,.02);
+}
+.nav-acct-header-name { font-size:.82rem; font-weight:600; color:var(--ink); }
+.nav-acct-header-plan { font-size:.72rem; color:var(--ink3); margin-top:.15rem; }
+.nav-acct-item {
+  display:block; padding:.6rem 1rem; font-size:.82rem; color:var(--ink2);
+  text-decoration:none; transition:background .12s;
+}
+.nav-acct-item:hover { background:var(--cream3); color:var(--ink); }
+.nav-acct-divider { border-top:1px solid var(--border2); margin:.2rem 0; }
+.nav-acct-item.danger { color:#c0392b; }
+.nav-acct-item.danger:hover { background:#fff5f5; }
 
 /* ═══════════════════════════════ PAGES ═══════════════════════════════ */
 .page { display:none; }
@@ -614,14 +667,18 @@ footer { background:#080808; padding:3rem 2rem; }
 
 /* ═══════════════════════════════ RESPONSIVE ═══════════════════════════════ */
 @media(max-width:900px){
-  nav { padding:0 1.25rem; }
-  .nav-links { display:none; }
-  .pricing-grid, 
+  nav { padding:0 1rem; }
+  .nav-links { max-width:calc(100vw - 280px); }
+  .pricing-grid,
   .features-bento { grid-template-columns:1fr; }
   .feat-card-wide { grid-column:span 1; }
   .g2 { grid-template-columns:1fr; }
   .scenario-row { grid-template-columns:1fr; }
   section { padding:4rem 1.25rem; }
+}
+@media(max-width:640px){
+  .nav-links { display:none; }
+  nav { padding:0 .9rem; }
 }
 @media(max-width:600px){
   .hero-stats { flex-direction:column; }
@@ -653,12 +710,28 @@ footer { background:#080808; padding:3rem 2rem; }
     <a href='#' class="nav-tab" data-tool="adveducation" onclick="navGoTo('adveducation');return false;">🎓 Adv. Education</a>
   </div>
   <div class="nav-right" id="nav-right">
-    <span class="nav-live">Live Data</span>
+    <span class="nav-live" title="Real-time market data">Live</span>
     <a class="btn-nav-outline" id="nav-login" href="/login">Log in</a>
     <a class="btn-nav" id="nav-signup" href="/signup">Start Free Trial</a>
-    <span id="nav-user" style="display:none; font-size:.85rem; color:var(--ink3);"></span>
-    <a class="btn-nav" id="nav-upgrade" href="#" style="display:none; background:var(--gold-d); font-size:.8rem; padding:.4rem 1rem;">Upgrade to Pro</a>
-    <a class="btn-nav-outline" id="nav-logout" href="#" style="display:none;">Log out</a>
+    <a class="btn-nav" id="nav-upgrade" href="/signup" style="display:none; background:var(--gold-d); font-size:.78rem; padding:.35rem .9rem;">Upgrade to Pro</a>
+    <!-- Account dropdown (shown when logged in) -->
+    <div class="nav-acct-wrap" id="nav-acct-wrap" style="display:none;">
+      <button class="nav-acct-btn" id="nav-acct-btn" onclick="toggleAcctMenu(event)">
+        <span id="nav-acct-name">Account</span>
+        <span class="nav-acct-badge" id="nav-acct-badge" style="display:none;"></span>
+        <span class="nav-acct-chevron">▾</span>
+      </button>
+      <div class="nav-acct-menu" id="nav-acct-menu">
+        <div class="nav-acct-header">
+          <div class="nav-acct-header-name" id="nav-acct-header-name"></div>
+          <div class="nav-acct-header-plan" id="nav-acct-header-plan"></div>
+        </div>
+        <a href="/account" class="nav-acct-item">⚙️ Account Settings</a>
+        <a href="/account/subscription" class="nav-acct-item">💳 Subscription</a>
+        <div class="nav-acct-divider"></div>
+        <a href="#" class="nav-acct-item danger" id="nav-acct-logout">↩ Log out</a>
+      </div>
+    </div>
   </div>
   <script>
   // ── View + nav controller ──
@@ -705,21 +778,35 @@ footer { background:#080808; padding:3rem 2rem; }
   // On hard load: respect ?view=tool in URL
   if (window.location.search.includes('view=tool')) showView('tool');
 
+  // ── Account dropdown toggle ──
+  function toggleAcctMenu(e) {
+    e.stopPropagation();
+    document.getElementById('nav-acct-wrap').classList.toggle('open');
+  }
+  document.addEventListener('click', () => {
+    const w = document.getElementById('nav-acct-wrap');
+    if (w) w.classList.remove('open');
+  });
+
   // ---- Auth-aware nav (talks to /api/auth/me + /api/auth/logout) ----
   (async () => {
-    const $login   = document.getElementById('nav-login');
-    const $signup  = document.getElementById('nav-signup');
-    const $user    = document.getElementById('nav-user');
-    const $logout  = document.getElementById('nav-logout');
-    const $upgrade = document.getElementById('nav-upgrade');
+    const $login     = document.getElementById('nav-login');
+    const $signup    = document.getElementById('nav-signup');
+    const $upgrade   = document.getElementById('nav-upgrade');
+    const $acctWrap  = document.getElementById('nav-acct-wrap');
+    const $acctName  = document.getElementById('nav-acct-name');
+    const $acctBadge = document.getElementById('nav-acct-badge');
+    const $acctHdrName = document.getElementById('nav-acct-header-name');
+    const $acctHdrPlan = document.getElementById('nav-acct-header-plan');
+    const $acctLogout  = document.getElementById('nav-acct-logout');
+
     try {
       const r = await fetch('/api/auth/me', { credentials: 'same-origin' });
       const { user } = await r.json();
       if (user) {
+        // Hide login / signup buttons
         $login.style.display  = 'none';
         $signup.style.display = 'none';
-        $user.style.display   = 'inline';
-        $logout.style.display = 'inline-block';
 
         // Store plan state globally
         if (typeof S !== 'undefined') {
@@ -727,22 +814,31 @@ footer { background:#080808; padding:3rem 2rem; }
           S.trialEndsAt = user.trial_ends_at || null;
         }
 
-        if (user.effectivePlan === 'pro') {
-          $user.textContent = user.username + ' ✦ Pro';
-          $user.style.color = 'var(--gold-d)';
-        } else if (user.effectivePlan === 'trial') {
-          const days = user.trial_ends_at
-            ? Math.max(0, Math.ceil((new Date(user.trial_ends_at) - Date.now()) / 86400000))
-            : 14;
-          $user.textContent = user.username + ' · Trial (' + days + 'd left)';
-        } else {
-          $user.textContent = user.username;
-          if ($upgrade) $upgrade.style.display = 'inline-block';
-        }
+        // Populate account dropdown
+        $acctName.textContent = user.username || user.email;
+        $acctHdrName.textContent = user.username || user.email;
+        $acctWrap.style.display = 'block';
 
-        // Show upgrade CTA only for free users
-        if (user.effectivePlan === 'free' && $upgrade) {
-          $upgrade.style.display = 'inline-block';
+        if (user.effectivePlan === 'pro') {
+          $acctBadge.textContent = 'PRO';
+          $acctBadge.style.display = 'inline';
+          $acctHdrPlan.textContent = 'Pro member';
+          $acctHdrPlan.style.color = 'var(--gold-d)';
+        } else if (user.effectivePlan === 'trial') {
+          const trialEnd = user.trial_ends_at ? new Date(user.trial_ends_at) : null;
+          const daysLeft = trialEnd ? Math.max(0, Math.ceil((trialEnd - Date.now()) / 86400000)) : null;
+          const trialExpiry = trialEnd ? trialEnd.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '';
+          $acctBadge.textContent = 'TRIAL';
+          $acctBadge.className = 'nav-acct-badge trial';
+          $acctBadge.style.display = 'inline';
+          $acctHdrPlan.textContent = daysLeft !== null
+            ? `Trial · ${daysLeft} day${daysLeft !== 1 ? 's' : ''} remaining (expires ${trialExpiry})`
+            : 'Trial member';
+          $acctHdrPlan.style.color = daysLeft !== null && daysLeft <= 3 ? '#e67e22' : 'var(--ink3)';
+        } else {
+          // Free user — show upgrade button
+          $acctHdrPlan.textContent = 'Free plan';
+          if ($upgrade) $upgrade.style.display = 'inline-block';
         }
 
         if (typeof decorateProTabs !== 'undefined') decorateProTabs();
@@ -760,25 +856,21 @@ footer { background:#080808; padding:3rem 2rem; }
 
         // Update hero + pricing section for logged-in pro/trial users
         if (typeof isPro === 'function' && isPro()) {
-          // Hero
           const heroMain = document.getElementById('hero-cta-main');
           const heroSec  = document.getElementById('hero-cta-secondary');
           if (heroMain) { heroMain.textContent = 'Open live tool →'; heroMain.removeAttribute('onclick'); heroMain.href='#'; heroMain.onclick=function(e){e.preventDefault();navGoTo('analyze');}; }
           if (heroSec)  heroSec.style.display = 'none';
 
-          // Swap pricing section for pro banner
           const pricingSection = document.getElementById('pricing');
           const proBanner      = document.getElementById('pro-member-banner');
           if (pricingSection) pricingSection.style.display = 'none';
           if (proBanner)      proBanner.style.display = 'block';
 
-          // Update bottom CTA strip for pro/trial users
           const ctaMain  = document.getElementById('cta-btn-main');
           const ctaPlans = document.getElementById('cta-btn-plans');
           if (ctaMain)  { ctaMain.textContent = 'Open Pro tool →'; ctaMain.href = '#'; ctaMain.onclick = function(e){ e.preventDefault(); navGoTo('analyze'); }; }
           if (ctaPlans) { ctaPlans.style.display = 'none'; }
 
-          // Fill in days remaining
           if (user.trial_ends_at) {
             const days = Math.max(0, Math.ceil((new Date(user.trial_ends_at) - Date.now()) / 86400000));
             const daysEl = document.getElementById('pro-banner-days');
@@ -799,11 +891,15 @@ footer { background:#080808; padding:3rem 2rem; }
         }
       }
     } catch (_) { /* server not running */ }
-    $logout.addEventListener('click', async (e) => {
-      e.preventDefault();
-      await fetch('/api/auth/logout', { method:'POST', credentials:'same-origin' });
-      window.location.href = '/login';
-    });
+
+    // Logout
+    if ($acctLogout) {
+      $acctLogout.addEventListener('click', async (e) => {
+        e.preventDefault();
+        await fetch('/api/auth/logout', { method:'POST', credentials:'same-origin' });
+        window.location.href = '/login';
+      });
+    }
     if ($upgrade) {
       $upgrade.addEventListener('click', (e) => { e.preventDefault(); showUpgradeModal(); });
     }
@@ -1628,21 +1724,30 @@ footer { background:#080808; padding:3rem 2rem; }
 
 /* ═══════ NAV TAB STYLES ═══════ */
 .nav-links {
+  flex:1; min-width:0;
   overflow-x:auto; scrollbar-width:none;
   flex-wrap:nowrap !important;
   gap:0 !important;
+  border-left:1px solid var(--border2);
+  padding-left:.25rem;
 }
 .nav-links::-webkit-scrollbar { display:none; }
 
 a.nav-tab {
-  font-size:.78rem; white-space:nowrap;
-  padding:.35rem .7rem; border-radius:5px;
-  color:rgba(14,14,14,.55) !important;
+  font-size:.75rem; white-space:nowrap;
+  padding:.3rem .62rem; border-radius:5px;
+  color:rgba(14,14,14,.52) !important;
   transition:color .15s, background .15s;
   text-decoration:none !important;
+  position:relative;
+}
+/* subtle separator after each tab except last */
+a.nav-tab + a.nav-tab::before {
+  content:''; position:absolute; left:0; top:25%; height:50%;
+  width:1px; background:rgba(14,14,14,.1);
 }
 a.nav-tab:hover { color:var(--ink) !important; background:rgba(200,155,60,.07); }
-a.nav-tab.active-tab { color:var(--gold-d) !important; font-weight:600; background:rgba(200,155,60,.08); }
+a.nav-tab.active-tab { color:var(--gold-d) !important; font-weight:600; background:rgba(200,155,60,.09); }
 
 
 /* ── Financials table ── */
