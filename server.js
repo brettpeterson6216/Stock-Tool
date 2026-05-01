@@ -581,7 +581,7 @@ async function getYahooCrumb() {
 app.get('/api/financials/:ticker', async (req, res) => {
   try {
     const ticker  = req.params.ticker.toUpperCase();
-    const modules = 'incomeStatementHistory,balanceSheetHistory,cashflowStatementHistory,defaultKeyStatistics,financialData';
+    const modules = 'incomeStatementHistory,incomeStatementHistoryQuarterly,balanceSheetHistory,balanceSheetHistoryQuarterly,cashflowStatementHistory,cashflowStatementHistoryQuarterly,defaultKeyStatistics,financialData';
     const { crumb, cookies } = await getYahooCrumb();
     const crumbParam = crumb ? `&crumb=${encodeURIComponent(crumb)}` : '';
     const url = `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${ticker}?modules=${modules}${crumbParam}`;
@@ -596,7 +596,7 @@ app.get('/api/financials/:ticker', async (req, res) => {
       if (r.status === 401) {
         _yfCrumb = null; _yfCookies = null; _yfCrumbAt = 0;
         const { crumb: c2, cookies: k2 } = await getYahooCrumb();
-        const url2 = `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${ticker}?modules=${modules}${c2 ? '&crumb='+encodeURIComponent(c2) : ''}`;
+        const url2 = `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${ticker}?modules=${modules}${c2 ? '&crumb=' + encodeURIComponent(c2) : ''}`;
         const h2 = { ...headers };
         if (k2) h2['Cookie'] = k2;
         const r2 = await fetch(url2, { headers: h2 });

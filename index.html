@@ -2537,9 +2537,9 @@ async function loadFinancials(ticker) {
     const data = await res.json();
     const r    = data.quoteSummary && data.quoteSummary.result && data.quoteSummary.result[0];
     if (!r) throw new Error('No data');
-    const inc  = (r.incomeStatementHistory  && r.incomeStatementHistory.incomeStatementHistory)  || [];
-    const bal  = (r.balanceSheetHistory      && r.balanceSheetHistory.balanceSheetStatements)     || [];
-    const cf   = (r.cashflowStatementHistory && r.cashflowStatementHistory.cashflowStatements)    || [];
+    const inc  = (r.incomeStatementHistory  && r.incomeStatementHistory.incomeStatementHistory  && r.incomeStatementHistory.incomeStatementHistory.length  ? r.incomeStatementHistory.incomeStatementHistory  : (r.incomeStatementHistoryQuarterly  && r.incomeStatementHistoryQuarterly.incomeStatementHistory))  || [];
+    const bal  = (r.balanceSheetHistory     && r.balanceSheetHistory.balanceSheetStatements     && r.balanceSheetHistory.balanceSheetStatements.length     ? r.balanceSheetHistory.balanceSheetStatements     : (r.balanceSheetHistoryQuarterly     && r.balanceSheetHistoryQuarterly.balanceSheetStatements))     || [];
+    const cf   = (r.cashflowStatementHistory && r.cashflowStatementHistory.cashflowStatements   && r.cashflowStatementHistory.cashflowStatements.length    ? r.cashflowStatementHistory.cashflowStatements    : (r.cashflowStatementHistoryQuarterly && r.cashflowStatementHistoryQuarterly.cashflowStatements))    || [];
 
     function fmt(v){
       if(v==null) return '—';
