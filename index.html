@@ -773,7 +773,7 @@ footer { background:#080808; padding:3rem 2rem; }
           // Update bottom CTA strip for pro/trial users
           const ctaMain  = document.getElementById('cta-btn-main');
           const ctaPlans = document.getElementById('cta-btn-plans');
-          if (ctaMain)  { ctaMain.textContent = 'Open Pro tool →'; ctaMain.href = '#tool'; }
+          if (ctaMain)  { ctaMain.textContent = 'Open Pro tool →'; ctaMain.href = '#'; ctaMain.onclick = function(e){ e.preventDefault(); navGoTo('analyze'); }; }
           if (ctaPlans) { ctaPlans.style.display = 'none'; }
 
           // Fill in days remaining
@@ -841,58 +841,74 @@ footer { background:#080808; padding:3rem 2rem; }
   <section id="features">
     <div class="container">
       <span class="sec-label">What's inside</span>
-      <h2 class="sec-h2">Everything analysts use, built for individual investors.</h2>
-      <p class="sec-sub">Professional-grade tools packaged into a platform anyone can run in under a minute — no spreadsheets, no finance degree required.</p>
+      <h2 class="sec-h2">Every tool a serious investor needs.</h2>
+      <p class="sec-sub">Professional-grade analysis packed into one platform — no spreadsheets, no finance degree required.</p>
       <div class="features-bento">
         <div class="feat-card">
-          <div class="feat-icon">📡</div>
+          <div class="feat-icon" style="font-size:1.15rem;">📡</div>
           <h3>Live Market Data</h3>
-          <p>Real-time price, volume, market cap, 52-week range, and exchange data for any publicly traded company globally.</p>
+          <p>Real-time price, volume, market cap, 52-week range, and exchange data for any publicly traded stock.</p>
         </div>
         <div class="feat-card">
-          <div class="feat-icon">📊</div>
-          <h3>8 Interactive Charts</h3>
-          <p>Price with MA/Bollinger overlays, RSI, MACD histogram, volume, daily returns distribution, projection, performance, and radar.</p>
+          <div class="feat-icon" style="font-size:1.15rem;">📈</div>
+          <h3>Interactive Charts</h3>
+          <p>Price with MA/Bollinger overlays, RSI, MACD, volume, daily returns, and performance comparison charts.</p>
         </div>
         <div class="feat-card">
-          <div class="feat-icon">🧮</div>
-          <h3>DCF Valuation Model</h3>
-          <p>Full discounted cash flow analysis with two-stage growth, custom WACC, terminal value, and margin of safety output.</p>
+          <div class="feat-icon" style="font-size:1.15rem;">💰</div>
+          <h3>Financial Statements</h3>
+          <p>Annual income statement, balance sheet, and cash flow for the last 4 years — pulled direct from filings.</p>
           <div class="feat-pro">PRO</div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon" style="font-size:1.15rem;">📐</div>
+          <h3>Advanced Metrics</h3>
+          <p>EV/EBITDA, ROIC, gross margin, FCF yield, debt ratios, and 20+ deep fundamental metrics by category.</p>
+          <div class="feat-pro">PRO</div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon" style="font-size:1.15rem;">📣</div>
+          <h3>Earnings History</h3>
+          <p>EPS estimate vs. actual for the last 12 quarters with beat/miss badges and a beat-rate summary.</p>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon" style="font-size:1.15rem;">📋</div>
+          <h3>SEC Filings</h3>
+          <p>One-click access to 10-K, 10-Q, 8-K, and full EDGAR filing history for any ticker.</p>
         </div>
         <div class="feat-card feat-card-wide">
-          <div class="feat-icon">⚖️</div>
-          <h3>Side-by-Side Stock Comparison</h3>
-          <p>Load up to 4 tickers and compare every key metric in a structured table with best/worst highlighting — plus a normalized performance chart and fundamental radar. Instantly see how companies stack up on price, valuation, growth, and risk.</p>
-          <div class="feat-pro">PRO — 3–4 stocks + charts</div>
+          <div class="feat-icon" style="font-size:1.15rem;">⚖️</div>
+          <h3>Side-by-Side Comparison</h3>
+          <p>Load up to 4 tickers and compare every key metric in a structured table with best/worst highlighting — plus a normalized performance chart and fundamental radar.</p>
+          <div class="feat-pro">PRO</div>
         </div>
         <div class="feat-card">
-          <div class="feat-icon">🎯</div>
+          <div class="feat-icon" style="font-size:1.15rem;">🎯</div>
           <h3>3-Scenario Projection</h3>
-          <p>Model bear, base, and bull cases with custom growth rates, margin assumptions, exit P/E, and CAGR per year.</p>
+          <p>Model bear, base, and bull cases with custom growth rates, margin assumptions, exit P/E, and CAGR.</p>
+          <div class="feat-pro">PRO</div>
         </div>
         <div class="feat-card">
-          <div class="feat-icon">🔍</div>
+          <div class="feat-icon" style="font-size:1.15rem;">🧮</div>
+          <h3>DCF Valuation</h3>
+          <p>Two-stage discounted cash flow model with custom WACC, terminal growth, and margin of safety output.</p>
+          <div class="feat-pro">PRO</div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon" style="font-size:1.15rem;">🔍</div>
           <h3>Stock Screener</h3>
-          <p>Filter 50,000+ stocks by P/E, P/B, dividend yield, market cap, sector, RSI, and 1-year performance to find opportunities.</p>
+          <p>Filter 50,000+ stocks by P/E, P/B, dividend yield, market cap, sector, RSI, and 1-year return.</p>
           <div class="feat-pro">PRO</div>
         </div>
         <div class="feat-card">
-          <div class="feat-icon">🔔</div>
-          <h3>Price & Signal Alerts</h3>
-          <p>Set price target, RSI, and moving average crossover alerts. Get email notifications the moment conditions are triggered.</p>
-          <div class="feat-pro">PRO</div>
+          <div class="feat-icon" style="font-size:1.15rem;">📚</div>
+          <h3>Education Center</h3>
+          <p>From P/E ratios to DCF valuation — bite-sized explanations of every metric and concept in the platform.</p>
         </div>
         <div class="feat-card">
-          <div class="feat-icon">📄</div>
+          <div class="feat-icon" style="font-size:1.15rem;">📄</div>
           <h3>PDF Report Export</h3>
-          <p>Generate clean, professional PDF analysis reports — complete with charts, projections, and documented assumptions — ready to share.</p>
-          <div class="feat-pro">PRO</div>
-        </div>
-        <div class="feat-card">
-          <div class="feat-icon">📋</div>
-          <h3>Portfolio Watchlist</h3>
-          <p>Track any number of stocks with live prices, daily change, and one-click access to full analysis from a personalized watchlist.</p>
+          <p>Generate clean, professional PDF analysis reports ready to print or share with your team.</p>
           <div class="feat-pro">PRO</div>
         </div>
       </div>
@@ -1568,9 +1584,6 @@ footer { background:#080808; padding:3rem 2rem; }
 <style>
 
 
-
-/* ── Tool tabs hidden on home page ── */
-#main-nav[data-view="home"] .nav-tab[data-tool] { display: none; }
 
 /* ── Tool accordion wrapper ── */
 .tool-accordion-wrap {
