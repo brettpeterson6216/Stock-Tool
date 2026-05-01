@@ -321,6 +321,7 @@ h2.sec-h2 {
 
 /* 2-col grid */
 .g2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+.g2 > div { min-width:0; }
 
 /* panel box inside tool */
 .panel-box {
@@ -376,7 +377,8 @@ h2.sec-h2 {
 
 /* compare tab */
 .cmp-inputs { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:1.5rem; align-items:flex-end; }
-.cmp-ig { flex:1; min-width:130px; }
+.cmp-ig { flex:1 1 130px; min-width:0; }
+.cmp-ig .ticker-input { flex:none; width:100%; min-width:0; }
 .cmp-ig label { display:block; font-family:var(--mono); font-size:.62rem; color:rgba(247,244,238,.35); text-transform:uppercase; letter-spacing:.07em; margin-bottom:5px; }
 
 .cmp-table-wrap { overflow-x:auto; margin-bottom:1.25rem; }
@@ -2557,18 +2559,22 @@ async function loadFinancials(ticker) {
       return (n*100).toFixed(1)+'%';
     }
 
+    function getRaw(v){ return v==null ? null : (v.raw!=null ? v.raw : (typeof v==='number' ? v : null)); }
+
     function buildTable(rows, statements) {
       if (!statements.length) return '<div style="color:rgba(247,244,238,.3);font-size:.8rem;">No data available.</div>';
-      const years = statements.map(s => s.endDate && s.endDate.fmt ? s.endDate.fmt.slice(0,4) : '');
+      const years = statements.map(s => s.endDate ? (s.endDate.fmt ? s.endDate.fmt.slice(0,4) : String(s.endDate).slice(0,4)) : '');
       let html = '<div style="overflow-x:auto;"><table class="fin-table"><thead><tr><th>Item</th>' + years.map(y=>'<th>'+y+'</th>').join('') + '</tr></thead><tbody>';
       for (const row of rows) {
         const cls = row.header ? ' class="fin-row-header"' : '';
         html += '<tr'+cls+'><td>'+(row.label||'')+'</td>';
         for (const stmt of statements) {
-          const raw = row.key ? stmt[row.key] : null;
-          let val = raw ? fmt(raw) : '—';
-          if (row.pct && raw) val = fmtPct(raw);
-          const rawNum = raw ? (raw.raw!=null ? raw.raw : (typeof raw==='number'?raw:null)) : null;
+          let rawObj = row.key ? stmt[row.key] : null;
+          // support computed rows
+          if (!rawObj && row.compute) rawObj = row.compute(stmt);
+          let val = rawObj ? fmt(rawObj) : '—';
+          if (row.pct && rawObj) val = fmtPct(rawObj);
+          const rawNum = getRaw(rawObj);
           const color = (rawNum!=null && rawNum < 0) ? ' class="fin-negative"' : (rawNum!=null && rawNum > 0 && row.highlight) ? ' class="fin-positive"' : '';
           html += '<td'+color+'>'+val+'</td>';
         }
@@ -2584,7 +2590,6 @@ async function loadFinancials(ticker) {
       {label:'Gross Profit',            key:'grossProfit',  highlight:true},
       {label:'Operating Expense',       key:'totalOperatingExpenses'},
       {label:'Operating Income',        key:'operatingIncome', highlight:true},
-      {label:'EBITDA',                  key:'ebitda'},
       {label:'Net Income',              key:'netIncome',    highlight:true},
       {label:'EPS (Basic)',             key:'basicEps'},
       {label:'EPS (Diluted)',           key:'dilutedEps'},
@@ -2602,7 +2607,14 @@ async function loadFinancials(ticker) {
     const cfRows = [
       {label:'Operating Cash Flow',     key:'totalCashFromOperatingActivities', highlight:true},
       {label:'Capital Expenditures',    key:'capitalExpenditures'},
-      {label:'Free Cash Flow',          key:'freeCashflow', highlight:true},
+      {label:'Free Cash Flow',          highlight:true,
+        compute: s => {
+          const op = getRaw(s.totalCashFromOperatingActivities);
+          const cx = getRaw(s.capitalExpenditures);
+          if (op==null || cx==null) return null;
+          return op + cx; // capex is stored as negative by Yahoo
+        }
+      },
       {label:'Investing Activities',    key:'totalCashflowsFromInvestingActivities'},
       {label:'Financing Activities',    key:'totalCashFromFinancingActivities'},
       {label:'Net Change in Cash',      key:'changeInCash'},
