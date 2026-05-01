@@ -217,13 +217,16 @@ h2.sec-h2 {
   background:rgba(0,0,0,.15); overflow-x:auto;
 }
 .tool-tab {
-  padding:.75rem 1.25rem; font-size:.82rem; font-weight:500;
-  color:rgba(247,244,238,.4); background:none; border:none;
-  border-bottom:2px solid transparent; white-space:nowrap;
-  transition:all .18s;
+  padding:.9rem 1.5rem; font-size:.88rem; font-weight:500;
+  color:rgba(247,244,238,.45); background:none; border:none;
+  border-bottom:3px solid transparent; white-space:nowrap;
+  transition:all .18s; cursor:pointer; letter-spacing:.01em;
 }
-.tool-tab.active { color:var(--gold); border-bottom-color:var(--gold); background:rgba(200,155,60,.06); }
-.tool-tab:hover:not(.active) { color:rgba(247,244,238,.7); }
+.tool-tab.active {
+  color:var(--gold); border-bottom-color:var(--gold);
+  background:rgba(200,155,60,.07);
+}
+.tool-tab:hover:not(.active) { color:rgba(247,244,238,.8); background:rgba(255,255,255,.03); }
 .tool-tab .pro-tag {
   display:inline-block; font-size:.58rem; font-weight:600;
   background:var(--gold); color:var(--ink); padding:1px 6px;
@@ -633,6 +636,7 @@ footer { background:#080808; padding:3rem 2rem; }
 <nav>
   <a class="nav-logo" href="#"><span class="logo-dot"></span>Implied<em style="font-style:italic;color:var(--gold-d);">Lens</em></a>
   <div class="nav-links">
+    <a href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">Home</a>
     <a href="#tool">Live Tool</a>
     <a href="#features">Features</a>
     <a href="#pricing">Pricing</a>
@@ -794,13 +798,12 @@ footer { background:#080808; padding:3rem 2rem; }
         </div>
 
         <div class="tool-tabs">
-          <button class="tool-tab active" data-tab="analyze" onclick="switchTab('analyze',this)">Analyze</button>
-          <button class="tool-tab" data-tab="compare" onclick="switchTab('compare',this)">Compare</button>
-          <button class="tool-tab" data-tab="projection" onclick="switchTab('projection',this)">Projection Model</button>
-          <button class="tool-tab" data-tab="dcf" onclick="switchTab('dcf',this)">DCF Valuation</button>
-          <button class="tool-tab" data-tab="screener" onclick="switchTab('screener',this); if(isPro()) loadScreener()">Screener</button>
-          <button class="tool-tab" data-tab="alerts" onclick="switchTab('alerts',this)">Price Alerts</button>
-          <button class="tool-tab" data-tab="reports" onclick="switchTab('reports',this)">PDF Reports</button>
+          <button class="tool-tab active" data-tab="analyze" onclick="switchTab('analyze',this)">📊 Analyze</button>
+          <button class="tool-tab" data-tab="compare" onclick="switchTab('compare',this)">⚖️ Compare</button>
+          <button class="tool-tab" data-tab="projection" onclick="switchTab('projection',this)">📈 Projection</button>
+          <button class="tool-tab" data-tab="dcf" onclick="switchTab('dcf',this)">🧮 DCF</button>
+          <button class="tool-tab" data-tab="screener" onclick="switchTab('screener',this); if(isPro()) loadScreener()">🔍 Screener</button>
+          <button class="tool-tab" data-tab="reports" onclick="switchTab('reports',this)">📄 Reports</button>
         </div>
 
         <div class="tool-body">
@@ -994,21 +997,13 @@ footer { background:#080808; padding:3rem 2rem; }
           </div>
 
           <!-- ── TAB: ALERTS ── -->
-          <div id="tab-alerts" class="tab-pane" style="display:none;">
-            <div style="padding:2rem;text-align:center;">
-              <div style="font-size:2rem;margin-bottom:1rem;">🔔</div>
-              <div style="font-family:var(--serif);font-size:1.4rem;color:var(--cream);margin-bottom:.5rem;">Price &amp; Signal Alerts</div>
-              <div style="font-size:.88rem;color:rgba(247,244,238,.5);max-width:380px;margin:0 auto 1.5rem;line-height:1.7;">Email-based alerts are coming soon. Set price targets, RSI triggers, and moving-average crossover alerts — you'll get notified the moment conditions are met.</div>
-              <div style="background:rgba(200,155,60,.08);border:1px solid rgba(200,155,60,.2);border-radius:var(--r2);padding:1rem 1.5rem;display:inline-block;font-family:var(--mono);font-size:.75rem;color:var(--gold);letter-spacing:.05em;">COMING SOON</div>
-            </div>
-          </div>
 
           <!-- ── TAB: REPORTS ── -->
           <div id="tab-reports" class="tab-pane" style="display:none;">
             <div style="padding:1.25rem 0;">
               <div style="font-size:.82rem;color:rgba(247,244,238,.5);margin-bottom:1.25rem;">Generate a print-ready PDF of your current stock analysis — including all charts, metrics, and projections.</div>
               <div id="report-no-stock" style="display:none;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:var(--r2);padding:1.5rem;text-align:center;color:rgba(247,244,238,.4);font-size:.85rem;">
-                Load a stock from the <strong style="color:var(--gold);">Analyze</strong> tab first, then come back here to export your report.
+                Load a stock from the <strong style="color:var(--gold);">📊 Analyze</strong> tab first, then come back here to export your report.
               </div>
               <div id="report-ready" style="display:none;">
                 <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:var(--r2);padding:1.25rem;margin-bottom:1rem;">
