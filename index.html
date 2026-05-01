@@ -531,22 +531,15 @@ h2.sec-h2 {
 .btn-plan-gold { background:var(--gold); color:var(--ink); border-color:var(--gold); }
 .btn-plan-gold:hover { background:#d4a93e; border-color:#d4a93e; }
 
-/* ═══════════════════════════════ TESTIMONIALS ═══════════════════════════════ */
-.testi-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem; margin-top:3.5rem; }
-.testi-card {
-  background:var(--card); border:1px solid var(--border2);
-  border-radius:var(--r3); padding:1.75rem;
-}
-.testi-stars { color:var(--gold); font-size:.875rem; margin-bottom:1rem; letter-spacing:.1em; }
-.testi-q { font-size:.875rem; color:var(--ink3); font-style:italic; line-height:1.7; margin-bottom:1.25rem; }
-.testi-author { display:flex; align-items:center; gap:10px; }
-.t-avatar {
-  width:36px; height:36px; border-radius:50%;
-  background:var(--gold-l2); display:flex; align-items:center; justify-content:center;
-  font-size:.72rem; font-weight:700; color:var(--gold-d); flex-shrink:0;
-}
-.t-name { font-size:.85rem; font-weight:600; }
-.t-title { font-size:.75rem; color:var(--ink5); }
+
+
+
+
+
+
+
+
+
 
 /* ═══════════════════════════════ CTA BANNER ═══════════════════════════════ */
 .cta-strip { background:var(--ink); color:var(--cream); text-align:center; padding:6rem 2rem; }
@@ -618,7 +611,7 @@ footer { background:#080808; padding:3rem 2rem; }
 @media(max-width:900px){
   nav { padding:0 1.25rem; }
   .nav-links { display:none; }
-  .pricing-grid, .testi-grid { grid-template-columns:1fr; }
+  .pricing-grid, 
   .features-bento { grid-template-columns:1fr; }
   .feat-card-wide { grid-column:span 1; }
   .g2 { grid-template-columns:1fr; }
@@ -643,7 +636,6 @@ footer { background:#080808; padding:3rem 2rem; }
     <a href="#tool">Live Tool</a>
     <a href="#features">Features</a>
     <a href="#pricing">Pricing</a>
-    <a href="#testimonials">Reviews</a>
   </div>
   <div class="nav-right" id="nav-right">
     <span class="nav-live">Live Data</span>
@@ -1207,30 +1199,6 @@ footer { background:#080808; padding:3rem 2rem; }
     </div>
   </section>
 
-  <!-- TESTIMONIALS -->
-  <section id="testimonials" style="background:var(--card);">
-    <div class="container">
-      <span class="sec-label">What users say</span>
-      <h2 class="sec-h2">Trusted by 12,000+ individual investors.</h2>
-      <div class="testi-grid">
-        <div class="testi-card">
-          <div class="testi-stars">★★★★★</div>
-          <p class="testi-q">"I used to spend hours building spreadsheets for every stock I researched. Implied Lens does in 30 seconds what took me an afternoon. The 3-scenario projection is exactly how I think about positions."</p>
-          <div class="testi-author"><div class="t-avatar">MR</div><div><div class="t-name">Marcus R.</div><div class="t-title">Self-directed investor, 12 years</div></div></div>
-        </div>
-        <div class="testi-card">
-          <div class="testi-stars">★★★★★</div>
-          <p class="testi-q">"Our investment club runs a stock comparison before every monthly meeting. Being able to load 4 tickers and see every metric side-by-side — with the radar chart — has completely changed how we debate positions."</p>
-          <div class="testi-author"><div class="t-avatar">JL</div><div><div class="t-name">Jennifer L.</div><div class="t-title">Investment club organizer, Ohio</div></div></div>
-        </div>
-        <div class="testi-card">
-          <div class="testi-stars">★★★★☆</div>
-          <p class="testi-q">"The DCF model was the thing that sold me. Seeing how changing WACC and terminal growth moves the intrinsic value — and comparing that to the live market price — finally made valuation click for me."</p>
-          <div class="testi-author"><div class="t-avatar">TK</div><div><div class="t-name">Tyler K.</div><div class="t-title">Finance student &amp; retail investor</div></div></div>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <!-- CTA -->
   <section class="cta-strip" id="cta-strip">
@@ -1315,7 +1283,7 @@ footer { background:#080808; padding:3rem 2rem; }
 @media print {
   nav, .tool-tabs, .search-row, .quick-row, .btn-search, .btn-run,
   .proj-controls, #proj-results .btn-run, footer, .cta-strip,
-  #features, #pricing, #testimonials, .hero, .tool-section > .container > .sec-label,
+  #features, #pricing, .hero, .tool-section > .container > .sec-label,
   .tool-section > .container > h2, .tool-section > .container > p,
   .tool-disclaimer, .modal-bg, .toast, .tool-titlebar,
   button { display: none !important; }
