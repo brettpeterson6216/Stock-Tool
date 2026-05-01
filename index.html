@@ -973,11 +973,17 @@ footer { background:#080808; padding:3rem 2rem; }
 
         <div class="tool-tabs">
           <button class="tool-tab active" data-tab="analyze" onclick="switchTab('analyze',this)">📊 Analyze</button>
+          <button class="tool-tab" data-tab="financials" onclick="switchTab('financials',this)">💰 Financials</button>
+          <button class="tool-tab" data-tab="advmetrics" onclick="switchTab('advmetrics',this)">📐 Adv. Metrics</button>
+          <button class="tool-tab" data-tab="earnings" onclick="switchTab('earnings',this)">📣 Earnings</button>
+          <button class="tool-tab" data-tab="secfilings" onclick="switchTab('secfilings',this)">📋 SEC Filings</button>
           <button class="tool-tab" data-tab="compare" onclick="switchTab('compare',this)">⚖️ Compare</button>
           <button class="tool-tab" data-tab="projection" onclick="switchTab('projection',this)">📈 Projection</button>
           <button class="tool-tab" data-tab="dcf" onclick="switchTab('dcf',this)">🧮 DCF</button>
           <button class="tool-tab" data-tab="screener" onclick="switchTab('screener',this); if(isPro()) loadScreener()">🔍 Screener</button>
           <button class="tool-tab" data-tab="reports" onclick="switchTab('reports',this)">📄 Reports</button>
+          <button class="tool-tab" data-tab="education" onclick="switchTab('education',this)">📚 Education</button>
+          <button class="tool-tab" data-tab="adveducation" onclick="switchTab('adveducation',this)">🎓 Adv. Education</button>
         </div>
 
         <div class="tool-body">
@@ -1232,6 +1238,164 @@ footer { background:#080808; padding:3rem 2rem; }
             <div style="margin-top:1rem;font-size:.7rem;color:rgba(247,244,238,.2);line-height:1.6;">This is an EPS-based simplified DCF, not a free-cash-flow model. Results are for educational purposes only — not investment advice.</div>
           </div>
 
+
+          <!-- ── TAB: FINANCIALS ── -->
+          <div id="tab-financials" class="tab-pane" style="display:none;">
+            <div style="font-size:.82rem;color:rgba(247,244,238,.5);margin-bottom:1.25rem;">Annual income statement, balance sheet, and cash flow for the last 4 years.</div>
+            <div id="fin-loading" style="color:rgba(247,244,238,.3);font-size:.82rem;display:none;">Loading financials…</div>
+            <div id="fin-error" style="color:#f87171;font-size:.82rem;display:none;"></div>
+            <div id="fin-content" style="display:none;">
+              <div style="display:flex;gap:.5rem;margin-bottom:1.25rem;flex-wrap:wrap;">
+                <button class="btn-run" style="font-size:.75rem;padding:.35rem .9rem;" onclick="showFinTab('income',this)">Income Statement</button>
+                <button class="btn-run" style="font-size:.75rem;padding:.35rem .9rem;background:rgba(200,155,60,.12);color:rgba(247,244,238,.5);" onclick="showFinTab('balance',this)">Balance Sheet</button>
+                <button class="btn-run" style="font-size:.75rem;padding:.35rem .9rem;background:rgba(200,155,60,.12);color:rgba(247,244,238,.5);" onclick="showFinTab('cashflow',this)">Cash Flow</button>
+              </div>
+              <div id="fin-income" class="fin-subtab"></div>
+              <div id="fin-balance" class="fin-subtab" style="display:none;"></div>
+              <div id="fin-cashflow" class="fin-subtab" style="display:none;"></div>
+            </div>
+            <div id="fin-nostock" style="color:rgba(247,244,238,.35);font-size:.85rem;">Search for a stock in the Analyze tab first.</div>
+          </div>
+
+          <!-- ── TAB: ADVANCED METRICS ── -->
+          <div id="tab-advmetrics" class="tab-pane" style="display:none;">
+            <div style="font-size:.82rem;color:rgba(247,244,238,.5);margin-bottom:1.25rem;">Deep fundamental metrics: valuation multiples, margins, returns, and leverage.</div>
+            <div id="advm-loading" style="color:rgba(247,244,238,.3);font-size:.82rem;display:none;">Loading metrics…</div>
+            <div id="advm-error" style="color:#f87171;font-size:.82rem;display:none;"></div>
+            <div id="advm-content"></div>
+            <div id="advm-nostock" style="color:rgba(247,244,238,.35);font-size:.85rem;">Search for a stock in the Analyze tab first.</div>
+          </div>
+
+          <!-- ── TAB: EARNINGS ── -->
+          <div id="tab-earnings" class="tab-pane" style="display:none;">
+            <div style="font-size:.82rem;color:rgba(247,244,238,.5);margin-bottom:1.25rem;">EPS estimates vs. actual results and earnings surprise history.</div>
+            <div id="earn-loading" style="color:rgba(247,244,238,.3);font-size:.82rem;display:none;">Loading earnings…</div>
+            <div id="earn-error" style="color:#f87171;font-size:.82rem;display:none;"></div>
+            <div id="earn-content"></div>
+            <div id="earn-nostock" style="color:rgba(247,244,238,.35);font-size:.85rem;">Search for a stock in the Analyze tab first.</div>
+          </div>
+
+          <!-- ── TAB: SEC FILINGS ── -->
+          <div id="tab-secfilings" class="tab-pane" style="display:none;">
+            <div style="font-size:.82rem;color:rgba(247,244,238,.5);margin-bottom:1.25rem;">Official SEC filings sourced directly from EDGAR.</div>
+            <div id="sec-nostock" style="color:rgba(247,244,238,.35);font-size:.85rem;">Search for a stock in the Analyze tab first.</div>
+            <div id="sec-content" style="display:none;">
+              <div style="display:grid;gap:.75rem;">
+                <a id="sec-10k" href="#" target="_blank" rel="noopener" class="sec-card">
+                  <div class="sec-type">10-K</div>
+                  <div class="sec-desc">Annual Report — full overview of business, financials, and risk factors.</div>
+                  <div class="sec-link">View on SEC EDGAR →</div>
+                </a>
+                <a id="sec-10q" href="#" target="_blank" rel="noopener" class="sec-card">
+                  <div class="sec-type">10-Q</div>
+                  <div class="sec-desc">Quarterly Report — unaudited financials and management discussion.</div>
+                  <div class="sec-link">View on SEC EDGAR →</div>
+                </a>
+                <a id="sec-8k" href="#" target="_blank" rel="noopener" class="sec-card">
+                  <div class="sec-type">8-K</div>
+                  <div class="sec-desc">Current Events — material events like earnings, M&amp;A, leadership changes.</div>
+                  <div class="sec-link">View on SEC EDGAR →</div>
+                </a>
+                <a id="sec-all" href="#" target="_blank" rel="noopener" class="sec-card">
+                  <div class="sec-type">All Filings</div>
+                  <div class="sec-desc">Full filing history — every document submitted to the SEC.</div>
+                  <div class="sec-link">Search EDGAR →</div>
+                </a>
+              </div>
+              <div style="margin-top:1rem;font-size:.72rem;color:rgba(247,244,238,.25);">Links open SEC EDGAR in a new tab. Data provided by the U.S. Securities and Exchange Commission.</div>
+            </div>
+          </div>
+
+          <!-- ── TAB: EDUCATION ── -->
+          <div id="tab-education" class="tab-pane" style="display:none;">
+            <div style="font-size:.82rem;color:rgba(247,244,238,.5);margin-bottom:1.5rem;">Core concepts every investor should know.</div>
+            <div style="display:grid;gap:.85rem;">
+              <div class="edu-card">
+                <div class="edu-title">📊 Price-to-Earnings (P/E) Ratio</div>
+                <div class="edu-body">The P/E ratio compares a company's stock price to its earnings per share. A high P/E can mean the market expects strong future growth; a low P/E may signal undervaluation or slow growth. Compare P/E to the sector average and the company's own history for context.</div>
+                <div class="edu-formula">P/E = Stock Price ÷ Earnings Per Share (EPS)</div>
+              </div>
+              <div class="edu-card">
+                <div class="edu-title">💰 Earnings Per Share (EPS)</div>
+                <div class="edu-body">EPS measures how much profit a company generates for each share outstanding. Rising EPS over time is generally a positive sign. Watch for "diluted" EPS, which accounts for options and convertible securities — it gives a more conservative picture.</div>
+                <div class="edu-formula">EPS = Net Income ÷ Shares Outstanding</div>
+              </div>
+              <div class="edu-card">
+                <div class="edu-title">📈 Market Capitalization</div>
+                <div class="edu-body">Market cap is the total dollar value of a company's outstanding shares. It helps classify companies: Mega-cap (&gt;$200B), Large-cap ($10–200B), Mid-cap ($2–10B), Small-cap (&lt;$2B). Larger companies tend to be more stable; smaller ones can offer higher growth potential with more risk.</div>
+                <div class="edu-formula">Market Cap = Share Price × Shares Outstanding</div>
+              </div>
+              <div class="edu-card">
+                <div class="edu-title">🏦 Revenue vs. Profit</div>
+                <div class="edu-body">Revenue is the total money a company brings in from its business. Profit (net income) is what remains after all expenses, taxes, and interest. A company can grow revenue while still losing money — always look at the full picture. Gross margin and operating margin help you understand efficiency.</div>
+                <div class="edu-formula">Net Income = Revenue − Cost of Goods − Expenses − Taxes − Interest</div>
+              </div>
+              <div class="edu-card">
+                <div class="edu-title">📉 52-Week High / Low</div>
+                <div class="edu-body">The highest and lowest prices a stock has traded at over the past year. A stock trading near its 52-week high may indicate strength or overvaluation; near its low may signal weakness or opportunity. Always combine with fundamental analysis — price alone tells an incomplete story.</div>
+              </div>
+              <div class="edu-card">
+                <div class="edu-title">🔄 Free Cash Flow (FCF)</div>
+                <div class="edu-body">FCF is the cash a company generates after spending on capital expenditures (buildings, equipment). It represents money available for dividends, buybacks, debt paydown, or reinvestment. Many analysts consider FCF a better measure of financial health than reported earnings.</div>
+                <div class="edu-formula">FCF = Operating Cash Flow − Capital Expenditures</div>
+              </div>
+              <div class="edu-card">
+                <div class="edu-title">⚖️ Debt-to-Equity (D/E) Ratio</div>
+                <div class="edu-body">D/E measures how much a company relies on debt versus shareholder equity to finance its operations. A ratio above 2.0 is generally considered high-risk, though acceptable levels vary by industry. Capital-intensive industries like utilities or manufacturing typically carry more debt than software companies.</div>
+                <div class="edu-formula">D/E = Total Liabilities ÷ Shareholders' Equity</div>
+              </div>
+              <div class="edu-card">
+                <div class="edu-title">💵 Dividend Yield</div>
+                <div class="edu-body">Dividend yield shows the annual dividend payment as a percentage of the stock price. A higher yield provides income but may signal a slowing company or an unsustainable payout. Always check the payout ratio — dividends exceeding earnings are a red flag.</div>
+                <div class="edu-formula">Dividend Yield = Annual Dividend ÷ Stock Price × 100</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── TAB: ADVANCED EDUCATION ── -->
+          <div id="tab-adveducation" class="tab-pane" style="display:none;">
+            <div style="font-size:.82rem;color:rgba(247,244,238,.5);margin-bottom:1.5rem;">Advanced valuation and analysis methods used by professional investors.</div>
+            <div style="display:grid;gap:.85rem;">
+              <div class="edu-card">
+                <div class="edu-title">🧮 Discounted Cash Flow (DCF) Valuation</div>
+                <div class="edu-body">DCF estimates the intrinsic value of a company by projecting future cash flows and discounting them back to today using a required rate of return (WACC). If the intrinsic value exceeds the current price, the stock may be undervalued. Small changes in assumptions (growth rate, discount rate) dramatically affect the result — always run multiple scenarios.</div>
+                <div class="edu-formula">Intrinsic Value = Σ [FCF<sub>t</sub> ÷ (1 + WACC)<sup>t</sup>] + Terminal Value</div>
+              </div>
+              <div class="edu-card">
+                <div class="edu-title">📐 EV/EBITDA Multiple</div>
+                <div class="edu-body">Enterprise Value to EBITDA is a capital-structure-neutral valuation multiple. It's preferred over P/E when comparing companies with different debt levels. A lower EV/EBITDA relative to peers may indicate undervaluation. Typical ranges vary widely: 8–12x for mature industrials, 20–40x+ for high-growth tech companies.</div>
+                <div class="edu-formula">EV = Market Cap + Debt − Cash &nbsp;|&nbsp; EV/EBITDA = EV ÷ EBITDA</div>
+              </div>
+              <div class="edu-card">
+                <div class="edu-title">📊 Return on Equity (ROE) &amp; ROIC</div>
+                <div class="edu-body">ROE measures how efficiently management uses shareholder equity to generate profit. ROIC (Return on Invested Capital) is broader — it measures returns on all invested capital (equity + debt). Warren Buffett favors companies with consistently high ROE (above 15%) with little to no debt. ROIC above WACC means value creation for shareholders.</div>
+                <div class="edu-formula">ROE = Net Income ÷ Shareholders Equity &nbsp;|&nbsp; ROIC = NOPAT ÷ Invested Capital</div>
+              </div>
+              <div class="edu-card">
+                <div class="edu-title">📉 Technical Analysis: Moving Averages</div>
+                <div class="edu-body">The 50-day and 200-day simple moving averages (SMA) are the most watched technical indicators. When the 50-day crosses above the 200-day (Golden Cross), it signals bullish momentum. When it crosses below (Death Cross), it signals bearish momentum. Moving averages smooth out short-term volatility to reveal the underlying trend.</div>
+              </div>
+              <div class="edu-card">
+                <div class="edu-title">⚡ RSI — Relative Strength Index</div>
+                <div class="edu-body">RSI measures the speed and magnitude of recent price changes on a 0–100 scale. Above 70 is typically overbought (potential sell signal); below 30 is oversold (potential buy signal). RSI works best in range-bound markets and can give false signals in strong trending markets. Always confirm with price action and fundamentals.</div>
+                <div class="edu-formula">RSI = 100 − [100 ÷ (1 + Average Gain ÷ Average Loss)]</div>
+              </div>
+              <div class="edu-card">
+                <div class="edu-title">📡 MACD — Moving Average Convergence Divergence</div>
+                <div class="edu-body">MACD is a trend-following momentum indicator that shows the relationship between two exponential moving averages (typically 12-day and 26-day EMA). The MACD line crossing above the signal line is bullish; crossing below is bearish. The histogram visualizes the gap between the two lines. Divergence between MACD and price can signal trend reversals.</div>
+                <div class="edu-formula">MACD = 12-day EMA − 26-day EMA &nbsp;|&nbsp; Signal = 9-day EMA of MACD</div>
+              </div>
+              <div class="edu-card">
+                <div class="edu-title">🏗 Comparable Company Analysis (Comps)</div>
+                <div class="edu-body">Comps involves valuing a company by comparing it to publicly traded peers using multiples like P/E, EV/EBITDA, P/S, and P/FCF. Select peers with similar business models, growth rates, and margins. Apply the peer median multiple to your company's metrics to derive an implied share price range. Used alongside DCF for a range of value estimates.</div>
+              </div>
+              <div class="edu-card">
+                <div class="edu-title">🔮 Margin of Safety</div>
+                <div class="edu-body">Coined by Benjamin Graham, margin of safety means only buying a stock when its market price is significantly below your estimated intrinsic value — typically 20–50% below. This buffer protects against errors in your analysis, unforeseen risks, and market volatility. The wider the margin of safety, the lower the risk. "Price is what you pay. Value is what you get." — Warren Buffett</div>
+              </div>
+            </div>
+          </div>
+
           <div class="tool-disclaimer">⚠ Implied Lens provides market data and modeling tools for informational and educational purposes only. Projections are hypothetical models — not investment advice. Past performance does not guarantee future results. Always consult a licensed financial advisor before investing.</div>
         </div><!-- /tool-body -->
       </div><!-- /tool-shell -->
@@ -1311,6 +1475,60 @@ footer { background:#080808; padding:3rem 2rem; }
 <div class="toast" id="toast"></div>
 
 <style>
+
+/* ── Financials table ── */
+.fin-table { width:100%; border-collapse:collapse; font-size:.78rem; }
+.fin-table th { color:rgba(247,244,238,.4); font-weight:500; text-align:right; padding:.4rem .6rem; border-bottom:1px solid rgba(255,255,255,.07); font-family:var(--mono); font-size:.65rem; text-transform:uppercase; letter-spacing:.08em; }
+.fin-table th:first-child { text-align:left; }
+.fin-table td { color:rgba(247,244,238,.8); text-align:right; padding:.4rem .6rem; border-bottom:1px solid rgba(255,255,255,.04); }
+.fin-table td:first-child { text-align:left; color:rgba(247,244,238,.5); font-size:.75rem; }
+.fin-table tr:hover td { background:rgba(200,155,60,.05); }
+.fin-row-header td { color:rgba(200,155,60,.8) !important; font-weight:600; background:rgba(200,155,60,.04); }
+.fin-positive { color:#4ade80 !important; }
+.fin-negative { color:#f87171 !important; }
+
+/* ── Advanced Metrics grid ── */
+.advm-section { margin-bottom:1.5rem; }
+.advm-section-title { font-family:var(--mono); font-size:.65rem; color:var(--gold-d); text-transform:uppercase; letter-spacing:.1em; margin-bottom:.75rem; }
+.advm-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:.6rem; }
+.advm-card { background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); border-radius:8px; padding:.7rem .85rem; }
+.advm-lbl { font-size:.68rem; color:rgba(247,244,238,.35); margin-bottom:.25rem; }
+.advm-val { font-size:1.05rem; font-weight:600; color:rgba(247,244,238,.9); font-family:var(--mono); }
+.advm-sub { font-size:.65rem; color:rgba(247,244,238,.25); margin-top:.15rem; }
+
+/* ── Earnings table ── */
+.earn-table { width:100%; border-collapse:collapse; font-size:.8rem; }
+.earn-table th { color:rgba(247,244,238,.4); font-weight:500; padding:.45rem .65rem; border-bottom:1px solid rgba(255,255,255,.08); font-family:var(--mono); font-size:.65rem; text-transform:uppercase; letter-spacing:.08em; text-align:right; }
+.earn-table th:first-child { text-align:left; }
+.earn-table td { padding:.45rem .65rem; border-bottom:1px solid rgba(255,255,255,.04); color:rgba(247,244,238,.8); text-align:right; }
+.earn-table td:first-child { text-align:left; color:rgba(247,244,238,.55); }
+.earn-beat { color:#4ade80; }
+.earn-miss { color:#f87171; }
+.earn-meet { color:rgba(247,244,238,.5); }
+.earn-badge { display:inline-block; font-size:.65rem; font-weight:700; padding:1px 6px; border-radius:3px; letter-spacing:.05em; }
+.earn-badge.beat { background:rgba(74,222,128,.15); color:#4ade80; }
+.earn-badge.miss { background:rgba(248,113,113,.15); color:#f87171; }
+.earn-badge.meet { background:rgba(247,244,238,.07); color:rgba(247,244,238,.4); }
+
+/* ── SEC Filings ── */
+.sec-card { display:block; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.07); border-radius:10px; padding:1rem 1.25rem; text-decoration:none; transition:background .15s,border-color .15s; }
+.sec-card:hover { background:rgba(200,155,60,.07); border-color:rgba(200,155,60,.25); }
+.sec-type { font-family:var(--mono); font-size:.72rem; color:var(--gold-d); text-transform:uppercase; letter-spacing:.12em; margin-bottom:.35rem; }
+.sec-desc { font-size:.82rem; color:rgba(247,244,238,.6); margin-bottom:.4rem; }
+.sec-link { font-size:.75rem; color:rgba(200,155,60,.7); }
+
+/* ── Education cards ── */
+.edu-card { background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); border-radius:10px; padding:1.1rem 1.3rem; }
+.edu-title { font-family:var(--serif); font-size:1rem; color:rgba(247,244,238,.9); margin-bottom:.6rem; }
+.edu-body { font-size:.82rem; color:rgba(247,244,238,.6); line-height:1.65; margin-bottom:.6rem; }
+.edu-formula { font-family:var(--mono); font-size:.72rem; color:var(--gold-d); background:rgba(200,155,60,.07); border-left:2px solid rgba(200,155,60,.4); padding:.45rem .8rem; border-radius:0 5px 5px 0; }
+
+/* ── Tab bar scrollable ── */
+.tool-tabs { overflow-x:auto; scrollbar-width:none; }
+.tool-tabs::-webkit-scrollbar { display:none; }
+.tool-tabs { flex-wrap:nowrap; }
+
+
 @media print {
   nav, .tool-tabs, .search-row, .quick-row, .btn-search, .btn-run,
   .proj-controls, #proj-results .btn-run, footer, .cta-strip,
@@ -1356,7 +1574,7 @@ const S = {
 };
 const PROXY = 'https://api.allorigins.win/raw?url=';
 const COLORS = ['#C89B3C','#4a9fd4','#4ade80','#f87171'];
-const PRO_TABS = ['projection','dcf','screener','reports'];
+const PRO_TABS = ['financials','advmetrics','projection','dcf','screener','reports','adveducation'];
 
 /* ══════════════════════════════════════════════════════
    TABS
@@ -1411,6 +1629,12 @@ function switchTab(id, btn) {
   document.querySelectorAll('.tab-pane').forEach(p=>p.style.display='none');
   btn.classList.add('active');
   document.getElementById('tab-'+id).style.display='block';
+  // Auto-load data tabs when opened
+  const t = S.ticker;
+  if      (id === 'financials')  loadFinancials(t);
+  else if (id === 'advmetrics')  loadAdvMetrics(t);
+  else if (id === 'earnings')    loadEarnings(t);
+  else if (id === 'secfilings')  loadSecFilings(t);
 }
 function switchTabLocked(id, btn) { switchTab(id, btn); }
 
@@ -2092,6 +2316,294 @@ async function renderNews(ticker, name) {
     el.innerHTML = '<div style="color:rgba(247,244,238,.3);font-size:.78rem;">News unavailable.</div>';
   }
 }
+
+/* =====================================================
+   FINANCIALS TAB
+===================================================== */
+async function loadFinancials(ticker) {
+  const loading = document.getElementById('fin-loading');
+  const error   = document.getElementById('fin-error');
+  const cont    = document.getElementById('fin-content');
+  const nostock = document.getElementById('fin-nostock');
+  if (!ticker) { if(nostock) nostock.style.display='block'; if(cont) cont.style.display='none'; return; }
+  if(nostock) nostock.style.display='none';
+  if(loading) loading.style.display='block';
+  if(error)   error.style.display='none';
+  if(cont)    cont.style.display='none';
+  try {
+    const res  = await fetch('/api/financials/' + ticker, { credentials:'same-origin' });
+    const data = await res.json();
+    const r    = data.quoteSummary && data.quoteSummary.result && data.quoteSummary.result[0];
+    if (!r) throw new Error('No data');
+    const inc  = (r.incomeStatementHistory  && r.incomeStatementHistory.incomeStatementHistory)  || [];
+    const bal  = (r.balanceSheetHistory      && r.balanceSheetHistory.balanceSheetStatements)     || [];
+    const cf   = (r.cashflowStatementHistory && r.cashflowStatementHistory.cashflowStatements)    || [];
+
+    function fmt(v){ if(v==null||v.raw==null) return '—'; const n=v.raw; if(Math.abs(n)>=1e9) return '$'+(n/1e9).toFixed(2)+'B'; if(Math.abs(n)>=1e6) return '$'+(n/1e6).toFixed(1)+'M'; return '$'+n.toLocaleString(); }
+    function fmtPct(v){ if(v==null||v.raw==null) return '—'; return (v.raw*100).toFixed(1)+'%'; }
+
+    function buildTable(rows, statements) {
+      if (!statements.length) return '<div style="color:rgba(247,244,238,.3);font-size:.8rem;">No data available.</div>';
+      const years = statements.map(s => s.endDate && s.endDate.fmt ? s.endDate.fmt.slice(0,4) : '');
+      let html = '<div style="overflow-x:auto;"><table class="fin-table"><thead><tr><th>Item</th>' + years.map(y=>'<th>'+y+'</th>').join('') + '</tr></thead><tbody>';
+      for (const row of rows) {
+        const cls = row.header ? ' class="fin-row-header"' : '';
+        html += '<tr'+cls+'><td>'+(row.label||'')+'</td>';
+        for (const stmt of statements) {
+          const raw = row.key ? stmt[row.key] : null;
+          let val = raw ? fmt(raw) : '—';
+          if (row.pct && raw) val = fmtPct(raw);
+          const color = (raw && raw.raw < 0) ? ' class="fin-negative"' : (raw && raw.raw > 0 && row.highlight) ? ' class="fin-positive"' : '';
+          html += '<td'+color+'>'+val+'</td>';
+        }
+        html += '</tr>';
+      }
+      html += '</tbody></table></div>';
+      return html;
+    }
+
+    const incRows = [
+      {label:'Total Revenue',           key:'totalRevenue'},
+      {label:'Cost of Revenue',         key:'costOfRevenue'},
+      {label:'Gross Profit',            key:'grossProfit',  highlight:true},
+      {label:'Operating Expense',       key:'totalOperatingExpenses'},
+      {label:'Operating Income',        key:'operatingIncome', highlight:true},
+      {label:'EBITDA',                  key:'ebitda'},
+      {label:'Net Income',              key:'netIncome',    highlight:true},
+      {label:'EPS (Basic)',             key:'basicEps'},
+      {label:'EPS (Diluted)',           key:'dilutedEps'},
+    ];
+    const balRows = [
+      {label:'Cash & Equivalents',      key:'cash',               highlight:true},
+      {label:'Short-term Investments',  key:'shortTermInvestments'},
+      {label:'Total Current Assets',    key:'totalCurrentAssets'},
+      {label:'Total Assets',            key:'totalAssets'},
+      {label:'Short-term Debt',         key:'shortLongTermDebt'},
+      {label:'Long-term Debt',          key:'longTermDebt'},
+      {label:'Total Liabilities',       key:'totalLiab'},
+      {label:'Shareholder Equity',      key:'totalStockholderEquity', highlight:true},
+    ];
+    const cfRows = [
+      {label:'Operating Cash Flow',     key:'totalCashFromOperatingActivities', highlight:true},
+      {label:'Capital Expenditures',    key:'capitalExpenditures'},
+      {label:'Free Cash Flow',          key:'freeCashflow', highlight:true},
+      {label:'Investing Activities',    key:'totalCashflowsFromInvestingActivities'},
+      {label:'Financing Activities',    key:'totalCashFromFinancingActivities'},
+      {label:'Net Change in Cash',      key:'changeInCash'},
+    ];
+
+    document.getElementById('fin-income').innerHTML   = buildTable(incRows, inc);
+    document.getElementById('fin-balance').innerHTML  = buildTable(balRows, bal);
+    document.getElementById('fin-cashflow').innerHTML = buildTable(cfRows,  cf);
+
+    if(loading) loading.style.display='none';
+    if(cont)    cont.style.display='block';
+  } catch(e) {
+    if(loading) loading.style.display='none';
+    if(error)   { error.style.display='block'; error.textContent='Could not load financials: ' + e.message; }
+    console.error('financials error', e);
+  }
+}
+
+let _finTab = 'income';
+function showFinTab(name, btn) {
+  _finTab = name;
+  document.querySelectorAll('#fin-content button').forEach(b => {
+    b.style.background = 'rgba(200,155,60,.12)';
+    b.style.color = 'rgba(247,244,238,.5)';
+  });
+  if(btn) { btn.style.background = ''; btn.style.color = ''; }
+  document.querySelectorAll('.fin-subtab').forEach(d => d.style.display='none');
+  const el = document.getElementById('fin-'+name);
+  if(el) el.style.display='block';
+}
+
+/* =====================================================
+   ADVANCED METRICS TAB
+===================================================== */
+async function loadAdvMetrics(ticker) {
+  const cont    = document.getElementById('advm-content');
+  const loading = document.getElementById('advm-loading');
+  const error   = document.getElementById('advm-error');
+  const nostock = document.getElementById('advm-nostock');
+  if (!ticker) { if(nostock) nostock.style.display='block'; return; }
+  if(nostock) nostock.style.display='none';
+  if(loading) loading.style.display='block';
+  if(error)   error.style.display='none';
+  try {
+    const [finRes, metRes] = await Promise.all([
+      fetch('/api/financials/' + ticker, {credentials:'same-origin'}),
+      fetch('https://finnhub.io/api/v1/stock/metric?symbol='+ticker+'&metric=all&token=d7n43rpr01qppri3flo0d7n43rpr01qppri3flog'),
+    ]);
+    const finData = await finRes.json();
+    const metData = await metRes.json();
+    const r = finData.quoteSummary && finData.quoteSummary.result && finData.quoteSummary.result[0];
+    const ks  = (r && r.defaultKeyStatistics) || {};
+    const fd  = (r && r.financialData)        || {};
+    const m   = metData.metric || {};
+
+    function v(val, suffix, decimals=2) {
+      if (val == null || val === '' || isNaN(val)) return '—';
+      const n = parseFloat(val);
+      if (isNaN(n)) return '—';
+      if (suffix === 'x') return n.toFixed(decimals) + 'x';
+      if (suffix === '%') return n.toFixed(decimals) + '%';
+      if (suffix === 'B') return '$' + n.toFixed(2) + 'B';
+      if (suffix === 'M') return '$' + n.toFixed(0) + 'M';
+      return n.toFixed(decimals);
+    }
+    function raw(obj) { return obj && obj.raw != null ? obj.raw : null; }
+
+    const sections = [
+      {
+        title: 'Valuation Multiples',
+        cards: [
+          {lbl:'EV / EBITDA',     val:v(raw(ks.enterpriseToEbitda),'x'), sub:'Enterprise Value basis'},
+          {lbl:'EV / Revenue',    val:v(raw(ks.enterpriseToRevenue),'x'), sub:'Enterprise Value basis'},
+          {lbl:'P/E (TTM)',        val:v(raw(ks.trailingPE),'x'), sub:'Price to earnings'},
+          {lbl:'Forward P/E',     val:v(raw(ks.forwardPE),'x'), sub:'Next 12 months est.'},
+          {lbl:'Price / Book',    val:v(raw(ks.priceToBook),'x'), sub:'P/B ratio'},
+          {lbl:'Price / Sales',   val:v(m['ps'],'x'), sub:'TTM'},
+        ]
+      },
+      {
+        title: 'Profitability & Returns',
+        cards: [
+          {lbl:'Gross Margin',    val:v(raw(fd.grossMargins)!=null ? raw(fd.grossMargins)*100 : null,'%'), sub:'Revenue − COGS'},
+          {lbl:'Operating Margin',val:v(raw(fd.operatingMargins)!=null ? raw(fd.operatingMargins)*100 : null,'%'), sub:'Operating income / revenue'},
+          {lbl:'Net Margin',      val:v(raw(fd.profitMargins)!=null ? raw(fd.profitMargins)*100 : null,'%'), sub:'Net income / revenue'},
+          {lbl:'Return on Equity',val:v(raw(fd.returnOnEquity)!=null ? raw(fd.returnOnEquity)*100 : null,'%'), sub:'ROE'},
+          {lbl:'Return on Assets',val:v(raw(fd.returnOnAssets)!=null ? raw(fd.returnOnAssets)*100 : null,'%'), sub:'ROA'},
+          {lbl:'ROIC',            val:v(m['roicTTM'],'%'), sub:'Return on invested capital'},
+        ]
+      },
+      {
+        title: 'Growth',
+        cards: [
+          {lbl:'Revenue Growth',  val:v(raw(fd.revenueGrowth)!=null ? raw(fd.revenueGrowth)*100 : null,'%'), sub:'YoY'},
+          {lbl:'Earnings Growth', val:v(raw(fd.earningsGrowth)!=null ? raw(fd.earningsGrowth)*100 : null,'%'), sub:'YoY'},
+          {lbl:'Rev Growth 5Y',   val:v(m['revenueGrowth5Y'],'%'), sub:'5-year CAGR'},
+          {lbl:'EPS Growth 5Y',   val:v(m['epsGrowth5Y'],'%'), sub:'5-year CAGR'},
+          {lbl:'Rev Growth 3Y',   val:v(m['revenueGrowth3Y'],'%'), sub:'3-year CAGR'},
+          {lbl:'EPS Growth TTM',  val:v(m['epsGrowthTTMYoy'],'%'), sub:'TTM YoY'},
+        ]
+      },
+      {
+        title: 'Financial Health & Leverage',
+        cards: [
+          {lbl:'Debt / Equity',   val:v(raw(fd.debtToEquity),'x',1), sub:'Total debt / equity'},
+          {lbl:'Current Ratio',   val:v(raw(fd.currentRatio),'x'), sub:'Current assets / liabilities'},
+          {lbl:'Quick Ratio',     val:v(raw(fd.quickRatio),'x'), sub:'Liquid assets / liabilities'},
+          {lbl:'FCF / Share',     val:v(raw(fd.freeCashflow) && raw(ks.sharesOutstanding) ? raw(fd.freeCashflow)/raw(ks.sharesOutstanding) : null,''), sub:'Free cash flow per share'},
+          {lbl:'Cash per Share',  val:v(m['cashPerSharePerShare'],''), sub:''},
+          {lbl:'Interest Coverage',val:v(m['netInterestCoverageAnnual'],'x'), sub:'EBIT / interest expense'},
+        ]
+      }
+    ];
+
+    let html = '';
+    for (const sec of sections) {
+      html += '<div class="advm-section"><div class="advm-section-title">'+sec.title+'</div><div class="advm-grid">';
+      for (const c of sec.cards) {
+        html += '<div class="advm-card"><div class="advm-lbl">'+c.lbl+'</div><div class="advm-val">'+c.val+'</div><div class="advm-sub">'+c.sub+'</div></div>';
+      }
+      html += '</div></div>';
+    }
+    if(loading) loading.style.display='none';
+    if(cont) cont.innerHTML = html;
+  } catch(e) {
+    if(loading) loading.style.display='none';
+    if(error) { error.style.display='block'; error.textContent='Could not load metrics: '+e.message; }
+    console.error('advmetrics error', e);
+  }
+}
+
+/* =====================================================
+   EARNINGS TAB
+===================================================== */
+async function loadEarnings(ticker) {
+  const cont    = document.getElementById('earn-content');
+  const loading = document.getElementById('earn-loading');
+  const error   = document.getElementById('earn-error');
+  const nostock = document.getElementById('earn-nostock');
+  if (!ticker) { if(nostock) nostock.style.display='block'; return; }
+  if(nostock) nostock.style.display='none';
+  if(loading) loading.style.display='block';
+  if(error)   error.style.display='none';
+  try {
+    const res  = await fetch('/api/earnings/' + ticker, {credentials:'same-origin'});
+    const data = await res.json();
+    if (!Array.isArray(data) || !data.length) {
+      if(loading) loading.style.display='none';
+      if(cont) cont.innerHTML='<div style="color:rgba(247,244,238,.3);font-size:.82rem;">No earnings data found for this ticker.</div>';
+      return;
+    }
+    // sort newest first
+    const rows = data.slice().sort((a,b) => (b.period||'').localeCompare(a.period||''));
+    let html = '<div style="overflow-x:auto;"><table class="earn-table"><thead><tr>'
+      + '<th style="text-align:left;">Period</th>'
+      + '<th>EPS Estimate</th>'
+      + '<th>EPS Actual</th>'
+      + '<th>Surprise</th>'
+      + '<th>Surprise %</th>'
+      + '<th>Result</th>'
+      + '</tr></thead><tbody>';
+    for (const row of rows) {
+      const est  = row.estimate   != null ? row.estimate.toFixed(2)   : '—';
+      const act  = row.actual     != null ? row.actual.toFixed(2)     : '—';
+      const surp = row.surprise   != null ? (row.surprise > 0 ? '+' : '') + row.surprise.toFixed(2) : '—';
+      const surpPct = row.surprisePercent != null ? (row.surprisePercent > 0 ? '+' : '') + row.surprisePercent.toFixed(1) + '%' : '—';
+      let badge = '', cls = '';
+      if (row.surprisePercent != null) {
+        if      (row.surprisePercent >  2) { badge='<span class="earn-badge beat">BEAT</span>'; cls='earn-beat'; }
+        else if (row.surprisePercent < -2) { badge='<span class="earn-badge miss">MISS</span>'; cls='earn-miss'; }
+        else                               { badge='<span class="earn-badge meet">IN-LINE</span>'; cls='earn-meet'; }
+      }
+      html += '<tr>'
+        + '<td>'+(row.period||'—')+'</td>'
+        + '<td>'+est+'</td>'
+        + '<td class="'+cls+'">'+act+'</td>'
+        + '<td class="'+cls+'">'+surp+'</td>'
+        + '<td class="'+cls+'">'+surpPct+'</td>'
+        + '<td>'+badge+'</td>'
+        + '</tr>';
+    }
+    html += '</tbody></table></div>';
+    // Beat/miss summary
+    const withData = rows.filter(r => r.surprisePercent != null);
+    if (withData.length) {
+      const beats = withData.filter(r => r.surprisePercent > 2).length;
+      const pct   = Math.round(beats / withData.length * 100);
+      html += '<div style="margin-top:1rem;font-size:.78rem;color:rgba(247,244,238,.4);">'
+        + ticker + ' beat EPS estimates in <strong style="color:rgba(247,244,238,.75);">'
+        + beats + ' of ' + withData.length + '</strong> reported quarters ('
+        + pct + '% beat rate).</div>';
+    }
+    if(loading) loading.style.display='none';
+    if(cont) cont.innerHTML = html;
+  } catch(e) {
+    if(loading) loading.style.display='none';
+    if(error) { error.style.display='block'; error.textContent='Could not load earnings: '+e.message; }
+    console.error('earnings error', e);
+  }
+}
+
+/* =====================================================
+   SEC FILINGS TAB
+===================================================== */
+function loadSecFilings(ticker) {
+  const nostock = document.getElementById('sec-nostock');
+  const cont    = document.getElementById('sec-content');
+  if (!ticker) { if(nostock) nostock.style.display='block'; if(cont) cont.style.display='none'; return; }
+  if(nostock) nostock.style.display='none';
+  const base = 'https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&CIK=' + encodeURIComponent(ticker);
+  document.getElementById('sec-10k').href  = base + '&type=10-K&dateb=&owner=include&count=10&search_text=';
+  document.getElementById('sec-10q').href  = base + '&type=10-Q&dateb=&owner=include&count=10&search_text=';
+  document.getElementById('sec-8k').href   = base + '&type=8-K&dateb=&owner=include&count=20&search_text=';
+  document.getElementById('sec-all').href  = base + '&type=&dateb=&owner=include&count=40&search_text=';
+  if(cont) cont.style.display='block';
+}
+
 
 </script>
 </body>

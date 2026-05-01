@@ -534,6 +534,47 @@ app.get('/api/quote/:ticker', async (req, res) => {
   }
 });
 
+
+// ============================================================
+//  Financials proxy  (Yahoo Finance quoteSummary)
+// ============================================================
+app.get('/api/financials/:ticker', async (req, res) => {
+  try {
+    const ticker = req.params.ticker.toUpperCase();
+    const modules = 'incomeStatementHistory,balanceSheetHistory,cashflowStatementHistory,defaultKeyStatistics,financialData';
+    const url = `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${ticker}?modules=${modules}`;
+    const r = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'application/json',
+      }
+    });
+    if (!r.ok) return res.status(r.status).json({ error: 'Yahoo returned ' + r.status });
+    const data = await r.json();
+    res.json(data);
+  } catch (e) {
+    console.error('financials proxy error:', e.message);
+    res.status(500).json({ error: 'Failed to fetch financials.' });
+  }
+});
+
+// ============================================================
+//  Earnings proxy  (Finnhub stock/earnings)
+// ============================================================
+app.get('/api/earnings/:ticker', async (req, res) => {
+  try {
+    const ticker = req.params.ticker.toUpperCase();
+    const url = `https://finnhub.io/api/v1/stock/earnings?symbol=${ticker}&limit=12&token=${FINNHUB_KEY}`;
+    const r = await fetch(url);
+    if (!r.ok) return res.status(r.status).json({ error: 'Finnhub returned ' + r.status });
+    const data = await r.json();
+    res.json(data);
+  } catch (e) {
+    console.error('earnings proxy error:', e.message);
+    res.status(500).json({ error: 'Failed to fetch earnings.' });
+  }
+});
+
 // ============================================================
 //  Pages
 // ============================================================
