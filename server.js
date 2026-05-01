@@ -630,6 +630,22 @@ app.get('/api/earnings/:ticker', async (req, res) => {
 });
 
 // ============================================================
+//  Finnhub fundamentals proxy  (avoids CORS from browser)
+// ============================================================
+app.get('/api/metrics/:ticker', async (req, res) => {
+  try {
+    const ticker = req.params.ticker.toUpperCase();
+    const url = `https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FINNHUB_KEY}`;
+    const r = await fetch(url);
+    if (!r.ok) return res.status(r.status).json({ error: 'Finnhub returned ' + r.status });
+    res.json(await r.json());
+  } catch (e) {
+    console.error('metrics proxy error:', e.message);
+    res.status(500).json({ error: 'Failed to fetch metrics.' });
+  }
+});
+
+// ============================================================
 //  Pages
 // ============================================================
 function requireAuth(req, res, next) {

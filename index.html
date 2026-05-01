@@ -1144,11 +1144,10 @@ footer { background:#080808; padding:3rem 2rem; }
                 </div>
               </div>
             </div><!-- /stock-result -->
-          </div><!-- /tab-analyze -->
+          
 
-          <!-- ── TAB: COMPARE (partially locked) ── -->
-            </div>
-          </div>
+            </div><!-- /body-analyze -->
+          </div><!-- /sec-analyze -->
 
           <div class="acc-section" id="sec-financials">
             <div class="acc-header" onclick="toggleSection('financials')">
@@ -1170,11 +1169,10 @@ footer { background:#080808; padding:3rem 2rem; }
               <div id="fin-cashflow" class="fin-subtab" style="display:none;"></div>
             </div>
             <div id="fin-nostock" style="color:rgba(247,244,238,.35);font-size:.85rem;">Search for a stock in the Analyze tab first.</div>
-          </div>
 
-          <!-- ── TAB: ADVANCED METRICS ── -->
-            </div>
-          </div>
+
+            </div><!-- /body-financials -->
+          </div><!-- /sec-financials -->
 
           <div class="acc-section" id="sec-advmetrics">
             <div class="acc-header" onclick="toggleSection('advmetrics')">
@@ -1187,11 +1185,10 @@ footer { background:#080808; padding:3rem 2rem; }
             <div id="advm-error" style="color:#f87171;font-size:.82rem;display:none;"></div>
             <div id="advm-content"></div>
             <div id="advm-nostock" style="color:rgba(247,244,238,.35);font-size:.85rem;">Search for a stock in the Analyze tab first.</div>
-          </div>
 
-          <!-- ── TAB: EARNINGS ── -->
-            </div>
-          </div>
+
+            </div><!-- /body-advmetrics -->
+          </div><!-- /sec-advmetrics -->
 
           <div class="acc-section" id="sec-earnings">
             <div class="acc-header" onclick="toggleSection('earnings')">
@@ -1204,11 +1201,10 @@ footer { background:#080808; padding:3rem 2rem; }
             <div id="earn-error" style="color:#f87171;font-size:.82rem;display:none;"></div>
             <div id="earn-content"></div>
             <div id="earn-nostock" style="color:rgba(247,244,238,.35);font-size:.85rem;">Search for a stock in the Analyze tab first.</div>
-          </div>
 
-          <!-- ── TAB: SEC FILINGS ── -->
-            </div>
-          </div>
+
+            </div><!-- /body-earnings -->
+          </div><!-- /sec-earnings -->
 
           <div class="acc-section" id="sec-secfilings">
             <div class="acc-header" onclick="toggleSection('secfilings')">
@@ -1243,11 +1239,10 @@ footer { background:#080808; padding:3rem 2rem; }
               </div>
               <div style="margin-top:1rem;font-size:.72rem;color:rgba(247,244,238,.25);">Links open SEC EDGAR in a new tab. Data provided by the U.S. Securities and Exchange Commission.</div>
             </div>
-          </div>
 
-          <!-- ── TAB: EDUCATION ── -->
-            </div>
-          </div>
+
+            </div><!-- /body-secfilings -->
+          </div><!-- /sec-secfilings -->
 
           <div class="acc-section" id="sec-compare">
             <div class="acc-header" onclick="toggleSection('compare')">
@@ -1273,11 +1268,10 @@ footer { background:#080808; padding:3rem 2rem; }
                 </div>
               </div>
             </div>
-          </div><!-- /tab-compare -->
 
-          <!-- ── TAB: SCREENER ── -->
-            </div>
-          </div>
+
+            </div><!-- /body-compare -->
+          </div><!-- /sec-compare -->
 
           <div class="acc-section" id="sec-projection">
             <div class="acc-header" onclick="toggleSection('projection')">
@@ -1307,9 +1301,9 @@ footer { background:#080808; padding:3rem 2rem; }
               <div class="h200" style="margin-top:14px;"><canvas id="adv-proj-chart"></canvas></div>
               <div id="adv-irr-table" style="margin-top:14px;"></div>
             </div>
-          </div>
-            </div>
-          </div>
+
+            </div><!-- /body-projection -->
+          </div><!-- /sec-projection -->
 
           <div class="acc-section" id="sec-dcf">
             <div class="acc-header" onclick="toggleSection('dcf')">
@@ -1329,12 +1323,11 @@ footer { background:#080808; padding:3rem 2rem; }
             <button class="btn-run" onclick="runDCF()">Calculate Intrinsic Value →</button>
             <div id="dcf-output" style="margin-top:1.25rem;"></div>
             <div style="margin-top:1rem;font-size:.7rem;color:rgba(247,244,238,.2);line-height:1.6;">This is an EPS-based simplified DCF, not a free-cash-flow model. Results are for educational purposes only — not investment advice.</div>
-          </div>
 
 
-          <!-- ── TAB: FINANCIALS ── -->
-            </div>
-          </div>
+
+            </div><!-- /body-dcf -->
+          </div><!-- /sec-dcf -->
 
           <div class="acc-section" id="sec-screener">
             <div class="acc-header" onclick="toggleSection('screener')">
@@ -1366,13 +1359,12 @@ footer { background:#080808; padding:3rem 2rem; }
                 <tbody id="scr-body"><tr><td colspan="9" style="text-align:center;color:rgba(247,244,238,.3);padding:2rem;">Click the Screener tab to load data</td></tr></tbody>
               </table>
             </div>
-          </div>
 
           <!-- ── TAB: ALERTS ── -->
 
-          <!-- ── TAB: REPORTS ── -->
-            </div>
-          </div>
+
+            </div><!-- /body-screener -->
+          </div><!-- /sec-screener -->
 
           <div class="acc-section" id="sec-reports">
             <div class="acc-header" onclick="toggleSection('reports')">
@@ -1395,11 +1387,11 @@ footer { background:#080808; padding:3rem 2rem; }
               </div>
               <div id="report-check" style="display:none;"></div>
             </div>
-          </div>
 
           <!-- DCF / Projection tabs (locked) -->
-            </div>
-          </div>
+
+            </div><!-- /body-reports -->
+          </div><!-- /sec-reports -->
 
           <div class="acc-section" id="sec-education">
             <div class="acc-header" onclick="toggleSection('education')">
@@ -1449,11 +1441,10 @@ footer { background:#080808; padding:3rem 2rem; }
                 <div class="edu-formula">Dividend Yield = Annual Dividend ÷ Stock Price × 100</div>
               </div>
             </div>
-          </div>
 
-          <!-- ── TAB: ADVANCED EDUCATION ── -->
-            </div>
-          </div>
+
+            </div><!-- /body-education -->
+          </div><!-- /sec-education -->
 
           <div class="acc-section" id="sec-adveducation">
             <div class="acc-header" onclick="toggleSection('adveducation')">
@@ -1501,9 +1492,9 @@ footer { background:#080808; padding:3rem 2rem; }
                 <div class="edu-body">Coined by Benjamin Graham, margin of safety means only buying a stock when its market price is significantly below your estimated intrinsic value — typically 20–50% below. This buffer protects against errors in your analysis, unforeseen risks, and market volatility. The wider the margin of safety, the lower the risk. "Price is what you pay. Value is what you get." — Warren Buffett</div>
               </div>
             </div>
-          </div>
-            </div>
-          </div>
+
+            </div><!-- /body-adveducation -->
+          </div><!-- /sec-adveducation -->
 
           <div class="tool-disclaimer">⚠ Implied Lens provides market data and modeling tools for informational and educational purposes only. Projections are hypothetical models — not investment advice. Past performance does not guarantee future results. Always consult a licensed financial advisor before investing.</div>
     </div><!-- /tool-accordion -->
@@ -2550,8 +2541,21 @@ async function loadFinancials(ticker) {
     const bal  = (r.balanceSheetHistory      && r.balanceSheetHistory.balanceSheetStatements)     || [];
     const cf   = (r.cashflowStatementHistory && r.cashflowStatementHistory.cashflowStatements)    || [];
 
-    function fmt(v){ if(v==null||v.raw==null) return '—'; const n=v.raw; if(Math.abs(n)>=1e9) return '$'+(n/1e9).toFixed(2)+'B'; if(Math.abs(n)>=1e6) return '$'+(n/1e6).toFixed(1)+'M'; return '$'+n.toLocaleString(); }
-    function fmtPct(v){ if(v==null||v.raw==null) return '—'; return (v.raw*100).toFixed(1)+'%'; }
+    function fmt(v){
+      if(v==null) return '—';
+      const n = (v.raw!=null) ? v.raw : (typeof v==='number' ? v : null);
+      if(n==null||isNaN(n)) return '—';
+      if(Math.abs(n)>=1e9) return '$'+(n/1e9).toFixed(2)+'B';
+      if(Math.abs(n)>=1e6) return '$'+(n/1e6).toFixed(1)+'M';
+      if(Math.abs(n)>=1e3) return '$'+(n/1e3).toFixed(0)+'K';
+      return '$'+n.toFixed(2);
+    }
+    function fmtPct(v){
+      if(v==null) return '—';
+      const n = (v.raw!=null) ? v.raw : (typeof v==='number' ? v : null);
+      if(n==null||isNaN(n)) return '—';
+      return (n*100).toFixed(1)+'%';
+    }
 
     function buildTable(rows, statements) {
       if (!statements.length) return '<div style="color:rgba(247,244,238,.3);font-size:.8rem;">No data available.</div>';
@@ -2564,7 +2568,8 @@ async function loadFinancials(ticker) {
           const raw = row.key ? stmt[row.key] : null;
           let val = raw ? fmt(raw) : '—';
           if (row.pct && raw) val = fmtPct(raw);
-          const color = (raw && raw.raw < 0) ? ' class="fin-negative"' : (raw && raw.raw > 0 && row.highlight) ? ' class="fin-positive"' : '';
+          const rawNum = raw ? (raw.raw!=null ? raw.raw : (typeof raw==='number'?raw:null)) : null;
+          const color = (rawNum!=null && rawNum < 0) ? ' class="fin-negative"' : (rawNum!=null && rawNum > 0 && row.highlight) ? ' class="fin-positive"' : '';
           html += '<td'+color+'>'+val+'</td>';
         }
         html += '</tr>';
@@ -2644,7 +2649,7 @@ async function loadAdvMetrics(ticker) {
   try {
     const [finRes, metRes] = await Promise.all([
       fetch('/api/financials/' + ticker, {credentials:'same-origin'}),
-      fetch('https://finnhub.io/api/v1/stock/metric?symbol='+ticker+'&metric=all&token=d7n43rpr01qppri3flo0d7n43rpr01qppri3flog'),
+      fetch('/api/metrics/' + ticker, {credentials:'same-origin'}),
     ]);
     const finData = await finRes.json();
     const metData = await metRes.json();
