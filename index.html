@@ -11,38 +11,20 @@
 <style>
 /* ═══════════════════════════════ TOKENS ═══════════════════════════════ */
 :root {
-  --cream: #F7F4EE;
-  --cream2: #F0EDE5;
-  --cream3: #E8E4DA;
-  --ink: #0E0E0E;
-  --ink2: #2A2A2A;
-  --ink3: #3A3A3A;
-  --ink4: #666;
-  --ink5: #999;
-  --gold: #C89B3C;
-  --gold-l: #F0D9A0;
-  --gold-l2: #F8EDD0;
-  --gold-d: #8A6A20;
-  --gold-d2: #5C4615;
-  --green: #1A7A4A;
-  --green-l: #E6F4ED;
-  --green-t: rgba(26,122,74,0.12);
-  --red: #B83030;
-  --red-l: #FDECEA;
-  --red-t: rgba(184,48,48,0.10);
-  --blue: #1C5FA8;
-  --blue-l: #E8F0FA;
-  --border: rgba(14,14,14,0.08);
-  --border2: rgba(14,14,14,0.14);
-  --border3: rgba(14,14,14,0.22);
-  --card: #FFFEFB;
-  --panel: #FDFAF4;
-  --shadow-sm: 0 1px 4px rgba(0,0,0,0.05);
-  --shadow: 0 2px 16px rgba(0,0,0,0.07);
-  --shadow-lg: 0 8px 40px rgba(0,0,0,0.09);
-  --r: 4px;
-  --r2: 8px;
-  --r3: 12px;
+  --cream:#F9F8F5; --cream2:#F2F0EB; --cream3:#E8E5DE;
+  --card:#FEFDFB;  --panel:#F6F4EF;
+  --ink:#0A0C0E;  --ink2:#1C2025; --ink3:#404752;
+  --ink4:#6B7380; --ink5:#9BA3AC;
+  --gold:#B8882A;   --gold-l:#E8D090;  --gold-l2:#F4E8C8;
+  --gold-d:#7A5A18; --gold-d2:#4E3A0E;
+  --green:#146640; --green-l:#E2F3EC; --green-t:rgba(20,102,64,.10);
+  --red:#A02828;   --red-l:#FCECEA;   --red-t:rgba(160,40,40,.10);
+  --blue:#1A5FA8;  --blue-l:#E6F0FB;
+  --border:rgba(10,12,14,.07); --border2:rgba(10,12,14,.12); --border3:rgba(10,12,14,.20);
+  --shadow-sm:0 1px 3px rgba(0,0,0,.05),0 1px 2px rgba(0,0,0,.04);
+  --shadow:0 2px 12px rgba(0,0,0,.07),0 1px 4px rgba(0,0,0,.04);
+  --shadow-lg:0 8px 32px rgba(0,0,0,.10),0 2px 8px rgba(0,0,0,.05);
+  --r:3px; --r2:6px; --r3:10px;
   --serif: 'DM Serif Display', serif;
   --sans: 'DM Sans', sans-serif;
   --mono: 'DM Mono', monospace;
@@ -685,234 +667,130 @@ footer { background:#080808; padding:3rem 2rem; }
   .cmp-inputs { flex-direction:column; }
 }
 
-/* ══════════════════════════════════════════════════
-   POLISH — light-context inputs (modal, forms on cream bg)
-══════════════════════════════════════════════════ */
-.input-light {
-  width:100%; background:#fff;
-  border:1.5px solid var(--border3);
-  border-radius:var(--r2); padding:.6rem .9rem;
-  font-family:var(--sans); font-size:.875rem;
-  color:var(--ink); outline:none;
-  transition:border-color .18s, box-shadow .18s;
-}
-.input-light::placeholder { color:var(--ink5); }
-.input-light:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(200,155,60,.12); }
 
-/* ══════════════════════════════════════════════════
-   POLISH — metric cards
-══════════════════════════════════════════════════ */
-.metric-card {
-  background:rgba(255,255,255,.055);
-  border:1px solid rgba(255,255,255,.09);
-  border-top:2px solid rgba(200,155,60,.22);
-  border-radius:var(--r2); padding:14px 16px;
-  transition:background .15s, border-top-color .15s;
-}
-.metric-card:hover {
-  background:rgba(255,255,255,.085);
-  border-top-color:rgba(200,155,60,.45);
-}
-.m-lbl { font-size:.61rem; letter-spacing:.08em; margin-bottom:6px; }
-.m-val { font-size:1.05rem; }
+/* ═══════════════════════════════════════════════════════════════════════
+   PROFESSIONAL POLISH
+═══════════════════════════════════════════════════════════════════════ */
+.input-light{width:100%;background:#fff;border:1.5px solid var(--border3);border-radius:var(--r2);padding:.6rem .875rem;font-family:var(--sans);font-size:.875rem;color:var(--ink);outline:none;transition:border-color .18s,box-shadow .18s;}
+.input-light::placeholder{color:var(--ink5);}
+.input-light:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(184,136,42,.10);}
+body{-webkit-font-smoothing:antialiased;}
+section{padding:5.5rem 2rem;}
+/* Nav */
+.nav-logo{font-size:1.15rem;letter-spacing:-.02em;}
+.nav-acct-btn{font-size:.75rem;padding:.3rem .65rem;border-radius:5px;}
+a.nav-tab{font-size:.73rem;font-weight:500;white-space:nowrap;padding:.28rem .58rem;border-radius:0;color:var(--ink4)!important;transition:color .15s,background .15s,box-shadow .15s;text-decoration:none!important;position:relative;letter-spacing:.01em;}
+a.nav-tab+a.nav-tab::before{content:'';position:absolute;left:0;top:22%;height:56%;width:1px;background:var(--border2);}
+a.nav-tab:hover{color:var(--ink)!important;background:rgba(10,12,14,.04);}
+a.nav-tab.active-tab{color:var(--gold-d)!important;font-weight:600;background:rgba(184,136,42,.08);box-shadow:inset 0 -2px 0 var(--gold-d);}
+.nav-links{flex:1;min-width:0;overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap!important;gap:0!important;border-left:1px solid var(--border2);padding-left:.25rem;}
+.nav-links::-webkit-scrollbar{display:none;}
+/* Hero */
+h1.hero-h1{letter-spacing:-.03em;line-height:1.03;}
+.hero-sub{font-size:1.05rem;}
+.hero-badge{font-size:.71rem;letter-spacing:.07em;box-shadow:var(--shadow-sm);}
+.h-stat-num{font-size:1.75rem;letter-spacing:-.02em;}
+.h-stat-lbl{font-size:.67rem;letter-spacing:.08em;}
+.btn-primary{border-radius:var(--r2);padding:.85rem 2rem;font-size:.93rem;letter-spacing:.01em;}
+.btn-primary:hover{background:var(--ink2);box-shadow:0 4px 20px rgba(0,0,0,.14);transform:translateY(-1px);}
+.btn-secondary{border-radius:var(--r2);padding:.85rem 2rem;font-size:.93rem;}
+/* Feature grid */
+.features-bento{border-radius:var(--r3);gap:1px;background:var(--border2);}
+.feat-card{padding:1.75rem;transition:background .18s,transform .18s;}
+.feat-card:hover{background:var(--panel);transform:translateY(-2px);position:relative;z-index:1;}
+.feat-icon{width:36px;height:36px;border-radius:var(--r2);background:var(--gold-l2);border:1px solid var(--gold-l);display:flex;align-items:center;justify-content:center;margin-bottom:1rem;}
+.feat-card h3{font-size:1rem;letter-spacing:-.01em;margin-bottom:.35rem;}
+.feat-card p{font-size:.83rem;line-height:1.68;color:var(--ink4);}
+/* Pricing */
+.pricing-card{border-radius:var(--r3)!important;transition:transform .2s,box-shadow .2s;}
+.pricing-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)!important;}
+/* Section type */
+h2.sec-h2{letter-spacing:-.022em;line-height:1.08;}
+.sec-sub{font-size:.975rem;line-height:1.72;}
+.sec-label{font-size:.68rem;letter-spacing:.13em;}
+/* Tool view — dark terminal */
+#view-tool{background:#0D1117!important;color:rgba(220,225,232,.9);}
+.tool-accordion-wrap{max-width:980px;padding:1.75rem 1.75rem 4rem;}
+.acc-section{border-bottom:1px solid rgba(255,255,255,.055);}
+.acc-section:first-child{border-top:1px solid rgba(255,255,255,.055);}
+.acc-header{padding:.95rem 1.4rem;background:rgba(255,255,255,.012);transition:background .15s;}
+.acc-header:hover{background:rgba(255,255,255,.025);}
+.acc-section.open>.acc-header{background:rgba(184,136,42,.05);border-left:2px solid rgba(184,136,42,.4);}
+.acc-title{font-size:.72rem;font-weight:600;letter-spacing:.09em;color:rgba(220,225,232,.6);text-transform:uppercase;}
+.acc-section.open>.acc-header .acc-title{color:rgba(220,225,232,.95);}
+.acc-chevron{font-size:.9rem;}
+.acc-body{padding:1.5rem 1.5rem 2rem;border-top:1px solid rgba(255,255,255,.04);}
+/* Metric cards */
+.metrics-grid{gap:5px;}
+.metric-card{background:rgba(255,255,255,.038);border:1px solid rgba(255,255,255,.065);border-radius:var(--r2);padding:12px 14px;transition:background .15s;}
+.metric-card:hover{background:rgba(255,255,255,.065);}
+.m-lbl{font-size:.58rem;letter-spacing:.09em;color:rgba(220,225,232,.33);margin-bottom:5px;}
+.m-val{font-size:.96rem;}
+.m-sub{font-size:.58rem;color:rgba(220,225,232,.25);margin-top:2px;}
+/* Charts */
+.chart-wrap{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:var(--r2);padding:1rem 1rem .75rem;margin-bottom:.875rem;}
+.chart-title{font-size:.67rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:rgba(220,225,232,.42);}
+.h240{height:230px;}.h200{height:195px;}.h180{height:170px;}.h150{height:145px;}
+.rpill{font-size:.66rem;padding:2px 9px;border-radius:3px;border-color:rgba(255,255,255,.09);color:rgba(220,225,232,.38);}
+.rpill.active,.rpill:hover{background:var(--gold);color:#0A0C0E;border-color:var(--gold);}
+/* Result header */
+.res-ticker-lbl{font-size:.67rem;letter-spacing:.13em;}
+.res-name{font-family:var(--sans);font-size:1.45rem;font-weight:600;letter-spacing:-.02em;}
+.price-big{font-size:2.4rem;letter-spacing:-.03em;}
+.price-chg{font-size:.76rem;font-weight:600;padding:3px 10px;border-radius:3px;}
+/* Inputs */
+.ticker-input{border-radius:var(--r2);padding:.62rem .95rem;font-size:.875rem;}
+.ticker-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(184,136,42,.12);}
+.btn-search{border-radius:var(--r2);padding:.62rem 1.4rem;font-size:.82rem;font-weight:600;letter-spacing:.02em;}
+.btn-search:hover{background:#c89630;box-shadow:0 2px 10px rgba(184,136,42,.28);}
+.quick-btn{font-size:.67rem;padding:3px 10px;border-radius:3px;border-color:rgba(255,255,255,.08);}
+/* Panels & buttons */
+.panel-box{border-radius:var(--r2);background:rgba(255,255,255,.032);border-color:rgba(255,255,255,.065);}
+.panel-box-title{font-size:.63rem;letter-spacing:.11em;}
+.btn-run{border-radius:var(--r2);font-size:.84rem;letter-spacing:.02em;}
+.btn-run:hover{background:#c89630;}
+.fc-input,.fc-select{border-radius:var(--r2);font-size:.82rem;}
+.fc-label{font-size:.59rem;letter-spacing:.09em;}
+/* Scenario */
+.sc-card{border-radius:var(--r2);padding:1.1rem;}
+.sc-lbl{font-size:.59rem;letter-spacing:.13em;}
+.sc-price{font-size:1.55rem;letter-spacing:-.02em;}
+.sc-pct{font-size:.74rem;}
+.sc-irr{font-size:.59rem;}
+/* DCF */
+.dcf-row{padding:.5rem 0;}.dcf-lbl{font-size:.77rem;}.dcf-val{font-size:.88rem;}
+/* Tables */
+.fin-table{font-size:.74rem;}
+.fin-table th{font-size:.6rem;letter-spacing:.09em;padding:.33rem .52rem;}
+.fin-table td{padding:.36rem .52rem;}
+.scr-filters{border-radius:var(--r2);padding:1rem;gap:11px;}
+.scr-table th{font-size:.59rem;letter-spacing:.09em;padding:7px 11px;}
+.scr-table td{font-size:.75rem;padding:8px 11px;}
+.scr-ticker{font-size:.81rem;font-weight:600;}
+.scr-name{font-size:.63rem;}
+.cmp-table th{font-size:.59rem;padding:7px 11px;letter-spacing:.09em;}
+.cmp-table td{font-size:.76rem;padding:7px 11px;}
+/* News & misc */
+.news-text{font-size:.76rem;line-height:1.54;color:rgba(220,225,232,.48);}
+.news-time{font-size:.59rem;}
+.news-item{padding:.55rem 0;border-bottom:1px solid rgba(255,255,255,.04);}
+.loading-bar{flex-direction:column;gap:10px;font-size:.7rem;letter-spacing:.06em;color:rgba(220,225,232,.28);font-family:var(--mono);}
+.spinner{width:20px;height:20px;border-width:1.5px;}
+.toast{border-radius:var(--r3)!important;padding:9px 18px!important;font-size:.79rem!important;font-weight:500;box-shadow:0 6px 24px rgba(0,0,0,.25)!important;}
+.toast.ok{background:#0f2a1c!important;border-color:rgba(74,222,128,.18)!important;}
+.toast.red{background:#2a0f0f!important;border-color:rgba(248,113,113,.18)!important;}
+.advm-section{margin-bottom:1.5rem;}
+.advm-section-title{font-size:.62rem;letter-spacing:.14em;margin-bottom:.75rem;}
+.advm-grid{gap:.4rem;}
+.risk-bar{height:3px;}.risk-name{font-size:.74rem;}.risk-val{font-size:.63rem;}
+.tool-disclaimer{font-size:.63rem;color:rgba(220,225,232,.16);}
+/* G2 grid */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.g2>div{min-width:0;}
+/* cmp inputs */
+.cmp-ig{flex:1 1 130px;min-width:0;}
+.cmp-ig .ticker-input{flex:none;width:100%;min-width:0;}
 
-/* ══════════════════════════════════════════════════
-   POLISH — chart containers
-══════════════════════════════════════════════════ */
-.chart-wrap {
-  background:rgba(255,255,255,.025);
-  border:1px solid rgba(255,255,255,.06);
-  border-radius:var(--r2); padding:1rem 1rem .75rem;
-  margin-bottom:1rem;
-}
-.chart-title { font-size:.75rem; font-weight:500; letter-spacing:.03em; }
-
-/* ══════════════════════════════════════════════════
-   POLISH — tool accordion body
-══════════════════════════════════════════════════ */
-.acc-section { border-bottom:1px solid rgba(255,255,255,.06); }
-.acc-header { padding:1.1rem 1.5rem; }
-.acc-title { font-size:.82rem; letter-spacing:.05em; }
-.acc-body { padding:1.5rem 1.75rem 2rem; }
-
-/* ══════════════════════════════════════════════════
-   POLISH — panel box
-══════════════════════════════════════════════════ */
-.panel-box {
-  background:rgba(255,255,255,.04);
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:var(--r2); padding:1.25rem;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
-}
-
-/* ══════════════════════════════════════════════════
-   POLISH — buttons
-══════════════════════════════════════════════════ */
-.btn-search {
-  border-radius:var(--r2); padding:.65rem 1.5rem;
-  letter-spacing:.01em; font-size:.85rem;
-  box-shadow:0 1px 3px rgba(0,0,0,.15);
-}
-.btn-search:hover { background:#d4a93e; box-shadow:0 2px 8px rgba(200,155,60,.3); transform:translateY(-1px); }
-.btn-search:active { transform:translateY(0); box-shadow:none; }
-
-.btn-run { border-radius:var(--r2); letter-spacing:.01em; }
-.btn-run:hover { box-shadow:0 3px 12px rgba(200,155,60,.25); }
-
-.quick-btn { border-radius:var(--r2); font-size:.71rem; padding:4px 11px; }
-
-/* ══════════════════════════════════════════════════
-   POLISH — loading state
-══════════════════════════════════════════════════ */
-.loading-bar {
-  flex-direction:column; gap:12px;
-  color:rgba(247,244,238,.35);
-  font-family:var(--mono); font-size:.75rem; letter-spacing:.04em;
-}
-.spinner {
-  width:22px; height:22px;
-  border:2px solid rgba(200,155,60,.15);
-  border-top-color:var(--gold);
-  border-radius:50%;
-  animation:spin .8s cubic-bezier(.6,0,.4,1) infinite;
-}
-
-/* ══════════════════════════════════════════════════
-   POLISH — result header & price
-══════════════════════════════════════════════════ */
-.res-name { font-size:1.6rem; }
-.price-big { font-size:2.6rem; letter-spacing:-.02em; }
-.price-chg { font-size:.82rem; padding:3px 11px; font-weight:500; }
-
-/* ══════════════════════════════════════════════════
-   POLISH — feature cards (home)
-══════════════════════════════════════════════════ */
-.feat-card {
-  background:var(--card); padding:2rem;
-  transition:background .18s, box-shadow .18s, transform .18s;
-}
-.feat-card:hover {
-  background:#FFFDF5;
-  box-shadow:0 4px 24px rgba(0,0,0,.07);
-  transform:translateY(-2px);
-  position:relative; z-index:1;
-}
-.feat-icon {
-  width:42px; height:42px;
-  border-radius:var(--r2);
-  background:linear-gradient(135deg, var(--gold-l2) 0%, var(--gold-l) 100%);
-  box-shadow:0 1px 4px rgba(200,155,60,.2);
-}
-.feat-card h3 { font-size:1.1rem; margin-bottom:.4rem; }
-.feat-card p { font-size:.85rem; line-height:1.7; }
-
-/* ══════════════════════════════════════════════════
-   POLISH — pricing cards (home)
-══════════════════════════════════════════════════ */
-.pricing-card {
-  border-radius:var(--r3) !important;
-  transition:box-shadow .2s, transform .2s;
-}
-.pricing-card:hover { transform:translateY(-3px); box-shadow:0 12px 40px rgba(0,0,0,.1) !important; }
-
-/* ══════════════════════════════════════════════════
-   POLISH — screener & compare tables
-══════════════════════════════════════════════════ */
-.scr-table tr { transition:background .1s; }
-.scr-table tr:hover td { background:rgba(200,155,60,.05) !important; }
-.scr-table th { font-size:.62rem; letter-spacing:.08em; }
-.scr-table td { font-size:.79rem; }
-.scr-ticker { font-size:.84rem; }
-
-/* ══════════════════════════════════════════════════
-   POLISH — news feed
-══════════════════════════════════════════════════ */
-.news-item {
-  padding:.625rem 0;
-  border-bottom:1px solid rgba(255,255,255,.045);
-  transition:background .12s;
-}
-.news-item:hover { background:rgba(255,255,255,.02); border-radius:4px; }
-.news-text { font-size:.79rem; line-height:1.55; color:rgba(247,244,238,.55); }
-.news-dot { width:6px; height:6px; background:var(--gold); opacity:.6; margin-top:7px; }
-
-/* ══════════════════════════════════════════════════
-   POLISH — earnings section
-══════════════════════════════════════════════════ */
-.earn-card {
-  transition:background .15s !important;
-}
-
-/* ══════════════════════════════════════════════════
-   POLISH — toast notification
-══════════════════════════════════════════════════ */
-.toast {
-  border-radius:var(--r3) !important;
-  padding:10px 20px !important;
-  font-weight:500; letter-spacing:.01em;
-  box-shadow:0 6px 24px rgba(0,0,0,.22) !important;
-}
-.toast.ok { background:#1a3d28 !important; border-color:rgba(74,222,128,.25) !important; }
-.toast.red { background:#3d1a1a !important; border-color:rgba(248,113,113,.25) !important; }
-
-/* ══════════════════════════════════════════════════
-   POLISH — fin table
-══════════════════════════════════════════════════ */
-.fin-table tr { transition:background .1s; }
-.fin-table td:first-child { font-size:.73rem; color:rgba(247,244,238,.45); }
-.fin-row-header td:first-child { color:rgba(200,155,60,.9) !important; }
-
-/* ══════════════════════════════════════════════════
-   POLISH — DCF & projection outputs
-══════════════════════════════════════════════════ */
-.dcf-row { padding:.55rem 0; }
-.dcf-lbl { font-size:.8rem; }
-.dcf-val { font-size:.92rem; }
-.sc-card { border-radius:var(--r3); padding:1.25rem; }
-.sc-price { font-size:1.6rem; }
-
-/* ══════════════════════════════════════════════════
-   POLISH — hero section
-══════════════════════════════════════════════════ */
-.hero-badge {
-  box-shadow:0 2px 12px rgba(200,155,60,.12);
-  transition:box-shadow .2s;
-}
-.h-stat-num { font-size:1.8rem; }
-.btn-primary { border-radius:var(--r2); letter-spacing:.01em; }
-.btn-primary:hover { box-shadow:0 4px 20px rgba(0,0,0,.15); }
-.btn-secondary { border-radius:var(--r2); }
-
-/* ══════════════════════════════════════════════════
-   POLISH — nav tabs active indicator
-══════════════════════════════════════════════════ */
-a.nav-tab.active-tab {
-  color:var(--gold-d) !important; font-weight:600;
-  background:rgba(200,155,60,.1);
-  box-shadow:inset 0 -2px 0 var(--gold-d);
-  border-radius:0;
-}
-a.nav-tab { border-radius:0; transition:color .15s, background .15s, box-shadow .15s; }
-
-/* ══════════════════════════════════════════════════
-   POLISH — tool view background (dark)
-══════════════════════════════════════════════════ */
-#view-tool {
-  background:linear-gradient(180deg, #111214 0%, #0e1012 100%) !important;
-}
-.tool-accordion-wrap { padding:2rem 1.75rem 4rem; }
-
-/* ══════════════════════════════════════════════════
-   POLISH — adv metrics grid
-══════════════════════════════════════════════════ */
-.advm-grid { gap:.5rem; }
-.advm-section { margin-bottom:1.75rem; }
-.advm-section-title { font-size:.67rem; letter-spacing:.12em; margin-bottom:.875rem; }
-
-/* ══════════════════════════════════════════════════
-   POLISH — page section padding
-══════════════════════════════════════════════════ */
-section { padding:5.5rem 2rem; }
 </style>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='16' fill='%23C89B3C'/><circle cx='16' cy='16' r='8' fill='%23F7F4EE'/></svg>">
 </head>
@@ -923,18 +801,18 @@ section { padding:5.5rem 2rem; }
   <a class="nav-logo" href="#"><span class="logo-dot"></span>Implied<em style="font-style:italic;color:var(--gold-d);">Lens</em></a>
   <div class="nav-links" id="nav-links">
     <a href='#' id='nav-home' class="nav-tab active-tab" onclick="navGoTo('home');return false;">Home</a>
-    <a href='#' class="nav-tab" data-tool="analyze"    onclick="navGoTo('analyze');return false;">📊 Analyze</a>
-    <a href='#' class="nav-tab" data-tool="financials" onclick="navGoTo('financials');return false;">💰 Financials</a>
-    <a href='#' class="nav-tab" data-tool="advmetrics" onclick="navGoTo('advmetrics');return false;">📐 Adv. Metrics</a>
-    <a href='#' class="nav-tab" data-tool="earnings"   onclick="navGoTo('earnings');return false;">📣 Earnings</a>
-    <a href='#' class="nav-tab" data-tool="secfilings" onclick="navGoTo('secfilings');return false;">📋 SEC Filings</a>
-    <a href='#' class="nav-tab" data-tool="compare"    onclick="navGoTo('compare');return false;">⚖️ Compare</a>
-    <a href='#' class="nav-tab" data-tool="projection" onclick="navGoTo('projection');return false;">📈 Projection</a>
-    <a href='#' class="nav-tab" data-tool="dcf"        onclick="navGoTo('dcf');return false;">🧮 DCF</a>
-    <a href='#' class="nav-tab" data-tool="screener"   onclick="navGoTo('screener');return false;">🔍 Screener</a>
-    <a href='#' class="nav-tab" data-tool="reports"    onclick="navGoTo('reports');return false;">📄 Reports</a>
-    <a href='#' class="nav-tab" data-tool="education"  onclick="navGoTo('education');return false;">📚 Education</a>
-    <a href='#' class="nav-tab" data-tool="adveducation" onclick="navGoTo('adveducation');return false;">🎓 Adv. Education</a>
+    <a href='#' class="nav-tab" data-tool="analyze"    onclick="navGoTo('analyze');return false;">Analyze</a>
+    <a href='#' class="nav-tab" data-tool="financials" onclick="navGoTo('financials');return false;">Financials</a>
+    <a href='#' class="nav-tab" data-tool="advmetrics" onclick="navGoTo('advmetrics');return false;">Metrics</a>
+    <a href='#' class="nav-tab" data-tool="earnings"   onclick="navGoTo('earnings');return false;">Earnings</a>
+    <a href='#' class="nav-tab" data-tool="secfilings" onclick="navGoTo('secfilings');return false;">SEC Filings</a>
+    <a href='#' class="nav-tab" data-tool="compare"    onclick="navGoTo('compare');return false;">Compare</a>
+    <a href='#' class="nav-tab" data-tool="projection" onclick="navGoTo('projection');return false;">Projection</a>
+    <a href='#' class="nav-tab" data-tool="dcf"        onclick="navGoTo('dcf');return false;">DCF</a>
+    <a href='#' class="nav-tab" data-tool="screener"   onclick="navGoTo('screener');return false;">Screener</a>
+    <a href='#' class="nav-tab" data-tool="reports"    onclick="navGoTo('reports');return false;">Reports</a>
+    <a href='#' class="nav-tab" data-tool="education"  onclick="navGoTo('education');return false;">Education</a>
+    <a href='#' class="nav-tab" data-tool="adveducation" onclick="navGoTo('adveducation');return false;">Adv. Education</a>
   </div>
   <div class="nav-right" id="nav-right">
     <span class="nav-live" title="Real-time market data">Live</span>
@@ -1170,68 +1048,68 @@ section { padding:5.5rem 2rem; }
       <p class="sec-sub">Professional-grade analysis packed into one platform — no spreadsheets, no finance degree required.</p>
       <div class="features-bento">
         <div class="feat-card">
-          <div class="feat-icon" style="font-size:1.15rem;">📡</div>
+          <div class="feat-icon"><span style="font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">LD</span></div>
           <h3>Live Market Data</h3>
           <p>Real-time price, volume, market cap, 52-week range, and exchange data for any publicly traded stock.</p>
         </div>
         <div class="feat-card">
-          <div class="feat-icon" style="font-size:1.15rem;">📈</div>
+          <div class="feat-icon"><span style="font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">CH</span></div>
           <h3>Interactive Charts</h3>
           <p>Price with MA/Bollinger overlays, RSI, MACD, volume, daily returns, and performance comparison charts.</p>
         </div>
         <div class="feat-card">
-          <div class="feat-icon" style="font-size:1.15rem;">💰</div>
+          <div class="feat-icon"><span style="font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">FS</span></div>
           <h3>Financial Statements</h3>
           <p>Annual income statement, balance sheet, and cash flow for the last 4 years — pulled direct from filings.</p>
           <div class="feat-pro">PRO</div>
         </div>
         <div class="feat-card">
-          <div class="feat-icon" style="font-size:1.15rem;">📐</div>
+          <div class="feat-icon"><span style="font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">AM</span></div>
           <h3>Advanced Metrics</h3>
           <p>EV/EBITDA, ROIC, gross margin, FCF yield, debt ratios, and 20+ deep fundamental metrics by category.</p>
           <div class="feat-pro">PRO</div>
         </div>
         <div class="feat-card">
-          <div class="feat-icon" style="font-size:1.15rem;">📣</div>
+          <div class="feat-icon"><span style="font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">EH</span></div>
           <h3>Earnings History</h3>
           <p>EPS estimate vs. actual for the last 12 quarters with beat/miss badges and a beat-rate summary.</p>
         </div>
         <div class="feat-card">
-          <div class="feat-icon" style="font-size:1.15rem;">📋</div>
+          <div class="feat-icon"><span style="font-family:var(--mono);font-size:.52rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">SEC</span></div>
           <h3>SEC Filings</h3>
           <p>One-click access to 10-K, 10-Q, 8-K, and full EDGAR filing history for any ticker.</p>
         </div>
         <div class="feat-card">
-          <div class="feat-icon" style="font-size:1.15rem;">⚖️</div>
+          <div class="feat-icon"><span style="font-family:var(--mono);font-size:.52rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">CMP</span></div>
           <h3>Side-by-Side Comparison</h3>
           <p>Compare up to 4 tickers on key metrics with best/worst highlighting, performance chart, and fundamental radar.</p>
           <div class="feat-pro">PRO</div>
         </div>
         <div class="feat-card">
-          <div class="feat-icon" style="font-size:1.15rem;">🎯</div>
+          <div class="feat-icon"><span style="font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">PR</span></div>
           <h3>3-Scenario Projection</h3>
           <p>Model bear, base, and bull cases with custom growth rates, margin assumptions, exit P/E, and CAGR.</p>
           <div class="feat-pro">PRO</div>
         </div>
         <div class="feat-card">
-          <div class="feat-icon" style="font-size:1.15rem;">🧮</div>
+          <div class="feat-icon"><span style="font-family:var(--mono);font-size:.52rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">DCF</span></div>
           <h3>DCF Valuation</h3>
           <p>Two-stage discounted cash flow model with custom WACC, terminal growth, and margin of safety output.</p>
           <div class="feat-pro">PRO</div>
         </div>
         <div class="feat-card">
-          <div class="feat-icon" style="font-size:1.15rem;">🔍</div>
+          <div class="feat-icon"><span style="font-family:var(--mono);font-size:.52rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">SCR</span></div>
           <h3>Stock Screener</h3>
           <p>Filter 50,000+ stocks by P/E, P/B, dividend yield, market cap, sector, RSI, and 1-year return.</p>
           <div class="feat-pro">PRO</div>
         </div>
         <div class="feat-card">
-          <div class="feat-icon" style="font-size:1.15rem;">📚</div>
+          <div class="feat-icon"><span style="font-family:var(--mono);font-size:.52rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">EDU</span></div>
           <h3>Education Center</h3>
           <p>From P/E ratios to DCF valuation — bite-sized explanations of every metric and concept in the platform.</p>
         </div>
         <div class="feat-card">
-          <div class="feat-icon" style="font-size:1.15rem;">📄</div>
+          <div class="feat-icon"><span style="font-family:var(--mono);font-size:.52rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">PDF</span></div>
           <h3>PDF Report Export</h3>
           <p>Generate clean, professional PDF analysis reports ready to print or share with your team.</p>
           <div class="feat-pro">PRO</div>
@@ -1331,7 +1209,7 @@ section { padding:5.5rem 2rem; }
 
           <div class="acc-section open" id="sec-analyze">
             <div class="acc-header" onclick="toggleSection('analyze')">
-              <span class="acc-title">📊 Analyze</span>
+              <span class="acc-title">Analyze</span>
               <span class="acc-chevron">›</span>
             </div>
             <div class="acc-body" id="body-analyze" >
@@ -1476,7 +1354,7 @@ section { padding:5.5rem 2rem; }
 
           <div class="acc-section" id="sec-financials">
             <div class="acc-header" onclick="toggleSection('financials')">
-              <span class="acc-title">💰 Financials <span class="acc-pro-badge">PRO</span></span>
+              <span class="acc-title">Financials <span class="acc-pro-badge">PRO</span></span>
               <span class="acc-chevron">›</span>
             </div>
             <div class="acc-body" id="body-financials" style="display:none;">
@@ -1501,7 +1379,7 @@ section { padding:5.5rem 2rem; }
 
           <div class="acc-section" id="sec-advmetrics">
             <div class="acc-header" onclick="toggleSection('advmetrics')">
-              <span class="acc-title">📐 Adv. Metrics <span class="acc-pro-badge">PRO</span></span>
+              <span class="acc-title">Metrics <span class="acc-pro-badge">PRO</span></span>
               <span class="acc-chevron">›</span>
             </div>
             <div class="acc-body" id="body-advmetrics" style="display:none;">
@@ -1517,7 +1395,7 @@ section { padding:5.5rem 2rem; }
 
           <div class="acc-section" id="sec-earnings">
             <div class="acc-header" onclick="toggleSection('earnings')">
-              <span class="acc-title">📣 Earnings</span>
+              <span class="acc-title">Earnings</span>
               <span class="acc-chevron">›</span>
             </div>
             <div class="acc-body" id="body-earnings" style="display:none;">
@@ -1533,7 +1411,7 @@ section { padding:5.5rem 2rem; }
 
           <div class="acc-section" id="sec-secfilings">
             <div class="acc-header" onclick="toggleSection('secfilings')">
-              <span class="acc-title">📋 SEC Filings</span>
+              <span class="acc-title">SEC Filings</span>
               <span class="acc-chevron">›</span>
             </div>
             <div class="acc-body" id="body-secfilings" style="display:none;">
@@ -1571,7 +1449,7 @@ section { padding:5.5rem 2rem; }
 
           <div class="acc-section" id="sec-compare">
             <div class="acc-header" onclick="toggleSection('compare')">
-              <span class="acc-title">⚖️ Compare <span class="acc-pro-badge">PRO</span></span>
+              <span class="acc-title">Compare <span class="acc-pro-badge">PRO</span></span>
               <span class="acc-chevron">›</span>
             </div>
             <div class="acc-body" id="body-compare" style="display:none;">
@@ -1600,7 +1478,7 @@ section { padding:5.5rem 2rem; }
 
           <div class="acc-section" id="sec-projection">
             <div class="acc-header" onclick="toggleSection('projection')">
-              <span class="acc-title">📈 Projection <span class="acc-pro-badge">PRO</span></span>
+              <span class="acc-title">Projection <span class="acc-pro-badge">PRO</span></span>
               <span class="acc-chevron">›</span>
             </div>
             <div class="acc-body" id="body-projection" style="display:none;">
@@ -1632,7 +1510,7 @@ section { padding:5.5rem 2rem; }
 
           <div class="acc-section" id="sec-dcf">
             <div class="acc-header" onclick="toggleSection('dcf')">
-              <span class="acc-title">🧮 DCF <span class="acc-pro-badge">PRO</span></span>
+              <span class="acc-title">DCF <span class="acc-pro-badge">PRO</span></span>
               <span class="acc-chevron">›</span>
             </div>
             <div class="acc-body" id="body-dcf" style="display:none;">
@@ -1656,7 +1534,7 @@ section { padding:5.5rem 2rem; }
 
           <div class="acc-section" id="sec-screener">
             <div class="acc-header" onclick="toggleSection('screener')">
-              <span class="acc-title">🔍 Screener <span class="acc-pro-badge">PRO</span></span>
+              <span class="acc-title">Screener <span class="acc-pro-badge">PRO</span></span>
               <span class="acc-chevron">›</span>
             </div>
             <div class="acc-body" id="body-screener" style="display:none;">
@@ -1693,14 +1571,14 @@ section { padding:5.5rem 2rem; }
 
           <div class="acc-section" id="sec-reports">
             <div class="acc-header" onclick="toggleSection('reports')">
-              <span class="acc-title">📄 Reports <span class="acc-pro-badge">PRO</span></span>
+              <span class="acc-title">Reports <span class="acc-pro-badge">PRO</span></span>
               <span class="acc-chevron">›</span>
             </div>
             <div class="acc-body" id="body-reports" style="display:none;">
 <div style="padding:1.25rem 0;">
               <div style="font-size:.82rem;color:rgba(247,244,238,.5);margin-bottom:1.25rem;">Generate a print-ready PDF of your current stock analysis — including all charts, metrics, and projections.</div>
               <div id="report-no-stock" style="display:none;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:var(--r2);padding:1.5rem;text-align:center;color:rgba(247,244,238,.4);font-size:.85rem;">
-                Load a stock from the <strong style="color:var(--gold);">📊 Analyze</strong> tab first, then come back here to export your report.
+                Load a stock from the <strong style="color:var(--gold);">Analyze</strong> tab first, then come back here to export your report.
               </div>
               <div id="report-ready" style="display:none;">
                 <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:var(--r2);padding:1.25rem;margin-bottom:1rem;">
@@ -1720,7 +1598,7 @@ section { padding:5.5rem 2rem; }
 
           <div class="acc-section" id="sec-education">
             <div class="acc-header" onclick="toggleSection('education')">
-              <span class="acc-title">📚 Education</span>
+              <span class="acc-title">Education</span>
               <span class="acc-chevron">›</span>
             </div>
             <div class="acc-body" id="body-education" style="display:none;">
@@ -1773,7 +1651,7 @@ section { padding:5.5rem 2rem; }
 
           <div class="acc-section" id="sec-adveducation">
             <div class="acc-header" onclick="toggleSection('adveducation')">
-              <span class="acc-title">🎓 Adv. Education <span class="acc-pro-badge">PRO</span></span>
+              <span class="acc-title">Adv. Education <span class="acc-pro-badge">PRO</span></span>
               <span class="acc-chevron">›</span>
             </div>
             <div class="acc-body" id="body-adveducation" style="display:none;">
