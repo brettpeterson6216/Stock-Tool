@@ -2526,7 +2526,7 @@ function applyScreener() {
   });
   renderScreenerTable(filtered);
 }
-function loadFromScreener(el){var t=el.getAttribute('data-ticker');if(t){quickLoad(t);document.querySelector('[data-tab=analyze]').click();}}
+function loadFromScreener(el){var t=el.getAttribute('data-ticker');if(t){quickLoad(t);navGoTo('analyze');}}
 function sortScreener(col) {
   if(S.screenerSort.col===col) S.screenerSort.dir*=-1;
   else { S.screenerSort.col=col; S.screenerSort.dir=-1; }
