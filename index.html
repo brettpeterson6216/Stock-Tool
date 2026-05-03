@@ -684,6 +684,235 @@ footer { background:#080808; padding:3rem 2rem; }
   .hero-stat:last-child { border-bottom:none; }
   .cmp-inputs { flex-direction:column; }
 }
+
+/* ══════════════════════════════════════════════════
+   POLISH — light-context inputs (modal, forms on cream bg)
+══════════════════════════════════════════════════ */
+.input-light {
+  width:100%; background:#fff;
+  border:1.5px solid var(--border3);
+  border-radius:var(--r2); padding:.6rem .9rem;
+  font-family:var(--sans); font-size:.875rem;
+  color:var(--ink); outline:none;
+  transition:border-color .18s, box-shadow .18s;
+}
+.input-light::placeholder { color:var(--ink5); }
+.input-light:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(200,155,60,.12); }
+
+/* ══════════════════════════════════════════════════
+   POLISH — metric cards
+══════════════════════════════════════════════════ */
+.metric-card {
+  background:rgba(255,255,255,.055);
+  border:1px solid rgba(255,255,255,.09);
+  border-top:2px solid rgba(200,155,60,.22);
+  border-radius:var(--r2); padding:14px 16px;
+  transition:background .15s, border-top-color .15s;
+}
+.metric-card:hover {
+  background:rgba(255,255,255,.085);
+  border-top-color:rgba(200,155,60,.45);
+}
+.m-lbl { font-size:.61rem; letter-spacing:.08em; margin-bottom:6px; }
+.m-val { font-size:1.05rem; }
+
+/* ══════════════════════════════════════════════════
+   POLISH — chart containers
+══════════════════════════════════════════════════ */
+.chart-wrap {
+  background:rgba(255,255,255,.025);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:var(--r2); padding:1rem 1rem .75rem;
+  margin-bottom:1rem;
+}
+.chart-title { font-size:.75rem; font-weight:500; letter-spacing:.03em; }
+
+/* ══════════════════════════════════════════════════
+   POLISH — tool accordion body
+══════════════════════════════════════════════════ */
+.acc-section { border-bottom:1px solid rgba(255,255,255,.06); }
+.acc-header { padding:1.1rem 1.5rem; }
+.acc-title { font-size:.82rem; letter-spacing:.05em; }
+.acc-body { padding:1.5rem 1.75rem 2rem; }
+
+/* ══════════════════════════════════════════════════
+   POLISH — panel box
+══════════════════════════════════════════════════ */
+.panel-box {
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:var(--r2); padding:1.25rem;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+}
+
+/* ══════════════════════════════════════════════════
+   POLISH — buttons
+══════════════════════════════════════════════════ */
+.btn-search {
+  border-radius:var(--r2); padding:.65rem 1.5rem;
+  letter-spacing:.01em; font-size:.85rem;
+  box-shadow:0 1px 3px rgba(0,0,0,.15);
+}
+.btn-search:hover { background:#d4a93e; box-shadow:0 2px 8px rgba(200,155,60,.3); transform:translateY(-1px); }
+.btn-search:active { transform:translateY(0); box-shadow:none; }
+
+.btn-run { border-radius:var(--r2); letter-spacing:.01em; }
+.btn-run:hover { box-shadow:0 3px 12px rgba(200,155,60,.25); }
+
+.quick-btn { border-radius:var(--r2); font-size:.71rem; padding:4px 11px; }
+
+/* ══════════════════════════════════════════════════
+   POLISH — loading state
+══════════════════════════════════════════════════ */
+.loading-bar {
+  flex-direction:column; gap:12px;
+  color:rgba(247,244,238,.35);
+  font-family:var(--mono); font-size:.75rem; letter-spacing:.04em;
+}
+.spinner {
+  width:22px; height:22px;
+  border:2px solid rgba(200,155,60,.15);
+  border-top-color:var(--gold);
+  border-radius:50%;
+  animation:spin .8s cubic-bezier(.6,0,.4,1) infinite;
+}
+
+/* ══════════════════════════════════════════════════
+   POLISH — result header & price
+══════════════════════════════════════════════════ */
+.res-name { font-size:1.6rem; }
+.price-big { font-size:2.6rem; letter-spacing:-.02em; }
+.price-chg { font-size:.82rem; padding:3px 11px; font-weight:500; }
+
+/* ══════════════════════════════════════════════════
+   POLISH — feature cards (home)
+══════════════════════════════════════════════════ */
+.feat-card {
+  background:var(--card); padding:2rem;
+  transition:background .18s, box-shadow .18s, transform .18s;
+}
+.feat-card:hover {
+  background:#FFFDF5;
+  box-shadow:0 4px 24px rgba(0,0,0,.07);
+  transform:translateY(-2px);
+  position:relative; z-index:1;
+}
+.feat-icon {
+  width:42px; height:42px;
+  border-radius:var(--r2);
+  background:linear-gradient(135deg, var(--gold-l2) 0%, var(--gold-l) 100%);
+  box-shadow:0 1px 4px rgba(200,155,60,.2);
+}
+.feat-card h3 { font-size:1.1rem; margin-bottom:.4rem; }
+.feat-card p { font-size:.85rem; line-height:1.7; }
+
+/* ══════════════════════════════════════════════════
+   POLISH — pricing cards (home)
+══════════════════════════════════════════════════ */
+.pricing-card {
+  border-radius:var(--r3) !important;
+  transition:box-shadow .2s, transform .2s;
+}
+.pricing-card:hover { transform:translateY(-3px); box-shadow:0 12px 40px rgba(0,0,0,.1) !important; }
+
+/* ══════════════════════════════════════════════════
+   POLISH — screener & compare tables
+══════════════════════════════════════════════════ */
+.scr-table tr { transition:background .1s; }
+.scr-table tr:hover td { background:rgba(200,155,60,.05) !important; }
+.scr-table th { font-size:.62rem; letter-spacing:.08em; }
+.scr-table td { font-size:.79rem; }
+.scr-ticker { font-size:.84rem; }
+
+/* ══════════════════════════════════════════════════
+   POLISH — news feed
+══════════════════════════════════════════════════ */
+.news-item {
+  padding:.625rem 0;
+  border-bottom:1px solid rgba(255,255,255,.045);
+  transition:background .12s;
+}
+.news-item:hover { background:rgba(255,255,255,.02); border-radius:4px; }
+.news-text { font-size:.79rem; line-height:1.55; color:rgba(247,244,238,.55); }
+.news-dot { width:6px; height:6px; background:var(--gold); opacity:.6; margin-top:7px; }
+
+/* ══════════════════════════════════════════════════
+   POLISH — earnings section
+══════════════════════════════════════════════════ */
+.earn-card {
+  transition:background .15s !important;
+}
+
+/* ══════════════════════════════════════════════════
+   POLISH — toast notification
+══════════════════════════════════════════════════ */
+.toast {
+  border-radius:var(--r3) !important;
+  padding:10px 20px !important;
+  font-weight:500; letter-spacing:.01em;
+  box-shadow:0 6px 24px rgba(0,0,0,.22) !important;
+}
+.toast.ok { background:#1a3d28 !important; border-color:rgba(74,222,128,.25) !important; }
+.toast.red { background:#3d1a1a !important; border-color:rgba(248,113,113,.25) !important; }
+
+/* ══════════════════════════════════════════════════
+   POLISH — fin table
+══════════════════════════════════════════════════ */
+.fin-table tr { transition:background .1s; }
+.fin-table td:first-child { font-size:.73rem; color:rgba(247,244,238,.45); }
+.fin-row-header td:first-child { color:rgba(200,155,60,.9) !important; }
+
+/* ══════════════════════════════════════════════════
+   POLISH — DCF & projection outputs
+══════════════════════════════════════════════════ */
+.dcf-row { padding:.55rem 0; }
+.dcf-lbl { font-size:.8rem; }
+.dcf-val { font-size:.92rem; }
+.sc-card { border-radius:var(--r3); padding:1.25rem; }
+.sc-price { font-size:1.6rem; }
+
+/* ══════════════════════════════════════════════════
+   POLISH — hero section
+══════════════════════════════════════════════════ */
+.hero-badge {
+  box-shadow:0 2px 12px rgba(200,155,60,.12);
+  transition:box-shadow .2s;
+}
+.h-stat-num { font-size:1.8rem; }
+.btn-primary { border-radius:var(--r2); letter-spacing:.01em; }
+.btn-primary:hover { box-shadow:0 4px 20px rgba(0,0,0,.15); }
+.btn-secondary { border-radius:var(--r2); }
+
+/* ══════════════════════════════════════════════════
+   POLISH — nav tabs active indicator
+══════════════════════════════════════════════════ */
+a.nav-tab.active-tab {
+  color:var(--gold-d) !important; font-weight:600;
+  background:rgba(200,155,60,.1);
+  box-shadow:inset 0 -2px 0 var(--gold-d);
+  border-radius:0;
+}
+a.nav-tab { border-radius:0; transition:color .15s, background .15s, box-shadow .15s; }
+
+/* ══════════════════════════════════════════════════
+   POLISH — tool view background (dark)
+══════════════════════════════════════════════════ */
+#view-tool {
+  background:linear-gradient(180deg, #111214 0%, #0e1012 100%) !important;
+}
+.tool-accordion-wrap { padding:2rem 1.75rem 4rem; }
+
+/* ══════════════════════════════════════════════════
+   POLISH — adv metrics grid
+══════════════════════════════════════════════════ */
+.advm-grid { gap:.5rem; }
+.advm-section { margin-bottom:1.75rem; }
+.advm-section-title { font-size:.67rem; letter-spacing:.12em; margin-bottom:.875rem; }
+
+/* ══════════════════════════════════════════════════
+   POLISH — page section padding
+══════════════════════════════════════════════════ */
+section { padding:5.5rem 2rem; }
 </style>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='16' fill='%23C89B3C'/><circle cx='16' cy='16' r='8' fill='%23F7F4EE'/></svg>">
 </head>
@@ -1672,11 +1901,11 @@ footer { background:#080808; padding:3rem 2rem; }
     <!-- Change password -->
     <div style="font-size:.78rem;font-weight:600;color:var(--ink);margin-bottom:.75rem;">Change Password</div>
     <div style="display:flex;flex-direction:column;gap:.6rem;">
-      <input type="password" id="am-cur-pw" placeholder="Current password" class="ticker-input" style="font-family:var(--sans);text-transform:none;font-size:.875rem;padding:.55rem .85rem;">
-      <input type="password" id="am-new-pw" placeholder="New password (min 8 characters)" class="ticker-input" style="font-family:var(--sans);text-transform:none;font-size:.875rem;padding:.55rem .85rem;">
-      <input type="password" id="am-confirm-pw" placeholder="Confirm new password" class="ticker-input" style="font-family:var(--sans);text-transform:none;font-size:.875rem;padding:.55rem .85rem;">
+      <input type="password" id="am-cur-pw" placeholder="Current password" class="input-light">
+      <input type="password" id="am-new-pw" placeholder="New password (min 8 characters)" class="input-light">
+      <input type="password" id="am-confirm-pw" placeholder="Confirm new password" class="input-light">
       <div id="am-pw-msg" style="font-size:.78rem;min-height:1rem;"></div>
-      <button class="btn-search" onclick="submitPasswordChange()" style="align-self:flex-start;padding:.5rem 1.25rem;font-size:.82rem;">Update Password</button>
+      <button onclick="submitPasswordChange()" style="align-self:flex-start;background:var(--ink);color:var(--cream);border:none;padding:.55rem 1.25rem;border-radius:var(--r2);font-size:.82rem;font-weight:500;cursor:pointer;transition:background .15s;letter-spacing:.01em;" onmouseover="this.style.background='var(--ink2)'" onmouseout="this.style.background='var(--ink)'">Update Password</button>
     </div>
   </div>
 </div>
