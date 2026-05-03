@@ -1630,6 +1630,57 @@ footer { background:#080808; padding:3rem 2rem; }
   </div>
 </div>
 
+<!-- Account Settings modal -->
+<div class="modal-bg" id="acct-modal-bg" onclick="if(event.target===this)closeAccountModal()">
+  <div class="modal" style="max-width:500px;">
+    <button class="modal-close" onclick="closeAccountModal()">✕</button>
+    <div style="font-family:var(--mono);font-size:.68rem;color:var(--gold-d);text-transform:uppercase;letter-spacing:.14em;margin-bottom:.4rem;">Account</div>
+    <h3 style="margin-bottom:1.5rem;">Account Settings</h3>
+
+    <!-- User info -->
+    <div style="background:var(--cream2);border:1px solid var(--border2);border-radius:var(--r2);padding:1rem 1.25rem;margin-bottom:1.5rem;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
+        <div>
+          <div style="font-size:.65rem;font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);margin-bottom:.25rem;">Username</div>
+          <div style="font-size:.9rem;font-weight:600;color:var(--ink);" id="am-username">—</div>
+        </div>
+        <div>
+          <div style="font-size:.65rem;font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);margin-bottom:.25rem;">Email</div>
+          <div style="font-size:.9rem;color:var(--ink2);word-break:break-all;" id="am-email">—</div>
+        </div>
+        <div>
+          <div style="font-size:.65rem;font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);margin-bottom:.25rem;">Plan</div>
+          <div style="font-size:.9rem;font-weight:600;" id="am-plan">—</div>
+        </div>
+        <div>
+          <div style="font-size:.65rem;font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);margin-bottom:.25rem;">Member Since</div>
+          <div style="font-size:.9rem;color:var(--ink2);" id="am-since">—</div>
+        </div>
+      </div>
+      <div id="am-trial-row" style="display:none;margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--border2);">
+        <div style="font-size:.65rem;font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);margin-bottom:.25rem;">Trial Status</div>
+        <div style="font-size:.85rem;" id="am-trial-info"></div>
+      </div>
+    </div>
+
+    <!-- Subscription button -->
+    <a href="/api/stripe/portal" style="display:block;text-align:center;background:var(--ink);color:var(--cream);padding:.6rem 1rem;border-radius:var(--r);font-size:.85rem;font-weight:500;text-decoration:none;margin-bottom:1.5rem;transition:background .15s;" onmouseover="this.style.background='var(--ink2)'" onmouseout="this.style.background='var(--ink)'" id="am-sub-btn">💳 Manage Subscription</a>
+
+    <!-- Divider -->
+    <div style="border-top:1px solid var(--border2);margin-bottom:1.25rem;"></div>
+
+    <!-- Change password -->
+    <div style="font-size:.78rem;font-weight:600;color:var(--ink);margin-bottom:.75rem;">Change Password</div>
+    <div style="display:flex;flex-direction:column;gap:.6rem;">
+      <input type="password" id="am-cur-pw" placeholder="Current password" class="ticker-input" style="font-family:var(--sans);text-transform:none;font-size:.875rem;padding:.55rem .85rem;">
+      <input type="password" id="am-new-pw" placeholder="New password (min 8 characters)" class="ticker-input" style="font-family:var(--sans);text-transform:none;font-size:.875rem;padding:.55rem .85rem;">
+      <input type="password" id="am-confirm-pw" placeholder="Confirm new password" class="ticker-input" style="font-family:var(--sans);text-transform:none;font-size:.875rem;padding:.55rem .85rem;">
+      <div id="am-pw-msg" style="font-size:.78rem;min-height:1rem;"></div>
+      <button class="btn-search" onclick="submitPasswordChange()" style="align-self:flex-start;padding:.5rem 1.25rem;font-size:.82rem;">Update Password</button>
+    </div>
+  </div>
+</div>
+
 <!-- Upgrade modal -->
 <div class="modal-bg" id="upgrade-modal-bg" onclick="if(event.target===this)closeUpgradeModal()">
   <div class="modal" style="max-width:480px;">
@@ -1941,6 +1992,85 @@ function checkReportReady() {
 
 function showUpgradeModal() { document.getElementById('upgrade-modal-bg').classList.add('show'); }
 function closeUpgradeModal() { document.getElementById('upgrade-modal-bg').classList.remove('show'); }
+
+/* ── Account Settings modal ── */
+async function openAccountModal() {
+  document.getElementById('acct-modal-bg').classList.add('show');
+  // Reset password fields & message
+  ['am-cur-pw','am-new-pw','am-confirm-pw'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+  const msg = document.getElementById('am-pw-msg'); if(msg) msg.textContent='';
+
+  try {
+    const r = await fetch('/api/auth/me', { credentials:'same-origin' });
+    const { user } = await r.json();
+    if (!user) return;
+
+    document.getElementById('am-username').textContent = user.username || '—';
+    document.getElementById('am-email').textContent    = user.email    || '—';
+
+    const since = user.created_at
+      ? new Date(typeof user.created_at === 'number' ? user.created_at : user.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})
+      : '—';
+    document.getElementById('am-since').textContent = since;
+
+    const planEl = document.getElementById('am-plan');
+    if (user.effectivePlan === 'pro') {
+      planEl.innerHTML = '<span style="color:var(--gold-d);">✦ Pro</span>';
+    } else if (user.effectivePlan === 'trial') {
+      planEl.innerHTML = '<span style="color:var(--gold-d);">Trial</span>';
+      const trialRow = document.getElementById('am-trial-row');
+      const trialInfo = document.getElementById('am-trial-info');
+      if (trialRow && user.trial_ends_at) {
+        const end = new Date(user.trial_ends_at);
+        const days = Math.max(0, Math.ceil((end - Date.now()) / 86400000));
+        const expiry = end.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+        trialInfo.innerHTML = days > 0
+          ? `<span style="color:${days<=3?'#e67e22':'var(--ink2)'};">${days} day${days!==1?'s':''} remaining — expires <strong>${expiry}</strong></span>`
+          : `<span style="color:#c0392b;">Trial expired on ${expiry}</span>`;
+        trialRow.style.display = 'block';
+      }
+      // Hide manage subscription for free trial (no Stripe customer yet usually)
+      const subBtn = document.getElementById('am-sub-btn');
+      if (subBtn && !user.stripe_customer_id) subBtn.style.display = 'none';
+    } else {
+      planEl.textContent = 'Free';
+      // Swap button to upgrade CTA
+      const subBtn = document.getElementById('am-sub-btn');
+      if (subBtn) { subBtn.textContent = '⭐ Upgrade to Pro'; subBtn.href='#'; subBtn.onclick=function(e){e.preventDefault();closeAccountModal();showUpgradeModal();}; }
+    }
+  } catch(_) {}
+}
+
+function closeAccountModal() {
+  document.getElementById('acct-modal-bg').classList.remove('show');
+}
+
+async function submitPasswordChange() {
+  const cur  = document.getElementById('am-cur-pw').value.trim();
+  const nw   = document.getElementById('am-new-pw').value;
+  const conf = document.getElementById('am-confirm-pw').value;
+  const msg  = document.getElementById('am-pw-msg');
+
+  if (!cur || !nw || !conf) { msg.style.color='#c0392b'; msg.textContent='Please fill in all fields.'; return; }
+  if (nw.length < 8)         { msg.style.color='#c0392b'; msg.textContent='New password must be at least 8 characters.'; return; }
+  if (nw !== conf)           { msg.style.color='#c0392b'; msg.textContent='New passwords do not match.'; return; }
+
+  msg.style.color='var(--ink3)'; msg.textContent='Updating…';
+  try {
+    const r = await fetch('/api/auth/change-password', {
+      method:'POST', credentials:'same-origin',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ currentPassword:cur, newPassword:nw }),
+    });
+    const data = await r.json();
+    if (data.ok) {
+      msg.style.color='#27ae60'; msg.textContent='Password updated successfully.';
+      ['am-cur-pw','am-new-pw','am-confirm-pw'].forEach(id => { document.getElementById(id).value=''; });
+    } else {
+      msg.style.color='#c0392b'; msg.textContent = data.error || 'Update failed.';
+    }
+  } catch(_) { msg.style.color='#c0392b'; msg.textContent='Network error. Please try again.'; }
+}
 
 async function startTrial(annual) {
   try {

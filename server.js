@@ -670,43 +670,19 @@ app.get('/api/metrics/:ticker', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch metrics.' });
   }
 });
-
 // ============================================================
-//  Pages
+//  Static pages
 // ============================================================
-function requireAuth(req, res, next) {
-  if (!req.session.userId) return res.redirect("/login");
-  next();
-}
-
 app.get(["/login", "/login.html"], (req, res) =>
-  res.sendFile(path.join(__dirname, "public", "login.html"))
+  res.sendFile(path.join(__dirname, "login.html"))
 );
-app.get(["/signup", "/signup.html", "/register"], (req, res) =>
-  res.sendFile(path.join(__dirname, "public", "signup.html"))
+app.get(["/signup", "/signup.html"], (req, res) =>
+  res.sendFile(path.join(__dirname, "signup.html"))
 );
-app.get(["/reset-password", "/reset-password.html"], (req, res) =>
-  res.sendFile(path.join(__dirname, "public", "reset-password.html"))
-);
-
-app.get("/", requireAuth, (req, res) =>
-  res.sendFile(path.join(__dirname, "index.html"))
-);
-app.get("/index.html", requireAuth, (req, res) =>
+app.get("*", (req, res) =>
   res.sendFile(path.join(__dirname, "index.html"))
 );
 
-app.use("/public", express.static(path.join(__dirname, "public")));
-app.use(express.static(path.join(__dirname), { index: false }));
-
-app.use((req, res) => res.status(404).send("Not found"));
-
-// ---- Start ----
 initDb().then(() => {
-  app.listen(PORT, () => {
-    console.log("Implied Lens running at http://localhost:" + PORT);
-  });
-}).catch(err => {
-  console.error("Failed to initialise database:", err);
-  process.exit(1);
-});
+  app.listen(PORT, () => console.log(`Implied Lens running on port ${PORT}`));
+}).catch(err => { console.error("DB init failed:", err); process.exit(1); });
