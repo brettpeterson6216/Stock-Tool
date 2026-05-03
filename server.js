@@ -488,6 +488,32 @@ api.post('/auth/reset-password', async (req, res) => {
 });
 
 // ============================================================
+//  Change password (logged-in user)
+// ============================================================
+api.post('/auth/change-password', async (req, res) => {
+  if (!req.session.userId) return res.status(401).json({ error: 'Not logged in.' });
+  const { currentPassword, newPassword } = req.body;
+  if (!currentPassword || !newPassword || newPassword.length < 8)
+    return res.status(400).json({ error: 'New password must be at least 8 characters.' });
+  try {
+    const r = await db.execute({
+      sql: 'SELECT password_hash FROM users WHERE id = ?',
+      args: [req.session.userId],
+    });
+    const user = r.rows[0];
+    if (!user) return res.status(404).json({ error: 'User not found.' });
+    const match = await bcrypt.compare(currentPassword, user.password_hash);
+    if (!match) return res.status(400).json({ error: 'Current password is incorrect.' });
+    const hash = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
+    await db.execute({ sql: 'UPDATE users SET password_hash = ? WHERE id = ?', args: [hash, req.session.userId] });
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error('change-password error:', err);
+    return res.status(500).json({ error: 'Something went wrong.' });
+  }
+});
+
+// ============================================================
 //  Stripe billing portal
 // ============================================================
 app.get('/api/stripe/portal', async (req, res) => {

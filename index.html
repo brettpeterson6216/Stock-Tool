@@ -724,8 +724,8 @@ footer { background:#080808; padding:3rem 2rem; }
           <div class="nav-acct-header-name" id="nav-acct-header-name"></div>
           <div class="nav-acct-header-plan" id="nav-acct-header-plan"></div>
         </div>
-        <a href="/account" class="nav-acct-item">⚙️ Account Settings</a>
-        <a href="/account/subscription" class="nav-acct-item">💳 Subscription</a>
+        <a href="#" class="nav-acct-item" onclick="openAccountModal();document.getElementById('nav-acct-wrap').classList.remove('open');return false;">⚙️ Account Settings</a>
+        <a href="/api/stripe/portal" class="nav-acct-item">💳 Subscription</a>
         <div class="nav-acct-divider"></div>
         <a href="#" class="nav-acct-item danger" id="nav-acct-logout">↩ Log out</a>
       </div>
