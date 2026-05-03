@@ -2107,6 +2107,116 @@ a.nav-tab.active-tab { color:var(--gold-d) !important; font-weight:600; backgrou
 .theme-toggle-thumb{width:13px;height:13px;border-radius:50%;background:var(--ink4);position:absolute;top:1px;left:1px;transition:left .2s,background .2s;}
 html[data-theme="dark"] .theme-toggle-track{background:rgba(184,136,42,.3);border-color:rgba(184,136,42,.4);}
 html[data-theme="dark"] .theme-toggle-thumb{left:16px;background:var(--gold);}
+
+/* ══════════════════════════════════════════════════════════
+   TOOL THEME FIX — all tool components use CSS variables
+   so they work correctly in both light and dark mode
+══════════════════════════════════════════════════════════ */
+
+/* ── Result header ── */
+#view-tool .res-name { color:var(--ink)!important; }
+#view-tool .res-exchange { color:var(--ink4)!important; }
+#view-tool .price-big { color:var(--ink)!important; }
+#view-tool .price-time { color:var(--ink5)!important; }
+
+/* ── Metric cards ── */
+#view-tool .m-lbl { color:var(--t-mlbl)!important; }
+#view-tool .m-val { color:var(--ink)!important; }
+#view-tool .m-sub { color:var(--t-msub)!important; }
+
+/* ── Form labels & inputs ── */
+#view-tool .fc-label { color:var(--t-mlbl)!important; }
+#view-tool .fc-input,
+#view-tool .fc-select {
+  background:var(--t-ticker-bg)!important;
+  border-color:var(--t-ticker-border)!important;
+  color:var(--t-ticker-color)!important;
+}
+#view-tool .fc-select option { background:var(--card); color:var(--ink); }
+#view-tool .panel-box-title { color:var(--ink4)!important; }
+#view-tool .panel-box {
+  background:var(--t-panel-bg)!important;
+  border-color:var(--t-panel-border)!important;
+}
+
+/* ── Scenario cards ── */
+#view-tool .sc-price { color:var(--ink)!important; }
+#view-tool .sc-irr { color:var(--t-msub)!important; }
+
+/* ── DCF ── */
+#view-tool .dcf-out {
+  background:var(--t-panel-bg)!important;
+  border-color:var(--t-panel-border)!important;
+}
+#view-tool .dcf-row { border-bottom-color:var(--t-acc-body-border)!important; }
+#view-tool .dcf-lbl { color:var(--ink4)!important; }
+#view-tool .dcf-val:not(.up):not(.dn):not(.gold) { color:var(--ink)!important; }
+
+/* ── Compare table ── */
+#view-tool .cmp-ig label { color:var(--t-mlbl)!important; }
+#view-tool .cmp-hdr { color:var(--ink)!important; }
+#view-tool .cmp-table th {
+  color:var(--t-mlbl)!important;
+  background:var(--t-acc-header-bg)!important;
+  border-bottom-color:var(--t-acc-border)!important;
+}
+#view-tool .cmp-table td {
+  color:var(--ink3)!important;
+  border-bottom-color:var(--t-acc-body-border)!important;
+}
+#view-tool .cmp-table td:first-child { color:var(--t-mlbl)!important; }
+
+/* ── Screener ── */
+#view-tool .scr-filters {
+  background:var(--t-panel-bg)!important;
+  border-color:var(--t-panel-border)!important;
+}
+#view-tool .scr-filter-group label { color:var(--t-mlbl)!important; }
+#view-tool .scr-slider { background:var(--t-acc-border)!important; }
+#view-tool .scr-table th {
+  color:var(--t-mlbl)!important;
+  background:var(--t-acc-header-bg)!important;
+  border-bottom-color:var(--t-acc-border)!important;
+}
+#view-tool .scr-table td {
+  color:var(--ink3)!important;
+  border-bottom-color:var(--t-acc-body-border)!important;
+}
+#view-tool .scr-ticker { color:var(--ink)!important; }
+#view-tool .scr-name { color:var(--t-mlbl)!important; }
+
+/* ── Earnings / fin tables ── */
+#view-tool .fin-table th {
+  color:var(--t-mlbl)!important;
+  background:var(--t-acc-header-bg)!important;
+  border-bottom-color:var(--t-acc-border)!important;
+}
+#view-tool .fin-table td {
+  color:var(--ink3)!important;
+  border-bottom-color:var(--t-acc-body-border)!important;
+}
+#view-tool .fin-table tr:hover td { background:rgba(184,136,42,.05)!important; }
+#view-tool .cmp-table tr:hover td { background:rgba(184,136,42,.05)!important; }
+#view-tool .scr-table tr:hover td { background:rgba(184,136,42,.05)!important; }
+
+/* ── Quick ticker buttons in analyze ── */
+#view-tool .quick-btn { color:var(--ink4)!important; border-color:var(--t-quick-btn-border)!important; }
+#view-tool .quick-btn:hover { color:var(--ink)!important; background:var(--t-acc-header-hover)!important; }
+
+/* ── News ── */
+#view-tool .news-text { color:var(--t-news-text)!important; }
+#view-tool .news-dot { background:rgba(184,136,42,.5)!important; }
+#view-tool .news-time { color:var(--t-msub)!important; }
+#view-tool .news-item { border-bottom-color:var(--t-news-border)!important; }
+
+/* ── Labels inside result area ── */
+#view-tool .res-ticker-lbl { color:var(--gold)!important; }
+#view-tool .tool-name { color:var(--ink4)!important; }
+
+/* ── Error msg ── */
+#view-tool .error-msg { color:#b94040!important; background:rgba(185,64,64,.08)!important; border-color:rgba(185,64,64,.18)!important; }
+html[data-theme="dark"] #view-tool .error-msg { color:#f87171!important; background:rgba(184,48,48,.12)!important; border-color:rgba(184,48,48,.2)!important; }
+
 </style>
 <script>
 /* ══════════════════════════════════════════════════════
