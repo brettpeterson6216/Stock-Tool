@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>
+(function(){var t=localStorage.getItem('il-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Implied Lens — Institutional-Grade Stock Analysis Platform</title>
@@ -11,8 +14,8 @@
 <style>
 /* ═══════════════════════════════ TOKENS ═══════════════════════════════ */
 :root {
-  --cream:#EDEAE2; --cream2:#E5E1D7; --cream3:#D8D3C8;
-  --card:#F7F4EE;  --panel:#EFECE5;
+  --cream:#F9F8F5; --cream2:#F2F0EB; --cream3:#E8E5DE;
+  --card:#FEFDFB;  --panel:#F6F4EF;
   --ink:#0A0C0E;  --ink2:#1C2025; --ink3:#404752;
   --ink4:#6B7380; --ink5:#9BA3AC;
   --gold:#B8882A;   --gold-l:#E8D090;  --gold-l2:#F4E8C8;
@@ -28,6 +31,32 @@
   --serif: 'DM Serif Display', serif;
   --sans: 'DM Sans', sans-serif;
   --mono: 'DM Mono', monospace;
+
+  /* ── Theme-switchable tool tokens (light defaults) ── */
+  --t-acc-border:rgba(10,12,14,.08);
+  --t-acc-header-bg:rgba(10,12,14,.02);
+  --t-acc-header-hover:rgba(10,12,14,.04);
+  --t-acc-body-border:rgba(10,12,14,.06);
+  --t-metric-bg:rgba(10,12,14,.028);
+  --t-metric-border:rgba(10,12,14,.065);
+  --t-metric-hover:rgba(10,12,14,.048);
+  --t-mlbl:var(--ink5);
+  --t-msub:rgba(10,12,14,.35);
+  --t-chart-bg:rgba(10,12,14,.025);
+  --t-chart-border:rgba(10,12,14,.06);
+  --t-chart-title:var(--ink5);
+  --t-ticker-bg:rgba(10,12,14,.04);
+  --t-ticker-border:var(--border2);
+  --t-ticker-color:var(--ink);
+  --t-ticker-ph:rgba(10,12,14,.28);
+  --t-rpill-border:var(--border2);
+  --t-rpill-color:var(--ink5);
+  --t-panel-bg:rgba(10,12,14,.025);
+  --t-panel-border:var(--border2);
+  --t-news-text:var(--ink4);
+  --t-news-border:var(--border);
+  --t-loading-color:var(--ink5);
+  --t-quick-btn-border:var(--border2);
 }
 
 /* ═══════════════════════════════ RESET ═══════════════════════════════ */
@@ -44,7 +73,7 @@ nav {
   position:fixed; top:0; left:0; right:0; z-index:500;
   height:56px; display:flex; align-items:center;
   padding:0 1.5rem;
-  background:rgba(237,234,226,0.97); backdrop-filter:blur(16px);
+  background:rgba(249,248,245,0.97); backdrop-filter:blur(16px);
   border-bottom:1px solid var(--border2);
   gap:0;
 }
@@ -272,12 +301,12 @@ h2.sec-h2 {
 /* search row */
 .search-row { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:1.5rem; }
 .ticker-input {
-  flex:1; min-width:160px; background:rgba(255,255,255,.07);
-  border:1px solid rgba(255,255,255,.13); border-radius:var(--r);
+  flex:1; min-width:160px; background:var(--t-ticker-bg);
+  border:1px solid var(--t-ticker-border); border-radius:var(--r);
   padding:.7rem 1rem; font-family:var(--mono); font-size:.9rem;
-  color:var(--cream); outline:none; transition:border-color .18s; text-transform:uppercase;
+  color:var(--t-ticker-color); outline:none; transition:border-color .18s; text-transform:uppercase;
 }
-.ticker-input::placeholder { color:rgba(247,244,238,.28); text-transform:none; font-family:var(--sans); font-size:.85rem; }
+.ticker-input::placeholder { color:var(--t-ticker-ph); text-transform:none; font-family:var(--sans); font-size:.85rem; }
 .ticker-input:focus { border-color:var(--gold); }
 .btn-search {
   background:var(--gold); color:var(--ink);
@@ -709,29 +738,29 @@ h2.sec-h2{letter-spacing:-.022em;line-height:1.08;}
 .sec-sub{font-size:.975rem;line-height:1.72;}
 .sec-label{font-size:.68rem;letter-spacing:.13em;}
 /* Tool view — dark terminal */
-#view-tool{background:#151B27!important;color:rgba(220,225,232,.9);}
+#view-tool{background:var(--cream)!important;color:var(--ink);transition:background .2s,color .2s;}
 .tool-accordion-wrap{max-width:980px;padding:calc(56px + 2rem) 1.75rem 4rem;}
-.acc-section{border-bottom:1px solid rgba(255,255,255,.055);}
-.acc-section:first-child{border-top:1px solid rgba(255,255,255,.055);}
-.acc-header{padding:.95rem 1.4rem;background:rgba(255,255,255,.012);transition:background .15s;}
-.acc-header:hover{background:rgba(255,255,255,.025);}
-.acc-section.open>.acc-header{background:rgba(184,136,42,.05);border-left:2px solid rgba(184,136,42,.4);}
-.acc-title{font-size:.72rem;font-weight:600;letter-spacing:.09em;color:rgba(220,225,232,.6);text-transform:uppercase;}
-.acc-section.open>.acc-header .acc-title{color:rgba(220,225,232,.95);}
-.acc-chevron{font-size:.9rem;}
-.acc-body{padding:1.5rem 1.5rem 2rem;border-top:1px solid rgba(255,255,255,.04);}
+.acc-section{border-bottom:1px solid var(--t-acc-border);}
+.acc-section:first-child{border-top:1px solid var(--t-acc-border);}
+.acc-header{padding:.95rem 1.4rem;background:var(--t-acc-header-bg);transition:background .15s;}
+.acc-header:hover{background:var(--t-acc-header-hover);}
+.acc-section.open>.acc-header{background:rgba(184,136,42,.06);border-left:2px solid rgba(184,136,42,.4);}
+.acc-title{font-size:.72rem;font-weight:600;letter-spacing:.09em;color:var(--ink4);text-transform:uppercase;}
+.acc-section.open>.acc-header .acc-title{color:var(--ink2);}
+.acc-chevron{font-size:.9rem;color:var(--ink5);}
+.acc-body{padding:1.5rem 1.5rem 2rem;border-top:1px solid var(--t-acc-body-border);}
 /* Metric cards */
 .metrics-grid{gap:5px;}
-.metric-card{background:rgba(255,255,255,.038);border:1px solid rgba(255,255,255,.065);border-radius:var(--r2);padding:12px 14px;transition:background .15s;}
-.metric-card:hover{background:rgba(255,255,255,.065);}
-.m-lbl{font-size:.58rem;letter-spacing:.09em;color:rgba(220,225,232,.33);margin-bottom:5px;}
+.metric-card{background:var(--t-metric-bg);border:1px solid var(--t-metric-border);border-radius:var(--r2);padding:12px 14px;transition:background .15s;}
+.metric-card:hover{background:var(--t-metric-hover);}
+.m-lbl{font-size:.58rem;letter-spacing:.09em;color:var(--t-mlbl);margin-bottom:5px;}
 .m-val{font-size:.96rem;}
-.m-sub{font-size:.58rem;color:rgba(220,225,232,.25);margin-top:2px;}
+.m-sub{font-size:.58rem;color:var(--t-msub);margin-top:2px;}
 /* Charts */
-.chart-wrap{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:var(--r2);padding:1rem 1rem .75rem;margin-bottom:.875rem;}
-.chart-title{font-size:.67rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:rgba(220,225,232,.42);}
+.chart-wrap{background:var(--t-chart-bg);border:1px solid var(--t-chart-border);border-radius:var(--r2);padding:1rem 1rem .75rem;margin-bottom:.875rem;}
+.chart-title{font-size:.67rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--t-chart-title);}
 .h240{height:230px;}.h200{height:195px;}.h180{height:170px;}.h150{height:145px;}
-.rpill{font-size:.66rem;padding:2px 9px;border-radius:3px;border-color:rgba(255,255,255,.09);color:rgba(220,225,232,.38);}
+.rpill{font-size:.66rem;padding:2px 9px;border-radius:3px;border-color:var(--t-rpill-border);color:var(--t-rpill-color);}
 .rpill.active,.rpill:hover{background:var(--gold);color:#0A0C0E;border-color:var(--gold);}
 /* Result header */
 .res-ticker-lbl{font-size:.67rem;letter-spacing:.13em;}
@@ -743,9 +772,9 @@ h2.sec-h2{letter-spacing:-.022em;line-height:1.08;}
 .ticker-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(184,136,42,.12);}
 .btn-search{border-radius:var(--r2);padding:.62rem 1.4rem;font-size:.82rem;font-weight:600;letter-spacing:.02em;}
 .btn-search:hover{background:#c89630;box-shadow:0 2px 10px rgba(184,136,42,.28);}
-.quick-btn{font-size:.67rem;padding:3px 10px;border-radius:3px;border-color:rgba(255,255,255,.08);}
+.quick-btn{font-size:.67rem;padding:3px 10px;border-radius:3px;border-color:var(--t-quick-btn-border);}
 /* Panels & buttons */
-.panel-box{border-radius:var(--r2);background:rgba(255,255,255,.032);border-color:rgba(255,255,255,.065);}
+.panel-box{border-radius:var(--r2);background:var(--t-panel-bg);border-color:var(--t-panel-border);}
 .panel-box-title{font-size:.63rem;letter-spacing:.11em;}
 .btn-run{border-radius:var(--r2);font-size:.84rem;letter-spacing:.02em;}
 .btn-run:hover{background:#c89630;}
@@ -771,10 +800,10 @@ h2.sec-h2{letter-spacing:-.022em;line-height:1.08;}
 .cmp-table th{font-size:.59rem;padding:7px 11px;letter-spacing:.09em;}
 .cmp-table td{font-size:.76rem;padding:7px 11px;}
 /* News & misc */
-.news-text{font-size:.76rem;line-height:1.54;color:rgba(220,225,232,.48);}
-.news-time{font-size:.59rem;}
-.news-item{padding:.55rem 0;border-bottom:1px solid rgba(255,255,255,.04);}
-.loading-bar{flex-direction:column;gap:10px;font-size:.7rem;letter-spacing:.06em;color:rgba(220,225,232,.28);font-family:var(--mono);}
+.news-text{font-size:.76rem;line-height:1.54;color:var(--t-news-text);}
+.news-time{font-size:.59rem;color:var(--t-msub);}
+.news-item{padding:.55rem 0;border-bottom:1px solid var(--t-news-border);}
+.loading-bar{flex-direction:column;gap:10px;font-size:.7rem;letter-spacing:.06em;color:var(--t-loading-color);font-family:var(--mono);}
 .spinner{width:20px;height:20px;border-width:1.5px;}
 .toast{border-radius:var(--r3)!important;padding:9px 18px!important;font-size:.79rem!important;font-weight:500;box-shadow:0 6px 24px rgba(0,0,0,.25)!important;}
 .toast.ok{background:#0f2a1c!important;border-color:rgba(74,222,128,.18)!important;}
@@ -791,6 +820,84 @@ h2.sec-h2{letter-spacing:-.022em;line-height:1.08;}
 .cmp-ig{flex:1 1 130px;min-width:0;}
 .cmp-ig .ticker-input{flex:none;width:100%;min-width:0;}
 
+
+
+/* ═══════════════════════════════ DARK THEME ═══════════════════════════════ */
+html[data-theme="dark"] {
+  --cream:#0F1520; --cream2:#141C2A; --cream3:#1A2438;
+  --card:#141C2A;  --panel:#182035;
+  --border:rgba(255,255,255,.055); --border2:rgba(255,255,255,.09); --border3:rgba(255,255,255,.16);
+  --shadow-sm:0 1px 3px rgba(0,0,0,.25); --shadow:0 2px 12px rgba(0,0,0,.4);
+  /* tool tokens flip */
+  --t-acc-border:rgba(255,255,255,.06);
+  --t-acc-header-bg:rgba(255,255,255,.012);
+  --t-acc-header-hover:rgba(255,255,255,.026);
+  --t-acc-body-border:rgba(255,255,255,.04);
+  --t-metric-bg:rgba(255,255,255,.038);
+  --t-metric-border:rgba(255,255,255,.065);
+  --t-metric-hover:rgba(255,255,255,.065);
+  --t-mlbl:rgba(220,225,232,.33);
+  --t-msub:rgba(220,225,232,.25);
+  --t-chart-bg:rgba(255,255,255,.02);
+  --t-chart-border:rgba(255,255,255,.05);
+  --t-chart-title:rgba(220,225,232,.42);
+  --t-ticker-bg:rgba(255,255,255,.07);
+  --t-ticker-border:rgba(255,255,255,.13);
+  --t-ticker-color:rgba(220,225,232,.9);
+  --t-ticker-ph:rgba(247,244,238,.28);
+  --t-rpill-border:rgba(255,255,255,.09);
+  --t-rpill-color:rgba(220,225,232,.38);
+  --t-panel-bg:rgba(255,255,255,.032);
+  --t-panel-border:rgba(255,255,255,.065);
+  --t-news-text:rgba(220,225,232,.5);
+  --t-news-border:rgba(255,255,255,.04);
+  --t-loading-color:rgba(220,225,232,.28);
+  --t-quick-btn-border:rgba(255,255,255,.08);
+}
+/* dark mode: page text & body */
+html[data-theme="dark"] body { color:rgba(220,225,232,.88); }
+html[data-theme="dark"] nav {
+  background:rgba(15,21,32,.97)!important;
+  border-bottom-color:rgba(255,255,255,.07)!important;
+}
+html[data-theme="dark"] .nav-logo { color:rgba(220,225,232,.9)!important; }
+html[data-theme="dark"] a.nav-tab { color:rgba(220,225,232,.45)!important; }
+html[data-theme="dark"] a.nav-tab:hover { color:rgba(220,225,232,.85)!important; background:rgba(255,255,255,.05)!important; }
+html[data-theme="dark"] a.nav-tab.active-tab { color:var(--gold)!important; background:rgba(184,136,42,.12)!important; box-shadow:inset 0 -2px 0 var(--gold)!important; }
+html[data-theme="dark"] a.nav-tab+a.nav-tab::before { background:rgba(255,255,255,.07)!important; }
+html[data-theme="dark"] .nav-acct-btn { color:rgba(220,225,232,.7)!important; border-color:rgba(255,255,255,.12)!important; background:rgba(255,255,255,.05)!important; }
+html[data-theme="dark"] .nav-live { background:rgba(184,136,42,.15)!important; color:var(--gold)!important; border-color:rgba(184,136,42,.3)!important; }
+/* headings */
+html[data-theme="dark"] h1,html[data-theme="dark"] h2,html[data-theme="dark"] h3,html[data-theme="dark"] h4 { color:rgba(220,225,232,.9); }
+html[data-theme="dark"] h1.hero-h1 em { color:var(--gold)!important; }
+/* buttons */
+html[data-theme="dark"] .btn-primary { background:var(--gold)!important; color:#111820!important; }
+html[data-theme="dark"] .btn-primary:hover { background:#C89B3C!important; }
+html[data-theme="dark"] .btn-secondary { color:rgba(220,225,232,.75)!important; border-color:rgba(255,255,255,.18)!important; }
+html[data-theme="dark"] .btn-nav-outline { color:rgba(220,225,232,.65)!important; border-color:rgba(255,255,255,.14)!important; }
+/* dark band sections on home page — use deeper shade */
+html[data-theme="dark"] .tool-section { background:#080C14!important; color:rgba(220,225,232,.9)!important; }
+html[data-theme="dark"] .tool-section .sec-sub { color:rgba(220,225,232,.45)!important; }
+/* featured pricing card */
+html[data-theme="dark"] .pricing-card.featured { background:rgba(184,136,42,.1)!important; border-color:rgba(184,136,42,.28)!important; color:rgba(220,225,232,.9)!important; }
+html[data-theme="dark"] .pricing-card.featured .p-dollar,html[data-theme="dark"] .pricing-card.featured .p-per,html[data-theme="dark"] .pricing-card.featured .p-desc { color:rgba(220,225,232,.45)!important; }
+html[data-theme="dark"] .pricing-card.featured .p-features li { color:rgba(220,225,232,.75)!important; }
+/* feat cards */
+html[data-theme="dark"] .feat-card:hover { background:rgba(255,255,255,.04)!important; }
+/* stats */
+html[data-theme="dark"] .h-stat-num { color:rgba(220,225,232,.9); }
+html[data-theme="dark"] .h-stat-lbl { color:rgba(220,225,232,.38); }
+html[data-theme="dark"] .h-stat-wrap { border-color:rgba(255,255,255,.09)!important; }
+/* misc */
+html[data-theme="dark"] .hero-sub { color:rgba(220,225,232,.55)!important; }
+html[data-theme="dark"] .sec-sub { color:rgba(220,225,232,.55)!important; }
+html[data-theme="dark"] .sec-label { color:var(--gold)!important; }
+html[data-theme="dark"] .feat-card p { color:rgba(220,225,232,.48)!important; }
+html[data-theme="dark"] .modal { background:rgba(15,21,32,.85)!important; }
+html[data-theme="dark"] .modal-box { background:var(--card)!important; border-color:rgba(255,255,255,.1)!important; }
+html[data-theme="dark"] .modal-box h2,html[data-theme="dark"] .modal-box label { color:rgba(220,225,232,.85)!important; }
+html[data-theme="dark"] .modal-note { color:rgba(220,225,232,.35)!important; }
+html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; border-color:rgba(255,255,255,.18)!important; }
 </style>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='16' fill='%23C89B3C'/><circle cx='16' cy='16' r='8' fill='%23F7F4EE'/></svg>">
 </head>
@@ -815,6 +922,7 @@ h2.sec-h2{letter-spacing:-.022em;line-height:1.08;}
     <a href='#' class="nav-tab" data-tool="adveducation" onclick="navGoTo('adveducation');return false;">Adv. Education</a>
   </div>
   <div class="nav-right" id="nav-right">
+    <button class="theme-toggle" id="theme-toggle-btn" onclick="toggleTheme()" title="Switch light / dark theme"><span class="theme-toggle-track"><span class="theme-toggle-thumb"></span></span></button>
     <span class="nav-live" title="Real-time market data">Live</span>
     <a class="btn-nav-outline" id="nav-login" href="/login">Log in</a>
     <a class="btn-nav" id="nav-signup" href="/signup">Start Free Trial</a>
@@ -1203,7 +1311,7 @@ h2.sec-h2{letter-spacing:-.022em;line-height:1.08;}
 </div><!-- /view-home -->
 
 <!-- ══════════ VIEW: LIVE TOOL ══════════ -->
-<div id="view-tool" style="display:none; min-height:100vh; background:#151B27; color:rgba(220,225,232,.9);">
+<div id="view-tool" style="display:none; min-height:100vh;">
   <div class="tool-accordion-wrap">
     <div class="tool-accordion">
 
@@ -1992,6 +2100,13 @@ a.nav-tab.active-tab { color:var(--gold-d) !important; font-weight:600; backgrou
 .sec-filing-desc{font-size:.78rem;color:rgba(220,225,232,.7);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .sec-filing-arrow{font-size:.72rem;color:rgba(220,225,232,.25);flex-shrink:0;}
 
+
+/* ── Theme toggle ── */
+.theme-toggle{background:none;border:none;cursor:pointer;display:flex;align-items:center;padding:.2rem .3rem;margin-right:.1rem;flex-shrink:0;}
+.theme-toggle-track{width:32px;height:17px;border-radius:9px;background:var(--border3);position:relative;transition:background .2s;display:block;border:1px solid var(--border2);}
+.theme-toggle-thumb{width:13px;height:13px;border-radius:50%;background:var(--ink4);position:absolute;top:1px;left:1px;transition:left .2s,background .2s;}
+html[data-theme="dark"] .theme-toggle-track{background:rgba(184,136,42,.3);border-color:rgba(184,136,42,.4);}
+html[data-theme="dark"] .theme-toggle-thumb{left:16px;background:var(--gold);}
 </style>
 <script>
 /* ══════════════════════════════════════════════════════
@@ -3240,6 +3355,18 @@ async function loadSecFilings(ticker) {
 }
 
 
+
+/* ─── Theme toggle ─────────────────────────────────────────── */
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  localStorage.setItem('il-theme', isDark ? 'light' : 'dark');
+}
+(function applyTheme(){
+  const saved = localStorage.getItem('il-theme');
+  if (saved === 'dark') document.documentElement.setAttribute('data-theme','dark');
+})();
 </script>
 </body>
 </html>
