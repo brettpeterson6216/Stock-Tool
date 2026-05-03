@@ -670,6 +670,59 @@ app.get('/api/metrics/:ticker', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch metrics.' });
   }
 });
+
+// ============================================================
+//  SEC EDGAR filings proxy
+// ============================================================
+app.get('/api/sec/:ticker', async (req, res) => {
+  const ticker = req.params.ticker.toUpperCase().replace(/[^A-Z0-9.]/g,'');
+  if (!ticker) return res.status(400).json({ error: 'No ticker' });
+  const UA = 'ImpliedLens/1.0 brettpeterson6216@gmail.com';
+  try {
+    // Step 1: look up CIK via EDGAR company search JSON
+    const cikUrl = `https://efts.sec.gov/LATEST/search-index?q=%22${ticker}%22&forms=10-K&dateRange=custom&startdt=2018-01-01`;
+    const cikResp = await fetch(cikUrl, { headers: { 'User-Agent': UA, 'Accept': 'application/json' } });
+    const cikData = await cikResp.json();
+    const hits = cikData?.hits?.hits || [];
+    if (!hits.length) return res.json({ filings: [], entity: ticker });
+
+    // Find best-matching entity (prefer exact ticker match in entity_name or file_num)
+    const entityId = hits[0]?._source?.entity_id;
+    if (!entityId) return res.json({ filings: [], entity: hits[0]?._source?.entity_name || ticker });
+
+    const paddedCik = String(entityId).padStart(10, '0');
+
+    // Step 2: fetch submission history for this CIK
+    const subUrl = `https://data.sec.gov/submissions/CIK${paddedCik}.json`;
+    const subResp = await fetch(subUrl, { headers: { 'User-Agent': UA } });
+    if (!subResp.ok) return res.json({ filings: [], entity: ticker });
+    const sub = await subResp.json();
+
+    const recent = sub.filings?.recent;
+    const filings = [];
+    const TYPES = new Set(['10-K','10-Q','8-K','DEF 14A','S-1','10-K/A','10-Q/A']);
+    if (recent && recent.form) {
+      for (let i = 0; i < recent.form.length && filings.length < 40; i++) {
+        if (!TYPES.has(recent.form[i])) continue;
+        const accDashes = recent.accessionNumber[i]; // e.g. 0000320193-24-000123
+        const accNoDashes = accDashes.replace(/-/g,'');
+        filings.push({
+          form:        recent.form[i],
+          date:        recent.filingDate[i],
+          description: recent.primaryDocDescription?.[i] || '',
+          primaryDoc:  recent.primaryDocument?.[i] || '',
+          accession:   accDashes,
+          viewerUrl:   `https://www.sec.gov/Archives/edgar/data/${parseInt(entityId)}/${accNoDashes}/${recent.primaryDocument?.[i] || ''}`,
+          indexUrl:    `https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=${paddedCik}&type=${encodeURIComponent(recent.form[i])}&dateb=&owner=include&count=10`
+        });
+      }
+    }
+    res.json({ entity: sub.name || ticker, cik: paddedCik, filings });
+  } catch (e) {
+    console.error('SEC proxy error:', e.message);
+    res.status(500).json({ error: 'Failed to fetch SEC data.' });
+  }
+});
 // ============================================================
 //  Static pages
 // ============================================================

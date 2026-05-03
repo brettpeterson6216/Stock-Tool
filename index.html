@@ -11,8 +11,8 @@
 <style>
 /* ═══════════════════════════════ TOKENS ═══════════════════════════════ */
 :root {
-  --cream:#F9F8F5; --cream2:#F2F0EB; --cream3:#E8E5DE;
-  --card:#FEFDFB;  --panel:#F6F4EF;
+  --cream:#EDEAE2; --cream2:#E5E1D7; --cream3:#D8D3C8;
+  --card:#F7F4EE;  --panel:#EFECE5;
   --ink:#0A0C0E;  --ink2:#1C2025; --ink3:#404752;
   --ink4:#6B7380; --ink5:#9BA3AC;
   --gold:#B8882A;   --gold-l:#E8D090;  --gold-l2:#F4E8C8;
@@ -44,7 +44,7 @@ nav {
   position:fixed; top:0; left:0; right:0; z-index:500;
   height:56px; display:flex; align-items:center;
   padding:0 1.5rem;
-  background:rgba(247,244,238,0.96); backdrop-filter:blur(16px);
+  background:rgba(237,234,226,0.97); backdrop-filter:blur(16px);
   border-bottom:1px solid var(--border2);
   gap:0;
 }
@@ -709,8 +709,8 @@ h2.sec-h2{letter-spacing:-.022em;line-height:1.08;}
 .sec-sub{font-size:.975rem;line-height:1.72;}
 .sec-label{font-size:.68rem;letter-spacing:.13em;}
 /* Tool view — dark terminal */
-#view-tool{background:#0D1117!important;color:rgba(220,225,232,.9);}
-.tool-accordion-wrap{max-width:980px;padding:1.75rem 1.75rem 4rem;}
+#view-tool{background:#151B27!important;color:rgba(220,225,232,.9);}
+.tool-accordion-wrap{max-width:980px;padding:calc(56px + 2rem) 1.75rem 4rem;}
 .acc-section{border-bottom:1px solid rgba(255,255,255,.055);}
 .acc-section:first-child{border-top:1px solid rgba(255,255,255,.055);}
 .acc-header{padding:.95rem 1.4rem;background:rgba(255,255,255,.012);transition:background .15s;}
@@ -1203,7 +1203,7 @@ h2.sec-h2{letter-spacing:-.022em;line-height:1.08;}
 </div><!-- /view-home -->
 
 <!-- ══════════ VIEW: LIVE TOOL ══════════ -->
-<div id="view-tool" style="display:none; min-height:100vh; background:var(--ink); color:var(--cream);">
+<div id="view-tool" style="display:none; min-height:100vh; background:#151B27; color:rgba(220,225,232,.9);">
   <div class="tool-accordion-wrap">
     <div class="tool-accordion">
 
@@ -1415,35 +1415,23 @@ h2.sec-h2{letter-spacing:-.022em;line-height:1.08;}
               <span class="acc-chevron">›</span>
             </div>
             <div class="acc-body" id="body-secfilings" style="display:none;">
-<div style="font-size:.82rem;color:rgba(247,244,238,.5);margin-bottom:1.25rem;">Official SEC filings sourced directly from EDGAR.</div>
-            <div id="sec-nostock" style="color:rgba(247,244,238,.35);font-size:.85rem;">Search for a stock in the Analyze tab first.</div>
-            <div id="sec-content" style="display:none;">
-              <div style="display:grid;gap:.75rem;">
-                <a id="sec-10k" href="#" target="_blank" rel="noopener" class="sec-card">
-                  <div class="sec-type">10-K</div>
-                  <div class="sec-desc">Annual Report — full overview of business, financials, and risk factors.</div>
-                  <div class="sec-link">View on SEC EDGAR →</div>
-                </a>
-                <a id="sec-10q" href="#" target="_blank" rel="noopener" class="sec-card">
-                  <div class="sec-type">10-Q</div>
-                  <div class="sec-desc">Quarterly Report — unaudited financials and management discussion.</div>
-                  <div class="sec-link">View on SEC EDGAR →</div>
-                </a>
-                <a id="sec-8k" href="#" target="_blank" rel="noopener" class="sec-card">
-                  <div class="sec-type">8-K</div>
-                  <div class="sec-desc">Current Events — material events like earnings, M&amp;A, leadership changes.</div>
-                  <div class="sec-link">View on SEC EDGAR →</div>
-                </a>
-                <a id="sec-all" href="#" target="_blank" rel="noopener" class="sec-card">
-                  <div class="sec-type">All Filings</div>
-                  <div class="sec-desc">Full filing history — every document submitted to the SEC.</div>
-                  <div class="sec-link">Search EDGAR →</div>
-                </a>
+              <div id="sec-nostock" style="color:rgba(220,225,232,.35);font-size:.85rem;padding:.5rem 0;">Search for a stock in the Analyze tab first.</div>
+              <div id="sec-loading" style="display:none;color:rgba(220,225,232,.4);font-size:.82rem;">Loading filings...</div>
+              <div id="sec-error" style="display:none;" class="error-msg"></div>
+              <div id="sec-content" style="display:none;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.75rem;">
+                  <div style="font-family:var(--mono);font-size:.7rem;color:rgba(220,225,232,.35);letter-spacing:.05em;" id="sec-entity-label"></div>
+                  <div style="display:flex;gap:.4rem;flex-wrap:wrap;" id="sec-filter-row">
+                    <button class="sec-filter-btn active" data-form="ALL" onclick="filterSecFilings('ALL')">All</button>
+                    <button class="sec-filter-btn" data-form="10-K" onclick="filterSecFilings('10-K')">10-K</button>
+                    <button class="sec-filter-btn" data-form="10-Q" onclick="filterSecFilings('10-Q')">10-Q</button>
+                    <button class="sec-filter-btn" data-form="8-K" onclick="filterSecFilings('8-K')">8-K</button>
+                    <button class="sec-filter-btn" data-form="DEF 14A" onclick="filterSecFilings('DEF 14A')">Proxy</button>
+                  </div>
+                </div>
+                <div id="sec-filings-list" style="display:flex;flex-direction:column;gap:.5rem;"></div>
+                <div style="margin-top:1.25rem;font-size:.69rem;color:rgba(220,225,232,.22);font-family:var(--mono);">Data sourced from SEC EDGAR. Links open official filings in a new tab.</div>
               </div>
-              <div style="margin-top:1rem;font-size:.72rem;color:rgba(247,244,238,.25);">Links open SEC EDGAR in a new tab. Data provided by the U.S. Securities and Exchange Commission.</div>
-            </div>
-
-
             </div><!-- /body-secfilings -->
           </div><!-- /sec-secfilings -->
 
@@ -1834,7 +1822,7 @@ h2.sec-h2{letter-spacing:-.022em;line-height:1.08;}
 .tool-accordion-wrap {
   max-width: 960px;
   margin: 0 auto;
-  padding: 1.5rem 1.5rem 3rem;
+  padding: calc(56px + 2rem) 1.5rem 3rem;
 }
 
 /* ═══════ ACCORDION TOOL LAYOUT ═══════ */
@@ -1988,6 +1976,22 @@ a.nav-tab.active-tab { color:var(--gold-d) !important; font-weight:600; backgrou
   .h240, .h150, .h200, .h180 { height: 180px !important; }
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 }
+
+/* ── SEC Filings filter buttons ── */
+.sec-filter-btn{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:var(--r);padding:.25rem .7rem;font-family:var(--mono);font-size:.65rem;font-weight:500;color:rgba(220,225,232,.5);cursor:pointer;letter-spacing:.04em;transition:all .15s;}
+.sec-filter-btn:hover{background:rgba(255,255,255,.09);color:rgba(220,225,232,.8);}
+.sec-filter-btn.active{background:rgba(184,136,42,.15);border-color:rgba(184,136,42,.4);color:var(--gold-l);}
+.sec-filing-row{display:flex;align-items:center;gap:.75rem;padding:.65rem .875rem;background:rgba(255,255,255,.028);border:1px solid rgba(255,255,255,.06);border-radius:var(--r2);text-decoration:none;transition:background .15s;}
+.sec-filing-row:hover{background:rgba(255,255,255,.055);border-color:rgba(184,136,42,.25);}
+.sec-filing-badge{font-family:var(--mono);font-size:.62rem;font-weight:600;letter-spacing:.05em;padding:.15rem .45rem;border-radius:3px;flex-shrink:0;min-width:40px;text-align:center;}
+.sec-badge-10k{background:rgba(184,136,42,.18);color:#D4A84B;border:1px solid rgba(184,136,42,.3);}
+.sec-badge-10q{background:rgba(26,95,168,.2);color:#6EB3F7;border:1px solid rgba(26,95,168,.3);}
+.sec-badge-8k{background:rgba(90,160,100,.15);color:#7DD87C;border:1px solid rgba(90,160,100,.25);}
+.sec-badge-other{background:rgba(255,255,255,.07);color:rgba(220,225,232,.5);border:1px solid rgba(255,255,255,.1);}
+.sec-filing-date{font-family:var(--mono);font-size:.68rem;color:rgba(220,225,232,.35);flex-shrink:0;}
+.sec-filing-desc{font-size:.78rem;color:rgba(220,225,232,.7);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sec-filing-arrow{font-size:.72rem;color:rgba(220,225,232,.25);flex-shrink:0;}
+
 </style>
 <script>
 /* ══════════════════════════════════════════════════════
@@ -3159,17 +3163,80 @@ async function loadEarnings(ticker) {
 /* =====================================================
    SEC FILINGS TAB
 ===================================================== */
-function loadSecFilings(ticker) {
-  const nostock = document.getElementById('sec-nostock');
-  const cont    = document.getElementById('sec-content');
-  if (!ticker) { if(nostock) nostock.style.display='block'; if(cont) cont.style.display='none'; return; }
-  if(nostock) nostock.style.display='none';
-  const base = 'https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&company=&CIK=' + encodeURIComponent(ticker);
-  document.getElementById('sec-10k').href  = base + '&type=10-K&dateb=&owner=include&count=10&search_text=';
-  document.getElementById('sec-10q').href  = base + '&type=10-Q&dateb=&owner=include&count=10&search_text=';
-  document.getElementById('sec-8k').href   = base + '&type=8-K&dateb=&owner=include&count=20&search_text=';
-  document.getElementById('sec-all').href  = base + '&type=&dateb=&owner=include&count=40&search_text=';
-  if(cont) cont.style.display='block';
+var _secFilings = [];
+var _secFilter  = 'ALL';
+
+function badgeClass(form) {
+  if (form === '10-K' || form === '10-K/A') return 'sec-badge-10k';
+  if (form === '10-Q' || form === '10-Q/A') return 'sec-badge-10q';
+  if (form === '8-K')  return 'sec-badge-8k';
+  return 'sec-badge-other';
+}
+
+function filterSecFilings(type) {
+  _secFilter = type;
+  document.querySelectorAll('.sec-filter-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.form === type);
+  });
+  renderSecFilings();
+}
+
+function renderSecFilings() {
+  const list = document.getElementById('sec-filings-list');
+  if (!list) return;
+  const rows = _secFilter === 'ALL' ? _secFilings : _secFilings.filter(f => f.form === _secFilter || (f.form === _secFilter + '/A'));
+  if (!rows.length) {
+    list.innerHTML = '<div style="font-size:.8rem;color:rgba(220,225,232,.3);padding:.5rem 0;">No filings found for this filter.</div>';
+    return;
+  }
+  list.innerHTML = rows.map(f => {
+    const badge = badgeClass(f.form);
+    const desc  = f.description || f.form;
+    const url   = f.viewerUrl && f.primaryDoc ? f.viewerUrl : f.indexUrl;
+    return `<a href="${url}" target="_blank" rel="noopener" class="sec-filing-row">
+      <span class="sec-filing-badge ${badge}">${f.form}</span>
+      <span class="sec-filing-date">${f.date}</span>
+      <span class="sec-filing-desc">${desc}</span>
+      <span class="sec-filing-arrow">↗</span>
+    </a>`;
+  }).join('');
+}
+
+async function loadSecFilings(ticker) {
+  const nostock  = document.getElementById('sec-nostock');
+  const loading  = document.getElementById('sec-loading');
+  const errEl    = document.getElementById('sec-error');
+  const cont     = document.getElementById('sec-content');
+  const entityLbl= document.getElementById('sec-entity-label');
+
+  if (!ticker) {
+    if(nostock) nostock.style.display='block';
+    if(cont)    cont.style.display='none';
+    return;
+  }
+  if(nostock)  nostock.style.display='none';
+  if(cont)     cont.style.display='none';
+  if(errEl)    errEl.style.display='none';
+  if(loading)  loading.style.display='block';
+
+  try {
+    const resp = await fetch('/api/sec/' + encodeURIComponent(ticker));
+    const data = await resp.json();
+    if(loading) loading.style.display='none';
+    if (data.error || !data.filings) {
+      if(errEl){ errEl.textContent = data.error || 'Failed to load filings.'; errEl.style.display='block'; }
+      return;
+    }
+    _secFilings = data.filings || [];
+    _secFilter  = 'ALL';
+    document.querySelectorAll('.sec-filter-btn').forEach(b => b.classList.toggle('active', b.dataset.form === 'ALL'));
+    if(entityLbl) entityLbl.textContent = data.entity ? data.entity.toUpperCase() + ' · CIK ' + parseInt(data.cik) : '';
+    if(cont) cont.style.display='block';
+    renderSecFilings();
+  } catch(e) {
+    if(loading) loading.style.display='none';
+    if(errEl){ errEl.textContent = 'Failed to connect to SEC EDGAR.'; errEl.style.display='block'; }
+  }
 }
 
 
