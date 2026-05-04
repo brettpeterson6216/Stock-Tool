@@ -11,6 +11,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-zoom/1.2.1/chartjs-plugin-zoom.min.js"></script>
 <style>
 /* ═══════════════════════════════ TOKENS ═══════════════════════════════ */
 :root {
@@ -1311,7 +1313,7 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
       <p>Join thousands of investors who run data-driven analysis before every trade. Free plan available — no credit card required.</p>
       <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
         <a href="#tool" class="btn-primary" id="cta-btn-main" style="background:var(--gold);color:var(--ink);">Try free live tool ↓</a>
-        <a href="#pricing" class="btn-secondary" id="cta-btn-plans" style="border-color:rgba(247,244,238,.2);color:var(--cream);">View all plans</a>
+        <a href="#pricing" class="btn-secondary" id="cta-btn-plans" style="border-color:var(--text5);color:var(--cream);">View all plans</a>
       </div>
     </div>
   </section>
@@ -1334,7 +1336,7 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
               <button class="btn-search" id="search-btn" onclick="fetchAndRender()">Analyze →</button>
             </div>
             <div class="quick-row">
-              <span style="font-family:var(--mono);font-size:.62rem;color:rgba(247,244,238,.25);align-self:center;text-transform:uppercase;letter-spacing:.07em;">Quick Load:</span>
+              <span style="font-family:var(--mono);font-size:.62rem;color:var(--text5);align-self:center;text-transform:uppercase;letter-spacing:.07em;">Quick Load:</span>
               <button class="quick-btn" onclick="quickLoad('AAPL')">AAPL</button>
               <button class="quick-btn" onclick="quickLoad('MSFT')">MSFT</button>
               <button class="quick-btn" onclick="quickLoad('NVDA')">NVDA</button>
@@ -1369,6 +1371,7 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
 
               <!-- Main price chart -->
               <div class="chart-wrap">
+                <button class="chart-exp-btn" onclick="expandChart('price-chart','Price Chart')" title="Expand chart">⤢</button>
                 <div class="chart-header">
                   <div>
                     <div class="chart-title">Price Chart</div>
@@ -1389,25 +1392,43 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
                 <div class="h240"><canvas id="price-chart"></canvas></div>
               </div>
 
+              <!-- Analyst Price Targets -->
+              <div id="analyst-panel" style="display:none;margin-bottom:14px;">
+                <div class="analyst-panel">
+                  <div class="analyst-target-box">
+                    <div class="analyst-box-title">Analyst Price Targets</div>
+                    <div id="analyst-targets-content"></div>
+                  </div>
+                  <div class="analyst-rec-box">
+                    <div class="analyst-box-title">Consensus Rating</div>
+                    <div id="analyst-rec-content"></div>
+                  </div>
+                </div>
+              </div>
+
               <!-- RSI + MACD -->
               <div class="g2">
-                <div>
-                  <div class="chart-header"><div class="chart-title">RSI (14)</div><div id="rsi-readout" style="font-family:var(--mono);font-size:.68rem;color:rgba(247,244,238,.4);"></div></div>
+                <div class="chart-wrap">
+                  <button class="chart-exp-btn" onclick="expandChart('rsi-chart','RSI (14)')" title="Expand chart">⤢</button>
+                  <div class="chart-header"><div class="chart-title">RSI (14)</div><div id="rsi-readout" style="font-family:var(--mono);font-size:.68rem;color:var(--text4);"></div></div>
                   <div class="h150"><canvas id="rsi-chart"></canvas></div>
                 </div>
-                <div>
-                  <div class="chart-header"><div class="chart-title">MACD (12,26,9)</div><div id="macd-readout" style="font-family:var(--mono);font-size:.68rem;color:rgba(247,244,238,.4);"></div></div>
+                <div class="chart-wrap">
+                  <button class="chart-exp-btn" onclick="expandChart('macd-chart','MACD (12,26,9)')" title="Expand chart">⤢</button>
+                  <div class="chart-header"><div class="chart-title">MACD (12,26,9)</div><div id="macd-readout" style="font-family:var(--mono);font-size:.68rem;color:var(--text4);"></div></div>
                   <div class="h150"><canvas id="macd-chart"></canvas></div>
                 </div>
               </div>
 
               <!-- Volume + Returns Distribution -->
               <div class="g2">
-                <div>
+                <div class="chart-wrap">
+                  <button class="chart-exp-btn" onclick="expandChart('vol-chart','Volume')" title="Expand chart">⤢</button>
                   <div class="chart-header"><div class="chart-title">Volume</div></div>
                   <div class="h150"><canvas id="vol-chart"></canvas></div>
                 </div>
-                <div>
+                <div class="chart-wrap">
+                  <button class="chart-exp-btn" onclick="expandChart('dist-chart','Daily Returns Distribution')" title="Expand chart">⤢</button>
                   <div class="chart-header"><div class="chart-title">Daily Returns Distribution</div></div>
                   <div class="h150"><canvas id="dist-chart"></canvas></div>
                 </div>
@@ -1451,7 +1472,7 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
               <div class="panel-box" style="margin-bottom:14px;" id="risk-panel">
                 <div class="panel-box-title">Risk &amp; Volatility Assessment</div>
                 <div id="risk-content">
-                  <div style="color:rgba(247,244,238,.3);font-size:.8rem;">Load a stock to see risk metrics.</div>
+                  <div style="color:var(--text5);font-size:.8rem;">Load a stock to see risk metrics.</div>
                 </div>
               </div>
 
@@ -1474,20 +1495,20 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
               <span class="acc-chevron">›</span>
             </div>
             <div class="acc-body" id="body-financials" style="display:none;">
-<div style="font-size:.82rem;color:rgba(247,244,238,.5);margin-bottom:1.25rem;">Annual income statement, balance sheet, and cash flow for the last 4 years.</div>
-            <div id="fin-loading" style="color:rgba(247,244,238,.3);font-size:.82rem;display:none;">Loading financials…</div>
+<div style="font-size:.82rem;margin-bottom:1.25rem;color:var(--text4);">Annual income statement, balance sheet, and cash flow for the last 4 years.</div>
+            <div id="fin-loading" style="font-size:.82rem;display:none;color:var(--text5);">Loading financials…</div>
             <div id="fin-error" style="color:#f87171;font-size:.82rem;display:none;"></div>
             <div id="fin-content" style="display:none;">
               <div style="display:flex;gap:.5rem;margin-bottom:1.25rem;flex-wrap:wrap;">
-                <button class="btn-run" style="font-size:.75rem;padding:.35rem .9rem;" onclick="showFinTab('income',this)">Income Statement</button>
-                <button class="btn-run" style="font-size:.75rem;padding:.35rem .9rem;background:rgba(200,155,60,.12);color:rgba(247,244,238,.5);" onclick="showFinTab('balance',this)">Balance Sheet</button>
-                <button class="btn-run" style="font-size:.75rem;padding:.35rem .9rem;background:rgba(200,155,60,.12);color:rgba(247,244,238,.5);" onclick="showFinTab('cashflow',this)">Cash Flow</button>
+                <button class="fin-tab-btn active" onclick="showFinTab('income',this)">Income Statement</button>
+                <button class="fin-tab-btn" onclick="showFinTab('balance',this)">Balance Sheet</button>
+                <button class="fin-tab-btn" onclick="showFinTab('cashflow',this)">Cash Flow</button>
               </div>
               <div id="fin-income" class="fin-subtab"></div>
               <div id="fin-balance" class="fin-subtab" style="display:none;"></div>
               <div id="fin-cashflow" class="fin-subtab" style="display:none;"></div>
             </div>
-            <div id="fin-nostock" style="color:rgba(247,244,238,.35);font-size:.85rem;">Search for a stock in the Analyze tab first.</div>
+            <div id="fin-nostock" style="font-size:.85rem;color:var(--text5);">Search for a stock in the Analyze tab first.</div>
 
 
             </div><!-- /body-financials -->
@@ -1499,11 +1520,11 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
               <span class="acc-chevron">›</span>
             </div>
             <div class="acc-body" id="body-advmetrics" style="display:none;">
-<div style="font-size:.82rem;color:rgba(247,244,238,.5);margin-bottom:1.25rem;">Deep fundamental metrics: valuation multiples, margins, returns, and leverage.</div>
-            <div id="advm-loading" style="color:rgba(247,244,238,.3);font-size:.82rem;display:none;">Loading metrics…</div>
+<div style="font-size:.82rem;color:var(--text4);margin-bottom:1.25rem;">Deep fundamental metrics: valuation multiples, margins, returns, and leverage.</div>
+            <div id="advm-loading" style="color:var(--text5);font-size:.82rem;display:none;">Loading metrics…</div>
             <div id="advm-error" style="color:#f87171;font-size:.82rem;display:none;"></div>
             <div id="advm-content"></div>
-            <div id="advm-nostock" style="color:rgba(247,244,238,.35);font-size:.85rem;">Search for a stock in the Analyze tab first.</div>
+            <div id="advm-nostock" style="color:var(--text5);font-size:.85rem;">Search for a stock in the Analyze tab first.</div>
 
 
             </div><!-- /body-advmetrics -->
@@ -1515,11 +1536,11 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
               <span class="acc-chevron">›</span>
             </div>
             <div class="acc-body" id="body-earnings" style="display:none;">
-<div style="font-size:.82rem;color:rgba(247,244,238,.5);margin-bottom:1.25rem;">EPS estimates vs. actual results and earnings surprise history.</div>
-            <div id="earn-loading" style="color:rgba(247,244,238,.3);font-size:.82rem;display:none;">Loading earnings…</div>
+<div style="font-size:.82rem;color:var(--text4);margin-bottom:1.25rem;">EPS estimates vs. actual results and earnings surprise history.</div>
+            <div id="earn-loading" style="color:var(--text5);font-size:.82rem;display:none;">Loading earnings…</div>
             <div id="earn-error" style="color:#f87171;font-size:.82rem;display:none;"></div>
             <div id="earn-content"></div>
-            <div id="earn-nostock" style="color:rgba(247,244,238,.35);font-size:.85rem;">Search for a stock in the Analyze tab first.</div>
+            <div id="earn-nostock" style="color:var(--text5);font-size:.85rem;">Search for a stock in the Analyze tab first.</div>
 
 
             </div><!-- /body-earnings -->
@@ -1551,6 +1572,42 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
             </div><!-- /body-secfilings -->
           </div><!-- /sec-secfilings -->
 
+          <!-- INSTITUTIONAL & DARK POOL -->
+          <div class="acc-section" id="sec-institutional">
+            <div class="acc-header" onclick="toggleSection('institutional')">
+              <span class="acc-title">Institutional &amp; Dark Pool <span class="acc-pro-badge">PRO</span></span>
+              <span class="acc-chevron">›</span>
+            </div>
+            <div class="acc-body" id="body-institutional" style="display:none;">
+              <div style="font-size:.82rem;color:var(--text4);margin-bottom:1.25rem;">Top institutional holders, dark pool trading volume, and short interest data from FINRA &amp; Finnhub.</div>
+              <div id="inst-loading" class="loading-bar" style="display:none;"><div class="spinner"></div> Loading institutional data…</div>
+              <div id="inst-nostock" style="color:var(--text5);font-size:.85rem;">Search for a stock in the Analyze tab first.</div>
+              <div id="inst-content" style="display:none;">
+                <!-- Dark Pool Summary Cards -->
+                <div class="analyst-box-title" style="margin-bottom:.65rem;">Dark Pool &amp; Short Interest</div>
+                <div id="dp-cards" class="dp-grid"></div>
+                <div style="margin-bottom:1.25rem;">
+                  <div class="analyst-box-title" style="margin-bottom:.5rem;">Weekly Dark Pool Volume (FINRA OTC)</div>
+                  <div class="dp-chart-wrap"><canvas id="dp-chart"></canvas></div>
+                </div>
+                <!-- Institutional Holders Table -->
+                <div class="analyst-box-title" style="margin-bottom:.65rem;">Top Institutional Holders</div>
+                <div style="overflow-x:auto;">
+                  <table class="inst-table" id="inst-table">
+                    <thead><tr>
+                      <th>Institution</th>
+                      <th>Shares Held</th>
+                      <th>% of Portfolio</th>
+                      <th>Change</th>
+                      <th>Filed</th>
+                    </tr></thead>
+                    <tbody id="inst-tbody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div><!-- /sec-institutional -->
+
           <div class="acc-section" id="sec-compare">
             <div class="acc-header" onclick="toggleSection('compare')">
               <span class="acc-title">Compare <span class="acc-pro-badge">PRO</span></span>
@@ -1558,12 +1615,12 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
             </div>
             <div class="acc-body" id="body-compare" style="display:none;">
 <div style="margin-bottom:1rem;">
-              <div style="font-size:.82rem;color:rgba(247,244,238,.5);margin-bottom:1.25rem;">Compare 2 stocks free. Load 3–4 stocks and access the performance chart &amp; radar with <span style="color:var(--gold);">Pro</span>.</div>
+              <div style="font-size:.82rem;color:var(--text3);margin-bottom:1.25rem;">Compare 2 stocks free. Load 3–4 stocks and access the performance chart &amp; radar with <span style="color:var(--gold);">Pro</span>.</div>
               <div class="cmp-inputs">
                 <div class="cmp-ig"><label>Stock 1</label><input class="ticker-input" id="cmp1" placeholder="e.g. AAPL" style="text-transform:uppercase;"></div>
                 <div class="cmp-ig"><label>Stock 2</label><input class="ticker-input" id="cmp2" placeholder="e.g. MSFT" style="text-transform:uppercase;"></div>
-                <div class="cmp-ig"><label>Stock 3 <span style="font-size:.72rem;color:rgba(247,244,238,.3);">(optional)</span></label><input class="ticker-input" id="cmp3" placeholder="e.g. GOOGL" style="text-transform:uppercase;"></div>
-                <div class="cmp-ig"><label>Stock 4 <span style="font-size:.72rem;color:rgba(247,244,238,.3);">(optional)</span></label><input class="ticker-input" id="cmp4" placeholder="e.g. AMZN" style="text-transform:uppercase;"></div>
+                <div class="cmp-ig"><label>Stock 3 <span style="font-size:.72rem;color:var(--text5);">(optional)</span></label><input class="ticker-input" id="cmp3" placeholder="e.g. GOOGL" style="text-transform:uppercase;"></div>
+                <div class="cmp-ig"><label>Stock 4 <span style="font-size:.72rem;color:var(--text5);">(optional)</span></label><input class="ticker-input" id="cmp4" placeholder="e.g. AMZN" style="text-transform:uppercase;"></div>
                 <button class="btn-search" onclick="runCompare()" style="align-self:flex-end;height:40px;">Compare →</button>
               </div>
               <div class="loading-bar" id="cmp-loading" style="display:none;"><div class="spinner"></div> Loading comparison data…</div>
@@ -1586,14 +1643,14 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
               <span class="acc-chevron">›</span>
             </div>
             <div class="acc-body" id="body-projection" style="display:none;">
-<div style="font-size:.82rem;color:rgba(247,244,238,.5);margin-bottom:1.25rem;">Advanced model with separate inputs per scenario. Load a stock first to auto-fill current price.</div>
+<div style="font-size:.82rem;color:var(--text3);margin-bottom:1.25rem;">Advanced model with separate inputs per scenario. Load a stock first to auto-fill current price.</div>
             <div class="proj-controls" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr));">
               <div><label class="fc-label">Time Horizon</label>
                 <select class="fc-select" id="adv-years"><option value="1">1 Year</option><option value="2">2 Years</option><option value="3">3 Years</option><option value="5" selected>5 Years</option><option value="10">10 Years</option></select>
               </div>
               <div><label class="fc-label">Current Price ($)</label><input class="fc-input" type="number" id="adv-price" value="100" step="0.01"></div>
               <div><label class="fc-label">Dividend Yield (%)</label><input class="fc-input" type="number" id="adv-div" value="0.5" step="0.1"></div>
-              <div style="grid-column:1/-1;border-top:1px solid rgba(255,255,255,.07);padding-top:.75rem;margin-top:.25rem;font-family:var(--mono);font-size:.65rem;color:rgba(247,244,238,.3);text-transform:uppercase;letter-spacing:.07em;">Bear / Base / Bull Inputs</div>
+              <div style="grid-column:1/-1;border-top:1px solid var(--t-acc-border);padding-top:.75rem;margin-top:.25rem;font-family:var(--mono);font-size:.65rem;color:var(--text5);text-transform:uppercase;letter-spacing:.07em;">Bear / Base / Bull Inputs</div>
               <div><label class="fc-label">Bear Growth (%/yr)</label><input class="fc-input" type="number" id="adv-g-bear" value="3" step="0.5"></div>
               <div><label class="fc-label">Base Growth (%/yr)</label><input class="fc-input" type="number" id="adv-g-base" value="12" step="0.5"></div>
               <div><label class="fc-label">Bull Growth (%/yr)</label><input class="fc-input" type="number" id="adv-g-bull" value="25" step="0.5"></div>
@@ -1618,18 +1675,18 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
               <span class="acc-chevron">›</span>
             </div>
             <div class="acc-body" id="body-dcf" style="display:none;">
-<div style="font-size:.82rem;color:rgba(247,244,238,.5);margin-bottom:1.25rem;">10-year two-stage discounted cash flow model. Enter the stock's EPS and your assumptions below.</div>
+<div style="font-size:.82rem;color:var(--text3);margin-bottom:1.25rem;">10-year two-stage discounted cash flow model. Enter the stock's EPS and your assumptions below.</div>
             <div class="proj-controls">
               <div><label class="fc-label">Current EPS ($)</label><input class="fc-input" type="number" id="dcf-eps" value="5.20" step="0.01"></div>
               <div><label class="fc-label">Growth Yr 1–5 (%)</label><input class="fc-input" type="number" id="dcf-g1" value="15" step="0.5"></div>
               <div><label class="fc-label">Growth Yr 6–10 (%)</label><input class="fc-input" type="number" id="dcf-g2" value="8" step="0.5"></div>
               <div><label class="fc-label">Terminal Growth (%)</label><input class="fc-input" type="number" id="dcf-tg" value="3" step="0.1"></div>
               <div><label class="fc-label">WACC (%)</label><input class="fc-input" type="number" id="dcf-wacc" value="10" step="0.1"></div>
-              <div><label class="fc-label">Current Price ($) <span style="color:rgba(247,244,238,.3);font-size:.58rem;">optional</span></label><input class="fc-input" type="number" id="dcf-price" value="" step="0.01" placeholder="Auto-fills from Analyze"></div>
+              <div><label class="fc-label">Current Price ($) <span style="color:var(--text5);font-size:.58rem;">optional</span></label><input class="fc-input" type="number" id="dcf-price" value="" step="0.01" placeholder="Auto-fills from Analyze"></div>
             </div>
             <button class="btn-run" onclick="runDCF()">Calculate Intrinsic Value →</button>
             <div id="dcf-output" style="margin-top:1.25rem;"></div>
-            <div style="margin-top:1rem;font-size:.7rem;color:rgba(247,244,238,.2);line-height:1.6;">This is an EPS-based simplified DCF, not a free-cash-flow model. Results are for educational purposes only — not investment advice.</div>
+            <div style="margin-top:1rem;font-size:.7rem;color:var(--text5);line-height:1.6;">This is an EPS-based simplified DCF, not a free-cash-flow model. Results are for educational purposes only — not investment advice.</div>
 
 
 
@@ -1663,7 +1720,7 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
                   <th onclick="sortScreener('dividendYield')">Div Yield ↕</th>
                   <th onclick="sortScreener('beta')">Beta ↕</th>
                 </tr></thead>
-                <tbody id="scr-body"><tr><td colspan="9" style="text-align:center;color:rgba(247,244,238,.3);padding:2rem;">Click the Screener tab to load data</td></tr></tbody>
+                <tbody id="scr-body"><tr><td colspan="9" style="text-align:center;color:var(--text5);padding:2rem;">Click the Screener tab to load data</td></tr></tbody>
               </table>
             </div>
 
@@ -1680,17 +1737,17 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
             </div>
             <div class="acc-body" id="body-reports" style="display:none;">
 <div style="padding:1.25rem 0;">
-              <div style="font-size:.82rem;color:rgba(247,244,238,.5);margin-bottom:1.25rem;">Generate a print-ready PDF of your current stock analysis — including all charts, metrics, and projections.</div>
-              <div id="report-no-stock" style="display:none;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:var(--r2);padding:1.5rem;text-align:center;color:rgba(247,244,238,.4);font-size:.85rem;">
+              <div style="font-size:.82rem;color:var(--text3);margin-bottom:1.25rem;">Generate a print-ready PDF of your current stock analysis — including all charts, metrics, and projections.</div>
+              <div id="report-no-stock" style="display:none;background:var(--t-metric-bg);border:1px solid var(--t-metric-border);border-radius:var(--r2);padding:1.5rem;text-align:center;color:var(--text4);font-size:.85rem;">
                 Load a stock from the <strong style="color:var(--gold);">Analyze</strong> tab first, then come back here to export your report.
               </div>
               <div id="report-ready" style="display:none;">
-                <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:var(--r2);padding:1.25rem;margin-bottom:1rem;">
-                  <div style="font-family:var(--mono);font-size:.75rem;color:rgba(247,244,238,.35);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.5rem;">Report contents</div>
-                  <div id="report-summary" style="font-size:.88rem;color:rgba(247,244,238,.65);line-height:1.8;"></div>
+                <div style="background:var(--t-metric-bg);border:1px solid var(--t-metric-border);border-radius:var(--r2);padding:1.25rem;margin-bottom:1rem;">
+                  <div style="font-family:var(--mono);font-size:.75rem;color:var(--text4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.5rem;">Report contents</div>
+                  <div id="report-summary" style="font-size:.88rem;color:var(--text2);line-height:1.8;"></div>
                 </div>
                 <button class="btn-run" onclick="exportPDF()" style="max-width:280px;">📄 Export PDF Report →</button>
-                <div style="margin-top:.75rem;font-size:.72rem;color:rgba(247,244,238,.25);">Opens a print dialog — choose "Save as PDF" in your browser's print panel.</div>
+                <div style="margin-top:.75rem;font-size:.72rem;color:var(--text5);">Opens a print dialog — choose "Save as PDF" in your browser's print panel.</div>
               </div>
               <div id="report-check" style="display:none;"></div>
             </div>
@@ -1706,7 +1763,7 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
               <span class="acc-chevron">›</span>
             </div>
             <div class="acc-body" id="body-education" style="display:none;">
-<div style="font-size:.82rem;color:rgba(247,244,238,.5);margin-bottom:1.5rem;">Core concepts every investor should know.</div>
+<div style="font-size:.82rem;color:var(--text3);margin-bottom:1.5rem;">Core concepts every investor should know.</div>
             <div style="display:grid;gap:.85rem;">
               <div class="edu-card">
                 <div class="edu-title">📊 Price-to-Earnings (P/E) Ratio</div>
@@ -1759,7 +1816,7 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
               <span class="acc-chevron">›</span>
             </div>
             <div class="acc-body" id="body-adveducation" style="display:none;">
-<div style="font-size:.82rem;color:rgba(247,244,238,.5);margin-bottom:1.5rem;">Advanced valuation and analysis methods used by professional investors.</div>
+<div style="font-size:.82rem;color:var(--text3);margin-bottom:1.5rem;">Advanced valuation and analysis methods used by professional investors.</div>
             <div style="display:grid;gap:.85rem;">
               <div class="edu-card">
                 <div class="edu-title">🧮 Discounted Cash Flow (DCF) Valuation</div>
@@ -1807,9 +1864,26 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
     </div><!-- /tool-accordion -->
   </div><!-- /tool-accordion-wrap -->
 
-  <div style="background:#111; border-top:1px solid rgba(255,255,255,.07); padding:1.25rem 2rem; font-size:.75rem; color:rgba(247,244,238,.3); display:flex; justify-content:space-between; align-items:center;">
+  <div style="background:var(--t-acc-header-bg); border-top:1px solid var(--t-acc-border); padding:1.25rem 2rem; font-size:.75rem; color:var(--text5); display:flex; justify-content:space-between; align-items:center;">
     <span>© 2026 Implied Lens. Not financial advice.</span>
-    <a href="#" onclick="navGoTo('home');return false;" style="color:rgba(247,244,238,.4); text-decoration:none;">← Back to home</a>
+    <a href="#" onclick="navGoTo('home');return false;" style="color:var(--text4); text-decoration:none;">← Back to home</a>
+  </div>
+</div>
+
+<!-- ══ CHART EXPAND MODAL ══ -->
+<div id="chart-expand-modal" onclick="if(event.target===this)closeExpandModal()">
+  <div class="cex-box">
+    <div class="cex-header">
+      <span class="cex-title" id="cex-title">Chart</span>
+      <div class="cex-controls">
+        <span class="cex-hint">Scroll to zoom · Drag to pan</span>
+        <button class="cex-btn" onclick="resetExpandZoom()">Reset Zoom</button>
+        <button class="cex-btn gold" onclick="closeExpandModal()">✕ Close</button>
+      </div>
+    </div>
+    <div class="cex-body">
+      <canvas id="chart-expanded"></canvas>
+    </div>
   </div>
 </div>
 
@@ -2200,6 +2274,24 @@ html[data-theme="dark"] #view-tool .error-msg{color:#f87171!important;background
 /* any remaining inputs inside tool */
 #view-tool input[type="number"],#view-tool input[type="text"]:not(.ticker-input),#view-tool select:not(.fc-select){
   background:var(--t-ticker-bg)!important;border-color:var(--t-ticker-border)!important;color:var(--text)!important;}
+/* advm, edu, sec cards */
+#view-tool .advm-card{background:var(--t-metric-bg)!important;border-color:var(--t-metric-border)!important;}
+#view-tool .sec-card{background:var(--t-metric-bg)!important;border-color:var(--t-metric-border)!important;}
+#view-tool .sec-card:hover{background:rgba(184,136,42,.07)!important;border-color:rgba(184,136,42,.25)!important;}
+#view-tool .edu-card{background:var(--t-metric-bg)!important;border-color:var(--t-metric-border)!important;}
+/* risk bar track */
+#view-tool .risk-bar{background:var(--t-acc-border)!important;}
+/* advm card labels/values */
+#view-tool .advm-lbl{color:var(--text5)!important;}
+#view-tool .advm-val{color:var(--text)!important;}
+/* edu cards */
+#view-tool .edu-title{color:var(--text)!important;}
+#view-tool .edu-body{color:var(--text3)!important;}
+/* report section */
+#view-tool .report-box{background:var(--t-panel-bg)!important;border-color:var(--t-panel-border)!important;}
+#view-tool #report-no-stock{background:var(--t-metric-bg)!important;border-color:var(--t-metric-border)!important;color:var(--text4)!important;}
+#view-tool #report-summary{color:var(--text3)!important;}
+#view-tool .report-section-lbl{color:var(--text5)!important;}
 /* SEC filings */
 #view-tool .sec-filing-row{background:var(--t-metric-bg)!important;border-color:var(--t-metric-border)!important;}
 #view-tool .sec-filing-row:hover{background:var(--t-metric-hover)!important;}
@@ -2225,6 +2317,142 @@ html[data-theme="dark"] .modal-box p,html[data-theme="dark"] .modal-box span:not
 html[data-theme="dark"] .input-light{background:rgba(255,255,255,.07)!important;border-color:rgba(255,255,255,.14)!important;color:rgba(220,225,232,.9)!important;}
 html[data-theme="dark"] .input-light::placeholder{color:rgba(220,225,232,.28)!important;}
 
+
+/* ── Financials sub-tab buttons ── */
+.fin-tab-btn{font-size:.75rem;padding:.35rem .9rem;border-radius:var(--r);border:1px solid var(--t-acc-border);background:var(--t-acc-header-bg);color:var(--text4);font-family:var(--sans);font-weight:500;cursor:pointer;transition:all .15s;}
+.fin-tab-btn:hover{color:var(--text);background:var(--t-acc-header-hover);}
+.fin-tab-btn.active{background:var(--gold);color:#111820;border-color:var(--gold);font-weight:600;}
+/* Also fix inline-styled description text inside financials */
+#view-tool #fin-content > div:first-child > div{color:var(--text4);}
+/* tool-tabs bar */
+#view-tool .tool-tabs{background:var(--t-acc-header-bg)!important;border-bottom-color:var(--t-acc-border)!important;}
+#view-tool .tool-name{color:var(--text4)!important;}
+#view-tool .tool-tab{color:var(--text4)!important;}
+#view-tool .tool-tab.active{color:var(--gold)!important;background:rgba(184,136,42,.07)!important;border-bottom-color:var(--gold)!important;}
+#view-tool .tool-tab:hover:not(.active){color:var(--text2)!important;background:var(--t-acc-header-hover)!important;}
+/* tool header strip */
+#view-tool .tool-header{background:var(--t-acc-header-bg)!important;border-bottom-color:var(--t-acc-border)!important;}
+/* search-row & quick buttons */
+#view-tool .search-row{background:var(--t-acc-header-bg)!important;border-bottom-color:var(--t-acc-border)!important;}
+/* earnings table */
+#view-tool .earn-table th{color:var(--text5)!important;background:var(--t-acc-header-bg)!important;border-bottom-color:var(--t-acc-border)!important;}
+#view-tool .earn-table td{color:var(--text3)!important;border-bottom-color:var(--t-acc-body-border)!important;}
+#view-tool .earn-table td:first-child{color:var(--text5)!important;}
+#view-tool .earn-table tr:hover td{background:rgba(184,136,42,.06)!important;}
+/* risk panel */
+#view-tool .risk-row{border-bottom-color:var(--t-acc-body-border)!important;}
+#view-tool .risk-lbl{color:var(--text4)!important;}
+#view-tool .risk-val{color:var(--text)!important;}
+/* compare input groups */
+#view-tool .cmp-ig input{background:var(--t-ticker-bg)!important;border-color:var(--t-ticker-border)!important;color:var(--text)!important;}
+/* screener run btn area */
+#view-tool .scr-input{background:var(--t-ticker-bg)!important;border-color:var(--t-ticker-border)!important;color:var(--text)!important;}
+/* projection model */
+#view-tool .proj-out{background:var(--t-panel-bg)!important;border-color:var(--t-panel-border)!important;}
+#view-tool .proj-row{border-bottom-color:var(--t-acc-body-border)!important;}
+#view-tool .proj-lbl{color:var(--text4)!important;}
+#view-tool .proj-val{color:var(--text)!important;}
+/* risk panel */
+#view-tool .risk-name{color:var(--text4)!important;}
+/* paywall + states */
+#view-tool .paywall-sub{color:var(--text4)!important;}
+#view-tool .loading-bar{color:var(--text5)!important;}
+#view-tool .tool-disclaimer{color:var(--text5)!important;border-top-color:var(--t-acc-body-border)!important;}
+/* inline fallback text — covers any remaining hardcoded inline color styles inside #view-tool */
+#view-tool [style*="rgba(247,244,238"]{color:var(--text4)!important;}
+#view-tool [style*="color:rgba(247"]{color:var(--text4)!important;}
+
+/* ══ SCROLLBAR ══ */
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:6px;border:2px solid transparent;background-clip:padding-box;}
+::-webkit-scrollbar-thumb:hover{background:var(--gold);border:2px solid transparent;background-clip:padding-box;}
+*{scrollbar-width:thin;scrollbar-color:var(--border2) transparent;}
+
+/* ══ CHART EXPAND BUTTON ══ */
+.chart-wrap{position:relative;}
+.chart-exp-btn{
+  position:absolute;top:8px;right:8px;z-index:2;
+  width:26px;height:26px;border-radius:5px;border:1px solid var(--t-acc-border);
+  background:var(--t-acc-header-bg);color:var(--text4);cursor:pointer;
+  font-size:.82rem;display:flex;align-items:center;justify-content:center;
+  opacity:0;transition:opacity .15s,background .15s,color .15s;
+  line-height:1;
+}
+.chart-wrap:hover .chart-exp-btn{opacity:1;}
+.chart-exp-btn:hover{background:var(--gold)!important;color:#111820!important;border-color:var(--gold)!important;}
+
+/* ══ CHART EXPAND MODAL ══ */
+#chart-expand-modal{
+  position:fixed;inset:0;z-index:9000;
+  background:rgba(0,0,0,.72);backdrop-filter:blur(6px);
+  display:none;align-items:center;justify-content:center;
+}
+#chart-expand-modal.open{display:flex;}
+.cex-box{
+  background:var(--card);border:1px solid var(--border2);border-radius:14px;
+  width:88vw;max-width:1280px;height:80vh;max-height:820px;
+  display:flex;flex-direction:column;overflow:hidden;
+  box-shadow:0 32px 80px rgba(0,0,0,.45);
+}
+.cex-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.75rem 1.25rem;border-bottom:1px solid var(--border);
+  background:var(--t-acc-header-bg);flex-shrink:0;
+}
+.cex-title{font-size:.95rem;font-weight:600;color:var(--text);font-family:var(--serif);}
+.cex-controls{display:flex;gap:.5rem;align-items:center;}
+.cex-btn{
+  font-size:.72rem;padding:.3rem .75rem;border-radius:var(--r);
+  border:1px solid var(--t-acc-border);background:var(--t-acc-header-bg);
+  color:var(--text4);cursor:pointer;font-family:var(--sans);transition:all .15s;
+}
+.cex-btn:hover{background:var(--t-acc-header-hover);color:var(--text);}
+.cex-btn.gold{background:var(--gold);color:#111820;border-color:var(--gold);font-weight:600;}
+.cex-hint{font-size:.68rem;color:var(--text5);font-family:var(--mono);}
+.cex-body{flex:1;position:relative;padding:1rem 1.25rem;min-height:0;}
+.cex-body canvas{width:100%!important;height:100%!important;}
+
+/* ══ ANALYST PANEL ══ */
+.analyst-panel{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:14px;}
+@media(max-width:640px){.analyst-panel{grid-template-columns:1fr;}}
+.analyst-target-box{background:var(--t-panel-bg);border:1px solid var(--t-panel-border);border-radius:var(--r2);padding:1rem 1.25rem;}
+.analyst-rec-box{background:var(--t-panel-bg);border:1px solid var(--t-panel-border);border-radius:var(--r2);padding:1rem 1.25rem;}
+.analyst-box-title{font-size:.68rem;font-weight:600;color:var(--text5);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.75rem;}
+.analyst-target-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:.35rem;}
+.analyst-target-lbl{font-size:.76rem;color:var(--text4);}
+.analyst-target-val{font-size:.82rem;font-weight:600;font-family:var(--mono);color:var(--text);}
+.analyst-upside{font-size:1.1rem;font-weight:700;font-family:var(--mono);margin-top:.5rem;}
+.analyst-upside.up{color:#4ade80;}
+.analyst-upside.dn{color:#f87171;}
+.analyst-gauge{display:flex;gap:3px;margin:10px 0 6px;}
+.analyst-gauge-seg{height:8px;border-radius:3px;flex:1;background:var(--t-acc-border);transition:background .2s;}
+.analyst-gauge-seg.lit.sb{background:#4ade80;}
+.analyst-gauge-seg.lit.b{background:#86efac;}
+.analyst-gauge-seg.lit.h{background:#fbbf24;}
+.analyst-gauge-seg.lit.s{background:#f97316;}
+.analyst-gauge-seg.lit.ss{background:#f87171;}
+.analyst-rec-lbl{font-size:.88rem;font-weight:700;color:var(--text);margin-bottom:2px;}
+.analyst-rec-sub{font-size:.72rem;color:var(--text5);font-family:var(--mono);}
+.analyst-breakdown{display:flex;gap:.35rem;margin-top:.65rem;flex-wrap:wrap;}
+.analyst-bd-item{font-size:.68rem;padding:2px 8px;border-radius:3px;border:1px solid var(--t-acc-border);color:var(--text4);}
+
+/* ══ INSTITUTIONAL & DARK POOL ══ */
+.inst-table{width:100%;border-collapse:collapse;font-size:.78rem;}
+.inst-table th{color:var(--text5);font-weight:500;padding:.45rem .65rem;border-bottom:1px solid var(--t-acc-border);font-family:var(--mono);font-size:.63rem;text-transform:uppercase;letter-spacing:.07em;text-align:right;}
+.inst-table th:first-child{text-align:left;}
+.inst-table td{padding:.45rem .65rem;border-bottom:1px solid var(--t-acc-body-border);color:var(--text3);text-align:right;}
+.inst-table td:first-child{text-align:left;color:var(--text);font-weight:500;}
+.inst-table tr:hover td{background:rgba(184,136,42,.05);}
+.dp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.75rem;margin-bottom:1rem;}
+.dp-card{background:var(--t-metric-bg);border:1px solid var(--t-metric-border);border-radius:var(--r2);padding:.75rem 1rem;}
+.dp-lbl{font-size:.62rem;color:var(--text5);font-family:var(--mono);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.3rem;}
+.dp-val{font-size:1.1rem;font-weight:700;font-family:var(--mono);color:var(--text);}
+.dp-sub{font-size:.65rem;color:var(--text5);margin-top:2px;}
+.dp-bar-wrap{height:6px;background:var(--t-acc-border);border-radius:3px;margin-top:6px;overflow:hidden;}
+.dp-bar-fill{height:100%;border-radius:3px;background:var(--gold);}
+.dp-chart-wrap{height:120px;margin-top:.75rem;}
+
 </style>
 <script>
 /* ══════════════════════════════════════════════════════
@@ -2238,6 +2466,7 @@ const S = {
   screenerSort: { col: 'marketCap', dir: -1 },
   userPlan: 'free',   // 'free' | 'trial' | 'pro'
   trialEndsAt: null,
+  analystTarget: null,  // { mean, high, low } set by loadAnalyst()
 };
 const PROXY = 'https://api.allorigins.win/raw?url=';
 const COLORS = ['#C89B3C','#4a9fd4','#4ade80','#f87171'];
@@ -2260,7 +2489,8 @@ function openSection(id, skipProCheck) {
   if      (id === 'financials')  { if(t) loadFinancials(t); }
   else if (id === 'advmetrics')  { if(t) loadAdvMetrics(t); }
   else if (id === 'earnings')    { if(t) loadEarnings(t); }
-  else if (id === 'secfilings')  { if(t) loadSecFilings(t); }
+  else if (id === 'secfilings')     { if(t) loadSecFilings(t); }
+  else if (id === 'institutional')  { if(t) loadInstitutional(t); }
   else if (id === 'screener')    { if(isPro()) loadScreener(); }
   else if (id === 'reports')     { setTimeout(checkReportReady, 100); }
 }
@@ -2324,7 +2554,7 @@ function checkReportReady() {
   const summary = document.getElementById('report-summary');
   if (summary) {
     summary.innerHTML =
-      '<strong style="color:rgba(247,244,238,.85);">' + S.ticker + '</strong> — ' +
+      '<strong style="color:var(--text);">' + S.ticker + '</strong> — ' +
       (meta.longName || S.ticker) + '<br>' +
       'Price: $' + (meta.regularMarketPrice || '—') +
       ' &nbsp;|&nbsp; Exchange: ' + (meta.fullExchangeName || '—') + '<br>' +
@@ -2514,11 +2744,138 @@ function bollinger(c,p=20,m=2) { return c.map((_,i)=>{ if(i<p-1)return{u:null,l:
    CHART HELPERS
 ══════════════════════════════════════════════════════ */
 function destroyChart(id) { if(S.charts[id]){S.charts[id].destroy();delete S.charts[id];} }
+/* Returns a theme-aware chart grid color */
+function gcol(){ return document.documentElement.getAttribute('data-theme')==='dark' ? 'rgba(255,255,255,.05)' : 'rgba(0,0,0,.07)'; }
+function ttbg(){ return document.documentElement.getAttribute('data-theme')==='dark' ? 'rgba(14,14,14,.92)' : 'rgba(255,255,255,.96)'; }
+function ttbody(){ return document.documentElement.getAttribute('data-theme')==='dark' ? '#E8EDE2' : '#1a1c20'; }
+function ttborder(){ return document.documentElement.getAttribute('data-theme')==='dark' ? 'rgba(255,255,255,.08)' : 'rgba(0,0,0,.1)'; }
+
+/* Crosshair plugin — draws a vertical line at hover position */
+const crosshairPlugin = {
+  id:'crosshair',
+  afterDraw(chart){
+    if(!chart._crosshairX) return;
+    const {ctx,chartArea:{top,bottom}}=chart;
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(chart._crosshairX, top);
+    ctx.lineTo(chart._crosshairX, bottom);
+    ctx.strokeStyle = document.documentElement.getAttribute('data-theme')==='dark'
+      ? 'rgba(255,255,255,.18)' : 'rgba(0,0,0,.18)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4,3]);
+    ctx.stroke();
+    ctx.restore();
+  },
+  afterEvent(chart, args){
+    const evt = args.event;
+    if(evt.type==='mousemove' && evt.x >= chart.chartArea.left && evt.x <= chart.chartArea.right){
+      chart._crosshairX = evt.x;
+    } else {
+      chart._crosshairX = null;
+    }
+    chart.draw();
+  }
+};
+Chart.register(crosshairPlugin);
+
 const baseOpts = (extraScales={}) => ({
   responsive:true, maintainAspectRatio:false,
-  plugins:{ legend:{display:false}, tooltip:{mode:'index',intersect:false,backgroundColor:'rgba(14,14,14,.92)',titleColor:'#999',bodyColor:'#E8EDE2',borderColor:'rgba(255,255,255,.08)',borderWidth:1} },
-  scales:{ x:{ticks:{color:'rgba(247,244,238,.22)',font:{size:10},maxTicksLimit:8},grid:{color:'rgba(255,255,255,.04)'},...(extraScales.x||{})}, y:{ticks:{color:'rgba(247,244,238,.22)',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'},...(extraScales.y||{})} }
+  interaction:{mode:'index',intersect:false},
+  plugins:{
+    legend:{display:false},
+    tooltip:{
+      mode:'index',intersect:false,
+      backgroundColor:ttbg(),titleColor:'#999',bodyColor:ttbody(),
+      borderColor:ttborder(),borderWidth:1,
+      padding:10, caretSize:5,
+      callbacks:{
+        label: ctx => ` ${ctx.dataset.label||''}: ${ctx.formattedValue}`
+      }
+    }
+  },
+  scales:{
+    x:{ticks:{color:'var(--text5)',font:{size:10},maxTicksLimit:8},grid:{color:gcol()},...(extraScales.x||{})},
+    y:{ticks:{color:'var(--text5)',font:{size:10}},grid:{color:gcol()},...(extraScales.y||{})}
+  }
 });
+
+/* ══ CHART EXPAND MODAL ══ */
+var _expandedChart = null;
+
+function expandChart(chartId, title) {
+  const src = S.charts[chartId];
+  if (!src) { toast('Load a stock first', 'red'); return; }
+  document.getElementById('cex-title').textContent = title;
+  const modal = document.getElementById('chart-expand-modal');
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  if(_expandedChart){ _expandedChart.destroy(); _expandedChart = null; }
+
+  const canvas = document.getElementById('chart-expanded');
+  // Deep-clone the chart config
+  const srcCfg = src.config;
+  // Rebuild datasets with hover dots enabled
+  const datasets = (srcCfg.data.datasets||[]).map(ds => ({
+    ...ds,
+    pointRadius: ds.type==='bar' ? undefined : 0,
+    pointHoverRadius: ds.type==='bar' ? undefined : 6,
+    pointHoverBorderWidth: 2,
+    pointHoverBackgroundColor: ds.borderColor || '#C89B3C',
+    pointHoverBorderColor: '#fff',
+  }));
+
+  _expandedChart = new Chart(canvas, {
+    type: srcCfg.type,
+    data: { labels:[...srcCfg.data.labels], datasets },
+    options: {
+      ...srcCfg.options,
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      plugins: {
+        ...(srcCfg.options?.plugins||{}),
+        legend: { display: true, labels: { color: 'var(--text4)', font:{size:11}, boxWidth:16, padding:16 } },
+        tooltip: {
+          mode:'index', intersect:false,
+          backgroundColor:ttbg(), titleColor:'#888', bodyColor:ttbody(),
+          borderColor:ttborder(), borderWidth:1, padding:12, caretSize:5
+        },
+        zoom: {
+          zoom: { wheel:{enabled:true,speed:0.08}, pinch:{enabled:true}, mode:'x', onZoom(){_expandedChart?.update('none');} },
+          pan:  { enabled:true, mode:'x', onPan(){_expandedChart?.update('none');} },
+          limits: { x:{min:'original',max:'original'} }
+        }
+      },
+      scales: {
+        ...(srcCfg.options?.scales||{}),
+        x: {
+          ...(srcCfg.options?.scales?.x||{}),
+          ticks:{color:'var(--text5)',font:{size:11},...(srcCfg.options?.scales?.x?.ticks||{})},
+          grid:{color:gcol()}
+        },
+        y: {
+          ...(srcCfg.options?.scales?.y||{}),
+          ticks:{color:'var(--text5)',font:{size:11},...(srcCfg.options?.scales?.y?.ticks||{})},
+          grid:{color:gcol()}
+        }
+      }
+    }
+  });
+}
+
+function resetExpandZoom(){
+  if(_expandedChart) _expandedChart.resetZoom();
+}
+
+function closeExpandModal(){
+  document.getElementById('chart-expand-modal').classList.remove('open');
+  document.body.style.overflow = '';
+  if(_expandedChart){ _expandedChart.destroy(); _expandedChart = null; }
+}
+
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeExpandModal(); });
 
 /* ══════════════════════════════════════════════════════
    QUICK LOAD / ANALYZE
@@ -2535,7 +2892,7 @@ async function fetchAndRender() {
   document.getElementById('stock-result').style.display='none';
   try {
     const result=await yahooFetch(ticker,S.range);
-    S.ticker=ticker; S.data=result;
+    S.ticker=ticker; S.data=result; S.analystTarget=null;
     renderStock(result,ticker);
     toast(`${ticker} loaded ✓`,'green');
   } catch(e) {
@@ -2602,6 +2959,7 @@ function renderStock(result, ticker) {
   buildDistChart(returns);
   renderRiskPanel(c,meta);
   renderNews(ticker,meta.longName||ticker);
+  loadAnalyst(ticker);
 
   document.getElementById('stock-result').style.display='block';
   document.getElementById('proj-results').style.display='none';
@@ -2614,15 +2972,28 @@ function buildPriceChart(result,closes,timestamps) {
   const valid=closes.map((c,i)=>({c,l:labels[i]})).filter(x=>x.c!=null);
   const vc=valid.map(x=>x.c), vl=valid.map(x=>x.l);
   const ma50v=sma(vc,50), ma200v=sma(vc,200), bbv=bollinger(vc,20);
+  const hoverPt={pointRadius:0,pointHoverRadius:6,pointHoverBorderWidth:2,pointHoverBorderColor:'#fff'};
   const ds=[{
     label:'Price',data:vc,borderColor:'#C89B3C',borderWidth:2,
-    pointRadius:0,fill:true,backgroundColor:ctx=>{const g=ctx.chart.ctx.createLinearGradient(0,0,0,240);g.addColorStop(0,'rgba(200,155,60,.15)');g.addColorStop(1,'rgba(200,155,60,0)');return g;},tension:.2,order:10,
+    ...hoverPt,pointHoverBackgroundColor:'#C89B3C',
+    fill:true,backgroundColor:ctx=>{const g=ctx.chart.ctx.createLinearGradient(0,0,0,240);g.addColorStop(0,'rgba(200,155,60,.15)');g.addColorStop(1,'rgba(200,155,60,0)');return g;},tension:.2,order:10,
   }];
-  if(S.inds.ma50) ds.push({label:'MA50',data:ma50v,borderColor:'#4a9fd4',borderWidth:1.5,pointRadius:0,fill:false,tension:.2,order:9});
-  if(S.inds.ma200) ds.push({label:'MA200',data:ma200v,borderColor:'#9b72c8',borderWidth:1.5,pointRadius:0,fill:false,tension:.2,order:8});
-  if(S.inds.bb) { ds.push({label:'BB+',data:bbv.map(x=>x.u),borderColor:'rgba(212,129,58,.5)',borderWidth:1,pointRadius:0,fill:false,tension:.2,order:7,borderDash:[3,3]}); ds.push({label:'BB-',data:bbv.map(x=>x.l),borderColor:'rgba(212,129,58,.5)',borderWidth:1,pointRadius:0,fill:false,tension:.2,order:6,borderDash:[3,3]}); }
-  const opts=baseOpts({y:{ticks:{color:'rgba(247,244,238,.22)',font:{size:10},callback:v=>`$${v.toFixed(0)}`}}});
-  opts.plugins.legend={display:S.inds.ma50||S.inds.ma200||S.inds.bb,labels:{color:'rgba(247,244,238,.35)',font:{size:10},boxWidth:14}};
+  if(S.inds.ma50) ds.push({label:'MA50',data:ma50v,borderColor:'#4a9fd4',borderWidth:1.5,...hoverPt,pointHoverBackgroundColor:'#4a9fd4',fill:false,tension:.2,order:9});
+  if(S.inds.ma200) ds.push({label:'MA200',data:ma200v,borderColor:'#9b72c8',borderWidth:1.5,...hoverPt,pointHoverBackgroundColor:'#9b72c8',fill:false,tension:.2,order:8});
+  if(S.inds.bb) {
+    ds.push({label:'BB+',data:bbv.map(x=>x.u),borderColor:'rgba(212,129,58,.5)',borderWidth:1,...hoverPt,fill:false,tension:.2,order:7,borderDash:[3,3]});
+    ds.push({label:'BB-',data:bbv.map(x=>x.l),borderColor:'rgba(212,129,58,.5)',borderWidth:1,...hoverPt,fill:false,tension:.2,order:6,borderDash:[3,3]});
+  }
+  // Analyst target lines (horizontal) — added if analyst data loaded
+  if(S.analystTarget){
+    const n=vl.length;
+    if(S.analystTarget.mean) ds.push({label:`Target $${S.analystTarget.mean.toFixed(0)}`,data:Array(n).fill(S.analystTarget.mean),borderColor:'rgba(139,195,74,.7)',borderWidth:1.5,borderDash:[6,4],pointRadius:0,pointHoverRadius:0,fill:false,tension:0,order:5});
+    if(S.analystTarget.high) ds.push({label:`High $${S.analystTarget.high.toFixed(0)}`,data:Array(n).fill(S.analystTarget.high),borderColor:'rgba(74,222,128,.4)',borderWidth:1,borderDash:[3,4],pointRadius:0,pointHoverRadius:0,fill:false,tension:0,order:4});
+    if(S.analystTarget.low)  ds.push({label:`Low $${S.analystTarget.low.toFixed(0)}`,data:Array(n).fill(S.analystTarget.low),borderColor:'rgba(248,113,113,.4)',borderWidth:1,borderDash:[3,4],pointRadius:0,pointHoverRadius:0,fill:false,tension:0,order:3});
+  }
+  const opts=baseOpts({y:{ticks:{color:'var(--text5)',font:{size:10},callback:v=>`$${v.toFixed(0)}`}}});
+  opts.plugins.legend={display:true,labels:{color:'var(--text4)',font:{size:10},boxWidth:14,filter:i=>i.text&&i.text.length>0}};
+  opts.plugins.tooltip.callbacks={label:ctx=>`${ctx.dataset.label||''}: $${Number(ctx.raw).toFixed(2)}`};
   S.charts['price-chart']=new Chart(document.getElementById('price-chart'),{type:'line',data:{labels:vl,datasets:ds},options:opts});
 }
 
@@ -2632,8 +3003,8 @@ function buildRSIChart(rsiVals,timestamps) {
   const last=rsiVals[rsiVals.length-1];
   document.getElementById('rsi-readout').textContent=last?`${last.toFixed(1)} — ${last<30?'Oversold':last>70?'Overbought':'Neutral'}`:'';
   S.charts['rsi-chart']=new Chart(document.getElementById('rsi-chart'),{
-    type:'line',data:{labels,datasets:[{label:'RSI',data:rsiVals,borderWidth:1.5,pointRadius:0,fill:false,tension:.2,segment:{borderColor:ctx=>{const v=ctx.p0?.parsed?.y;return v<30?'#4ade80':v>70?'#f87171':'#C89B3C';}}}]},
-    options:{...baseOpts(),scales:{x:{display:false},y:{min:0,max:100,ticks:{color:'rgba(247,244,238,.22)',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'}}},plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false}}},
+    type:'line',data:{labels,datasets:[{label:'RSI',data:rsiVals,borderWidth:1.5,pointRadius:0,pointHoverRadius:5,pointHoverBorderWidth:2,pointHoverBorderColor:'#fff',pointHoverBackgroundColor:'#C89B3C',fill:false,tension:.2,segment:{borderColor:ctx=>{const v=ctx.p0?.parsed?.y;return v<30?'#4ade80':v>70?'#f87171':'#C89B3C';}}}]},
+    options:{...baseOpts(),scales:{x:{display:false},y:{min:0,max:100,ticks:{color:'var(--text5)',font:{size:10}},grid:{color:gcol()}}},plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,callbacks:{label:ctx=>`RSI: ${Number(ctx.raw).toFixed(1)}`}}}},
   });
 }
 
@@ -2646,9 +3017,9 @@ function buildMACDChart(closes,timestamps) {
   S.charts['macd-chart']=new Chart(document.getElementById('macd-chart'),{
     type:'bar',data:{labels,datasets:[
       {type:'bar',data:hist,backgroundColor:hist.map(v=>v>=0?'rgba(74,222,128,.5)':'rgba(248,113,113,.5)'),borderWidth:0,order:3},
-      {type:'line',data:line,borderColor:'#4a9fd4',borderWidth:1.5,pointRadius:0,fill:false,tension:.2,order:1},
-      {type:'line',data:sig,borderColor:'#f87171',borderWidth:1.5,pointRadius:0,fill:false,tension:.2,order:2,borderDash:[3,3]},
-    ]},options:{...baseOpts(),scales:{x:{display:false},y:{ticks:{color:'rgba(247,244,238,.22)',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'}}},plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false}}},
+      {type:'line',data:line,borderColor:'#4a9fd4',borderWidth:1.5,pointRadius:0,pointHoverRadius:5,pointHoverBorderColor:'#fff',pointHoverBackgroundColor:'#4a9fd4',fill:false,tension:.2,order:1,label:'MACD'},
+      {type:'line',data:sig,borderColor:'#f87171',borderWidth:1.5,pointRadius:0,pointHoverRadius:5,pointHoverBorderColor:'#fff',pointHoverBackgroundColor:'#f87171',fill:false,tension:.2,order:2,borderDash:[3,3],label:'Signal'},
+    ]},options:{...baseOpts(),scales:{x:{display:false},y:{ticks:{color:'var(--text5)',font:{size:10}},grid:{color:gcol()}}},plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false}}},
   });
 }
 
@@ -2658,7 +3029,7 @@ function buildVolChart(vols,timestamps,closes) {
   const bg=vols.map((_,i)=>closes[i]>=closes[i-1]?'rgba(74,222,128,.55)':'rgba(248,113,113,.55)');
   S.charts['vol-chart']=new Chart(document.getElementById('vol-chart'),{
     type:'bar',data:{labels,datasets:[{data:vols,backgroundColor:bg,borderWidth:0}]},
-    options:{...baseOpts({y:{ticks:{color:'rgba(247,244,238,.22)',font:{size:10},callback:v=>fmtBig(v).replace('$','')}}}),plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false}}},
+    options:{...baseOpts({y:{ticks:{color:'var(--text5)',font:{size:10},callback:v=>fmtBig(v).replace('$','')}}}),plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false}}},
   });
 }
 
@@ -2737,7 +3108,7 @@ function runProjection() {
   ds.unshift({label:'Current',data:Array(years+1).fill(price),borderColor:'rgba(255,255,255,.1)',borderWidth:1,borderDash:[4,4],pointRadius:0,fill:false});
   S.charts['proj-chart']=new Chart(document.getElementById('proj-chart'),{
     type:'line',data:{labels,datasets:ds},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:'rgba(247,244,238,.35)',font:{size:10},boxWidth:14}},tooltip:{mode:'index',intersect:false,backgroundColor:'rgba(14,14,14,.92)',titleColor:'#999',bodyColor:'#E8EDE2',borderColor:'rgba(255,255,255,.08)',borderWidth:1}},scales:{x:{ticks:{color:'rgba(247,244,238,.22)',font:{size:11}},grid:{color:'rgba(255,255,255,.04)'}},y:{ticks:{color:'rgba(247,244,238,.22)',font:{size:10},callback:v=>`$${v.toFixed(0)}`},grid:{color:'rgba(255,255,255,.04)'}}}}
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:'var(--text4)',font:{size:10},boxWidth:14}},tooltip:{mode:'index',intersect:false,backgroundColor:ttbg(),titleColor:'#999',bodyColor:ttbody(),borderColor:ttborder(),borderWidth:1}},scales:{x:{ticks:{color:'var(--text5)',font:{size:11}},grid:{color:gcol()}},y:{ticks:{color:'var(--text5)',font:{size:10},callback:v=>`$${v.toFixed(0)}`},grid:{color:gcol()}}}}
   });
   document.getElementById('proj-results').style.display='block';
 }
@@ -2810,8 +3181,8 @@ function buildPerfChart(tickers,results) {
     const base=c[0];
     return{label:t,data:c.map(v=>parseFloat(((v-base)/base*100).toFixed(2))),borderColor:COLORS[i],borderWidth:2,pointRadius:0,fill:false,tension:.2};
   });
-  var perfOpts=baseOpts({y:{ticks:{color:'rgba(247,244,238,.22)',font:{size:10},callback:function(v){return (v>0?'+':'')+v.toFixed(0)+'%';}}}});
-  perfOpts.plugins={legend:{display:true,labels:{color:'rgba(247,244,238,.4)',font:{size:10},boxWidth:12}},tooltip:{mode:'index',intersect:false,backgroundColor:'rgba(14,14,14,.92)',bodyColor:'#E8EDE2',borderColor:'rgba(255,255,255,.08)',borderWidth:1}};
+  var perfOpts=baseOpts({y:{ticks:{color:'var(--text5)',font:{size:10},callback:function(v){return (v>0?'+':'')+v.toFixed(0)+'%';}}}});
+  perfOpts.plugins={legend:{display:true,labels:{color:'var(--text4)',font:{size:10},boxWidth:12}},tooltip:{mode:'index',intersect:false,backgroundColor:'rgba(14,14,14,.92)',bodyColor:'#E8EDE2',borderColor:'rgba(255,255,255,.08)',borderWidth:1}};
   S.charts['cmp-perf-chart']=new Chart(el,{type:'line',data:{labels:labels,datasets:datasets},options:perfOpts});
 }
 
@@ -2837,8 +3208,8 @@ function buildRadarChart(tickers,results) {
   S.charts['cmp-radar-chart']=new Chart(el,{
     type:'radar',data:{labels:['1Y Return','RSI','Low Vol','Mkt Cap','Value (P/E)'],datasets},
     options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:true,labels:{color:'rgba(247,244,238,.4)',font:{size:10},boxWidth:12}}},
-      scales:{r:{min:0,max:100,ticks:{display:false},grid:{color:'rgba(255,255,255,.1)'},pointLabels:{color:'rgba(247,244,238,.4)',font:{size:9}},angleLines:{color:'rgba(255,255,255,.08)'}}},
+      plugins:{legend:{display:true,labels:{color:'var(--text4)',font:{size:10},boxWidth:12}}},
+      scales:{r:{min:0,max:100,ticks:{display:false},grid:{color:gcol()},pointLabels:{color:'var(--text4)',font:{size:9}},angleLines:{color:gcol()}}},
     }
   });
 }
@@ -2950,10 +3321,10 @@ function runAdvancedProjection() {
   S.charts['adv-proj-chart']=new Chart(document.getElementById('adv-proj-chart'),{
     type:'line',data:{labels:labels,datasets:datasets},
     options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:true,labels:{color:'rgba(247,244,238,.35)',font:{size:10},boxWidth:14}},tooltip:{mode:'index',intersect:false,backgroundColor:'rgba(14,14,14,.92)',titleColor:'#999',bodyColor:'#E8EDE2',borderColor:'rgba(255,255,255,.08)',borderWidth:1}},
-      scales:{x:{ticks:{color:'rgba(247,244,238,.22)',font:{size:11}},grid:{color:'rgba(255,255,255,.04)'}},y:{ticks:{color:'rgba(247,244,238,.22)',font:{size:10},callback:function(v){return '$'+v.toFixed(0);}},grid:{color:'rgba(255,255,255,.04)'}}}}
+      plugins:{legend:{display:true,labels:{color:'var(--text4)',font:{size:10},boxWidth:14}},tooltip:{mode:'index',intersect:false,backgroundColor:'rgba(14,14,14,.92)',titleColor:'#999',bodyColor:'#E8EDE2',borderColor:'rgba(255,255,255,.08)',borderWidth:1}},
+      scales:{x:{ticks:{color:'var(--text5)',font:{size:11}},grid:{color:gcol()}},y:{ticks:{color:'var(--text5)',font:{size:10},callback:function(v){return '$'+v.toFixed(0);}},grid:{color:gcol()}}}}
   });
-  var irrHtml='<div class="dcf-out"><div class="dcf-row" style="background:rgba(255,255,255,.03);"><span class="dcf-lbl" style="font-weight:600;">Scenario</span><span class="dcf-val" style="font-weight:600;">Price</span><span class="dcf-val" style="font-weight:600;">Total Return</span><span class="dcf-val" style="font-weight:600;">CAGR</span></div>';
+  var irrHtml='<div class="dcf-out"><div class="dcf-row" style="background:var(--t-acc-header-bg);"><span class="dcf-lbl" style="font-weight:600;color:var(--text3);">Scenario</span><span class="dcf-val" style="font-weight:600;">Price</span><span class="dcf-val" style="font-weight:600;">Total Return</span><span class="dcf-val" style="font-weight:600;">CAGR</span></div>';
   results.forEach(function(r){
     irrHtml+='<div class="dcf-row"><span class="dcf-lbl">'+r.l+'</span><span class="dcf-val">$'+r.priceN.toFixed(2)+'</span><span class="dcf-val '+(r.tot>=0?'up':'dn')+'">'+(r.tot>=0?'+':'')+r.tot.toFixed(1)+'%</span><span class="dcf-val">'+r.cagr.toFixed(1)+'%/yr</span></div>';
   });
@@ -3008,7 +3379,7 @@ function sortScreener(col) {
 }
 function renderScreenerTable(stocks) {
   var tbody=document.getElementById('scr-body');
-  if(!stocks.length){tbody.innerHTML='<tr><td colspan="9" style="text-align:center;color:rgba(247,244,238,.3);padding:2rem;">No stocks match the current filters.</td></tr>';return;}
+  if(!stocks.length){tbody.innerHTML='<tr><td colspan="9" style="text-align:center;color:var(--text5);padding:2rem;">No stocks match the current filters.</td></tr>';return;}
   tbody.innerHTML=stocks.map(function(s){
     var chg1D=s.change1D||0;
     var chg1Y=s.change1Y;
@@ -3080,12 +3451,12 @@ function renderRiskPanel(closes, meta) {
 async function renderNews(ticker, name) {
   const el = document.getElementById('news-items');
   if (!el) return;
-  el.innerHTML = '<div style="color:rgba(247,244,238,.3);font-size:.78rem;">Loading news…</div>';
+  el.innerHTML = '<div style="color:var(--text5);font-size:.78rem;">Loading news…</div>';
   try {
     const res  = await fetch('/api/news/' + ticker, { credentials: 'same-origin' });
     const data = await res.json();
     if (!Array.isArray(data) || !data.length) {
-      el.innerHTML = '<div style="color:rgba(247,244,238,.3);font-size:.78rem;">No recent news found.</div>';
+      el.innerHTML = '<div style="color:var(--text5);font-size:.78rem;">No recent news found.</div>';
       return;
     }
     el.innerHTML = data.slice(0, 6).map(item => `
@@ -3094,7 +3465,7 @@ async function renderNews(ticker, name) {
         <div class="news-meta">${item.source || ''} · ${item.datetime ? new Date(item.datetime * 1000).toLocaleDateString() : ''}</div>
       </a>`).join('');
   } catch(e) {
-    el.innerHTML = '<div style="color:rgba(247,244,238,.3);font-size:.78rem;">News unavailable.</div>';
+    el.innerHTML = '<div style="color:var(--text5);font-size:.78rem;">News unavailable.</div>';
   }
 }
 
@@ -3139,7 +3510,7 @@ async function loadFinancials(ticker) {
     function getRaw(v){ return v==null ? null : (v.raw!=null ? v.raw : (typeof v==='number' ? v : null)); }
 
     function buildTable(rows, statements) {
-      if (!statements.length) return '<div style="color:rgba(247,244,238,.3);font-size:.8rem;">No data available.</div>';
+      if (!statements.length) return '<div style="color:var(--text5);font-size:.8rem;">No data available.</div>';
       const years = statements.map(s => s.endDate ? (s.endDate.fmt ? s.endDate.fmt.slice(0,4) : String(s.endDate).slice(0,4)) : '');
       let html = '<div style="overflow-x:auto;"><table class="fin-table"><thead><tr><th>Item</th>' + years.map(y=>'<th>'+y+'</th>').join('') + '</tr></thead><tbody>';
       for (const row of rows) {
@@ -3215,7 +3586,7 @@ function showFinTab(name, btn) {
   _finTab = name;
   document.querySelectorAll('#fin-content button').forEach(b => {
     b.style.background = 'rgba(200,155,60,.12)';
-    b.style.color = 'rgba(247,244,238,.5)';
+    b.style.color = 'var(--text3)';
   });
   if(btn) { btn.style.background = ''; btn.style.color = ''; }
   document.querySelectorAll('.fin-subtab').forEach(d => d.style.display='none');
@@ -3340,7 +3711,7 @@ async function loadEarnings(ticker) {
     const data = await res.json();
     if (!Array.isArray(data) || !data.length) {
       if(loading) loading.style.display='none';
-      if(cont) cont.innerHTML='<div style="color:rgba(247,244,238,.3);font-size:.82rem;">No earnings data found for this ticker.</div>';
+      if(cont) cont.innerHTML='<div style="color:var(--text5);font-size:.82rem;">No earnings data found for this ticker.</div>';
       return;
     }
     // sort newest first
@@ -3379,8 +3750,8 @@ async function loadEarnings(ticker) {
     if (withData.length) {
       const beats = withData.filter(r => r.surprisePercent > 2).length;
       const pct   = Math.round(beats / withData.length * 100);
-      html += '<div style="margin-top:1rem;font-size:.78rem;color:rgba(247,244,238,.4);">'
-        + ticker + ' beat EPS estimates in <strong style="color:rgba(247,244,238,.75);">'
+      html += '<div style="margin-top:1rem;font-size:.78rem;color:var(--text4);">'
+        + ticker + ' beat EPS estimates in <strong style="color:var(--text2);">'
         + beats + ' of ' + withData.length + '</strong> reported quarters ('
         + pct + '% beat rate).</div>';
     }
@@ -3485,6 +3856,209 @@ function toggleTheme() {
   const saved = localStorage.getItem('il-theme');
   if (saved === 'dark') document.documentElement.setAttribute('data-theme','dark');
 })();
+
+/* =====================================================
+   ANALYST PRICE TARGETS
+===================================================== */
+var S_analystCache = {};
+
+async function loadAnalyst(ticker) {
+  document.getElementById('analyst-panel').style.display = 'none';
+  try {
+    const res  = await fetch('/api/analyst/' + ticker, {credentials:'same-origin'});
+    const data = await res.json();
+    const pt   = data.priceTarget || {};
+    const recs = data.recommendations || [];
+
+    // Store targets so price chart can draw lines
+    if (pt.targetMean) {
+      S.analystTarget = { mean: pt.targetMean, high: pt.targetHigh, low: pt.targetLow };
+      // Rebuild price chart with target lines
+      if (S.data && S.charts['price-chart']) {
+        const meta = S.data.meta;
+        const ts   = S.data.timestamp || [];
+        const q    = S.data.indicators.quote[0];
+        buildPriceChart(S.data, q.close||[], ts);
+      }
+    }
+
+    renderAnalystTargets(pt);
+    renderAnalystRec(recs);
+    document.getElementById('analyst-panel').style.display = 'block';
+  } catch(e) {
+    console.warn('analyst load failed:', e.message);
+  }
+}
+
+function renderAnalystTargets(pt) {
+  const el = document.getElementById('analyst-targets-content');
+  if (!el || !pt) return;
+  const price = S.data?.meta?.regularMarketPrice || 0;
+  const mean  = pt.targetMean || pt.targetMeanPrice;
+  const high  = pt.targetHigh || pt.targetHighPrice;
+  const low   = pt.targetLow  || pt.targetLowPrice;
+  const n     = pt.numberOfAnalysts || pt.numberOfAnalystOpinions || 0;
+  if (!mean) { el.innerHTML = '<div style="color:var(--text5);font-size:.78rem;">No price target data available.</div>'; return; }
+  const upside = price > 0 ? ((mean - price) / price * 100) : null;
+  const uClass = upside == null ? '' : upside >= 0 ? 'up' : 'dn';
+  el.innerHTML = `
+    <div class="analyst-target-row"><span class="analyst-target-lbl">Mean Target</span><span class="analyst-target-val">$${mean.toFixed(2)}</span></div>
+    <div class="analyst-target-row"><span class="analyst-target-lbl">High Target</span><span class="analyst-target-val" style="color:#4ade80;">$${high ? high.toFixed(2) : '—'}</span></div>
+    <div class="analyst-target-row"><span class="analyst-target-lbl">Low Target</span><span class="analyst-target-val" style="color:#f87171;">$${low  ? low.toFixed(2)  : '—'}</span></div>
+    <div class="analyst-target-row"><span class="analyst-target-lbl">Analysts</span><span class="analyst-target-val">${n || '—'}</span></div>
+    ${upside != null ? `<div class="analyst-upside ${uClass}">${upside >= 0 ? '▲' : '▼'} ${Math.abs(upside).toFixed(1)}% upside</div>` : ''}
+  `;
+}
+
+function renderAnalystRec(recs) {
+  const el = document.getElementById('analyst-rec-content');
+  if (!el) return;
+  // Most recent period
+  if (!recs || !recs.length) { el.innerHTML = '<div style="color:var(--text5);font-size:.78rem;">No recommendation data.</div>'; return; }
+  const r = recs[0]; // most recent
+  const sb = r.strongBuy||0, b = r.buy||0, h = r.hold||0, s = r.sell||0, ss = r.strongSell||0;
+  const total = sb+b+h+s+ss || 1;
+  // Weighted score 1-5 (1=strong buy, 5=strong sell)
+  const score = (sb*1 + b*2 + h*3 + s*4 + ss*5) / total;
+  const labels = ['','Strong Buy','Buy','Hold','Sell','Strong Sell'];
+  const recLabel = score < 1.5 ? 'Strong Buy' : score < 2.5 ? 'Buy' : score < 3.5 ? 'Hold' : score < 4.5 ? 'Sell' : 'Strong Sell';
+  const recColor = score < 1.5 ? '#4ade80' : score < 2.5 ? '#86efac' : score < 3.5 ? '#fbbf24' : score < 4.5 ? '#f97316' : '#f87171';
+  // Gauge: 5 segments
+  const segs = [
+    {key:'sb', cls:'sb', pct: sb/total},
+    {key:'b',  cls:'b',  pct: b/total},
+    {key:'h',  cls:'h',  pct: h/total},
+    {key:'s',  cls:'s',  pct: s/total},
+    {key:'ss', cls:'ss', pct: ss/total},
+  ];
+  el.innerHTML = `
+    <div class="analyst-gauge">
+      ${segs.map(sg => `<div class="analyst-gauge-seg lit ${sg.cls}" style="flex:${Math.max(sg.pct*100, 4)}"></div>`).join('')}
+    </div>
+    <div class="analyst-rec-lbl" style="color:${recColor};">${recLabel}</div>
+    <div class="analyst-rec-sub">${r.period || ''} · Score ${score.toFixed(2)} / 5.00</div>
+    <div class="analyst-breakdown">
+      <div class="analyst-bd-item" style="color:#4ade80;">Strong Buy: ${sb}</div>
+      <div class="analyst-bd-item" style="color:#86efac;">Buy: ${b}</div>
+      <div class="analyst-bd-item">Hold: ${h}</div>
+      <div class="analyst-bd-item" style="color:#f97316;">Sell: ${s}</div>
+      <div class="analyst-bd-item" style="color:#f87171;">Strong Sell: ${ss}</div>
+    </div>
+  `;
+}
+
+/* =====================================================
+   INSTITUTIONAL & DARK POOL
+===================================================== */
+async function loadInstitutional(ticker) {
+  const loading = document.getElementById('inst-loading');
+  const content = document.getElementById('inst-content');
+  const nostock = document.getElementById('inst-nostock');
+  if (!ticker) { if(nostock) nostock.style.display='block'; if(content) content.style.display='none'; return; }
+  if(nostock) nostock.style.display='none';
+  if(loading) loading.style.display='flex';
+  if(content) content.style.display='none';
+  try {
+    const [instRes, dpRes] = await Promise.all([
+      fetch('/api/institutional/' + ticker, {credentials:'same-origin'}),
+      fetch('/api/darkpool/' + ticker, {credentials:'same-origin'})
+    ]);
+    const instData = instRes.ok ? await instRes.json() : {};
+    const dpData   = dpRes.ok  ? await dpRes.json()   : {};
+    if(loading) loading.style.display='none';
+    renderDarkPool(dpData);
+    renderInstitutional(instData);
+    if(content) content.style.display='block';
+  } catch(e) {
+    if(loading) loading.style.display='none';
+    console.warn('institutional load failed:', e.message);
+  }
+}
+
+function renderDarkPool(data) {
+  const cards = document.getElementById('dp-cards');
+  if (!cards) return;
+  const dp  = data.darkpool || [];
+  const si  = data.shortInterest || {};
+
+  // Short interest metrics
+  const siPct   = si.shortPercent != null ? (si.shortPercent * 100).toFixed(1) : null;
+  const siShares= si.shortInterest ? fmtBig(si.shortInterest).replace('$','') : null;
+  const siDate  = si.settleDate || si.date || null;
+
+  // Dark pool volume stats from weekly data
+  let totalVol = 0, weeksAvg = 0;
+  if (dp.length) {
+    const vols = dp.map(w => Number(w.totalWeeklyShareQuantity)||0);
+    totalVol = vols[0] || 0;
+    weeksAvg = vols.reduce((a,b)=>a+b,0) / vols.length;
+  }
+  const dpPct = weeksAvg > 0 && totalVol > 0 ? (totalVol / weeksAvg * 100).toFixed(0) : null;
+
+  cards.innerHTML = [
+    { lbl:'Short Interest %',  val: siPct  ? siPct+'%' : '—',     sub: siDate || '', bar: siPct ? Math.min(parseFloat(siPct),50)/50 : 0,  color: siPct && parseFloat(siPct)>15 ? '#f87171' : '#C89B3C' },
+    { lbl:'Shares Short',      val: siShares || '—',               sub: 'shares held short', bar: 0, color: '#C89B3C' },
+    { lbl:'Dark Pool Volume',  val: dp[0]?.totalWeeklyShareQuantity ? fmtBig(dp[0].totalWeeklyShareQuantity).replace('$','') : '—', sub: dp[0]?.weekStartDate ? 'week of '+dp[0].weekStartDate : 'latest week', bar: dpPct ? Math.min(parseFloat(dpPct),200)/200 : 0, color: '#4a9fd4' },
+    { lbl:'Weekly Trades',     val: dp[0]?.totalWeeklyTradeCount   ? fmtBig(dp[0].totalWeeklyTradeCount).replace('$','') : '—', sub: 'OTC dark pool trades', bar: 0, color: '#9b72c8' },
+  ].map(c => `
+    <div class="dp-card">
+      <div class="dp-lbl">${c.lbl}</div>
+      <div class="dp-val" style="color:${c.color};">${c.val}</div>
+      <div class="dp-sub">${c.sub}</div>
+      ${c.bar > 0 ? `<div class="dp-bar-wrap"><div class="dp-bar-fill" style="width:${(c.bar*100).toFixed(0)}%;background:${c.color};"></div></div>` : ''}
+    </div>`).join('');
+
+  // Build weekly dark pool chart
+  if (dp.length >= 2) {
+    destroyChart('dp-chart');
+    const labels = dp.map(w => w.weekStartDate || '').reverse();
+    const vols   = dp.map(w => Number(w.totalWeeklyShareQuantity)||0).reverse();
+    S.charts['dp-chart'] = new Chart(document.getElementById('dp-chart'), {
+      type:'bar',
+      data:{labels, datasets:[{
+        label:'Dark Pool Volume',
+        data: vols,
+        backgroundColor:'rgba(74,159,212,.55)',
+        borderColor:'rgba(74,159,212,.9)',
+        borderWidth:1,
+        borderRadius:3
+      }]},
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        plugins:{legend:{display:false}, tooltip:{callbacks:{label:ctx=>' '+fmtBig(ctx.raw).replace('$','')}}},
+        scales:{
+          x:{ticks:{color:'var(--text5)',font:{size:9}}, grid:{display:false}},
+          y:{ticks:{color:'var(--text5)',font:{size:9},callback:v=>fmtBig(v).replace('$','')}, grid:{color:gcol()}}
+        }
+      }
+    });
+  }
+}
+
+function renderInstitutional(data) {
+  const tbody = document.getElementById('inst-tbody');
+  if (!tbody) return;
+  const holders = data.ownership || [];
+  if (!holders.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text5);padding:1.5rem;">No institutional holder data available for this ticker.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = holders.map(h => {
+    const shares = h.share != null ? fmtBig(h.share).replace('$','') : '—';
+    const pct    = h.percentageHeld != null ? (h.percentageHeld * 100).toFixed(2) + '%' : '—';
+    const change = h.change != null ? h.change : null;
+    const changeStr = change != null ? `<span style="color:${change>0?'#4ade80':change<0?'#f87171':'var(--text4)'}">${change>0?'+':''}${fmtBig(change).replace('$','')}</span>` : '—';
+    return `<tr>
+      <td>${h.holderName||h.name||'—'}</td>
+      <td>${shares}</td>
+      <td>${pct}</td>
+      <td>${changeStr}</td>
+      <td style="font-size:.68rem;color:var(--text5);">${h.reportDate||h.date||'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+
 </script>
 </body>
 </html>

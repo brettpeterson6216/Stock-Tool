@@ -605,33 +605,120 @@ async function getYahooCrumb() {
 //  Financials proxy  (Yahoo Finance quoteSummary)
 // ============================================================
 app.get('/api/financials/:ticker', async (req, res) => {
-  try {
-    const ticker  = req.params.ticker.toUpperCase();
+  const ticker = req.params.ticker.toUpperCase();
+
+  // ── Helper: fetch Yahoo quoteSummary ──────────────────────
+  async function tryYahoo() {
     const modules = 'incomeStatementHistory,incomeStatementHistoryQuarterly,balanceSheetHistory,balanceSheetHistoryQuarterly,cashflowStatementHistory,cashflowStatementHistoryQuarterly,defaultKeyStatistics,financialData';
     const { crumb, cookies } = await getYahooCrumb();
-    const crumbParam = crumb ? `&crumb=${encodeURIComponent(crumb)}` : '';
-    const url = `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${ticker}?modules=${modules}${crumbParam}`;
-    const headers = {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      'Accept': 'application/json',
-    };
-    if (cookies) headers['Cookie'] = cookies;
-    const r = await fetch(url, { headers });
-    if (!r.ok) {
-      // If 401, force crumb refresh and retry once
-      if (r.status === 401) {
-        _yfCrumb = null; _yfCookies = null; _yfCrumbAt = 0;
-        const { crumb: c2, cookies: k2 } = await getYahooCrumb();
-        const url2 = `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${ticker}?modules=${modules}${c2 ? '&crumb=' + encodeURIComponent(c2) : ''}`;
-        const h2 = { ...headers };
-        if (k2) h2['Cookie'] = k2;
-        const r2 = await fetch(url2, { headers: h2 });
-        if (!r2.ok) return res.status(r2.status).json({ error: 'Yahoo returned ' + r2.status + ' (after crumb retry)' });
-        return res.json(await r2.json());
-      }
-      return res.status(r.status).json({ error: 'Yahoo returned ' + r.status });
+    const cp  = crumb ? `&crumb=${encodeURIComponent(crumb)}` : '';
+    // Try query2 first (more permissive), then query1
+    for (const host of ['query2', 'query1']) {
+      const url = `https://${host}.finance.yahoo.com/v10/finance/quoteSummary/${ticker}?modules=${encodeURIComponent(modules)}&formatted=true&lang=en-US&region=US${cp}`;
+      const hdr = {
+        'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept':'application/json', 'Accept-Language':'en-US,en;q=0.9',
+      };
+      if (cookies) hdr['Cookie'] = cookies;
+      try {
+        const r = await fetch(url, { headers: hdr });
+        if (r.status === 401 && host === 'query2') {
+          _yfCrumb = null; _yfCookies = null; _yfCrumbAt = 0; continue;
+        }
+        if (!r.ok) continue;
+        const data = await r.json();
+        if (data?.quoteSummary?.result?.[0]) return data;
+      } catch(_) { continue; }
     }
-    res.json(await r.json());
+    return null;
+  }
+
+  // ── Helper: fetch Finnhub financials-reported ─────────────
+  async function tryFinnhub() {
+    const url = `https://finnhub.io/api/v1/financials-reported?symbol=${ticker}&freq=annual&token=${FINNHUB_KEY}`;
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('Finnhub ' + r.status);
+    const fh = await r.json();
+    const annuals = (fh.data || []).filter(d => d.quarter === 0).slice(0, 4);
+    if (!annuals.length) throw new Error('No Finnhub annual data');
+
+    function fv(arr, concepts) {
+      for (const c of concepts) {
+        const item = (arr||[]).find(x => x.concept === c);
+        if (item && item.value != null) return { raw: item.value };
+      }
+      return null;
+    }
+
+    const incS = annuals.map(a => ({
+      endDate: { fmt: a.endDate, raw: Math.floor(new Date(a.endDate).getTime()/1000) },
+      totalRevenue:           fv(a.report?.ic, ['Revenues','RevenueFromContractWithCustomerExcludingAssessedTax','SalesRevenueNet','RevenueFromContractWithCustomerIncludingAssessedTax']),
+      costOfRevenue:          fv(a.report?.ic, ['CostOfGoodsAndServicesSold','CostOfRevenue','CostOfGoodsSold']),
+      grossProfit:            fv(a.report?.ic, ['GrossProfit']),
+      totalOperatingExpenses: fv(a.report?.ic, ['OperatingExpenses','CostsAndExpenses']),
+      operatingIncome:        fv(a.report?.ic, ['OperatingIncomeLoss']),
+      netIncome:              fv(a.report?.ic, ['NetIncomeLoss']),
+      basicEps:               fv(a.report?.ic, ['EarningsPerShareBasic']),
+      dilutedEps:             fv(a.report?.ic, ['EarningsPerShareDiluted']),
+    }));
+
+    const balS = annuals.map(a => ({
+      endDate: { fmt: a.endDate, raw: Math.floor(new Date(a.endDate).getTime()/1000) },
+      cash:                  fv(a.report?.bs, ['CashAndCashEquivalentsAtCarryingValue','Cash','CashAndCashEquivalents']),
+      shortTermInvestments:  fv(a.report?.bs, ['ShortTermInvestments','AvailableForSaleSecuritiesCurrent']),
+      totalCurrentAssets:    fv(a.report?.bs, ['AssetsCurrent']),
+      totalAssets:           fv(a.report?.bs, ['Assets']),
+      shortLongTermDebt:     fv(a.report?.bs, ['ShortTermBorrowings','DebtCurrent','CommercialPaper','ShortTermNotes']),
+      longTermDebt:          fv(a.report?.bs, ['LongTermDebt','LongTermDebtNoncurrent']),
+      totalLiab:             fv(a.report?.bs, ['Liabilities']),
+      totalStockholderEquity:fv(a.report?.bs, ['StockholdersEquity','StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest']),
+    }));
+
+    const cfS = annuals.map(a => {
+      const capexRaw = fv(a.report?.cf, ['PaymentsToAcquirePropertyPlantAndEquipment','CapitalExpenditures']);
+      const capex = capexRaw ? { raw: -Math.abs(capexRaw.raw) } : null;
+      return {
+        endDate: { fmt: a.endDate, raw: Math.floor(new Date(a.endDate).getTime()/1000) },
+        totalCashFromOperatingActivities:       fv(a.report?.cf, ['NetCashProvidedByUsedInOperatingActivities']),
+        capitalExpenditures:                    capex,
+        totalCashflowsFromInvestingActivities:  fv(a.report?.cf, ['NetCashProvidedByUsedInInvestingActivities']),
+        totalCashFromFinancingActivities:        fv(a.report?.cf, ['NetCashProvidedByUsedInFinancingActivities']),
+        changeInCash:                           fv(a.report?.cf, ['CashAndCashEquivalentsPeriodIncreaseDecrease','NetIncreaseDecreaseInCashAndCashEquivalents']),
+      };
+    });
+    return { incS, balS, cfS };
+  }
+
+  // ── Main: try Yahoo, check if bal+cf present, else merge Finnhub ──
+  try {
+    const yahooData = await tryYahoo();
+    const yr = yahooData?.quoteSummary?.result?.[0] || {};
+    const hasBal = yr.balanceSheetHistory?.balanceSheetStatements?.length > 0;
+    const hasCf  = yr.cashflowStatementHistory?.cashflowStatements?.length > 0;
+
+    if (hasBal && hasCf) return res.json(yahooData);
+
+    // Yahoo missing balance/cashflow — fetch Finnhub to fill gaps
+    try {
+      const fh = await tryFinnhub();
+      return res.json({
+        quoteSummary: { result: [{
+          ...yr,
+          incomeStatementHistory:         { incomeStatementHistory:  hasBal ? yr.incomeStatementHistory?.incomeStatementHistory  || fh.incS : fh.incS },
+          balanceSheetHistory:            { balanceSheetStatements:  fh.balS },
+          cashflowStatementHistory:       { cashflowStatements:      fh.cfS  },
+          incomeStatementHistoryQuarterly:  yr.incomeStatementHistoryQuarterly  || { incomeStatementHistory: [] },
+          balanceSheetHistoryQuarterly:     yr.balanceSheetHistoryQuarterly     || { balanceSheetStatements: [] },
+          cashflowStatementHistoryQuarterly:yr.cashflowStatementHistoryQuarterly|| { cashflowStatements:     [] },
+          defaultKeyStatistics: yr.defaultKeyStatistics,
+          financialData:        yr.financialData,
+        }]}
+      });
+    } catch (fhErr) {
+      console.error('Finnhub financials error:', fhErr.message);
+      if (yahooData) return res.json(yahooData); // return whatever Yahoo gave us
+      return res.status(404).json({ error: 'No financial data available.' });
+    }
   } catch (e) {
     console.error('financials proxy error:', e.message);
     res.status(500).json({ error: 'Failed to fetch financials.' });
@@ -723,6 +810,60 @@ app.get('/api/sec/:ticker', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch SEC data.' });
   }
 });
+// ============================================================
+//  Analyst price targets + recommendations  (Finnhub)
+// ============================================================
+app.get('/api/analyst/:ticker', async (req, res) => {
+  const ticker = req.params.ticker.toUpperCase();
+  try {
+    const [ptResp, recResp] = await Promise.all([
+      fetch(`https://finnhub.io/api/v1/stock/price-target?symbol=${ticker}&token=${FINNHUB_KEY}`),
+      fetch(`https://finnhub.io/api/v1/stock/recommendation?symbol=${ticker}&token=${FINNHUB_KEY}`)
+    ]);
+    const [pt, rec] = await Promise.all([ptResp.json(), recResp.json()]);
+    res.json({ priceTarget: pt, recommendations: rec });
+  } catch (e) {
+    console.error('analyst proxy error:', e.message);
+    res.status(500).json({ error: 'Failed to fetch analyst data.' });
+  }
+});
+
+// ============================================================
+//  Institutional ownership  (Finnhub)
+// ============================================================
+app.get('/api/institutional/:ticker', async (req, res) => {
+  const ticker = req.params.ticker.toUpperCase();
+  try {
+    const r = await fetch(`https://finnhub.io/api/v1/stock/ownership?symbol=${ticker}&limit=10&token=${FINNHUB_KEY}`);
+    const data = await r.json();
+    res.json(data);
+  } catch (e) {
+    console.error('institutional proxy error:', e.message);
+    res.status(500).json({ error: 'Failed to fetch institutional data.' });
+  }
+});
+
+// ============================================================
+//  Dark pool / short interest  (FINRA OTC + Finnhub)
+// ============================================================
+app.get('/api/darkpool/:ticker', async (req, res) => {
+  const ticker = req.params.ticker.toUpperCase();
+  try {
+    // FINRA OTC dark pool weekly summary
+    const finraUrl = `https://api.finra.org/data/group/OTCMarket/name/weeklySummary?compareFilters=[{"fieldName":"issueSymbolIdentifier","compareType":"equal","fieldValue":"${ticker}"}]&fields=weekStartDate,totalWeeklyShareQuantity,totalWeeklyTradeCount,lastSalePrice&limit=8&sortFields=[{"fieldName":"weekStartDate","sortType":"DESC"}]`;
+    const [finraResp, siResp] = await Promise.all([
+      fetch(finraUrl, { headers: { 'Accept': 'application/json' } }),
+      fetch(`https://finnhub.io/api/v1/stock/short-interest?symbol=${ticker}&token=${FINNHUB_KEY}`)
+    ]);
+    const finraData = finraResp.ok ? await finraResp.json() : [];
+    const siData   = siResp.ok   ? await siResp.json()   : {};
+    res.json({ darkpool: finraData, shortInterest: siData });
+  } catch (e) {
+    console.error('darkpool proxy error:', e.message);
+    res.status(500).json({ error: 'Failed to fetch dark pool data.' });
+  }
+});
+
 // ============================================================
 //  Static pages
 // ============================================================
