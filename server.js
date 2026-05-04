@@ -766,16 +766,34 @@ app.get('/api/sec/:ticker', async (req, res) => {
   if (!ticker) return res.status(400).json({ error: 'No ticker' });
   const UA = 'ImpliedLens/1.0 brettpeterson6216@gmail.com';
   try {
-    // Step 1: look up CIK via EDGAR company search JSON
-    const cikUrl = `https://efts.sec.gov/LATEST/search-index?q=%22${ticker}%22&forms=10-K&dateRange=custom&startdt=2018-01-01`;
-    const cikResp = await fetch(cikUrl, { headers: { 'User-Agent': UA, 'Accept': 'application/json' } });
-    const cikData = await cikResp.json();
-    const hits = cikData?.hits?.hits || [];
-    if (!hits.length) return res.json({ filings: [], entity: ticker });
+    // Strategy 1: EDGAR full-text search for company filings
+    let entityId = null, entityName = ticker;
+    const cikUrl = `https://efts.sec.gov/LATEST/search-index?q=%22${encodeURIComponent(ticker)}%22&forms=10-K,10-Q,8-K`;
+    try {
+      const cikResp = await fetch(cikUrl, { headers: { 'User-Agent': UA, 'Accept': 'application/json' } });
+      if (cikResp.ok) {
+        const cikData = await cikResp.json();
+        const hits = cikData?.hits?.hits || [];
+        if (hits.length) {
+          entityId   = hits[0]?._source?.entity_id;
+          entityName = hits[0]?._source?.entity_name || ticker;
+        }
+      }
+    } catch(_) {}
 
-    // Find best-matching entity (prefer exact ticker match in entity_name or file_num)
-    const entityId = hits[0]?._source?.entity_id;
-    if (!entityId) return res.json({ filings: [], entity: hits[0]?._source?.entity_name || ticker });
+    // Strategy 2: EDGAR company tickers JSON (authoritative ticker→CIK map)
+    if (!entityId) {
+      try {
+        const tcResp = await fetch('https://www.sec.gov/files/company_tickers.json', { headers: { 'User-Agent': UA } });
+        if (tcResp.ok) {
+          const tcData = await tcResp.json();
+          const entry = Object.values(tcData).find(e => e.ticker?.toUpperCase() === ticker);
+          if (entry) { entityId = entry.cik_str; entityName = entry.title || ticker; }
+        }
+      } catch(_) {}
+    }
+
+    if (!entityId) return res.json({ filings: [], entity: ticker });
 
     const paddedCik = String(entityId).padStart(10, '0');
 
@@ -816,12 +834,57 @@ app.get('/api/sec/:ticker', async (req, res) => {
 app.get('/api/analyst/:ticker', async (req, res) => {
   const ticker = req.params.ticker.toUpperCase();
   try {
+    // Finnhub: price targets + recommendations
     const [ptResp, recResp] = await Promise.all([
       fetch(`https://finnhub.io/api/v1/stock/price-target?symbol=${ticker}&token=${FINNHUB_KEY}`),
       fetch(`https://finnhub.io/api/v1/stock/recommendation?symbol=${ticker}&token=${FINNHUB_KEY}`)
     ]);
     const [pt, rec] = await Promise.all([ptResp.json(), recResp.json()]);
-    res.json({ priceTarget: pt, recommendations: rec });
+
+    // Yahoo financialData as fallback for targets + P/E, P/S
+    let yahooFd = {};
+    try {
+      const { crumb, cookies } = await getYahooCrumb();
+      const cp = crumb ? `&crumb=${encodeURIComponent(crumb)}` : '';
+      const yUrl = `https://query2.finance.yahoo.com/v10/finance/quoteSummary/${ticker}?modules=financialData,defaultKeyStatistics${cp}&formatted=true`;
+      const yHdr = { 'User-Agent':'Mozilla/5.0', 'Accept':'application/json' };
+      if (cookies) yHdr['Cookie'] = cookies;
+      const yr = await fetch(yUrl, { headers: yHdr });
+      if (yr.ok) {
+        const yd = await yr.json();
+        const r0 = yd?.quoteSummary?.result?.[0] || {};
+        const fd = r0.financialData || {};
+        const ks = r0.defaultKeyStatistics || {};
+        yahooFd = {
+          targetMeanPrice:  fd.targetMeanPrice?.raw,
+          targetHighPrice:  fd.targetHighPrice?.raw,
+          targetLowPrice:   fd.targetLowPrice?.raw,
+          targetMedianPrice:fd.targetMedianPrice?.raw,
+          numberOfAnalystOpinions: fd.numberOfAnalystOpinions?.raw,
+          recommendationMean: fd.recommendationMean?.raw,
+          recommendationKey:  fd.recommendationKey,
+          priceToBook:        ks.priceToBook?.raw,
+          trailingPE:         ks.trailingPE?.raw,
+          forwardPE:          ks.forwardPE?.raw,
+          priceToSales:       ks.priceToSalesTrailing12Months?.raw,
+          marketCap:          ks.marketCap?.raw,
+          enterpriseValue:    ks.enterpriseValue?.raw,
+          currentPrice:       fd.currentPrice?.raw,
+        };
+      }
+    } catch(_) {}
+
+    // Merge: prefer Finnhub, fall back to Yahoo
+    const merged = {
+      targetMean:  pt.targetMean  || yahooFd.targetMeanPrice  || null,
+      targetHigh:  pt.targetHigh  || yahooFd.targetHighPrice  || null,
+      targetLow:   pt.targetLow   || yahooFd.targetLowPrice   || null,
+      targetMedian:pt.targetMedian|| yahooFd.targetMedianPrice|| null,
+      numberOfAnalysts: pt.numberOfAnalysts || yahooFd.numberOfAnalystOpinions || null,
+      lastUpdated: pt.lastUpdated || null,
+      symbol: ticker,
+    };
+    res.json({ priceTarget: merged, recommendations: rec, yahooFd });
   } catch (e) {
     console.error('analyst proxy error:', e.message);
     res.status(500).json({ error: 'Failed to fetch analyst data.' });
@@ -849,15 +912,40 @@ app.get('/api/institutional/:ticker', async (req, res) => {
 app.get('/api/darkpool/:ticker', async (req, res) => {
   const ticker = req.params.ticker.toUpperCase();
   try {
-    // FINRA OTC dark pool weekly summary
-    const finraUrl = `https://api.finra.org/data/group/OTCMarket/name/weeklySummary?compareFilters=[{"fieldName":"issueSymbolIdentifier","compareType":"equal","fieldValue":"${ticker}"}]&fields=weekStartDate,totalWeeklyShareQuantity,totalWeeklyTradeCount,lastSalePrice&limit=8&sortFields=[{"fieldName":"weekStartDate","sortType":"DESC"}]`;
-    const [finraResp, siResp] = await Promise.all([
-      fetch(finraUrl, { headers: { 'Accept': 'application/json' } }),
-      fetch(`https://finnhub.io/api/v1/stock/short-interest?symbol=${ticker}&token=${FINNHUB_KEY}`)
+    // FINRA OTC dark pool weekly summary — properly URL-encoded
+    const compareFilters = encodeURIComponent(JSON.stringify([
+      { fieldName:'issueSymbolIdentifier', compareType:'equal', fieldValue: ticker }
+    ]));
+    const sortFields = encodeURIComponent(JSON.stringify([{ fieldName:'weekStartDate', sortType:'DESC' }]));
+    const finraUrl = `https://api.finra.org/data/group/OTCMarket/name/weeklySummary?compareFilters=${compareFilters}&fields=weekStartDate,totalWeeklyShareQuantity,totalWeeklyTradeCount,lastSalePrice&limit=8&sortFields=${sortFields}`;
+
+    // Short interest from Yahoo Finance defaultKeyStatistics (free)
+    const { crumb, cookies } = await getYahooCrumb();
+    const cp = crumb ? `&crumb=${encodeURIComponent(crumb)}` : '';
+    const yahooUrl = `https://query2.finance.yahoo.com/v10/finance/quoteSummary/${ticker}?modules=defaultKeyStatistics${cp}&formatted=true`;
+    const yahooHdr = { 'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Accept':'application/json' };
+    if (cookies) yahooHdr['Cookie'] = cookies;
+
+    const [finraResp, yahooResp] = await Promise.all([
+      fetch(finraUrl, { headers: { 'Accept':'application/json', 'User-Agent':'ImpliedLens/1.0 brettpeterson6216@gmail.com' } }).catch(()=>null),
+      fetch(yahooUrl, { headers: yahooHdr }).catch(()=>null)
     ]);
-    const finraData = finraResp.ok ? await finraResp.json() : [];
-    const siData   = siResp.ok   ? await siResp.json()   : {};
-    res.json({ darkpool: finraData, shortInterest: siData });
+
+    const finraData = (finraResp?.ok) ? await finraResp.json().catch(()=>[]) : [];
+    let siData = {};
+    if (yahooResp?.ok) {
+      const yd = await yahooResp.json().catch(()=>({}));
+      const ks = yd?.quoteSummary?.result?.[0]?.defaultKeyStatistics || {};
+      siData = {
+        sharesShort:         ks.sharesShort?.raw         || null,
+        shortRatio:          ks.shortRatio?.raw          || null,
+        shortPercentOfFloat: ks.shortPercentOfFloat?.raw || null,
+        dateShortInterest:   ks.dateShortInterest?.fmt   || null,
+        sharesOutstanding:   ks.sharesOutstanding?.raw   || null,
+        floatShares:         ks.floatShares?.raw         || null,
+      };
+    }
+    res.json({ darkpool: Array.isArray(finraData) ? finraData : [], shortInterest: siData });
   } catch (e) {
     console.error('darkpool proxy error:', e.message);
     res.status(500).json({ error: 'Failed to fetch dark pool data.' });

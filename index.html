@@ -1732,24 +1732,35 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
 
           <div class="acc-section" id="sec-reports">
             <div class="acc-header" onclick="toggleSection('reports')">
-              <span class="acc-title">Reports <span class="acc-pro-badge">PRO</span></span>
+              <span class="acc-title">Saved Analyses</span>
               <span class="acc-chevron">›</span>
             </div>
             <div class="acc-body" id="body-reports" style="display:none;">
-<div style="padding:1.25rem 0;">
-              <div style="font-size:.82rem;color:var(--text3);margin-bottom:1.25rem;">Generate a print-ready PDF of your current stock analysis — including all charts, metrics, and projections.</div>
-              <div id="report-no-stock" style="display:none;background:var(--t-metric-bg);border:1px solid var(--t-metric-border);border-radius:var(--r2);padding:1.5rem;text-align:center;color:var(--text4);font-size:.85rem;">
-                Load a stock from the <strong style="color:var(--gold);">Analyze</strong> tab first, then come back here to export your report.
+<div style="padding:.75rem 0;">
+              <!-- Sort/Filter controls -->
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+                <span style="font-size:.72rem;color:var(--text5);text-transform:uppercase;letter-spacing:.07em;">Sort by:</span>
+                <button class="sa-sort-btn active" id="sa-sort-date" onclick="setSavedSort('date')">Date</button>
+                <button class="sa-sort-btn" id="sa-sort-stock" onclick="setSavedSort('stock')">Stock</button>
+                <button class="sa-sort-btn" id="sa-sort-type" onclick="setSavedSort('type')">Type</button>
+                <div style="flex:1;"></div>
+                <button class="sa-clear-btn" onclick="clearAllSaved()">Clear All</button>
               </div>
-              <div id="report-ready" style="display:none;">
-                <div style="background:var(--t-metric-bg);border:1px solid var(--t-metric-border);border-radius:var(--r2);padding:1.25rem;margin-bottom:1rem;">
-                  <div style="font-family:var(--mono);font-size:.75rem;color:var(--text4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.5rem;">Report contents</div>
-                  <div id="report-summary" style="font-size:.88rem;color:var(--text2);line-height:1.8;"></div>
-                </div>
-                <button class="btn-run" onclick="exportPDF()" style="max-width:280px;">📄 Export PDF Report →</button>
-                <div style="margin-top:.75rem;font-size:.72rem;color:var(--text5);">Opens a print dialog — choose "Save as PDF" in your browser's print panel.</div>
+              <!-- Filter pills -->
+              <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;" id="sa-type-filters">
+                <button class="sa-pill active" data-type="ALL" onclick="setSavedTypeFilter('ALL')">All</button>
+                <button class="sa-pill" data-type="price" onclick="setSavedTypeFilter('price')">Price Snapshot</button>
+                <button class="sa-pill" data-type="dcf" onclick="setSavedTypeFilter('dcf')">DCF</button>
+                <button class="sa-pill" data-type="projection" onclick="setSavedTypeFilter('projection')">Projection</button>
+                <button class="sa-pill" data-type="compare" onclick="setSavedTypeFilter('compare')">Compare</button>
+                <button class="sa-pill" data-type="note" onclick="setSavedTypeFilter('note')">Notes</button>
               </div>
-              <div id="report-check" style="display:none;"></div>
+              <!-- List -->
+              <div id="sa-list"></div>
+              <div id="sa-empty" style="text-align:center;padding:2rem 0;color:var(--text5);font-size:.82rem;display:none;">
+                No saved analyses yet.<br>
+                <span style="font-size:.75rem;">Use the <strong style="color:var(--gold);">Save Analysis</strong> buttons on charts and models to bookmark results here.</span>
+              </div>
             </div>
 
           <!-- DCF / Projection tabs (locked) -->
@@ -2257,6 +2268,37 @@ html[data-theme="dark"] .theme-toggle-thumb{left:16px;background:var(--gold);}
 #view-tool .scr-table tr:hover td{background:rgba(184,136,42,.06)!important;}
 #view-tool .scr-ticker{color:var(--text)!important;}
 #view-tool .scr-name{color:var(--text5)!important;}
+/* ── saved analyses tab ── */
+.sa-sort-btn{font-size:.7rem;padding:3px 10px;border-radius:20px;border:1px solid var(--t-metric-border);background:transparent;color:var(--text4);cursor:pointer;transition:all .15s;}
+.sa-sort-btn.active,.sa-sort-btn:hover{background:var(--gold);color:#0a0a0a;border-color:var(--gold);}
+.sa-clear-btn{font-size:.7rem;padding:3px 10px;border-radius:20px;border:1px solid rgba(248,113,113,.3);background:transparent;color:#f87171;cursor:pointer;}
+.sa-clear-btn:hover{background:#f87171;color:#fff;}
+.sa-pill{font-size:.68rem;padding:3px 10px;border-radius:20px;border:1px solid var(--t-metric-border);background:transparent;color:var(--text5);cursor:pointer;transition:all .15s;}
+.sa-pill.active,.sa-pill:hover{border-color:var(--gold);color:var(--gold);}
+.sa-card{background:var(--t-metric-bg);border:1px solid var(--t-metric-border);border-radius:8px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:10px;transition:border-color .15s;}
+.sa-card:hover{border-color:var(--gold);}
+.sa-type-badge{font-size:.6rem;font-family:var(--mono);text-transform:uppercase;letter-spacing:.07em;padding:2px 7px;border-radius:10px;white-space:nowrap;}
+.sa-type-price{background:rgba(200,155,60,.15);color:var(--gold);}
+.sa-type-dcf{background:rgba(139,195,74,.15);color:#8bc34a;}
+.sa-type-projection{background:rgba(100,181,246,.15);color:#64b5f6;}
+.sa-type-compare{background:rgba(206,147,216,.15);color:#ce93d8;}
+.sa-type-note{background:rgba(128,128,128,.15);color:var(--text4);}
+.sa-card-body{flex:1;min-width:0;}
+.sa-card-title{font-size:.82rem;color:var(--text);margin-bottom:2px;font-weight:500;}
+.sa-card-meta{font-size:.7rem;color:var(--text5);}
+.sa-card-actions{display:flex;gap:6px;margin-top:6px;}
+.sa-btn{font-size:.68rem;padding:3px 10px;border-radius:6px;border:1px solid var(--t-metric-border);background:transparent;color:var(--text4);cursor:pointer;}
+.sa-btn:hover{border-color:var(--gold);color:var(--gold);}
+.sa-del-btn{font-size:.68rem;padding:3px 8px;border-radius:6px;border:1px solid rgba(248,113,113,.25);background:transparent;color:#f87171;cursor:pointer;}
+.sa-del-btn:hover{background:#f87171;color:#fff;}
+/* save analysis button on charts */
+.chart-save-btn{font-size:.65rem;padding:3px 8px;border-radius:6px;border:1px solid var(--t-metric-border);background:transparent;color:var(--text5);cursor:pointer;transition:all .15s;}
+.chart-save-btn:hover{border-color:var(--gold);color:var(--gold);}
+.btn-save-analysis{margin-top:8px;padding:8px 20px;font-size:.78rem;border-radius:8px;border:1px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer;transition:all .2s;}
+.btn-save-analysis:hover{background:var(--gold);color:#0a0a0a;}
+/* ── earnings expand row hover ── */
+tr.earn-expand-row:hover td{background:var(--t-metric-bg);}
+
 /* fin/earnings tables */
 #view-tool .fin-table th{color:var(--text5)!important;background:var(--t-acc-header-bg)!important;border-bottom-color:var(--t-acc-border)!important;}
 #view-tool .fin-table td{color:var(--text3)!important;border-bottom-color:var(--t-acc-body-border)!important;}
@@ -2492,7 +2534,7 @@ function openSection(id, skipProCheck) {
   else if (id === 'secfilings')     { if(t) loadSecFilings(t); }
   else if (id === 'institutional')  { if(t) loadInstitutional(t); }
   else if (id === 'screener')    { if(isPro()) loadScreener(); }
-  else if (id === 'reports')     { setTimeout(checkReportReady, 100); }
+  else if (id === 'reports')     { setTimeout(renderSavedAnalyses, 100); }
 }
 
 function closeSection(id) {
@@ -2523,43 +2565,146 @@ function switchTab(id, btn) {
 ══════════════════════════════════════════════════════ */
 
 
-function exportPDF() {
-  if (!S.ticker) { toast('Load a stock first.', 'err'); return; }
-  // Expand all sections so they appear in print
-  document.querySelectorAll('.tab-pane').forEach(p => p.setAttribute('data-print-hidden', p.style.display));
-  document.querySelectorAll('.tab-pane').forEach(p => p.style.display = 'block');
-  window.print();
-  // Restore after print dialog closes
-  setTimeout(() => {
-    document.querySelectorAll('.tab-pane').forEach(p => {
-      const orig = p.getAttribute('data-print-hidden');
-      if (orig !== null) { p.style.display = orig; p.removeAttribute('data-print-hidden'); }
+/* =====================================================
+   SAVED ANALYSES
+===================================================== */
+var _savedSort = 'date';
+var _savedTypeFilter = 'ALL';
+
+const SA_KEY = 'impliedLens_savedAnalyses';
+
+function getSavedAnalyses() {
+  try { return JSON.parse(localStorage.getItem(SA_KEY) || '[]'); } catch(_) { return []; }
+}
+function putSavedAnalyses(arr) {
+  try { localStorage.setItem(SA_KEY, JSON.stringify(arr)); } catch(_) {}
+}
+
+function saveAnalysis(type) {
+  if (!S.ticker && type !== 'note') { toast('Load a stock first.', 'err'); return; }
+  const meta = S.data?.meta || {};
+  let title = '', data = {};
+  const price = meta.regularMarketPrice;
+  const now = new Date().toISOString();
+
+  if (type === 'price') {
+    title = `${S.ticker} — Price Snapshot $${price ? price.toFixed(2) : '—'}`;
+    data = { price, marketCap: meta.marketCap, range: S.range };
+  } else if (type === 'dcf') {
+    const dcfEl = document.getElementById('dcf-output');
+    title = `${S.ticker} — DCF Analysis`;
+    data = { intrinsicText: dcfEl ? dcfEl.innerText.slice(0,200) : '', price };
+  } else if (type === 'projection') {
+    const projEl = document.getElementById('proj-output');
+    title = `${S.ticker} — Projection Model`;
+    data = { summaryText: projEl ? projEl.innerText.slice(0,200) : '', price };
+  } else if (type === 'compare') {
+    const tickers = ['cmp1','cmp2','cmp3','cmp4'].map(id=>document.getElementById(id)?.value.trim().toUpperCase()).filter(Boolean);
+    title = `Compare: ${tickers.join(' vs ')}`;
+    data = { tickers };
+  }
+
+  const entry = { id: Date.now(), type, ticker: S.ticker || '', title, date: now, data };
+  const all = getSavedAnalyses();
+  all.unshift(entry);
+  putSavedAnalyses(all.slice(0, 100)); // cap at 100
+  toast('Analysis saved!', 'green');
+  renderSavedAnalyses();
+}
+
+function setSavedSort(s) {
+  _savedSort = s;
+  document.querySelectorAll('.sa-sort-btn').forEach(b => b.classList.toggle('active', b.id === 'sa-sort-'+s));
+  renderSavedAnalyses();
+}
+
+function setSavedTypeFilter(t) {
+  _savedTypeFilter = t;
+  document.querySelectorAll('.sa-pill').forEach(b => b.classList.toggle('active', b.dataset.type === t));
+  renderSavedAnalyses();
+}
+
+function deleteSavedAnalysis(id) {
+  const all = getSavedAnalyses().filter(a => a.id !== id);
+  putSavedAnalyses(all);
+  renderSavedAnalyses();
+}
+
+function clearAllSaved() {
+  if (!confirm('Clear all saved analyses? This cannot be undone.')) return;
+  putSavedAnalyses([]);
+  renderSavedAnalyses();
+}
+
+function loadSavedAnalysis(entry) {
+  if (entry.type === 'compare' && entry.data.tickers) {
+    entry.data.tickers.forEach((t,i) => {
+      const el = document.getElementById('cmp'+(i+1));
+      if (el) el.value = t;
     });
-  }, 1000);
+    openSection('compare');
+    toast('Compare tickers loaded — click Compare →', 'green');
+    return;
+  }
+  if (entry.ticker) {
+    document.getElementById('ticker-input').value = entry.ticker;
+    document.getElementById('btn-analyze').click();
+    toast('Loading ' + entry.ticker + '…', 'green');
+  }
+}
+
+function renderSavedAnalyses() {
+  const list = document.getElementById('sa-list');
+  const empty = document.getElementById('sa-empty');
+  if (!list) return;
+
+  let all = getSavedAnalyses();
+  if (_savedTypeFilter !== 'ALL') all = all.filter(a => a.type === _savedTypeFilter);
+
+  if (_savedSort === 'date') {
+    all.sort((a,b) => b.id - a.id);
+  } else if (_savedSort === 'stock') {
+    all.sort((a,b) => (a.ticker||'').localeCompare(b.ticker||''));
+  } else if (_savedSort === 'type') {
+    all.sort((a,b) => a.type.localeCompare(b.type));
+  }
+
+  if (!all.length) {
+    list.innerHTML = '';
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  const typeLabels = { price:'Price Snapshot', dcf:'DCF', projection:'Projection', compare:'Compare', note:'Note' };
+  const typeClass  = { price:'sa-type-price', dcf:'sa-type-dcf', projection:'sa-type-projection', compare:'sa-type-compare', note:'sa-type-note' };
+
+  list.innerHTML = all.map(entry => {
+    const d = new Date(entry.date);
+    const dateStr = d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})
+      + ' ' + d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    const label = typeLabels[entry.type] || entry.type;
+    const cls   = typeClass[entry.type] || 'sa-type-note';
+    return `<div class="sa-card">
+      <span class="sa-type-badge ${cls}">${label}</span>
+      <div class="sa-card-body">
+        <div class="sa-card-title">${entry.title}</div>
+        <div class="sa-card-meta">${dateStr}${entry.ticker ? ' · '+entry.ticker : ''}</div>
+        <div class="sa-card-actions">
+          <button class="sa-btn" onclick="loadSavedAnalysis(${JSON.stringify(entry).replace(/"/g,'&quot;')})">↩ Load</button>
+          <button class="sa-del-btn" onclick="deleteSavedAnalysis(${entry.id})">✕ Delete</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 function checkReportReady() {
-  const noStock = document.getElementById('report-no-stock');
-  const ready   = document.getElementById('report-ready');
-  const check   = document.getElementById('report-check');
-  if (check) check.style.display = 'none';
-  if (!S.ticker || !S.data) {
-    if (noStock) noStock.style.display = 'block';
-    if (ready)   ready.style.display   = 'none';
-    return;
-  }
-  if (noStock) noStock.style.display = 'none';
-  if (ready)   ready.style.display   = 'block';
-  const meta = S.data.meta || {};
-  const summary = document.getElementById('report-summary');
-  if (summary) {
-    summary.innerHTML =
-      '<strong style="color:var(--text);">' + S.ticker + '</strong> — ' +
-      (meta.longName || S.ticker) + '<br>' +
-      'Price: $' + (meta.regularMarketPrice || '—') +
-      ' &nbsp;|&nbsp; Exchange: ' + (meta.fullExchangeName || '—') + '<br>' +
-      'Includes: Price chart · Key metrics · RSI/MACD · Projection · Risk panel';
-  }
+  renderSavedAnalyses();
+}
+
+function exportPDF() {
+  saveAnalysis('price');
 }
 
 // switchTab → now handled by toggleSection/openSection above
@@ -2963,7 +3108,7 @@ function renderStock(result, ticker) {
 
   document.getElementById('stock-result').style.display='block';
   document.getElementById('proj-results').style.display='none';
-  checkReportReady();
+  renderSavedAnalyses();
 }
 
 function buildPriceChart(result,closes,timestamps) {
@@ -3124,16 +3269,19 @@ async function runCompare() {
   document.getElementById('cmp-loading').style.display='flex';
   document.getElementById('cmp-results').style.display='none';
   try {
-    const results=await Promise.all(tickers.map(t=>yahooFetch(t,'1y')));
-    buildCompareTable(tickers,results);
-    buildPerfChart(tickers,results);
-    buildRadarChart(tickers,results);
+    const [results, analystArr] = await Promise.all([
+      Promise.all(tickers.map(t=>yahooFetch(t,'1y'))),
+      Promise.all(tickers.map(t=>fetch('/api/analyst/'+encodeURIComponent(t),{credentials:'same-origin'}).then(r=>r.json()).catch(()=>({}))))
+    ]);
+    buildCompareTable(tickers, results, analystArr);
+    buildPerfChart(tickers, results);
+    buildRadarChart(tickers, results, analystArr);
     document.getElementById('cmp-results').style.display='block';
   } catch(e){ toast('Failed to load one or more tickers','red'); }
   finally { document.getElementById('cmp-loading').style.display='none'; }
 }
 
-function buildCompareTable(tickers,results) {
+function buildCompareTable(tickers, results, analystArr=[]) {
   const metas=results.map(r=>r.meta);
   const closes=results.map(r=>r.indicators.quote[0].close.filter(x=>x!=null));
   const prices=metas.map(m=>m.regularMarketPrice||0);
@@ -3142,14 +3290,22 @@ function buildCompareTable(tickers,results) {
   const yr1=closes.map(c=>c.length>1?((c[c.length-1]-c[0])/c[0]*100):0);
   const rsiVals=closes.map(c=>{const v=rsi(c);return v[v.length-1];});
   const stdDevs=closes.map(c=>{const ret=c.map((v,i)=>i===0?0:(v-c[i-1])/c[i-1]);return Math.sqrt(ret.reduce((a,b)=>a+b*b,0)/ret.length)*Math.sqrt(252)*100;});
+  // Merge analyst/Yahoo fundamental data per ticker
+  const afds = analystArr.map(a => a.yahooFd || {});
+  const getMarketCap = (m,afd) => afd.marketCap || m.marketCap || null;
+  const getPE = (m,afd) => afd.trailingPE || m.trailingPE || null;
+  const getForwardPE = (m,afd) => afd.forwardPE || m.forwardPE || null;
+  const getPS = (m,afd) => afd.priceToSales || null;
   const rows=[
     {l:'Price',vals:prices.map(p=>`$${p.toFixed(2)}`),nums:prices,hi:true},
     {l:'Day Change',vals:dayChg.map(fmtPct),nums:dayChg,hi:true},
     {l:'1Y Return',vals:yr1.map(fmtPct),nums:yr1,hi:true},
-    {l:'Market Cap',vals:metas.map(m=>fmtBig(m.marketCap)),nums:metas.map(m=>m.marketCap||0),hi:true},
+    {l:'Market Cap',vals:metas.map((m,i)=>{const c=getMarketCap(m,afds[i]);return c?fmtBig(c):'—';}),nums:metas.map((m,i)=>getMarketCap(m,afds[i])||0),hi:true},
     {l:'52W High',vals:metas.map(m=>m.fiftyTwoWeekHigh?`$${m.fiftyTwoWeekHigh.toFixed(2)}`:'—'),nums:null,hi:false},
     {l:'52W Low',vals:metas.map(m=>m.fiftyTwoWeekLow?`$${m.fiftyTwoWeekLow.toFixed(2)}`:'—'),nums:null,hi:false},
-    {l:'P/E Ratio',vals:metas.map(m=>m.trailingPE?m.trailingPE.toFixed(1)+'x':'—'),nums:metas.map(m=>m.trailingPE||999),hi:false},
+    {l:'P/E (TTM)',vals:metas.map((m,i)=>{const pe=getPE(m,afds[i]);return pe?pe.toFixed(1)+'x':'—';}),nums:metas.map((m,i)=>{const pe=getPE(m,afds[i]);return pe||999;}),hi:false},
+    {l:'Fwd P/E',vals:metas.map((m,i)=>{const pe=getForwardPE(m,afds[i]);return pe?pe.toFixed(1)+'x':'—';}),nums:metas.map((m,i)=>{const pe=getForwardPE(m,afds[i]);return pe||999;}),hi:false},
+    {l:'P/S Ratio',vals:metas.map((m,i)=>{const ps=getPS(m,afds[i]);return ps?ps.toFixed(2)+'x':'—';}),nums:metas.map((m,i)=>{const ps=getPS(m,afds[i]);return ps||999;}),hi:false},
     {l:'RSI (14)',vals:rsiVals.map(r=>r?r.toFixed(1):'—'),nums:rsiVals.map(r=>r||50),hi:false},
     {l:'Volatility',vals:stdDevs.map(v=>`${v.toFixed(1)}%`),nums:stdDevs,hi:false},
     {l:'Exchange',vals:metas.map(m=>m.exchangeName||'—'),nums:null,hi:false},
@@ -3186,7 +3342,7 @@ function buildPerfChart(tickers,results) {
   S.charts['cmp-perf-chart']=new Chart(el,{type:'line',data:{labels:labels,datasets:datasets},options:perfOpts});
 }
 
-function buildRadarChart(tickers,results) {
+function buildRadarChart(tickers, results, analystArr=[]) {
   destroyChart('cmp-radar-chart');
   const el=document.getElementById('cmp-radar-chart'); if(!el)return;
   const metas=results.map(r=>r.meta);
@@ -3195,8 +3351,10 @@ function buildRadarChart(tickers,results) {
   const yr1=closes.map(c=>c.length>1?((c[c.length-1]-c[0])/c[0]*100):0);
   const rsiVals=closes.map(c=>{const v=rsi(c);return v[v.length-1]||50;});
   const vols=closes.map(c=>{const ret=c.map((v,i)=>i===0?0:(v-c[i-1])/c[i-1]);return Math.sqrt(ret.reduce((a,b)=>a+b*b,0)/ret.length)*Math.sqrt(252)*100;});
-  const caps=metas.map(m=>m.marketCap||0);
-  const pes=metas.map(m=>m.trailingPE||50);
+  const caps=caps2||metas.map(m=>m.marketCap||0);
+  const afdsR=analystArr.map(a=>a.yahooFd||{});
+  const pes=metas.map((m,i)=>afdsR[i].trailingPE||m.trailingPE||50);
+  const caps2=metas.map((m,i)=>afdsR[i].marketCap||m.marketCap||0);
   const norm=(arr,invert=false)=>{const mn=Math.min(...arr),mx=Math.max(...arr);return arr.map(v=>mx===mn?50:invert?(1-(v-mn)/(mx-mn))*100:((v-mn)/(mx-mn))*100);};
   const nYr1=norm(yr1); const nRsi=norm(rsiVals); const nVol=norm(vols,true); const nCap=norm(caps); const nPe=norm(pes,true);
   const datasets=tickers.map((t,i)=>({
@@ -3414,34 +3572,82 @@ function renderRiskPanel(closes, meta) {
   }
   if (!returns.length) return;
 
-  // Metrics
-  const mean   = returns.reduce((a,b) => a+b, 0) / returns.length;
-  const variance = returns.reduce((a,b) => a + Math.pow(b - mean, 2), 0) / returns.length;
+  const n = returns.length;
+  const mean   = returns.reduce((a,b) => a+b, 0) / n;
+  const variance = returns.reduce((a,b) => a + Math.pow(b - mean, 2), 0) / n;
   const stdDev = Math.sqrt(variance);
   const annualVol = (stdDev * Math.sqrt(252)).toFixed(1);
-  const sharpe  = stdDev > 0 ? ((mean * 252) / (stdDev * Math.sqrt(252))).toFixed(2) : '--';
-  const maxDD   = (() => {
-    let peak = closes[0], dd = 0;
-    for (const c of closes) { if (c > peak) peak = c; dd = Math.min(dd, (c - peak) / peak * 100); }
-    return dd.toFixed(1);
-  })();
-  const beta    = meta.beta ? Number(meta.beta).toFixed(2) : '--';
+  const annualReturn = (mean * 252).toFixed(1);
+
+  // Risk-free rate ~4.5% annual → 0.01746 daily
+  const rfDaily = 0.01746;
+  const rfAnnual = 4.5;
+
+  // Sharpe ratio
+  const sharpe = stdDev > 0 ? (((mean - rfDaily) * 252) / (stdDev * Math.sqrt(252))).toFixed(2) : '--';
+
+  // Sortino ratio (downside deviation)
+  const downReturns = returns.filter(r => r < rfDaily);
+  const downVar = downReturns.length > 0 ? downReturns.reduce((a,b) => a + Math.pow(b - rfDaily, 2), 0) / downReturns.length : 0;
+  const downDev = Math.sqrt(downVar);
+  const sortino = downDev > 0 ? (((mean - rfDaily) * 252) / (downDev * Math.sqrt(252))).toFixed(2) : '--';
+
+  // Max drawdown & Calmar ratio
+  let peak = closes[0], maxDDraw = 0;
+  for (const c of closes) { if (c > peak) peak = c; maxDDraw = Math.min(maxDDraw, (c - peak) / peak * 100); }
+  const maxDD = maxDDraw.toFixed(1);
+  const calmar = maxDDraw < 0 ? (parseFloat(annualReturn) / Math.abs(maxDDraw)).toFixed(2) : '--';
+
+  // Beta
+  const betaRaw = meta.beta ? Number(meta.beta) : null;
+  const beta = betaRaw != null ? betaRaw.toFixed(2) : '--';
+
+  // Alpha (Jensen's) = annualReturn - [rfAnnual + beta*(marketReturn - rfAnnual)]
+  // Assume S&P 500 long-run ~10% annual
+  const marketReturn = 10;
+  const alpha = betaRaw != null
+    ? (parseFloat(annualReturn) - (rfAnnual + betaRaw * (marketReturn - rfAnnual))).toFixed(2)
+    : '--';
+
+  // Treynor ratio = (annualReturn - rfAnnual) / beta
+  const treynor = betaRaw != null && betaRaw !== 0
+    ? ((parseFloat(annualReturn) - rfAnnual) / betaRaw).toFixed(2)
+    : '--';
+
+  // VaR & CVaR (95% confidence, historical)
   const sortedR = [...returns].sort((a,b) => a - b);
-  const var95   = sortedR[Math.floor(sortedR.length * 0.05)]?.toFixed(2) || '--';
+  const var95Idx = Math.floor(n * 0.05);
+  const var95 = sortedR[var95Idx]?.toFixed(2) || '--';
+  const cvar95 = var95Idx > 0
+    ? (sortedR.slice(0, var95Idx).reduce((a,b) => a+b, 0) / var95Idx).toFixed(2)
+    : var95;
 
   const col = v => parseFloat(v) >= 0 ? '#4ade80' : '#f87171';
-  const ratingScore = [parseFloat(annualVol) < 25, parseFloat(maxDD) > -20, parseFloat(sharpe) > 0.5].filter(Boolean).length;
+  const posCol = v => { const f=parseFloat(v); return isNaN(f)?'var(--text4)':f>=0?'#4ade80':'#f87171'; };
+  const ratingScore = [parseFloat(annualVol) < 25, maxDDraw > -20, parseFloat(sharpe) > 0.5].filter(Boolean).length;
   const rating = ['High Risk','Moderate Risk','Moderate','Low–Moderate Risk'][ratingScore] || 'Moderate';
   const ratingColor = ['#f87171','#C89B3C','#C89B3C','#4ade80'][ratingScore] || '#C89B3C';
 
+  const stat = (label, val, valColor, note='') =>
+    `<div class="risk-stat">
+      <div class="risk-stat-label">${label}${note?`<span style="font-size:.6rem;color:var(--text5);margin-left:4px;">${note}</span>`:''}</div>
+      <div class="risk-stat-val" style="color:${valColor}">${val}</div>
+    </div>`;
+
   el.innerHTML = `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
-      <div class="risk-stat"><div class="risk-stat-label">Annual Volatility</div><div class="risk-stat-val" style="color:${col(-parseFloat(annualVol))}">${annualVol}%</div></div>
-      <div class="risk-stat"><div class="risk-stat-label">Beta</div><div class="risk-stat-val">${beta}</div></div>
-      <div class="risk-stat"><div class="risk-stat-label">Max Drawdown</div><div class="risk-stat-val" style="color:#f87171">${maxDD}%</div></div>
-      <div class="risk-stat"><div class="risk-stat-label">Sharpe (est.)</div><div class="risk-stat-val" style="color:${col(parseFloat(sharpe))}">${sharpe}</div></div>
-      <div class="risk-stat"><div class="risk-stat-label">1-Day VaR (95%)</div><div class="risk-stat-val" style="color:#f87171">${var95}%</div></div>
-      <div class="risk-stat"><div class="risk-stat-label">Risk Rating</div><div class="risk-stat-val" style="color:${ratingColor}">${rating}</div></div>
+      ${stat('Annual Volatility', annualVol+'%', col(-parseFloat(annualVol)))}
+      ${stat('Annual Return', annualReturn+'%', posCol(annualReturn), 'est.')}
+      ${stat('Beta', beta, betaRaw!=null?(betaRaw<0.8?'#4ade80':betaRaw>1.4?'#f87171':'var(--gold)'):'var(--text4)')}
+      ${stat('Alpha', alpha!=='--'?alpha+'%':'--', posCol(alpha), 'vs S&P 500')}
+      ${stat('Sharpe Ratio', sharpe, posCol(sharpe), 'rf 4.5%')}
+      ${stat('Sortino Ratio', sortino, posCol(sortino), 'downside')}
+      ${stat('Treynor Ratio', treynor!=='--'?treynor+'%':'--', posCol(treynor))}
+      ${stat('Calmar Ratio', calmar, posCol(calmar), '1Y')}
+      ${stat('Max Drawdown', maxDD+'%', '#f87171')}
+      ${stat('1-Day VaR 95%', var95!=='--'?var95+'%':'--', '#f87171')}
+      ${stat('CVaR (ES) 95%', cvar95!=='--'?cvar95+'%':'--', '#f87171', 'avg tail')}
+      ${stat('Risk Rating', rating, ratingColor)}
     </div>`;
 }
 
@@ -3716,52 +3922,106 @@ async function loadEarnings(ticker) {
     }
     // sort newest first
     const rows = data.slice().sort((a,b) => (b.period||'').localeCompare(a.period||''));
-    let html = '<div style="overflow-x:auto;"><table class="earn-table"><thead><tr>'
+    // Build beat/miss summary bar
+    const withData = rows.filter(r => r.surprisePercent != null);
+    const beats = withData.filter(r => r.surprisePercent > 2).length;
+    const misses = withData.filter(r => r.surprisePercent < -2).length;
+    const inLine = withData.length - beats - misses;
+    const beatPct = withData.length ? Math.round(beats / withData.length * 100) : 0;
+    // Summary bar HTML
+    let summaryHtml = '';
+    if (withData.length) {
+      summaryHtml = `
+        <div style="display:flex;gap:8px;align-items:center;background:var(--t-metric-bg);border:1px solid var(--t-metric-border);border-radius:8px;padding:10px 14px;margin-bottom:12px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:180px;">
+            <div style="font-size:.68rem;color:var(--text5);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">${ticker} EPS Beat Rate — Last ${withData.length} Quarters</div>
+            <div style="height:6px;background:var(--t-acc-border);border-radius:3px;overflow:hidden;display:flex;">
+              <div style="width:${beatPct}%;background:#4ade80;"></div>
+              <div style="width:${Math.round(inLine/withData.length*100)}%;background:var(--gold);"></div>
+              <div style="width:${Math.round(misses/withData.length*100)}%;background:#f87171;"></div>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;">
+            <span style="font-size:.75rem;color:#4ade80;"><strong>${beats}</strong> Beat</span>
+            <span style="font-size:.75rem;color:var(--gold);"><strong>${inLine}</strong> In-Line</span>
+            <span style="font-size:.75rem;color:#f87171;"><strong>${misses}</strong> Miss</span>
+          </div>
+        </div>`;
+    }
+    // Build expandable rows
+    let tableHtml = '<div style="overflow-x:auto;"><table class="earn-table"><thead><tr>'
       + '<th style="text-align:left;">Period</th>'
-      + '<th>EPS Estimate</th>'
+      + '<th>EPS Est.</th>'
       + '<th>EPS Actual</th>'
-      + '<th>Surprise</th>'
       + '<th>Surprise %</th>'
       + '<th>Result</th>'
+      + '<th style="width:28px;"></th>'
       + '</tr></thead><tbody>';
-    for (const row of rows) {
-      const est  = row.estimate   != null ? row.estimate.toFixed(2)   : '—';
-      const act  = row.actual     != null ? row.actual.toFixed(2)     : '—';
-      const surp = row.surprise   != null ? (row.surprise > 0 ? '+' : '') + row.surprise.toFixed(2) : '—';
+    rows.forEach((row, idx) => {
+      const est  = row.estimate   != null ? '$'+row.estimate.toFixed(2)   : '—';
+      const act  = row.actual     != null ? '$'+row.actual.toFixed(2)     : '—';
+      const surp = row.surprise   != null ? (row.surprise > 0 ? '+' : '') + '$'+row.surprise.toFixed(2) : '—';
       const surpPct = row.surprisePercent != null ? (row.surprisePercent > 0 ? '+' : '') + row.surprisePercent.toFixed(1) + '%' : '—';
-      let badge = '', cls = '';
+      let badge = '', cls = '', barColor = 'var(--gold)', barWidth = 50;
       if (row.surprisePercent != null) {
-        if      (row.surprisePercent >  2) { badge='<span class="earn-badge beat">BEAT</span>'; cls='earn-beat'; }
-        else if (row.surprisePercent < -2) { badge='<span class="earn-badge miss">MISS</span>'; cls='earn-miss'; }
-        else                               { badge='<span class="earn-badge meet">IN-LINE</span>'; cls='earn-meet'; }
+        if      (row.surprisePercent >  2) { badge='<span class="earn-badge beat">BEAT</span>'; cls='earn-beat'; barColor='#4ade80'; barWidth=Math.min(100,50+row.surprisePercent*2); }
+        else if (row.surprisePercent < -2) { badge='<span class="earn-badge miss">MISS</span>'; cls='earn-miss'; barColor='#f87171'; barWidth=Math.max(5,50+row.surprisePercent*2); }
+        else                               { badge='<span class="earn-badge meet">IN-LINE</span>'; cls='earn-meet'; barWidth=50; }
       }
-      html += '<tr>'
-        + '<td>'+(row.period||'—')+'</td>'
-        + '<td>'+est+'</td>'
-        + '<td class="'+cls+'">'+act+'</td>'
-        + '<td class="'+cls+'">'+surp+'</td>'
-        + '<td class="'+cls+'">'+surpPct+'</td>'
-        + '<td>'+badge+'</td>'
-        + '</tr>';
-    }
-    html += '</tbody></table></div>';
-    // Beat/miss summary
-    const withData = rows.filter(r => r.surprisePercent != null);
-    if (withData.length) {
-      const beats = withData.filter(r => r.surprisePercent > 2).length;
-      const pct   = Math.round(beats / withData.length * 100);
-      html += '<div style="margin-top:1rem;font-size:.78rem;color:var(--text4);">'
-        + ticker + ' beat EPS estimates in <strong style="color:var(--text2);">'
-        + beats + ' of ' + withData.length + '</strong> reported quarters ('
-        + pct + '% beat rate).</div>';
-    }
+      const detailId = 'earn-det-'+idx;
+      tableHtml += `<tr class="earn-expand-row" onclick="toggleEarnDetail('${detailId}')" style="cursor:pointer;">
+        <td>${row.period||'—'}</td>
+        <td>${est}</td>
+        <td class="${cls}">${act}</td>
+        <td class="${cls}">${surpPct}</td>
+        <td>${badge}</td>
+        <td style="text-align:center;color:var(--text5);font-size:.7rem;" id="chev-${detailId}">›</td>
+      </tr>
+      <tr id="${detailId}" style="display:none;">
+        <td colspan="6" style="padding:0;">
+          <div style="background:var(--t-metric-bg);border-radius:6px;padding:10px 14px;margin:2px 0 4px 0;border:1px solid var(--t-metric-border);">
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:8px;">
+              <div>
+                <div style="font-size:.65rem;color:var(--text5);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">Est. EPS</div>
+                <div style="font-size:.95rem;font-family:var(--mono);color:var(--text2);">${est}</div>
+              </div>
+              <div>
+                <div style="font-size:.65rem;color:var(--text5);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">Actual EPS</div>
+                <div style="font-size:.95rem;font-family:var(--mono);color:${cls==='earn-beat'?'#4ade80':cls==='earn-miss'?'#f87171':'var(--text2)'};">${act}</div>
+              </div>
+              <div>
+                <div style="font-size:.65rem;color:var(--text5);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">Surprise</div>
+                <div style="font-size:.95rem;font-family:var(--mono);color:${cls==='earn-beat'?'#4ade80':cls==='earn-miss'?'#f87171':'var(--text2)'};">${surp}</div>
+              </div>
+            </div>
+            ${row.surprisePercent != null ? `<div style="margin-top:6px;">
+              <div style="font-size:.62rem;color:var(--text5);margin-bottom:3px;">EPS Surprise vs Estimate</div>
+              <div style="height:5px;background:var(--t-acc-border);border-radius:3px;overflow:hidden;">
+                <div style="width:${barWidth}%;background:${barColor};height:100%;border-radius:3px;transition:width .4s ease;"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:.58rem;color:var(--text5);margin-top:2px;"><span>Miss</span><span>In-Line</span><span>Beat</span></div>
+            </div>` : ''}
+          </div>
+        </td>
+      </tr>`;
+    });
+    tableHtml += '</tbody></table></div>';
     if(loading) loading.style.display='none';
-    if(cont) cont.innerHTML = html;
+    if(cont) cont.innerHTML = summaryHtml + tableHtml;
   } catch(e) {
     if(loading) loading.style.display='none';
     if(error) { error.style.display='block'; error.textContent='Could not load earnings: '+e.message; }
     console.error('earnings error', e);
   }
+}
+
+function toggleEarnDetail(id) {
+  const det = document.getElementById(id);
+  const chev = document.getElementById('chev-'+id);
+  if (!det) return;
+  const open = det.style.display !== 'none';
+  det.style.display = open ? 'none' : 'table-row';
+  if (chev) chev.textContent = open ? '›' : '˅';
 }
 
 /* =====================================================
