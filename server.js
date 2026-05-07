@@ -743,7 +743,7 @@ app.get('/api/financials/:ticker', async (req, res) => {
 app.get('/api/earnings/:ticker', async (req, res) => {
   try {
     const ticker = req.params.ticker.toUpperCase();
-    const url = `https://finnhub.io/api/v1/stock/earnings?symbol=${ticker}&limit=12&token=${FINNHUB_KEY}`;
+    const url = `https://finnhub.io/api/v1/stock/earnings?symbol=${ticker}&limit=20&token=${FINNHUB_KEY}`;
     const r = await fetch(url);
     if (!r.ok) return res.status(r.status).json({ error: 'Finnhub returned ' + r.status });
     const data = await r.json();
@@ -966,17 +966,4 @@ app.get('/api/darkpool/:ticker', async (req, res) => {
 
 // ============================================================
 //  Static pages
-// ============================================================
-app.get(["/login", "/login.html"], (req, res) =>
-  res.sendFile(path.join(__dirname, "login.html"))
-);
-app.get(["/signup", "/signup.html"], (req, res) =>
-  res.sendFile(path.join(__dirname, "signup.html"))
-);
-app.get("*", (req, res) =>
-  res.sendFile(path.join(__dirname, "index.html"))
-);
-
-initDb().then(() => {
-  app.listen(PORT, () => console.log(`Implied Lens running on port ${PORT}`));
-}).catch(err => { console.error("DB init failed:", err); process.exit(1); });
+// =======================================================

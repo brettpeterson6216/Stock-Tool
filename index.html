@@ -2553,6 +2553,9 @@ html[data-theme="dark"] .input-light::placeholder{color:rgba(220,225,232,.28)!im
 .inst-table td{padding:.45rem .65rem;border-bottom:1px solid var(--t-acc-body-border);color:var(--text3);text-align:right;}
 .inst-table td:first-child{text-align:left;color:var(--text);font-weight:500;}
 .inst-table tr:hover td{background:rgba(184,136,42,.05);}
+.risk-stat{background:var(--t-metric-bg);border:1px solid var(--t-metric-border);border-radius:8px;padding:10px 12px;}
+.risk-stat-label{font-size:.67rem;color:var(--text5);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+.risk-stat-val{font-size:1rem;font-family:var(--mono);font-weight:500;color:var(--text);}
 .dp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.75rem;margin-bottom:1rem;}
 .dp-card{background:var(--t-metric-bg);border:1px solid var(--t-metric-border);border-radius:var(--r2);padding:.75rem 1rem;}
 .dp-lbl{font-size:.62rem;color:var(--text5);font-family:var(--mono);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.3rem;}
@@ -2560,7 +2563,15 @@ html[data-theme="dark"] .input-light::placeholder{color:rgba(220,225,232,.28)!im
 .dp-sub{font-size:.65rem;color:var(--text5);margin-top:2px;}
 .dp-bar-wrap{height:6px;background:var(--t-acc-border);border-radius:3px;margin-top:6px;overflow:hidden;}
 .dp-bar-fill{height:100%;border-radius:3px;background:var(--gold);}
-.dp-chart-wrap{height:120px;margin-top:.75rem;}
+.dp-chart-wrap{height:140px;margin-top:.75rem;}
+.dp-card{background:var(--t-metric-bg);border:1px solid var(--t-metric-border);border-radius:8px;padding:10px 12px;}
+.dp-card-lbl{font-size:.67rem;color:var(--text5);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+.dp-card-val{font-size:1rem;font-family:var(--mono);font-weight:500;}
+.inst-table{width:100%;border-collapse:collapse;font-size:.78rem;}
+.inst-table th{text-align:left;padding:6px 8px;color:var(--text5);font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--t-acc-border);}
+.inst-table td{padding:7px 8px;color:var(--text3);border-bottom:1px solid var(--t-acc-border);}
+.inst-table tr:last-child td{border-bottom:none;}
+.inst-table tr:hover td{background:var(--t-metric-bg);}
 
 </style>
 <script>
@@ -3359,8 +3370,8 @@ function buildCompareTable(tickers, results, analystArr=[]) {
   const stdDevs=closes.map(c=>{const ret=c.map((v,i)=>i===0?0:(v-c[i-1])/c[i-1]);return Math.sqrt(ret.reduce((a,b)=>a+b*b,0)/ret.length)*Math.sqrt(252)*100;});
   // Merge analyst/Yahoo fundamental data per ticker
   const afds = analystArr.map(a => a.yahooFd || {});
-  const getMarketCap = (m,afd) => afd.marketCap || m.marketCap || null;
-  const getPE = (m,afd) => afd.trailingPE || m.trailingPE || null;
+  const getMarketCap = (m,afd) => (afd&&afd.marketCap) || m.marketCap || null;
+  const getPE = (m,afd) => (afd&&afd.trailingPE) || m.trailingPE || null;
   const getForwardPE = (m,afd) => afd.forwardPE || m.forwardPE || null;
   const getPS = (m,afd) => afd.priceToSales || null;
   const rows=[
@@ -3856,11 +3867,12 @@ async function loadFinancials(ticker) {
 let _finTab = 'income';
 function showFinTab(name, btn) {
   _finTab = name;
-  document.querySelectorAll('#fin-content button').forEach(b => {
-    b.style.background = 'rgba(200,155,60,.12)';
-    b.style.color = 'var(--text3)';
+  document.querySelectorAll('.fin-tab-btn').forEach(b => {
+    b.classList.remove('active');
+    b.style.background = '';
+    b.style.color = '';
   });
-  if(btn) { btn.style.background = ''; btn.style.color = ''; }
+  if(btn) { btn.classList.add('active'); }
   document.querySelectorAll('.fin-subtab').forEach(d => d.style.display='none');
   const el = document.getElementById('fin-'+name);
   if(el) el.style.display='block';
@@ -3908,10 +3920,10 @@ async function loadAdvMetrics(ticker) {
         cards: [
           {lbl:'EV / EBITDA',     val:v(raw(ks.enterpriseToEbitda),'x'), sub:'Enterprise Value basis'},
           {lbl:'EV / Revenue',    val:v(raw(ks.enterpriseToRevenue),'x'), sub:'Enterprise Value basis'},
-          {lbl:'P/E (TTM)',        val:v(raw(ks.trailingPE),'x'), sub:'Price to earnings'},
+          {lbl:'P/E (TTM)',        val:v(raw(ks.trailingPE)!=null?raw(ks.trailingPE):m['peNormalizedAnnual'],'x'), sub:'Price to earnings'},
           {lbl:'Forward P/E',     val:v(raw(ks.forwardPE),'x'), sub:'Next 12 months est.'},
           {lbl:'Price / Book',    val:v(raw(ks.priceToBook),'x'), sub:'P/B ratio'},
-          {lbl:'Price / Sales',   val:v(m['ps'],'x'), sub:'TTM'},
+          {lbl:'Price / Sales',   val:v(m['psTTM']!=null?m['psTTM']:raw(ks.priceToSalesTrailing12Months),'x'), sub:'TTM'},
         ]
       },
       {
@@ -3922,7 +3934,7 @@ async function loadAdvMetrics(ticker) {
           {lbl:'Net Margin',      val:v(raw(fd.profitMargins)!=null ? raw(fd.profitMargins)*100 : null,'%'), sub:'Net income / revenue'},
           {lbl:'Return on Equity',val:v(raw(fd.returnOnEquity)!=null ? raw(fd.returnOnEquity)*100 : null,'%'), sub:'ROE'},
           {lbl:'Return on Assets',val:v(raw(fd.returnOnAssets)!=null ? raw(fd.returnOnAssets)*100 : null,'%'), sub:'ROA'},
-          {lbl:'ROIC',            val:v(m['roicTTM'],'%'), sub:'Return on invested capital'},
+          {lbl:'ROIC',            val:v(m['roicTTM']!=null?m['roicTTM']:m['roeRfy'],'%'), sub:'Return on invested capital'},
         ]
       },
       {
@@ -3943,7 +3955,7 @@ async function loadAdvMetrics(ticker) {
           {lbl:'Current Ratio',   val:v(raw(fd.currentRatio),'x'), sub:'Current assets / liabilities'},
           {lbl:'Quick Ratio',     val:v(raw(fd.quickRatio),'x'), sub:'Liquid assets / liabilities'},
           {lbl:'FCF / Share',     val:v(raw(fd.freeCashflow) && raw(ks.sharesOutstanding) ? raw(fd.freeCashflow)/raw(ks.sharesOutstanding) : null,''), sub:'Free cash flow per share'},
-          {lbl:'Cash per Share',  val:v(m['cashPerSharePerShare'],''), sub:''},
+          {lbl:'Cash per Share',  val:v(m['cashPerSharePerShare']!=null?m['cashPerSharePerShare']:m['totalDebtToEquity']!=null&&raw(fd.totalCash)&&raw(ks.sharesOutstanding)?raw(fd.totalCash)/raw(ks.sharesOutstanding):null,''), sub:'Cash / shares outstanding'},
           {lbl:'Interest Coverage',val:v(m['netInterestCoverageAnnual'],'x'), sub:'EBIT / interest expense'},
         ]
       }
@@ -3963,6 +3975,109 @@ async function loadAdvMetrics(ticker) {
     if(loading) loading.style.display='none';
     if(error) { error.style.display='block'; error.textContent='Could not load metrics: '+e.message; }
     console.error('advmetrics error', e);
+  }
+}
+
+/* =====================================================
+   INSTITUTIONAL & DARK POOL
+===================================================== */
+async function loadInstitutional(ticker) {
+  const dpCards  = document.getElementById('dp-cards');
+  const dpCanvas = document.getElementById('dp-chart');
+  const instTbl  = document.getElementById('inst-tbody');
+  const loading  = document.getElementById('inst-loading');
+  const nostock  = document.getElementById('inst-nostock');
+  if (!ticker) { if(nostock) nostock.style.display='block'; return; }
+  if(nostock) nostock.style.display='none';
+  if(loading) loading.style.display='flex';
+
+  try {
+    const [dpRes, instRes] = await Promise.all([
+      fetch('/api/darkpool/'+encodeURIComponent(ticker),{credentials:'same-origin'}),
+      fetch('/api/institutional/'+encodeURIComponent(ticker),{credentials:'same-origin'})
+    ]);
+    const dpData   = await dpRes.json();
+    const instData = await instRes.json();
+    if(loading) loading.style.display='none';
+
+    // ── Dark Pool cards ──
+    const dp  = Array.isArray(dpData.darkpool) ? dpData.darkpool : [];
+    const si  = dpData.shortInterest || {};
+    const siShares  = si.sharesShort           ? fmtBig(si.sharesShort).replace('$','')   : null;
+    const siRatio   = si.shortRatio            ? si.shortRatio.toFixed(2)+'d'             : null;
+    const siPct     = si.shortPercentOfFloat   ? (si.shortPercentOfFloat*100).toFixed(2)+'%' : null;
+    const siDate    = si.dateShortInterest     || null;
+
+    const siCards = [
+      { lbl:'Short % Float',   val: siPct    || '—', color: siPct && parseFloat(siPct)>15 ? '#f87171' : '#C89B3C' },
+      { lbl:'Shares Short',    val: siShares || '—', color:'var(--text)' },
+      { lbl:'Short Ratio',     val: siRatio  || '—', color:'var(--text)' },
+      { lbl:'SI Date',         val: siDate   || '—', color:'var(--text5)' },
+    ];
+
+    if(dpCards) {
+      const dpKpi = dp.length ? [
+        { lbl:'Latest Week Vol',  val: dp[0].totalWeeklyShareQuantity ? fmtBig(dp[0].totalWeeklyShareQuantity).replace('$','') : '—', color:'var(--gold)' },
+        { lbl:'Latest Trades',   val: dp[0].totalWeeklyTradeCount    ? Number(dp[0].totalWeeklyTradeCount).toLocaleString()        : '—', color:'var(--gold)' },
+        { lbl:'Last Sale Price', val: dp[0].lastSalePrice            ? '$'+Number(dp[0].lastSalePrice).toFixed(2)                 : '—', color:'var(--text)' },
+      ] : [];
+      const allCards = [...dpKpi, ...siCards];
+      if(!allCards.length) {
+        dpCards.innerHTML = '<div style="color:var(--text5);font-size:.8rem;">No dark pool data available for this ticker. FINRA OTC data covers stocks traded off-exchange; some NYSE/NASDAQ stocks may not appear.</div>';
+      } else {
+        dpCards.innerHTML = allCards.map(c =>
+          `<div class="dp-card"><div class="dp-card-lbl">${c.lbl}</div><div class="dp-card-val" style="color:${c.color}">${c.val}</div></div>`
+        ).join('');
+      }
+    }
+
+    // ── Dark Pool bar chart ──
+    if(dpCanvas && dp.length) {
+      destroyChart('dp-chart');
+      const labels = dp.map(w=>w.weekStartDate||'').reverse();
+      const vols   = dp.map(w=>w.totalWeeklyShareQuantity||0).reverse();
+      S.charts['dp-chart'] = new Chart(dpCanvas, {
+        type:'bar',
+        data:{ labels, datasets:[{ label:'OTC Weekly Volume', data:vols, backgroundColor:'rgba(200,155,60,.55)', borderColor:'#C89B3C', borderWidth:1, borderRadius:3 }] },
+        options:{
+          responsive:true, maintainAspectRatio:false,
+          plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>' '+Number(ctx.raw).toLocaleString()+' shares'}} },
+          scales:{
+            x:{ticks:{color:'var(--text5)',font:{size:9}}, grid:{display:false}},
+            y:{ticks:{color:'var(--text5)',font:{size:9},callback:v=>fmtBig(v).replace('$','')}, grid:{color:gcol()}}
+          }
+        }
+      });
+    } else if(dpCanvas) {
+      dpCanvas.parentElement.innerHTML = '<div style="color:var(--text5);font-size:.78rem;padding:.5rem 0;">No weekly OTC volume data found for this ticker from FINRA.</div>';
+    }
+
+    // ── Institutional table ──
+    if(instTbl) {
+      const holders = instData.ownership || [];
+      if(!holders.length) {
+        instTbl.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text5);padding:1.5rem;">No institutional holder data available.</td></tr>';
+      } else {
+        instTbl.innerHTML = holders.map(h => {
+          const shares    = h.share          != null ? fmtBig(h.share).replace('$','')       : '—';
+          const pct       = h.percentageHeld != null ? (h.percentageHeld*100).toFixed(2)+'%' : '—';
+          const change    = h.change         != null ? h.change : null;
+          const chgColor  = change>0?'#4ade80':change<0?'#f87171':'var(--text4)';
+          const chgStr    = change!=null ? `<span style="color:${chgColor}">${change>0?'+':''}${fmtBig(change).replace('$','')}</span>` : '—';
+          return `<tr>
+            <td>${h.holderName||h.name||'—'}</td>
+            <td>${shares}</td>
+            <td>${pct}</td>
+            <td>${chgStr}</td>
+            <td style="font-size:.68rem;color:var(--text5);">${h.reportDate||h.date||'—'}</td>
+          </tr>`;
+        }).join('');
+      }
+    }
+  } catch(e) {
+    if(loading) loading.style.display='none';
+    console.error('institutional/darkpool error', e);
+    if(dpCards) dpCards.innerHTML = '<div style="color:#f87171;font-size:.8rem;">Failed to load dark pool data.</div>';
   }
 }
 
