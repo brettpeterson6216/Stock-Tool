@@ -927,7 +927,7 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
     <a href='#' class="nav-tab" data-tool="projection" onclick="navGoTo('projection');return false;">Projection</a>
     <a href='#' class="nav-tab" data-tool="dcf"        onclick="navGoTo('dcf');return false;">DCF</a>
     <a href='#' class="nav-tab" data-tool="screener"   onclick="navGoTo('screener');return false;">Screener</a>
-    <a href='#' class="nav-tab" data-tool="reports"    onclick="navGoTo('reports');return false;">Reports</a>
+    <a href='#' class="nav-tab" data-tool="reports"    onclick="navGoTo('reports');return false;">Saved</a>
     <a href='#' class="nav-tab" data-tool="education"  onclick="navGoTo('education');return false;">Education</a>
     <a href='#' class="nav-tab" data-tool="adveducation" onclick="navGoTo('adveducation');return false;">Adv. Education</a>
   </div>
@@ -1625,6 +1625,9 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
               </div>
               <div class="loading-bar" id="cmp-loading" style="display:none;"><div class="spinner"></div> Loading comparison data…</div>
               <div id="cmp-results" style="display:none;">
+                <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+                  <button class="chart-save-btn" onclick="saveAnalysis('compare')" title="Save this comparison">⊕ Save Comparison</button>
+                </div>
                 <div class="cmp-table-wrap"><table class="cmp-table" id="cmp-table"></table></div>
                 <div class="g2" style="margin-top:14px;">
                   <div><div class="chart-header"><div class="chart-title">Normalized Performance (1Y)</div></div><div class="h200"><canvas id="cmp-perf-chart"></canvas></div></div>
@@ -1659,7 +1662,10 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
               <div><label class="fc-label">Bull Exit P/E</label><input class="fc-input" type="number" id="adv-pe-bull" value="35" step="1"></div>
               <div><label class="fc-label">Current P/E</label><input class="fc-input" type="number" id="adv-pe-now" value="25" step="1"></div>
             </div>
-            <button class="btn-run" onclick="runAdvancedProjection()">Run Advanced Projection →</button>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+              <button class="btn-run" onclick="runAdvancedProjection()">Run Advanced Projection →</button>
+              <button class="btn-save-analysis" onclick="saveAnalysis('projection')">⊕ Save to Analyses</button>
+            </div>
             <div id="adv-proj-results" style="display:none;">
               <div class="scenario-row" id="adv-scenario-cards" style="margin-top:1.25rem;"></div>
               <div class="h200" style="margin-top:14px;"><canvas id="adv-proj-chart"></canvas></div>
@@ -1684,7 +1690,10 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
               <div><label class="fc-label">WACC (%)</label><input class="fc-input" type="number" id="dcf-wacc" value="10" step="0.1"></div>
               <div><label class="fc-label">Current Price ($) <span style="color:var(--text5);font-size:.58rem;">optional</span></label><input class="fc-input" type="number" id="dcf-price" value="" step="0.01" placeholder="Auto-fills from Analyze"></div>
             </div>
-            <button class="btn-run" onclick="runDCF()">Calculate Intrinsic Value →</button>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+              <button class="btn-run" onclick="runDCF()">Calculate Intrinsic Value →</button>
+              <button class="btn-save-analysis" onclick="saveAnalysis('dcf')">⊕ Save to Analyses</button>
+            </div>
             <div id="dcf-output" style="margin-top:1.25rem;"></div>
             <div style="margin-top:1rem;font-size:.7rem;color:var(--text5);line-height:1.6;">This is an EPS-based simplified DCF, not a free-cash-flow model. Results are for educational purposes only — not investment advice.</div>
 
@@ -2595,8 +2604,8 @@ function saveAnalysis(type) {
     title = `${S.ticker} — DCF Analysis`;
     data = { intrinsicText: dcfEl ? dcfEl.innerText.slice(0,200) : '', price };
   } else if (type === 'projection') {
-    const projEl = document.getElementById('proj-output');
-    title = `${S.ticker} — Projection Model`;
+    const projEl = document.getElementById('adv-scenario-cards') || document.getElementById('adv-proj-results');
+    title = `${S.ticker} — Advanced Projection`;
     data = { summaryText: projEl ? projEl.innerText.slice(0,200) : '', price };
   } else if (type === 'compare') {
     const tickers = ['cmp1','cmp2','cmp3','cmp4'].map(id=>document.getElementById(id)?.value.trim().toUpperCase()).filter(Boolean);
@@ -3351,10 +3360,9 @@ function buildRadarChart(tickers, results, analystArr=[]) {
   const yr1=closes.map(c=>c.length>1?((c[c.length-1]-c[0])/c[0]*100):0);
   const rsiVals=closes.map(c=>{const v=rsi(c);return v[v.length-1]||50;});
   const vols=closes.map(c=>{const ret=c.map((v,i)=>i===0?0:(v-c[i-1])/c[i-1]);return Math.sqrt(ret.reduce((a,b)=>a+b*b,0)/ret.length)*Math.sqrt(252)*100;});
-  const caps=caps2||metas.map(m=>m.marketCap||0);
   const afdsR=analystArr.map(a=>a.yahooFd||{});
+  const caps=metas.map((m,i)=>afdsR[i].marketCap||m.marketCap||0);
   const pes=metas.map((m,i)=>afdsR[i].trailingPE||m.trailingPE||50);
-  const caps2=metas.map((m,i)=>afdsR[i].marketCap||m.marketCap||0);
   const norm=(arr,invert=false)=>{const mn=Math.min(...arr),mx=Math.max(...arr);return arr.map(v=>mx===mn?50:invert?(1-(v-mn)/(mx-mn))*100:((v-mn)/(mx-mn))*100);};
   const nYr1=norm(yr1); const nRsi=norm(rsiVals); const nVol=norm(vols,true); const nCap=norm(caps); const nPe=norm(pes,true);
   const datasets=tickers.map((t,i)=>({
