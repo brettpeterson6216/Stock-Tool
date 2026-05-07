@@ -136,6 +136,18 @@ setInterval(() => {
 const app = express();
 app.set("trust proxy", 1);
 app.use(helmet({ contentSecurityPolicy: false }));
+
+// ── Serve static public assets (logo, robots.txt, sitemap.xml, etc.) ──
+app.use(express.static(path.join(__dirname, "public"), {
+  maxAge: "7d",
+  etag: true,
+  setHeaders(res, filePath) {
+    if (filePath.endsWith(".svg"))       res.setHeader("Content-Type", "image/svg+xml");
+    if (filePath.endsWith("robots.txt")) res.setHeader("Content-Type", "text/plain");
+    if (filePath.endsWith("sitemap.xml"))res.setHeader("Content-Type", "application/xml");
+  }
+}));
+
 app.use(express.json({ limit: "64kb", verify: (req, _res, buf) => { req.rawBody = buf; } }));
 app.use(express.urlencoded({ extended: false, limit: "64kb" }));
 

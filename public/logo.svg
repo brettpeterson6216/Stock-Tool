@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F0D9A0;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#C89B3C;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8A6A20;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="darkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1c20;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0E0E0E;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+      <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="96" fill="url(#darkGrad)" stroke="#C89B3C" stroke-width="1.5" opacity="0.95"/>
+  <!-- Outer lens ring -->
+  <circle cx="100" cy="100" r="62" fill="none" stroke="url(#goldGrad)" stroke-width="2.5" opacity="0.6"/>
+  <!-- Inner lens ring -->
+  <circle cx="100" cy="100" r="44" fill="none" stroke="url(#goldGrad)" stroke-width="1.5" opacity="0.4"/>
+  <!-- Lens aperture blades (8 blades) -->
+  <g opacity="0.35" stroke="#C89B3C" stroke-width="1" fill="none">
+    <line x1="100" y1="56" x2="100" y2="38"/>
+    <line x1="100" y1="144" x2="100" y2="162"/>
+    <line x1="56" y1="100" x2="38" y2="100"/>
+    <line x1="144" y1="100" x2="162" y2="100"/>
+    <line x1="72.3" y1="72.3" x2="59.6" y2="59.6"/>
+    <line x1="127.7" y1="127.7" x2="140.4" y2="140.4"/>
+    <line x1="127.7" y1="72.3" x2="140.4" y2="59.6"/>
+    <line x1="72.3" y1="127.7" x2="59.6" y2="140.4"/>
+  </g>
+  <!-- Candlestick chart bars inside lens -->
+  <!-- Bar 1 (bear) -->
+  <rect x="62" y="108" width="7" height="18" rx="1" fill="#f87171" opacity="0.9"/>
+  <line x1="65.5" y1="104" x2="65.5" y2="108" stroke="#f87171" stroke-width="1.5" opacity="0.9"/>
+  <line x1="65.5" y1="126" x2="65.5" y2="130" stroke="#f87171" stroke-width="1.5" opacity="0.9"/>
+  <!-- Bar 2 (bull) -->
+  <rect x="75" y="95" width="7" height="22" rx="1" fill="#4ade80" opacity="0.9"/>
+  <line x1="78.5" y1="89" x2="78.5" y2="95" stroke="#4ade80" stroke-width="1.5" opacity="0.9"/>
+  <line x1="78.5" y1="117" x2="78.5" y2="122" stroke="#4ade80" stroke-width="1.5" opacity="0.9"/>
+  <!-- Bar 3 (bull, tall) -->
+  <rect x="88" y="82" width="7" height="30" rx="1" fill="url(#goldGrad)" opacity="1" filter="url(#glow)"/>
+  <line x1="91.5" y1="75" x2="91.5" y2="82" stroke="#C89B3C" stroke-width="1.5"/>
+  <line x1="91.5" y1="112" x2="91.5" y2="118" stroke="#C89B3C" stroke-width="1.5"/>
+  <!-- Bar 4 (bear) -->
+  <rect x="101" y="92" width="7" height="20" rx="1" fill="#f87171" opacity="0.9"/>
+  <line x1="104.5" y1="87" x2="104.5" y2="92" stroke="#f87171" stroke-width="1.5" opacity="0.9"/>
+  <line x1="104.5" y1="112" x2="104.5" y2="117" stroke="#f87171" stroke-width="1.5" opacity="0.9"/>
+  <!-- Bar 5 (bull) -->
+  <rect x="114" y="80" width="7" height="26" rx="1" fill="#4ade80" opacity="0.9"/>
+  <line x1="117.5" y1="74" x2="117.5" y2="80" stroke="#4ade80" stroke-width="1.5" opacity="0.9"/>
+  <line x1="117.5" y1="106" x2="117.5" y2="112" stroke="#4ade80" stroke-width="1.5" opacity="0.9"/>
+  <!-- Bar 6 (bull, tallest) -->
+  <rect x="127" y="68" width="7" height="36" rx="1" fill="url(#goldGrad)" opacity="1" filter="url(#glow)"/>
+  <line x1="130.5" y1="62" x2="130.5" y2="68" stroke="#C89B3C" stroke-width="1.5"/>
+  <line x1="130.5" y1="104" x2="130.5" y2="110" stroke="#C89B3C" stroke-width="1.5"/>
+  <!-- Horizontal baseline -->
+  <line x1="60" y1="130" x2="140" y2="130" stroke="#C89B3C" stroke-width="0.75" opacity="0.3"/>
+  <!-- Central lens glint -->
+  <circle cx="100" cy="100" r="4" fill="#C89B3C" opacity="0.7" filter="url(#glow)"/>
+  <circle cx="100" cy="100" r="2" fill="#F0D9A0"/>
+</svg>

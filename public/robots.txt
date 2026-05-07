@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /login
+Disallow: /login.html
+Disallow: /signup
+Disallow: /signup.html
+Disallow: /reset-password
+Disallow: /reset-password.html
+Disallow: /api/
+
+Sitemap: https://impliedlens.com/sitemap.xml

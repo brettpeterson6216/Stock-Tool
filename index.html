@@ -7,6 +7,62 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Implied Lens — Institutional-Grade Stock Analysis Platform</title>
+<meta name="description" content="Implied Lens is a professional stock analysis platform with real-time price charts, DCF valuation, earnings history, SEC filings, analyst targets, dark pool data, financial statements, and stock screener — built for serious investors.">
+<meta name="keywords" content="stock analysis, stock screener, DCF valuation, earnings history, SEC filings, analyst price targets, dark pool data, institutional holdings, stock comparison, financial statements, implied lens">
+<meta name="author" content="Implied Lens">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#C89B3C">
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://impliedlens.com/">
+<meta property="og:title" content="Implied Lens — Institutional-Grade Stock Analysis">
+<meta property="og:description" content="Real-time stock charts, DCF valuation, earnings history, SEC filings, analyst targets, dark pool data, and a full stock screener — all in one platform.">
+<meta property="og:image" content="https://impliedlens.com/logo.svg">
+<meta property="og:site_name" content="Implied Lens">
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Implied Lens — Stock Analysis Platform">
+<meta name="twitter:description" content="Professional stock analysis: real-time charts, DCF valuation, SEC filings, analyst targets, dark pool data, and more.">
+<meta name="twitter:image" content="https://impliedlens.com/logo.svg">
+<!-- Canonical -->
+<link rel="canonical" href="https://impliedlens.com/">
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="alternate icon" href="/favicon.ico">
+<!-- Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Implied Lens",
+  "url": "https://impliedlens.com",
+  "description": "Implied Lens is an institutional-grade stock analysis platform offering real-time price charts, DCF valuation models, earnings history, SEC filings, analyst price targets, dark pool volume data, institutional holdings, and a comprehensive stock screener.",
+  "applicationCategory": "FinanceApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "featureList": [
+    "Real-time stock price charts",
+    "DCF intrinsic value calculator",
+    "Earnings history and EPS surprise tracker",
+    "SEC EDGAR filing browser",
+    "Analyst price targets and recommendations",
+    "Dark pool and institutional holdings data",
+    "Stock screener with 50,000+ stocks",
+    "Compare up to 4 stocks side by side",
+    "Risk metrics: Sharpe, Sortino, Alpha, Beta, VaR",
+    "Financial statements: Income, Balance Sheet, Cash Flow"
+  ],
+  "publisher": {
+    "@type": "Organization",
+    "name": "Implied Lens",
+    "url": "https://impliedlens.com",
+    "logo": "https://impliedlens.com/logo.svg"
+  }
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
@@ -909,13 +965,15 @@ html[data-theme="dark"] .modal-box h2,html[data-theme="dark"] .modal-box label {
 html[data-theme="dark"] .modal-note { color:rgba(220,225,232,.35)!important; }
 html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; border-color:rgba(255,255,255,.18)!important; }
 </style>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='16' fill='%23C89B3C'/><circle cx='16' cy='16' r='8' fill='%23F7F4EE'/></svg>">
 </head>
 <body>
 
 <!-- ══════════ NAV ══════════ -->
 <nav id="main-nav" data-view="home">
-  <a class="nav-logo" href="#"><span class="logo-dot"></span>Implied<em style="font-style:italic;color:var(--gold-d);">Lens</em></a>
+  <a class="nav-logo" href="#" onclick="navGoTo('home');return false;" style="display:flex;align-items:center;gap:9px;text-decoration:none;">
+    <img src="/logo.svg" alt="Implied Lens" style="width:28px;height:28px;border-radius:50%;flex-shrink:0;">
+    <span>Implied<em style="font-style:italic;color:var(--gold-d);">Lens</em></span>
+  </a>
   <div class="nav-links" id="nav-links">
     <a href='#' id='nav-home' class="nav-tab active-tab" onclick="navGoTo('home');return false;">Home</a>
     <a href='#' class="nav-tab" data-tool="analyze"    onclick="navGoTo('analyze');return false;">Analyze</a>
@@ -4084,231 +4142,6 @@ async function loadSecFilings(ticker) {
   if (!ticker) {
     if(nostock) nostock.style.display='block';
     if(cont)    cont.style.display='none';
-    return;
-  }
-  if(nostock)  nostock.style.display='none';
-  if(cont)     cont.style.display='none';
-  if(errEl)    errEl.style.display='none';
-  if(loading)  loading.style.display='block';
-
-  try {
-    const resp = await fetch('/api/sec/' + encodeURIComponent(ticker));
-    const data = await resp.json();
-    if(loading) loading.style.display='none';
-    if (data.error || !data.filings) {
-      if(errEl){ errEl.textContent = data.error || 'Failed to load filings.'; errEl.style.display='block'; }
-      return;
-    }
-    _secFilings = data.filings || [];
-    _secFilter  = 'ALL';
-    document.querySelectorAll('.sec-filter-btn').forEach(b => b.classList.toggle('active', b.dataset.form === 'ALL'));
-    if(entityLbl) entityLbl.textContent = data.entity ? data.entity.toUpperCase() + ' · CIK ' + parseInt(data.cik) : '';
-    if(cont) cont.style.display='block';
-    renderSecFilings();
-  } catch(e) {
-    if(loading) loading.style.display='none';
-    if(errEl){ errEl.textContent = 'Failed to connect to SEC EDGAR.'; errEl.style.display='block'; }
-  }
-}
-
-
-
-/* ─── Theme toggle ─────────────────────────────────────────── */
-function toggleTheme() {
-  const html = document.documentElement;
-  const isDark = html.getAttribute('data-theme') === 'dark';
-  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
-  localStorage.setItem('il-theme', isDark ? 'light' : 'dark');
-}
-(function applyTheme(){
-  const saved = localStorage.getItem('il-theme');
-  if (saved === 'dark') document.documentElement.setAttribute('data-theme','dark');
-})();
-
-/* =====================================================
-   ANALYST PRICE TARGETS
-===================================================== */
-var S_analystCache = {};
-
-async function loadAnalyst(ticker) {
-  document.getElementById('analyst-panel').style.display = 'none';
-  try {
-    const res  = await fetch('/api/analyst/' + ticker, {credentials:'same-origin'});
-    const data = await res.json();
-    const pt   = data.priceTarget || {};
-    const recs = data.recommendations || [];
-
-    // Store targets so price chart can draw lines
-    if (pt.targetMean) {
-      S.analystTarget = { mean: pt.targetMean, high: pt.targetHigh, low: pt.targetLow };
-      // Rebuild price chart with target lines
-      if (S.data && S.charts['price-chart']) {
-        const meta = S.data.meta;
-        const ts   = S.data.timestamp || [];
-        const q    = S.data.indicators.quote[0];
-        buildPriceChart(S.data, q.close||[], ts);
-      }
-    }
-
-    renderAnalystTargets(pt);
-    renderAnalystRec(recs);
-    document.getElementById('analyst-panel').style.display = 'block';
-  } catch(e) {
-    console.warn('analyst load failed:', e.message);
-  }
-}
-
-function renderAnalystTargets(pt) {
-  const el = document.getElementById('analyst-targets-content');
-  if (!el || !pt) return;
-  const price = S.data?.meta?.regularMarketPrice || 0;
-  const mean  = pt.targetMean || pt.targetMeanPrice;
-  const high  = pt.targetHigh || pt.targetHighPrice;
-  const low   = pt.targetLow  || pt.targetLowPrice;
-  const n     = pt.numberOfAnalysts || pt.numberOfAnalystOpinions || 0;
-  if (!mean) { el.innerHTML = '<div style="color:var(--text5);font-size:.78rem;">No price target data available.</div>'; return; }
-  const upside = price > 0 ? ((mean - price) / price * 100) : null;
-  const uClass = upside == null ? '' : upside >= 0 ? 'up' : 'dn';
-  el.innerHTML = `
-    <div class="analyst-target-row"><span class="analyst-target-lbl">Mean Target</span><span class="analyst-target-val">$${mean.toFixed(2)}</span></div>
-    <div class="analyst-target-row"><span class="analyst-target-lbl">High Target</span><span class="analyst-target-val" style="color:#4ade80;">$${high ? high.toFixed(2) : '—'}</span></div>
-    <div class="analyst-target-row"><span class="analyst-target-lbl">Low Target</span><span class="analyst-target-val" style="color:#f87171;">$${low  ? low.toFixed(2)  : '—'}</span></div>
-    <div class="analyst-target-row"><span class="analyst-target-lbl">Analysts</span><span class="analyst-target-val">${n || '—'}</span></div>
-    ${upside != null ? `<div class="analyst-upside ${uClass}">${upside >= 0 ? '▲' : '▼'} ${Math.abs(upside).toFixed(1)}% upside</div>` : ''}
-  `;
-}
-
-function renderAnalystRec(recs) {
-  const el = document.getElementById('analyst-rec-content');
-  if (!el) return;
-  // Most recent period
-  if (!recs || !recs.length) { el.innerHTML = '<div style="color:var(--text5);font-size:.78rem;">No recommendation data.</div>'; return; }
-  const r = recs[0]; // most recent
-  const sb = r.strongBuy||0, b = r.buy||0, h = r.hold||0, s = r.sell||0, ss = r.strongSell||0;
-  const total = sb+b+h+s+ss || 1;
-  // Weighted score 1-5 (1=strong buy, 5=strong sell)
-  const score = (sb*1 + b*2 + h*3 + s*4 + ss*5) / total;
-  const labels = ['','Strong Buy','Buy','Hold','Sell','Strong Sell'];
-  const recLabel = score < 1.5 ? 'Strong Buy' : score < 2.5 ? 'Buy' : score < 3.5 ? 'Hold' : score < 4.5 ? 'Sell' : 'Strong Sell';
-  const recColor = score < 1.5 ? '#4ade80' : score < 2.5 ? '#86efac' : score < 3.5 ? '#fbbf24' : score < 4.5 ? '#f97316' : '#f87171';
-  // Gauge: 5 segments
-  const segs = [
-    {key:'sb', cls:'sb', pct: sb/total},
-    {key:'b',  cls:'b',  pct: b/total},
-    {key:'h',  cls:'h',  pct: h/total},
-    {key:'s',  cls:'s',  pct: s/total},
-    {key:'ss', cls:'ss', pct: ss/total},
-  ];
-  el.innerHTML = `
-    <div class="analyst-gauge">
-      ${segs.map(sg => `<div class="analyst-gauge-seg lit ${sg.cls}" style="flex:${Math.max(sg.pct*100, 4)}"></div>`).join('')}
-    </div>
-    <div class="analyst-rec-lbl" style="color:${recColor};">${recLabel}</div>
-    <div class="analyst-rec-sub">${r.period || ''} · Score ${score.toFixed(2)} / 5.00</div>
-    <div class="analyst-breakdown">
-      <div class="analyst-bd-item" style="color:#4ade80;">Strong Buy: ${sb}</div>
-      <div class="analyst-bd-item" style="color:#86efac;">Buy: ${b}</div>
-      <div class="analyst-bd-item">Hold: ${h}</div>
-      <div class="analyst-bd-item" style="color:#f97316;">Sell: ${s}</div>
-      <div class="analyst-bd-item" style="color:#f87171;">Strong Sell: ${ss}</div>
-    </div>
-  `;
-}
-
-/* =====================================================
-   INSTITUTIONAL & DARK POOL
-===================================================== */
-async function loadInstitutional(ticker) {
-  const loading = document.getElementById('inst-loading');
-  const content = document.getElementById('inst-content');
-  const nostock = document.getElementById('inst-nostock');
-  if (!ticker) { if(nostock) nostock.style.display='block'; if(content) content.style.display='none'; return; }
-  if(nostock) nostock.style.display='none';
-  if(loading) loading.style.display='flex';
-  if(content) content.style.display='none';
-  try {
-    const [instRes, dpRes] = await Promise.all([
-      fetch('/api/institutional/' + ticker, {credentials:'same-origin'}),
-      fetch('/api/darkpool/' + ticker, {credentials:'same-origin'})
-    ]);
-    const instData = instRes.ok ? await instRes.json() : {};
-    const dpData   = dpRes.ok  ? await dpRes.json()   : {};
-    if(loading) loading.style.display='none';
-    renderDarkPool(dpData);
-    renderInstitutional(instData);
-    if(content) content.style.display='block';
-  } catch(e) {
-    if(loading) loading.style.display='none';
-    console.warn('institutional load failed:', e.message);
-  }
-}
-
-function renderDarkPool(data) {
-  const cards = document.getElementById('dp-cards');
-  if (!cards) return;
-  const dp  = data.darkpool || [];
-  const si  = data.shortInterest || {};
-
-  // Short interest metrics
-  const siPct   = si.shortPercent != null ? (si.shortPercent * 100).toFixed(1) : null;
-  const siShares= si.shortInterest ? fmtBig(si.shortInterest).replace('$','') : null;
-  const siDate  = si.settleDate || si.date || null;
-
-  // Dark pool volume stats from weekly data
-  let totalVol = 0, weeksAvg = 0;
-  if (dp.length) {
-    const vols = dp.map(w => Number(w.totalWeeklyShareQuantity)||0);
-    totalVol = vols[0] || 0;
-    weeksAvg = vols.reduce((a,b)=>a+b,0) / vols.length;
-  }
-  const dpPct = weeksAvg > 0 && totalVol > 0 ? (totalVol / weeksAvg * 100).toFixed(0) : null;
-
-  cards.innerHTML = [
-    { lbl:'Short Interest %',  val: siPct  ? siPct+'%' : '—',     sub: siDate || '', bar: siPct ? Math.min(parseFloat(siPct),50)/50 : 0,  color: siPct && parseFloat(siPct)>15 ? '#f87171' : '#C89B3C' },
-    { lbl:'Shares Short',      val: siShares || '—',               sub: 'shares held short', bar: 0, color: '#C89B3C' },
-    { lbl:'Dark Pool Volume',  val: dp[0]?.totalWeeklyShareQuantity ? fmtBig(dp[0].totalWeeklyShareQuantity).replace('$','') : '—', sub: dp[0]?.weekStartDate ? 'week of '+dp[0].weekStartDate : 'latest week', bar: dpPct ? Math.min(parseFloat(dpPct),200)/200 : 0, color: '#4a9fd4' },
-    { lbl:'Weekly Trades',     val: dp[0]?.totalWeeklyTradeCount   ? fmtBig(dp[0].totalWeeklyTradeCount).replace('$','') : '—', sub: 'OTC dark pool trades', bar: 0, color: '#9b72c8' },
-  ].map(c => `
-    <div class="dp-card">
-      <div class="dp-lbl">${c.lbl}</div>
-      <div class="dp-val" style="color:${c.color};">${c.val}</div>
-      <div class="dp-sub">${c.sub}</div>
-      ${c.bar > 0 ? `<div class="dp-bar-wrap"><div class="dp-bar-fill" style="width:${(c.bar*100).toFixed(0)}%;background:${c.color};"></div></div>` : ''}
-    </div>`).join('');
-
-  // Build weekly dark pool chart
-  if (dp.length >= 2) {
-    destroyChart('dp-chart');
-    const labels = dp.map(w => w.weekStartDate || '').reverse();
-    const vols   = dp.map(w => Number(w.totalWeeklyShareQuantity)||0).reverse();
-    S.charts['dp-chart'] = new Chart(document.getElementById('dp-chart'), {
-      type:'bar',
-      data:{labels, datasets:[{
-        label:'Dark Pool Volume',
-        data: vols,
-        backgroundColor:'rgba(74,159,212,.55)',
-        borderColor:'rgba(74,159,212,.9)',
-        borderWidth:1,
-        borderRadius:3
-      }]},
-      options:{
-        responsive:true, maintainAspectRatio:false,
-        plugins:{legend:{display:false}, tooltip:{callbacks:{label:ctx=>' '+fmtBig(ctx.raw).replace('$','')}}},
-        scales:{
-          x:{ticks:{color:'var(--text5)',font:{size:9}}, grid:{display:false}},
-          y:{ticks:{color:'var(--text5)',font:{size:9},callback:v=>fmtBig(v).replace('$','')}, grid:{color:gcol()}}
-        }
-      }
-    });
-  }
-}
-
-function renderInstitutional(data) {
-  const tbody = document.getElementById('inst-tbody');
-  if (!tbody) return;
-  const holders = data.ownership || [];
-  if (!holders.length) {
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text5);padding:1.5rem;">No institutional holder data available for this ticker.</td></tr>';
     return;
   }
   tbody.innerHTML = holders.map(h => {
