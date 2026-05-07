@@ -966,4 +966,20 @@ app.get('/api/darkpool/:ticker', async (req, res) => {
 
 // ============================================================
 //  Static pages
-// =======================================================
+// ============================================================
+app.get(["/login", "/login.html"], (req, res) =>
+  res.sendFile(path.join(__dirname, "public", "login.html"))
+);
+app.get(["/signup", "/signup.html"], (req, res) =>
+  res.sendFile(path.join(__dirname, "public", "signup.html"))
+);
+app.get(["/reset-password", "/reset-password.html"], (req, res) =>
+  res.sendFile(path.join(__dirname, "public", "reset-password.html"))
+);
+app.get("*", (req, res) =>
+  res.sendFile(path.join(__dirname, "index.html"))
+);
+
+initDb().then(() => {
+  app.listen(PORT, () => console.log(`Implied Lens running on port ${PORT}`));
+}).catch(err => { console.error("DB init failed:", err); process.exit(1); });
