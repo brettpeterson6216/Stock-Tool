@@ -554,17 +554,48 @@ app.get('/api/stripe/portal', async (req, res) => {
 // ============================================================
 app.get('/api/quote/:ticker', async (req, res) => {
   try {
-    const ticker = req.params.ticker.toUpperCase();
-    const range  = (req.query.range || '1y').replace(/[^a-z0-9]/gi, '');
-    const url    = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=${range}&includePrePost=false`;
-    const r = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept': 'application/json',
+    const ticker = req.params.ticker.toUpperCase().replace(/[^A-Z0-9.\-^]/g, '');
+    if (!ticker) return res.status(400).json({ error: 'No ticker' });
+    const range = (req.query.range || '1y').replace(/[^a-z0-9]/gi, '');
+
+    // Try with crumb+cookie first (most reliable), fall back to plain request
+    let data = null;
+    const baseHdr = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Accept': 'application/json, text/plain, */*',
+      'Accept-Language': 'en-US,en;q=0.9',
+      'Accept-Encoding': 'gzip, deflate, br',
+      'Origin': 'https://finance.yahoo.com',
+      'Referer': 'https://finance.yahoo.com/',
+    };
+
+    // Attempt 1: with crumb
+    try {
+      const { crumb, cookies } = await getYahooCrumb();
+      if (crumb) {
+        const hdr = { ...baseHdr };
+        if (cookies) hdr['Cookie'] = cookies;
+        const url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=${range}&includePrePost=false&crumb=${encodeURIComponent(crumb)}`;
+        const r = await fetch(url, { headers: hdr });
+        if (r.ok) data = await r.json();
       }
-    });
-    if (!r.ok) return res.status(r.status).json({ error: 'Yahoo Finance returned ' + r.status });
-    const data = await r.json();
+    } catch (_) {}
+
+    // Attempt 2: query2 without crumb
+    if (!data) {
+      const url2 = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=${range}&includePrePost=false`;
+      const r2 = await fetch(url2, { headers: baseHdr });
+      if (r2.ok) data = await r2.json();
+    }
+
+    // Attempt 3: query1 as last resort
+    if (!data) {
+      const url3 = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=${range}&includePrePost=false`;
+      const r3 = await fetch(url3, { headers: baseHdr });
+      if (!r3.ok) return res.status(r3.status).json({ error: 'Yahoo Finance returned ' + r3.status });
+      data = await r3.json();
+    }
+
     res.json(data);
   } catch (e) {
     console.error('quote proxy error:', e.message);
