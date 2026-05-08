@@ -560,72 +560,135 @@ app.get('/api/quote/:ticker', async (req, res) => {
     if (!ticker) return res.status(400).json({ error: 'No ticker' });
     const range = (req.query.range || '1y').replace(/[^a-z0-9]/gi, '');
 
-    // Use Finnhub for reliable OHLCV data (Yahoo Finance blocks server-side requests)
-    const toTs  = Math.floor(Date.now() / 1000);
-    const secMap = { '1d':86400, '5d':5*86400, '1mo':30*86400, '3mo':90*86400,
-                     '6mo':182*86400, '1y':365*86400, '2y':2*365*86400, '5y':5*365*86400 };
-    const fromTs = toTs - (secMap[range] || 365*86400);
-    const res2Map = { '1d':'D', '5d':'D', '1mo':'D', '3mo':'D', '6mo':'D', '1y':'D', '2y':'W', '5y':'W' };
-    const resolution = res2Map[range] || 'D';
+    const YH = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+      'Accept': 'application/json, text/plain, */*',
+      'Accept-Language': 'en-US,en;q=0.9',
+      'Origin': 'https://finance.yahoo.com',
+      'Referer': 'https://finance.yahoo.com/',
+    };
 
-    const FH = FINNHUB_KEY;
-    const [candleResp, quoteResp, profileResp, metricResp] = await Promise.all([
-      fetch(`https://finnhub.io/api/v1/stock/candle?symbol=${ticker}&resolution=${resolution}&from=${fromTs}&to=${toTs}&token=${FH}`),
-      fetch(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FH}`),
-      fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${FH}`),
-      fetch(`https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FH}`)
-    ]);
+    // Attempt 1: Yahoo Finance v8 chart (query2, no crumb)
+    let data = null;
+    try {
+      const u = `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=1d&range=${range}&includePrePost=false`;
+      const r = await fetch(u, { headers: YH });
+      if (r.ok) {
+        const j = await r.json();
+        if (j?.chart?.result?.[0]?.timestamp?.length) data = j;
+      }
+    } catch (_) {}
 
-    const [candle, quote, profile, metricData] = await Promise.all([
-      candleResp.json(), quoteResp.json(), profileResp.json(), metricResp.json()
-    ]);
+    // Attempt 2: Yahoo Finance v8 chart (query1, no crumb)
+    if (!data) {
+      try {
+        const u = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=1d&range=${range}&includePrePost=false`;
+        const r = await fetch(u, { headers: YH });
+        if (r.ok) {
+          const j = await r.json();
+          if (j?.chart?.result?.[0]?.timestamp?.length) data = j;
+        }
+      } catch (_) {}
+    }
 
-    if (candle.s !== 'ok' || !candle.t?.length) {
+    // Attempt 3: Stooq CSV (free, no auth needed)
+    if (!data) {
+      try {
+        const now = new Date();
+        const rangeDays = { '1d':5, '5d':10, '1mo':35, '3mo':95, '6mo':185, '1y':370, '2y':740, '5y':1830 };
+        const days = rangeDays[range] || 370;
+        const from = new Date(now - days * 86400000);
+        const fmt  = d => d.toISOString().slice(0,10).replace(/-/g,'');
+        const stooqUrl = `https://stooq.com/q/d/l/?s=${encodeURIComponent(ticker)}.US&d1=${fmt(from)}&d2=${fmt(now)}&i=d`;
+        const r = await fetch(stooqUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+        if (r.ok) {
+          const csv = await r.text();
+          const lines = csv.trim().split('\n').slice(1).filter(l => l && !l.startsWith('No data') && !l.includes('<'));
+          if (lines.length) {
+            const timestamps = [], opens = [], highs = [], lows = [], closes = [], vols = [];
+            for (const line of lines) {
+              const [date, o, h, l, c, v] = line.split(',');
+              if (!date || !c || isNaN(parseFloat(c))) continue;
+              timestamps.push(Math.floor(new Date(date).getTime() / 1000));
+              opens.push(parseFloat(o) || null);
+              highs.push(parseFloat(h) || null);
+              lows.push(parseFloat(l) || null);
+              closes.push(parseFloat(c));
+              vols.push(parseInt(v) || null);
+            }
+            if (timestamps.length) {
+              const FH = FINNHUB_KEY;
+              const [qr, pr, mr] = await Promise.all([
+                fetch(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FH}`).catch(()=>null),
+                fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${FH}`).catch(()=>null),
+                fetch(`https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FH}`).catch(()=>null),
+              ]);
+              const qt = qr?.ok ? await qr.json().catch(()=>({})) : {};
+              const pf = pr?.ok ? await pr.json().catch(()=>({})) : {};
+              const mt = mr?.ok ? await mr.json().catch(()=>({})) : {};
+              const m2 = mt.metric || {};
+              const price2 = qt.c || closes[closes.length - 1];
+              const shares2 = pf.shareOutstanding ? pf.shareOutstanding * 1e6 : null;
+              data = { chart: { result: [{ meta: {
+                symbol: ticker, currency: pf.currency || 'USD', exchangeName: pf.exchange || '',
+                instrumentType: 'EQUITY', longName: pf.name || ticker, shortName: pf.name || ticker,
+                regularMarketPrice: price2, previousClose: qt.pc || null, chartPreviousClose: qt.pc || null,
+                regularMarketVolume: qt.v || vols[vols.length-1] || null,
+                averageDailyVolume3Month: m2['3MonthAverageTradingVolume'] ? m2['3MonthAverageTradingVolume']*1e6 : null,
+                marketCap: shares2 && price2 ? shares2 * price2 : null,
+                fiftyTwoWeekHigh: m2['52WeekHigh'] || null, fiftyTwoWeekLow: m2['52WeekLow'] || null,
+                trailingPE: m2.peNormalizedAnnual || m2.peBasicExclExtraTTM || null,
+              }, timestamp: timestamps, indicators: {
+                quote: [{ open: opens, high: highs, low: lows, close: closes, volume: vols }],
+                adjclose: [{ adjclose: closes }]
+              }}], error: null }};
+            }
+          }
+        }
+      } catch (_) {}
+    }
+
+    if (!data) {
       return res.status(404).json({ error: `No price data found for "${ticker}". Check the ticker symbol.` });
     }
 
-    const m = metricData.metric || {};
-    const price = quote.c || candle.c[candle.c.length - 1];
-    const shares = profile.shareOutstanding ? profile.shareOutstanding * 1e6 : null;
-    const marketCap = shares && price ? shares * price : null;
+    // Augment meta with Finnhub real-time data if Yahoo was used (Yahoo meta can be sparse)
+    const result = data.chart.result[0];
+    if (!result.meta.marketCap || !result.meta.fiftyTwoWeekHigh) {
+      try {
+        const FH = FINNHUB_KEY;
+        const [qr, pr, mr] = await Promise.all([
+          fetch(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FH}`).catch(()=>null),
+          fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${FH}`).catch(()=>null),
+          fetch(`https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FH}`).catch(()=>null),
+        ]);
+        const qt = qr?.ok ? await qr.json().catch(()=>({})) : {};
+        const pf = pr?.ok ? await pr.json().catch(()=>({})) : {};
+        const mt = mr?.ok ? await mr.json().catch(()=>({})) : {};
+        const m = mt.metric || {};
+        const shares = pf.shareOutstanding ? pf.shareOutstanding * 1e6 : null;
+        const price  = qt.c || result.meta.regularMarketPrice;
+        result.meta.longName              = result.meta.longName  || pf.name || ticker;
+        result.meta.shortName             = result.meta.shortName || pf.name || ticker;
+        result.meta.regularMarketPrice    = price || result.meta.regularMarketPrice;
+        result.meta.previousClose         = qt.pc || result.meta.previousClose;
+        result.meta.chartPreviousClose    = qt.pc || result.meta.chartPreviousClose;
+        result.meta.regularMarketVolume   = qt.v  || result.meta.regularMarketVolume;
+        result.meta.marketCap             = (shares && price) ? shares * price : result.meta.marketCap;
+        result.meta.fiftyTwoWeekHigh      = m['52WeekHigh']  || result.meta.fiftyTwoWeekHigh;
+        result.meta.fiftyTwoWeekLow       = m['52WeekLow']   || result.meta.fiftyTwoWeekLow;
+        result.meta.trailingPE            = m.peNormalizedAnnual || m.peBasicExclExtraTTM || result.meta.trailingPE;
+        result.meta.averageDailyVolume3Month = m['3MonthAverageTradingVolume']
+          ? m['3MonthAverageTradingVolume'] * 1e6 : result.meta.averageDailyVolume3Month;
+      } catch (_) {}
+    }
 
-    const meta = {
-      symbol:                   ticker,
-      currency:                 profile.currency || 'USD',
-      exchangeName:             profile.exchange  || '',
-      instrumentType:           'EQUITY',
-      longName:                 profile.name || ticker,
-      shortName:                profile.name || ticker,
-      regularMarketPrice:       price,
-      previousClose:            quote.pc || null,
-      chartPreviousClose:       quote.pc || null,
-      regularMarketVolume:      candle.v[candle.v.length - 1] || null,
-      averageDailyVolume3Month: m['3MonthAverageTradingVolume'] ? m['3MonthAverageTradingVolume'] * 1e6 : null,
-      marketCap,
-      fiftyTwoWeekHigh:         m['52WeekHigh'] || null,
-      fiftyTwoWeekLow:          m['52WeekLow']  || null,
-      trailingPE:               m.peNormalizedAnnual || m.peBasicExclExtraTTM || null,
-    };
-
-    res.json({
-      chart: {
-        result: [{
-          meta,
-          timestamp: candle.t,
-          indicators: {
-            quote:    [{ open: candle.o, high: candle.h, low: candle.l, close: candle.c, volume: candle.v }],
-            adjclose: [{ adjclose: candle.c }]
-          }
-        }],
-        error: null
-      }
-    });
+    res.json(data);
   } catch (e) {
     console.error('quote proxy error:', e.message);
     res.status(500).json({ error: 'Failed to fetch quote data: ' + e.message });
   }
 });
-
 
 // ============================================================
 //  Yahoo Finance quoteSummary helper  (used by financials/earnings/analyst)
