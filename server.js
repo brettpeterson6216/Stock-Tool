@@ -17,6 +17,9 @@ const helmet    = require("helmet");
 const rateLimit = require("express-rate-limit");
 const { createClient } = require("@libsql/client");
 const Stripe = require("stripe");
+const yahooFinance = require('yahoo-finance2').default;
+// Suppress yahoo-finance2 validation notices
+yahooFinance.setGlobalConfig({ validation: { logOptionsErrors: false } });
 
 const PORT                 = process.env.PORT || 3000;
 const SESSION_SECRET       = process.env.SESSION_SECRET || "change-me-in-production-please";
@@ -558,89 +561,72 @@ app.get('/api/quote/:ticker', async (req, res) => {
     if (!ticker) return res.status(400).json({ error: 'No ticker' });
     const range = (req.query.range || '1y').replace(/[^a-z0-9]/gi, '');
 
-    // Try with crumb+cookie first (most reliable), fall back to plain request
-    let data = null;
-    const baseHdr = {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      'Accept': 'application/json, text/plain, */*',
-      'Accept-Language': 'en-US,en;q=0.9',
-      'Accept-Encoding': 'gzip, deflate, br',
-      'Origin': 'https://finance.yahoo.com',
-      'Referer': 'https://finance.yahoo.com/',
-    };
+    // Use yahoo-finance2 — handles auth/cookies automatically
+    const [chartData, quoteData] = await Promise.all([
+      yahooFinance.chart(ticker, { interval: '1d', range }),
+      yahooFinance.quote(ticker).catch(() => ({}))
+    ]);
 
-    // Attempt 1: with crumb
-    try {
-      const { crumb, cookies } = await getYahooCrumb();
-      if (crumb) {
-        const hdr = { ...baseHdr };
-        if (cookies) hdr['Cookie'] = cookies;
-        const url = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=${range}&includePrePost=false&crumb=${encodeURIComponent(crumb)}`;
-        const r = await fetch(url, { headers: hdr });
-        if (r.ok) data = await r.json();
+    if (!chartData || !chartData.quotes || chartData.quotes.length === 0) {
+      return res.status(404).json({ error: 'No data for ' + ticker });
+    }
+
+    // Transform to Yahoo Finance v8 chart format (what the frontend expects)
+    const quotes = chartData.quotes;
+    const meta   = chartData.meta || {};
+
+    // Merge extra fields from quote()
+    const qd = quoteData || {};
+    meta.longName              = qd.longName              || meta.longName  || ticker;
+    meta.shortName             = qd.shortName             || meta.shortName || ticker;
+    meta.marketCap             = qd.marketCap             || meta.marketCap || null;
+    meta.trailingPE            = qd.trailingPE            || meta.trailingPE || null;
+    meta.regularMarketPrice    = qd.regularMarketPrice    || meta.regularMarketPrice || null;
+    meta.previousClose         = qd.regularMarketPreviousClose || meta.chartPreviousClose || null;
+    meta.chartPreviousClose    = meta.previousClose;
+    meta.regularMarketVolume   = qd.regularMarketVolume   || meta.regularMarketVolume || null;
+    meta.averageDailyVolume3Month = qd.averageDailyVolume3Month || null;
+    meta.fiftyTwoWeekHigh      = qd.fiftyTwoWeekHigh      || meta.fiftyTwoWeekHigh || null;
+    meta.fiftyTwoWeekLow       = qd.fiftyTwoWeekLow       || meta.fiftyTwoWeekLow  || null;
+
+    const timestamps = quotes.map(q => Math.floor(new Date(q.date).getTime() / 1000));
+    const opens      = quotes.map(q => q.open   ?? null);
+    const highs      = quotes.map(q => q.high   ?? null);
+    const lows       = quotes.map(q => q.low    ?? null);
+    const closes     = quotes.map(q => q.close  ?? null);
+    const volumes    = quotes.map(q => q.volume ?? null);
+    const adjcloses  = quotes.map(q => q.adjclose ?? q.close ?? null);
+
+    res.json({
+      chart: {
+        result: [{
+          meta,
+          timestamp: timestamps,
+          indicators: {
+            quote:    [{ open: opens, high: highs, low: lows, close: closes, volume: volumes }],
+            adjclose: [{ adjclose: adjcloses }]
+          }
+        }],
+        error: null
       }
-    } catch (_) {}
-
-    // Attempt 2: query2 without crumb
-    if (!data) {
-      const url2 = `https://query2.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=${range}&includePrePost=false`;
-      const r2 = await fetch(url2, { headers: baseHdr });
-      if (r2.ok) data = await r2.json();
-    }
-
-    // Attempt 3: query1 as last resort
-    if (!data) {
-      const url3 = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=${range}&includePrePost=false`;
-      const r3 = await fetch(url3, { headers: baseHdr });
-      if (!r3.ok) return res.status(r3.status).json({ error: 'Yahoo Finance returned ' + r3.status });
-      data = await r3.json();
-    }
-
-    res.json(data);
+    });
   } catch (e) {
     console.error('quote proxy error:', e.message);
-    res.status(500).json({ error: 'Failed to fetch quote data.' });
+    res.status(500).json({ error: 'Failed to fetch quote data: ' + e.message });
   }
 });
 
 
 // ============================================================
-//  Yahoo Finance crumb cache  (required for quoteSummary v10)
+//  Yahoo Finance quoteSummary helper  (used by financials/earnings/analyst)
 // ============================================================
-let _yfCrumb   = null;
-let _yfCookies = null;
-let _yfCrumbAt = 0;
-const YF_CRUMB_TTL = 25 * 60 * 1000; // refresh every 25 min
-
-async function getYahooCrumb() {
-  if (_yfCrumb && (Date.now() - _yfCrumbAt) < YF_CRUMB_TTL) return { crumb: _yfCrumb, cookies: _yfCookies };
+async function getYahooSummary(ticker, modules) {
   try {
-    // Step 1 — accept the consent cookie
-    const consent = await fetch('https://fc.yahoo.com/', {
-      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36', 'Accept': '*/*' },
-      redirect: 'follow',
-    });
-    const rawCookies = consent.headers.getSetCookie ? consent.headers.getSetCookie() : [];
-    const cookieStr  = rawCookies.map(c => c.split(';')[0]).join('; ');
-
-    // Step 2 — fetch crumb
-    const crumbRes = await fetch('https://query1.finance.yahoo.com/v1/test/getcrumb', {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': '*/*',
-        'Cookie': cookieStr,
-      },
-    });
-    const crumb = (await crumbRes.text()).trim();
-    if (!crumb || crumb.includes('<')) throw new Error('bad crumb: ' + crumb.slice(0, 40));
-    _yfCrumb   = crumb;
-    _yfCookies = cookieStr;
-    _yfCrumbAt = Date.now();
-    console.log('Yahoo crumb refreshed:', crumb.slice(0, 8) + '...');
-    return { crumb, cookies: cookieStr };
+    const result = await yahooFinance.quoteSummary(ticker, { modules });
+    return result;
   } catch (e) {
-    console.error('getYahooCrumb failed:', e.message);
-    return { crumb: null, cookies: null };
+    console.error('quoteSummary error for', ticker, ':', e.message);
+    return null;
   }
 }
 
@@ -650,30 +636,18 @@ async function getYahooCrumb() {
 app.get('/api/financials/:ticker', async (req, res) => {
   const ticker = req.params.ticker.toUpperCase();
 
-  // ── Helper: fetch Yahoo quoteSummary ──────────────────────
+  // ── Helper: fetch Yahoo quoteSummary via yahoo-finance2 ──────────────────────
   async function tryYahoo() {
-    const modules = 'incomeStatementHistory,incomeStatementHistoryQuarterly,balanceSheetHistory,balanceSheetHistoryQuarterly,cashflowStatementHistory,cashflowStatementHistoryQuarterly,defaultKeyStatistics,financialData';
-    const { crumb, cookies } = await getYahooCrumb();
-    const cp  = crumb ? `&crumb=${encodeURIComponent(crumb)}` : '';
-    // Try query2 first (more permissive), then query1
-    for (const host of ['query2', 'query1']) {
-      const url = `https://${host}.finance.yahoo.com/v10/finance/quoteSummary/${ticker}?modules=${encodeURIComponent(modules)}&formatted=true&lang=en-US&region=US${cp}`;
-      const hdr = {
-        'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-        'Accept':'application/json', 'Accept-Language':'en-US,en;q=0.9',
-      };
-      if (cookies) hdr['Cookie'] = cookies;
-      try {
-        const r = await fetch(url, { headers: hdr });
-        if (r.status === 401 && host === 'query2') {
-          _yfCrumb = null; _yfCookies = null; _yfCrumbAt = 0; continue;
-        }
-        if (!r.ok) continue;
-        const data = await r.json();
-        if (data?.quoteSummary?.result?.[0]) return data;
-      } catch(_) { continue; }
-    }
-    return null;
+    const modules = [
+      'incomeStatementHistory','incomeStatementHistoryQuarterly',
+      'balanceSheetHistory','balanceSheetHistoryQuarterly',
+      'cashflowStatementHistory','cashflowStatementHistoryQuarterly',
+      'defaultKeyStatistics','financialData'
+    ];
+    const result = await getYahooSummary(ticker, modules);
+    if (!result) return null;
+    // Wrap in the shape the rest of this route expects
+    return { quoteSummary: { result: [result] } };
   }
 
   // ── Helper: fetch Finnhub financials-reported ─────────────
@@ -884,35 +858,28 @@ app.get('/api/analyst/:ticker', async (req, res) => {
     ]);
     const [pt, rec] = await Promise.all([ptResp.json(), recResp.json()]);
 
-    // Yahoo financialData as fallback for targets + P/E, P/S
+    // Yahoo financialData via yahoo-finance2 for targets + P/E, P/S
     let yahooFd = {};
     try {
-      const { crumb, cookies } = await getYahooCrumb();
-      const cp = crumb ? `&crumb=${encodeURIComponent(crumb)}` : '';
-      const yUrl = `https://query2.finance.yahoo.com/v10/finance/quoteSummary/${ticker}?modules=financialData,defaultKeyStatistics${cp}&formatted=true`;
-      const yHdr = { 'User-Agent':'Mozilla/5.0', 'Accept':'application/json' };
-      if (cookies) yHdr['Cookie'] = cookies;
-      const yr = await fetch(yUrl, { headers: yHdr });
-      if (yr.ok) {
-        const yd = await yr.json();
-        const r0 = yd?.quoteSummary?.result?.[0] || {};
-        const fd = r0.financialData || {};
-        const ks = r0.defaultKeyStatistics || {};
+      const yd = await getYahooSummary(ticker, ['financialData', 'defaultKeyStatistics']);
+      if (yd) {
+        const fd = yd.financialData || {};
+        const ks = yd.defaultKeyStatistics || {};
         yahooFd = {
-          targetMeanPrice:  fd.targetMeanPrice?.raw,
-          targetHighPrice:  fd.targetHighPrice?.raw,
-          targetLowPrice:   fd.targetLowPrice?.raw,
-          targetMedianPrice:fd.targetMedianPrice?.raw,
-          numberOfAnalystOpinions: fd.numberOfAnalystOpinions?.raw,
-          recommendationMean: fd.recommendationMean?.raw,
-          recommendationKey:  fd.recommendationKey,
-          priceToBook:        ks.priceToBook?.raw,
-          trailingPE:         ks.trailingPE?.raw,
-          forwardPE:          ks.forwardPE?.raw,
-          priceToSales:       ks.priceToSalesTrailing12Months?.raw,
-          marketCap:          ks.marketCap?.raw,
-          enterpriseValue:    ks.enterpriseValue?.raw,
-          currentPrice:       fd.currentPrice?.raw,
+          targetMeanPrice:  fd.targetMeanPrice?.raw  ?? fd.targetMeanPrice  ?? null,
+          targetHighPrice:  fd.targetHighPrice?.raw  ?? fd.targetHighPrice  ?? null,
+          targetLowPrice:   fd.targetLowPrice?.raw   ?? fd.targetLowPrice   ?? null,
+          targetMedianPrice:fd.targetMedianPrice?.raw?? fd.targetMedianPrice?? null,
+          numberOfAnalystOpinions: fd.numberOfAnalystOpinions?.raw ?? fd.numberOfAnalystOpinions ?? null,
+          recommendationMean: fd.recommendationMean?.raw ?? fd.recommendationMean ?? null,
+          recommendationKey:  fd.recommendationKey ?? null,
+          priceToBook:        ks.priceToBook?.raw  ?? ks.priceToBook  ?? null,
+          trailingPE:         ks.trailingPE?.raw   ?? ks.trailingPE   ?? null,
+          forwardPE:          ks.forwardPE?.raw    ?? ks.forwardPE    ?? null,
+          priceToSales:       ks.priceToSalesTrailing12Months?.raw ?? ks.priceToSalesTrailing12Months ?? null,
+          marketCap:          ks.marketCap?.raw    ?? ks.marketCap    ?? null,
+          enterpriseValue:    ks.enterpriseValue?.raw ?? ks.enterpriseValue ?? null,
+          currentPrice:       fd.currentPrice?.raw ?? fd.currentPrice ?? null,
         };
       }
     } catch(_) {}
@@ -962,30 +929,23 @@ app.get('/api/darkpool/:ticker', async (req, res) => {
     const sortFields = encodeURIComponent(JSON.stringify([{ fieldName:'weekStartDate', sortType:'DESC' }]));
     const finraUrl = `https://api.finra.org/data/group/OTCMarket/name/weeklySummary?compareFilters=${compareFilters}&fields=weekStartDate,totalWeeklyShareQuantity,totalWeeklyTradeCount,lastSalePrice&limit=8&sortFields=${sortFields}`;
 
-    // Short interest from Yahoo Finance defaultKeyStatistics (free)
-    const { crumb, cookies } = await getYahooCrumb();
-    const cp = crumb ? `&crumb=${encodeURIComponent(crumb)}` : '';
-    const yahooUrl = `https://query2.finance.yahoo.com/v10/finance/quoteSummary/${ticker}?modules=defaultKeyStatistics${cp}&formatted=true`;
-    const yahooHdr = { 'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Accept':'application/json' };
-    if (cookies) yahooHdr['Cookie'] = cookies;
-
-    const [finraResp, yahooResp] = await Promise.all([
+    // Short interest from Yahoo Finance via yahoo-finance2
+    const [finraResp, ydResult] = await Promise.all([
       fetch(finraUrl, { headers: { 'Accept':'application/json', 'User-Agent':'ImpliedLens/1.0 brettpeterson6216@gmail.com' } }).catch(()=>null),
-      fetch(yahooUrl, { headers: yahooHdr }).catch(()=>null)
+      getYahooSummary(ticker, ['defaultKeyStatistics']).catch(()=>null)
     ]);
 
     const finraData = (finraResp?.ok) ? await finraResp.json().catch(()=>[]) : [];
     let siData = {};
-    if (yahooResp?.ok) {
-      const yd = await yahooResp.json().catch(()=>({}));
-      const ks = yd?.quoteSummary?.result?.[0]?.defaultKeyStatistics || {};
+    if (ydResult) {
+      const ks = ydResult.defaultKeyStatistics || {};
       siData = {
-        sharesShort:         ks.sharesShort?.raw         || null,
-        shortRatio:          ks.shortRatio?.raw          || null,
-        shortPercentOfFloat: ks.shortPercentOfFloat?.raw || null,
-        dateShortInterest:   ks.dateShortInterest?.fmt   || null,
-        sharesOutstanding:   ks.sharesOutstanding?.raw   || null,
-        floatShares:         ks.floatShares?.raw         || null,
+        sharesShort:         ks.sharesShort?.raw         ?? ks.sharesShort         ?? null,
+        shortRatio:          ks.shortRatio?.raw          ?? ks.shortRatio          ?? null,
+        shortPercentOfFloat: ks.shortPercentOfFloat?.raw ?? ks.shortPercentOfFloat ?? null,
+        dateShortInterest:   ks.dateShortInterest?.fmt   ?? null,
+        sharesOutstanding:   ks.sharesOutstanding?.raw   ?? ks.sharesOutstanding   ?? null,
+        floatShares:         ks.floatShares?.raw         ?? ks.floatShares         ?? null,
       };
     }
     res.json({ darkpool: Array.isArray(finraData) ? finraData : [], shortInterest: siData });
