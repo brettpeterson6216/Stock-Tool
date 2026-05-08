@@ -17,9 +17,8 @@ const helmet    = require("helmet");
 const rateLimit = require("express-rate-limit");
 const { createClient } = require("@libsql/client");
 const Stripe = require("stripe");
-const yahooFinance = require('yahoo-finance2').default;
-// Suppress yahoo-finance2 validation notices
-yahooFinance.setGlobalConfig({ validation: { logOptionsErrors: false } });
+const _YF = require('yahoo-finance2').default;
+const yahooFinance = new _YF({ suppressNotices: ['yahooSurvey'] });
 
 const PORT                 = process.env.PORT || 3000;
 const SESSION_SECRET       = process.env.SESSION_SECRET || "change-me-in-production-please";
@@ -562,8 +561,15 @@ app.get('/api/quote/:ticker', async (req, res) => {
     const range = (req.query.range || '1y').replace(/[^a-z0-9]/gi, '');
 
     // Use yahoo-finance2 — handles auth/cookies automatically
+    // Convert range string to period1 date (v3 API uses period1/period2)
+    const now = new Date();
+    const period1 = new Date(now);
+    const rangeMap = { '1d':1, '5d':5, '1mo':30, '3mo':90, '6mo':182, '1y':365, '2y':730, '5y':1825, '10y':3650 };
+    const days = rangeMap[range] || 365;
+    period1.setDate(period1.getDate() - days);
+
     const [chartData, quoteData] = await Promise.all([
-      yahooFinance.chart(ticker, { interval: '1d', range }),
+      yahooFinance.chart(ticker, { interval: '1d', period1, period2: now }),
       yahooFinance.quote(ticker).catch(() => ({}))
     ]);
 
@@ -622,7 +628,9 @@ app.get('/api/quote/:ticker', async (req, res) => {
 // ============================================================
 async function getYahooSummary(ticker, modules) {
   try {
-    const result = await yahooFinance.quoteSummary(ticker, { modules });
+    // modules must be an array in yahoo-finance2 v3
+    const mods = Array.isArray(modules) ? modules : modules.split(',').map(m => m.trim());
+    const result = await yahooFinance.quoteSummary(ticker, { modules: mods });
     return result;
   } catch (e) {
     console.error('quoteSummary error for', ticker, ':', e.message);
