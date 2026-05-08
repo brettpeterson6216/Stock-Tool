@@ -3120,7 +3120,7 @@ async function fetchAndRender() {
     toast(`${ticker} loaded ✓`,'green');
   } catch(e) {
     const err=document.getElementById('analyze-error');
-    err.textContent=`Could not load "${ticker}". Please try a valid US ticker symbol (e.g. AAPL, TSLA, NVDA).`;
+    err.textContent=`Could not load "${ticker}": ${e.message}`;
     err.style.display='block';
   } finally {
     btn.disabled=false; btn.textContent='Analyze →';
@@ -3187,6 +3187,26 @@ function renderStock(result, ticker) {
   document.getElementById('stock-result').style.display='block';
   document.getElementById('proj-results').style.display='none';
   renderSavedAnalyses();
+}
+
+async function loadAnalyst(ticker) {
+  try {
+    const r = await fetch(`/api/analyst/${encodeURIComponent(ticker)}`, { credentials: 'same-origin' });
+    if (!r.ok) return;
+    const d = await r.json();
+    const pt = d.priceTarget || {};
+    const mean = pt.targetMean  || null;
+    const high = pt.targetHigh  || null;
+    const low  = pt.targetLow   || null;
+    if (mean || high || low) {
+      S.analystTarget = { mean, high, low };
+      // Rebuild price chart to overlay analyst target lines
+      if (S.data) {
+        const c = S.data.indicators.quote[0].close.filter(x => x != null);
+        buildPriceChart(S.data, c, S.data.timestamp);
+      }
+    }
+  } catch (_) {}
 }
 
 function buildPriceChart(result,closes,timestamps) {
