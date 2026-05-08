@@ -308,7 +308,7 @@ app.post("/api/stripe/create-checkout", async (req, res) => {
       mode: "subscription",
       payment_method_types: ["card"],
       line_items: [{ price: priceId, quantity: 1 }],
-      subscription_data: { trial_period_days: 14 },
+      subscription_data: { trial_period_days: 7 },
       success_url: APP_URL + "/?upgraded=1",
       cancel_url: APP_URL + "/",
       metadata: { userId: String(req.session.userId) },
