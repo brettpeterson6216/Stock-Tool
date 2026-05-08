@@ -3189,6 +3189,17 @@ function renderStock(result, ticker) {
   renderSavedAnalyses();
 }
 
+function toggleTheme() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  if (isDark) {
+    document.documentElement.removeAttribute('data-theme');
+    localStorage.setItem('il-theme', 'light');
+  } else {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    localStorage.setItem('il-theme', 'dark');
+  }
+}
+
 async function loadAnalyst(ticker) {
   try {
     const r = await fetch(`/api/analyst/${encodeURIComponent(ticker)}`, { credentials: 'same-origin' });
@@ -4275,23 +4286,33 @@ async function loadSecFilings(ticker) {
   const entityLbl= document.getElementById('sec-entity-label');
 
   if (!ticker) {
-    if(nostock) nostock.style.display='block';
-    if(cont)    cont.style.display='none';
+    if(nostock) { nostock.style.display='block'; }
+    if(cont)    { cont.style.display='none'; }
     return;
   }
-  tbody.innerHTML = holders.map(h => {
-    const shares = h.share != null ? fmtBig(h.share).replace('$','') : '—';
-    const pct    = h.percentageHeld != null ? (h.percentageHeld * 100).toFixed(2) + '%' : '—';
-    const change = h.change != null ? h.change : null;
-    const changeStr = change != null ? `<span style="color:${change>0?'#4ade80':change<0?'#f87171':'var(--text4)'}">${change>0?'+':''}${fmtBig(change).replace('$','')}</span>` : '—';
-    return `<tr>
-      <td>${h.holderName||h.name||'—'}</td>
-      <td>${shares}</td>
-      <td>${pct}</td>
-      <td>${changeStr}</td>
-      <td style="font-size:.68rem;color:var(--text5);">${h.reportDate||h.date||'—'}</td>
-    </tr>`;
-  }).join('');
+  if(nostock) nostock.style.display='none';
+  if(loading) loading.style.display='block';
+  if(errEl)   errEl.style.display='none';
+  if(cont)    cont.style.display='none';
+
+  try {
+    const r = await fetch('/api/sec/' + encodeURIComponent(ticker), { credentials:'same-origin' });
+    const d = await r.json();
+    if(loading) loading.style.display='none';
+    if (!r.ok || !d.filings) throw new Error(d.error || 'No filings found');
+
+    if(entityLbl) entityLbl.textContent = d.entity + (d.cik ? '  ·  CIK ' + d.cik : '');
+
+    // Store filings globally for filter
+    _secFilings = d.filings;
+    _secFilter  = 'ALL';
+    renderSecFilings();
+
+    if(cont) cont.style.display='block';
+  } catch(e) {
+    if(loading) loading.style.display='none';
+    if(errEl)   { errEl.textContent = 'Could not load SEC filings: ' + e.message; errEl.style.display='block'; }
+  }
 }
 
 

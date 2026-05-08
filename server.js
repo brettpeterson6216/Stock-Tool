@@ -784,17 +784,20 @@ app.get('/api/financials/:ticker', async (req, res) => {
   try {
     // Fetch all Finnhub data in parallel
     const [fhResp, metricResp, profileResp, quoteResp] = await Promise.all([
-      fetch(`https://finnhub.io/api/v1/financials-reported?symbol=${ticker}&freq=annual&token=${FINNHUB_KEY}`),
-      fetch(`https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FINNHUB_KEY}`),
-      fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${FINNHUB_KEY}`),
-      fetch(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_KEY}`),
+      fetchWithTimeout(`https://finnhub.io/api/v1/financials-reported?symbol=${ticker}&freq=annual&token=${FINNHUB_KEY}`, {}, 8000),
+      fetchWithTimeout(`https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FINNHUB_KEY}`, {}, 8000),
+      fetchWithTimeout(`https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${FINNHUB_KEY}`, {}, 8000),
+      fetchWithTimeout(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_KEY}`, {}, 8000),
     ]);
     const [fhData, metricData, profileData, quoteData] = await Promise.all([
-      fhResp.json(), metricResp.json(), profileResp.json(), quoteResp.json()
+      fhResp.json().catch(()=>({})),
+      metricResp.json().catch(()=>({})),
+      profileResp.json().catch(()=>({})),
+      quoteResp.json().catch(()=>({})),
     ]);
 
     const annuals = (fhData.data || []).filter(d => d.quarter === 0).slice(0, 4);
-    if (!annuals.length) return res.status(404).json({ error: 'No financial data available.' });
+    if (!annuals.length) return res.status(404).json({ error: 'No financial data available for ' + ticker + '. Finnhub may not carry XBRL data for this ticker.' });
 
     function fv(arr, concepts) {
       for (const c of concepts) {
