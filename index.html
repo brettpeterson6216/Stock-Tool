@@ -1329,7 +1329,7 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
           <div class="pricing-pop">Most Popular</div>
           <div class="pricing-tier">Pro</div>
           <div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">7.99</span><span class="p-per">/month</span></div>
-          <p class="p-desc" style="font-size:.8rem;margin-bottom:.25rem;opacity:.7;">or $60/year — save 37%</p>
+          <p class="p-desc" style="font-size:.8rem;margin-bottom:.25rem;opacity:.7;">or $59.99/year — save 37%</p>
           <p class="p-desc">For serious investors who research and track positions every day.</p>
           <ul class="p-features">
             <li>Unlimited stock analyses</li>
@@ -1341,7 +1341,7 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
             <li>PDF report export</li>
             <li>Risk & volatility dashboard</li>
           </ul>
-          <button class="btn-plan btn-plan-gold" id="pricing-pro-btn" onclick="showUpgradeModal()">Start 14-day free trial →</button>
+          <button class="btn-plan btn-plan-gold" id="pricing-pro-btn" onclick="showUpgradeModal()">Start 7-day free trial →</button>
         </div>
         <div class="pricing-card">
           <div class="pricing-tier">Team</div>
@@ -1988,7 +1988,7 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
   <div class="modal">
     <button class="modal-close" onclick="closeModal()">✕</button>
     <h3>Upgrade to Pro</h3>
-    <p>Get full access to all Pro features with a 14-day free trial.</p>
+    <p>Get full access to all Pro features with a 7-day free trial.</p>
     <button class="btn-modal-cta" onclick="closeModal(); showUpgradeModal();">See plans →</button>
   </div>
 </div>
@@ -2050,7 +2050,7 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
     <button class="modal-close" onclick="closeUpgradeModal()">✕</button>
     <div style="font-family:var(--mono);font-size:.68rem;color:var(--gold-d);text-transform:uppercase;letter-spacing:.14em;margin-bottom:.5rem;">Pro Plan</div>
     <h3 style="font-family:var(--serif);font-size:1.6rem;letter-spacing:-.01em;margin-bottom:.5rem;">Unlock <em style="color:var(--gold-d);font-style:italic;">all</em> the tools.</h3>
-    <p style="font-size:.9rem;color:var(--ink4);margin-bottom:1.5rem;">14-day free trial. No charge until day 15. Cancel anytime.</p>
+    <p style="font-size:.9rem;color:var(--ink4);margin-bottom:1.5rem;">7-day free trial. No charge until day 8. Cancel anytime.</p>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1.25rem;">
       <div id="plan-monthly" class="plan-opt sel" onclick="selectUpgradePlan('monthly')" style="cursor:pointer;">
@@ -2074,8 +2074,8 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
       <li style="font-size:.82rem;color:var(--ink3);">✓ Risk dashboard</li>
     </ul>
 
-    <button id="upgrade-cta-btn" class="btn-modal-cta" onclick="handleUpgradeClick()">Start 14-day free trial →</button>
-    <div class="modal-note" style="margin-top:.75rem;">Card required to hold trial. You won't be charged until day 15.</div>
+    <button id="upgrade-cta-btn" class="btn-modal-cta" onclick="handleUpgradeClick()">Start 7-day free trial →</button>
+    <div class="modal-note" style="margin-top:.75rem;">Card required to hold trial. You won't be charged until day 8.</div>
   </div>
 </div>
 
@@ -2925,7 +2925,7 @@ async function handleUpgradeClick() {
   const btn = document.getElementById('upgrade-cta-btn');
   btn.disabled = true; btn.textContent = 'Redirecting to checkout…';
   await startTrial(_upgradePlan === 'annual');
-  btn.disabled = false; btn.textContent = 'Start 14-day free trial →';
+  btn.disabled = false; btn.textContent = 'Start 7-day free trial →';
 }
 
 /* ══════════════════════════════════════════════════════
