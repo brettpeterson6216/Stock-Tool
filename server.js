@@ -17,8 +17,8 @@ const helmet    = require("helmet");
 const rateLimit = require("express-rate-limit");
 const { createClient } = require("@libsql/client");
 const Stripe = require("stripe");
-const _YF = require('yahoo-finance2').default;
-const yahooFinance = new _YF({ suppressNotices: ['yahooSurvey'] });
+// yahoo-finance2 removed: Yahoo blocks server-side requests and hangs indefinitely.
+// All data now served via Finnhub + FINRA + SEC.
 
 const PORT                 = process.env.PORT || 3000;
 const SESSION_SECRET       = process.env.SESSION_SECRET || "change-me-in-production-please";
@@ -630,46 +630,30 @@ app.get('/api/quote/:ticker', async (req, res) => {
 // ============================================================
 //  Yahoo Finance quoteSummary helper  (used by financials/earnings/analyst)
 // ============================================================
-async function getYahooSummary(ticker, modules) {
-  try {
-    // modules must be an array in yahoo-finance2 v3
-    const mods = Array.isArray(modules) ? modules : modules.split(',').map(m => m.trim());
-    const result = await yahooFinance.quoteSummary(ticker, { modules: mods });
-    return result;
-  } catch (e) {
-    console.error('quoteSummary error for', ticker, ':', e.message);
-    return null;
-  }
+// Yahoo Finance blocks server-side requests — always return null so Finnhub fallbacks run immediately.
+async function getYahooSummary(_ticker, _modules) {
+  return null;
 }
 
 // ============================================================
-//  Financials proxy  (Yahoo Finance quoteSummary)
+//  Financials proxy  (Finnhub financials-reported + metric)
 // ============================================================
 app.get('/api/financials/:ticker', async (req, res) => {
   const ticker = req.params.ticker.toUpperCase();
+  try {
+    // Fetch all Finnhub data in parallel
+    const [fhResp, metricResp, profileResp, quoteResp] = await Promise.all([
+      fetch(`https://finnhub.io/api/v1/financials-reported?symbol=${ticker}&freq=annual&token=${FINNHUB_KEY}`),
+      fetch(`https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FINNHUB_KEY}`),
+      fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${FINNHUB_KEY}`),
+      fetch(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_KEY}`),
+    ]);
+    const [fhData, metricData, profileData, quoteData] = await Promise.all([
+      fhResp.json(), metricResp.json(), profileResp.json(), quoteResp.json()
+    ]);
 
-  // ── Helper: fetch Yahoo quoteSummary via yahoo-finance2 ──────────────────────
-  async function tryYahoo() {
-    const modules = [
-      'incomeStatementHistory','incomeStatementHistoryQuarterly',
-      'balanceSheetHistory','balanceSheetHistoryQuarterly',
-      'cashflowStatementHistory','cashflowStatementHistoryQuarterly',
-      'defaultKeyStatistics','financialData'
-    ];
-    const result = await getYahooSummary(ticker, modules);
-    if (!result) return null;
-    // Wrap in the shape the rest of this route expects
-    return { quoteSummary: { result: [result] } };
-  }
-
-  // ── Helper: fetch Finnhub financials-reported ─────────────
-  async function tryFinnhub() {
-    const url = `https://finnhub.io/api/v1/financials-reported?symbol=${ticker}&freq=annual&token=${FINNHUB_KEY}`;
-    const r = await fetch(url);
-    if (!r.ok) throw new Error('Finnhub ' + r.status);
-    const fh = await r.json();
-    const annuals = (fh.data || []).filter(d => d.quarter === 0).slice(0, 4);
-    if (!annuals.length) throw new Error('No Finnhub annual data');
+    const annuals = (fhData.data || []).filter(d => d.quarter === 0).slice(0, 4);
+    if (!annuals.length) return res.status(404).json({ error: 'No financial data available.' });
 
     function fv(arr, concepts) {
       for (const c of concepts) {
@@ -708,46 +692,60 @@ app.get('/api/financials/:ticker', async (req, res) => {
       const capex = capexRaw ? { raw: -Math.abs(capexRaw.raw) } : null;
       return {
         endDate: { fmt: a.endDate, raw: Math.floor(new Date(a.endDate).getTime()/1000) },
-        totalCashFromOperatingActivities:       fv(a.report?.cf, ['NetCashProvidedByUsedInOperatingActivities']),
-        capitalExpenditures:                    capex,
-        totalCashflowsFromInvestingActivities:  fv(a.report?.cf, ['NetCashProvidedByUsedInInvestingActivities']),
-        totalCashFromFinancingActivities:        fv(a.report?.cf, ['NetCashProvidedByUsedInFinancingActivities']),
-        changeInCash:                           fv(a.report?.cf, ['CashAndCashEquivalentsPeriodIncreaseDecrease','NetIncreaseDecreaseInCashAndCashEquivalents']),
+        totalCashFromOperatingActivities:      fv(a.report?.cf, ['NetCashProvidedByUsedInOperatingActivities']),
+        capitalExpenditures:                   capex,
+        totalCashflowsFromInvestingActivities: fv(a.report?.cf, ['NetCashProvidedByUsedInInvestingActivities']),
+        totalCashFromFinancingActivities:      fv(a.report?.cf, ['NetCashProvidedByUsedInFinancingActivities']),
+        changeInCash:                          fv(a.report?.cf, ['CashAndCashEquivalentsPeriodIncreaseDecrease','NetIncreaseDecreaseInCashAndCashEquivalents']),
       };
     });
-    return { incS, balS, cfS };
-  }
 
-  // ── Main: try Yahoo, check if bal+cf present, else merge Finnhub ──
-  try {
-    const yahooData = await tryYahoo();
-    const yr = yahooData?.quoteSummary?.result?.[0] || {};
-    const hasBal = yr.balanceSheetHistory?.balanceSheetStatements?.length > 0;
-    const hasCf  = yr.cashflowStatementHistory?.cashflowStatements?.length > 0;
+    // Build key statistics from Finnhub metric (replaces Yahoo defaultKeyStatistics + financialData)
+    const m = metricData.metric || {};
+    const price  = quoteData.c || null;
+    const shares = profileData.shareOutstanding ? profileData.shareOutstanding * 1e6 : null;
+    const n = v => (v != null && !isNaN(v)) ? { raw: v } : null;  // wrap as Yahoo-style object
 
-    if (hasBal && hasCf) return res.json(yahooData);
+    const defaultKeyStatistics = {
+      trailingPE:                   n(m.peNormalizedAnnual || m.peBasicExclExtraTTM),
+      forwardPE:                    null,
+      priceToBook:                  n(m.pbQuarterly),
+      priceToSalesTrailing12Months: n(m.psTTM),
+      enterpriseToEbitda:           n(m.evEbitdaTTM),
+      enterpriseToRevenue:          null,
+      sharesOutstanding:            n(shares),
+      bookValuePerShare:            n(m.bookValuePerShareQuarterly),
+    };
 
-    // Yahoo missing balance/cashflow — fetch Finnhub to fill gaps
-    try {
-      const fh = await tryFinnhub();
-      return res.json({
-        quoteSummary: { result: [{
-          ...yr,
-          incomeStatementHistory:         { incomeStatementHistory:  hasBal ? yr.incomeStatementHistory?.incomeStatementHistory  || fh.incS : fh.incS },
-          balanceSheetHistory:            { balanceSheetStatements:  fh.balS },
-          cashflowStatementHistory:       { cashflowStatements:      fh.cfS  },
-          incomeStatementHistoryQuarterly:  yr.incomeStatementHistoryQuarterly  || { incomeStatementHistory: [] },
-          balanceSheetHistoryQuarterly:     yr.balanceSheetHistoryQuarterly     || { balanceSheetStatements: [] },
-          cashflowStatementHistoryQuarterly:yr.cashflowStatementHistoryQuarterly|| { cashflowStatements:     [] },
-          defaultKeyStatistics: yr.defaultKeyStatistics,
-          financialData:        yr.financialData,
-        }]}
-      });
-    } catch (fhErr) {
-      console.error('Finnhub financials error:', fhErr.message);
-      if (yahooData) return res.json(yahooData); // return whatever Yahoo gave us
-      return res.status(404).json({ error: 'No financial data available.' });
-    }
+    // Finnhub stores margins/returns as actual % (e.g. 25 = 25%); Yahoo uses decimals (0.25)
+    const pct = v => (v != null && !isNaN(v)) ? { raw: v / 100 } : null;
+    const financialData = {
+      grossMargins:     pct(m.grossMarginAnnual    ?? m.grossMarginTTM),
+      operatingMargins: pct(m.operatingProfitMarginAnnual ?? m.operatingProfitMarginTTM),
+      profitMargins:    pct(m.netProfitMarginAnnual ?? m.netProfitMarginTTM),
+      returnOnEquity:   pct(m.roeTTM  ?? m.roeRfy),
+      returnOnAssets:   pct(m.roaTTM  ?? m.roaRfy),
+      revenueGrowth:    pct(m.revenueGrowthQuarterlyYoy ?? m.revenueGrowth3Y),
+      earningsGrowth:   pct(m.epsGrowthTTMYoy ?? m.epsGrowth3Y),
+      debtToEquity:     n(m.totalDebt2EquityQuarterly ?? m.totalDebt2EquityAnnual),
+      currentRatio:     n(m.currentRatioQuarterly  ?? m.currentRatioAnnual),
+      quickRatio:       n(m.quickRatioQuarterly    ?? m.quickRatioAnnual),
+      freeCashflow:     (m.fcfPerShareTTM != null && shares) ? n(m.fcfPerShareTTM * shares) : null,
+      currentPrice:     n(price),
+    };
+
+    return res.json({
+      quoteSummary: { result: [{
+        incomeStatementHistory:           { incomeStatementHistory:  incS },
+        balanceSheetHistory:              { balanceSheetStatements:  balS },
+        cashflowStatementHistory:         { cashflowStatements:      cfS  },
+        incomeStatementHistoryQuarterly:  { incomeStatementHistory:  [] },
+        balanceSheetHistoryQuarterly:     { balanceSheetStatements:  [] },
+        cashflowStatementHistoryQuarterly:{ cashflowStatements:      [] },
+        defaultKeyStatistics,
+        financialData,
+      }]}
+    });
   } catch (e) {
     console.error('financials proxy error:', e.message);
     res.status(500).json({ error: 'Failed to fetch financials.' });
@@ -870,30 +868,31 @@ app.get('/api/analyst/:ticker', async (req, res) => {
     ]);
     const [pt, rec] = await Promise.all([ptResp.json(), recResp.json()]);
 
-    // Yahoo financialData via yahoo-finance2 for targets + P/E, P/S
+    // Key statistics from Finnhub metric (replaces the old Yahoo call which blocks server-side)
     let yahooFd = {};
     try {
-      const yd = await getYahooSummary(ticker, ['financialData', 'defaultKeyStatistics']);
-      if (yd) {
-        const fd = yd.financialData || {};
-        const ks = yd.defaultKeyStatistics || {};
-        yahooFd = {
-          targetMeanPrice:  fd.targetMeanPrice?.raw  ?? fd.targetMeanPrice  ?? null,
-          targetHighPrice:  fd.targetHighPrice?.raw  ?? fd.targetHighPrice  ?? null,
-          targetLowPrice:   fd.targetLowPrice?.raw   ?? fd.targetLowPrice   ?? null,
-          targetMedianPrice:fd.targetMedianPrice?.raw?? fd.targetMedianPrice?? null,
-          numberOfAnalystOpinions: fd.numberOfAnalystOpinions?.raw ?? fd.numberOfAnalystOpinions ?? null,
-          recommendationMean: fd.recommendationMean?.raw ?? fd.recommendationMean ?? null,
-          recommendationKey:  fd.recommendationKey ?? null,
-          priceToBook:        ks.priceToBook?.raw  ?? ks.priceToBook  ?? null,
-          trailingPE:         ks.trailingPE?.raw   ?? ks.trailingPE   ?? null,
-          forwardPE:          ks.forwardPE?.raw    ?? ks.forwardPE    ?? null,
-          priceToSales:       ks.priceToSalesTrailing12Months?.raw ?? ks.priceToSalesTrailing12Months ?? null,
-          marketCap:          ks.marketCap?.raw    ?? ks.marketCap    ?? null,
-          enterpriseValue:    ks.enterpriseValue?.raw ?? ks.enterpriseValue ?? null,
-          currentPrice:       fd.currentPrice?.raw ?? fd.currentPrice ?? null,
-        };
-      }
+      const [metricResp, quoteResp] = await Promise.all([
+        fetch(`https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FINNHUB_KEY}`),
+        fetch(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_KEY}`),
+      ]);
+      const [metricData, quoteData] = await Promise.all([metricResp.json(), quoteResp.json()]);
+      const m = metricData.metric || {};
+      yahooFd = {
+        targetMeanPrice:  null,   // already in Finnhub pt above
+        targetHighPrice:  null,
+        targetLowPrice:   null,
+        targetMedianPrice:null,
+        numberOfAnalystOpinions: null,
+        recommendationMean: null,
+        recommendationKey: null,
+        priceToBook:   m.pbQuarterly || null,
+        trailingPE:    m.peNormalizedAnnual || m.peBasicExclExtraTTM || null,
+        forwardPE:     null,
+        priceToSales:  m.psTTM || null,
+        marketCap:     m.marketCapitalization ? m.marketCapitalization * 1e6 : null,
+        enterpriseValue: null,
+        currentPrice:  quoteData.c || null,
+      };
     } catch(_) {}
 
     // Merge: prefer Finnhub, fall back to Yahoo
@@ -941,25 +940,25 @@ app.get('/api/darkpool/:ticker', async (req, res) => {
     const sortFields = encodeURIComponent(JSON.stringify([{ fieldName:'weekStartDate', sortType:'DESC' }]));
     const finraUrl = `https://api.finra.org/data/group/OTCMarket/name/weeklySummary?compareFilters=${compareFilters}&fields=weekStartDate,totalWeeklyShareQuantity,totalWeeklyTradeCount,lastSalePrice&limit=8&sortFields=${sortFields}`;
 
-    // Short interest from Yahoo Finance via yahoo-finance2
-    const [finraResp, ydResult] = await Promise.all([
+    // Fetch FINRA dark pool data + Finnhub metric for share stats (Yahoo removed — blocks server-side)
+    const [finraResp, metricResp] = await Promise.all([
       fetch(finraUrl, { headers: { 'Accept':'application/json', 'User-Agent':'ImpliedLens/1.0 brettpeterson6216@gmail.com' } }).catch(()=>null),
-      getYahooSummary(ticker, ['defaultKeyStatistics']).catch(()=>null)
+      fetch(`https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FINNHUB_KEY}`).catch(()=>null),
     ]);
 
     const finraData = (finraResp?.ok) ? await finraResp.json().catch(()=>[]) : [];
-    let siData = {};
-    if (ydResult) {
-      const ks = ydResult.defaultKeyStatistics || {};
-      siData = {
-        sharesShort:         ks.sharesShort?.raw         ?? ks.sharesShort         ?? null,
-        shortRatio:          ks.shortRatio?.raw          ?? ks.shortRatio          ?? null,
-        shortPercentOfFloat: ks.shortPercentOfFloat?.raw ?? ks.shortPercentOfFloat ?? null,
-        dateShortInterest:   ks.dateShortInterest?.fmt   ?? null,
-        sharesOutstanding:   ks.sharesOutstanding?.raw   ?? ks.sharesOutstanding   ?? null,
-        floatShares:         ks.floatShares?.raw         ?? ks.floatShares         ?? null,
-      };
-    }
+    const metricData = (metricResp?.ok) ? await metricResp.json().catch(()=>({})) : {};
+    const m = metricData.metric || {};
+
+    // Short interest not available on Finnhub free tier — show available share stats
+    const siData = {
+      sharesShort:         null,
+      shortRatio:          null,
+      shortPercentOfFloat: null,
+      dateShortInterest:   null,
+      sharesOutstanding:   m.sharesOutstanding || null,
+      floatShares:         null,
+    };
     res.json({ darkpool: Array.isArray(finraData) ? finraData : [], shortInterest: siData });
   } catch (e) {
     console.error('darkpool proxy error:', e.message);
