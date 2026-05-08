@@ -560,57 +560,61 @@ app.get('/api/quote/:ticker', async (req, res) => {
     if (!ticker) return res.status(400).json({ error: 'No ticker' });
     const range = (req.query.range || '1y').replace(/[^a-z0-9]/gi, '');
 
-    // Use yahoo-finance2 — handles auth/cookies automatically
-    // Convert range string to period1 date (v3 API uses period1/period2)
-    const now = new Date();
-    const period1 = new Date(now);
-    const rangeMap = { '1d':1, '5d':5, '1mo':30, '3mo':90, '6mo':182, '1y':365, '2y':730, '5y':1825, '10y':3650 };
-    const days = rangeMap[range] || 365;
-    period1.setDate(period1.getDate() - days);
+    // Use Finnhub for reliable OHLCV data (Yahoo Finance blocks server-side requests)
+    const toTs  = Math.floor(Date.now() / 1000);
+    const secMap = { '1d':86400, '5d':5*86400, '1mo':30*86400, '3mo':90*86400,
+                     '6mo':182*86400, '1y':365*86400, '2y':2*365*86400, '5y':5*365*86400 };
+    const fromTs = toTs - (secMap[range] || 365*86400);
+    const res2Map = { '1d':'D', '5d':'D', '1mo':'D', '3mo':'D', '6mo':'D', '1y':'D', '2y':'W', '5y':'W' };
+    const resolution = res2Map[range] || 'D';
 
-    const [chartData, quoteData] = await Promise.all([
-      yahooFinance.chart(ticker, { interval: '1d', period1, period2: now }),
-      yahooFinance.quote(ticker).catch(() => ({}))
+    const FH = FINNHUB_KEY;
+    const [candleResp, quoteResp, profileResp, metricResp] = await Promise.all([
+      fetch(`https://finnhub.io/api/v1/stock/candle?symbol=${ticker}&resolution=${resolution}&from=${fromTs}&to=${toTs}&token=${FH}`),
+      fetch(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FH}`),
+      fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${FH}`),
+      fetch(`https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FH}`)
     ]);
 
-    if (!chartData || !chartData.quotes || chartData.quotes.length === 0) {
-      return res.status(404).json({ error: 'No data for ' + ticker });
+    const [candle, quote, profile, metricData] = await Promise.all([
+      candleResp.json(), quoteResp.json(), profileResp.json(), metricResp.json()
+    ]);
+
+    if (candle.s !== 'ok' || !candle.t?.length) {
+      return res.status(404).json({ error: `No price data found for "${ticker}". Check the ticker symbol.` });
     }
 
-    // Transform to Yahoo Finance v8 chart format (what the frontend expects)
-    const quotes = chartData.quotes;
-    const meta   = chartData.meta || {};
+    const m = metricData.metric || {};
+    const price = quote.c || candle.c[candle.c.length - 1];
+    const shares = profile.shareOutstanding ? profile.shareOutstanding * 1e6 : null;
+    const marketCap = shares && price ? shares * price : null;
 
-    // Merge extra fields from quote()
-    const qd = quoteData || {};
-    meta.longName              = qd.longName              || meta.longName  || ticker;
-    meta.shortName             = qd.shortName             || meta.shortName || ticker;
-    meta.marketCap             = qd.marketCap             || meta.marketCap || null;
-    meta.trailingPE            = qd.trailingPE            || meta.trailingPE || null;
-    meta.regularMarketPrice    = qd.regularMarketPrice    || meta.regularMarketPrice || null;
-    meta.previousClose         = qd.regularMarketPreviousClose || meta.chartPreviousClose || null;
-    meta.chartPreviousClose    = meta.previousClose;
-    meta.regularMarketVolume   = qd.regularMarketVolume   || meta.regularMarketVolume || null;
-    meta.averageDailyVolume3Month = qd.averageDailyVolume3Month || null;
-    meta.fiftyTwoWeekHigh      = qd.fiftyTwoWeekHigh      || meta.fiftyTwoWeekHigh || null;
-    meta.fiftyTwoWeekLow       = qd.fiftyTwoWeekLow       || meta.fiftyTwoWeekLow  || null;
-
-    const timestamps = quotes.map(q => Math.floor(new Date(q.date).getTime() / 1000));
-    const opens      = quotes.map(q => q.open   ?? null);
-    const highs      = quotes.map(q => q.high   ?? null);
-    const lows       = quotes.map(q => q.low    ?? null);
-    const closes     = quotes.map(q => q.close  ?? null);
-    const volumes    = quotes.map(q => q.volume ?? null);
-    const adjcloses  = quotes.map(q => q.adjclose ?? q.close ?? null);
+    const meta = {
+      symbol:                   ticker,
+      currency:                 profile.currency || 'USD',
+      exchangeName:             profile.exchange  || '',
+      instrumentType:           'EQUITY',
+      longName:                 profile.name || ticker,
+      shortName:                profile.name || ticker,
+      regularMarketPrice:       price,
+      previousClose:            quote.pc || null,
+      chartPreviousClose:       quote.pc || null,
+      regularMarketVolume:      candle.v[candle.v.length - 1] || null,
+      averageDailyVolume3Month: m['3MonthAverageTradingVolume'] ? m['3MonthAverageTradingVolume'] * 1e6 : null,
+      marketCap,
+      fiftyTwoWeekHigh:         m['52WeekHigh'] || null,
+      fiftyTwoWeekLow:          m['52WeekLow']  || null,
+      trailingPE:               m.peNormalizedAnnual || m.peBasicExclExtraTTM || null,
+    };
 
     res.json({
       chart: {
         result: [{
           meta,
-          timestamp: timestamps,
+          timestamp: candle.t,
           indicators: {
-            quote:    [{ open: opens, high: highs, low: lows, close: closes, volume: volumes }],
-            adjclose: [{ adjclose: adjcloses }]
+            quote:    [{ open: candle.o, high: candle.h, low: candle.l, close: candle.c, volume: candle.v }],
+            adjclose: [{ adjclose: candle.c }]
           }
         }],
         error: null
