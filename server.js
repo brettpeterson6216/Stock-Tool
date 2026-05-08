@@ -554,6 +554,20 @@ app.get('/api/stripe/portal', async (req, res) => {
 // ============================================================
 //  Yahoo Finance proxy (avoids CORS issues on client)
 // ============================================================
+// Helper: fetch with timeout (AbortController)
+async function fetchWithTimeout(url, options = {}, timeoutMs = 5000) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { ...options, signal: ctrl.signal });
+    clearTimeout(timer);
+    return res;
+  } catch (e) {
+    clearTimeout(timer);
+    throw e;
+  }
+}
+
 app.get('/api/quote/:ticker', async (req, res) => {
   try {
     const ticker = req.params.ticker.toUpperCase().replace(/[^A-Z0-9.\-^]/g, '');
@@ -568,105 +582,169 @@ app.get('/api/quote/:ticker', async (req, res) => {
       'Referer': 'https://finance.yahoo.com/',
     };
 
-    // Attempt 1: Yahoo Finance v8 chart (query2, no crumb)
     let data = null;
+
+    // Attempt 1: Yahoo Finance v8 chart (query2) — 4-second timeout so we fail fast if blocked
     try {
       const u = `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=1d&range=${range}&includePrePost=false`;
-      const r = await fetch(u, { headers: YH });
+      const r = await fetchWithTimeout(u, { headers: YH }, 4000);
       if (r.ok) {
         const j = await r.json();
-        if (j?.chart?.result?.[0]?.timestamp?.length) data = j;
+        if (j?.chart?.result?.[0]?.timestamp?.length) {
+          console.log(`[quote] Yahoo query2 OK for ${ticker}`);
+          data = j;
+        }
+      } else {
+        console.log(`[quote] Yahoo query2 ${r.status} for ${ticker}`);
       }
-    } catch (_) {}
+    } catch (e) {
+      console.log(`[quote] Yahoo query2 failed for ${ticker}: ${e.message}`);
+    }
 
-    // Attempt 2: Yahoo Finance v8 chart (query1, no crumb)
+    // Attempt 2: Yahoo Finance v8 chart (query1) — 4-second timeout
     if (!data) {
       try {
         const u = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=1d&range=${range}&includePrePost=false`;
-        const r = await fetch(u, { headers: YH });
+        const r = await fetchWithTimeout(u, { headers: YH }, 4000);
         if (r.ok) {
           const j = await r.json();
-          if (j?.chart?.result?.[0]?.timestamp?.length) data = j;
+          if (j?.chart?.result?.[0]?.timestamp?.length) {
+            console.log(`[quote] Yahoo query1 OK for ${ticker}`);
+            data = j;
+          }
+        } else {
+          console.log(`[quote] Yahoo query1 ${r.status} for ${ticker}`);
         }
-      } catch (_) {}
+      } catch (e) {
+        console.log(`[quote] Yahoo query1 failed for ${ticker}: ${e.message}`);
+      }
     }
 
-    // Attempt 3: Stooq CSV (free, no auth needed)
+    // Attempt 3: Yahoo Finance v7 CSV download — different endpoint, sometimes bypasses blocks
     if (!data) {
       try {
-        const now = new Date();
-        const rangeDays = { '1d':5, '5d':10, '1mo':35, '3mo':95, '6mo':185, '1y':370, '2y':740, '5y':1830 };
-        const days = rangeDays[range] || 370;
-        const from = new Date(now - days * 86400000);
-        const fmt  = d => d.toISOString().slice(0,10).replace(/-/g,'');
-        const stooqUrl = `https://stooq.com/q/d/l/?s=${encodeURIComponent(ticker)}.US&d1=${fmt(from)}&d2=${fmt(now)}&i=d`;
-        const r = await fetch(stooqUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+        const now2   = Math.floor(Date.now() / 1000);
+        const rangeSecs = { '1d':86400,'5d':5*86400,'1mo':30*86400,'3mo':90*86400,'6mo':180*86400,'1y':365*86400,'2y':730*86400,'5y':1825*86400 };
+        const period1 = now2 - (rangeSecs[range] || 365*86400);
+        const csvUrl = `https://query1.finance.yahoo.com/v7/finance/download/${encodeURIComponent(ticker)}?period1=${period1}&period2=${now2}&interval=1d&events=history&includeAdjustedClose=true`;
+        const r = await fetchWithTimeout(csvUrl, { headers: YH }, 4000);
         if (r.ok) {
           const csv = await r.text();
-          const lines = csv.trim().split('\n').slice(1).filter(l => l && !l.startsWith('No data') && !l.includes('<'));
-          if (lines.length) {
-            const timestamps = [], opens = [], highs = [], lows = [], closes = [], vols = [];
+          const lines = csv.trim().split('\n').slice(1).filter(l => l && !l.startsWith('Date') && !l.includes('<') && !l.startsWith('No data'));
+          if (lines.length > 2) {
+            const timestamps=[], opens=[], highs=[], lows=[], closes=[], vols=[];
             for (const line of lines) {
-              const [date, o, h, l, c, v] = line.split(',');
+              const [date,,o,h,l,c,,v] = line.split(',');  // Date,Open,High,Low,Close,Adj Close,Volume
               if (!date || !c || isNaN(parseFloat(c))) continue;
-              timestamps.push(Math.floor(new Date(date).getTime() / 1000));
-              opens.push(parseFloat(o) || null);
-              highs.push(parseFloat(h) || null);
-              lows.push(parseFloat(l) || null);
-              closes.push(parseFloat(c));
-              vols.push(parseInt(v) || null);
+              timestamps.push(Math.floor(new Date(date).getTime()/1000));
+              opens.push(parseFloat(o)||null); highs.push(parseFloat(h)||null);
+              lows.push(parseFloat(l)||null);  closes.push(parseFloat(c));
+              vols.push(parseInt(v)||null);
             }
-            if (timestamps.length) {
-              const FH = FINNHUB_KEY;
-              const [qr, pr, mr] = await Promise.all([
-                fetch(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FH}`).catch(()=>null),
-                fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${FH}`).catch(()=>null),
-                fetch(`https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FH}`).catch(()=>null),
-              ]);
-              const qt = qr?.ok ? await qr.json().catch(()=>({})) : {};
-              const pf = pr?.ok ? await pr.json().catch(()=>({})) : {};
-              const mt = mr?.ok ? await mr.json().catch(()=>({})) : {};
-              const m2 = mt.metric || {};
-              const price2 = qt.c || closes[closes.length - 1];
-              const shares2 = pf.shareOutstanding ? pf.shareOutstanding * 1e6 : null;
+            if (timestamps.length > 2) {
+              console.log(`[quote] Yahoo v7 CSV OK for ${ticker} (${timestamps.length} rows)`);
               data = { chart: { result: [{ meta: {
-                symbol: ticker, currency: pf.currency || 'USD', exchangeName: pf.exchange || '',
-                instrumentType: 'EQUITY', longName: pf.name || ticker, shortName: pf.name || ticker,
-                regularMarketPrice: price2, previousClose: qt.pc || null, chartPreviousClose: qt.pc || null,
-                regularMarketVolume: qt.v || vols[vols.length-1] || null,
-                averageDailyVolume3Month: m2['3MonthAverageTradingVolume'] ? m2['3MonthAverageTradingVolume']*1e6 : null,
-                marketCap: shares2 && price2 ? shares2 * price2 : null,
-                fiftyTwoWeekHigh: m2['52WeekHigh'] || null, fiftyTwoWeekLow: m2['52WeekLow'] || null,
-                trailingPE: m2.peNormalizedAnnual || m2.peBasicExclExtraTTM || null,
+                symbol: ticker, currency: 'USD', exchangeName: '', instrumentType: 'EQUITY',
+                longName: ticker, shortName: ticker,
+                regularMarketPrice: closes[closes.length-1],
+                previousClose: closes[closes.length-2] || null,
+                chartPreviousClose: closes[closes.length-2] || null,
               }, timestamp: timestamps, indicators: {
                 quote: [{ open: opens, high: highs, low: lows, close: closes, volume: vols }],
                 adjclose: [{ adjclose: closes }]
               }}], error: null }};
             }
           }
+        } else {
+          console.log(`[quote] Yahoo v7 CSV ${r.status} for ${ticker}`);
         }
-      } catch (_) {}
+      } catch (e) {
+        console.log(`[quote] Yahoo v7 CSV failed for ${ticker}: ${e.message}`);
+      }
+    }
+
+    // Attempt 4: Stooq CSV (free, no auth, works from server IPs)
+    if (!data) {
+      try {
+        const now3 = new Date();
+        const rangeDays = { '1d':5,'5d':10,'1mo':35,'3mo':95,'6mo':185,'1y':370,'2y':740,'5y':1830 };
+        const days = rangeDays[range] || 370;
+        const from = new Date(now3 - days * 86400000);
+        const fmt  = d => d.toISOString().slice(0,10).replace(/-/g,'');
+        const stooqUrl = `https://stooq.com/q/d/l/?s=${encodeURIComponent(ticker)}.US&d1=${fmt(from)}&d2=${fmt(now3)}&i=d`;
+        const r = await fetchWithTimeout(stooqUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } }, 8000);
+        if (r.ok) {
+          const csv = await r.text();
+          const lines = csv.trim().split('\n').slice(1).filter(l => l && !l.startsWith('No data') && !l.includes('<'));
+          if (lines.length > 2) {
+            const timestamps=[], opens=[], highs=[], lows=[], closes=[], vols=[];
+            for (const line of lines) {
+              const [date,o,h,l,c,v] = line.split(',');
+              if (!date || !c || isNaN(parseFloat(c))) continue;
+              timestamps.push(Math.floor(new Date(date).getTime()/1000));
+              opens.push(parseFloat(o)||null); highs.push(parseFloat(h)||null);
+              lows.push(parseFloat(l)||null);  closes.push(parseFloat(c));
+              vols.push(parseInt(v)||null);
+            }
+            if (timestamps.length > 2) {
+              console.log(`[quote] Stooq OK for ${ticker} (${timestamps.length} rows)`);
+              const FH = FINNHUB_KEY;
+              const [qr, pr, mr] = await Promise.all([
+                fetchWithTimeout(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FH}`, {}, 4000).catch(()=>null),
+                fetchWithTimeout(`https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${FH}`, {}, 4000).catch(()=>null),
+                fetchWithTimeout(`https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FH}`, {}, 4000).catch(()=>null),
+              ]);
+              const qt = qr?.ok ? await qr.json().catch(()=>({})) : {};
+              const pf = pr?.ok ? await pr.json().catch(()=>({})) : {};
+              const mt = mr?.ok ? await mr.json().catch(()=>({})) : {};
+              const m2 = mt.metric || {};
+              const price2  = qt.c  || closes[closes.length-1];
+              const shares2 = pf.shareOutstanding ? pf.shareOutstanding * 1e6 : null;
+              data = { chart: { result: [{ meta: {
+                symbol: ticker, currency: pf.currency||'USD', exchangeName: pf.exchange||'',
+                instrumentType: 'EQUITY', longName: pf.name||ticker, shortName: pf.name||ticker,
+                regularMarketPrice: price2, previousClose: qt.pc||null, chartPreviousClose: qt.pc||null,
+                regularMarketVolume: qt.v||vols[vols.length-1]||null,
+                averageDailyVolume3Month: m2['3MonthAverageTradingVolume'] ? m2['3MonthAverageTradingVolume']*1e6 : null,
+                marketCap: shares2 && price2 ? shares2*price2 : null,
+                fiftyTwoWeekHigh: m2['52WeekHigh']||null, fiftyTwoWeekLow: m2['52WeekLow']||null,
+                trailingPE: m2.peNormalizedAnnual||m2.peBasicExclExtraTTM||null,
+              }, timestamp: timestamps, indicators: {
+                quote: [{ open: opens, high: highs, low: lows, close: closes, volume: vols }],
+                adjclose: [{ adjclose: closes }]
+              }}], error: null }};
+            }
+          } else {
+            console.log(`[quote] Stooq returned no rows for ${ticker}: ${csv.slice(0,200)}`);
+          }
+        } else {
+          console.log(`[quote] Stooq ${r.status} for ${ticker}`);
+        }
+      } catch (e) {
+        console.log(`[quote] Stooq failed for ${ticker}: ${e.message}`);
+      }
     }
 
     if (!data) {
+      console.log(`[quote] All sources exhausted for ${ticker}`);
       return res.status(404).json({ error: `No price data found for "${ticker}". Check the ticker symbol.` });
     }
 
-    // Augment meta with Finnhub real-time data if Yahoo was used (Yahoo meta can be sparse)
+    // Augment meta with Finnhub real-time data if missing
     const result = data.chart.result[0];
     if (!result.meta.marketCap || !result.meta.fiftyTwoWeekHigh) {
       try {
         const FH = FINNHUB_KEY;
         const [qr, pr, mr] = await Promise.all([
-          fetch(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FH}`).catch(()=>null),
-          fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${FH}`).catch(()=>null),
-          fetch(`https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FH}`).catch(()=>null),
+          fetchWithTimeout(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FH}`, {}, 4000).catch(()=>null),
+          fetchWithTimeout(`https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${FH}`, {}, 4000).catch(()=>null),
+          fetchWithTimeout(`https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FH}`, {}, 4000).catch(()=>null),
         ]);
         const qt = qr?.ok ? await qr.json().catch(()=>({})) : {};
         const pf = pr?.ok ? await pr.json().catch(()=>({})) : {};
         const mt = mr?.ok ? await mr.json().catch(()=>({})) : {};
-        const m = mt.metric || {};
-        const shares = pf.shareOutstanding ? pf.shareOutstanding * 1e6 : null;
+        const m  = mt.metric || {};
+        const shares = pf.shareOutstanding ? pf.shareOutstanding*1e6 : null;
         const price  = qt.c || result.meta.regularMarketPrice;
         result.meta.longName              = result.meta.longName  || pf.name || ticker;
         result.meta.shortName             = result.meta.shortName || pf.name || ticker;
@@ -674,18 +752,18 @@ app.get('/api/quote/:ticker', async (req, res) => {
         result.meta.previousClose         = qt.pc || result.meta.previousClose;
         result.meta.chartPreviousClose    = qt.pc || result.meta.chartPreviousClose;
         result.meta.regularMarketVolume   = qt.v  || result.meta.regularMarketVolume;
-        result.meta.marketCap             = (shares && price) ? shares * price : result.meta.marketCap;
+        result.meta.marketCap             = (shares && price) ? shares*price : result.meta.marketCap;
         result.meta.fiftyTwoWeekHigh      = m['52WeekHigh']  || result.meta.fiftyTwoWeekHigh;
         result.meta.fiftyTwoWeekLow       = m['52WeekLow']   || result.meta.fiftyTwoWeekLow;
         result.meta.trailingPE            = m.peNormalizedAnnual || m.peBasicExclExtraTTM || result.meta.trailingPE;
         result.meta.averageDailyVolume3Month = m['3MonthAverageTradingVolume']
-          ? m['3MonthAverageTradingVolume'] * 1e6 : result.meta.averageDailyVolume3Month;
+          ? m['3MonthAverageTradingVolume']*1e6 : result.meta.averageDailyVolume3Month;
       } catch (_) {}
     }
 
     res.json(data);
   } catch (e) {
-    console.error('quote proxy error:', e.message);
+    console.error('[quote] proxy error:', e.message);
     res.status(500).json({ error: 'Failed to fetch quote data: ' + e.message });
   }
 });
