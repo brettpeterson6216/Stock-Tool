@@ -801,7 +801,7 @@ h2.sec-h2{letter-spacing:-.022em;line-height:1.08;}
 .sec-label{font-size:.68rem;letter-spacing:.13em;}
 /* Tool view — dark terminal */
 #view-tool{background:var(--cream)!important;color:var(--text);transition:background .2s,color .2s;}
-.tool-accordion-wrap{max-width:980px;padding:calc(56px + 2rem) 1.75rem 4rem;}
+.tool-accordion-wrap{max-width:1300px;padding:calc(56px + 2rem) 1.75rem 4rem;}
 .acc-section{border-bottom:1px solid var(--t-acc-border);}
 .acc-section:first-child{border-top:1px solid var(--t-acc-border);}
 .acc-header{padding:.95rem 1.4rem;background:var(--t-acc-header-bg);transition:background .15s;}
@@ -1395,19 +1395,8 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
               <input class="ticker-input" id="main-ticker" type="text" placeholder="Enter ticker symbol (e.g. AAPL, TSLA, NVDA, SPY)">
               <button class="btn-search" id="search-btn" onclick="fetchAndRender()">Analyze →</button>
             </div>
-            <div class="quick-row">
-              <span style="font-family:var(--mono);font-size:.62rem;color:var(--text5);align-self:center;text-transform:uppercase;letter-spacing:.07em;">Quick Load:</span>
-              <button class="quick-btn" onclick="quickLoad('AAPL')">AAPL</button>
-              <button class="quick-btn" onclick="quickLoad('MSFT')">MSFT</button>
-              <button class="quick-btn" onclick="quickLoad('NVDA')">NVDA</button>
-              <button class="quick-btn" onclick="quickLoad('TSLA')">TSLA</button>
-              <button class="quick-btn" onclick="quickLoad('META')">META</button>
-              <button class="quick-btn" onclick="quickLoad('AMZN')">AMZN</button>
-              <button class="quick-btn" onclick="quickLoad('GOOGL')">GOOGL</button>
-              <button class="quick-btn" onclick="quickLoad('JPM')">JPM</button>
-              <button class="quick-btn" onclick="quickLoad('SPY')">SPY</button>
-              <button class="quick-btn" onclick="quickLoad('BRK-B')">BRK-B</button>
-            </div>
+            <!-- Featured stocks grid (shown before search) -->
+            <div id="featured-grid"></div>
             <div class="loading-bar" id="analyze-loading" style="display:none;"><div class="spinner"></div> Fetching live market data…</div>
             <div class="error-msg" id="analyze-error"></div>
 
@@ -1428,6 +1417,10 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
               </div>
 
               <div class="metrics-grid" id="metrics-grid"></div>
+
+              <!-- Dashboard 2-col layout: charts left, sidebar right -->
+              <div class="dash-layout">
+              <div class="dash-main">
 
               <!-- Main price chart -->
               <div class="chart-wrap">
@@ -1452,19 +1445,7 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
                 <div class="h240"><canvas id="price-chart"></canvas></div>
               </div>
 
-              <!-- Analyst Price Targets -->
-              <div id="analyst-panel" style="display:none;margin-bottom:14px;">
-                <div class="analyst-panel">
-                  <div class="analyst-target-box">
-                    <div class="analyst-box-title">Analyst Price Targets</div>
-                    <div id="analyst-targets-content"></div>
-                  </div>
-                  <div class="analyst-rec-box">
-                    <div class="analyst-box-title">Consensus Rating</div>
-                    <div id="analyst-rec-content"></div>
-                  </div>
-                </div>
-              </div>
+<!-- analyst-panel moved to sidebar -->
 
               <!-- RSI + MACD -->
               <div class="g2">
@@ -1494,6 +1475,33 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
                 </div>
               </div>
 
+              </div><!-- /dash-main -->
+
+              <!-- Sidebar -->
+              <div class="dash-sidebar">
+                <!-- Analyst panel lives here on wide screens -->
+                <div id="analyst-sidebar"></div>
+                <!-- Mini risk summary -->
+                <div class="sidebar-card" id="sidebar-risk" style="display:none;">
+                  <div class="sidebar-card-title">Risk Summary</div>
+                  <div id="sidebar-risk-content"></div>
+                </div>
+                <!-- Quick DCF in sidebar -->
+                <div class="sidebar-card">
+                  <div class="sidebar-card-title">Quick DCF — Intrinsic Value</div>
+                  <div class="proj-controls" style="grid-template-columns:1fr 1fr;gap:6px 10px;">
+                    <div><label class="fc-label">EPS ($)</label><input class="fc-input" type="number" id="qdcf-eps" value="" step="0.01" placeholder="e.g. 5.20"></div>
+                    <div><label class="fc-label">WACC (%)</label><input class="fc-input" type="number" id="qdcf-wacc" value="10" step="0.1"></div>
+                    <div><label class="fc-label">Growth Yr 1–5 (%)</label><input class="fc-input" type="number" id="qdcf-g1" value="15" step="0.5"></div>
+                    <div><label class="fc-label">Growth Yr 6–10 (%)</label><input class="fc-input" type="number" id="qdcf-g2" value="8" step="0.5"></div>
+                    <div style="grid-column:1/-1;"><label class="fc-label">Terminal Growth (%)</label><input class="fc-input" type="number" id="qdcf-tg" value="3" step="0.1"></div>
+                  </div>
+                  <button class="btn-run" style="margin-top:.6rem;width:100%;" onclick="runQuickDCF()">Calculate →</button>
+                  <div id="qdcf-output" style="margin-top:.75rem;"></div>
+                </div>
+              </div><!-- /dash-sidebar -->
+              </div><!-- /dash-layout -->
+
               <!-- Free Projection -->
               <div class="panel-box" style="margin-bottom:14px;">
                 <div class="panel-box-title">Forward Projection — 3 Scenarios</div>
@@ -1514,19 +1522,7 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
                 </div>
               </div>
 
-              <!-- INLINE: Quick DCF -->
-              <div class="panel-box" style="margin-bottom:14px;" id="inline-dcf-panel" >
-                <div class="panel-box-title">Quick DCF — Intrinsic Value</div>
-                <div class="proj-controls" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr));">
-                  <div><label class="fc-label">EPS ($)</label><input class="fc-input" type="number" id="qdcf-eps" value="" step="0.01" placeholder="e.g. 5.20"></div>
-                  <div><label class="fc-label">Growth Yr 1–5 (%)</label><input class="fc-input" type="number" id="qdcf-g1" value="15" step="0.5"></div>
-                  <div><label class="fc-label">Growth Yr 6–10 (%)</label><input class="fc-input" type="number" id="qdcf-g2" value="8" step="0.5"></div>
-                  <div><label class="fc-label">WACC (%)</label><input class="fc-input" type="number" id="qdcf-wacc" value="10" step="0.1"></div>
-                  <div><label class="fc-label">Terminal Growth (%)</label><input class="fc-input" type="number" id="qdcf-tg" value="3" step="0.1"></div>
-                </div>
-                <button class="btn-run" style="margin-top:.75rem;" onclick="runQuickDCF()">Calculate →</button>
-                <div id="qdcf-output" style="margin-top:.875rem;"></div>
-              </div>
+
 
               <!-- INLINE: Risk & Volatility -->
               <div class="panel-box" style="margin-bottom:14px;" id="risk-panel">
@@ -2792,6 +2788,70 @@ function exportPDF() {
 function showUpgradeModal(annual) { document.getElementById('upgrade-modal-bg').classList.add('show'); if(annual) selectUpgradePlan('annual'); else selectUpgradePlan('monthly'); }
 function closeUpgradeModal() { document.getElementById('upgrade-modal-bg').classList.remove('show'); }
 
+
+/* ── Featured stocks grid ── */
+#featured-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin:1.25rem 0 .5rem;}
+.fstock-card{background:var(--t-chart-bg);border:1px solid var(--t-chart-border);border-radius:var(--r2);padding:.75rem 1rem;cursor:pointer;transition:border-color .18s,transform .18s;text-align:left;}
+.fstock-card:hover{border-color:var(--gold);transform:translateY(-2px);}
+.fstock-sym{font-size:.72rem;font-weight:700;color:var(--text4);letter-spacing:.05em;margin-bottom:2px;}
+.fstock-price{font-size:1rem;font-weight:700;color:var(--text1);margin-bottom:1px;}
+.fstock-chg{font-size:.72rem;font-weight:600;}
+.fstock-chg.up{color:#4ade80;}.fstock-chg.dn{color:#f87171;}
+.news-item.news-pos{border-left:3px solid #4ade80;}
+.news-item.news-neg{border-left:3px solid #f87171;}
+.news-item.news-neu{border-left:3px solid var(--t-chart-border);}
+.fstock-ticker{font-family:var(--mono);font-size:.78rem;font-weight:700;color:var(--gold);letter-spacing:.04em;}
+.fstock-name{font-size:.65rem;color:var(--text5);margin:.1rem 0 .4rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fstock-price{font-size:.9rem;font-weight:600;color:var(--text);}
+.fstock-chg{font-size:.68rem;font-family:var(--mono);margin-top:.15rem;}
+.fstock-chg.up{color:#4ade80;}.fstock-chg.dn{color:#f87171;}
+
+/* ── Dashboard 2-column layout ── */
+@media(min-width:960px){
+  .dash-layout{display:grid;grid-template-columns:1fr 300px;gap:16px;align-items:start;}
+  .dash-main{min-width:0;}
+  .dash-sidebar{display:flex;flex-direction:column;gap:12px;}
+}
+@media(max-width:959px){.dash-sidebar{margin-top:12px;}}
+
+/* ── Tooltip system ── */
+.tip-wrap{position:relative;display:inline-block;}
+.tip-icon{display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;border-radius:50%;background:var(--text5);color:var(--t-acc-body-bg,#fff);font-size:.6rem;font-weight:700;cursor:help;margin-left:4px;opacity:.6;vertical-align:middle;flex-shrink:0;}
+.tip-icon:hover{opacity:1;}
+.tip-box{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--t-chart-bg,#1a1c28);border:1px solid var(--t-chart-border,rgba(255,255,255,.1));border-radius:8px;padding:.55rem .75rem;font-size:.72rem;color:var(--text4);line-height:1.45;width:210px;z-index:999;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,.25);}
+.tip-wrap:hover .tip-box{display:block;}
+.tip-box strong{color:var(--gold);display:block;margin-bottom:2px;font-size:.7rem;}
+
+/* ── Analyst consensus bar ── */
+.consensus-wrap{margin-top:.75rem;}
+.consensus-bar-row{display:flex;height:8px;border-radius:4px;overflow:hidden;gap:2px;margin:.4rem 0;}
+.cb-buy{background:#4ade80;}.cb-hold{background:#C89B3C;}.cb-sell{background:#f87171;}
+.consensus-legend{display:flex;gap:12px;font-size:.68rem;color:var(--text5);font-family:var(--mono);}
+.cl-dot{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:3px;vertical-align:middle;}
+.consensus-rating{font-size:1.1rem;font-weight:700;margin-bottom:2px;}
+
+/* ── News sentiment ── */
+.news-item{padding:.6rem 0 .6rem .65rem!important;border-left:3px solid transparent;transition:border-color .15s;}
+.news-pos{border-left-color:#4ade80!important;}
+.news-neg{border-left-color:#f87171!important;}
+.news-neu{border-left-color:var(--text5)!important;opacity:.8;}
+.news-headline{font-size:.8rem;color:var(--text);font-weight:500;line-height:1.35;margin-bottom:3px;}
+.news-meta{font-size:.65rem;color:var(--text5);font-family:var(--mono);}
+.news-sentiment-badge{display:inline-block;font-size:.58rem;font-weight:700;padding:.1rem .35rem;border-radius:3px;margin-right:5px;letter-spacing:.04em;text-transform:uppercase;vertical-align:middle;}
+.nsb-pos{background:rgba(74,222,128,.15);color:#4ade80;}
+.nsb-neg{background:rgba(248,113,113,.15);color:#f87171;}
+.nsb-neu{background:rgba(255,255,255,.06);color:var(--text5);}
+
+/* ── Sidebar card style ── */
+.sidebar-card{background:var(--t-panel-bg);border:1px solid var(--t-panel-border);border-radius:var(--r2);padding:1rem 1.1rem;}
+.sidebar-card-title{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text5);margin-bottom:.75rem;}
+
+/* ── Section grid below analyze ── */
+@media(min-width:960px){
+  .acc-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+  .acc-grid-2 .acc-section{border-right:none;}
+}
+
 /* ── Account Settings modal ── */
 async function openAccountModal() {
   document.getElementById('acct-modal-bg').classList.add('show');
@@ -3183,7 +3243,21 @@ function renderStock(result, ticker) {
     {l:'MA 200',v:ma200Now?`$${ma200Now.toFixed(2)}`:'—',s:ma200Now?(price>ma200Now?'Above (Bullish)':'Below (Bearish)'):'',c:ma200Now?(price>ma200Now?'up':'dn'):''},
     {l:'Volatility',v:`${stdDev.toFixed(1)}%`,s:'Annualized',c:stdDev>40?'dn':stdDev<20?'up':''},
   ];
-  document.getElementById('metrics-grid').innerHTML=metrics.map(m=>`<div class="metric-card"><div class="m-lbl">${m.l}</div><div class="m-val ${m.c}">${m.v}</div>${m.s?`<div class="m-sub">${m.s}</div>`:''}</div>`).join('');
+  const METRIC_TIPS={
+    '52W High':'The highest price this stock reached in the past 52 weeks.',
+    '52W Low':'The lowest price this stock reached in the past 52 weeks.',
+    'Market Cap':'Total market value of all outstanding shares.',
+    'Volume':'Number of shares traded today vs 3-month average.',
+    'RSI (14)':'Relative Strength Index. Below 30 = oversold, above 70 = overbought.',
+    'MA 50':'50-day moving average. Price above it is generally bullish.',
+    'MA 200':'200-day moving average. Price above it signals long-term uptrend.',
+    'Volatility':'Annualized standard deviation of daily returns. Higher = more risk.',
+  };
+  document.getElementById('metrics-grid').innerHTML=metrics.map(m=>{
+    const tip=METRIC_TIPS[m.l]||'';
+    const tipHtml=tip?`<span class="tip-wrap"><span class="tip-icon">?</span><span class="tip-box">${tip}</span></span>`:'';
+    return `<div class="metric-card"><div class="m-lbl">${m.l}${tipHtml}</div><div class="m-val ${m.c}">${m.v}</div>${m.s?`<div class="m-sub">${m.s}</div>`:''}</div>`;
+  }).join('');
 
   const peNow=Math.round(meta.trailingPE||25);
   document.getElementById('proj-pe').value=peNow;
@@ -3197,6 +3271,7 @@ function renderStock(result, ticker) {
   buildMACDChart(c,ts);
   buildVolChart(vols,ts,c);
   buildDistChart(returns);
+  S.meta = meta;
   renderRiskPanel(c,meta);
   renderNews(ticker,meta.longName||ticker);
   loadAnalyst(ticker);
@@ -3204,6 +3279,55 @@ function renderStock(result, ticker) {
   document.getElementById('stock-result').style.display='block';
   document.getElementById('proj-results').style.display='none';
   renderSavedAnalyses();
+}
+
+
+/* =====================================================
+   FEATURED STOCKS GRID
+===================================================== */
+const FEATURED_TICKERS = ['AAPL','NVDA','MSFT','TSLA','AMZN','META','GOOGL','SPY'];
+async function loadFeaturedGrid() {
+  const el = document.getElementById('featured-grid');
+  if (!el) return;
+  // Show skeleton placeholders
+  el.innerHTML = FEATURED_TICKERS.map(t =>
+    `<div class="fstock-card" style="opacity:.4;"><div class="fstock-sym">${t}</div><div class="fstock-price">—</div><div class="fstock-chg">Loading…</div></div>`
+  ).join('');
+  // Fetch all tickers in parallel
+  const results = await Promise.allSettled(
+    FEATURED_TICKERS.map(t =>
+      fetch(`/api/quote/${t}?range=1d`, { credentials:'same-origin' })
+        .then(r => r.ok ? r.json() : null)
+        .catch(() => null)
+    )
+  );
+  el.innerHTML = results.map((res, i) => {
+    const t = FEATURED_TICKERS[i];
+    const data = res.status === 'fulfilled' ? res.value : null;
+    const meta = data?.chart?.result?.[0]?.meta;
+    if (!meta) {
+      return `<div class="fstock-card" onclick="loadTicker('${t}')">
+        <div class="fstock-sym">${t}</div>
+        <div class="fstock-price">—</div>
+        <div class="fstock-chg" style="color:var(--text5);">N/A</div>
+      </div>`;
+    }
+    const price = meta.regularMarketPrice ?? meta.chartPreviousClose;
+    const prev  = meta.chartPreviousClose || price;
+    const chg   = price - prev;
+    const chgPct = prev ? (chg / prev * 100) : 0;
+    const up = chg >= 0;
+    return `<div class="fstock-card" onclick="loadTicker('${t}')">
+      <div class="fstock-sym">${t}</div>
+      <div class="fstock-price">$${price >= 1000 ? price.toFixed(0) : price.toFixed(2)}</div>
+      <div class="fstock-chg ${up?'up':'dn'}">${up?'▲':'▼'} ${Math.abs(chgPct).toFixed(2)}%</div>
+    </div>`;
+  }).join('');
+}
+
+function loadTicker(ticker) {
+  document.getElementById('main-ticker').value = ticker;
+  fetchAndRender();
 }
 
 function toggleTheme() {
@@ -3222,17 +3346,85 @@ async function loadAnalyst(ticker) {
     const r = await fetch(`/api/analyst/${encodeURIComponent(ticker)}`, { credentials: 'same-origin' });
     if (!r.ok) return;
     const d = await r.json();
+
+    // ── Price targets → overlay on chart ──
     const pt = d.priceTarget || {};
-    const mean = pt.targetMean  || null;
-    const high = pt.targetHigh  || null;
-    const low  = pt.targetLow   || null;
+    const mean = pt.targetMean || null;
+    const high = pt.targetHigh || null;
+    const low  = pt.targetLow  || null;
     if (mean || high || low) {
       S.analystTarget = { mean, high, low };
-      // Rebuild price chart to overlay analyst target lines
       if (S.data) {
         const c = S.data.indicators.quote[0].close.filter(x => x != null);
         buildPriceChart(S.data, c, S.data.timestamp);
       }
+    }
+
+    // ── Consensus bar → sidebar ──
+    const sideEl = document.getElementById('analyst-sidebar');
+    if (!sideEl) return;
+
+    const recs = Array.isArray(d.recommendations) ? d.recommendations : [];
+    // Aggregate last 3 months of recommendation data
+    const counts = { strongBuy:0, buy:0, hold:0, sell:0, strongSell:0 };
+    recs.slice(0, 3).forEach(r2 => {
+      counts.strongBuy  += (r2.strongBuy  || 0);
+      counts.buy        += (r2.buy        || 0);
+      counts.hold       += (r2.hold       || 0);
+      counts.sell       += (r2.sell       || 0);
+      counts.strongSell += (r2.strongSell || 0);
+    });
+    const totalRec = counts.strongBuy + counts.buy + counts.hold + counts.sell + counts.strongSell;
+
+    // Price target row
+    let ptHtml = '';
+    if (mean) {
+      const curPrice = S.meta ? S.meta.regularMarketPrice : null;
+      const upside = curPrice ? ((mean - curPrice) / curPrice * 100).toFixed(1) : null;
+      ptHtml = `
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
+          <span style="font-size:.72rem;color:var(--text4);">Analyst Price Target</span>
+          <span style="font-size:1.05rem;font-weight:700;color:var(--gold);">$${mean.toFixed(2)}</span>
+        </div>
+        ${upside!==null?`<div style="font-size:.7rem;color:${parseFloat(upside)>=0?'#4ade80':'#f87171'};margin-bottom:8px;">${parseFloat(upside)>=0?'▲':'▼'} ${Math.abs(upside)}% from current price</div>`:''}
+        ${high||low?`<div style="font-size:.68rem;color:var(--text5);margin-bottom:10px;">Range: ${low?'$'+low.toFixed(2):'—'} – ${high?'$'+high.toFixed(2):'—'}</div>`:''}`;
+    }
+
+    // Consensus bar
+    let barHtml = '';
+    if (totalRec > 0) {
+      const pSB = (counts.strongBuy  / totalRec * 100).toFixed(1);
+      const pB  = (counts.buy        / totalRec * 100).toFixed(1);
+      const pH  = (counts.hold       / totalRec * 100).toFixed(1);
+      const pS  = (counts.sell       / totalRec * 100).toFixed(1);
+      const pSS = (counts.strongSell / totalRec * 100).toFixed(1);
+
+      const bullPct = (counts.strongBuy + counts.buy) / totalRec * 100;
+      const bearPct = (counts.sell + counts.strongSell) / totalRec * 100;
+      let consensus = 'Hold', consColor = '#C89B3C';
+      if (bullPct >= 60) { consensus = 'Buy';       consColor = '#4ade80'; }
+      if (bullPct >= 80) { consensus = 'Strong Buy'; consColor = '#22c55e'; }
+      if (bearPct >= 50) { consensus = 'Sell';       consColor = '#f87171'; }
+
+      barHtml = `
+        <div style="font-size:.7rem;color:var(--text4);margin-bottom:4px;">Analyst Consensus <span style="float:right;font-weight:700;color:${consColor};">${consensus}</span></div>
+        <div class="consensus-bar-row">
+          ${pSB>0?`<div style="flex:${pSB};background:#22c55e;border-radius:3px;" title="Strong Buy ${pSB}%"></div>`:''}
+          ${pB>0?`<div style="flex:${pB};background:#4ade80;border-radius:3px;" title="Buy ${pB}%"></div>`:''}
+          ${pH>0?`<div style="flex:${pH};background:#C89B3C;border-radius:3px;" title="Hold ${pH}%"></div>`:''}
+          ${pS>0?`<div style="flex:${pS};background:#f87171;border-radius:3px;" title="Sell ${pS}%"></div>`:''}
+          ${pSS>0?`<div style="flex:${pSS};background:#dc2626;border-radius:3px;" title="Strong Sell ${pSS}%"></div>`:''}
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--text5);margin-top:3px;">
+          <span>🟢 ${counts.strongBuy+counts.buy} Buy</span>
+          <span>🟡 ${counts.hold} Hold</span>
+          <span>🔴 ${counts.sell+counts.strongSell} Sell</span>
+        </div>
+        <div style="font-size:.62rem;color:var(--text5);margin-top:4px;">Based on ${totalRec} analyst ratings</div>`;
+    }
+
+    if (ptHtml || barHtml) {
+      sideEl.innerHTML = `<div class="sidebar-card">${ptHtml}${barHtml}</div>`;
     }
   } catch (_) {}
 }
@@ -3833,6 +4025,21 @@ function renderRiskPanel(closes, meta) {
     ? (sortedR.slice(0, var95Idx).reduce((a,b) => a+b, 0) / var95Idx).toFixed(2)
     : var95;
 
+  // Mirror key stats into sidebar-risk
+  const sideRisk = document.getElementById('sidebar-risk');
+  const sideRiskContent = document.getElementById('sidebar-risk-content');
+  if (sideRisk && sideRiskContent) {
+    sideRisk.style.display = 'block';
+    sideRiskContent.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:.72rem;">
+        <div><div style="color:var(--text5);">Ann. Volatility</div><div style="font-weight:700;color:${parseFloat(annualVol)<25?'#4ade80':'#f87171'};">${annualVol}%</div></div>
+        <div><div style="color:var(--text5);">Ann. Return</div><div style="font-weight:700;color:${parseFloat(annualReturn)>=0?'#4ade80':'#f87171'};">${annualReturn}%</div></div>
+        <div><div style="color:var(--text5);">Max Drawdown</div><div style="font-weight:700;color:${parseFloat(maxDD)>-20?'#4ade80':'#f87171'};">${maxDD}%</div></div>
+        <div><div style="color:var(--text5);">Sharpe</div><div style="font-weight:700;color:${parseFloat(sharpe)>0.5?'#4ade80':parseFloat(sharpe)<0?'#f87171':'#C89B3C'};">${sharpe}</div></div>
+        <div><div style="color:var(--text5);">Beta</div><div style="font-weight:700;">${beta}</div></div>
+        <div><div style="color:var(--text5);">VaR 95%</div><div style="font-weight:700;color:#f87171;">${var95}%</div></div>
+      </div>`;
+  }
   const col = v => parseFloat(v) >= 0 ? '#4ade80' : '#f87171';
   const posCol = v => { const f=parseFloat(v); return isNaN(f)?'var(--text4)':f>=0?'#4ade80':'#f87171'; };
   const ratingScore = [parseFloat(annualVol) < 25, maxDDraw > -20, parseFloat(sharpe) > 0.5].filter(Boolean).length;
@@ -3876,11 +4083,18 @@ async function renderNews(ticker, name) {
       el.innerHTML = '<div style="color:var(--text5);font-size:.78rem;">No recent news found.</div>';
       return;
     }
-    el.innerHTML = data.slice(0, 6).map(item => `
-      <a class="news-item" href="${item.url}" target="_blank" rel="noopener">
-        <div class="news-headline">${item.headline || 'No title'}</div>
+    const POS_WORDS = /surges?|soars?|beats?|strong|rises?|record|gains?|upgrades?|bullish|profit|growth|rally|buy|outperform|expands?|exceeds?/i;
+    const NEG_WORDS = /falls?|drops?|misses?|weak|loss|declines?|downgrades?|bearish|plunges?|cuts?|layoffs?|sell|underperform|concerns?|risks?|disappoints?/i;
+    el.innerHTML = data.slice(0, 8).map(item => {
+      const h = item.headline || 'No title';
+      let cls = 'news-neu';
+      if (item.sentiment === 'positive' || POS_WORDS.test(h)) cls = 'news-pos';
+      else if (item.sentiment === 'negative' || NEG_WORDS.test(h)) cls = 'news-neg';
+      return `<a class="news-item ${cls}" href="${item.url}" target="_blank" rel="noopener">
+        <div class="news-headline">${h}</div>
         <div class="news-meta">${item.source || ''} · ${item.datetime ? new Date(item.datetime * 1000).toLocaleDateString() : ''}</div>
-      </a>`).join('');
+      </a>`;
+    }).join('');
   } catch(e) {
     el.innerHTML = '<div style="color:var(--text5);font-size:.78rem;">News unavailable.</div>';
   }
@@ -4419,6 +4633,9 @@ async function loadSecFilings(ticker) {
 }
 
 
+
+// Auto-load featured grid on page open
+loadFeaturedGrid();
 </script>
 </body>
 </html>
