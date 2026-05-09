@@ -781,136 +781,65 @@ async function getYahooSummary(_ticker, _modules) {
 // ============================================================
 app.get('/api/financials/:ticker', async (req, res) => {
   const ticker = req.params.ticker.toUpperCase();
+
+  const YH = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+    'Accept': 'application/json, text/plain, */*',
+    'Accept-Language': 'en-US,en;q=0.9',
+    'Origin': 'https://finance.yahoo.com',
+    'Referer': 'https://finance.yahoo.com/',
+  };
+
+  const MODULES = [
+    'incomeStatementHistory',
+    'incomeStatementHistoryQuarterly',
+    'balanceSheetHistory',
+    'balanceSheetHistoryQuarterly',
+    'cashflowStatementHistory',
+    'cashflowStatementHistoryQuarterly',
+    'defaultKeyStatistics',
+    'financialData',
+  ].join(',');
+
   try {
-    // Fetch all Finnhub data in parallel
-    const [fhResp, metricResp, profileResp, quoteResp] = await Promise.all([
-      fetchWithTimeout(`https://finnhub.io/api/v1/financials-reported?symbol=${ticker}&freq=annual&token=${FINNHUB_KEY}`, {}, 8000),
-      fetchWithTimeout(`https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FINNHUB_KEY}`, {}, 8000),
-      fetchWithTimeout(`https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${FINNHUB_KEY}`, {}, 8000),
-      fetchWithTimeout(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_KEY}`, {}, 8000),
-    ]);
-    const [fhData, metricData, profileData, quoteData] = await Promise.all([
-      fhResp.json().catch(()=>({})),
-      metricResp.json().catch(()=>({})),
-      profileResp.json().catch(()=>({})),
-      quoteResp.json().catch(()=>({})),
-    ]);
+    let yhData = null;
 
-    const allData = fhData.data || [];
-    console.log(`[financials] ${ticker}: Finnhub returned ${allData.length} records. Forms: ${[...new Set(allData.map(d=>d.form))].join(',')}, Quarters: ${[...new Set(allData.map(d=>d.quarter))].join(',')}`);
-
-    // Annual = quarter 0 OR form contains 10-K
-    let annuals = allData.filter(d => d.quarter === 0 || (d.form && d.form.includes('10-K'))).slice(0, 4);
-
-    // Fallback: if no annual data try quarterly (10-Q) so we show something
-    if (!annuals.length) {
-      annuals = allData.filter(d => d.quarter > 0 || (d.form && d.form.includes('10-Q'))).slice(0, 4);
-      console.log(`[financials] ${ticker}: no annual data, falling back to ${annuals.length} quarterly records`);
+    // Try query2 first, fall back to query1
+    for (const host of ['query2', 'query1']) {
+      try {
+        const url = `https://${host}.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(ticker)}?modules=${MODULES}&corsDomain=finance.yahoo.com&formatted=true`;
+        const r = await fetchWithTimeout(url, { headers: YH }, 8000);
+        if (r.ok) {
+          const json = await r.json();
+          if (json?.quoteSummary?.result?.[0]) {
+            yhData = json;
+            console.log(`[financials] ${ticker}: Yahoo ${host} OK`);
+            break;
+          }
+        }
+        console.log(`[financials] ${ticker}: Yahoo ${host} returned ${r.status}`);
+      } catch (e) {
+        console.log(`[financials] ${ticker}: Yahoo ${host} failed: ${e.message}`);
+      }
     }
 
-    if (!annuals.length) {
-      console.log(`[financials] ${ticker}: no XBRL data from Finnhub (likely ETF/fund). Returning metric-only response.`);
-      // Still return metric/profile data so Metrics tab works for ETFs
+    if (!yhData) {
+      // ETF / fund or Yahoo blocked — return metric-only so Metrics tab still works
+      console.log(`[financials] ${ticker}: no Yahoo data, returning metric-only via Finnhub`);
+      let metricData = {};
+      try {
+        const mr = await fetchWithTimeout(`https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FINNHUB_KEY}`, {}, 6000);
+        metricData = await mr.json().catch(()=>({}));
+      } catch(_) {}
       return res.json({
         noStatements: true,
-        metric:   metricData.metric  || {},
-        profile:  profileData        || {},
-        quote:    quoteData          || {},
+        metric: metricData.metric || {},
         quoteSummary: { result: [{ defaultKeyStatistics:{}, financialData:{} }] }
       });
     }
 
-    function fv(arr, concepts) {
-      for (const c of concepts) {
-        const item = (arr||[]).find(x => x.concept === c);
-        if (item && item.value != null) return { raw: item.value };
-      }
-      return null;
-    }
+    return res.json(yhData);
 
-    const incS = annuals.map(a => ({
-      endDate: { fmt: a.endDate, raw: Math.floor(new Date(a.endDate).getTime()/1000) },
-      totalRevenue:           fv(a.report?.ic, ['Revenues','RevenueFromContractWithCustomerExcludingAssessedTax','SalesRevenueNet','RevenueFromContractWithCustomerIncludingAssessedTax']),
-      costOfRevenue:          fv(a.report?.ic, ['CostOfGoodsAndServicesSold','CostOfRevenue','CostOfGoodsSold']),
-      grossProfit:            fv(a.report?.ic, ['GrossProfit']),
-      totalOperatingExpenses: fv(a.report?.ic, ['OperatingExpenses','CostsAndExpenses']),
-      operatingIncome:        fv(a.report?.ic, ['OperatingIncomeLoss']),
-      netIncome:              fv(a.report?.ic, ['NetIncomeLoss']),
-      basicEps:               fv(a.report?.ic, ['EarningsPerShareBasic']),
-      dilutedEps:             fv(a.report?.ic, ['EarningsPerShareDiluted']),
-    }));
-
-    const balS = annuals.map(a => ({
-      endDate: { fmt: a.endDate, raw: Math.floor(new Date(a.endDate).getTime()/1000) },
-      cash:                  fv(a.report?.bs, ['CashAndCashEquivalentsAtCarryingValue','Cash','CashAndCashEquivalents']),
-      shortTermInvestments:  fv(a.report?.bs, ['ShortTermInvestments','AvailableForSaleSecuritiesCurrent']),
-      totalCurrentAssets:    fv(a.report?.bs, ['AssetsCurrent']),
-      totalAssets:           fv(a.report?.bs, ['Assets']),
-      shortLongTermDebt:     fv(a.report?.bs, ['ShortTermBorrowings','DebtCurrent','CommercialPaper','ShortTermNotes']),
-      longTermDebt:          fv(a.report?.bs, ['LongTermDebt','LongTermDebtNoncurrent']),
-      totalLiab:             fv(a.report?.bs, ['Liabilities']),
-      totalStockholderEquity:fv(a.report?.bs, ['StockholdersEquity','StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest']),
-    }));
-
-    const cfS = annuals.map(a => {
-      const capexRaw = fv(a.report?.cf, ['PaymentsToAcquirePropertyPlantAndEquipment','CapitalExpenditures']);
-      const capex = capexRaw ? { raw: -Math.abs(capexRaw.raw) } : null;
-      return {
-        endDate: { fmt: a.endDate, raw: Math.floor(new Date(a.endDate).getTime()/1000) },
-        totalCashFromOperatingActivities:      fv(a.report?.cf, ['NetCashProvidedByUsedInOperatingActivities']),
-        capitalExpenditures:                   capex,
-        totalCashflowsFromInvestingActivities: fv(a.report?.cf, ['NetCashProvidedByUsedInInvestingActivities']),
-        totalCashFromFinancingActivities:      fv(a.report?.cf, ['NetCashProvidedByUsedInFinancingActivities']),
-        changeInCash:                          fv(a.report?.cf, ['CashAndCashEquivalentsPeriodIncreaseDecrease','NetIncreaseDecreaseInCashAndCashEquivalents']),
-      };
-    });
-
-    // Build key statistics from Finnhub metric (replaces Yahoo defaultKeyStatistics + financialData)
-    const m = metricData.metric || {};
-    const price  = quoteData.c || null;
-    const shares = profileData.shareOutstanding ? profileData.shareOutstanding * 1e6 : null;
-    const n = v => (v != null && !isNaN(v)) ? { raw: v } : null;  // wrap as Yahoo-style object
-
-    const defaultKeyStatistics = {
-      trailingPE:                   n(m.peNormalizedAnnual || m.peBasicExclExtraTTM),
-      forwardPE:                    null,
-      priceToBook:                  n(m.pbQuarterly),
-      priceToSalesTrailing12Months: n(m.psTTM),
-      enterpriseToEbitda:           n(m.evEbitdaTTM),
-      enterpriseToRevenue:          null,
-      sharesOutstanding:            n(shares),
-      bookValuePerShare:            n(m.bookValuePerShareQuarterly),
-    };
-
-    // Finnhub stores margins/returns as actual % (e.g. 25 = 25%); Yahoo uses decimals (0.25)
-    const pct = v => (v != null && !isNaN(v)) ? { raw: v / 100 } : null;
-    const financialData = {
-      grossMargins:     pct(m.grossMarginAnnual    ?? m.grossMarginTTM),
-      operatingMargins: pct(m.operatingProfitMarginAnnual ?? m.operatingProfitMarginTTM),
-      profitMargins:    pct(m.netProfitMarginAnnual ?? m.netProfitMarginTTM),
-      returnOnEquity:   pct(m.roeTTM  ?? m.roeRfy),
-      returnOnAssets:   pct(m.roaTTM  ?? m.roaRfy),
-      revenueGrowth:    pct(m.revenueGrowthQuarterlyYoy ?? m.revenueGrowth3Y),
-      earningsGrowth:   pct(m.epsGrowthTTMYoy ?? m.epsGrowth3Y),
-      debtToEquity:     n(m.totalDebt2EquityQuarterly ?? m.totalDebt2EquityAnnual),
-      currentRatio:     n(m.currentRatioQuarterly  ?? m.currentRatioAnnual),
-      quickRatio:       n(m.quickRatioQuarterly    ?? m.quickRatioAnnual),
-      freeCashflow:     (m.fcfPerShareTTM != null && shares) ? n(m.fcfPerShareTTM * shares) : null,
-      currentPrice:     n(price),
-    };
-
-    return res.json({
-      quoteSummary: { result: [{
-        incomeStatementHistory:           { incomeStatementHistory:  incS },
-        balanceSheetHistory:              { balanceSheetStatements:  balS },
-        cashflowStatementHistory:         { cashflowStatements:      cfS  },
-        incomeStatementHistoryQuarterly:  { incomeStatementHistory:  [] },
-        balanceSheetHistoryQuarterly:     { balanceSheetStatements:  [] },
-        cashflowStatementHistoryQuarterly:{ cashflowStatements:      [] },
-        defaultKeyStatistics,
-        financialData,
-      }]}
-    });
   } catch (e) {
     console.error('financials proxy error:', e.message);
     res.status(500).json({ error: 'Failed to fetch financials.' });
