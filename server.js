@@ -796,8 +796,22 @@ app.get('/api/financials/:ticker', async (req, res) => {
       quoteResp.json().catch(()=>({})),
     ]);
 
-    const annuals = (fhData.data || []).filter(d => d.quarter === 0).slice(0, 4);
-    if (!annuals.length) return res.status(404).json({ error: 'No financial data available for ' + ticker + '. Finnhub may not carry XBRL data for this ticker.' });
+    const allData = fhData.data || [];
+    console.log(`[financials] ${ticker}: Finnhub returned ${allData.length} records. Forms: ${[...new Set(allData.map(d=>d.form))].join(',')}, Quarters: ${[...new Set(allData.map(d=>d.quarter))].join(',')}`);
+
+    // Annual = quarter 0 OR form contains 10-K
+    let annuals = allData.filter(d => d.quarter === 0 || (d.form && d.form.includes('10-K'))).slice(0, 4);
+
+    // Fallback: if no annual data try quarterly (10-Q) so we show something
+    if (!annuals.length) {
+      annuals = allData.filter(d => d.quarter > 0 || (d.form && d.form.includes('10-Q'))).slice(0, 4);
+      console.log(`[financials] ${ticker}: no annual data, falling back to ${annuals.length} quarterly records`);
+    }
+
+    if (!annuals.length) {
+      console.log(`[financials] ${ticker}: no data at all from Finnhub. Raw response: ${JSON.stringify(fhData).slice(0,200)}`);
+      return res.status(404).json({ error: 'No financial data available for ' + ticker + '.' });
+    }
 
     function fv(arr, concepts) {
       for (const c of concepts) {
