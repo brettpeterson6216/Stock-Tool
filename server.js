@@ -780,69 +780,197 @@ async function getYahooSummary(_ticker, _modules) {
 //  Financials proxy  (Finnhub financials-reported + metric)
 // ============================================================
 app.get('/api/financials/:ticker', async (req, res) => {
-  const ticker = req.params.ticker.toUpperCase();
-
-  const YH = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-    'Accept': 'application/json, text/plain, */*',
-    'Accept-Language': 'en-US,en;q=0.9',
-    'Origin': 'https://finance.yahoo.com',
-    'Referer': 'https://finance.yahoo.com/',
-  };
-
-  const MODULES = [
-    'incomeStatementHistory',
-    'incomeStatementHistoryQuarterly',
-    'balanceSheetHistory',
-    'balanceSheetHistoryQuarterly',
-    'cashflowStatementHistory',
-    'cashflowStatementHistoryQuarterly',
-    'defaultKeyStatistics',
-    'financialData',
-  ].join(',');
+  const ticker = req.params.ticker.toUpperCase().replace(/[^A-Z0-9.]/g, '');
+  const UA = 'ImpliedLens/1.0 brettpeterson6216@gmail.com';
 
   try {
-    let yhData = null;
-
-    // Try query2 first, fall back to query1
-    for (const host of ['query2', 'query1']) {
-      try {
-        const url = `https://${host}.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(ticker)}?modules=${MODULES}&corsDomain=finance.yahoo.com&formatted=true`;
-        const r = await fetchWithTimeout(url, { headers: YH }, 8000);
-        if (r.ok) {
-          const json = await r.json();
-          if (json?.quoteSummary?.result?.[0]) {
-            yhData = json;
-            console.log(`[financials] ${ticker}: Yahoo ${host} OK`);
-            break;
-          }
-        }
-        console.log(`[financials] ${ticker}: Yahoo ${host} returned ${r.status}`);
-      } catch (e) {
-        console.log(`[financials] ${ticker}: Yahoo ${host} failed: ${e.message}`);
+    // Step 1: Resolve CIK from SEC's authoritative ticker map
+    let cik = null;
+    try {
+      const r = await fetchWithTimeout('https://www.sec.gov/files/company_tickers.json', { headers: { 'User-Agent': UA } }, 6000);
+      if (r.ok) {
+        const data = await r.json();
+        const entry = Object.values(data).find(e => e.ticker?.toUpperCase() === ticker);
+        if (entry) cik = String(entry.cik_str).padStart(10, '0');
       }
-    }
+    } catch(_) {}
 
-    if (!yhData) {
-      // ETF / fund or Yahoo blocked — return metric-only so Metrics tab still works
-      console.log(`[financials] ${ticker}: no Yahoo data, returning metric-only via Finnhub`);
-      let metricData = {};
+    // Fallback: EDGAR full-text search
+    if (!cik) {
       try {
-        const mr = await fetchWithTimeout(`https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FINNHUB_KEY}`, {}, 6000);
-        metricData = await mr.json().catch(()=>({}));
+        const r = await fetchWithTimeout(
+          `https://efts.sec.gov/LATEST/search-index?q=%22${encodeURIComponent(ticker)}%22&forms=10-K`,
+          { headers: { 'User-Agent': UA, 'Accept': 'application/json' } }, 5000
+        );
+        if (r.ok) {
+          const d = await r.json();
+          const hit = (d?.hits?.hits || [])[0];
+          if (hit?._source?.entity_id) cik = String(hit._source.entity_id).padStart(10, '0');
+        }
       } catch(_) {}
-      return res.json({
-        noStatements: true,
-        metric: metricData.metric || {},
-        quoteSummary: { result: [{ defaultKeyStatistics:{}, financialData:{} }] }
-      });
     }
 
-    return res.json(yhData);
+    if (!cik) {
+      console.log(`[financials] ${ticker}: CIK not found (ETF/fund)`);
+      return res.json({ noStatements: true, quoteSummary: { result: [{ defaultKeyStatistics:{}, financialData:{} }] } });
+    }
+
+    console.log(`[financials] ${ticker}: CIK=${cik}`);
+
+    // Step 2: Fetch XBRL company facts from SEC EDGAR (free, no auth)
+    const factsResp = await fetchWithTimeout(
+      `https://data.sec.gov/api/xbrl/companyfacts/CIK${cik}.json`,
+      { headers: { 'User-Agent': UA } }, 15000
+    );
+    if (!factsResp.ok) throw new Error(`companyfacts ${factsResp.status}`);
+    const facts = await factsResp.json();
+    const gaap = facts.facts?.['us-gaap'] || {};
+
+    // Step 3: Extract annual (10-K) series for a list of concept names
+    function annualSeries(concepts) {
+      for (const concept of concepts) {
+        const units = gaap[concept]?.units?.USD || gaap[concept]?.units?.shares || [];
+        const byYear = {};
+        for (const u of units) {
+          if (u.form !== '10-K') continue;
+          const yr = u.fy || u.end?.slice(0, 4);
+          if (!yr) continue;
+          if (!byYear[yr] || u.filed > byYear[yr].filed) byYear[yr] = u;
+        }
+        const sorted = Object.values(byYear)
+          .sort((a, b) => (b.fy || b.end) > (a.fy || a.end) ? 1 : -1)
+          .slice(0, 4);
+        if (sorted.length) return sorted;
+      }
+      return [];
+    }
+
+    // Step 4: Pull series for each financial line item
+    const revSeries    = annualSeries(['Revenues','RevenueFromContractWithCustomerExcludingAssessedTax','SalesRevenueNet','RevenueFromContractWithCustomerIncludingAssessedTax']);
+    const cogsSeries   = annualSeries(['CostOfGoodsAndServicesSold','CostOfRevenue','CostOfGoodsSold']);
+    const gpSeries     = annualSeries(['GrossProfit']);
+    const opexSeries   = annualSeries(['OperatingExpenses','CostsAndExpenses']);
+    const opinSeries   = annualSeries(['OperatingIncomeLoss']);
+    const niSeries     = annualSeries(['NetIncomeLoss','ProfitLoss']);
+    const epsBasSeries = annualSeries(['EarningsPerShareBasic']);
+    const epsDilSeries = annualSeries(['EarningsPerShareDiluted']);
+    const cashSeries   = annualSeries(['CashAndCashEquivalentsAtCarryingValue','Cash']);
+    const stiSeries    = annualSeries(['ShortTermInvestments','AvailableForSaleSecuritiesCurrent']);
+    const tcaSeries    = annualSeries(['AssetsCurrent']);
+    const tasSeries    = annualSeries(['Assets']);
+    const ltdSeries    = annualSeries(['LongTermDebt','LongTermDebtNoncurrent']);
+    const tlbSeries    = annualSeries(['Liabilities']);
+    const equSeries    = annualSeries(['StockholdersEquity','StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest']);
+    const ocfSeries    = annualSeries(['NetCashProvidedByUsedInOperatingActivities']);
+    const capexSeries  = annualSeries(['PaymentsToAcquirePropertyPlantAndEquipment','CapitalExpenditures']);
+    const icfSeries    = annualSeries(['NetCashProvidedByUsedInInvestingActivities']);
+    const fcfSeries    = annualSeries(['NetCashProvidedByUsedInFinancingActivities']);
+    const cchSeries    = annualSeries(['CashAndCashEquivalentsPeriodIncreaseDecrease','NetIncreaseDecreaseInCashAndCashEquivalents']);
+
+    const backbone = revSeries.length ? revSeries : (niSeries.length ? niSeries : opinSeries);
+    if (!backbone.length) {
+      console.log(`[financials] ${ticker}: no annual XBRL data found (ETF?)`);
+      return res.json({ noStatements: true, quoteSummary: { result: [{ defaultKeyStatistics:{}, financialData:{} }] } });
+    }
+
+    const years = backbone.map(b => String(b.fy || b.end?.slice(0, 4)));
+
+    function pickVal(series, yr) {
+      const e = series.find(s => String(s.fy || s.end?.slice(0, 4)) === yr);
+      return e ? { raw: e.val } : null;
+    }
+
+    const incS = years.map(yr => ({
+      endDate:               { fmt: yr, raw: Math.floor(new Date(`${yr}-12-31`).getTime() / 1000) },
+      totalRevenue:          pickVal(revSeries,    yr),
+      costOfRevenue:         pickVal(cogsSeries,   yr),
+      grossProfit:           pickVal(gpSeries,     yr),
+      totalOperatingExpenses:pickVal(opexSeries,   yr),
+      operatingIncome:       pickVal(opinSeries,   yr),
+      netIncome:             pickVal(niSeries,     yr),
+      basicEps:              pickVal(epsBasSeries, yr),
+      dilutedEps:            pickVal(epsDilSeries, yr),
+    }));
+
+    const balS = years.map(yr => ({
+      endDate:               { fmt: yr, raw: Math.floor(new Date(`${yr}-12-31`).getTime() / 1000) },
+      cash:                  pickVal(cashSeries, yr),
+      shortTermInvestments:  pickVal(stiSeries,  yr),
+      totalCurrentAssets:    pickVal(tcaSeries,  yr),
+      totalAssets:           pickVal(tasSeries,  yr),
+      longTermDebt:          pickVal(ltdSeries,  yr),
+      totalLiab:             pickVal(tlbSeries,  yr),
+      totalStockholderEquity:pickVal(equSeries,  yr),
+    }));
+
+    const cfS = years.map(yr => {
+      const capexEntry = capexSeries.find(s => String(s.fy || s.end?.slice(0, 4)) === yr);
+      return {
+        endDate:               { fmt: yr, raw: Math.floor(new Date(`${yr}-12-31`).getTime() / 1000) },
+        totalCashFromOperatingActivities:      pickVal(ocfSeries,  yr),
+        capitalExpenditures:                   capexEntry ? { raw: -Math.abs(capexEntry.val) } : null,
+        totalCashflowsFromInvestingActivities: pickVal(icfSeries,  yr),
+        totalCashFromFinancingActivities:      pickVal(fcfSeries,  yr),
+        changeInCash:                          pickVal(cchSeries,  yr),
+      };
+    });
+
+    // Step 5: Augment with Finnhub metric ratios (valuation multiples etc.)
+    let m = {}, shares = null;
+    try {
+      const [mr, pr] = await Promise.all([
+        fetchWithTimeout(`https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FINNHUB_KEY}`, {}, 5000),
+        fetchWithTimeout(`https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${FINNHUB_KEY}`, {}, 5000),
+      ]);
+      const [md, pd] = await Promise.all([mr.json().catch(()=>({})), pr.json().catch(()=>({}))]);
+      m = md.metric || {};
+      shares = pd.shareOutstanding ? pd.shareOutstanding * 1e6 : null;
+    } catch(_) {}
+
+    const n   = v => (v != null && !isNaN(v)) ? { raw: v } : null;
+    const pct = v => (v != null && !isNaN(v)) ? { raw: v / 100 } : null;
+
+    const defaultKeyStatistics = {
+      trailingPE:                   n(m.peNormalizedAnnual || m.peBasicExclExtraTTM),
+      forwardPE:                    null,
+      priceToBook:                  n(m.pbQuarterly),
+      priceToSalesTrailing12Months: n(m.psTTM),
+      enterpriseToEbitda:           n(m.evEbitdaTTM),
+      enterpriseToRevenue:          null,
+      sharesOutstanding:            n(shares),
+      bookValuePerShare:            n(m.bookValuePerShareQuarterly),
+    };
+    const financialData = {
+      grossMargins:     pct(m.grossMarginAnnual    ?? m.grossMarginTTM),
+      operatingMargins: pct(m.operatingProfitMarginAnnual ?? m.operatingProfitMarginTTM),
+      profitMargins:    pct(m.netProfitMarginAnnual ?? m.netProfitMarginTTM),
+      returnOnEquity:   pct(m.roeTTM  ?? m.roeRfy),
+      returnOnAssets:   pct(m.roaTTM  ?? m.roaRfy),
+      revenueGrowth:    pct(m.revenueGrowthQuarterlyYoy ?? m.revenueGrowth3Y),
+      earningsGrowth:   pct(m.epsGrowthTTMYoy ?? m.epsGrowth3Y),
+      debtToEquity:     n(m.totalDebt2EquityQuarterly ?? m.totalDebt2EquityAnnual),
+      currentRatio:     n(m.currentRatioQuarterly  ?? m.currentRatioAnnual),
+      quickRatio:       n(m.quickRatioQuarterly    ?? m.quickRatioAnnual),
+      freeCashflow:     (m.fcfPerShareTTM != null && shares) ? n(m.fcfPerShareTTM * shares) : null,
+    };
+
+    console.log(`[financials] ${ticker}: EDGAR OK — years: ${years.join(', ')}`);
+    return res.json({
+      quoteSummary: { result: [{
+        incomeStatementHistory:            { incomeStatementHistory:  incS },
+        balanceSheetHistory:               { balanceSheetStatements:  balS },
+        cashflowStatementHistory:          { cashflowStatements:      cfS  },
+        incomeStatementHistoryQuarterly:   { incomeStatementHistory:  [] },
+        balanceSheetHistoryQuarterly:      { balanceSheetStatements:  [] },
+        cashflowStatementHistoryQuarterly: { cashflowStatements:      [] },
+        defaultKeyStatistics,
+        financialData,
+      }]}
+    });
 
   } catch (e) {
-    console.error('financials proxy error:', e.message);
-    res.status(500).json({ error: 'Failed to fetch financials.' });
+    console.error('[financials] error:', e.message);
+    res.status(500).json({ error: 'Failed to fetch financials: ' + e.message });
   }
 });
 
