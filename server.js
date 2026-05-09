@@ -809,8 +809,15 @@ app.get('/api/financials/:ticker', async (req, res) => {
     }
 
     if (!annuals.length) {
-      console.log(`[financials] ${ticker}: no data at all from Finnhub. Raw response: ${JSON.stringify(fhData).slice(0,200)}`);
-      return res.status(404).json({ error: 'No financial data available for ' + ticker + '.' });
+      console.log(`[financials] ${ticker}: no XBRL data from Finnhub (likely ETF/fund). Returning metric-only response.`);
+      // Still return metric/profile data so Metrics tab works for ETFs
+      return res.json({
+        noStatements: true,
+        metric:   metricData.metric  || {},
+        profile:  profileData        || {},
+        quote:    quoteData          || {},
+        quoteSummary: { result: [{ defaultKeyStatistics:{}, financialData:{} }] }
+      });
     }
 
     function fv(arr, concepts) {

@@ -4114,6 +4114,14 @@ async function loadFinancials(ticker) {
   try {
     const res  = await fetch('/api/financials/' + ticker, { credentials:'same-origin' });
     const data = await res.json();
+
+    // ETF / fund: no XBRL statements available
+    if (data.noStatements) {
+      if(loading) loading.style.display='none';
+      if(error) { error.textContent = `Financial statements are not available for ${ticker} — this is likely an ETF or fund. Use the Metrics tab for key statistics.`; error.style.display='block'; }
+      return;
+    }
+
     const r    = data.quoteSummary && data.quoteSummary.result && data.quoteSummary.result[0];
     if (!r) throw new Error('No data');
     const inc  = (r.incomeStatementHistory  && r.incomeStatementHistory.incomeStatementHistory  && r.incomeStatementHistory.incomeStatementHistory.length  ? r.incomeStatementHistory.incomeStatementHistory  : (r.incomeStatementHistoryQuarterly  && r.incomeStatementHistoryQuarterly.incomeStatementHistory))  || [];
@@ -4243,10 +4251,12 @@ async function loadAdvMetrics(ticker) {
     ]);
     const finData = await finRes.json();
     const metData = await metRes.json();
+    // finData may be a noStatements (ETF) response or a full quoteSummary response
     const r = finData.quoteSummary && finData.quoteSummary.result && finData.quoteSummary.result[0];
     const ks  = (r && r.defaultKeyStatistics) || {};
     const fd  = (r && r.financialData)        || {};
-    const m   = metData.metric || {};
+    // Prefer Finnhub metric data; merge in any finData.metric (ETF path) too
+    const m   = Object.assign({}, finData.metric || {}, metData.metric || {});
 
     function v(val, suffix, decimals=2) {
       if (val == null || val === '' || isNaN(val)) return '—';
