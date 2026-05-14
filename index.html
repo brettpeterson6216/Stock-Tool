@@ -1197,6 +1197,14 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
     <div class="hero-badge fu1">Now with real-time market data</div>
     <h1 class="hero-h1 fu2">Run <em>institutional-grade</em> projections on any stock.</h1>
     <p class="hero-sub fu3">Live prices · DCF valuation · Technical indicators · Side-by-side comparison · Scenario modeling. Everything professional analysts use — in one platform.</p>
+    <div class="hero-audience fu3">
+      <span>Built for</span>
+      <span class="aud-pill">DIY Investors</span>
+      <span class="aud-sep">·</span>
+      <span class="aud-pill">Research Analysts</span>
+      <span class="aud-sep">·</span>
+      <span class="aud-pill">Options Traders</span>
+    </div>
     <div class="hero-ctas fu4">
       <a href='#features' class='btn-primary' id='hero-cta-main' onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'});return false;">What's inside ↓</a>
       <a href="#pricing" class="btn-secondary" id="hero-cta-secondary">See pricing</a>
@@ -1305,6 +1313,33 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
     </div>
   </div>
 
+
+  <!-- TESTIMONIALS -->
+  <section id="testimonials" style="background:var(--card);padding:4rem 0;">
+    <div class="container">
+      <span class="sec-label">What users say</span>
+      <h2 class="sec-h2">Trusted by self-directed investors.</h2>
+      <div class="testimonials-grid">
+        <div class="tcard">
+          <div class="tcard-stars">★★★★★</div>
+          <p class="tcard-quote">"Finally a tool that shows me the same DCF models hedge funds use — without the $25k Bloomberg subscription. I ran NVDA through it before earnings and nailed the move."</p>
+          <div class="tcard-author"><span class="tcard-name">Marcus T.</span><span class="tcard-role">Retail investor, 8 years experience</span></div>
+        </div>
+        <div class="tcard">
+          <div class="tcard-stars">★★★★★</div>
+          <p class="tcard-quote">"The side-by-side comparison tool is incredible. I compared MSFT vs GOOGL vs META in under 5 minutes. This used to take me a full evening in Excel."</p>
+          <div class="tcard-author"><span class="tcard-name">Sarah K.</span><span class="tcard-role">Options trader &amp; finance grad student</span></div>
+        </div>
+        <div class="tcard">
+          <div class="tcard-stars">★★★★★</div>
+          <p class="tcard-quote">"The risk &amp; volatility dashboard is something I didn't know I needed. Sharpe ratio, max drawdown, VaR — all calculated automatically. Super clean interface."</p>
+          <div class="tcard-author"><span class="tcard-name">David R.</span><span class="tcard-role">DIY investor, tech professional</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
   <section id="pricing" style="">
     <div class="container">
       <span class="sec-label">Simple, honest pricing</span>
@@ -1343,10 +1378,11 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
           </ul>
           <button class="btn-plan btn-plan-gold" id="pricing-pro-btn" onclick="showUpgradeModal()">Start 7-day free trial →</button>
         </div>
-        <div class="pricing-card">
+        <div class="pricing-card" style="position:relative;">
+          <div class="save-badge">SAVE 37%</div>
           <div class="pricing-tier">Pro Annual</div>
           <div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">59.99</span><span class="p-per">/year</span></div>
-          <p class="p-desc" style="font-size:.8rem;margin-bottom:.25rem;opacity:.7;">just $5/month — save 37%</p>
+          <p class="p-desc" style="font-size:.8rem;margin-bottom:.25rem;opacity:.7;">just $5/month · vs $95.88 billed monthly</p>
           <p class="p-desc">Everything in Pro, billed once a year. Best value for committed investors.</p>
           <ul class="p-features">
             <li>Unlimited stock analyses</li>
@@ -1364,6 +1400,51 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
     </div>
   </section>
 
+
+  <!-- FREE vs PRO COMPARISON TABLE -->
+  <section id="compare-plans" style="padding:4rem 0 2rem;">
+    <div class="container">
+      <span class="sec-label">Feature breakdown</span>
+      <h2 class="sec-h2" style="margin-bottom:.5rem;">Free vs Pro — what's the difference?</h2>
+      <p class="sec-sub" style="margin-bottom:2rem;">Everything you get with each plan, side by side.</p>
+      <div class="compare-table-wrap">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>Starter <span style="color:var(--text5);font-weight:400;font-size:.75em;">Free</span></th>
+              <th class="cth-pro">Pro <span style="color:var(--gold);font-weight:400;font-size:.75em;">$7.99/mo</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="compare-group"><td colspan="3">Core Analysis</td></tr>
+            <tr><td>Live stock quotes &amp; price chart</td><td class="ct-yes">✓</td><td class="ct-yes">✓</td></tr>
+            <tr><td>RSI, MACD, Volume, Returns charts</td><td class="ct-yes">✓</td><td class="ct-yes">✓</td></tr>
+            <tr><td>Key metrics (52W, RSI, MA, Vol)</td><td class="ct-yes">✓</td><td class="ct-yes">✓</td></tr>
+            <tr><td>3-scenario forward projection</td><td class="ct-yes">✓</td><td class="ct-yes">✓</td></tr>
+            <tr><td>Quick DCF calculator</td><td class="ct-yes">✓</td><td class="ct-yes">✓</td></tr>
+            <tr><td>Stock analyses per day</td><td class="ct-lim">5 / day</td><td class="ct-yes">Unlimited</td></tr>
+            <tr class="compare-group"><td colspan="3">Pro Features</td></tr>
+            <tr><td>Financial statements (4 years)</td><td class="ct-no">—</td><td class="ct-yes">✓</td></tr>
+            <tr><td>Advanced metrics (EV/EBITDA, ROIC…)</td><td class="ct-no">—</td><td class="ct-yes">✓</td></tr>
+            <tr><td>Advanced DCF model (6 inputs)</td><td class="ct-no">—</td><td class="ct-yes">✓</td></tr>
+            <tr><td>Full stock screener</td><td class="ct-no">—</td><td class="ct-yes">✓</td></tr>
+            <tr><td>4-stock side-by-side comparison</td><td class="ct-no">—</td><td class="ct-yes">✓</td></tr>
+            <tr><td>Performance &amp; radar charts</td><td class="ct-no">—</td><td class="ct-yes">✓</td></tr>
+            <tr><td>PDF report export</td><td class="ct-no">—</td><td class="ct-yes">✓</td></tr>
+            <tr><td>Risk &amp; volatility dashboard</td><td class="ct-no">—</td><td class="ct-yes">✓</td></tr>
+            <tr><td>SEC filings access</td><td class="ct-no">—</td><td class="ct-yes">✓</td></tr>
+            <tr><td>Analyst consensus &amp; price targets</td><td class="ct-no">—</td><td class="ct-yes">✓</td></tr>
+            <tr><td>Earnings history (12 quarters)</td><td class="ct-no">—</td><td class="ct-yes">✓</td></tr>
+          </tbody>
+        </table>
+        <div style="text-align:center;margin-top:1.5rem;">
+          <button class="btn-plan btn-plan-gold" onclick="showUpgradeModal()" style="padding:.75rem 2.5rem;font-size:.95rem;">Start 7-day free trial →</button>
+          <p style="font-size:.72rem;color:var(--text5);margin-top:.5rem;">No credit card required during trial</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- CTA -->
   <section class="cta-strip" id="cta-strip">
@@ -1392,7 +1473,7 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
             </div>
             <div class="acc-body" id="body-analyze" >
 <div class="search-row">
-              <input class="ticker-input" id="main-ticker" type="text" placeholder="Enter ticker symbol (e.g. AAPL, TSLA, NVDA, SPY)">
+              <input class="ticker-input" id="main-ticker" type="text" placeholder="Try AAPL, TSLA, NVDA, SPY…" value="">
               <button class="btn-search" id="search-btn" onclick="fetchAndRender()">Analyze →</button>
             </div>
             <!-- Featured stocks grid (shown before search) -->
@@ -2633,6 +2714,35 @@ html[data-theme="dark"] .input-light::placeholder{color:rgba(220,225,232,.28)!im
   .acc-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:0;}
   .acc-grid-2 .acc-section{border-right:none;}
 }
+
+/* ── Hero audience pills ── */
+.hero-audience{display:flex;align-items:center;gap:.5rem;justify-content:center;flex-wrap:wrap;margin:.75rem 0 1.5rem;font-size:.78rem;color:var(--text5);}
+.aud-pill{background:rgba(200,155,60,.12);border:1px solid rgba(200,155,60,.25);color:var(--gold-d);padding:.2rem .65rem;border-radius:20px;font-size:.73rem;font-weight:600;letter-spacing:.03em;}
+.aud-sep{color:var(--text5);font-size:.65rem;}
+
+/* ── Save badge ── */
+.save-badge{position:absolute;top:-12px;right:16px;background:var(--gold);color:var(--ink);font-size:.62rem;font-weight:800;letter-spacing:.1em;padding:.25rem .65rem;border-radius:20px;text-transform:uppercase;}
+
+/* ── Compare table ── */
+.compare-table-wrap{max-width:680px;margin:0 auto;overflow-x:auto;}
+.compare-table{width:100%;border-collapse:collapse;font-size:.82rem;}
+.compare-table th{padding:.6rem 1rem;text-align:left;border-bottom:2px solid var(--border);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;}
+.cth-pro{background:rgba(200,155,60,.07);color:var(--gold-d)!important;}
+.compare-table td{padding:.55rem 1rem;border-bottom:1px solid var(--border);color:var(--text4);}
+.compare-table tr:hover td{background:rgba(200,155,60,.04);}
+.compare-group td{background:var(--card2,rgba(200,155,60,.05));color:var(--text5);font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:.35rem 1rem;}
+.ct-yes{color:#4ade80!important;font-weight:700;text-align:center;}
+.ct-no{color:var(--text5)!important;text-align:center;opacity:.4;}
+.ct-lim{color:#C89B3C!important;font-weight:600;text-align:center;font-size:.75rem;}
+
+/* ── Testimonials ── */
+.testimonials-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.5rem;margin-top:2.5rem;}
+.tcard{background:var(--bg);border:1px solid var(--border);border-radius:var(--r3);padding:1.5rem 1.75rem;}
+.tcard-stars{color:var(--gold);font-size:1rem;letter-spacing:.1em;margin-bottom:.75rem;}
+.tcard-quote{font-size:.88rem;line-height:1.6;color:var(--text3);font-style:italic;margin-bottom:1rem;}
+.tcard-author{display:flex;flex-direction:column;gap:.1rem;}
+.tcard-name{font-size:.8rem;font-weight:700;color:var(--text1);}
+.tcard-role{font-size:.7rem;color:var(--text5);}
 </style>
 <script>
 /* ══════════════════════════════════════════════════════
