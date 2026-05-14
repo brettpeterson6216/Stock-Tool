@@ -65,6 +65,8 @@ async function initDb() {
     "trial_ends_at TEXT",
     "stripe_customer_id TEXT",
     "stripe_subscription_id TEXT",
+    "analysis_date TEXT",
+    "analysis_count INTEGER NOT NULL DEFAULT 0",
   ];
   for (const col of planCols) {
     try { await db.execute("ALTER TABLE users ADD COLUMN " + col); } catch (_) {}
@@ -568,7 +570,92 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 5000) {
   }
 }
 
-app.get('/api/quote/:ticker', async (req, res) => {
+// ============================================================
+//  Analysis rate limiter  (free = 5/day, guest = 2/day)
+// ============================================================
+const FREE_DAILY_LIMIT  = 5;
+const GUEST_DAILY_LIMIT = 2;
+
+async function checkAnalysisLimit(req, res, next) {
+  const today = new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD'
+
+  if (req.session.userId) {
+    // ── Logged-in user ──────────────────────────────────────
+    let row;
+    try {
+      const r = await db.execute({
+        sql:  'SELECT plan, trial_ends_at, analysis_date, analysis_count FROM users WHERE id = ?',
+        args: [req.session.userId],
+      });
+      row = r.rows[0];
+    } catch (_) { return next(); } // DB error → don't block the user
+
+    if (!row) return next();
+
+    const plan = getEffectivePlan(row);
+    if (plan === 'pro' || plan === 'trial') {
+      res.setHeader('X-Plan', plan);
+      return next(); // unlimited
+    }
+
+    // Free plan — check daily count
+    const count     = row.analysis_date === today ? (Number(row.analysis_count) || 0) : 0;
+    const remaining = FREE_DAILY_LIMIT - count;
+
+    if (remaining <= 0) {
+      return res.status(429).json({
+        error:        'Daily limit reached',
+        limitReached: true,
+        limit:        FREE_DAILY_LIMIT,
+        remaining:    0,
+        plan:         'free',
+      });
+    }
+
+    // Increment counter
+    try {
+      await db.execute({
+        sql:  'UPDATE users SET analysis_date = ?, analysis_count = ? WHERE id = ?',
+        args: [today, count + 1, req.session.userId],
+      });
+    } catch (_) {}
+
+    res.setHeader('X-Plan',               plan);
+    res.setHeader('X-Analyses-Used',      String(count + 1));
+    res.setHeader('X-Analyses-Remaining', String(remaining - 1));
+    res.setHeader('X-Analyses-Limit',     String(FREE_DAILY_LIMIT));
+    return next();
+
+  } else {
+    // ── Guest (not logged in) — track by session ────────────
+    if (req.session.guestDate !== today) {
+      req.session.guestDate  = today;
+      req.session.guestCount = 0;
+    }
+    const count     = req.session.guestCount || 0;
+    const remaining = GUEST_DAILY_LIMIT - count;
+
+    if (remaining <= 0) {
+      return res.status(429).json({
+        error:         'Daily limit reached',
+        limitReached:  true,
+        limit:         GUEST_DAILY_LIMIT,
+        remaining:     0,
+        requiresLogin: true,
+        plan:          'guest',
+      });
+    }
+
+    req.session.guestCount = count + 1;
+    res.setHeader('X-Plan',               'guest');
+    res.setHeader('X-Analyses-Used',      String(count + 1));
+    res.setHeader('X-Analyses-Remaining', String(remaining - 1));
+    res.setHeader('X-Analyses-Limit',     String(GUEST_DAILY_LIMIT));
+    return next();
+  }
+}
+
+app.get('/api/quote/:ticker', checkAnalysisLimit, async (req, res) => {
   try {
     const ticker = req.params.ticker.toUpperCase().replace(/[^A-Z0-9.\-^]/g, '');
     if (!ticker) return res.status(400).json({ error: 'No ticker' });
@@ -1010,7 +1097,30 @@ app.get('/api/metrics/:ticker', async (req, res) => {
 // ============================================================
 //  SEC EDGAR filings proxy
 // ============================================================
-app.get('/api/sec/:ticker', async (req, res) => {
+app.get('/api/me/limit', async (req, res) => {
+  const today = new Date().toISOString().slice(0, 10);
+  if (!req.session.userId) {
+    const guestCount = req.session.guestDate === today ? (req.session.guestCount || 0) : 0;
+    return res.json({ plan: 'guest', used: guestCount, limit: GUEST_DAILY_LIMIT, remaining: GUEST_DAILY_LIMIT - guestCount });
+  }
+  try {
+    const r = await db.execute({
+      sql: 'SELECT plan, trial_ends_at, analysis_date, analysis_count FROM users WHERE id = ?',
+      args: [req.session.userId],
+    });
+    const row = r.rows[0];
+    if (!row) return res.json({ plan: 'free', used: 0, limit: FREE_DAILY_LIMIT, remaining: FREE_DAILY_LIMIT });
+    const plan = getEffectivePlan(row);
+    if (plan === 'pro' || plan === 'trial') return res.json({ plan, used: 0, limit: null, remaining: null });
+    const used = row.analysis_date === today ? (Number(row.analysis_count) || 0) : 0;
+    res.json({ plan, used, limit: FREE_DAILY_LIMIT, remaining: FREE_DAILY_LIMIT - used });
+  } catch (e) {
+    res.json({ plan: 'free', used: 0, limit: FREE_DAILY_LIMIT, remaining: FREE_DAILY_LIMIT });
+  }
+});
+
+app.get('/api/sec/:ticker'
+, async (req, res) => {
   const ticker = req.params.ticker.toUpperCase().replace(/[^A-Z0-9.]/g,'');
   if (!ticker) return res.status(400).json({ error: 'No ticker' });
   const UA = 'ImpliedLens/1.0 brettpeterson6216@gmail.com';

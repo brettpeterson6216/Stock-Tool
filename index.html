@@ -1478,6 +1478,7 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
             </div>
             <!-- Featured stocks grid (shown before search) -->
             <div id="featured-grid"></div>
+            <div id="limit-counter" style="display:none;align-items:center;gap:8px;margin-bottom:.75rem;flex-wrap:wrap;"></div>
             <div class="loading-bar" id="analyze-loading" style="display:none;"><div class="spinner"></div> Fetching live market data…</div>
             <div class="error-msg" id="analyze-error"></div>
 
@@ -3111,12 +3112,50 @@ function toast(msg, type='') {
    FETCH
 ══════════════════════════════════════════════════════ */
 async function yahooFetch(ticker, range='1y') {
-  // Use our own server proxy to avoid CORS restrictions
   const r = await fetch(`/api/quote/${encodeURIComponent(ticker)}?range=${range}`, { credentials: 'same-origin' });
+
+  // Handle rate limit / daily cap
+  if (r.status === 429) {
+    const d = await r.json().catch(()=>({}));
+    updateLimitUI(d.remaining ?? 0, d.limit ?? 5, d.plan || 'free');
+    if (d.requiresLogin) {
+      const e = new Error('SIGNUP_REQUIRED');
+      e.limitData = d; throw e;
+    }
+    const e = new Error('LIMIT_REACHED');
+    e.limitData = d; throw e;
+  }
+
   if (!r.ok) throw new Error('fetch failed: ' + r.status);
   const d = await r.json();
   if (!d.chart?.result?.[0]) throw new Error('No data returned for ' + ticker);
+
+  // Update limit counter from response headers
+  const remaining = r.headers.get('X-Analyses-Remaining');
+  const limit     = r.headers.get('X-Analyses-Limit');
+  const plan      = r.headers.get('X-Plan') || S.userPlan;
+  if (remaining !== null) updateLimitUI(Number(remaining), Number(limit||5), plan);
+
   return d.chart.result[0];
+}
+
+// Update the analyses-remaining badge in the UI
+function updateLimitUI(remaining, limit, plan) {
+  const wrap = document.getElementById('limit-counter');
+  if (!wrap) return;
+  if (plan === 'pro' || plan === 'trial') { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'flex';
+  const used = limit - remaining;
+  const pct  = Math.min(100, (used / limit) * 100);
+  const color = remaining <= 1 ? '#f87171' : remaining <= 2 ? '#C89B3C' : '#4ade80';
+  wrap.innerHTML = `
+    <span style="font-size:.68rem;color:var(--text5);">Free analyses today:</span>
+    <span style="font-size:.68rem;font-weight:700;color:${color};">${used}/${limit}</span>
+    <div style="height:4px;width:60px;background:var(--t-chart-border);border-radius:2px;overflow:hidden;">
+      <div style="height:100%;width:${pct}%;background:${color};border-radius:2px;transition:width .3s;"></div>
+    </div>
+    ${remaining === 0 ? `<button onclick="showUpgradeModal()" style="font-size:.63rem;padding:.15rem .45rem;background:var(--gold);color:var(--ink);border:none;border-radius:4px;cursor:pointer;font-weight:700;">Upgrade</button>` : ''}
+  `;
 }
 
 function fmtBig(n) { if(!n) return '—'; if(n>=1e12) return `$${(n/1e12).toFixed(2)}T`; if(n>=1e9) return `$${(n/1e9).toFixed(2)}B`; if(n>=1e6) return `$${(n/1e6).toFixed(2)}M`; return `$${n.toLocaleString()}`; }
@@ -3304,9 +3343,18 @@ async function fetchAndRender() {
     renderStock(result,ticker);
     toast(`${ticker} loaded ✓`,'green');
   } catch(e) {
-    const err=document.getElementById('analyze-error');
-    err.textContent=`Could not load "${ticker}": ${e.message}`;
-    err.style.display='block';
+    if (e.message === 'LIMIT_REACHED') {
+      showUpgradeModal();
+      const err=document.getElementById('analyze-error');
+      err.innerHTML=`<span>You've used all <strong>${e.limitData?.limit||5} free analyses</strong> for today. <a href="#" onclick="showUpgradeModal();return false;" style="color:var(--gold);font-weight:600;">Upgrade to Pro</a> for unlimited access.</span>`;
+      err.style.display='block';
+    } else if (e.message === 'SIGNUP_REQUIRED') {
+      window.location.href = '/signup';
+    } else {
+      const err=document.getElementById('analyze-error');
+      err.textContent=`Could not load "${ticker}": ${e.message}`;
+      err.style.display='block';
+    }
   } finally {
     btn.disabled=false; btn.textContent='Analyze →';
     document.getElementById('analyze-loading').style.display='none';
@@ -4754,6 +4802,16 @@ async function loadSecFilings(ticker) {
 
 // Auto-load featured grid on page open
 loadFeaturedGrid();
+
+// Prime the analysis limit counter for free/guest users
+(async () => {
+  try {
+    const r = await fetch('/api/me/limit', { credentials: 'same-origin' });
+    if (!r.ok) return;
+    const d = await r.json();
+    if (d.limit !== null) updateLimitUI(d.remaining, d.limit, d.plan);
+  } catch(_) {}
+})();
 </script>
 </body>
 </html>
