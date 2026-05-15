@@ -28,6 +28,20 @@ const STRIPE_SECRET_KEY    = process.env.STRIPE_SECRET_KEY    || "";
 const STRIPE_WEBHOOK_SECRET= process.env.STRIPE_WEBHOOK_SECRET|| "";
 const STRIPE_PRICE_MONTHLY = process.env.STRIPE_PRICE_MONTHLY || "";
 const STRIPE_PRICE_ANNUAL  = process.env.STRIPE_PRICE_ANNUAL  || "";
+// ── Email helper ────────────────────────────────────────────────────
+async function sendEmail({ to, subject, html }) {
+  if (!resend) {
+    console.log('[email] RESEND_API_KEY not set — would send to', to, '|', subject);
+    return;
+  }
+  try {
+    await resend.emails.send({ from: FROM_EMAIL, to, subject, html });
+    console.log('[email] Sent to', to);
+  } catch(e) {
+    console.error('[email] Send failed:', e.message);
+  }
+}
+
 const APP_URL              = process.env.APP_URL || "http://localhost:" + (process.env.PORT || 3000);
 const stripe               = STRIPE_SECRET_KEY ? Stripe(STRIPE_SECRET_KEY) : null;
 
@@ -634,6 +648,10 @@ app.get("/api/screener", async (req, res) => {
 //  Password reset
 // ============================================================
 const crypto = require('crypto');
+const { Resend } = require('resend');
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+const FROM_EMAIL = process.env.FROM_EMAIL || 'ImpliedLens <onboarding@resend.dev>';
+
 
 api.post('/auth/forgot-password', async (req, res) => {
   const email = String(req.body.email || '').trim().toLowerCase();
@@ -650,8 +668,20 @@ api.post('/auth/forgot-password', async (req, res) => {
       args: [token, result.rows[0].id, expires],
     });
     const resetUrl = APP_URL + '/reset-password?token=' + token;
-    // TODO: Send email with resetUrl. For now, log it so you can find it in Render logs.
-    console.log('PASSWORD RESET LINK for', email, ':', resetUrl);
+    await sendEmail({
+      to: email,
+      subject: 'Reset your ImpliedLens password',
+      html: `
+        <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#08090D;color:#e0e1e8;border-radius:12px;">
+          <h2 style="font-size:1.4rem;margin-bottom:8px;color:#fff;">Reset your <span style="color:#C8882A;">ImpliedLens</span> password</h2>
+          <p style="color:rgba(220,225,232,.65);font-size:.9rem;margin-bottom:24px;">Click the button below to set a new password. This link expires in 1 hour.</p>
+          <a href="${resetUrl}" style="display:inline-block;padding:12px 28px;background:#C8882A;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;font-size:.95rem;">Reset Password →</a>
+          <p style="margin-top:24px;font-size:.75rem;color:rgba(220,225,232,.35);">If you didn't request this, you can safely ignore this email.</p>
+          <hr style="border:none;border-top:1px solid rgba(255,255,255,.08);margin:24px 0;">
+          <p style="font-size:.72rem;color:rgba(220,225,232,.25);">ImpliedLens · impliedlens.com</p>
+        </div>`
+    });
+    console.log('[reset] Link generated for', email);
     return res.json({ ok: true });
   } catch (err) {
     console.error('forgot-password error:', err);
