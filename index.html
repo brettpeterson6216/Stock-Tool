@@ -967,6 +967,7 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
 </style>
 </head>
 <body>
+<div id="auth-veil"></div>
 
 <!-- ══════════ NAV ══════════ -->
 <nav id="main-nav" data-view="home">
@@ -1064,6 +1065,13 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
   });
 
   // ---- Auth-aware nav (talks to /api/auth/me + /api/auth/logout) ----
+
+  function _dismissVeil() {
+    var v = document.getElementById('auth-veil');
+    if (!v) return;
+    v.classList.add('done');
+    setTimeout(function(){ if(v.parentNode) v.parentNode.removeChild(v); }, 220);
+  }
   (async () => {
     const $login     = document.getElementById('nav-login');
     const $signup    = document.getElementById('nav-signup');
@@ -1165,7 +1173,7 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
           history.replaceState(null, '', '/');
         }
       }
-    } catch (_) { /* server not running */ }
+    } catch (_) { /* server not running */ } finally { _dismissVeil(); }
 
     // Logout
     if ($acctLogout) {
@@ -2844,6 +2852,15 @@ html[data-theme="dark"] .input-light::placeholder{color:rgba(220,225,232,.28)!im
   .sb-item { justify-content:center; padding:8px 4px; }
   .sb-home-btn span { display:none; }
 }
+
+/* Auth init veil — prevents home flash for logged-in users */
+#auth-veil {
+  position:fixed; inset:0; z-index:9998;
+  background:var(--cream);
+  transition:opacity .18s ease;
+  pointer-events:none;
+}
+#auth-veil.done { opacity:0; }
 </style>
 <script>
 /* ══════════════════════════════════════════════════════
