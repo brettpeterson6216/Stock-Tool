@@ -1047,7 +1047,10 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
   function navGoTo(id) {
     if (id === 'home') { showView('home'); updateNavToolLink(true); return; }
     showView('tool');
-    setActiveNavTab(null);
+    // highlight the Tool nav tab whenever we're in the tool view
+    document.querySelectorAll('.nav-tab').forEach(a => a.classList.remove('active-tab'));
+    const toolTab = document.getElementById('nav-tool-link');
+    if (toolTab) toolTab.classList.add('active-tab');
     window.scrollTo(0,0);
     openSection(id, true);
   }
@@ -1372,7 +1375,9 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
     </div>
   </section>
 
-id="view-tool" style="display:none;">
+</div><!-- /view-home -->
+
+<div id="view-tool" style="display:none;">
   <div class="app-shell">
     <!-- ── Left sidebar ── -->
     <div class="app-sidebar">
@@ -2829,6 +2834,31 @@ html[data-theme="dark"] .modal-close { color: var(--text4); }
 html[data-theme="dark"] .modal ul li { color: var(--text3); }
 html[data-theme="dark"] .modal p[style*="ink4"] { color: var(--text3) !important; }
 html[data-theme="dark"] .plan-opt-sub { color: var(--text4); }
+
+/* ── Dark mode: account settings modal ── */
+html[data-theme="dark"] #acct-modal-bg .modal { background: var(--panel); }
+/* User info card */
+html[data-theme="dark"] #acct-modal-bg div[style*="cream2"] { background: var(--card) !important; border-color: var(--border2) !important; }
+/* Label row titles (ink4) */
+html[data-theme="dark"] #acct-modal-bg div[style*="ink4"] { color: var(--text4) !important; }
+/* Value text rows (ink / ink2) */
+html[data-theme="dark"] #am-username { color: var(--text) !important; }
+html[data-theme="dark"] #am-email    { color: var(--text2) !important; }
+html[data-theme="dark"] #am-since    { color: var(--text2) !important; }
+html[data-theme="dark"] #am-plan     { color: var(--text) !important; }
+html[data-theme="dark"] #am-trial-info { color: var(--text3) !important; }
+/* Divider line */
+html[data-theme="dark"] #acct-modal-bg div[style*="border-top:1px solid var(--border2)"] { border-top-color: var(--border2) !important; }
+/* "Change Password" section heading */
+html[data-theme="dark"] #acct-modal-bg div[style*="font-size:.78rem;font-weight:600"] { color: var(--text) !important; }
+/* Manage Subscription button */
+html[data-theme="dark"] #am-sub-btn { background: var(--card) !important; color: var(--text) !important; border: 1px solid var(--border2) !important; }
+html[data-theme="dark"] #am-sub-btn:hover { background: var(--border2) !important; }
+/* Update Password button */
+html[data-theme="dark"] #acct-modal-bg button[onclick*="submitPasswordChange"] { background: var(--gold) !important; color: #fff !important; border: none !important; }
+html[data-theme="dark"] #acct-modal-bg button[onclick*="submitPasswordChange"]:hover { background: var(--gold-d) !important; }
+/* Password message text */
+html[data-theme="dark"] #am-pw-msg { color: var(--text3) !important; }
 
 /* ── Home tool cards ── */
 .home-tool-card {
@@ -4990,69 +5020,4 @@ function renderSecFilings() {
     return `<a href="${url}" target="_blank" rel="noopener" class="sec-filing-row">
       <span class="sec-filing-badge ${badge}">${f.form}</span>
       <span class="sec-filing-date">${f.date}</span>
-      <span class="sec-filing-desc">${desc}</span>
-      <span class="sec-filing-arrow">↗</span>
-    </a>`;
-  }).join('');
-}
-
-async function loadSecFilings(ticker) {
-  const nostock  = document.getElementById('sec-nostock');
-  const loading  = document.getElementById('sec-loading');
-  const errEl    = document.getElementById('sec-error');
-  const cont     = document.getElementById('sec-content');
-  const entityLbl= document.getElementById('sec-entity-label');
-
-  if (!ticker) {
-    if(nostock) { nostock.style.display='block'; }
-    if(cont)    { cont.style.display='none'; }
-    return;
-  }
-  if(nostock) nostock.style.display='none';
-  if(loading) loading.style.display='block';
-  if(errEl)   errEl.style.display='none';
-  if(cont)    cont.style.display='none';
-
-  try {
-    const r = await fetch('/api/sec/' + encodeURIComponent(ticker), { credentials:'same-origin' });
-    const d = await r.json();
-    if(loading) loading.style.display='none';
-    if (!r.ok || !d.filings) throw new Error(d.error || 'No filings found');
-
-    if(entityLbl) entityLbl.textContent = d.entity + (d.cik ? '  ·  CIK ' + d.cik : '');
-
-    // Store filings globally for filter
-    _secFilings = d.filings;
-    _secFilter  = 'ALL';
-    renderSecFilings();
-
-    if(cont) cont.style.display='block';
-  } catch(e) {
-    if(loading) loading.style.display='none';
-    if(errEl)   { errEl.textContent = 'Could not load SEC filings: ' + e.message; errEl.style.display='block'; }
-  }
-}
-
-
-
-// Auto-load featured grid on page open
-loadFeaturedGrid();
-
-// Prime the analysis limit counter for free/guest users
-(async () => {
-  try {
-    const r = await fetch('/api/me/limit', { credentials: 'same-origin' });
-    if (!r.ok) return;
-    const d = await r.json();
-    if (d.limit !== null) updateLimitUI(d.remaining, d.limit, d.plan);
-  } catch(_) {}
-})();
-
-// Enter key → search
-(function(){
-  var ti = document.getElementById('main-ticker');
-  if (ti) ti.addEventListener('keydown', function(e){ if(e.key==='Enter'){e.preventDefault();if(typeof fetchAndRender==='function')fetchAndRender();} });
-})();
-</script>
-</body>
-</html>
+ 
