@@ -5018,4 +5018,78 @@ function renderSecFilings() {
   list.innerHTML = rows.map(f => {
     const badge = badgeClass(f.form);
     const desc  = f.description || f.form;
-    c
+    const url   = f.viewerUrl && f.primaryDoc ? f.viewerUrl : f.indexUrl;
+    return `<a href="${url}" target="_blank" rel="noopener" class="sec-filing-row">
+      <span class="sec-filing-badge ${badge}">${f.form}</span>
+      <span class="sec-filing-date">${f.date}</span>
+      <span class="sec-filing-desc">${desc}</span>
+      <span class="sec-filing-arrow">&#x2197;</span>
+    </a>`;
+  }).join('');
+}
+
+async function loadSecFilings(ticker) {
+  const nostock   = document.getElementById('sec-nostock');
+  const loading   = document.getElementById('sec-loading');
+  const errEl     = document.getElementById('sec-error');
+  const cont      = document.getElementById('sec-content');
+  const entityLbl = document.getElementById('sec-entity-label');
+
+  if (!ticker) {
+    if (nostock) nostock.style.display = 'block';
+    if (cont)    cont.style.display    = 'none';
+    return;
+  }
+  if (nostock) nostock.style.display = 'none';
+  if (loading) loading.style.display = 'block';
+  if (errEl)   errEl.style.display   = 'none';
+  if (cont)    cont.style.display    = 'none';
+
+  try {
+    const r = await fetch('/api/sec/' + encodeURIComponent(ticker), { credentials: 'same-origin' });
+    const d = await r.json();
+    if (loading) loading.style.display = 'none';
+    if (!r.ok || !d.filings) throw new Error(d.error || 'No filings found');
+    if (entityLbl) entityLbl.textContent = d.entity + (d.cik ? '  \u00b7  CIK ' + d.cik : '');
+    _secFilings = d.filings;
+    _secFilter  = 'ALL';
+    renderSecFilings();
+    if (cont) cont.style.display = 'block';
+  } catch(e) {
+    if (loading) loading.style.display = 'none';
+    if (errEl)   { errEl.textContent = 'Could not load SEC filings: ' + e.message; errEl.style.display = 'block'; }
+  }
+}
+
+/* ── Boot: featured grid + enter key + clear-to-restore ── */
+(function() {
+  // Load live ticker cards
+  loadFeaturedGrid();
+
+  var ti = document.getElementById('main-ticker');
+  if (ti) {
+    // Enter key triggers search
+    ti.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') { e.preventDefault(); if (typeof fetchAndRender === 'function') fetchAndRender(); }
+    });
+    // Restore grid when input is cleared
+    ti.addEventListener('input', function() {
+      var fg = document.getElementById('featured-grid');
+      if (!fg) return;
+      fg.style.display = ti.value.trim() === '' ? 'grid' : fg.style.display;
+    });
+  }
+})();
+
+/* ── Prime analysis limit counter for free/guest users ── */
+(async () => {
+  try {
+    const r = await fetch('/api/me/limit', { credentials: 'same-origin' });
+    if (!r.ok) return;
+    const d = await r.json();
+    if (d.limit !== null) updateLimitUI(d.remaining, d.limit, d.plan);
+  } catch(_) {}
+})();
+</script>
+</body>
+</html>
