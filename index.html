@@ -726,6 +726,7 @@ footer { background:#080808; padding:3rem 2rem; }
 .modal .plan-opt-name { font-size:.78rem; font-weight:600; color:var(--gold-d); text-transform:uppercase; letter-spacing:.06em; margin-bottom:4px; }
 .modal .plan-opt-price { font-family:var(--serif); font-size:1.5rem; }
 .modal .plan-opt-per { font-size:.75rem; color:var(--ink4); }
+.plan-opt-sub { font-size:.72rem; color:var(--ink5); margin-top:4px; }
 .btn-modal-cta { width:100%; background:var(--ink); color:var(--cream); border:none; padding:1rem; border-radius:var(--r); font-size:.9rem; font-weight:500; transition:background .18s; }
 .btn-modal-cta:hover { background:var(--ink2); }
 .modal-note { text-align:center; font-size:.72rem; color:var(--ink5); margin-top:.875rem; }
@@ -2147,12 +2148,12 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
       <div id="plan-monthly" class="plan-opt sel" onclick="selectUpgradePlan('monthly')" style="cursor:pointer;">
         <div class="plan-opt-name">Monthly</div>
         <div class="plan-opt-price">$7.99<span class="plan-opt-per">/mo</span></div>
-        <div style="font-size:.72rem;color:var(--ink5);margin-top:4px;">Billed monthly</div>
+        <div class="plan-opt-sub">Billed monthly</div>
       </div>
       <div id="plan-annual" class="plan-opt" onclick="selectUpgradePlan('annual')" style="cursor:pointer;">
         <div class="plan-opt-name">Annual <span style="font-size:.65rem;background:var(--gold);color:#fff;border-radius:3px;padding:1px 5px;">SAVE 37%</span></div>
         <div class="plan-opt-price">$5.00<span class="plan-opt-per">/mo</span></div>
-        <div style="font-size:.72rem;color:var(--ink5);margin-top:4px;">$60 billed yearly</div>
+        <div class="plan-opt-sub">$60 billed yearly</div>
       </div>
     </div>
 
@@ -2861,6 +2862,39 @@ html[data-theme="dark"] .input-light::placeholder{color:rgba(220,225,232,.28)!im
   pointer-events:none;
 }
 #auth-veil.done { opacity:0; }
+
+/* ── Dark mode: upgrade modal ── */
+html[data-theme="dark"] .modal {
+  background: var(--panel);
+  color: var(--text);
+}
+html[data-theme="dark"] .modal h3,
+html[data-theme="dark"] .modal p {
+  color: var(--text2);
+}
+html[data-theme="dark"] .modal p { color: var(--text3); }
+html[data-theme="dark"] .plan-opt {
+  background: var(--card);
+  border-color: var(--border2);
+  color: var(--text);
+}
+html[data-theme="dark"] .plan-opt.sel {
+  background: rgba(200,136,42,.13);
+  border-color: var(--gold);
+}
+html[data-theme="dark"] .plan-opt-name { color: var(--gold); }
+html[data-theme="dark"] .plan-opt-price { color: var(--text); }
+html[data-theme="dark"] .plan-opt-per  { color: var(--text4); }
+html[data-theme="dark"] .modal .plan-opt div[style*="ink5"] { color: var(--text4) !important; }
+html[data-theme="dark"] .btn-modal-cta {
+  background: var(--gold);
+  color: #fff;
+}
+html[data-theme="dark"] .btn-modal-cta:hover { background: var(--gold-d); }
+html[data-theme="dark"] .modal-close { color: var(--text4); }
+html[data-theme="dark"] .modal ul li { color: var(--text3); }
+html[data-theme="dark"] .modal p[style*="ink4"] { color: var(--text3) !important; }
+html[data-theme="dark"] .plan-opt-sub { color: var(--text4); }
 </style>
 <script>
 /* ══════════════════════════════════════════════════════
