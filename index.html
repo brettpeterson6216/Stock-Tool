@@ -976,7 +976,11 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
   </a>
   <div class="nav-links" id="nav-links">
     <a href='#' id='nav-home' class="nav-tab active-tab" onclick="navGoTo('home');return false;">Home</a>
-    <a href='#' class="nav-tab" id="nav-tool-link" data-tool="analyze" onclick="navGoTo('analyze');return false;">Open Tool</a>
+    <a href='#' class="nav-tab" id="nav-tool-link" data-tool="analyze" onclick="navGoTo('analyze');return false;">Tool</a>
+    <a href='#' class="nav-tab" id="nav-education-link" onclick="navGoTo('education');return false;">Education</a>
+    <a href='#' class="nav-tab" id="nav-saved-link" onclick="navGoTo('reports');return false;">Saved</a>
+    <a href='/blog' class="nav-tab" id="nav-blog-link">Blog</a>
+    <a href='/about' class="nav-tab" id="nav-about-link">About</a>
   </div>
   <div id="nav-ticker-bar">
     <span class="ntb-sym" id="ntb-sym"></span>
@@ -1304,30 +1308,6 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
   </div>
 
 
-  <!-- TESTIMONIALS -->
-  <section id="testimonials" style="background:var(--card);padding:4rem 0;">
-    <div class="container">
-      <span class="sec-label">What users say</span>
-      <h2 class="sec-h2">Trusted by self-directed investors.</h2>
-      <div class="testimonials-grid">
-        <div class="tcard">
-          <div class="tcard-stars">★★★★★</div>
-          <p class="tcard-quote">"Finally a tool that shows me the same DCF models hedge funds use — without the $25k Bloomberg subscription. I ran NVDA through it before earnings and nailed the move."</p>
-          <div class="tcard-author"><span class="tcard-name">Marcus T.</span><span class="tcard-role">Retail investor, 8 years experience</span></div>
-        </div>
-        <div class="tcard">
-          <div class="tcard-stars">★★★★★</div>
-          <p class="tcard-quote">"The side-by-side comparison tool is incredible. I compared MSFT vs GOOGL vs META in under 5 minutes. This used to take me a full evening in Excel."</p>
-          <div class="tcard-author"><span class="tcard-name">Sarah K.</span><span class="tcard-role">Options trader &amp; finance grad student</span></div>
-        </div>
-        <div class="tcard">
-          <div class="tcard-stars">★★★★★</div>
-          <p class="tcard-quote">"The risk &amp; volatility dashboard is something I didn't know I needed. Sharpe ratio, max drawdown, VaR — all calculated automatically. Super clean interface."</p>
-          <div class="tcard-author"><span class="tcard-name">David R.</span><span class="tcard-role">DIY investor, tech professional</span></div>
-        </div>
-      </div>
-    </div>
-  </section>
 
 
   <section id="pricing" style="">
@@ -2774,7 +2754,7 @@ html[data-theme="dark"] .input-light::placeholder{color:rgba(220,225,232,.28)!im
 .app-shell { display:flex; flex:1; overflow:hidden; min-height:0; }
 
 /* Sidebar */
-.app-sidebar { width:100px; background:var(--t-acc-header-bg); border-right:1px solid var(--t-acc-border); display:flex; flex-direction:column; flex-shrink:0; overflow-y:auto; overflow-x:hidden; }
+.app-sidebar { width:150px; background:var(--t-acc-header-bg); border-right:1px solid var(--t-acc-border); display:flex; flex-direction:column; flex-shrink:0; overflow-y:auto; overflow-x:hidden; }
 .sb-home-btn { display:flex; align-items:center; gap:8px; padding:9px 12px 7px; border-bottom:1px solid var(--t-acc-border); cursor:pointer; color:var(--text5); font-size:11px; font-family:var(--sans); text-decoration:none; }
 .sb-home-btn:hover { color:var(--gold); background:rgba(200,136,42,.06); }
 .sb-home-btn i { font-size:15px; }
@@ -2786,7 +2766,7 @@ html[data-theme="dark"] .input-light::placeholder{color:rgba(220,225,232,.28)!im
 .sb-item-icon { font-size:15px; color:var(--text5); flex-shrink:0; transition:color .12s; }
 .sb-item.active .sb-item-icon { color:var(--gold); }
 .sb-item:hover .sb-item-icon { color:var(--text3); }
-.sb-item-label { font-size:11px; color:var(--text5); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:color .12s; }
+.sb-item-label { font-size:11px; color:var(--text5); white-space:nowrap; transition:color .12s; }
 .sb-item.active .sb-item-label { color:var(--gold); font-weight:500; }
 .sb-item:hover .sb-item-label { color:var(--text2); }
 .sb-sep { height:1px; background:var(--t-acc-border); margin:5px 10px; }
@@ -2802,7 +2782,7 @@ html[data-theme="dark"] .input-light::placeholder{color:rgba(220,225,232,.28)!im
 /* Section header */
 .app-section-hdr { height:34px; background:#0F1118; border-bottom:1px solid rgba(200,136,42,.25); display:flex; align-items:center; padding:0 12px; gap:8px; flex-shrink:0; }
 .ash-icon { font-size:15px; color:var(--gold); opacity:.7; }
-.ash-title { font-family:var(--serif); font-size:13px; color:var(--text3); font-style:italic; }
+.ash-title { font-family:var(--sans); font-size:12px; font-weight:500; color:var(--text3); letter-spacing:.01em; }
 .ash-sub { font-size:10px; color:var(--text5); }
 .ash-actions { margin-left:auto; display:flex; align-items:center; gap:4px; }
 .ash-btn { font-size:10px; padding:3px 8px; border-radius:4px; border:1px solid var(--t-acc-border); color:var(--text5); background:transparent; cursor:pointer; display:flex; align-items:center; gap:3px; font-family:var(--sans); white-space:nowrap; }
@@ -2856,7 +2836,6 @@ html[data-theme="dark"] .input-light::placeholder{color:rgba(220,225,232,.28)!im
 .app-section > .acc-body { display:block!important; padding:0!important; border-top:none!important; }
 /* Nav tool link visibility */
 #nav-tool-link { display:inline-flex; }
-nav[data-view="tool"] #nav-tool-link { display:none; }
 
 /* Responsive: collapse sidebar on narrow */
 @media(max-width:700px){
@@ -3014,8 +2993,7 @@ function updateStatsFooter() {
 }
 
 function updateNavToolLink(isHome) {
-  const tl = document.getElementById('nav-tool-link');
-  if (tl) tl.style.display = ''; // CSS nav[data-view] handles visibility
+  // All nav tabs always visible — no-op
   const bar = document.getElementById('nav-ticker-bar');
   if (bar && isHome) bar.classList.remove('visible');
 }
@@ -3558,7 +3536,7 @@ async function fetchAndRender() {
     const result=await yahooFetch(ticker,S.range);
     S.ticker=ticker; S.data=result; S.analystTarget=null;
     renderStock(result,ticker);
-    toast(`${ticker} loaded ✓`,'green');
+    toast(`${ticker} loaded ✓`,'green'); const _fg=document.getElementById('featured-grid'); if(_fg) _fg.style.display='none';
   } catch(e) {
     if (e.message === 'LIMIT_REACHED') {
       showUpgradeModal();
@@ -5032,6 +5010,12 @@ loadFeaturedGrid();
     const d = await r.json();
     if (d.limit !== null) updateLimitUI(d.remaining, d.limit, d.plan);
   } catch(_) {}
+})();
+
+// Enter key → search
+(function(){
+  var ti = document.getElementById('main-ticker');
+  if (ti) ti.addEventListener('keydown', function(e){ if(e.key==='Enter'){e.preventDefault();if(typeof fetchAndRender==='function')fetchAndRender();} });
 })();
 </script>
 </body>
