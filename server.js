@@ -444,39 +444,123 @@ app.get("/api/news/:ticker", async (req, res) => {
 //  Finnhub proxy -- screener (top 35 stocks)
 // ============================================================
 const SCREENER_TICKERS = [
-  "AAPL","MSFT","NVDA","GOOGL","AMZN","META","TSLA","BRK-B","LLY","JPM",
-  "V","UNH","XOM","MA","AVGO","JNJ","PG","HD","COST","MRK",
-  "ABBV","CVX","PEP","KO","WMT","BAC","CRM","TMO","ORCL","AMD",
-  "NFLX","ADBE","QCOM","TXN","INTC"
+  // Technology
+  "AAPL","MSFT","NVDA","GOOGL","AMZN","META","AVGO","AMD","QCOM","TXN",
+  "INTC","ORCL","CRM","ADBE","CSCO","IBM","AMAT","KLAC","LRCX","PANW",
+  "CRWD","SNOW","PLTR","NET","MDB","DDOG","ZS","NOW","INTU","FTNT",
+  // Consumer Discretionary
+  "TSLA","HD","MCD","NKE","LOW","BKNG","TGT","TJX","SBUX","CMG",
+  "AMZN","MAR","HLT","F","GM","ABNB","EBAY","ETSY","LULU","DG",
+  // Consumer Staples
+  "WMT","PG","KO","PEP","COST","PM","MO","CL","MDLZ","GIS","KHC","HSY",
+  // Healthcare
+  "LLY","UNH","JNJ","MRK","ABBV","TMO","ABT","BMY","PFE","AMGN",
+  "GILD","ISRG","VRTX","REGN","CVS","CI","MDT","BSX","DHR","HCA",
+  // Financials
+  "JPM","BAC","WFC","GS","MS","V","MA","BLK","AXP","C",
+  "SCHW","USB","PNC","COF","ICE","CME","CB","MET","PRU","AFL",
+  // Energy
+  "XOM","CVX","COP","EOG","SLB","PSX","VLO","MPC","OXY","KMI",
+  // Industrials
+  "GE","CAT","HON","UPS","FDX","RTX","LMT","NOC","DE","MMM",
+  "EMR","ETN","ITW","GD","TDG","ODFL","URI","WAB","CARR",
+  // Materials
+  "LIN","APD","SHW","NEM","FCX","NUE","VMC","MLM","ALB","DOW",
+  // Real Estate
+  "PLD","AMT","CCI","EQIX","SPG","O","PSA","EXR","WELL","AVB",
+  // Utilities
+  "NEE","SO","DUK","D","EXC","SRE","AEP","XEL","WEC",
+  // ETFs
+  "SPY","QQQ","IWM","DIA","XLF","XLK","XLV","XLE","GLD","TLT"
 ];
 
+// Sector map for display
+const SCREENER_SECTOR = {
+  AAPL:"Tech",MSFT:"Tech",NVDA:"Tech",GOOGL:"Tech",AMZN:"Cons.Disc",META:"Tech",
+  AVGO:"Tech",AMD:"Tech",QCOM:"Tech",TXN:"Tech",INTC:"Tech",ORCL:"Tech",
+  CRM:"Tech",ADBE:"Tech",CSCO:"Tech",IBM:"Tech",AMAT:"Tech",KLAC:"Tech",
+  LRCX:"Tech",PANW:"Tech",CRWD:"Tech",SNOW:"Tech",PLTR:"Tech",NET:"Tech",
+  MDB:"Tech",DDOG:"Tech",ZS:"Tech",NOW:"Tech",INTU:"Tech",FTNT:"Tech",
+  TSLA:"Cons.Disc",HD:"Cons.Disc",MCD:"Cons.Disc",NKE:"Cons.Disc",LOW:"Cons.Disc",
+  BKNG:"Cons.Disc",TGT:"Cons.Disc",TJX:"Cons.Disc",SBUX:"Cons.Disc",CMG:"Cons.Disc",
+  MAR:"Cons.Disc",HLT:"Cons.Disc",F:"Cons.Disc",GM:"Cons.Disc",ABNB:"Cons.Disc",
+  EBAY:"Cons.Disc",ETSY:"Cons.Disc",LULU:"Cons.Disc",DG:"Cons.Disc",
+  WMT:"Staples",PG:"Staples",KO:"Staples",PEP:"Staples",COST:"Staples",
+  PM:"Staples",MO:"Staples",CL:"Staples",MDLZ:"Staples",GIS:"Staples",
+  KHC:"Staples",HSY:"Staples",
+  LLY:"Health",UNH:"Health",JNJ:"Health",MRK:"Health",ABBV:"Health",
+  TMO:"Health",ABT:"Health",BMY:"Health",PFE:"Health",AMGN:"Health",
+  GILD:"Health",ISRG:"Health",VRTX:"Health",REGN:"Health",CVS:"Health",
+  CI:"Health",MDT:"Health",BSX:"Health",DHR:"Health",HCA:"Health",
+  JPM:"Finance",BAC:"Finance",WFC:"Finance",GS:"Finance",MS:"Finance",
+  V:"Finance",MA:"Finance",BLK:"Finance",AXP:"Finance",C:"Finance",
+  SCHW:"Finance",USB:"Finance",PNC:"Finance",COF:"Finance",ICE:"Finance",
+  CME:"Finance",CB:"Finance",MET:"Finance",PRU:"Finance",AFL:"Finance",
+  XOM:"Energy",CVX:"Energy",COP:"Energy",EOG:"Energy",SLB:"Energy",
+  PSX:"Energy",VLO:"Energy",MPC:"Energy",OXY:"Energy",KMI:"Energy",
+  GE:"Industrials",CAT:"Industrials",HON:"Industrials",UPS:"Industrials",
+  FDX:"Industrials",RTX:"Industrials",LMT:"Industrials",NOC:"Industrials",
+  DE:"Industrials",MMM:"Industrials",EMR:"Industrials",ETN:"Industrials",
+  ITW:"Industrials",GD:"Industrials",TDG:"Industrials",ODFL:"Industrials",
+  URI:"Industrials",WAB:"Industrials",CARR:"Industrials",
+  LIN:"Materials",APD:"Materials",SHW:"Materials",NEM:"Materials",
+  FCX:"Materials",NUE:"Materials",VMC:"Materials",MLM:"Materials",
+  ALB:"Materials",DOW:"Materials",
+  PLD:"Real Est.",AMT:"Real Est.",CCI:"Real Est.",EQIX:"Real Est.",
+  SPG:"Real Est.",O:"Real Est.",PSA:"Real Est.",EXR:"Real Est.",
+  WELL:"Real Est.",AVB:"Real Est.",
+  NEE:"Utilities",SO:"Utilities",DUK:"Utilities",D:"Utilities",
+  EXC:"Utilities",SRE:"Utilities",AEP:"Utilities",XEL:"Utilities",WEC:"Utilities",
+  SPY:"ETF",QQQ:"ETF",IWM:"ETF",DIA:"ETF",XLF:"ETF",
+  XLK:"ETF",XLV:"ETF",XLE:"ETF",GLD:"ETF",TLT:"ETF"
+};
+
+// Screener cache (20-min TTL)
+let _screenerCache = { data: null, ts: 0 };
+const SCREENER_TTL = 20 * 60 * 1000;
+
 app.get("/api/screener", async (req, res) => {
+  // Serve cached data if fresh
+  if (_screenerCache.data && Date.now() - _screenerCache.ts < SCREENER_TTL) {
+    return res.json(_screenerCache.data);
+  }
   try {
-    const results = await Promise.allSettled(
-      SCREENER_TICKERS.map(async (ticker) => {
-        const [qRes, mRes] = await Promise.all([
-          fetch("https://finnhub.io/api/v1/quote?symbol=" + ticker + "&token=" + FINNHUB_KEY),
-          fetch("https://finnhub.io/api/v1/stock/metric?symbol=" + ticker + "&metric=all&token=" + FINNHUB_KEY)
-        ]);
-        const [q, md] = await Promise.all([qRes.json(), mRes.json()]);
-        const m = md.metric || {};
-        return {
-          ticker,
-          price: q.c || 0,
-          change1D: q.pc > 0 ? ((q.c - q.pc) / q.pc * 100) : 0,
-          change1Y: m["52WeekPriceReturnDaily"] || null,
-          marketCap: m.marketCapitalization ? m.marketCapitalization * 1e6 : null,
-          pe: m.peBasicExclExtraTTM || m.peTTM || null,
-          pb: m.pbQuarterly || null,
-          dividendYield: m.dividendYieldIndicatedAnnual || 0,
-          beta: m.beta || null,
-        };
-      })
-    );
-    const stocks = results
-      .filter(r => r.status === "fulfilled" && r.value.price > 0)
-      .map(r => r.value);
-    res.json(stocks);
+    const CHUNK = 20;
+    const allStocks = [];
+    for (let i = 0; i < SCREENER_TICKERS.length; i += CHUNK) {
+      const chunk = SCREENER_TICKERS.slice(i, i + CHUNK);
+      const results = await Promise.allSettled(
+        chunk.map(async (ticker) => {
+          const [qRes, mRes] = await Promise.all([
+            fetch(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_KEY}`),
+            fetch(`https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FINNHUB_KEY}`)
+          ]);
+          const [q, md] = await Promise.all([qRes.json(), mRes.json()]);
+          const m = md.metric || {};
+          return {
+            ticker,
+            sector: SCREENER_SECTOR[ticker] || "Other",
+            price: q.c || 0,
+            change1D: q.pc > 0 ? ((q.c - q.pc) / q.pc * 100) : 0,
+            change1Y: m["52WeekPriceReturnDaily"] || null,
+            revenueGrowth: m["revenueGrowthTTMYoy"] || null,
+            marketCap: m.marketCapitalization ? m.marketCapitalization * 1e6 : null,
+            pe: m.peBasicExclExtraTTM || m.peTTM || null,
+            pb: m.pbQuarterly || null,
+            dividendYield: m.dividendYieldIndicatedAnnual || 0,
+            beta: m.beta || null,
+            rsi: m.rsi14 || null,
+            epsGrowth: m.epsGrowthTTMYoy || null,
+          };
+        })
+      );
+      allStocks.push(...results.filter(r => r.status === "fulfilled" && r.value.price > 0).map(r => r.value));
+      if (i + CHUNK < SCREENER_TICKERS.length) {
+        await new Promise(r => setTimeout(r, 400)); // respect Finnhub rate limit
+      }
+    }
+    _screenerCache = { data: allStocks, ts: Date.now() };
+    res.json(allStocks);
   } catch (e) {
     console.error("screener error:", e);
     res.status(500).json({ error: "Screener fetch failed" });

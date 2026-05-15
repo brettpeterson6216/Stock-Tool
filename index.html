@@ -1755,15 +1755,15 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
 
           <!-- INSTITUTIONAL & DARK POOL -->
           <div class="app-section" id="sec-institutional"><div class="acc-body" id="body-institutional" style="display:none;">
-              <div style="font-size:.82rem;color:var(--text4);margin-bottom:1.25rem;">Top institutional holders, dark pool trading volume, and short interest data from FINRA &amp; Finnhub.</div>
+              <div style="font-size:.82rem;color:var(--text4);margin-bottom:1.25rem;">Top institutional holders, OTC trading volume, and short interest data from FINRA &amp; Finnhub.</div>
               <div id="inst-loading" class="loading-bar" style="display:none;"><div class="spinner"></div> Loading institutional data…</div>
               <div id="inst-nostock" style="color:var(--text5);font-size:.85rem;">Search for a stock in the Analyze tab first.</div>
               <div id="inst-content" style="display:none;">
-                <!-- Dark Pool Summary Cards -->
-                <div class="analyst-box-title" style="margin-bottom:.65rem;">Dark Pool &amp; Short Interest</div>
+                <!-- OTC Flow & Short Interest Cards -->
+                <div class="analyst-box-title" style="margin-bottom:.65rem;">OTC Flow &amp; Short Interest</div>
                 <div id="dp-cards" class="dp-grid"></div>
                 <div style="margin-bottom:1.25rem;">
-                  <div class="analyst-box-title" style="margin-bottom:.5rem;">Weekly Dark Pool Volume (FINRA OTC)</div>
+                  <div class="analyst-box-title" style="margin-bottom:.5rem;">Weekly OTC Weekly Volume (FINRA)</div>
                   <div class="dp-chart-wrap"><canvas id="dp-chart"></canvas></div>
                 </div>
                 <!-- Institutional Holders Table -->
@@ -1879,6 +1879,8 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
                   <th onclick="sortScreener('price')">Price ↕</th>
                   <th onclick="sortScreener('change1D')">Day ↕</th>
                   <th onclick="sortScreener('change1Y')">1Y Chg ↕</th>
+                  <th onclick="sortScreener('revenueGrowth')">Rev Gr ↕</th>
+                  <th onclick="sortScreener('sector')">Sector ↕</th>
                   <th onclick="sortScreener('marketCap')">Mkt Cap ↕</th>
                   <th onclick="sortScreener('pe')">P/E ↕</th>
                   <th onclick="sortScreener('pb')">P/B ↕</th>
@@ -4346,17 +4348,22 @@ function sortScreener(col) {
 }
 function renderScreenerTable(stocks) {
   var tbody=document.getElementById('scr-body');
-  if(!stocks.length){tbody.innerHTML='<tr><td colspan="9" style="text-align:center;color:var(--text5);padding:2rem;">No stocks match the current filters.</td></tr>';return;}
+  if(!stocks.length){tbody.innerHTML='<tr><td colspan="11" style="text-align:center;color:var(--text5);padding:2rem;">No stocks match the current filters.</td></tr>';return;}
   tbody.innerHTML=stocks.map(function(s){
     var chg1D=s.change1D||0;
     var chg1Y=s.change1Y;
+    var revGr=s.revenueGrowth;
     var cap=s.marketCap?fmtBig(s.marketCap):'--';
+    var sector=s.sector||'--';
+    var revGrStr=revGr==null?'--':(revGr>0?'<span style="color:#4ade80">+'+revGr.toFixed(1)+'%</span>':'<span style="color:#f87171">'+revGr.toFixed(1)+'%</span>');
     var signal=chg1Y==null?'--':chg1Y>20?'<span class="tag tag-up">Bullish</span>':chg1Y<-15?'<span class="tag tag-dn">Bearish</span>':'<span class="tag tag-neu">Neutral</span>';
     return '<tr style="cursor:pointer" onclick="loadFromScreener(this)" data-ticker="'+s.ticker+'">'
       +'<td><span class="scr-ticker">'+s.ticker+'</span></td>'
+      +'<td style="font-size:.72rem;color:var(--text4)">'+sector+'</td>'
       +'<td>$'+(s.price||0).toFixed(2)+'</td>'
       +'<td style="color:'+(chg1D>=0?'#4ade80':'#f87171')+'">'+(chg1D>=0?'+':'')+chg1D.toFixed(2)+'%</td>'
       +'<td style="color:'+(chg1Y==null?'inherit':chg1Y>=0?'#4ade80':'#f87171')+'">'+(chg1Y!=null?(chg1Y>=0?'+':'')+chg1Y.toFixed(1)+'%':'--')+'</td>'
+      +'<td>'+revGrStr+'</td>'
       +'<td>'+cap+'</td>'
       +'<td>'+(s.pe!=null&&s.pe>0?s.pe.toFixed(1)+'x':'--')+'</td>'
       +'<td>'+(s.pb!=null&&s.pb>0?s.pb.toFixed(1)+'x':'--')+'</td>'
@@ -4764,7 +4771,7 @@ async function loadInstitutional(ticker) {
     const instData = await instRes.json();
     if(loading) loading.style.display='none';
 
-    // ── Dark Pool cards ──
+    // ── OTC Flow & Short Interest cards ──
     const dp  = Array.isArray(dpData.darkpool) ? dpData.darkpool : [];
     const si  = dpData.shortInterest || {};
     const siShares  = si.sharesShort           ? fmtBig(si.sharesShort).replace('$','')   : null;
@@ -4795,7 +4802,7 @@ async function loadInstitutional(ticker) {
       }
     }
 
-    // ── Dark Pool bar chart ──
+    // ── OTC Weekly Volume bar chart ──
     if(dpCanvas && dp.length) {
       destroyChart('dp-chart');
       const labels = dp.map(w=>w.weekStartDate||'').reverse();
