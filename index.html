@@ -1024,13 +1024,18 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
       if (tool) { tool.style.display = 'flex'; tool.style.flexDirection = 'column'; }
       history.replaceState(null, '', '/?view=tool');
       const nav = document.getElementById('main-nav'); if(nav) nav.setAttribute('data-view','tool');
+      // highlight Tool tab
+      document.querySelectorAll('.nav-tab').forEach(a => a.classList.remove('active-tab'));
+      const tt = document.getElementById('nav-tool-link'); if(tt) tt.classList.add('active-tab');
     } else {
       if (tool) tool.style.display = 'none';
       if (home) home.style.display = 'block';
       history.replaceState(null, '', '/');
       const nav2 = document.getElementById('main-nav'); if(nav2) nav2.setAttribute('data-view','home');
+      // highlight Home tab
+      document.querySelectorAll('.nav-tab').forEach(a => a.classList.remove('active-tab'));
+      const ht = document.getElementById('nav-home'); if(ht) ht.classList.add('active-tab');
     }
-    setActiveNavTab(view === 'tool' ? null : 'home');
   }
 
   function setActiveNavTab(toolId) {
@@ -1046,11 +1051,7 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
 
   function navGoTo(id) {
     if (id === 'home') { showView('home'); updateNavToolLink(true); return; }
-    showView('tool');
-    // highlight the Tool nav tab whenever we're in the tool view
-    document.querySelectorAll('.nav-tab').forEach(a => a.classList.remove('active-tab'));
-    const toolTab = document.getElementById('nav-tool-link');
-    if (toolTab) toolTab.classList.add('active-tab');
+    showView('tool'); // showView now handles tab highlighting
     window.scrollTo(0,0);
     openSection(id, true);
   }
@@ -1074,8 +1075,10 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
     var v = document.getElementById('auth-veil');
     if (!v) return;
     v.classList.add('done');
-    setTimeout(function(){ if(v.parentNode) v.parentNode.removeChild(v); }, 220);
+    setTimeout(function(){ if(v && v.parentNode) v.parentNode.removeChild(v); }, 220);
   }
+  // Safety: dismiss veil after 4 seconds no matter what (network timeout guard)
+  setTimeout(_dismissVeil, 4000);
   (async () => {
     const $login     = document.getElementById('nav-login');
     const $signup    = document.getElementById('nav-signup');
@@ -1134,8 +1137,7 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
 
         // Logged-in users go straight to tool view unless they explicitly came home
         if (!window.location.search.includes('view=home')) {
-          showView('tool');
-          setActiveNavTab(null);
+          showView('tool'); // showView handles tab highlighting
         }
 
         // Hide PRO feature badges for paying/trial members
@@ -5016,8 +5018,4 @@ function renderSecFilings() {
   list.innerHTML = rows.map(f => {
     const badge = badgeClass(f.form);
     const desc  = f.description || f.form;
-    const url   = f.viewerUrl && f.primaryDoc ? f.viewerUrl : f.indexUrl;
-    return `<a href="${url}" target="_blank" rel="noopener" class="sec-filing-row">
-      <span class="sec-filing-badge ${badge}">${f.form}</span>
-      <span class="sec-filing-date">${f.date}</span>
- 
+    c
