@@ -820,7 +820,7 @@ async function checkAnalysisLimit(req, res, next) {
     let row;
     try {
       const r = await db.execute({
-        sql:  'SELECT plan, trial_ends_at, analysis_date, analysis_count FROM users WHERE id = ?',
+        sql:  'SELECT email, plan, trial_ends_at, analysis_date, analysis_count FROM users WHERE id = ?',
         args: [req.session.userId],
       });
       row = r.rows[0];
@@ -1341,7 +1341,7 @@ app.get('/api/me/limit', async (req, res) => {
   }
   try {
     const r = await db.execute({
-      sql: 'SELECT plan, trial_ends_at, analysis_date, analysis_count FROM users WHERE id = ?',
+      sql: 'SELECT email, plan, trial_ends_at, analysis_date, analysis_count FROM users WHERE id = ?',
       args: [req.session.userId],
     });
     const row = r.rows[0];
@@ -1604,4 +1604,4 @@ app.get("/blog", (req, res) => {
     .soc-btn:hover{background:rgba(200,136,42,.1);border-color:#C8882A}
     .pill{display:inline-block;padding:.25rem .75rem;border-radius:100px;background:rgba(200,136,42,.12);color:#C8882A;font-size:.72rem;font-weight:600;letter-spacing:.06em;margin-bottom:1.5rem}
     .back{display:inline-block;margin-top:1.5rem;color:rgba(220,225,232,.4);font-size:.8rem;text-decoration:none}
-    .back:hover{color:#C
+    .back:
