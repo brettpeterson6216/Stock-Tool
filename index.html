@@ -2769,7 +2769,7 @@ html[data-theme="dark"] .input-light::placeholder{color:rgba(220,225,232,.28)!im
 .tcard-role{font-size:.7rem;color:var(--text5);}
 
 /* ════════════════════ APP SHELL ════════════════════ */
-#view-tool { display:flex; flex-direction:column; height:100vh; overflow:hidden; }
+#view-tool { display:flex; flex-direction:column; height:100vh; padding-top:56px; box-sizing:border-box; overflow:hidden; }
 #view-tool.shown { display:flex!important; }
 .app-shell { display:flex; flex:1; overflow:hidden; min-height:0; }
 
@@ -2786,7 +2786,7 @@ html[data-theme="dark"] .input-light::placeholder{color:rgba(220,225,232,.28)!im
 .sb-item-icon { font-size:15px; color:var(--text5); flex-shrink:0; transition:color .12s; }
 .sb-item.active .sb-item-icon { color:var(--gold); }
 .sb-item:hover .sb-item-icon { color:var(--text3); }
-.sb-item-label { font-size:11px; color:var(--text5); white-space:nowrap; overflow:hidden; transition:color .12s; }
+.sb-item-label { font-size:11px; color:var(--text5); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:color .12s; }
 .sb-item.active .sb-item-label { color:var(--gold); font-weight:500; }
 .sb-item:hover .sb-item-label { color:var(--text2); }
 .sb-sep { height:1px; background:var(--t-acc-border); margin:5px 10px; }
