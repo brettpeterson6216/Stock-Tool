@@ -86,7 +86,13 @@ async function initDb() {
 }
 
 // ---- Plan helper ----
+// Emails granted free Pro access (comma-separated in GIFTED_EMAILS env var)
+const GIFTED_EMAILS = new Set(
+  (process.env.GIFTED_EMAILS || "").split(",").map(e => e.trim().toLowerCase()).filter(Boolean)
+);
+
 function getEffectivePlan(user) {
+  if (GIFTED_EMAILS.has((user.email || "").toLowerCase())) return "pro";
   if (user.plan === "pro") return "pro";
   if (user.plan === "trial" && user.trial_ends_at && new Date(user.trial_ends_at) > new Date()) return "trial";
   return "free";
@@ -283,6 +289,34 @@ api.get("/auth/me", async (req, res) => {
     return res.json({ user });
   } catch (err) {
     return res.json({ user: null });
+  }
+});
+
+
+// ── Admin: grant / revoke pro without Stripe ──────────────────────────
+api.post("/admin/grant-pro", async (req, res) => {
+  const secret = req.headers["x-admin-secret"] || req.body?.secret;
+  if (!secret || secret !== process.env.ADMIN_SECRET) {
+    return res.status(403).json({ error: "Forbidden" });
+  }
+  const { email, revoke } = req.body || {};
+  if (!email) return res.status(400).json({ error: "email required" });
+  try {
+    if (revoke) {
+      await db.execute({
+        sql: "UPDATE users SET plan = 'free', trial_ends_at = NULL WHERE email = ?",
+        args: [email.toLowerCase()],
+      });
+      return res.json({ ok: true, action: "revoked", email });
+    } else {
+      await db.execute({
+        sql: "UPDATE users SET plan = 'pro', trial_ends_at = NULL WHERE email = ?",
+        args: [email.toLowerCase()],
+      });
+      return res.json({ ok: true, action: "granted", email });
+    }
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
   }
 });
 
