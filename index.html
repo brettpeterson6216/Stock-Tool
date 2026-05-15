@@ -976,7 +976,7 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
   </a>
   <div class="nav-links" id="nav-links">
     <a href='#' id='nav-home' class="nav-tab active-tab" onclick="navGoTo('home');return false;">Home</a>
-    <a href='#' class="nav-tab" id="nav-tool-link" data-tool="analyze" onclick="navGoTo('analyze');return false;" style="display:none;">Open Tool</a>
+    <a href='#' class="nav-tab" id="nav-tool-link" data-tool="analyze" onclick="navGoTo('analyze');return false;">Open Tool</a>
   </div>
   <div id="nav-ticker-bar">
     <span class="ntb-sym" id="ntb-sym"></span>
@@ -2800,7 +2800,7 @@ html[data-theme="dark"] .input-light::placeholder{color:rgba(220,225,232,.28)!im
 .app-main { flex:1; display:flex; flex-direction:column; overflow:hidden; min-width:0; }
 
 /* Section header */
-.app-section-hdr { height:34px; background:var(--t-acc-header-bg); border-bottom:1px solid var(--t-acc-border); display:flex; align-items:center; padding:0 12px; gap:8px; flex-shrink:0; }
+.app-section-hdr { height:34px; background:#0F1118; border-bottom:1px solid rgba(200,136,42,.25); display:flex; align-items:center; padding:0 12px; gap:8px; flex-shrink:0; }
 .ash-icon { font-size:15px; color:var(--gold); opacity:.7; }
 .ash-title { font-family:var(--serif); font-size:13px; color:var(--text3); font-style:italic; }
 .ash-sub { font-size:10px; color:var(--text5); }
@@ -2810,7 +2810,7 @@ html[data-theme="dark"] .input-light::placeholder{color:rgba(220,225,232,.28)!im
 .ash-btn i { font-size:12px; }
 
 /* Chart toolbar */
-.app-chart-toolbar { height:30px; background:var(--t-acc-header-bg); border-bottom:1px solid var(--t-acc-border); display:flex; align-items:center; padding:0 8px; gap:1px; flex-shrink:0; overflow:hidden; }
+.app-chart-toolbar { height:30px; background:#0C0E14; border-bottom:1px solid rgba(255,255,255,.07); display:flex; align-items:center; padding:0 8px; gap:1px; flex-shrink:0; overflow:hidden; }
 .act-sep { width:1px; height:14px; background:var(--t-acc-border); margin:0 5px; flex-shrink:0; }
 .act-btn { height:22px; padding:0 7px; border-radius:4px; font-size:10px; color:var(--text5); cursor:pointer; display:flex; align-items:center; gap:3px; border:none; background:transparent; font-family:var(--sans); white-space:nowrap; transition:background .1s,color .1s; }
 .act-btn:hover { background:var(--t-metric-hover); color:var(--text2); }
@@ -2854,6 +2854,9 @@ html[data-theme="dark"] .input-light::placeholder{color:rgba(220,225,232,.28)!im
 /* Hide old accordion chrome in app-shell context */
 .app-section .acc-header { display:none!important; }
 .app-section > .acc-body { display:block!important; padding:0!important; border-top:none!important; }
+/* Nav tool link visibility */
+#nav-tool-link { display:inline-flex; }
+nav[data-view="tool"] #nav-tool-link { display:none; }
 
 /* Responsive: collapse sidebar on narrow */
 @media(max-width:700px){
@@ -3012,7 +3015,7 @@ function updateStatsFooter() {
 
 function updateNavToolLink(isHome) {
   const tl = document.getElementById('nav-tool-link');
-  if (tl) tl.style.display = isHome ? '' : 'none';
+  if (tl) tl.style.display = ''; // CSS nav[data-view] handles visibility
   const bar = document.getElementById('nav-ticker-bar');
   if (bar && isHome) bar.classList.remove('visible');
 }
