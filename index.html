@@ -976,18 +976,12 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
   </a>
   <div class="nav-links" id="nav-links">
     <a href='#' id='nav-home' class="nav-tab active-tab" onclick="navGoTo('home');return false;">Home</a>
-    <a href='#' class="nav-tab" data-tool="analyze"    onclick="navGoTo('analyze');return false;">Analyze</a>
-    <a href='#' class="nav-tab" data-tool="financials" onclick="navGoTo('financials');return false;">Financials</a>
-    <a href='#' class="nav-tab" data-tool="advmetrics" onclick="navGoTo('advmetrics');return false;">Metrics</a>
-    <a href='#' class="nav-tab" data-tool="earnings"   onclick="navGoTo('earnings');return false;">Earnings</a>
-    <a href='#' class="nav-tab" data-tool="secfilings" onclick="navGoTo('secfilings');return false;">SEC Filings</a>
-    <a href='#' class="nav-tab" data-tool="compare"    onclick="navGoTo('compare');return false;">Compare</a>
-    <a href='#' class="nav-tab" data-tool="projection" onclick="navGoTo('projection');return false;">Projection</a>
-    <a href='#' class="nav-tab" data-tool="dcf"        onclick="navGoTo('dcf');return false;">DCF</a>
-    <a href='#' class="nav-tab" data-tool="screener"   onclick="navGoTo('screener');return false;">Screener</a>
-    <a href='#' class="nav-tab" data-tool="reports"    onclick="navGoTo('reports');return false;">Saved</a>
-    <a href='#' class="nav-tab" data-tool="education"  onclick="navGoTo('education');return false;">Education</a>
-    <a href='#' class="nav-tab" data-tool="adveducation" onclick="navGoTo('adveducation');return false;">Adv. Education</a>
+    <a href='#' class="nav-tab" id="nav-tool-link" data-tool="analyze" onclick="navGoTo('analyze');return false;" style="display:none;">Open Tool</a>
+  </div>
+  <div id="nav-ticker-bar">
+    <span class="ntb-sym" id="ntb-sym"></span>
+    <span class="ntb-price" id="ntb-price"></span>
+    <span class="ntb-chg" id="ntb-chg"></span>
   </div>
   <div class="nav-right" id="nav-right">
     <button class="theme-toggle" id="theme-toggle-btn" onclick="toggleTheme()" title="Switch light / dark theme"><span class="theme-toggle-track"><span class="theme-toggle-thumb"></span></span></button>
@@ -1021,7 +1015,7 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
     const tool = document.getElementById('view-tool');
     if (view === 'tool') {
       if (home) home.style.display = 'none';
-      if (tool) tool.style.display = 'block';
+      if (tool) { tool.style.display = 'flex'; tool.style.flexDirection = 'column'; }
       history.replaceState(null, '', '/?view=tool');
       const nav = document.getElementById('main-nav'); if(nav) nav.setAttribute('data-view','tool');
     } else {
@@ -1045,15 +1039,11 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
   }
 
   function navGoTo(id) {
-    if (id === 'home') { showView('home'); return; }
+    if (id === 'home') { showView('home'); updateNavToolLink(true); return; }
     showView('tool');
-    setActiveNavTab(id);
+    setActiveNavTab(null);
     window.scrollTo(0,0);
     openSection(id, true);
-    setTimeout(() => {
-      const el = document.getElementById('sec-' + id);
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 80);
   }
 
   // On hard load: respect ?view=tool in URL
@@ -1462,16 +1452,100 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
 </div><!-- /view-home -->
 
 <!-- ══════════ VIEW: LIVE TOOL ══════════ -->
-<div id="view-tool" style="display:none; min-height:100vh;">
-  <div class="tool-accordion-wrap">
-    <div class="tool-accordion">
+<div id="view-tool" style="display:none;">
+  <div class="app-shell">
+    <!-- ── Left sidebar ── -->
+    <div class="app-sidebar">
+      <a href="#" class="sb-home-btn" onclick="navGoTo('home');return false;"><i class="ti ti-home" aria-hidden="true"></i><span>Home</span></a>
 
-          <div class="acc-section open" id="sec-analyze">
-            <div class="acc-header" onclick="toggleSection('analyze')">
-              <span class="acc-title">Analyze</span>
-              <span class="acc-chevron">›</span>
-            </div>
-            <div class="acc-body" id="body-analyze" >
+      <div class="sb-group-pad">
+        <div class="sb-group-label">Analyze</div>
+        <div class="sb-item active" data-sec="analyze" onclick="openSection('analyze')"><i class="ti ti-chart-candle sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Chart</span></div>
+        <div class="sb-item" data-sec="financials" onclick="openSection('financials')"><i class="ti ti-table sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Financials</span></div>
+        <div class="sb-item" data-sec="advmetrics" onclick="openSection('advmetrics')"><i class="ti ti-report-analytics sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Metrics</span></div>
+        <div class="sb-item" data-sec="earnings" onclick="openSection('earnings')"><i class="ti ti-trending-up sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Earnings</span></div>
+        <div class="sb-item" data-sec="secfilings" onclick="openSection('secfilings')"><i class="ti ti-file-text sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">SEC Filings</span></div>
+        <div class="sb-item" data-sec="institutional" onclick="openSection('institutional')"><i class="ti ti-building-bank sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Institutional</span></div>
+      </div>
+
+      <div class="sb-sep"></div>
+
+      <div class="sb-group-pad">
+        <div class="sb-group-label">Tools</div>
+        <div class="sb-item" data-sec="compare" onclick="openSection('compare')"><i class="ti ti-adjustments-horizontal sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Compare</span></div>
+        <div class="sb-item" data-sec="projection" onclick="openSection('projection')"><i class="ti ti-timeline sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Projection</span></div>
+        <div class="sb-item" data-sec="dcf" onclick="openSection('dcf')"><i class="ti ti-calculator sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">DCF</span></div>
+        <div class="sb-item" data-sec="screener" onclick="openSection('screener')"><i class="ti ti-filter sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Screener</span></div>
+      </div>
+
+      <div class="sb-sep"></div>
+
+      <div class="sb-group-pad">
+        <div class="sb-group-label">Library</div>
+        <div class="sb-item" data-sec="reports" onclick="openSection('reports')"><i class="ti ti-bookmark sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Saved</span></div>
+        <div class="sb-item" data-sec="education" onclick="openSection('education')"><i class="ti ti-school sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Education</span></div>
+        <div class="sb-item" data-sec="adveducation" onclick="openSection('adveducation')"><i class="ti ti-certificate sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Adv. Learn</span></div>
+      </div>
+
+      <div class="sb-bottom">
+        <div class="sb-pro-card" onclick="showUpgradeModal()">
+          <div class="sb-pro-title">⚡ Go Pro</div>
+          <div class="sb-pro-sub">Unlimited access</div>
+        </div>
+      </div>
+    </div><!-- /app-sidebar -->
+
+    <!-- ── Main content ── -->
+    <div class="app-main">
+      <!-- Section header row -->
+      <div class="app-section-hdr" id="app-section-hdr">
+        <i class="ti ti-chart-candle ash-icon" id="ash-icon" aria-hidden="true"></i>
+        <span class="ash-title" id="ash-title">Chart &amp; Analysis</span>
+        <span class="ash-sub" id="ash-sub"></span>
+        <div class="ash-actions">
+          <button class="ash-btn" onclick="if(S.ticker)toast('Alert set for '+S.ticker,'ok')"><i class="ti ti-bell-plus"></i>Alert</button>
+          <button class="ash-btn" onclick="if(S.ticker)saveAnalysis('price')"><i class="ti ti-bookmark"></i>Save</button>
+          <button class="ash-btn" onclick="window.print()"><i class="ti ti-download"></i>Export</button>
+        </div>
+      </div>
+      <!-- Chart toolbar (analyze section only) -->
+      <div class="app-chart-toolbar" id="app-chart-toolbar">
+        <div class="act-btn on" id="ct-candle" onclick="setChartType('candle',this)" title="Candlestick"><i class="ti ti-chart-candle"></i> Candle</div>
+        <div class="act-btn" id="ct-line" onclick="setChartType('line',this)" title="Line"><i class="ti ti-chart-line"></i> Line</div>
+        <div class="act-btn" id="ct-area" onclick="setChartType('area',this)" title="Area"><i class="ti ti-chart-area"></i> Area</div>
+        <div class="act-sep"></div>
+        <div class="act-btn on" id="ind-ma50-btn" onclick="toggleInd(document.querySelector('[data-ind=ma50]'),'ma50')"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#4a9fd4;margin-right:3px;"></span>MA50</div>
+        <div class="act-btn" id="ind-ma200-btn" onclick="toggleInd(document.querySelector('[data-ind=ma200]'),'ma200')"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#9b72c8;margin-right:3px;"></span>MA200</div>
+        <div class="act-btn" id="ind-bb-btn" onclick="toggleInd(document.querySelector('[data-ind=bb]'),'bb')"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#d4813a;margin-right:3px;"></span>Bollinger</div>
+        <div class="act-sep"></div>
+        <div class="act-btn" id="epins-btn" onclick="this.classList.toggle('on')"><i class="ti ti-tag"></i> Earnings</div>
+        <div class="act-btn" id="npins-btn" onclick="this.classList.toggle('on')"><i class="ti ti-news"></i> News</div>
+        <div class="act-right">
+          <div class="act-btn" onclick="expandChart('price-chart','Price Chart')" title="Fullscreen"><i class="ti ti-maximize"></i></div>
+        </div>
+      </div>
+      <!-- Timeframe strip (analyze section only) -->
+      <div class="app-tf-strip" id="app-tf-strip">
+        <button class="tf-pill" onclick="changeRange('1d',this)">1D</button>
+        <button class="tf-pill" onclick="changeRange('5d',this)">5D</button>
+        <button class="tf-pill" onclick="changeRange('1mo',this)">1M</button>
+        <button class="tf-pill" onclick="changeRange('3mo',this)">3M</button>
+        <button class="tf-pill" onclick="changeRange('6mo',this)">6M</button>
+        <button class="tf-pill" onclick="changeRange('ytd',this)">YTD</button>
+        <button class="tf-pill on" onclick="changeRange('1y',this)">1Y</button>
+        <button class="tf-pill" onclick="changeRange('2y',this)">2Y</button>
+        <button class="tf-pill" onclick="changeRange('5y',this)">5Y</button>
+        <button class="tf-pill" onclick="changeRange('max',this)">Max</button>
+        <div class="tf-right">
+          <button class="tf-tog" onclick="this.classList.toggle('on')">Log</button>
+          <button class="tf-tog" onclick="this.classList.toggle('on')">%</button>
+          <button class="tf-tog" onclick="this.classList.toggle('on')">Vol</button>
+        </div>
+      </div>
+      <!-- Scrollable content area -->
+      <div class="app-content-scroll">
+
+          <div class="app-section open" id="sec-analyze"><div class="acc-body" id="body-analyze">
 <div class="search-row">
               <input class="ticker-input" id="main-ticker" type="text" placeholder="Try AAPL, TSLA, NVDA, SPY…" value="">
               <button class="btn-search" id="search-btn" onclick="fetchAndRender()">Analyze →</button>
@@ -1627,12 +1701,7 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
             </div><!-- /body-analyze -->
           </div><!-- /sec-analyze -->
 
-          <div class="acc-section" id="sec-financials">
-            <div class="acc-header" onclick="toggleSection('financials')">
-              <span class="acc-title">Financials <span class="acc-pro-badge">PRO</span></span>
-              <span class="acc-chevron">›</span>
-            </div>
-            <div class="acc-body" id="body-financials" style="display:none;">
+          <div class="app-section" id="sec-financials"><div class="acc-body" id="body-financials" style="display:none;">
 <div style="font-size:.82rem;margin-bottom:1.25rem;color:var(--text4);">Annual income statement, balance sheet, and cash flow for the last 4 years.</div>
             <div id="fin-loading" style="font-size:.82rem;display:none;color:var(--text5);">Loading financials…</div>
             <div id="fin-error" style="color:#f87171;font-size:.82rem;display:none;"></div>
@@ -1652,12 +1721,7 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
             </div><!-- /body-financials -->
           </div><!-- /sec-financials -->
 
-          <div class="acc-section" id="sec-advmetrics">
-            <div class="acc-header" onclick="toggleSection('advmetrics')">
-              <span class="acc-title">Metrics <span class="acc-pro-badge">PRO</span></span>
-              <span class="acc-chevron">›</span>
-            </div>
-            <div class="acc-body" id="body-advmetrics" style="display:none;">
+          <div class="app-section" id="sec-advmetrics"><div class="acc-body" id="body-advmetrics" style="display:none;">
 <div style="font-size:.82rem;color:var(--text4);margin-bottom:1.25rem;">Deep fundamental metrics: valuation multiples, margins, returns, and leverage.</div>
             <div id="advm-loading" style="color:var(--text5);font-size:.82rem;display:none;">Loading metrics…</div>
             <div id="advm-error" style="color:#f87171;font-size:.82rem;display:none;"></div>
@@ -1668,12 +1732,7 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
             </div><!-- /body-advmetrics -->
           </div><!-- /sec-advmetrics -->
 
-          <div class="acc-section" id="sec-earnings">
-            <div class="acc-header" onclick="toggleSection('earnings')">
-              <span class="acc-title">Earnings</span>
-              <span class="acc-chevron">›</span>
-            </div>
-            <div class="acc-body" id="body-earnings" style="display:none;">
+          <div class="app-section" id="sec-earnings"><div class="acc-body" id="body-earnings" style="display:none;">
 <div style="font-size:.82rem;color:var(--text4);margin-bottom:1.25rem;">EPS estimates vs. actual results and earnings surprise history.</div>
             <div id="earn-loading" style="color:var(--text5);font-size:.82rem;display:none;">Loading earnings…</div>
             <div id="earn-error" style="color:#f87171;font-size:.82rem;display:none;"></div>
@@ -1684,12 +1743,7 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
             </div><!-- /body-earnings -->
           </div><!-- /sec-earnings -->
 
-          <div class="acc-section" id="sec-secfilings">
-            <div class="acc-header" onclick="toggleSection('secfilings')">
-              <span class="acc-title">SEC Filings</span>
-              <span class="acc-chevron">›</span>
-            </div>
-            <div class="acc-body" id="body-secfilings" style="display:none;">
+          <div class="app-section" id="sec-secfilings"><div class="acc-body" id="body-secfilings" style="display:none;">
               <div id="sec-nostock" style="color:rgba(220,225,232,.35);font-size:.85rem;padding:.5rem 0;">Search for a stock in the Analyze tab first.</div>
               <div id="sec-loading" style="display:none;color:rgba(220,225,232,.4);font-size:.82rem;">Loading filings...</div>
               <div id="sec-error" style="display:none;" class="error-msg"></div>
@@ -1711,12 +1765,7 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
           </div><!-- /sec-secfilings -->
 
           <!-- INSTITUTIONAL & DARK POOL -->
-          <div class="acc-section" id="sec-institutional">
-            <div class="acc-header" onclick="toggleSection('institutional')">
-              <span class="acc-title">Institutional &amp; Dark Pool <span class="acc-pro-badge">PRO</span></span>
-              <span class="acc-chevron">›</span>
-            </div>
-            <div class="acc-body" id="body-institutional" style="display:none;">
+          <div class="app-section" id="sec-institutional"><div class="acc-body" id="body-institutional" style="display:none;">
               <div style="font-size:.82rem;color:var(--text4);margin-bottom:1.25rem;">Top institutional holders, dark pool trading volume, and short interest data from FINRA &amp; Finnhub.</div>
               <div id="inst-loading" class="loading-bar" style="display:none;"><div class="spinner"></div> Loading institutional data…</div>
               <div id="inst-nostock" style="color:var(--text5);font-size:.85rem;">Search for a stock in the Analyze tab first.</div>
@@ -1746,12 +1795,7 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
             </div>
           </div><!-- /sec-institutional -->
 
-          <div class="acc-section" id="sec-compare">
-            <div class="acc-header" onclick="toggleSection('compare')">
-              <span class="acc-title">Compare <span class="acc-pro-badge">PRO</span></span>
-              <span class="acc-chevron">›</span>
-            </div>
-            <div class="acc-body" id="body-compare" style="display:none;">
+          <div class="app-section" id="sec-compare"><div class="acc-body" id="body-compare" style="display:none;">
 <div style="margin-bottom:1rem;">
               <div style="font-size:.82rem;color:var(--text3);margin-bottom:1.25rem;">Compare 2 stocks free. Load 3–4 stocks and access the performance chart &amp; radar with <span style="color:var(--gold);">Pro</span>.</div>
               <div class="cmp-inputs">
@@ -1778,12 +1822,7 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
             </div><!-- /body-compare -->
           </div><!-- /sec-compare -->
 
-          <div class="acc-section" id="sec-projection">
-            <div class="acc-header" onclick="toggleSection('projection')">
-              <span class="acc-title">Projection <span class="acc-pro-badge">PRO</span></span>
-              <span class="acc-chevron">›</span>
-            </div>
-            <div class="acc-body" id="body-projection" style="display:none;">
+          <div class="app-section" id="sec-projection"><div class="acc-body" id="body-projection" style="display:none;">
 <div style="font-size:.82rem;color:var(--text3);margin-bottom:1.25rem;">Advanced model with separate inputs per scenario. Load a stock first to auto-fill current price.</div>
             <div class="proj-controls" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr));">
               <div><label class="fc-label">Time Horizon</label>
@@ -1813,12 +1852,7 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
             </div><!-- /body-projection -->
           </div><!-- /sec-projection -->
 
-          <div class="acc-section" id="sec-dcf">
-            <div class="acc-header" onclick="toggleSection('dcf')">
-              <span class="acc-title">DCF <span class="acc-pro-badge">PRO</span></span>
-              <span class="acc-chevron">›</span>
-            </div>
-            <div class="acc-body" id="body-dcf" style="display:none;">
+          <div class="app-section" id="sec-dcf"><div class="acc-body" id="body-dcf" style="display:none;">
 <div style="font-size:.82rem;color:var(--text3);margin-bottom:1.25rem;">10-year two-stage discounted cash flow model. Enter the stock's EPS and your assumptions below.</div>
             <div class="proj-controls">
               <div><label class="fc-label">Current EPS ($)</label><input class="fc-input" type="number" id="dcf-eps" value="5.20" step="0.01"></div>
@@ -1840,12 +1874,7 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
             </div><!-- /body-dcf -->
           </div><!-- /sec-dcf -->
 
-          <div class="acc-section" id="sec-screener">
-            <div class="acc-header" onclick="toggleSection('screener')">
-              <span class="acc-title">Screener <span class="acc-pro-badge">PRO</span></span>
-              <span class="acc-chevron">›</span>
-            </div>
-            <div class="acc-body" id="body-screener" style="display:none;">
+          <div class="app-section" id="sec-screener"><div class="acc-body" id="body-screener" style="display:none;">
 <div class="scr-filters">
               <div class="scr-filter-group"><label>Max P/E <span id="scr-pe-val">50x</span></label><input type="range" class="scr-slider" id="scr-pe" min="5" max="200" value="50" oninput="document.getElementById('scr-pe-val').textContent=this.value+'x';applyScreener()"></div>
               <div class="scr-filter-group"><label>Max P/B <span id="scr-pb-val">20x</span></label><input type="range" class="scr-slider" id="scr-pb" min="0" max="50" value="20" oninput="document.getElementById('scr-pb-val').textContent=this.value+'x';applyScreener()"></div>
@@ -1877,12 +1906,7 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
             </div><!-- /body-screener -->
           </div><!-- /sec-screener -->
 
-          <div class="acc-section" id="sec-reports">
-            <div class="acc-header" onclick="toggleSection('reports')">
-              <span class="acc-title">Saved Analyses</span>
-              <span class="acc-chevron">›</span>
-            </div>
-            <div class="acc-body" id="body-reports" style="display:none;">
+          <div class="app-section" id="sec-reports"><div class="acc-body" id="body-reports" style="display:none;">
 <div style="padding:.75rem 0;">
               <!-- Sort/Filter controls -->
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
@@ -1915,12 +1939,7 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
             </div><!-- /body-reports -->
           </div><!-- /sec-reports -->
 
-          <div class="acc-section" id="sec-education">
-            <div class="acc-header" onclick="toggleSection('education')">
-              <span class="acc-title">Education</span>
-              <span class="acc-chevron">›</span>
-            </div>
-            <div class="acc-body" id="body-education" style="display:none;">
+          <div class="app-section" id="sec-education"><div class="acc-body" id="body-education" style="display:none;">
 <div style="font-size:.82rem;color:var(--text3);margin-bottom:1.5rem;">Core concepts every investor should know.</div>
             <div style="display:grid;gap:.85rem;">
               <div class="edu-card">
@@ -1968,12 +1987,7 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
             </div><!-- /body-education -->
           </div><!-- /sec-education -->
 
-          <div class="acc-section" id="sec-adveducation">
-            <div class="acc-header" onclick="toggleSection('adveducation')">
-              <span class="acc-title">Adv. Education <span class="acc-pro-badge">PRO</span></span>
-              <span class="acc-chevron">›</span>
-            </div>
-            <div class="acc-body" id="body-adveducation" style="display:none;">
+          <div class="app-section" id="sec-adveducation"><div class="acc-body" id="body-adveducation" style="display:none;">
 <div style="font-size:.82rem;color:var(--text3);margin-bottom:1.5rem;">Advanced valuation and analysis methods used by professional investors.</div>
             <div style="display:grid;gap:.85rem;">
               <div class="edu-card">
@@ -2019,13 +2033,22 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
           </div><!-- /sec-adveducation -->
 
           <div class="tool-disclaimer">⚠ Implied Lens provides market data and modeling tools for informational and educational purposes only. Projections are hypothetical models — not investment advice. Past performance does not guarantee future results. Always consult a licensed financial advisor before investing.</div>
-    </div><!-- /tool-accordion -->
-  </div><!-- /tool-accordion-wrap -->
-
-  <div style="background:var(--t-acc-header-bg); border-top:1px solid var(--t-acc-border); padding:1.25rem 2rem; font-size:.75rem; color:var(--text5); display:flex; justify-content:space-between; align-items:center;">
-    <span>© 2026 Implied Lens. Not financial advice.</span>
-    <a href="#" onclick="navGoTo('home');return false;" style="color:var(--text4); text-decoration:none;">← Back to home</a>
-  </div>
+      </div><!-- /app-content-scroll -->
+      <!-- Stats footer — always pinned -->
+      <div class="app-stats-footer" id="app-stats-footer">
+        <div class="asf-item"><div class="asf-l">Open</div><div class="asf-v" id="asf-open">—</div></div>
+        <div class="asf-item"><div class="asf-l">High</div><div class="asf-v pos" id="asf-high">—</div></div>
+        <div class="asf-item"><div class="asf-l">Low</div><div class="asf-v neg" id="asf-low">—</div></div>
+        <div class="asf-item"><div class="asf-l">Volume</div><div class="asf-v" id="asf-vol">—</div></div>
+        <div class="asf-item"><div class="asf-l">Mkt Cap</div><div class="asf-v" id="asf-mktcap">—</div></div>
+        <div class="asf-item"><div class="asf-l">P/E</div><div class="asf-v" id="asf-pe">—</div></div>
+        <div class="asf-item"><div class="asf-l">EPS TTM</div><div class="asf-v" id="asf-eps">—</div></div>
+        <div class="asf-item"><div class="asf-l">52W Hi</div><div class="asf-v pos" id="asf-52hi">—</div></div>
+        <div class="asf-item"><div class="asf-l">52W Lo</div><div class="asf-v neg" id="asf-52lo">—</div></div>
+        <div class="asf-item" style="flex:0.6;"><a href="#" onclick="navGoTo('home');return false;" style="font-size:9px;color:var(--text5);text-decoration:none;">← Home</a></div>
+      </div>
+    </div><!-- /app-main -->
+  </div><!-- /app-shell -->
 </div>
 
 <!-- ══ CHART EXPAND MODAL ══ -->
@@ -2744,6 +2767,101 @@ html[data-theme="dark"] .input-light::placeholder{color:rgba(220,225,232,.28)!im
 .tcard-author{display:flex;flex-direction:column;gap:.1rem;}
 .tcard-name{font-size:.8rem;font-weight:700;color:var(--text1);}
 .tcard-role{font-size:.7rem;color:var(--text5);}
+
+/* ════════════════════ APP SHELL ════════════════════ */
+#view-tool { display:flex; flex-direction:column; height:100vh; overflow:hidden; }
+#view-tool.shown { display:flex!important; }
+.app-shell { display:flex; flex:1; overflow:hidden; min-height:0; }
+
+/* Sidebar */
+.app-sidebar { width:100px; background:var(--t-acc-header-bg); border-right:1px solid var(--t-acc-border); display:flex; flex-direction:column; flex-shrink:0; overflow-y:auto; overflow-x:hidden; }
+.sb-home-btn { display:flex; align-items:center; gap:8px; padding:9px 12px 7px; border-bottom:1px solid var(--t-acc-border); cursor:pointer; color:var(--text5); font-size:11px; font-family:var(--sans); text-decoration:none; }
+.sb-home-btn:hover { color:var(--gold); background:rgba(200,136,42,.06); }
+.sb-home-btn i { font-size:15px; }
+.sb-group-pad { padding:8px 4px 2px; }
+.sb-group-label { font-size:8px; text-transform:uppercase; letter-spacing:.1em; color:var(--text5); padding:0 10px; margin-bottom:3px; opacity:.65; }
+.sb-item { display:flex; align-items:center; gap:8px; padding:7px 10px; border-radius:7px; cursor:pointer; margin:1px 4px; transition:background .12s; }
+.sb-item:hover { background:var(--t-metric-hover); }
+.sb-item.active { background:rgba(200,136,42,.14); }
+.sb-item-icon { font-size:15px; color:var(--text5); flex-shrink:0; transition:color .12s; }
+.sb-item.active .sb-item-icon { color:var(--gold); }
+.sb-item:hover .sb-item-icon { color:var(--text3); }
+.sb-item-label { font-size:11px; color:var(--text5); white-space:nowrap; overflow:hidden; transition:color .12s; }
+.sb-item.active .sb-item-label { color:var(--gold); font-weight:500; }
+.sb-item:hover .sb-item-label { color:var(--text2); }
+.sb-sep { height:1px; background:var(--t-acc-border); margin:5px 10px; }
+.sb-bottom { margin-top:auto; padding:8px; }
+.sb-pro-card { background:rgba(200,136,42,.08); border:1px solid rgba(200,136,42,.2); border-radius:8px; padding:9px 10px; cursor:pointer; text-align:center; }
+.sb-pro-card:hover { background:rgba(200,136,42,.14); }
+.sb-pro-title { font-size:11px; color:var(--gold); font-weight:500; }
+.sb-pro-sub { font-size:9px; color:var(--text5); margin-top:2px; }
+
+/* App main */
+.app-main { flex:1; display:flex; flex-direction:column; overflow:hidden; min-width:0; }
+
+/* Section header */
+.app-section-hdr { height:34px; background:var(--t-acc-header-bg); border-bottom:1px solid var(--t-acc-border); display:flex; align-items:center; padding:0 12px; gap:8px; flex-shrink:0; }
+.ash-icon { font-size:15px; color:var(--gold); opacity:.7; }
+.ash-title { font-family:var(--serif); font-size:13px; color:var(--text3); font-style:italic; }
+.ash-sub { font-size:10px; color:var(--text5); }
+.ash-actions { margin-left:auto; display:flex; align-items:center; gap:4px; }
+.ash-btn { font-size:10px; padding:3px 8px; border-radius:4px; border:1px solid var(--t-acc-border); color:var(--text5); background:transparent; cursor:pointer; display:flex; align-items:center; gap:3px; font-family:var(--sans); white-space:nowrap; }
+.ash-btn:hover { border-color:var(--gold); color:var(--gold); }
+.ash-btn i { font-size:12px; }
+
+/* Chart toolbar */
+.app-chart-toolbar { height:30px; background:var(--t-acc-header-bg); border-bottom:1px solid var(--t-acc-border); display:flex; align-items:center; padding:0 8px; gap:1px; flex-shrink:0; overflow:hidden; }
+.act-sep { width:1px; height:14px; background:var(--t-acc-border); margin:0 5px; flex-shrink:0; }
+.act-btn { height:22px; padding:0 7px; border-radius:4px; font-size:10px; color:var(--text5); cursor:pointer; display:flex; align-items:center; gap:3px; border:none; background:transparent; font-family:var(--sans); white-space:nowrap; transition:background .1s,color .1s; }
+.act-btn:hover { background:var(--t-metric-hover); color:var(--text2); }
+.act-btn.on { background:rgba(200,136,42,.14); color:var(--gold); }
+.act-btn i { font-size:13px; }
+.act-right { margin-left:auto; display:flex; align-items:center; gap:1px; }
+
+/* Timeframe strip */
+.app-tf-strip { height:26px; background:var(--t-chart-bg); border-bottom:1px solid var(--t-acc-border); display:flex; align-items:center; padding:0 8px; gap:1px; flex-shrink:0; }
+.tf-pill { font-size:10px; font-family:var(--mono); padding:0 7px; height:18px; border-radius:3px; color:var(--text5); cursor:pointer; display:flex; align-items:center; border:none; background:transparent; transition:all .1s; }
+.tf-pill:hover { color:var(--text2); background:var(--t-metric-hover); }
+.tf-pill.on { color:var(--gold); background:rgba(200,136,42,.12); }
+.tf-right { margin-left:auto; display:flex; align-items:center; gap:3px; }
+.tf-tog { font-size:9px; font-family:var(--sans); color:var(--text5); padding:0 6px; cursor:pointer; border:none; background:transparent; }
+.tf-tog:hover { color:var(--text3); }
+.tf-tog.on { color:var(--gold); }
+
+/* Content scroll */
+.app-content-scroll { flex:1; overflow-y:auto; overflow-x:hidden; padding:1rem 1.5rem 2rem; }
+.app-section { display:none; }
+.app-section.open { display:block; }
+
+/* Stats footer */
+.app-stats-footer { height:34px; border-top:1px solid var(--t-acc-border); background:var(--t-acc-header-bg); display:flex; align-items:center; padding:0 6px; flex-shrink:0; overflow:hidden; }
+.asf-item { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; border-right:1px solid var(--t-acc-border); padding:0 4px; min-width:0; }
+.asf-item:last-child { border-right:none; }
+.asf-l { font-size:7px; text-transform:uppercase; letter-spacing:.07em; color:var(--text5); white-space:nowrap; }
+.asf-v { font-family:var(--mono); font-size:10px; color:var(--text3); white-space:nowrap; overflow:hidden; }
+.asf-v.pos { color:var(--green); }
+.asf-v.neg { color:var(--red); }
+
+/* Nav ticker bar */
+#nav-ticker-bar { display:none; align-items:center; gap:8px; }
+#nav-ticker-bar.visible { display:flex; }
+.ntb-sym { font-family:var(--mono); font-size:.82rem; font-weight:500; color:var(--gold); }
+.ntb-price { font-family:var(--mono); font-size:.82rem; color:var(--text); }
+.ntb-chg { font-family:var(--mono); font-size:.75rem; padding:2px 6px; border-radius:4px; }
+.ntb-pos { color:var(--green); background:var(--green-t); }
+.ntb-neg { color:var(--red); background:var(--red-t); }
+
+/* Hide old accordion chrome in app-shell context */
+.app-section .acc-header { display:none!important; }
+.app-section > .acc-body { display:block!important; padding:0!important; border-top:none!important; }
+
+/* Responsive: collapse sidebar on narrow */
+@media(max-width:700px){
+  .app-sidebar { width:52px; }
+  .sb-item-label,.sb-group-label,.sb-pro-sub,.sb-pro-title { display:none; }
+  .sb-item { justify-content:center; padding:8px 4px; }
+  .sb-home-btn span { display:none; }
+}
 </style>
 <script>
 /* ══════════════════════════════════════════════════════
@@ -2770,11 +2888,32 @@ function openSection(id, skipProCheck) {
   if (!skipProCheck && PRO_SECTIONS.includes(id) && !isPro()) {
     showUpgradeModal(); return;
   }
+  // Close all sections first
+  document.querySelectorAll('.app-section').forEach(el => {
+    el.classList.remove('open');
+    const b = el.querySelector('.acc-body');
+    if (b) b.style.display = 'none';
+  });
+  // Update sidebar active state
+  document.querySelectorAll('.sb-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.sec === id);
+  });
+  // Open the target section
   const sec = document.getElementById('sec-' + id);
   const bod = document.getElementById('body-' + id);
   if (!sec || !bod) return;
   sec.classList.add('open');
   bod.style.display = 'block';
+  // Show/hide chart toolbars (only for analyze)
+  const ct = document.getElementById('app-chart-toolbar');
+  const tf = document.getElementById('app-tf-strip');
+  if (ct) ct.style.display = id === 'analyze' ? '' : 'none';
+  if (tf) tf.style.display = id === 'analyze' ? '' : 'none';
+  // Update section header
+  updateSectionHeader(id);
+  // Scroll content to top
+  const scroll = document.querySelector('.app-content-scroll');
+  if (scroll) scroll.scrollTop = 0;
   // Auto-load data tabs
   const t = S.ticker;
   if      (id === 'financials')  { if(t) loadFinancials(t); }
@@ -2808,6 +2947,81 @@ function toggleSection(id) {
 function switchTab(id, btn) {
   openSection(id);
 }
+
+// App shell helpers
+const SECTION_META = {
+  analyze:     { icon:'ti-chart-candle',  title:'Chart & Analysis' },
+  financials:  { icon:'ti-table',         title:'Financials' },
+  advmetrics:  { icon:'ti-report-analytics', title:'Adv. Metrics' },
+  earnings:    { icon:'ti-trending-up',   title:'Earnings & EPS' },
+  secfilings:  { icon:'ti-file-text',     title:'SEC Filings' },
+  institutional:{ icon:'ti-building-bank', title:'Institutional' },
+  compare:     { icon:'ti-adjustments-horizontal', title:'Compare Stocks' },
+  projection:  { icon:'ti-timeline',      title:'Projection' },
+  dcf:         { icon:'ti-calculator',    title:'DCF Valuation' },
+  screener:    { icon:'ti-filter',        title:'Screener' },
+  reports:     { icon:'ti-bookmark',      title:'Saved Analyses' },
+  education:   { icon:'ti-school',        title:'Education' },
+  adveducation:{ icon:'ti-certificate',   title:'Adv. Education' },
+};
+
+function updateSectionHeader(id) {
+  const m = SECTION_META[id] || { icon:'ti-layout', title: id };
+  const iconEl = document.getElementById('ash-icon');
+  const titleEl = document.getElementById('ash-title');
+  const subEl = document.getElementById('ash-sub');
+  if (iconEl) { iconEl.className = ''; iconEl.classList.add('ti', m.icon, 'ash-icon'); }
+  if (titleEl) titleEl.textContent = m.title;
+  if (subEl && S.ticker) subEl.textContent = S.name ? S.name + ' · ' + (S.meta && S.meta.exchangeName || '') : S.ticker;
+  else if (subEl) subEl.textContent = '';
+}
+
+function updateNavTickerBar() {
+  const bar = document.getElementById('nav-ticker-bar');
+  if (!bar || !S.ticker) return;
+  const sym = document.getElementById('ntb-sym');
+  const price = document.getElementById('ntb-price');
+  const chg = document.getElementById('ntb-chg');
+  if (sym) sym.textContent = S.ticker;
+  const p = S.data && S.data.meta && S.data.meta.regularMarketPrice;
+  const c = S.data && S.data.meta && S.data.meta.regularMarketChangePercent;
+  if (price && p) price.textContent = '$' + p.toFixed(2);
+  if (chg && c !== undefined) {
+    const pct = c.toFixed(2);
+    chg.textContent = (c >= 0 ? '▲ +' : '▼ ') + pct + '%';
+    chg.className = 'ntb-chg ' + (c >= 0 ? 'ntb-pos' : 'ntb-neg');
+  }
+  bar.classList.add('visible');
+}
+
+function updateStatsFooter() {
+  if (!S.data || !S.data.meta) return;
+  const m = S.data.meta;
+  const fmt = (v, pre='$') => v != null ? pre + (v >= 1e12 ? (v/1e12).toFixed(2)+'T' : v >= 1e9 ? (v/1e9).toFixed(2)+'B' : v >= 1e6 ? (v/1e6).toFixed(2)+'M' : v.toFixed(2)) : '—';
+  const set = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
+  set('asf-open',  m.regularMarketOpen    != null ? '$'+m.regularMarketOpen.toFixed(2) : '—');
+  set('asf-high',  m.regularMarketDayHigh != null ? '$'+m.regularMarketDayHigh.toFixed(2) : '—');
+  set('asf-low',   m.regularMarketDayLow  != null ? '$'+m.regularMarketDayLow.toFixed(2) : '—');
+  set('asf-vol',   m.regularMarketVolume  != null ? fmt(m.regularMarketVolume,'') : '—');
+  set('asf-mktcap',m.marketCap            != null ? fmt(m.marketCap) : '—');
+  set('asf-pe',    m.trailingPE           != null ? m.trailingPE.toFixed(1)+'×' : '—');
+  set('asf-eps',   m.epsTrailingTwelveMonths != null ? '$'+m.epsTrailingTwelveMonths.toFixed(2) : '—');
+  set('asf-52hi',  m.fiftyTwoWeekHigh     != null ? '$'+m.fiftyTwoWeekHigh.toFixed(2) : '—');
+  set('asf-52lo',  m.fiftyTwoWeekLow      != null ? '$'+m.fiftyTwoWeekLow.toFixed(2) : '—');
+}
+
+function updateNavToolLink(isHome) {
+  const tl = document.getElementById('nav-tool-link');
+  if (tl) tl.style.display = isHome ? '' : 'none';
+  const bar = document.getElementById('nav-ticker-bar');
+  if (bar && isHome) bar.classList.remove('visible');
+}
+
+function setChartType(type, btn) {
+  document.querySelectorAll('#app-chart-toolbar .act-btn[id^="ct-"]').forEach(b => b.classList.remove('on'));
+  if(btn) btn.classList.add('on');
+}
+
 
 /* ══════════════════════════════════════════════════════
    TABS
@@ -3428,6 +3642,9 @@ function renderStock(result, ticker) {
   buildVolChart(vols,ts,c);
   buildDistChart(returns);
   S.meta = meta;
+  updateNavTickerBar();
+  updateStatsFooter();
+  updateSectionHeader('analyze');
   renderRiskPanel(c,meta);
   renderNews(ticker,meta.longName||ticker);
   loadAnalyst(ticker);
@@ -3751,6 +3968,7 @@ function toggleInd(btn,ind) {
 }
 
 async function changeRange(range,btn) {
+  document.querySelectorAll('.tf-pill').forEach(p=>{const r=p.getAttribute('onclick')||'';p.classList.toggle('on',r.includes("'"+range+"'"));});
   document.querySelectorAll('.rpill').forEach(p=>p.classList.remove('active'));
   btn.classList.add('active'); S.range=range;
   if(!S.ticker) return;
