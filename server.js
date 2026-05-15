@@ -59,6 +59,20 @@ async function initDb() {
   `);
   await db.execute(`CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions(expires)`);
 
+  // Saved analyses (persists across sessions)
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS saved_analyses (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id     INTEGER NOT NULL,
+      ticker      TEXT    NOT NULL,
+      type        TEXT    NOT NULL DEFAULT 'price',
+      label       TEXT,
+      data        TEXT    NOT NULL,
+      created_at  TEXT    NOT NULL DEFAULT (datetime('now'))
+    )
+  `);
+  await db.execute(`CREATE INDEX IF NOT EXISTS idx_saves_user ON saved_analyses(user_id)`);
+
   // Add plan columns if they do not exist yet
   const planCols = [
     "plan TEXT NOT NULL DEFAULT 'free'",
@@ -319,6 +333,54 @@ api.post("/admin/grant-pro", async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 });
+
+// ── Saved analyses (account-linked, persistent) ──────────────────────
+api.get('/saves', async (req, res) => {
+  if (!req.session.userId) return res.status(401).json({ error: 'Not logged in' });
+  try {
+    const r = await db.execute({
+      sql: 'SELECT id, ticker, type, label, data, created_at FROM saved_analyses WHERE user_id=? ORDER BY created_at DESC LIMIT 200',
+      args: [req.session.userId]
+    });
+    res.json(r.rows.map(row => ({
+      id: row.id, ticker: row.ticker, type: row.type,
+      label: row.label, data: JSON.parse(row.data || '{}'), created_at: row.created_at
+    })));
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+api.post('/saves', async (req, res) => {
+  if (!req.session.userId) return res.status(401).json({ error: 'Not logged in' });
+  const { ticker, type, label, data } = req.body || {};
+  if (!ticker || !data) return res.status(400).json({ error: 'ticker and data required' });
+  try {
+    const r = await db.execute({
+      sql: 'INSERT INTO saved_analyses (user_id, ticker, type, label, data) VALUES (?,?,?,?,?)',
+      args: [req.session.userId, ticker.toUpperCase(), type||'price', label||'', JSON.stringify(data)]
+    });
+    res.json({ ok: true, id: Number(r.lastInsertRowid) });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+api.delete('/saves/:id', async (req, res) => {
+  if (!req.session.userId) return res.status(401).json({ error: 'Not logged in' });
+  try {
+    await db.execute({
+      sql: 'DELETE FROM saved_analyses WHERE id=? AND user_id=?',
+      args: [req.params.id, req.session.userId]
+    });
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+api.delete('/saves', async (req, res) => {
+  if (!req.session.userId) return res.status(401).json({ error: 'Not logged in' });
+  try {
+    await db.execute({ sql: 'DELETE FROM saved_analyses WHERE user_id=?', args: [req.session.userId] });
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
 
 app.use("/api", api);
 
@@ -1428,6 +1490,82 @@ app.get(["/signup", "/signup.html"], (req, res) =>
 app.get(["/reset-password", "/reset-password.html"], (req, res) =>
   res.sendFile(path.join(__dirname, "public", "reset-password.html"))
 );
+// ── Static pages ────────────────────────────────────────────────────
+app.get("/about", (req, res) => {
+  res.send(`<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>About — ImpliedLens</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Inter',sans-serif;background:#08090D;color:rgba(220,225,232,.9);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem}
+    .wrap{max-width:640px;width:100%;text-align:center}
+    .logo{font-family:'Playfair Display',serif;font-size:1.8rem;color:#fff;margin-bottom:.25rem}
+    .logo em{color:#C8882A;font-style:italic}
+    .tagline{font-size:.85rem;color:rgba(220,225,232,.4);letter-spacing:.1em;text-transform:uppercase;margin-bottom:2.5rem}
+    h1{font-family:'Playfair Display',serif;font-size:2.2rem;margin-bottom:1rem;line-height:1.3}
+    p{font-size:.95rem;color:rgba(220,225,232,.65);line-height:1.8;margin-bottom:1.25rem}
+    .socials{display:flex;gap:1rem;justify-content:center;margin:2rem 0}
+    .soc-btn{display:inline-flex;align-items:center;gap:8px;padding:.65rem 1.4rem;border-radius:8px;border:1px solid rgba(200,136,42,.35);color:#C8882A;text-decoration:none;font-size:.85rem;font-weight:500;transition:all .18s}
+    .soc-btn:hover{background:rgba(200,136,42,.1);border-color:#C8882A}
+    .back{display:inline-block;margin-top:1.5rem;color:rgba(220,225,232,.4);font-size:.8rem;text-decoration:none}
+    .back:hover{color:#C8882A}
+  </style></head><body>
+  <div class="wrap">
+    <div class="logo">Implied<em>Lens</em></div>
+    <div class="tagline">Stock Analysis Platform</div>
+    <h1>Built for the self-directed investor.</h1>
+    <p>ImpliedLens gives individual investors access to the same analytical tools used by professional analysts — DCF valuation, financial statement analysis, earnings history, risk metrics, and more — without the Bloomberg price tag.</p>
+    <p>The platform pulls data directly from SEC EDGAR filings, Yahoo Finance, and Finnhub, so every number you see traces back to a primary source.</p>
+    <p>Follow along as we build and improve the platform.</p>
+    <div class="socials">
+      <a href="https://x.com/ImpliedLens" target="_blank" class="soc-btn">𝕏 @ImpliedLens</a>
+      <a href="https://instagram.com/ImpliedLens" target="_blank" class="soc-btn">📸 @ImpliedLens</a>
+    </div>
+    <a href="/" class="back">← Back to ImpliedLens</a>
+  </div>
+</body></html>`);
+});
+
+app.get("/blog", (req, res) => {
+  res.send(`<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Blog — ImpliedLens</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Inter',sans-serif;background:#08090D;color:rgba(220,225,232,.9);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem}
+    .wrap{max-width:640px;width:100%;text-align:center}
+    .logo{font-family:'Playfair Display',serif;font-size:1.8rem;color:#fff;margin-bottom:.25rem}
+    .logo em{color:#C8882A;font-style:italic}
+    .tagline{font-size:.85rem;color:rgba(220,225,232,.4);letter-spacing:.1em;text-transform:uppercase;margin-bottom:2.5rem}
+    h1{font-family:'Playfair Display',serif;font-size:2.2rem;margin-bottom:1rem;line-height:1.3}
+    p{font-size:.95rem;color:rgba(220,225,232,.65);line-height:1.8;margin-bottom:1.25rem}
+    .socials{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin:2rem 0}
+    .soc-btn{display:inline-flex;align-items:center;gap:8px;padding:.65rem 1.4rem;border-radius:8px;border:1px solid rgba(200,136,42,.35);color:#C8882A;text-decoration:none;font-size:.85rem;font-weight:500;transition:all .18s}
+    .soc-btn:hover{background:rgba(200,136,42,.1);border-color:#C8882A}
+    .pill{display:inline-block;padding:.25rem .75rem;border-radius:100px;background:rgba(200,136,42,.12);color:#C8882A;font-size:.72rem;font-weight:600;letter-spacing:.06em;margin-bottom:1.5rem}
+    .back{display:inline-block;margin-top:1.5rem;color:rgba(220,225,232,.4);font-size:.8rem;text-decoration:none}
+    .back:hover{color:#C8882A}
+  </style></head><body>
+  <div class="wrap">
+    <div class="logo">Implied<em>Lens</em></div>
+    <div class="tagline">Stock Analysis Platform</div>
+    <span class="pill">COMING SOON</span>
+    <h1>Market insights &amp; platform updates.</h1>
+    <p>The ImpliedLens blog is where we'll share analysis walkthroughs, feature updates, investing frameworks, and how to get the most out of the platform.</p>
+    <p>In the meantime, follow us on social for updates and market commentary.</p>
+    <div class="socials">
+      <a href="https://x.com/ImpliedLens" target="_blank" class="soc-btn">𝕏 @ImpliedLens</a>
+      <a href="https://instagram.com/ImpliedLens" target="_blank" class="soc-btn">📸 @ImpliedLens</a>
+    </div>
+    <a href="/" class="back">← Back to ImpliedLens</a>
+  </div>
+</body></html>`);
+});
+
 app.get("*", (req, res) =>
   res.sendFile(path.join(__dirname, "index.html"))
 );

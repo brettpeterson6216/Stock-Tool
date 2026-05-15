@@ -1126,6 +1126,8 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
         }
 
         if (typeof decorateProTabs !== 'undefined') decorateProTabs();
+        // Sync saved analyses from DB
+        if (typeof syncSavesFromDB === 'function') syncSavesFromDB();
 
         // Logged-in users go straight to tool view unless they explicitly came home
         if (!window.location.search.includes('view=home')) {
@@ -1194,23 +1196,15 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
 <!-- ══════════ VIEW: HOME ══════════ -->
 <div id="view-home">
 
-  <!-- HERO -->
+  <!-- ═══════════════ HERO ═══════════════ -->
   <section class="hero">
     <div class="hero-radial"></div>
     <div class="hero-badge fu1">Now with updated market data</div>
     <h1 class="hero-h1 fu2">Run <em>institutional-grade</em> projections on any stock.</h1>
-    <p class="hero-sub fu3">Live prices · DCF valuation · Technical indicators · Side-by-side comparison · Scenario modeling. Everything professional analysts use — in one platform.</p>
-    <div class="hero-audience fu3">
-      <span>Built for</span>
-      <span class="aud-pill">DIY Investors</span>
-      <span class="aud-sep">·</span>
-      <span class="aud-pill">Research Analysts</span>
-      <span class="aud-sep">·</span>
-      <span class="aud-pill">Options Traders</span>
-    </div>
+    <p class="hero-sub fu3">DCF valuation · Technical analysis · Financial statements · Risk metrics · Everything in one place.</p>
     <div class="hero-ctas fu4">
-      <a href='#features' class='btn-primary' id='hero-cta-main' onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'});return false;">What's inside ↓</a>
-      <a href="#pricing" class="btn-secondary" id="hero-cta-secondary">See pricing</a>
+      <a href="#" class="btn-primary" id="hero-cta-main" onclick="navGoTo('analyze');return false;">Launch the Tool →</a>
+      <a href="#pricing" class="btn-secondary" id="hero-cta-secondary" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'});return false;">See pricing</a>
     </div>
     <div class="hero-stats fu4">
       <div class="hero-stat"><span class="h-stat-num">50,000+</span><span class="h-stat-lbl">Stocks Covered</span></div>
@@ -1221,92 +1215,84 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
     <div class="trust-bar">
       <div class="trust-item">No Bloomberg terminal required</div>
       <div class="trust-item">No credit card for free plan</div>
-      <div class="trust-item">Export-ready PDF reports</div>
       <div class="trust-item">Cancel anytime</div>
     </div>
   </section>
 
+  <!-- ═══════════════ TOOL SHORTCUTS ═══════════════ -->
+  <section style="padding:3rem 0 2rem; background:var(--card);">
+    <div class="container">
+      <span class="sec-label">Quick Access</span>
+      <h2 class="sec-h2" style="margin-bottom:1.75rem;">Jump straight into any tool.</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;">
+        <div class="home-tool-card" onclick="navGoTo('analyze')">
+          <i class="ti ti-chart-candle home-tc-icon"></i>
+          <div class="home-tc-name">Chart &amp; Analysis</div>
+          <div class="home-tc-desc">Price chart, RSI, MACD, Bollinger Bands</div>
+        </div>
+        <div class="home-tool-card" onclick="navGoTo('financials')">
+          <i class="ti ti-table home-tc-icon"></i>
+          <div class="home-tc-name">Financials</div>
+          <div class="home-tc-desc">4-year income, balance sheet, cash flow</div>
+        </div>
+        <div class="home-tool-card" onclick="navGoTo('dcf')">
+          <i class="ti ti-calculator home-tc-icon"></i>
+          <div class="home-tc-name">DCF Valuation</div>
+          <div class="home-tc-desc">Intrinsic value &amp; Graham Number</div>
+        </div>
+        <div class="home-tool-card" onclick="navGoTo('projection')">
+          <i class="ti ti-timeline home-tc-icon"></i>
+          <div class="home-tc-name">Projection Model</div>
+          <div class="home-tc-desc">Bear / base / bull scenario forecasts</div>
+        </div>
+        <div class="home-tool-card" onclick="navGoTo('screener')">
+          <i class="ti ti-filter home-tc-icon"></i>
+          <div class="home-tc-name">Stock Screener</div>
+          <div class="home-tc-desc">Filter by sector, P/E, growth &amp; more</div>
+        </div>
+        <div class="home-tool-card" onclick="navGoTo('advmetrics')">
+          <i class="ti ti-report-analytics home-tc-icon"></i>
+          <div class="home-tc-name">Advanced Metrics</div>
+          <div class="home-tc-desc">EV/EBITDA, ROIC, FCF yield, 20+ ratios</div>
+        </div>
+        <div class="home-tool-card" onclick="navGoTo('compare')">
+          <i class="ti ti-adjustments-horizontal home-tc-icon"></i>
+          <div class="home-tc-name">Compare Stocks</div>
+          <div class="home-tc-desc">Side-by-side up to 4 tickers</div>
+        </div>
+        <div class="home-tool-card" onclick="navGoTo('education')">
+          <i class="ti ti-school home-tc-icon"></i>
+          <div class="home-tc-name">Education</div>
+          <div class="home-tc-desc">P/E, DCF, WACC &amp; every concept explained</div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-  <!-- FEATURES -->
+  <!-- ═══════════════ FEATURES ═══════════════ -->
   <section id="features">
     <div class="container">
       <span class="sec-label">What's inside</span>
       <h2 class="sec-h2">Every tool a serious investor needs.</h2>
       <p class="sec-sub">Professional-grade analysis packed into one platform — no spreadsheets, no finance degree required.</p>
       <div class="features-bento">
-        <div class="feat-card">
-          <div class="feat-icon"><span style="font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">LD</span></div>
-          <h3>Live Market Data</h3>
-          <p>Up-to-date price, volume, market cap, 52-week range, and exchange data for any publicly traded stock.</p>
-        </div>
-        <div class="feat-card">
-          <div class="feat-icon"><span style="font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">CH</span></div>
-          <h3>Interactive Charts</h3>
-          <p>Price with MA/Bollinger overlays, RSI, MACD, volume, daily returns, and performance comparison charts.</p>
-        </div>
-        <div class="feat-card">
-          <div class="feat-icon"><span style="font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">FS</span></div>
-          <h3>Financial Statements</h3>
-          <p>Annual income statement, balance sheet, and cash flow for the last 4 years — pulled direct from filings.</p>
-          <div class="feat-pro">PRO</div>
-        </div>
-        <div class="feat-card">
-          <div class="feat-icon"><span style="font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">AM</span></div>
-          <h3>Advanced Metrics</h3>
-          <p>EV/EBITDA, ROIC, gross margin, FCF yield, debt ratios, and 20+ deep fundamental metrics by category.</p>
-          <div class="feat-pro">PRO</div>
-        </div>
-        <div class="feat-card">
-          <div class="feat-icon"><span style="font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">EH</span></div>
-          <h3>Earnings History</h3>
-          <p>EPS estimate vs. actual for the last 12 quarters with beat/miss badges and a beat-rate summary.</p>
-        </div>
-        <div class="feat-card">
-          <div class="feat-icon"><span style="font-family:var(--mono);font-size:.52rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">SEC</span></div>
-          <h3>SEC Filings</h3>
-          <p>One-click access to 10-K, 10-Q, 8-K, and full EDGAR filing history for any ticker.</p>
-        </div>
-        <div class="feat-card">
-          <div class="feat-icon"><span style="font-family:var(--mono);font-size:.52rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">CMP</span></div>
-          <h3>Side-by-Side Comparison</h3>
-          <p>Compare up to 4 tickers on key metrics with best/worst highlighting, performance chart, and fundamental radar.</p>
-          <div class="feat-pro">PRO</div>
-        </div>
-        <div class="feat-card">
-          <div class="feat-icon"><span style="font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">PR</span></div>
-          <h3>3-Scenario Projection</h3>
-          <p>Model bear, base, and bull cases with custom growth rates, margin assumptions, exit P/E, and CAGR.</p>
-          <div class="feat-pro">PRO</div>
-        </div>
-        <div class="feat-card">
-          <div class="feat-icon"><span style="font-family:var(--mono);font-size:.52rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">DCF</span></div>
-          <h3>DCF Valuation</h3>
-          <p>Two-stage discounted cash flow model with custom WACC, terminal growth, and margin of safety output.</p>
-          <div class="feat-pro">PRO</div>
-        </div>
-        <div class="feat-card">
-          <div class="feat-icon"><span style="font-family:var(--mono);font-size:.52rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">SCR</span></div>
-          <h3>Stock Screener</h3>
-          <p>Filter 50,000+ stocks by P/E, P/B, dividend yield, market cap, sector, RSI, and 1-year return.</p>
-          <div class="feat-pro">PRO</div>
-        </div>
-        <div class="feat-card">
-          <div class="feat-icon"><span style="font-family:var(--mono);font-size:.52rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">EDU</span></div>
-          <h3>Education Center</h3>
-          <p>From P/E ratios to DCF valuation — bite-sized explanations of every metric and concept in the platform.</p>
-        </div>
-        <div class="feat-card">
-          <div class="feat-icon"><span style="font-family:var(--mono);font-size:.52rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">PDF</span></div>
-          <h3>PDF Report Export</h3>
-          <p>Generate clean, professional PDF analysis reports ready to print or share with your team.</p>
-          <div class="feat-pro">PRO</div>
-        </div>
+        <div class="feat-card"><div class="feat-icon"><span style="font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">LD</span></div><h3>Market Data</h3><p>Up-to-date price, volume, market cap, 52-week range, and exchange data for any publicly traded stock.</p></div>
+        <div class="feat-card"><div class="feat-icon"><span style="font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">CH</span></div><h3>Interactive Charts</h3><p>Price with MA/Bollinger overlays, RSI, MACD, volume, daily returns, and performance comparison charts.</p></div>
+        <div class="feat-card"><div class="feat-icon"><span style="font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">FS</span></div><h3>Financial Statements</h3><p>Annual income statement, balance sheet, and cash flow for the last 4 years — pulled direct from filings.</p><div class="feat-pro">PRO</div></div>
+        <div class="feat-card"><div class="feat-icon"><span style="font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">AM</span></div><h3>Advanced Metrics</h3><p>EV/EBITDA, ROIC, gross margin, FCF yield, debt ratios, and 20+ deep fundamental metrics by category.</p><div class="feat-pro">PRO</div></div>
+        <div class="feat-card"><div class="feat-icon"><span style="font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">EH</span></div><h3>Earnings History</h3><p>EPS estimate vs. actual for the last 12 quarters with beat/miss badges and a beat-rate summary.</p></div>
+        <div class="feat-card"><div class="feat-icon"><span style="font-family:var(--mono);font-size:.52rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">SEC</span></div><h3>SEC Filings</h3><p>One-click access to 10-K, 10-Q, 8-K, and full EDGAR filing history for any ticker.</p></div>
+        <div class="feat-card"><div class="feat-icon"><span style="font-family:var(--mono);font-size:.52rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">CMP</span></div><h3>Side-by-Side Comparison</h3><p>Compare up to 4 tickers on key metrics with best/worst highlighting, performance chart, and fundamental radar.</p><div class="feat-pro">PRO</div></div>
+        <div class="feat-card"><div class="feat-icon"><span style="font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">PR</span></div><h3>3-Scenario Projection</h3><p>Model bear, base, and bull cases with custom growth rates, margin assumptions, exit P/E, and CAGR.</p><div class="feat-pro">PRO</div></div>
+        <div class="feat-card"><div class="feat-icon"><span style="font-family:var(--mono);font-size:.52rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">DCF</span></div><h3>DCF Valuation</h3><p>Two-stage discounted cash flow with WACC, terminal growth, margin of safety, and Graham Number.</p><div class="feat-pro">PRO</div></div>
+        <div class="feat-card"><div class="feat-icon"><span style="font-family:var(--mono);font-size:.52rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">SCR</span></div><h3>Stock Screener</h3><p>Filter across sectors by P/E, P/B, dividend yield, market cap, revenue growth, and 1-year return.</p><div class="feat-pro">PRO</div></div>
+        <div class="feat-card"><div class="feat-icon"><span style="font-family:var(--mono);font-size:.52rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">EDU</span></div><h3>Education Center</h3><p>From P/E ratios to DCF valuation — bite-sized explanations of every metric and concept in the platform.</p></div>
+        <div class="feat-card"><div class="feat-icon"><span style="font-family:var(--mono);font-size:.52rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">PDF</span></div><h3>PDF Report Export</h3><p>Generate clean, professional PDF analysis reports ready to print or share.</p><div class="feat-pro">PRO</div></div>
       </div>
     </div>
   </section>
 
   <!-- PRICING -->
-  <!-- Pro member banner (shown instead of pricing cards for trial/pro users) -->
   <div id="pro-member-banner" style="display:none; background:var(--card); border-top:1px solid var(--border2); border-bottom:1px solid var(--border2); padding:3rem 2rem; text-align:center;">
     <div style="max-width:560px; margin:0 auto;">
       <div style="font-family:var(--mono); font-size:.7rem; color:var(--gold-d); text-transform:uppercase; letter-spacing:.18em; margin-bottom:.75rem;">Your plan</div>
@@ -1316,14 +1302,11 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
     </div>
   </div>
 
-
-
-
   <section id="pricing" style="">
     <div class="container">
       <span class="sec-label">Simple, honest pricing</span>
       <h2 class="sec-h2">Start free. Upgrade when you're ready.</h2>
-      <p class="sec-sub">No Bloomberg fees. No hidden paywalls. Professional tools at a price that makes sense for individual investors and small teams.</p>
+      <p class="sec-sub">No Bloomberg fees. No hidden paywalls. Professional tools at a price that makes sense for individual investors.</p>
       <div class="pricing-grid">
         <div class="pricing-card">
           <div class="pricing-tier">Starter</div>
@@ -1331,9 +1314,9 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
           <p class="p-desc">For curious investors exploring the platform with no commitment.</p>
           <ul class="p-features">
             <li>5 stock analyses per day</li>
-            <li>Live price & key metrics</li>
+            <li>Live price &amp; key metrics</li>
             <li>Price chart with MA overlays</li>
-            <li>RSI & MACD indicators</li>
+            <li>RSI &amp; MACD indicators</li>
             <li>3-scenario projection model</li>
             <li>2-stock comparison table</li>
           </ul>
@@ -1350,10 +1333,10 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
             <li>DCF intrinsic value model</li>
             <li>Advanced projection (6 inputs)</li>
             <li>4-stock side-by-side comparison</li>
-            <li>Performance & radar charts</li>
+            <li>Performance &amp; radar charts</li>
             <li>Full stock screener</li>
             <li>PDF report export</li>
-            <li>Risk & volatility dashboard</li>
+            <li>Risk &amp; volatility dashboard</li>
           </ul>
           <button class="btn-plan btn-plan-gold" id="pricing-pro-btn" onclick="showUpgradeModal()">Start 7-day free trial →</button>
         </div>
@@ -1362,7 +1345,7 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
           <div class="pricing-tier">Pro Annual</div>
           <div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">59.99</span><span class="p-per">/year</span></div>
           <p class="p-desc" style="font-size:.8rem;margin-bottom:.25rem;opacity:.7;">just $5/month · vs $95.88 billed monthly</p>
-          <p class="p-desc">Everything in Pro, billed once a year. Best value for committed investors.</p>
+          <p class="p-desc">Everything in Pro, billed once a year.</p>
           <ul class="p-features">
             <li>Unlimited stock analyses</li>
             <li>DCF intrinsic value model</li>
@@ -1379,69 +1362,17 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
     </div>
   </section>
 
-
-  <!-- FREE vs PRO COMPARISON TABLE -->
-  <section id="compare-plans" style="padding:4rem 0 2rem;">
-    <div class="container">
-      <span class="sec-label">Feature breakdown</span>
-      <h2 class="sec-h2" style="margin-bottom:.5rem;">Free vs Pro — what's the difference?</h2>
-      <p class="sec-sub" style="margin-bottom:2rem;">Everything you get with each plan, side by side.</p>
-      <div class="compare-table-wrap">
-        <table class="compare-table">
-          <thead>
-            <tr>
-              <th>Feature</th>
-              <th>Starter <span style="color:var(--text5);font-weight:400;font-size:.75em;">Free</span></th>
-              <th class="cth-pro">Pro <span style="color:var(--gold);font-weight:400;font-size:.75em;">$7.99/mo</span></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="compare-group"><td colspan="3">Core Analysis</td></tr>
-            <tr><td>Live stock quotes &amp; price chart</td><td class="ct-yes">✓</td><td class="ct-yes">✓</td></tr>
-            <tr><td>RSI, MACD, Volume, Returns charts</td><td class="ct-yes">✓</td><td class="ct-yes">✓</td></tr>
-            <tr><td>Key metrics (52W, RSI, MA, Vol)</td><td class="ct-yes">✓</td><td class="ct-yes">✓</td></tr>
-            <tr><td>3-scenario forward projection</td><td class="ct-yes">✓</td><td class="ct-yes">✓</td></tr>
-            <tr><td>Quick DCF calculator</td><td class="ct-yes">✓</td><td class="ct-yes">✓</td></tr>
-            <tr><td>Stock analyses per day</td><td class="ct-lim">5 / day</td><td class="ct-yes">Unlimited</td></tr>
-            <tr class="compare-group"><td colspan="3">Pro Features</td></tr>
-            <tr><td>Financial statements (4 years)</td><td class="ct-no">—</td><td class="ct-yes">✓</td></tr>
-            <tr><td>Advanced metrics (EV/EBITDA, ROIC…)</td><td class="ct-no">—</td><td class="ct-yes">✓</td></tr>
-            <tr><td>Advanced DCF model (6 inputs)</td><td class="ct-no">—</td><td class="ct-yes">✓</td></tr>
-            <tr><td>Full stock screener</td><td class="ct-no">—</td><td class="ct-yes">✓</td></tr>
-            <tr><td>4-stock side-by-side comparison</td><td class="ct-no">—</td><td class="ct-yes">✓</td></tr>
-            <tr><td>Performance &amp; radar charts</td><td class="ct-no">—</td><td class="ct-yes">✓</td></tr>
-            <tr><td>PDF report export</td><td class="ct-no">—</td><td class="ct-yes">✓</td></tr>
-            <tr><td>Risk &amp; volatility dashboard</td><td class="ct-no">—</td><td class="ct-yes">✓</td></tr>
-            <tr><td>SEC filings access</td><td class="ct-no">—</td><td class="ct-yes">✓</td></tr>
-            <tr><td>Analyst consensus &amp; price targets</td><td class="ct-no">—</td><td class="ct-yes">✓</td></tr>
-            <tr><td>Earnings history (12 quarters)</td><td class="ct-no">—</td><td class="ct-yes">✓</td></tr>
-          </tbody>
-        </table>
-        <div style="text-align:center;margin-top:1.5rem;">
-          <button class="btn-plan btn-plan-gold" onclick="showUpgradeModal()" style="padding:.75rem 2.5rem;font-size:.95rem;">Start 7-day free trial →</button>
-          <p style="font-size:.72rem;color:var(--text5);margin-top:.5rem;">No credit card required during trial</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- CTA -->
+  <!-- CTA STRIP -->
   <section class="cta-strip" id="cta-strip">
-    <div class="container">
-      <span class="sec-label" style="color:var(--gold);">Get started today</span>
-      <h2 class="sec-h2">Stop guessing. Start projecting.</h2>
-      <p>Run data-driven analysis before every trade. Free plan available — no credit card required.</p>
-      <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
-        <a href="#tool" class="btn-primary" id="cta-btn-main" style="background:var(--gold);color:var(--ink);">Try free live tool ↓</a>
-        <a href="#pricing" class="btn-secondary" id="cta-btn-plans" style="border-color:var(--text5);color:var(--cream);">View all plans</a>
-      </div>
+    <div class="container" style="text-align:center;">
+      <h2 class="sec-h2" style="color:inherit;margin-bottom:.5rem;">Ready to start?</h2>
+      <p style="color:inherit;opacity:.7;margin-bottom:1.5rem;">Run data-driven analysis before every trade.</p>
+      <a href="#" class="btn-primary" id="cta-btn-main" onclick="navGoTo('analyze');return false;">Try free live tool ↓</a>
+      <a href="#pricing" class="btn-secondary" id="cta-btn-plans" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'});return false;" style="margin-left:12px;">View all plans</a>
     </div>
   </section>
 
-</div><!-- /view-home -->
-
-<!-- ══════════ VIEW: LIVE TOOL ══════════ -->
-<div id="view-tool" style="display:none;">
+id="view-tool" style="display:none;">
   <div class="app-shell">
     <!-- ── Left sidebar ── -->
     <div class="app-sidebar">
@@ -1865,6 +1796,7 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
 
           <div class="app-section" id="sec-screener"><div class="acc-body" id="body-screener" style="display:none;">
 <div class="scr-filters">
+              <div class="scr-filter-group"><label>Sector</label><select id="scr-sector" onchange="applyScreener()" style="width:100%;background:var(--card);color:var(--text);border:1px solid var(--border2);border-radius:var(--r);padding:4px 6px;font-size:.72rem;margin-top:6px;"><option value="ALL">All Sectors</option><option value="Tech">Technology</option><option value="Health">Healthcare</option><option value="Finance">Financials</option><option value="Cons.Disc">Consumer Disc.</option><option value="Staples">Consumer Staples</option><option value="Energy">Energy</option><option value="Industrials">Industrials</option><option value="Materials">Materials</option><option value="Real Est.">Real Estate</option><option value="Utilities">Utilities</option><option value="ETF">ETFs</option></select></div>
               <div class="scr-filter-group"><label>Max P/E <span id="scr-pe-val">50x</span></label><input type="range" class="scr-slider" id="scr-pe" min="5" max="200" value="50" oninput="document.getElementById('scr-pe-val').textContent=this.value+'x';applyScreener()"></div>
               <div class="scr-filter-group"><label>Max P/B <span id="scr-pb-val">20x</span></label><input type="range" class="scr-slider" id="scr-pb" min="0" max="50" value="20" oninput="document.getElementById('scr-pb-val').textContent=this.value+'x';applyScreener()"></div>
               <div class="scr-filter-group"><label>Min Div Yield <span id="scr-div-val">0%</span></label><input type="range" class="scr-slider" id="scr-div" min="0" max="10" value="0" step="0.5" oninput="document.getElementById('scr-div-val').textContent=this.value+'%';applyScreener()"></div>
@@ -2897,6 +2829,22 @@ html[data-theme="dark"] .modal-close { color: var(--text4); }
 html[data-theme="dark"] .modal ul li { color: var(--text3); }
 html[data-theme="dark"] .modal p[style*="ink4"] { color: var(--text3) !important; }
 html[data-theme="dark"] .plan-opt-sub { color: var(--text4); }
+
+/* ── Home tool cards ── */
+.home-tool-card {
+  background:var(--card); border:1px solid var(--border2);
+  border-radius:var(--r3); padding:1.25rem 1rem 1rem;
+  cursor:pointer; transition:all .18s;
+  display:flex; flex-direction:column; gap:6px;
+}
+.home-tool-card:hover {
+  border-color:var(--gold); background:rgba(200,136,42,.06);
+  transform:translateY(-2px); box-shadow:var(--shadow);
+}
+.home-tc-icon { font-size:1.3rem; color:var(--gold); margin-bottom:2px; }
+.home-tc-name { font-weight:600; font-size:.9rem; color:var(--text); }
+.home-tc-desc { font-size:.75rem; color:var(--text4); line-height:1.5; }
+
 </style>
 <script>
 /* ══════════════════════════════════════════════════════
@@ -3070,11 +3018,24 @@ var _savedTypeFilter = 'ALL';
 
 const SA_KEY = 'impliedLens_savedAnalyses';
 
+// Saves storage — DB when logged in, localStorage fallback
 function getSavedAnalyses() {
   try { return JSON.parse(localStorage.getItem(SA_KEY) || '[]'); } catch(_) { return []; }
 }
 function putSavedAnalyses(arr) {
   try { localStorage.setItem(SA_KEY, JSON.stringify(arr)); } catch(_) {}
+}
+// Load from DB into local cache and re-render
+async function syncSavesFromDB() {
+  try {
+    const r = await fetch('/api/saves', { credentials:'same-origin' });
+    if (!r.ok) return;
+    const rows = await r.json();
+    // Merge DB rows into localStorage format
+    const mapped = rows.map(row => ({ ...row.data, id: 'db_' + row.id, _dbId: row.id, ticker: row.ticker, type: row.type, title: row.label || row.ticker }));
+    putSavedAnalyses(mapped);
+    renderSavedAnalyses();
+  } catch(_) {}
 }
 
 function saveAnalysis(type) {
@@ -3104,9 +3065,17 @@ function saveAnalysis(type) {
   const entry = { id: Date.now(), type, ticker: S.ticker || '', title, date: now, data };
   const all = getSavedAnalyses();
   all.unshift(entry);
-  putSavedAnalyses(all.slice(0, 100)); // cap at 100
-  toast('Analysis saved!', 'green');
+  putSavedAnalyses(all.slice(0, 100));
+  toast('Saved ✓', 'green');
   renderSavedAnalyses();
+  // Persist to DB if logged in
+  if (S.userPlan && S.userPlan !== 'free_guest') {
+    fetch('/api/saves', {
+      method: 'POST', credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ticker: entry.ticker || S.ticker, type: entry.type, label: entry.title, data: entry })
+    }).catch(() => {});
+  }
 }
 
 function setSavedSort(s) {
@@ -3122,15 +3091,21 @@ function setSavedTypeFilter(t) {
 }
 
 function deleteSavedAnalysis(id) {
-  const all = getSavedAnalyses().filter(a => a.id !== id);
-  putSavedAnalyses(all);
+  const all = getSavedAnalyses();
+  const entry = all.find(a => a.id === id);
+  putSavedAnalyses(all.filter(a => a.id !== id));
   renderSavedAnalyses();
+  // Also delete from DB if it has a DB id
+  if (entry && entry._dbId) {
+    fetch('/api/saves/' + entry._dbId, { method:'DELETE', credentials:'same-origin' }).catch(() => {});
+  }
 }
 
 function clearAllSaved() {
   if (!confirm('Clear all saved analyses? This cannot be undone.')) return;
   putSavedAnalyses([]);
   renderSavedAnalyses();
+  fetch('/api/saves', { method:'DELETE', credentials:'same-origin' }).catch(() => {});
 }
 
 function loadSavedAnalysis(entry) {
@@ -4324,12 +4299,15 @@ function applyScreener() {
   var minDiv=parseFloat(document.getElementById('scr-div').value);
   var minCap=parseFloat(document.getElementById('scr-cap').value)*1e9;
   var minRet=parseFloat(document.getElementById('scr-ret').value);
+  var sectorEl=document.getElementById('scr-sector');
+  var sector=sectorEl?sectorEl.value:'ALL';
   var filtered=S.screenerData.filter(function(s){
     if(s.pe!=null && s.pe>0 && s.pe>maxPE) return false;
     if(s.pb!=null && s.pb>0 && s.pb>maxPB) return false;
     if((s.dividendYield||0)<minDiv) return false;
     if(s.marketCap!=null && s.marketCap<minCap) return false;
     if(s.change1Y!=null && s.change1Y<minRet) return false;
+    if(sector!=='ALL' && (s.sector||'')!==sector) return false;
     return true;
   });
   var col=S.screenerSort.col, dir=S.screenerSort.dir;
