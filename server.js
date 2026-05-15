@@ -716,6 +716,32 @@ api.post('/auth/reset-password', async (req, res) => {
 // ============================================================
 //  Change password (logged-in user)
 // ============================================================
+api.post('/auth/change-username', async (req, res) => {
+  if (!req.session.userId) return res.status(401).json({ error: 'Not logged in.' });
+  const { username } = req.body;
+  if (!username || username.length < 3)
+    return res.status(400).json({ error: 'Username must be at least 3 characters.' });
+  if (!/^[a-z0-9_.-]+$/i.test(username))
+    return res.status(400).json({ error: 'Only letters, numbers, _ . and - are allowed.' });
+  try {
+    // Check uniqueness
+    const existing = await db.execute({
+      sql: 'SELECT id FROM users WHERE LOWER(username) = LOWER(?) AND id != ?',
+      args: [username, req.session.userId],
+    });
+    if (existing.rows.length > 0)
+      return res.status(400).json({ error: 'That username is already taken.' });
+    await db.execute({
+      sql: 'UPDATE users SET username = ? WHERE id = ?',
+      args: [username.toLowerCase(), req.session.userId],
+    });
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error('change-username error:', err);
+    return res.status(500).json({ error: 'Something went wrong.' });
+  }
+});
+
 api.post('/auth/change-password', async (req, res) => {
   if (!req.session.userId) return res.status(401).json({ error: 'Not logged in.' });
   const { currentPassword, newPassword } = req.body;
@@ -1578,28 +1604,4 @@ app.get("/blog", (req, res) => {
     .soc-btn:hover{background:rgba(200,136,42,.1);border-color:#C8882A}
     .pill{display:inline-block;padding:.25rem .75rem;border-radius:100px;background:rgba(200,136,42,.12);color:#C8882A;font-size:.72rem;font-weight:600;letter-spacing:.06em;margin-bottom:1.5rem}
     .back{display:inline-block;margin-top:1.5rem;color:rgba(220,225,232,.4);font-size:.8rem;text-decoration:none}
-    .back:hover{color:#C8882A}
-  </style></head><body>
-  <div class="wrap">
-    <div class="logo">Implied<em>Lens</em></div>
-    <div class="tagline">Stock Analysis Platform</div>
-    <span class="pill">COMING SOON</span>
-    <h1>Market insights &amp; platform updates.</h1>
-    <p>The ImpliedLens blog is where we'll share analysis walkthroughs, feature updates, investing frameworks, and how to get the most out of the platform.</p>
-    <p>In the meantime, follow us on social for updates and market commentary.</p>
-    <div class="socials">
-      <a href="https://x.com/ImpliedLens" target="_blank" class="soc-btn">𝕏 @ImpliedLens</a>
-      <a href="https://instagram.com/ImpliedLens" target="_blank" class="soc-btn">📸 @ImpliedLens</a>
-    </div>
-    <a href="/" class="back">← Back to ImpliedLens</a>
-  </div>
-</body></html>`);
-});
-
-app.get("*", (req, res) =>
-  res.sendFile(path.join(__dirname, "index.html"))
-);
-
-initDb().then(() => {
-  app.listen(PORT, () => console.log(`Implied Lens running on port ${PORT}`));
-}).catch(err => { console.error("DB init failed:", err); process.exit(1); });
+    .back:hover{color:#C

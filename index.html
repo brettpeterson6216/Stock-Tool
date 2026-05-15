@@ -2065,6 +2065,17 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
     <!-- Divider -->
     <div style="border-top:1px solid var(--border2);margin-bottom:1.25rem;"></div>
 
+    <!-- Change username -->
+    <div style="font-size:.78rem;font-weight:600;color:var(--ink);margin-bottom:.75rem;">Change Username</div>
+    <div style="display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.5rem;">
+      <input type="text" id="am-new-username" placeholder="New username" class="input-light" autocomplete="off" style="text-transform:lowercase;">
+      <div id="am-username-msg" style="font-size:.78rem;min-height:1rem;"></div>
+      <button onclick="submitUsernameChange()" style="align-self:flex-start;background:var(--ink);color:var(--cream);border:none;padding:.55rem 1.25rem;border-radius:var(--r2);font-size:.82rem;font-weight:500;cursor:pointer;transition:background .15s;letter-spacing:.01em;" onmouseover="this.style.background='var(--ink2)'" onmouseout="this.style.background='var(--ink)'">Update Username</button>
+    </div>
+
+    <!-- Divider -->
+    <div style="border-top:1px solid var(--border2);margin-bottom:1.25rem;"></div>
+
     <!-- Change password -->
     <div style="font-size:.78rem;font-weight:600;color:var(--ink);margin-bottom:.75rem;">Change Password</div>
     <div style="display:flex;flex-direction:column;gap:.6rem;">
@@ -2857,8 +2868,11 @@ html[data-theme="dark"] #acct-modal-bg div[style*="font-size:.78rem;font-weight:
 html[data-theme="dark"] #am-sub-btn { background: var(--card) !important; color: var(--text) !important; border: 1px solid var(--border2) !important; }
 html[data-theme="dark"] #am-sub-btn:hover { background: var(--border2) !important; }
 /* Update Password button */
-html[data-theme="dark"] #acct-modal-bg button[onclick*="submitPasswordChange"] { background: var(--gold) !important; color: #fff !important; border: none !important; }
-html[data-theme="dark"] #acct-modal-bg button[onclick*="submitPasswordChange"]:hover { background: var(--gold-d) !important; }
+html[data-theme="dark"] #acct-modal-bg button[onclick*="submitPasswordChange"],
+html[data-theme="dark"] #acct-modal-bg button[onclick*="submitUsernameChange"] { background: var(--gold) !important; color: #fff !important; border: none !important; }
+html[data-theme="dark"] #acct-modal-bg button[onclick*="submitPasswordChange"]:hover,
+html[data-theme="dark"] #acct-modal-bg button[onclick*="submitUsernameChange"]:hover { background: var(--gold-d) !important; }
+html[data-theme="dark"] #am-username-msg { color: var(--text3) !important; }
 /* Password message text */
 html[data-theme="dark"] #am-pw-msg { color: var(--text3) !important; }
 
@@ -3266,6 +3280,38 @@ async function openAccountModal() {
 
 function closeAccountModal() {
   document.getElementById('acct-modal-bg').classList.remove('show');
+}
+
+async function submitUsernameChange() {
+  const input = document.getElementById('am-new-username');
+  const msg   = document.getElementById('am-username-msg');
+  const val   = input.value.trim().toLowerCase();
+
+  if (!val)          { msg.style.color='#c0392b'; msg.textContent='Please enter a new username.'; return; }
+  if (val.length < 3) { msg.style.color='#c0392b'; msg.textContent='Username must be at least 3 characters.'; return; }
+  if (!/^[a-z0-9_.-]+$/.test(val)) { msg.style.color='#c0392b'; msg.textContent='Only letters, numbers, _ . and - are allowed.'; return; }
+
+  msg.style.color='var(--ink3)'; msg.textContent='Updating…';
+  try {
+    const r = await fetch('/api/auth/change-username', {
+      method:'POST', credentials:'same-origin',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ username: val }),
+    });
+    const data = await r.json();
+    if (data.ok) {
+      msg.style.color='#27ae60'; msg.textContent='Username updated successfully.';
+      input.value = '';
+      // Update displayed name in nav + modal header
+      document.getElementById('am-username').textContent = val;
+      const navName = document.getElementById('nav-acct-name');
+      const hdrName = document.getElementById('nav-acct-header-name');
+      if (navName) navName.textContent = val;
+      if (hdrName) hdrName.textContent = val;
+    } else {
+      msg.style.color='#c0392b'; msg.textContent = data.error || 'Update failed.';
+    }
+  } catch(_) { msg.style.color='#c0392b'; msg.textContent='Network error. Please try again.'; }
 }
 
 async function submitPasswordChange() {
@@ -5017,79 +5063,4 @@ function renderSecFilings() {
   }
   list.innerHTML = rows.map(f => {
     const badge = badgeClass(f.form);
-    const desc  = f.description || f.form;
-    const url   = f.viewerUrl && f.primaryDoc ? f.viewerUrl : f.indexUrl;
-    return `<a href="${url}" target="_blank" rel="noopener" class="sec-filing-row">
-      <span class="sec-filing-badge ${badge}">${f.form}</span>
-      <span class="sec-filing-date">${f.date}</span>
-      <span class="sec-filing-desc">${desc}</span>
-      <span class="sec-filing-arrow">&#x2197;</span>
-    </a>`;
-  }).join('');
-}
-
-async function loadSecFilings(ticker) {
-  const nostock   = document.getElementById('sec-nostock');
-  const loading   = document.getElementById('sec-loading');
-  const errEl     = document.getElementById('sec-error');
-  const cont      = document.getElementById('sec-content');
-  const entityLbl = document.getElementById('sec-entity-label');
-
-  if (!ticker) {
-    if (nostock) nostock.style.display = 'block';
-    if (cont)    cont.style.display    = 'none';
-    return;
-  }
-  if (nostock) nostock.style.display = 'none';
-  if (loading) loading.style.display = 'block';
-  if (errEl)   errEl.style.display   = 'none';
-  if (cont)    cont.style.display    = 'none';
-
-  try {
-    const r = await fetch('/api/sec/' + encodeURIComponent(ticker), { credentials: 'same-origin' });
-    const d = await r.json();
-    if (loading) loading.style.display = 'none';
-    if (!r.ok || !d.filings) throw new Error(d.error || 'No filings found');
-    if (entityLbl) entityLbl.textContent = d.entity + (d.cik ? '  \u00b7  CIK ' + d.cik : '');
-    _secFilings = d.filings;
-    _secFilter  = 'ALL';
-    renderSecFilings();
-    if (cont) cont.style.display = 'block';
-  } catch(e) {
-    if (loading) loading.style.display = 'none';
-    if (errEl)   { errEl.textContent = 'Could not load SEC filings: ' + e.message; errEl.style.display = 'block'; }
-  }
-}
-
-/* ── Boot: featured grid + enter key + clear-to-restore ── */
-(function() {
-  // Load live ticker cards
-  loadFeaturedGrid();
-
-  var ti = document.getElementById('main-ticker');
-  if (ti) {
-    // Enter key triggers search
-    ti.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') { e.preventDefault(); if (typeof fetchAndRender === 'function') fetchAndRender(); }
-    });
-    // Restore grid when input is cleared
-    ti.addEventListener('input', function() {
-      var fg = document.getElementById('featured-grid');
-      if (!fg) return;
-      fg.style.display = ti.value.trim() === '' ? 'grid' : fg.style.display;
-    });
-  }
-})();
-
-/* ── Prime analysis limit counter for free/guest users ── */
-(async () => {
-  try {
-    const r = await fetch('/api/me/limit', { credentials: 'same-origin' });
-    if (!r.ok) return;
-    const d = await r.json();
-    if (d.limit !== null) updateLimitUI(d.remaining, d.limit, d.plan);
-  } catch(_) {}
-})();
-</script>
-</body>
-</html>
+    const desc 
