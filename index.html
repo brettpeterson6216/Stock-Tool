@@ -3711,6 +3711,54 @@ function renderStock(result, ticker) {
   if(document.getElementById('adv-pe-now')) document.getElementById('adv-pe-now').value=peNow;
   if(document.getElementById('dcf-price')) document.getElementById('dcf-price').value=price.toFixed(2);
 
+  // Async: fetch analyst consensus estimates and auto-fill projection defaults
+  (async () => {
+    try {
+      const er = await fetch('/api/estimates/' + encodeURIComponent(ticker), { credentials:'same-origin' });
+      if (!er.ok) return;
+      const est = await er.json();
+
+      // Revenue growth → use analyst consensus if available, otherwise keep current
+      const growthEl = document.getElementById('proj-growth');
+      if (est.revenueGrowth !== null && growthEl) {
+        const g = Math.max(-50, Math.min(200, est.revenueGrowth));
+        growthEl.value = g.toFixed(1);
+        growthEl.title = 'Auto-filled from analyst consensus revenue estimate';
+      }
+
+      // Forward P/E → prefer analyst-implied over trailing
+      const peEl = document.getElementById('proj-pe');
+      if (est.forwardPE && est.forwardPE > 0 && est.forwardPE < 500 && peEl) {
+        peEl.value = Math.round(est.forwardPE);
+        peEl.title = 'Auto-filled from forward P/E estimate';
+      }
+
+      // Margin scenario → based on historical margin trend
+      const marginEl = document.getElementById('proj-margin');
+      if (est.marginTrend && marginEl) {
+        marginEl.value = est.marginTrend;
+      }
+
+      // Store estimates on S for use in tooltips/display
+      S.estimates = est;
+
+      // Show a small badge indicating data source
+      const growthLabel = document.querySelector('label[for="proj-growth"], .fc-label');
+      const badge = document.getElementById('proj-est-badge');
+      if (!badge) {
+        const projForm = document.getElementById('proj-growth')?.closest('.fc-grid, div');
+        if (projForm) {
+          const b = document.createElement('div');
+          b.id = 'proj-est-badge';
+          b.style.cssText = 'font-size:.63rem;color:var(--gold);font-family:var(--mono);margin-bottom:.5rem;letter-spacing:.04em;';
+          b.textContent = '✦ Inputs auto-filled from analyst consensus estimates';
+          const btn = document.querySelector('button[onclick="runProjection()"]');
+          if (btn && btn.parentNode) btn.parentNode.insertBefore(b, btn);
+        }
+      }
+    } catch(_) {}
+  })();
+
   buildPriceChart(result,c,ts);
   buildRSIChart(rsiVals,ts);
   buildMACDChart(c,ts);

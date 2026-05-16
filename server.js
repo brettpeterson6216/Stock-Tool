@@ -1423,6 +1423,87 @@ app.get('/api/sec/:ticker'
   }
 });
 // ============================================================
+
+// ============================================================
+//  Forward estimates — consensus revenue/EPS growth + forward P/E
+// ============================================================
+app.get('/api/estimates/:ticker', async (req, res) => {
+  const ticker = req.params.ticker.toUpperCase().replace(/[^A-Z0-9.]/g,'');
+  if (!ticker) return res.status(400).json({ error: 'No ticker' });
+  try {
+    const FH = FINNHUB_KEY;
+    const [revResp, epsResp, metResp, ptResp] = await Promise.allSettled([
+      fetch(`https://finnhub.io/api/v1/stock/revenue-estimate?symbol=${ticker}&freq=annual&token=${FH}`),
+      fetch(`https://finnhub.io/api/v1/stock/eps-estimate?symbol=${ticker}&freq=annual&token=${FH}`),
+      fetch(`https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FH}`),
+      fetch(`https://finnhub.io/api/v1/stock/price-target?symbol=${ticker}&token=${FH}`),
+    ]);
+
+    const safe = async (p) => {
+      try { if (p.status==='fulfilled' && p.value.ok) return await p.value.json(); } catch(_){}
+      return null;
+    };
+    const [rev, eps, met, pt] = await Promise.all([safe(revResp), safe(epsResp), safe(metResp), safe(ptResp)]);
+
+    // Revenue growth: use next-year vs current-year analyst estimate
+    let revenueGrowth = null;
+    if (rev?.data?.length >= 2) {
+      const sorted = [...rev.data].sort((a,b) => a.period.localeCompare(b.period));
+      const cur = sorted.find(d => d.revenueAvg > 0);
+      const nxt = sorted.find(d => d.period > (cur?.period||'') && d.revenueAvg > 0);
+      if (cur && nxt && cur.revenueAvg > 0) {
+        revenueGrowth = Math.round(((nxt.revenueAvg / cur.revenueAvg) - 1) * 1000) / 10;
+      }
+    }
+
+    // EPS growth: use next-year vs current-year
+    let epsGrowth = null;
+    if (eps?.data?.length >= 2) {
+      const sorted = [...eps.data].sort((a,b) => a.period.localeCompare(b.period));
+      const cur = sorted.find(d => d.epsAvg > 0);
+      const nxt = sorted.find(d => d.period > (cur?.period||'') && d.epsAvg > 0);
+      if (cur && nxt && cur.epsAvg > 0) {
+        epsGrowth = Math.round(((nxt.epsAvg / cur.epsAvg) - 1) * 1000) / 10;
+      }
+    }
+
+    // Forward P/E from metrics
+    const m = met?.metric || {};
+    const forwardPE = m['peNormalizedAnnual'] || m['peBasicExclExtraTTM'] || null;
+
+    // Margin trend → suggest scenario
+    const marginTrend = (() => {
+      const mg3  = m['netProfitMargin3Y']   || null;
+      const mgTTM = m['netProfitMarginTTM'] || m['netProfitMarginAnnual'] || null;
+      if (mg3 && mgTTM) {
+        const diff = mgTTM - mg3;
+        if (diff >  1.5) return 'expand';
+        if (diff < -1.5) return 'compress';
+      }
+      return 'flat';
+    })();
+
+    // Analyst price target
+    const priceTarget = pt?.targetMean || pt?.targetHigh ? {
+      mean: pt.targetMean || null,
+      high: pt.targetHigh || null,
+      low:  pt.targetLow  || null,
+    } : null;
+
+    return res.json({
+      ticker,
+      revenueGrowth,   // % e.g. 12.5
+      epsGrowth,       // % e.g. 18.2
+      forwardPE,       // number e.g. 28
+      marginTrend,     // 'compress'|'flat'|'expand'
+      priceTarget,
+    });
+  } catch(e) {
+    console.error('estimates error', e.message);
+    return res.status(500).json({ error: 'Could not fetch estimates' });
+  }
+});
+
 //  Analyst price targets + recommendations  (Finnhub)
 // ============================================================
 app.get('/api/analyst/:ticker', async (req, res) => {
