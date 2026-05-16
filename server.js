@@ -1490,13 +1490,53 @@ app.get('/api/estimates/:ticker', async (req, res) => {
       low:  pt.targetLow  || null,
     } : null;
 
+    // Forward quarterly EPS estimates (next 4 quarters)
+    let forwardEPS = null;
+    let nextYearEPS = null;
+    if (eps?.data?.length) {
+      const sorted = [...eps.data].sort((a,b) => a.period.localeCompare(b.period));
+      const future = sorted.filter(d => d.epsAvg != null && d.epsAvg > 0);
+      if (future.length) {
+        nextYearEPS = future[0].epsAvg;
+      }
+    }
+
+    // EPS quarterly estimates
+    let fwdQuarterly = [];
+    try {
+      const qEpsResp = await fetch(`https://finnhub.io/api/v1/stock/eps-estimate?symbol=${ticker}&freq=quarterly&token=${FH}`);
+      if (qEpsResp.ok) {
+        const qEps = await qEpsResp.json();
+        if (qEps?.data?.length) {
+          const now = new Date().toISOString().slice(0,7);
+          fwdQuarterly = qEps.data
+            .filter(d => d.period >= now && d.epsAvg != null)
+            .sort((a,b) => a.period.localeCompare(b.period))
+            .slice(0,4)
+            .map(d => ({ period: d.period, epsAvg: d.epsAvg, epsHigh: d.epsHigh, epsLow: d.epsLow, numberAnalysts: d.numberAnalysts }));
+        }
+      }
+    } catch(_) {}
+
+    // WACC suggestion based on beta
+    let suggestedWACC = null;
+    const beta = m['beta'] || m['betaAnnual'] || null;
+    if (beta) {
+      // WACC = rf + beta * equity_risk_premium (rf=4.5%, erp=5.5%)
+      suggestedWACC = Math.round((4.5 + Number(beta) * 5.5) * 10) / 10;
+      suggestedWACC = Math.max(6, Math.min(20, suggestedWACC));
+    }
+
     return res.json({
       ticker,
-      revenueGrowth,   // % e.g. 12.5
-      epsGrowth,       // % e.g. 18.2
-      forwardPE,       // number e.g. 28
-      marginTrend,     // 'compress'|'flat'|'expand'
+      revenueGrowth,
+      epsGrowth,
+      forwardPE,
+      marginTrend,
       priceTarget,
+      nextYearEPS,
+      fwdQuarterly,
+      suggestedWACC,
     });
   } catch(e) {
     console.error('estimates error', e.message);

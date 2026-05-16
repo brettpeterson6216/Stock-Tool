@@ -3704,6 +3704,45 @@ function renderStock(result, ticker) {
     return `<div class="metric-card"><div class="m-lbl">${m.l}${tipHtml}</div><div class="m-val ${m.c}">${m.v}</div>${m.s?`<div class="m-sub">${m.s}</div>`:''}</div>`;
   }).join('');
 
+  // Sector benchmark comparison panel
+  (async () => {
+    try {
+      const profResp = await fetch('/api/analyst/'+encodeURIComponent(ticker), {credentials:'same-origin'});
+      const profData = profResp.ok ? await profResp.json() : {};
+      const sector = profData.sector || (S.estimates && S.estimates.sector) || null;
+      const bm = getSectorBenchmark(sector);
+      const benchEl = document.getElementById('metrics-bench');
+      if (!bm || !benchEl) return;
+      const peVal = meta.trailingPE || null;
+      const pbVal = meta.priceToBook || null;
+      const psVal = meta.priceToSalesTrailing12Months || null;
+      const vsRow = (label, val, bmVal, higherBetter=false) => {
+        if (!val || !bmVal) return '';
+        const diff = ((val - bmVal) / bmVal * 100);
+        const better = higherBetter ? diff > 0 : diff < 0;
+        const color = Math.abs(diff) < 10 ? 'var(--text4)' : better ? '#4ade80' : '#f87171';
+        const arrow = diff > 5 ? '↑' : diff < -5 ? '↓' : '→';
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--t-acc-border);">
+          <span style="font-size:.72rem;color:var(--text4);">${label}</span>
+          <span style="font-size:.72rem;">
+            <span style="color:var(--text);font-weight:600;">${val.toFixed(1)}x</span>
+            <span style="color:var(--text5);"> vs </span>
+            <span style="color:var(--text5);">${bmVal}x</span>
+            <span style="color:${color};margin-left:4px;">${arrow} ${Math.abs(diff).toFixed(0)}%</span>
+          </span>
+        </div>`;
+      };
+      benchEl.innerHTML = `
+        <div style="margin-top:1rem;background:var(--t-metric-bg);border:1px solid var(--t-metric-border);border-radius:8px;padding:10px 14px;">
+          <div style="font-size:.62rem;color:var(--gold);font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">vs ${sector||'Sector'} Median</div>
+          ${vsRow('P/E Ratio', peVal, bm.pe)}
+          ${vsRow('P/B Ratio', pbVal, bm.pb)}
+          ${vsRow('P/S Ratio', psVal, bm.ps)}
+          <div style="font-size:.6rem;color:var(--text5);margin-top:6px;">↓ below sector = cheaper · ↑ above = premium</div>
+        </div>`;
+    } catch(_) {}
+  })();
+
   const peNow=Math.round(meta.trailingPE||25);
   document.getElementById('proj-pe').value=peNow;
   // Auto-fill advanced projection + DCF fields
@@ -3739,21 +3778,61 @@ function renderStock(result, ticker) {
         marginEl.value = est.marginTrend;
       }
 
-      // Store estimates on S for use in tooltips/display
       S.estimates = est;
 
-      // Show a small badge indicating data source
-      const growthLabel = document.querySelector('label[for="proj-growth"], .fc-label');
+      // ── DCF: auto-fill EPS + WACC + growth ──
+      if (est.nextYearEPS) {
+        ['dcf-eps','qdcf-eps'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) { el.value = est.nextYearEPS.toFixed(2); el.title = 'Forward EPS from analyst consensus'; }
+        });
+      }
+      if (est.suggestedWACC) {
+        ['dcf-wacc','qdcf-wacc'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) { el.value = est.suggestedWACC.toFixed(1); el.title = 'WACC = Risk-free (4.5%) + Beta × ERP (5.5%)'; }
+        });
+      }
+      if (est.epsGrowth !== null) {
+        const g1 = Math.max(0, Math.min(100, est.epsGrowth));
+        const g2 = Math.max(0, Math.min(50, g1 * 0.55));
+        ['dcf-g1','qdcf-g1'].forEach(id => { const el=document.getElementById(id); if(el) el.value=g1.toFixed(1); });
+        ['dcf-g2','qdcf-g2'].forEach(id => { const el=document.getElementById(id); if(el) el.value=g2.toFixed(1); });
+      }
+
+      // ── Advanced Projection: auto-fill Bear/Base/Bull ──
+      if (est.epsGrowth !== null || est.revenueGrowth !== null) {
+        const baseG = est.epsGrowth !== null ? est.epsGrowth : est.revenueGrowth;
+        const bear = (baseG * 0.35).toFixed(1);
+        const base = baseG.toFixed(1);
+        const bull = (baseG * 1.8).toFixed(1);
+        const advBear = document.getElementById('adv-g-bear');
+        const advBase = document.getElementById('adv-g-base');
+        const advBull = document.getElementById('adv-g-bull');
+        if(advBear) advBear.value = bear;
+        if(advBase) advBase.value = base;
+        if(advBull) advBull.value = bull;
+      }
+      if (est.forwardPE) {
+        const peBear = document.getElementById('adv-pe-bear');
+        const peBase = document.getElementById('adv-pe-base');
+        const peBull = document.getElementById('adv-pe-bull');
+        const fpe = Math.round(est.forwardPE);
+        if(peBear) peBear.value = Math.round(fpe * 0.72);
+        if(peBase) peBase.value = fpe;
+        if(peBull) peBull.value = Math.round(fpe * 1.32);
+      }
+
+      // ── Badge ──
       const badge = document.getElementById('proj-est-badge');
       if (!badge) {
-        const projForm = document.getElementById('proj-growth')?.closest('.fc-grid, div');
-        if (projForm) {
+        const btn = document.querySelector('button[onclick="runProjection()"]');
+        if (btn && btn.parentNode) {
           const b = document.createElement('div');
           b.id = 'proj-est-badge';
           b.style.cssText = 'font-size:.63rem;color:var(--gold);font-family:var(--mono);margin-bottom:.5rem;letter-spacing:.04em;';
-          b.textContent = '✦ Inputs auto-filled from analyst consensus estimates';
-          const btn = document.querySelector('button[onclick="runProjection()"]');
-          if (btn && btn.parentNode) btn.parentNode.insertBefore(b, btn);
+          b.textContent = '\u2736 Inputs auto-filled from analyst consensus estimates';
+          btn.parentNode.insertBefore(b, btn);
         }
       }
     } catch(_) {}
@@ -3781,6 +3860,27 @@ function renderStock(result, ticker) {
 /* =====================================================
    FEATURED STOCKS GRID
 ===================================================== */
+
+// ── Sector benchmark data (industry medians) ──
+const SECTOR_BENCHMARKS = {
+  'Technology':        { pe:28, pb:6.5, ps:5.5, roe:22, grossMargin:55, debtEq:0.6 },
+  'Healthcare':        { pe:22, pb:4.2, ps:3.8, roe:16, grossMargin:58, debtEq:0.8 },
+  'Financial Services':{ pe:13, pb:1.4, ps:2.2, roe:12, grossMargin:65, debtEq:2.1 },
+  'Consumer Cyclical': { pe:20, pb:3.8, ps:1.2, roe:18, grossMargin:38, debtEq:1.1 },
+  'Consumer Defensive':{ pe:22, pb:4.5, ps:1.8, roe:20, grossMargin:42, debtEq:0.9 },
+  'Industrials':       { pe:20, pb:3.2, ps:1.6, roe:15, grossMargin:35, debtEq:1.0 },
+  'Energy':            { pe:12, pb:1.8, ps:1.2, roe:14, grossMargin:45, debtEq:0.6 },
+  'Utilities':         { pe:18, pb:1.6, ps:2.0, roe:10, grossMargin:40, debtEq:1.4 },
+  'Real Estate':       { pe:35, pb:2.0, ps:5.5, roe: 8, grossMargin:62, debtEq:1.5 },
+  'Communication':     { pe:18, pb:2.8, ps:2.2, roe:15, grossMargin:50, debtEq:0.9 },
+  'Basic Materials':   { pe:15, pb:2.2, ps:1.4, roe:12, grossMargin:30, debtEq:0.7 },
+};
+function getSectorBenchmark(sector) {
+  if (!sector) return null;
+  const key = Object.keys(SECTOR_BENCHMARKS).find(k => sector.toLowerCase().includes(k.toLowerCase()));
+  return key ? SECTOR_BENCHMARKS[key] : null;
+}
+
 const FEATURED_TICKERS = ['AAPL','NVDA','MSFT','TSLA','AMZN','META','GOOGL','SPY'];
 async function loadFeaturedGrid() {
   const el = document.getElementById('featured-grid');
@@ -4958,8 +5058,33 @@ async function loadEarnings(ticker) {
   if(loading) loading.style.display='block';
   if(error)   error.style.display='none';
   try {
-    const res  = await fetch('/api/earnings/' + ticker, {credentials:'same-origin'});
-    const data = await res.json();
+    // Fetch forward quarterly estimates alongside historical
+    const [res, estRes] = await Promise.allSettled([
+      fetch('/api/earnings/' + ticker, {credentials:'same-origin'}),
+      fetch('/api/estimates/' + ticker, {credentials:'same-origin'}),
+    ]);
+    const data = res.status==='fulfilled' && res.value.ok ? await res.value.json() : [];
+    const estData = estRes.status==='fulfilled' && estRes.value.ok ? await estRes.value.json() : {};
+    const fwdQ = estData.fwdQuarterly || [];
+
+    // Render forward estimates banner if available
+    if (fwdQ.length && cont) {
+      const fwdHtml = `<div style="background:rgba(200,136,42,.08);border:1px solid rgba(200,136,42,.25);border-radius:8px;padding:10px 14px;margin-bottom:12px;">
+        <div style="font-size:.65rem;color:var(--gold);font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">\u2736 Analyst Forward EPS Estimates</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          ${fwdQ.map(q => `<div style="background:var(--t-metric-bg);border:1px solid var(--t-metric-border);border-radius:6px;padding:6px 10px;min-width:90px;">
+            <div style="font-size:.6rem;color:var(--text5);margin-bottom:2px;">${q.period}</div>
+            <div style="font-size:.9rem;font-weight:700;color:var(--text);">$${q.epsAvg.toFixed(2)}</div>
+            <div style="font-size:.58rem;color:var(--text5);">$${(q.epsLow||q.epsAvg).toFixed(2)}–$${(q.epsHigh||q.epsAvg).toFixed(2)}</div>
+            <div style="font-size:.57rem;color:var(--text5);">${q.numberAnalysts||'?'} analysts</div>
+          </div>`).join('')}
+        </div>
+      </div>`;
+      const fwdBanner = document.createElement('div');
+      fwdBanner.innerHTML = fwdHtml;
+      cont.prepend(fwdBanner);
+    }
+
     if (!Array.isArray(data) || !data.length) {
       if(loading) loading.style.display='none';
       if(cont) cont.innerHTML='<div style="color:var(--text5);font-size:.82rem;">No earnings data found for this ticker.</div>';
