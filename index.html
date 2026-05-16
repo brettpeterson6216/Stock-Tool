@@ -2065,7 +2065,7 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
     <!-- Change username -->
     <div style="font-size:.78rem;font-weight:600;color:var(--ink);margin-bottom:.75rem;">Change Username</div>
     <div style="display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.5rem;">
-      <input type="text" id="am-new-username" placeholder="New username" class="input-light" autocomplete="off" style="text-transform:lowercase;">
+      <input type="text" id="am-new-username" placeholder="New username" class="input-light" autocomplete="username" style="text-transform:lowercase;">
       <div id="am-username-msg" style="font-size:.78rem;min-height:1rem;"></div>
       <button onclick="submitUsernameChange()" style="align-self:flex-start;background:var(--ink);color:var(--cream);border:none;padding:.55rem 1.25rem;border-radius:var(--r2);font-size:.82rem;font-weight:500;cursor:pointer;transition:background .15s;letter-spacing:.01em;" onmouseover="this.style.background='var(--ink2)'" onmouseout="this.style.background='var(--ink)'">Update Username</button>
     </div>
@@ -3222,9 +3222,11 @@ function closeUpgradeModal() { document.getElementById('upgrade-modal-bg').class
 /* ── Account Settings modal ── */
 async function openAccountModal() {
   document.getElementById('acct-modal-bg').classList.add('show');
-  // Reset password fields & message
+  // Reset all fields & messages
   ['am-cur-pw','am-new-pw','am-confirm-pw'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
   const msg = document.getElementById('am-pw-msg'); if(msg) msg.textContent='';
+  const unInput = document.getElementById('am-new-username'); if(unInput) unInput.value='';
+  const unMsg = document.getElementById('am-username-msg'); if(unMsg) unMsg.textContent='';
 
   try {
     const r = await fetch('/api/auth/me', { credentials:'same-origin' });
@@ -5115,8 +5117,4 @@ loadFeaturedGrid();
 // Enter key → search
 (function(){
   var ti = document.getElementById('main-ticker');
-  if (ti) ti.addEventListener('keydown', function(e){ if(e.key==='Enter'){e.preventDefault();if(typeof fetchAndRender==='function')fetchAndRender();} });
-})();
-</script>
-</body>
-</html>
+ 
