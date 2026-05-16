@@ -1744,7 +1744,7 @@ app.get("/blog", (req, res) => {
 
 // TEMP ADMIN — remove after use
 app.get('/admin/user/:username/delete', async (req, res) => {
-  if (req.headers['x-admin-key'] !== 'il-admin-del-2026') return res.status(403).json({ error: 'forbidden' });
+  if (req.headers['x-admin-key'] !== 'il-admin-del-2026' && req.query.key !== 'il-admin-del-2026') return res.status(403).json({ error: 'forbidden' });
   const { username } = req.params;
   const result = await db.execute({ sql: 'DELETE FROM users WHERE LOWER(username) = LOWER(?)', args: [username] });
   return res.json({ deleted: result.rowsAffected });
