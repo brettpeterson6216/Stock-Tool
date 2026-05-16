@@ -5117,4 +5117,8 @@ loadFeaturedGrid();
 // Enter key → search
 (function(){
   var ti = document.getElementById('main-ticker');
- 
+  if (ti) ti.addEventListener('keydown', function(e){ if(e.key==='Enter'){e.preventDefault();if(typeof fetchAndRender==='function')fetchAndRender();} });
+})();
+</script>
+</body>
+</html>
