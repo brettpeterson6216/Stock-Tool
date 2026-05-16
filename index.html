@@ -4070,10 +4070,11 @@ function runProjection() {
   const pe=parseFloat(document.getElementById('proj-pe').value);
   const mm={compress:.85,flat:1.0,expand:1.15}[margin];
   const eps=price/pe;
+  // All three scenarios shift with the selected margin — Bear/Bull offset around it
   const scenarios=[
-    {l:'Bear',cls:'sc-bear',g:growthBase*.4,pem:.7,mm:.85},
-    {l:'Base',cls:'sc-base',g:growthBase,pem:1.0,mm},
-    {l:'Bull',cls:'sc-bull',g:growthBase*1.7,pem:1.3,mm:1.15},
+    {l:'Bear',cls:'sc-bear',g:growthBase*.4, pem:.7, mm:mm*.88},
+    {l:'Base',cls:'sc-base',g:growthBase,    pem:1.0,mm:mm},
+    {l:'Bull',cls:'sc-bull',g:growthBase*1.7,pem:1.3,mm:mm*1.12},
   ];
   const results=scenarios.map(s=>{
     const fEps=eps*Math.pow(1+s.g,years)*s.mm;
