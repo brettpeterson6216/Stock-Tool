@@ -4100,17 +4100,18 @@ function buildPriceChart(result,closes,timestamps) {
   } else {
     ds=[{label:'Price',data:vc,borderColor:'#D4972E',borderWidth:2,...hp,pointHoverBackgroundColor:'#D4972E',fill:true,backgroundColor:fillGrad,tension:.2,order:10}];
   }
-  if(S.inds.ma50)  ds.push({label:'MA 50', data:ma50v, borderColor:'#4a9fd4',borderWidth:1.5,...hp,pointHoverBackgroundColor:'#4a9fd4',fill:false,tension:.2,order:9});
-  if(S.inds.ma200) ds.push({label:'MA 200',data:ma200v,borderColor:'#a78bfa',borderWidth:1.5,...hp,pointHoverBackgroundColor:'#a78bfa',fill:false,tension:.2,order:8});
+  const lineType = S.chartType==='candle' ? {type:'line'} : {};
+  if(S.inds.ma50)  ds.push({...lineType,label:'MA 50', data:ma50v, borderColor:'#4a9fd4',borderWidth:1.5,...hp,pointHoverBackgroundColor:'#4a9fd4',fill:false,tension:.2,order:9});
+  if(S.inds.ma200) ds.push({...lineType,label:'MA 200',data:ma200v,borderColor:'#a78bfa',borderWidth:1.5,...hp,pointHoverBackgroundColor:'#a78bfa',fill:false,tension:.2,order:8});
   if(S.inds.bb) {
-    ds.push({label:'BB Upper',data:bbv.map(x=>x.u),borderColor:'rgba(212,129,58,.55)',borderWidth:1,pointRadius:0,fill:false,tension:.2,order:7,borderDash:[4,3]});
-    ds.push({label:'BB Lower',data:bbv.map(x=>x.l),borderColor:'rgba(212,129,58,.55)',borderWidth:1,pointRadius:0,fill:false,tension:.2,order:6,borderDash:[4,3]});
+    ds.push({...lineType,label:'BB Upper',data:bbv.map(x=>x.u),borderColor:'rgba(212,129,58,.55)',borderWidth:1,pointRadius:0,fill:false,tension:.2,order:7,borderDash:[4,3]});
+    ds.push({...lineType,label:'BB Lower',data:bbv.map(x=>x.l),borderColor:'rgba(212,129,58,.55)',borderWidth:1,pointRadius:0,fill:false,tension:.2,order:6,borderDash:[4,3]});
   }
   if(S.analystTarget){
     const n=vl.length;
-    if(S.analystTarget.mean) ds.push({label:`Analyst Target $${S.analystTarget.mean.toFixed(0)}`,data:Array(n).fill(S.analystTarget.mean),borderColor:'rgba(139,195,74,.8)',borderWidth:1.5,borderDash:[6,4],pointRadius:0,fill:false,tension:0,order:5});
-    if(S.analystTarget.high) ds.push({label:`High $${S.analystTarget.high.toFixed(0)}`,         data:Array(n).fill(S.analystTarget.high), borderColor:'rgba(74,222,128,.45)', borderWidth:1,borderDash:[3,4],pointRadius:0,fill:false,tension:0,order:4});
-    if(S.analystTarget.low)  ds.push({label:`Low $${S.analystTarget.low.toFixed(0)}`,            data:Array(n).fill(S.analystTarget.low),  borderColor:'rgba(248,113,113,.45)',borderWidth:1,borderDash:[3,4],pointRadius:0,fill:false,tension:0,order:3});
+    if(S.analystTarget.mean) ds.push({...lineType,label:`Analyst Target $${S.analystTarget.mean.toFixed(0)}`,data:Array(n).fill(S.analystTarget.mean),borderColor:'rgba(139,195,74,.8)',borderWidth:1.5,borderDash:[6,4],pointRadius:0,fill:false,tension:0,order:5});
+    if(S.analystTarget.high) ds.push({...lineType,label:`High $${S.analystTarget.high.toFixed(0)}`,         data:Array(n).fill(S.analystTarget.high), borderColor:'rgba(74,222,128,.45)', borderWidth:1,borderDash:[3,4],pointRadius:0,fill:false,tension:0,order:4});
+    if(S.analystTarget.low)  ds.push({...lineType,label:`Low $${S.analystTarget.low.toFixed(0)}`,            data:Array(n).fill(S.analystTarget.low),  borderColor:'rgba(248,113,113,.45)',borderWidth:1,borderDash:[3,4],pointRadius:0,fill:false,tension:0,order:3});
   }
   const opts=baseOpts({
     y:{
