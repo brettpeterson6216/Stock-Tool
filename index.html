@@ -967,6 +967,129 @@ html[data-theme="dark"] .modal-box { background:var(--card)!important; border-co
 html[data-theme="dark"] .modal-box h2,html[data-theme="dark"] .modal-box label { color:rgba(220,225,232,.85)!important; }
 html[data-theme="dark"] .modal-note { color:rgba(220,225,232,.35)!important; }
 html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; border-color:rgba(255,255,255,.18)!important; }
+
+/* ══════════════════════════════════════════
+   HOME DASHBOARD — v2
+══════════════════════════════════════════ */
+/* Hero */
+.home-hero{display:flex;align-items:center;justify-content:space-between;gap:2rem;padding:2.5rem 2rem 2rem;background:var(--card);border-bottom:1px solid var(--border2);min-height:200px;overflow:hidden;position:relative;}
+.hh-left{flex:1;min-width:0;max-width:640px;z-index:1;}
+.hh-right{flex-shrink:0;width:260px;height:160px;opacity:.85;display:flex;align-items:center;justify-content:center;}
+@media(max-width:768px){.hh-right{display:none;}}
+.hh-badge{display:inline-flex;align-items:center;gap:6px;font-size:.68rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-d);background:rgba(200,136,42,.1);border:1px solid rgba(200,136,42,.25);border-radius:100px;padding:3px 10px;margin-bottom:.75rem;}
+.hh-badge::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--gold);flex-shrink:0;}
+.hh-title{font-family:var(--serif);font-size:2rem;line-height:1.12;letter-spacing:-.02em;color:var(--ink);margin-bottom:.5rem;}
+.hh-title em{font-style:italic;color:var(--gold-d);}
+.hh-sub{font-size:.88rem;color:var(--ink4);margin-bottom:1.1rem;}
+.hh-search{display:flex;align-items:center;gap:0;background:var(--cream);border:1.5px solid var(--border3);border-radius:8px;overflow:hidden;box-shadow:var(--shadow-sm);max-width:540px;transition:border-color .18s;}
+.hh-search:focus-within{border-color:var(--gold);}
+.hh-search-icon{padding:0 10px 0 13px;color:var(--ink5);font-size:15px;flex-shrink:0;}
+.hh-search input{flex:1;border:none;background:transparent;font-family:var(--sans);font-size:.88rem;color:var(--ink);padding:.62rem 0;outline:none;}
+.hh-search input::placeholder{color:var(--ink5);}
+.hh-search-btn{background:var(--gold);color:#fff;border:none;padding:.62rem 1.1rem;font-family:var(--sans);font-size:.82rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .15s;flex-shrink:0;}
+.hh-search-btn:hover{background:var(--gold-d);}
+.hh-chips{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:.65rem;}
+.hh-chip-lbl{font-size:.72rem;color:var(--ink5);flex-shrink:0;}
+.hh-chip{font-size:.72rem;font-weight:500;padding:3px 9px;border-radius:100px;border:1px solid var(--border2);color:var(--ink3);background:transparent;cursor:pointer;transition:all .14s;font-family:var(--sans);}
+.hh-chip:hover{background:var(--gold);color:#fff;border-color:var(--gold);}
+
+/* Featured ticker strip */
+.home-ticker-strip{display:grid;grid-template-columns:repeat(8,1fr);border-bottom:1px solid var(--border2);background:var(--panel);}
+@media(max-width:900px){.home-ticker-strip{grid-template-columns:repeat(4,1fr);}}
+.ht-card{padding:.65rem .9rem;border-right:1px solid var(--border2);cursor:pointer;transition:background .12s;display:flex;flex-direction:column;gap:2px;}
+.ht-card:last-child{border-right:none;}
+.ht-card:hover{background:var(--cream2);}
+.ht-sym{font-family:var(--mono);font-size:.72rem;font-weight:600;color:var(--ink2);}
+.ht-name{font-size:.6rem;color:var(--ink5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ht-price{font-family:var(--mono);font-size:.88rem;font-weight:600;color:var(--ink);}
+.ht-chg{font-size:.67rem;font-weight:500;}
+.ht-spark{height:24px;width:100%;margin-top:2px;}
+
+/* Dashboard grid */
+.home-dash{display:grid;grid-template-columns:1fr 340px;gap:0;border-bottom:1px solid var(--border2);}
+@media(max-width:1024px){.home-dash{grid-template-columns:1fr;}}
+.home-card{background:var(--card);padding:1rem 1.25rem;border-right:1px solid var(--border2);}
+.home-card:last-child{border-right:none;}
+.hc-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;}
+.hc-title{font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:var(--ink3);}
+.hc-link{font-size:.68rem;color:var(--gold);text-decoration:none;display:flex;align-items:center;gap:3px;}
+.hc-link:hover{color:var(--gold-d);}
+.mo-tabs-row{display:flex;gap:2px;margin-bottom:.6rem;}
+.mo-tab{font-size:.67rem;padding:2px 7px;border-radius:3px;border:none;background:transparent;color:var(--ink5);cursor:pointer;font-family:var(--sans);transition:all .12s;}
+.mo-tab.on{background:var(--gold);color:#fff;font-weight:600;}
+.mo-tab:hover:not(.on){background:var(--cream2);color:var(--ink3);}
+.mo-legend{display:flex;align-items:center;gap:1rem;margin-bottom:.5rem;}
+.mo-legend-item{display:flex;align-items:center;gap:5px;font-size:.68rem;color:var(--ink4);}
+.mo-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.mo-chart-wrap{height:175px;margin-bottom:.75rem;}
+.mo-indices{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.mo-index{background:var(--panel);border-radius:6px;padding:.5rem .65rem;border:1px solid var(--border);}
+.mo-index-name{font-size:.6rem;color:var(--ink5);text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px;}
+.mo-index-val{font-family:var(--mono);font-size:.82rem;font-weight:600;color:var(--ink);}
+.mo-index-chg{font-size:.65rem;font-weight:500;}
+
+/* Right col */
+.home-right-col{display:flex;flex-direction:column;}
+.home-right-col .home-card{border-right:none;border-bottom:1px solid var(--border2);flex:1;}
+.home-right-col .home-card:last-child{border-bottom:none;}
+
+/* Watchlist table */
+.wl-table{width:100%;border-collapse:collapse;}
+.wl-table th{font-size:.58rem;text-transform:uppercase;letter-spacing:.09em;color:var(--ink5);padding:0 4px 5px;text-align:left;font-weight:500;}
+.wl-table th:last-child{text-align:right;}
+.wl-table td{padding:5px 4px;border-top:1px solid var(--border);font-size:.78rem;vertical-align:middle;}
+.wl-table tr:first-child td{border-top:none;}
+.wl-table tr{cursor:pointer;transition:background .1s;}
+.wl-table tr:hover td{background:var(--cream2);}
+.wl-sym{font-family:var(--mono);font-weight:600;font-size:.75rem;color:var(--ink2);}
+.wl-name{color:var(--ink4);font-size:.68rem;}
+.wl-price{font-family:var(--mono);font-size:.78rem;color:var(--ink);text-align:right;}
+.wl-chg{font-size:.72rem;font-weight:500;text-align:right;white-space:nowrap;}
+
+/* Analyst signals */
+.analyst-ring-wrap{display:flex;align-items:center;gap:1rem;margin-bottom:.6rem;}
+.analyst-ring{position:relative;width:80px;height:80px;flex-shrink:0;}
+.analyst-ring canvas{width:80px!important;height:80px!important;}
+.analyst-ring-label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;}
+.arl-pct{font-family:var(--mono);font-size:.95rem;font-weight:700;color:var(--ink);}
+.arl-txt{font-size:.55rem;text-transform:uppercase;letter-spacing:.06em;color:var(--gold-d);font-weight:600;}
+.analyst-breakdown{display:flex;flex-direction:column;gap:4px;flex:1;}
+.abl-row{display:flex;align-items:center;gap:6px;font-size:.72rem;}
+.abl-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.abl-label{color:var(--ink4);flex:1;}
+.abl-val{font-family:var(--mono);font-weight:600;color:var(--ink2);}
+.analyst-note{font-size:.6rem;color:var(--ink5);text-align:center;margin-top:.25rem;}
+
+/* Movers section */
+.home-movers{background:var(--card);border-top:1px solid var(--border2);padding:.75rem 1.25rem 1rem;}
+.movers-tabs-row{display:flex;gap:4px;margin-bottom:.75rem;}
+.movers-tab{font-size:.7rem;font-weight:500;padding:4px 12px;border-radius:4px;border:1px solid var(--border2);background:transparent;color:var(--ink4);cursor:pointer;font-family:var(--sans);transition:all .14s;}
+.movers-tab.on{background:var(--ink);color:var(--cream);border-color:var(--ink);}
+.movers-tab:hover:not(.on){background:var(--cream2);}
+.movers-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+@media(max-width:900px){.movers-grid{grid-template-columns:repeat(3,1fr);}}
+.mover-card{background:var(--panel);border:1px solid var(--border);border-radius:7px;padding:.6rem .75rem;cursor:pointer;transition:all .15s;}
+.mover-card:hover{border-color:rgba(200,136,42,.4);background:var(--card);}
+.mover-sym{font-family:var(--mono);font-size:.78rem;font-weight:700;color:var(--ink2);margin-bottom:1px;}
+.mover-name{font-size:.6rem;color:var(--ink5);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mover-price{font-family:var(--mono);font-size:.82rem;font-weight:600;color:var(--ink);}
+.mover-chg{font-size:.68rem;font-weight:600;margin-top:1px;}
+
+/* Dark mode overrides for home */
+html[data-theme="dark"] .home-hero{background:var(--panel);}
+html[data-theme="dark"] .home-ticker-strip{background:rgba(255,255,255,.02);}
+html[data-theme="dark"] .ht-card:hover{background:rgba(255,255,255,.04);}
+html[data-theme="dark"] .home-card{background:var(--card);}
+html[data-theme="dark"] .mo-index{background:rgba(255,255,255,.04);}
+html[data-theme="dark"] .wl-table tr:hover td{background:rgba(255,255,255,.04);}
+html[data-theme="dark"] .hh-search{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12);}
+html[data-theme="dark"] .hh-search input{color:var(--cream);}
+html[data-theme="dark"] .hh-chip{border-color:rgba(255,255,255,.12);color:rgba(220,225,232,.6);}
+html[data-theme="dark"] .mover-card{background:rgba(255,255,255,.04);}
+html[data-theme="dark"] .mover-card:hover{background:rgba(255,255,255,.07);}
+html[data-theme="dark"] .movers-tab.on{background:var(--gold);border-color:var(--gold);color:#fff;}
+html[data-theme="dark"] .home-movers{background:var(--card);}
+
 </style>
 </head>
 <body>
@@ -1201,97 +1324,166 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
 <div id="view-home">
 
   <!-- ═══════════════ HERO ═══════════════ -->
-  <section class="hero">
-    <div class="hero-radial"></div>
-    <div class="hero-badge fu1">Now with updated market data</div>
-    <h1 class="hero-h1 fu2">Run <em>institutional-grade</em> projections on any stock.</h1>
-    <p class="hero-sub fu3">DCF valuation · Technical analysis · Financial statements · Risk metrics · Everything in one place.</p>
-    <div class="hero-ctas fu4">
-      <a href="#" class="btn-primary" id="hero-cta-main" onclick="navGoTo('analyze');return false;">Launch the Tool →</a>
-      <a href="#pricing" class="btn-secondary" id="hero-cta-secondary" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'});return false;">See pricing</a>
-    </div>
-    <div class="hero-stats fu4">
-      <div class="hero-stat"><span class="h-stat-num">50,000+</span><span class="h-stat-lbl">Stocks Covered</span></div>
-      <div class="hero-stat"><span class="h-stat-num">Intraday</span><span class="h-stat-lbl">Price Data</span></div>
-      <div class="hero-stat"><span class="h-stat-num">8 Charts</span><span class="h-stat-lbl">Per Analysis</span></div>
-      <div class="hero-stat"><span class="h-stat-num">$0</span><span class="h-stat-lbl">To Start</span></div>
-    </div>
-    <div class="trust-bar">
-      <div class="trust-item">No Bloomberg terminal required</div>
-      <div class="trust-item">No credit card for free plan</div>
-      <div class="trust-item">Cancel anytime</div>
-    </div>
-  </section>
-
-  <!-- ═══════════════ TOOL SHORTCUTS ═══════════════ -->
-  <section style="padding:3rem 0 2rem; background:var(--card);">
-    <div class="container">
-      <span class="sec-label">Quick Access</span>
-      <h2 class="sec-h2" style="margin-bottom:1.75rem;">Jump straight into any tool.</h2>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;">
-        <div class="home-tool-card" onclick="navGoTo('analyze')">
-          <i class="ti ti-chart-candle home-tc-icon"></i>
-          <div class="home-tc-name">Chart &amp; Analysis</div>
-          <div class="home-tc-desc">Price chart, RSI, MACD, Bollinger Bands</div>
-        </div>
-        <div class="home-tool-card" onclick="navGoTo('financials')">
-          <i class="ti ti-table home-tc-icon"></i>
-          <div class="home-tc-name">Financials</div>
-          <div class="home-tc-desc">4-year income, balance sheet, cash flow</div>
-        </div>
-        <div class="home-tool-card" onclick="navGoTo('dcf')">
-          <i class="ti ti-calculator home-tc-icon"></i>
-          <div class="home-tc-name">DCF Valuation</div>
-          <div class="home-tc-desc">Intrinsic value &amp; Graham Number</div>
-        </div>
-        <div class="home-tool-card" onclick="navGoTo('projection')">
-          <i class="ti ti-timeline home-tc-icon"></i>
-          <div class="home-tc-name">Projection Model</div>
-          <div class="home-tc-desc">Bear / base / bull scenario forecasts</div>
-        </div>
-        <div class="home-tool-card" onclick="navGoTo('screener')">
-          <i class="ti ti-filter home-tc-icon"></i>
-          <div class="home-tc-name">Stock Screener</div>
-          <div class="home-tc-desc">Filter by sector, P/E, growth &amp; more</div>
-        </div>
-        <div class="home-tool-card" onclick="navGoTo('advmetrics')">
-          <i class="ti ti-report-analytics home-tc-icon"></i>
-          <div class="home-tc-name">Advanced Metrics</div>
-          <div class="home-tc-desc">EV/EBITDA, ROIC, FCF yield, 20+ ratios</div>
-        </div>
-        <div class="home-tool-card" onclick="navGoTo('compare')">
-          <i class="ti ti-adjustments-horizontal home-tc-icon"></i>
-          <div class="home-tc-name">Compare Stocks</div>
-          <div class="home-tc-desc">Side-by-side up to 4 tickers</div>
-        </div>
-        <div class="home-tool-card" onclick="navGoTo('education')">
-          <i class="ti ti-school home-tc-icon"></i>
-          <div class="home-tc-name">Education</div>
-          <div class="home-tc-desc">P/E, DCF, WACC &amp; every concept explained</div>
-        </div>
+  <section class="home-hero">
+    <div class="hh-left">
+      <div class="hh-badge">Live Market Data · Updated in Real-Time</div>
+      <h1 class="hh-title">Smarter Stock Analysis<br>for <em>Confident Investors.</em></h1>
+      <p class="hh-sub">Powerful tools. Proprietary data. Actionable insights.</p>
+      <div class="hh-search">
+        <span class="hh-search-icon"><i class="ti ti-search"></i></span>
+        <input type="text" id="hero-search" placeholder="Search any stock or ETF (e.g. AAPL, TSLA, NVDA)..." autocomplete="off" autocorrect="off" spellcheck="false">
+        <button class="hh-search-btn" onclick="heroSearch()">Analyze →</button>
+      </div>
+      <div class="hh-chips">
+        <span class="hh-chip-lbl">Popular:</span>
+        <button class="hh-chip" onclick="heroLoadTicker('AAPL')">AAPL</button>
+        <button class="hh-chip" onclick="heroLoadTicker('NVDA')">NVDA</button>
+        <button class="hh-chip" onclick="heroLoadTicker('TSLA')">TSLA</button>
+        <button class="hh-chip" onclick="heroLoadTicker('MSFT')">MSFT</button>
+        <button class="hh-chip" onclick="heroLoadTicker('AMZN')">AMZN</button>
+        <button class="hh-chip" onclick="heroLoadTicker('SPY')">SPY</button>
+        <button class="hh-chip" onclick="heroLoadTicker('QQQ')">QQQ</button>
       </div>
     </div>
+    <div class="hh-right">
+      <svg viewBox="0 0 260 160" xmlns="http://www.w3.org/2000/svg" fill="none" style="width:100%;height:100%;">
+        <defs>
+          <linearGradient id="hg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#C8882A" stop-opacity=".35"/><stop offset="100%" stop-color="#C8882A" stop-opacity="0"/></linearGradient>
+          <linearGradient id="hg2" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#C8882A" stop-opacity="0"/><stop offset="50%" stop-color="#C8882A" stop-opacity=".6"/><stop offset="100%" stop-color="#C8882A" stop-opacity="0"/></linearGradient>
+        </defs>
+        <!-- Grid lines -->
+        <line x1="0" y1="130" x2="260" y2="130" stroke="#C8882A" stroke-opacity=".1" stroke-width="1"/>
+        <line x1="0" y1="100" x2="260" y2="100" stroke="#C8882A" stroke-opacity=".08" stroke-width="1"/>
+        <line x1="0" y1="70"  x2="260" y2="70"  stroke="#C8882A" stroke-opacity=".08" stroke-width="1"/>
+        <line x1="0" y1="40"  x2="260" y2="40"  stroke="#C8882A" stroke-opacity=".08" stroke-width="1"/>
+        <!-- Area fill -->
+        <path d="M0,115 C20,110 35,108 55,100 C70,94 85,85 105,78 C120,72 135,75 155,65 C170,57 185,45 205,38 C220,33 240,28 260,20 L260,130 L0,130 Z" fill="url(#hg1)"/>
+        <!-- Price line -->
+        <path d="M0,115 C20,110 35,108 55,100 C70,94 85,85 105,78 C120,72 135,75 155,65 C170,57 185,45 205,38 C220,33 240,28 260,20" stroke="#C8882A" stroke-width="2" stroke-opacity=".8"/>
+        <!-- Candle bodies -->
+        <rect x="22" y="104" width="6" height="10" rx="1" fill="#f87171" opacity=".7"/>
+        <line x1="25" y1="101" x2="25" y2="104" stroke="#f87171" stroke-opacity=".7" stroke-width="1"/>
+        <line x1="25" y1="114" x2="25" y2="117" stroke="#f87171" stroke-opacity=".7" stroke-width="1"/>
+        <rect x="42" y="96" width="6" height="8" rx="1" fill="#4ade80" opacity=".7"/>
+        <line x1="45" y1="92" x2="45" y2="96" stroke="#4ade80" stroke-opacity=".7" stroke-width="1"/>
+        <line x1="45" y1="104" x2="45" y2="107" stroke="#4ade80" stroke-opacity=".7" stroke-width="1"/>
+        <rect x="92" y="79" width="6" height="9" rx="1" fill="#4ade80" opacity=".7"/>
+        <line x1="95" y1="75" x2="95" y2="79" stroke="#4ade80" stroke-opacity=".7" stroke-width="1"/>
+        <line x1="95" y1="88" x2="95" y2="91" stroke="#4ade80" stroke-opacity=".7" stroke-width="1"/>
+        <rect x="142" y="68" width="6" height="11" rx="1" fill="#f87171" opacity=".7"/>
+        <line x1="145" y1="64" x2="145" y2="68" stroke="#f87171" stroke-opacity=".7" stroke-width="1"/>
+        <line x1="145" y1="79" x2="145" y2="82" stroke="#f87171" stroke-opacity=".7" stroke-width="1"/>
+        <rect x="192" y="38" width="6" height="10" rx="1" fill="#4ade80" opacity=".7"/>
+        <line x1="195" y1="34" x2="195" y2="38" stroke="#4ade80" stroke-opacity=".7" stroke-width="1"/>
+        <line x1="195" y1="48" x2="195" y2="51" stroke="#4ade80" stroke-opacity=".7" stroke-width="1"/>
+        <rect x="222" y="28" width="6" height="9" rx="1" fill="#4ade80" opacity=".7"/>
+        <line x1="225" y1="23" x2="225" y2="28" stroke="#4ade80" stroke-opacity=".7" stroke-width="1"/>
+        <line x1="225" y1="37" x2="225" y2="40" stroke="#4ade80" stroke-opacity=".7" stroke-width="1"/>
+        <!-- Horizontal accent line -->
+        <line x1="0" y1="158" x2="260" y2="158" stroke="url(#hg2)" stroke-width="1.5"/>
+      </svg>
+    </div>
   </section>
 
-  <!-- ═══════════════ FEATURES ═══════════════ -->
-  <section id="features">
+  <!-- ═══════════════ TICKER STRIP ═══════════════ -->
+  <div class="home-ticker-strip" id="home-ticker-strip">
+    <div class="ht-card" style="opacity:.4;" id="ht-loading"><div class="ht-sym">Loading…</div></div>
+  </div>
+
+  <!-- ═══════════════ DASHBOARD GRID ═══════════════ -->
+  <div class="home-dash">
+    <!-- Market Overview -->
+    <div class="home-card">
+      <div class="hc-hdr">
+        <span class="hc-title">Market Performance</span>
+        <div class="mo-tabs-row" id="mo-tabs">
+          <button class="mo-tab on" onclick="loadMarketOverview('1d',this)">1D</button>
+          <button class="mo-tab" onclick="loadMarketOverview('5d',this)">5D</button>
+          <button class="mo-tab" onclick="loadMarketOverview('1mo',this)">1M</button>
+          <button class="mo-tab" onclick="loadMarketOverview('3mo',this)">3M</button>
+          <button class="mo-tab" onclick="loadMarketOverview('ytd',this)">YTD</button>
+          <button class="mo-tab" onclick="loadMarketOverview('1y',this)">1Y</button>
+          <button class="mo-tab" onclick="loadMarketOverview('5y',this)">5Y</button>
+        </div>
+      </div>
+      <div class="mo-legend">
+        <div class="mo-legend-item"><div class="mo-legend-dot" style="background:#4a9fd4"></div><span>S&amp;P 500</span></div>
+        <div class="mo-legend-item"><div class="mo-legend-dot" style="background:#C8882A"></div><span>Nasdaq 100</span></div>
+        <div class="mo-legend-item"><div class="mo-legend-dot" style="background:#a78bfa"></div><span>Dow Jones</span></div>
+      </div>
+      <div class="mo-chart-wrap"><canvas id="market-overview-chart"></canvas></div>
+      <div class="mo-indices" id="mo-indices">
+        <div class="mo-index"><div class="mo-index-name">S&amp;P 500</div><div class="mo-index-val" id="mo-sp">—</div><div class="mo-index-chg" id="mo-sp-chg">—</div></div>
+        <div class="mo-index"><div class="mo-index-name">Nasdaq 100</div><div class="mo-index-val" id="mo-nq">—</div><div class="mo-index-chg" id="mo-nq-chg">—</div></div>
+        <div class="mo-index"><div class="mo-index-name">Dow Jones</div><div class="mo-index-val" id="mo-dj">—</div><div class="mo-index-chg" id="mo-dj-chg">—</div></div>
+      </div>
+    </div>
+
+    <!-- Right column: Watchlist + Analyst Signals -->
+    <div class="home-right-col">
+      <!-- Watchlist -->
+      <div class="home-card">
+        <div class="hc-hdr">
+          <span class="hc-title">Your Watchlist</span>
+          <a class="hc-link" href="#" onclick="navGoTo('analyze');return false;">View all →</a>
+        </div>
+        <table class="wl-table">
+          <thead><tr><th>Symbol</th><th>Price</th><th style="text-align:right">1D %</th></tr></thead>
+          <tbody id="home-watchlist-body"><tr><td colspan="3" style="color:var(--ink5);font-size:.72rem;text-align:center;padding:1rem;">Loading…</td></tr></tbody>
+        </table>
+      </div>
+      <!-- Analyst Signals -->
+      <div class="home-card">
+        <div class="hc-hdr">
+          <span class="hc-title">Analyst Signals</span>
+          <span class="hc-link" id="analyst-based-on" style="font-size:.6rem;color:var(--ink5);">Featured tickers</span>
+        </div>
+        <div class="analyst-ring-wrap">
+          <div class="analyst-ring">
+            <canvas id="analyst-donut-chart"></canvas>
+            <div class="analyst-ring-label">
+              <div class="arl-pct" id="analyst-bull-pct">—</div>
+              <div class="arl-txt">Bullish</div>
+            </div>
+          </div>
+          <div class="analyst-breakdown">
+            <div class="abl-row"><div class="abl-dot" style="background:#4ade80"></div><span class="abl-label">Buy</span><span class="abl-val" id="abl-buy">—</span></div>
+            <div class="abl-row"><div class="abl-dot" style="background:#9ca3af"></div><span class="abl-label">Hold</span><span class="abl-val" id="abl-hold">—</span></div>
+            <div class="abl-row"><div class="abl-dot" style="background:#f87171"></div><span class="abl-label">Sell</span><span class="abl-val" id="abl-sell">—</span></div>
+          </div>
+        </div>
+        <div class="analyst-note" id="analyst-note">Based on analyst ratings for featured tickers</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ MARKET MOVERS ═══════════════ -->
+  <div class="home-movers">
+    <div class="hc-hdr" style="margin-bottom:.5rem;">
+      <span class="hc-title">Market Movers</span>
+    </div>
+    <div class="movers-tabs-row">
+      <button class="movers-tab on" onclick="switchMovers('gainers',this)">Top Gainers</button>
+      <button class="movers-tab" onclick="switchMovers('losers',this)">Top Losers</button>
+      <button class="movers-tab" onclick="switchMovers('active',this)">Most Active</button>
+    </div>
+    <div class="movers-grid" id="movers-grid">
+      <div style="color:var(--ink5);font-size:.75rem;grid-column:1/-1;text-align:center;padding:1rem;">Loading market data…</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ FEATURES (compact) ═══════════════ -->
+  <section id="features" style="padding:2.5rem 0;">
     <div class="container">
       <span class="sec-label">What's inside</span>
-      <h2 class="sec-h2">Every tool a serious investor needs.</h2>
-      <p class="sec-sub">Professional-grade analysis packed into one platform — no spreadsheets, no finance degree required.</p>
+      <h2 class="sec-h2" style="margin-bottom:1.5rem;">Every tool a serious investor needs.</h2>
       <div class="features-bento">
-        <div class="feat-card"><div class="feat-icon"><span style="font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">LD</span></div><h3>Market Data</h3><p>Up-to-date price, volume, market cap, 52-week range, and exchange data for any publicly traded stock.</p></div>
-        <div class="feat-card"><div class="feat-icon"><span style="font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">CH</span></div><h3>Interactive Charts</h3><p>Price with MA/Bollinger overlays, RSI, MACD, volume, daily returns, and performance comparison charts.</p></div>
-        <div class="feat-card"><div class="feat-icon"><span style="font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">FS</span></div><h3>Financial Statements</h3><p>Annual income statement, balance sheet, and cash flow for the last 4 years — pulled direct from filings.</p><div class="feat-pro">PRO</div></div>
-        <div class="feat-card"><div class="feat-icon"><span style="font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">AM</span></div><h3>Advanced Metrics</h3><p>EV/EBITDA, ROIC, gross margin, FCF yield, debt ratios, and 20+ deep fundamental metrics by category.</p><div class="feat-pro">PRO</div></div>
-        <div class="feat-card"><div class="feat-icon"><span style="font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">EH</span></div><h3>Earnings History</h3><p>EPS estimate vs. actual for the last 12 quarters with beat/miss badges and a beat-rate summary.</p></div>
-        <div class="feat-card"><div class="feat-icon"><span style="font-family:var(--mono);font-size:.52rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">SEC</span></div><h3>SEC Filings</h3><p>One-click access to 10-K, 10-Q, 8-K, and full EDGAR filing history for any ticker.</p></div>
-        <div class="feat-card"><div class="feat-icon"><span style="font-family:var(--mono);font-size:.52rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">CMP</span></div><h3>Side-by-Side Comparison</h3><p>Compare up to 4 tickers on key metrics with best/worst highlighting, performance chart, and fundamental radar.</p><div class="feat-pro">PRO</div></div>
-        <div class="feat-card"><div class="feat-icon"><span style="font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">PR</span></div><h3>3-Scenario Projection</h3><p>Model bear, base, and bull cases with custom growth rates, margin assumptions, exit P/E, and CAGR.</p><div class="feat-pro">PRO</div></div>
-        <div class="feat-card"><div class="feat-icon"><span style="font-family:var(--mono);font-size:.52rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">DCF</span></div><h3>DCF Valuation</h3><p>Two-stage discounted cash flow with WACC, terminal growth, margin of safety, and Graham Number.</p><div class="feat-pro">PRO</div></div>
-        <div class="feat-card"><div class="feat-icon"><span style="font-family:var(--mono);font-size:.52rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">SCR</span></div><h3>Stock Screener</h3><p>Filter across sectors by P/E, P/B, dividend yield, market cap, revenue growth, and 1-year return.</p><div class="feat-pro">PRO</div></div>
-        <div class="feat-card"><div class="feat-icon"><span style="font-family:var(--mono);font-size:.52rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">EDU</span></div><h3>Education Center</h3><p>From P/E ratios to DCF valuation — bite-sized explanations of every metric and concept in the platform.</p></div>
-        <div class="feat-card"><div class="feat-icon"><span style="font-family:var(--mono);font-size:.52rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">PDF</span></div><h3>PDF Report Export</h3><p>Generate clean, professional PDF analysis reports ready to print or share.</p><div class="feat-pro">PRO</div></div>
+        <div class="feat-card"><div class="feat-icon"><span style="font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">CH</span></div><h3>Interactive Charts</h3><p>Candlestick, line and area charts with MA/Bollinger overlays, RSI, MACD, OBV, ATR and more.</p></div>
+        <div class="feat-card"><div class="feat-icon"><span style="font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">FS</span></div><h3>Financial Statements</h3><p>Annual income statement, balance sheet, and cash flow for the last 4 years.</p><div class="feat-pro">PRO</div></div>
+        <div class="feat-card"><div class="feat-icon"><span style="font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">AM</span></div><h3>Advanced Metrics</h3><p>EV/EBITDA, ROIC, gross margin, FCF yield and 20+ deep fundamental ratios.</p><div class="feat-pro">PRO</div></div>
+        <div class="feat-card"><div class="feat-icon"><span style="font-family:var(--mono);font-size:.52rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">DCF</span></div><h3>DCF Valuation</h3><p>Two-stage discounted cash flow with WACC, terminal growth and margin of safety.</p><div class="feat-pro">PRO</div></div>
+        <div class="feat-card"><div class="feat-icon"><span style="font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">PR</span></div><h3>3-Scenario Projection</h3><p>Bear, base, and bull case models with analyst-consensus auto-fill.</p><div class="feat-pro">PRO</div></div>
+        <div class="feat-card"><div class="feat-icon"><span style="font-family:var(--mono);font-size:.52rem;font-weight:700;color:var(--gold-d);letter-spacing:.04em;">SCR</span></div><h3>Stock Screener</h3><p>Filter across sectors by P/E, P/B, dividend yield, market cap, revenue growth and more.</p><div class="feat-pro">PRO</div></div>
       </div>
     </div>
   </section>
@@ -1306,11 +1498,11 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
     </div>
   </div>
 
-  <section id="pricing" style="">
+  <section id="pricing">
     <div class="container">
       <span class="sec-label">Simple, honest pricing</span>
       <h2 class="sec-h2">Start free. Upgrade when you're ready.</h2>
-      <p class="sec-sub">No Bloomberg fees. No hidden paywalls. Professional tools at a price that makes sense for individual investors.</p>
+      <p class="sec-sub">No Bloomberg fees. No hidden paywalls. Professional tools at a price that makes sense.</p>
       <div class="pricing-grid">
         <div class="pricing-card">
           <div class="pricing-tier">Starter</div>
@@ -1331,13 +1523,12 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
           <div class="pricing-tier">Pro</div>
           <div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">7.99</span><span class="p-per">/month</span></div>
           <p class="p-desc" style="font-size:.8rem;margin-bottom:.25rem;opacity:.7;">or $59.99/year — save 37%</p>
-          <p class="p-desc">For serious investors who research and track positions every day.</p>
+          <p class="p-desc">For serious investors who research every day.</p>
           <ul class="p-features">
             <li>Unlimited stock analyses</li>
             <li>DCF intrinsic value model</li>
             <li>Advanced projection (6 inputs)</li>
             <li>4-stock side-by-side comparison</li>
-            <li>Performance &amp; radar charts</li>
             <li>Full stock screener</li>
             <li>PDF report export</li>
             <li>Risk &amp; volatility dashboard</li>
@@ -1355,7 +1546,6 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
             <li>DCF intrinsic value model</li>
             <li>Advanced projection (6 inputs)</li>
             <li>4-stock side-by-side comparison</li>
-            <li>Performance &amp; radar charts</li>
             <li>Full stock screener</li>
             <li>PDF report export</li>
             <li>Risk &amp; volatility dashboard</li>
@@ -1366,7 +1556,6 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
     </div>
   </section>
 
-  <!-- CTA STRIP -->
   <section class="cta-strip" id="cta-strip">
     <div class="container" style="text-align:center;">
       <h2 class="sec-h2" style="color:inherit;margin-bottom:.5rem;">Ready to start?</h2>
@@ -5372,6 +5561,9 @@ async function loadSecFilings(ticker) {
 
 // Auto-load featured grid on page open
 loadFeaturedGrid();
+loadHomeTickerStrip();
+loadMarketOverview('1d');
+loadMarketMovers();
 
 // Prime the analysis limit counter for free/guest users
 (async () => {

@@ -1742,6 +1742,27 @@ app.get("/blog", (req, res) => {
 </body></html>`);
 });
 
+// Market movers (gainers / losers / most active)
+app.get('/api/market/movers', async (req, res) => {
+  const type = req.query.type || 'gainers';
+  const scrIds = type === 'losers' ? 'day_losers' : type === 'active' ? 'most_actives' : 'day_gainers';
+  try {
+    const url = `https://query1.finance.yahoo.com/v1/finance/screener/predefined/saved?formatted=true&scrIds=${scrIds}&start=0&count=6`;
+    const r = await fetchWithTimeout(url, { headers: { 'User-Agent': 'Mozilla/5.0' } }, 6000);
+    const j = await r.json();
+    const quotes = j?.finance?.result?.[0]?.quotes || [];
+    const items = quotes.map(q => ({
+      symbol: q.symbol,
+      name:   q.shortName || q.longName || q.symbol,
+      price:  q.regularMarketPrice?.raw ?? q.regularMarketPrice ?? 0,
+      chgPct: q.regularMarketChangePercent?.raw ?? q.regularMarketChangePercent ?? 0,
+    }));
+    return res.json(items);
+  } catch(e) {
+    return res.json([]);
+  }
+});
+
 app.get("*", (req, res) =>
   res.sendFile(path.join(__dirname, "index.html"))
 );
