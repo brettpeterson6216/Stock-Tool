@@ -361,11 +361,15 @@ h2.sec-h2 {
 .tool-body { padding:1.75rem; }
 
 /* search row */
-.search-row{display:flex;align-items:center;margin-bottom:1.25rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:10px;overflow:hidden;transition:border-color .18s;}
+.tool-welcome{text-align:center;padding:2.5rem 1.5rem 1.75rem;margin-bottom:.25rem;}
+.tw-title{font-family:var(--serif);font-size:2rem;color:rgba(220,225,232,.9);letter-spacing:-.02em;margin-bottom:.5rem;}
+.tw-sub{font-size:.82rem;color:rgba(220,225,232,.35);max-width:440px;margin:0 auto;line-height:1.65;}
+.search-row{display:flex;align-items:center;margin-bottom:1.25rem;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.13);border-radius:10px;overflow:hidden;transition:border-color .18s;max-width:640px;margin-left:auto;margin-right:auto;}
+.search-row:focus-within{border-color:rgba(200,136,42,.65);box-shadow:0 0 0 3px rgba(200,136,42,.12);}
 .search-row:focus-within{border-color:rgba(200,136,42,.55);box-shadow:0 0 0 3px rgba(200,136,42,.1);}
-.ticker-input{flex:1;min-width:0;background:transparent;border:none;outline:none;padding:.68rem 1rem;font-family:var(--mono);font-size:.9rem;color:var(--text);text-transform:uppercase;}
+.ticker-input{flex:1;min-width:0;background:transparent;border:none;outline:none;padding:.85rem 1.15rem;font-family:var(--mono);font-size:1rem;color:var(--text);text-transform:uppercase;}
 .ticker-input::placeholder{color:var(--text5);text-transform:none;font-family:var(--sans);font-size:.85rem;}
-.btn-search{background:linear-gradient(135deg,#D4972E,#B8781A);color:#fff;border:none;padding:.68rem 1.35rem;font-size:.83rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:opacity .15s;flex-shrink:0;}
+.btn-search{background:linear-gradient(135deg,#D4972E,#B8781A);color:#fff;border:none;padding:.85rem 1.5rem;font-size:.85rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:opacity .15s;flex-shrink:0;letter-spacing:.04em;}
 .btn-search:hover{opacity:.88;}
 .btn-search:disabled{opacity:.4;cursor:not-allowed;}
 
@@ -791,7 +795,44 @@ h2.sec-h2{letter-spacing:-.022em;line-height:1.08;}
 .sec-sub{font-size:.975rem;line-height:1.72;}
 .sec-label{font-size:.68rem;letter-spacing:.13em;}
 /* Tool view — dark terminal */
-#view-tool{background:var(--cream)!important;color:var(--text);transition:background .2s,color .2s;}
+#view-tool{
+  background:#09090E!important;
+  color:rgba(220,225,232,.88);
+  /* Force dark CSS variables regardless of theme */
+  --cream:#09090E;
+  --cream2:#0E0F14;
+  --cream3:#14161C;
+  --card:#0C0D12;
+  --panel:#0F1016;
+  --border2:rgba(255,255,255,.07);
+  --text:rgba(220,225,232,.88);
+  --text2:rgba(220,225,232,.72);
+  --text3:rgba(220,225,232,.6);
+  --text4:rgba(220,225,232,.45);
+  --text5:rgba(220,225,232,.28);
+  --ink:rgba(247,244,238,.9);
+  --ink2:rgba(247,244,238,.72);
+  --ink3:rgba(247,244,238,.6);
+  --ink4:rgba(247,244,238,.42);
+  --ink5:rgba(247,244,238,.28);
+  --t-acc-border:rgba(255,255,255,.06);
+  --t-acc-header-bg:rgba(255,255,255,.012);
+  --t-acc-header-hover:rgba(255,255,255,.026);
+  --t-acc-body-border:rgba(255,255,255,.04);
+  --t-metric-bg:rgba(255,255,255,.038);
+  --t-metric-border:rgba(255,255,255,.065);
+  --t-metric-hover:rgba(255,255,255,.065);
+  --t-chart-bg:rgba(255,255,255,.02);
+  --t-chart-border:rgba(255,255,255,.05);
+  --t-chart-title:rgba(220,225,232,.42);
+  --t-ticker-bg:rgba(255,255,255,.07);
+  --t-ticker-border:rgba(255,255,255,.13);
+  --t-ticker-color:rgba(220,225,232,.9);
+  --t-ticker-ph:rgba(247,244,238,.28);
+  --t-panel-bg:rgba(255,255,255,.032);
+  --t-panel-border:rgba(255,255,255,.065);
+  --t-rpill-border:rgba(255,255,255,.1);
+}
 .tool-accordion-wrap{max-width:1300px;padding:calc(56px + 2rem) 1.75rem 4rem;}
 .acc-section{border-bottom:1px solid var(--t-acc-border);}
 .acc-section:first-child{border-top:1px solid var(--t-acc-border);}
@@ -1796,11 +1837,16 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
       <div class="app-content-scroll">
 
           <div class="app-section open" id="sec-analyze"><div class="acc-body" id="body-analyze">
-<div class="search-row">
+<div class="tool-welcome" id="tool-welcome">
+              <div class="tw-title">Market Intelligence</div>
+              <div class="tw-sub">Search any ticker for real-time charts, financials, metrics, and AI-powered analysis</div>
+            </div>
+            <div class="search-row">
               <input class="ticker-input" id="main-ticker" type="text" placeholder="Try AAPL, TSLA, NVDA, SPY…" value="">
               <button class="btn-search" id="search-btn" onclick="fetchAndRender()">Analyze →</button>
             </div>
             <!-- Featured stocks grid (shown before search) -->
+            <div class="fg-label" id="fg-label">Quick Access</div>
             <div id="featured-grid"></div>
             <div id="limit-counter" style="display:none;align-items:center;gap:8px;margin-bottom:.75rem;flex-wrap:wrap;"></div>
             <div class="loading-bar" id="analyze-loading" style="display:none;"><div class="spinner"></div> Fetching live market data…</div>
@@ -2823,7 +2869,7 @@ html[data-theme="dark"] .input-light::placeholder{color:rgba(220,225,232,.28)!im
 /* tool header strip */
 #view-tool .tool-header{background:var(--t-acc-header-bg)!important;border-bottom-color:var(--t-acc-border)!important;}
 /* search-row & quick buttons */
-#view-tool .search-row{background:rgba(255,255,255,.04)!important;border:1px solid rgba(255,255,255,.09)!important;border-radius:10px!important;}
+#view-tool .search-row{background:rgba(255,255,255,.06)!important;border:1px solid rgba(255,255,255,.13)!important;border-radius:10px!important;max-width:640px!important;margin-left:auto!important;margin-right:auto!important;}
 /* earnings table */
 #view-tool .earn-table th{color:var(--text5)!important;background:var(--t-acc-header-bg)!important;border-bottom-color:var(--t-acc-border)!important;}
 #view-tool .earn-table td{color:var(--text3)!important;border-bottom-color:var(--t-acc-body-border)!important;}
@@ -2964,16 +3010,17 @@ html[data-theme="dark"] .input-light::placeholder{color:rgba(220,225,232,.28)!im
 .inst-table tr:hover td{background:var(--t-metric-bg);}
 
 /* ── Featured stocks grid ── */
-#featured-grid{display:flex;overflow-x:auto;scrollbar-width:none;border:1px solid var(--border2);border-radius:8px;overflow:hidden;margin-bottom:1.25rem;}
-.fstock-card{background:var(--panel);border-right:1px solid var(--border2);border-bottom:1px solid var(--border2);padding:.55rem .85rem;cursor:pointer;transition:background .12s;min-width:120px;flex:1;}
-.fstock-card:hover{background:rgba(200,136,42,.07);}
+#featured-grid{display:flex;overflow-x:auto;scrollbar-width:none;border:1px solid rgba(255,255,255,.1);border-radius:10px;overflow:hidden;margin-bottom:1.5rem;max-width:640px;margin-left:auto;margin-right:auto;}
+.fstock-card{background:rgba(255,255,255,.03);border-right:1px solid rgba(255,255,255,.07);border-bottom:none;padding:.65rem .9rem;cursor:pointer;transition:background .12s;min-width:110px;flex:1;}
+.fstock-card:hover{background:rgba(200,136,42,.09);}
 .fstock-top{display:flex;align-items:center;gap:6px;margin-bottom:2px;}
 .fstock-logo{width:17px;height:17px;border-radius:4px;flex-shrink:0;object-fit:contain;}
-.fstock-sym{font-family:var(--mono);font-size:.71rem;font-weight:700;color:var(--text2);}
-.fstock-price{font-family:var(--mono);font-size:.84rem;font-weight:600;color:var(--text);margin-bottom:1px;}
+.fstock-sym{font-family:var(--mono);font-size:.72rem;font-weight:700;color:rgba(220,225,232,.75);}
+.fstock-price{font-family:var(--mono);font-size:.84rem;font-weight:600;color:rgba(220,225,232,.9);margin-bottom:1px;}
 .fstock-chg{font-size:.63rem;font-weight:600;}
 .fstock-chg.up{color:#4ade80;}.fstock-chg.dn{color:#f87171;}
 .fstock-spark{height:21px;width:100%;margin-top:3px;}
+.fg-label{font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(220,225,232,.25);text-align:center;margin-bottom:.55rem;max-width:640px;margin-left:auto;margin-right:auto;}
 .news-item.news-pos{border-left:3px solid #4ade80;}
 .news-item.news-neg{border-left:3px solid #f87171;}
 .news-item.news-neu{border-left:3px solid var(--t-chart-border);}
@@ -3987,7 +4034,7 @@ async function fetchAndRender() {
     const result=await yahooFetch(ticker,S.range);
     S.ticker=ticker; S.data=result; S.analystTarget=null;
     renderStock(result,ticker);
-    toast(`${ticker} loaded ✓`,'green'); const _fg=document.getElementById('featured-grid'); if(_fg) _fg.style.display='none';
+    toast(`${ticker} loaded ✓`,'green'); const _fg=document.getElementById('featured-grid'); if(_fg) _fg.style.display='none'; const _tw=document.getElementById('tool-welcome'); if(_tw) _tw.style.display='none'; const _fl=document.getElementById('fg-label'); if(_fl) _fl.style.display='none';
   } catch(e) {
     if (e.message === 'LIMIT_REACHED') {
       showUpgradeModal();
