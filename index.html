@@ -1225,7 +1225,7 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
     } else {
       if (tool) tool.style.display = 'none';
       if (home) home.style.display = 'block';
-      history.replaceState(null, '', '/');
+      history.replaceState(null, '', '/?view=home');
       const nav2 = document.getElementById('main-nav'); if(nav2) nav2.setAttribute('data-view','home');
       document.querySelectorAll('.nav-tab').forEach(a => a.classList.remove('active-tab'));
       const ht = document.getElementById('nav-home'); if(ht) ht.classList.add('active-tab');
@@ -1250,8 +1250,14 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
     openSection(id, true);
   }
 
-  // On hard load: respect ?view=tool in URL
-  if (window.location.search.includes('view=tool')) showView('tool');
+  // On hard load: respect ?view=tool or ?view=home in URL
+  // Must wait for DOM since #view-home / #view-tool are defined after this <nav>
+  document.addEventListener('DOMContentLoaded', function() {
+    if (window.location.search.includes('view=tool')) showView('tool');
+    else if (!window.location.search.includes('view=home')) {
+      // nav data-view defaults to "home" — no action needed
+    }
+  });
 
   // ── Account dropdown toggle ──
   function toggleAcctMenu(e) {
@@ -2844,6 +2850,15 @@ html[data-theme="dark"] .input-light::placeholder{color:rgba(220,225,232,.28)!im
 /* inline fallback text — covers any remaining hardcoded inline color styles inside #view-tool */
 #view-tool [style*="rgba(247,244,238"]{color:var(--text4)!important;}
 #view-tool [style*="color:rgba(247"]{color:var(--text4)!important;}
+
+/* ══ VIEW SWITCHING (belt-and-suspenders) ══
+   The JS also sets inline display styles, but this CSS
+   ensures the correct view shows even in edge cases.    */
+#main-nav[data-view="tool"] ~ #view-home{display:none!important;}
+#main-nav[data-view="tool"] ~ #view-tool{display:flex!important;flex-direction:column!important;}
+#main-nav[data-view="home"] ~ #view-tool{display:none!important;}
+/* Default (no attribute): home visible, tool hidden */
+#main-nav:not([data-view="tool"]) ~ #view-tool{display:none!important;}
 
 /* ══ SCROLLBAR ══ */
 ::-webkit-scrollbar{width:8px;height:8px;}
