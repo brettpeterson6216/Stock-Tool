@@ -969,111 +969,204 @@ html[data-theme="dark"] .modal-note { color:rgba(220,225,232,.35)!important; }
 html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; border-color:rgba(255,255,255,.18)!important; }
 
 /* ══════════════════════════════════════════
-   HOME DASHBOARD — v3 PREMIUM
+   HOME DASHBOARD — v4 PREMIUM
 ══════════════════════════════════════════ */
-.home-hero{position:relative;display:flex;align-items:center;min-height:260px;overflow:hidden;background:#0A0B0F;border-bottom:1px solid rgba(200,136,42,.15);}
+
+/* --- Home Shell --- */
+.home-shell{display:flex;min-height:calc(100vh - 48px);}
+.hs-sidebar{width:196px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--border2);display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;position:sticky;top:48px;height:calc(100vh - 48px);}
+@media(max-width:960px){.hs-sidebar{width:50px;}}
+@media(max-width:680px){.hs-sidebar{display:none;}}
+.hs-main{flex:1;min-width:0;overflow-x:hidden;}
+
+/* --- Sidebar nav --- */
+.hsb-home{display:flex;align-items:center;gap:9px;padding:.7rem 1rem;font-size:.76rem;font-weight:600;color:var(--text3);text-decoration:none;border-bottom:1px solid var(--border2);transition:color .14s,background .14s;}
+.hsb-home:hover,.hsb-home.active{color:var(--gold);}
+.hsb-home.active{background:rgba(200,136,42,.07);}
+.hsb-home .ti{font-size:14px;flex-shrink:0;}
+.hsb-section{padding:.4rem 0 .2rem;}
+.hsb-label{font-size:.53rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text5);padding:.35rem 1rem .2rem;line-height:1;}
+.hsb-item{display:flex;align-items:center;gap:8px;padding:.32rem 1rem;font-size:.71rem;color:var(--text4);text-decoration:none;cursor:pointer;transition:background .12s,color .12s;white-space:nowrap;overflow:hidden;}
+.hsb-item .ti{font-size:13px;flex-shrink:0;color:var(--text5);}
+.hsb-item:hover{background:rgba(200,136,42,.07);color:var(--ink);}
+.hsb-item:hover .ti{color:var(--gold);}
+.hsb-upgrade{margin-top:auto;padding:.9rem 1rem;border-top:1px solid var(--border2);}
+.hsb-up-icon{width:26px;height:26px;border-radius:6px;background:linear-gradient(135deg,rgba(212,151,46,.2),rgba(212,151,46,.05));border:1px solid rgba(212,151,46,.3);display:flex;align-items:center;justify-content:center;color:#D4972E;font-size:11px;margin-bottom:.45rem;}
+.hsb-up-title{font-size:.68rem;font-weight:700;color:var(--text2);margin-bottom:1px;}
+.hsb-up-sub{font-size:.58rem;color:var(--text5);margin-bottom:.45rem;line-height:1.35;}
+.hsb-up-link{display:inline-block;font-size:.6rem;font-weight:600;color:#D4972E;text-decoration:none;}
+.hsb-up-link:hover{text-decoration:underline;}
+@media(max-width:960px){.hsb-label,.hsb-item span,.hsb-home span,.hsb-upgrade div,.hsb-up-link{display:none;}.hsb-item{justify-content:center;padding:.42rem;}.hsb-home{justify-content:center;padding:.55rem;}.hsb-upgrade{padding:.45rem;}.hsb-up-icon{margin:0 auto;}}
+
+/* --- Hero --- */
+.home-hero{position:relative;display:flex;align-items:center;min-height:230px;overflow:hidden;background:#0A0B0F;border-bottom:1px solid rgba(200,136,42,.15);}
 .home-hero::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(200,136,42,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(200,136,42,.04) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;}
-.hh-left{flex:1;min-width:0;padding:2.5rem 2rem 2.5rem 2.5rem;z-index:1;}
-.hh-right{flex-shrink:0;width:420px;height:260px;position:relative;z-index:1;}
+.hh-left{flex:1;min-width:0;padding:1.9rem 2rem 1.9rem 2.25rem;z-index:1;}
+.hh-right{flex-shrink:0;width:360px;height:230px;position:relative;z-index:1;}
 @media(max-width:900px){.hh-right{display:none;}}
-.hh-badge{display:inline-flex;align-items:center;gap:6px;font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#D4972E;background:rgba(212,151,46,.12);border:1px solid rgba(212,151,46,.25);border-radius:100px;padding:4px 12px;margin-bottom:.9rem;}
+.hh-badge{display:inline-flex;align-items:center;gap:6px;font-size:.61rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#D4972E;background:rgba(212,151,46,.12);border:1px solid rgba(212,151,46,.25);border-radius:100px;padding:3px 10px;margin-bottom:.75rem;}
 .hh-badge::before{content:'';width:5px;height:5px;border-radius:50%;background:#D4972E;box-shadow:0 0 6px #D4972E;animation:blink 2s infinite;flex-shrink:0;}
-.hh-title{font-family:var(--serif);font-size:2.4rem;line-height:1.1;letter-spacing:-.02em;color:#E8E2D4;margin-bottom:.5rem;}
+.hh-title{font-family:var(--serif);font-size:2.1rem;line-height:1.1;letter-spacing:-.02em;color:#E8E2D4;margin-bottom:.4rem;}
 .hh-title em{font-style:normal;background:linear-gradient(90deg,#D4972E,#F0C060);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.hh-sub{font-size:.88rem;color:rgba(232,226,212,.45);margin-bottom:1.25rem;}
-.hh-search{display:flex;align-items:center;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;overflow:hidden;max-width:560px;transition:border-color .18s;}
+.hh-sub{font-size:.83rem;color:rgba(232,226,212,.45);margin-bottom:1.1rem;}
+.hh-search{display:flex;align-items:center;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;overflow:hidden;max-width:500px;transition:border-color .18s;}
 .hh-search:focus-within{border-color:rgba(212,151,46,.6);box-shadow:0 0 0 3px rgba(212,151,46,.1);}
 .hh-search-icon{padding:0 10px 0 14px;color:rgba(232,226,212,.35);font-size:15px;flex-shrink:0;}
-.hh-search input{flex:1;border:none;background:transparent;font-family:var(--sans);font-size:.88rem;color:#E8E2D4;padding:.72rem 0;outline:none;}
+.hh-search input{flex:1;border:none;background:transparent;font-family:var(--sans);font-size:.84rem;color:#E8E2D4;padding:.65rem 0;outline:none;}
 .hh-search input::placeholder{color:rgba(232,226,212,.3);}
-.hh-search-btn{background:linear-gradient(135deg,#D4972E,#B8781A);color:#fff;border:none;padding:.72rem 1.3rem;font-family:var(--sans);font-size:.85rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:opacity .15s;flex-shrink:0;}
+.hh-search-btn{background:linear-gradient(135deg,#D4972E,#B8781A);color:#fff;border:none;padding:.65rem 1.2rem;font-family:var(--sans);font-size:.82rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:opacity .15s;flex-shrink:0;}
 .hh-search-btn:hover{opacity:.88;}
-.hh-chips{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:.7rem;}
-.hh-chip-lbl{font-size:.7rem;color:rgba(232,226,212,.35);flex-shrink:0;}
-.hh-chip{font-size:.7rem;font-weight:500;padding:3px 10px;border-radius:100px;border:1px solid rgba(255,255,255,.1);color:rgba(232,226,212,.55);background:rgba(255,255,255,.04);cursor:pointer;transition:all .14s;font-family:var(--sans);}
+.hh-chips{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:.6rem;}
+.hh-chip-lbl{font-size:.67rem;color:rgba(232,226,212,.35);flex-shrink:0;}
+.hh-chip{font-size:.67rem;font-weight:500;padding:3px 9px;border-radius:100px;border:1px solid rgba(255,255,255,.1);color:rgba(232,226,212,.55);background:rgba(255,255,255,.04);cursor:pointer;transition:all .14s;font-family:var(--sans);}
 .hh-chip:hover{background:rgba(212,151,46,.18);border-color:rgba(212,151,46,.4);color:#D4972E;}
 html:not([data-theme="dark"]) .home-hero{background:var(--ink);}
+
+/* --- Ticker strip --- */
 .home-ticker-strip{display:flex;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border2);background:var(--panel);}
 .home-ticker-strip::-webkit-scrollbar{display:none;}
-.ht-card{flex:0 0 12.5%;min-width:130px;padding:.6rem .9rem;border-right:1px solid var(--border2);cursor:pointer;transition:background .12s;}
+.ht-card{flex:0 0 12.5%;min-width:128px;padding:.52rem .8rem;border-right:1px solid var(--border2);cursor:pointer;transition:background .12s;}
 .ht-card:hover{background:rgba(200,136,42,.06);}
 .ht-top{display:flex;align-items:center;gap:6px;margin-bottom:2px;}
-.ht-logo{width:18px;height:18px;border-radius:4px;flex-shrink:0;object-fit:contain;}
-.ht-sym{font-family:var(--mono);font-size:.72rem;font-weight:700;color:var(--text2);}
-.ht-price{font-family:var(--mono);font-size:.86rem;font-weight:600;color:var(--text);}
-.ht-chg{font-size:.65rem;font-weight:600;}
-.ht-spark{height:24px;width:100%;margin-top:3px;}
+.ht-logo{width:17px;height:17px;border-radius:4px;flex-shrink:0;object-fit:contain;}
+.ht-sym{font-family:var(--mono);font-size:.71rem;font-weight:700;color:var(--text2);}
+.ht-price{font-family:var(--mono);font-size:.83rem;font-weight:600;color:var(--text);}
+.ht-chg{font-size:.62rem;font-weight:600;}
+.ht-spark{height:21px;width:100%;margin-top:3px;}
+
+/* --- Home dashboard grid (5 cells, 3 col x 2 row) --- */
 .home-grid{display:grid;grid-template-columns:1.7fr 1fr 1fr;grid-template-rows:auto auto;border-bottom:1px solid var(--border2);}
 @media(max-width:1200px){.home-grid{grid-template-columns:1fr 1fr;}}
-@media(max-width:800px){.home-grid{grid-template-columns:1fr;}}
-.hg-market{grid-row:1/3;border-right:1px solid var(--border2);}
-.hg-insights{grid-row:1;border-right:1px solid var(--border2);border-bottom:1px solid var(--border2);}
-.hg-learning{grid-row:1;border-bottom:1px solid var(--border2);}
-.hg-report{grid-row:2;grid-column:2/4;}
-.hc{background:var(--card);padding:1rem 1.25rem;}
-.hc-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem;}
-.hc-title{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);}
-.hc-link{font-size:.68rem;color:var(--gold);text-decoration:none;display:flex;align-items:center;gap:3px;}
+@media(max-width:768px){.home-grid{grid-template-columns:1fr;}}
+.hg-market{grid-column:1;grid-row:1/3;border-right:1px solid var(--border2);}
+.hg-watch{grid-column:2;grid-row:1;border-right:1px solid var(--border2);border-bottom:1px solid var(--border2);}
+.hg-signals{grid-column:3;grid-row:1;border-bottom:1px solid var(--border2);}
+.hg-insights{grid-column:2;grid-row:2;border-right:1px solid var(--border2);}
+.hg-movers{grid-column:3;grid-row:2;}
+.hc{background:var(--card);padding:.95rem 1.1rem;}
+.hc-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:.7rem;}
+.hc-title{font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);}
+.hc-link{font-size:.63rem;color:var(--gold);text-decoration:none;display:flex;align-items:center;gap:3px;}
 .hc-link:hover{color:var(--gold-d);}
+
+/* --- Market Overview --- */
 .mo-tabs-row{display:flex;gap:2px;}
-.mo-tab{font-size:.65rem;padding:2px 8px;border-radius:3px;border:none;background:transparent;color:var(--text5);cursor:pointer;font-family:var(--sans);transition:all .12s;}
+.mo-tab{font-size:.61rem;padding:2px 7px;border-radius:3px;border:none;background:transparent;color:var(--text5);cursor:pointer;font-family:var(--sans);transition:all .12s;}
 .mo-tab.on{background:var(--gold);color:#fff;font-weight:700;}
 .mo-tab:hover:not(.on){background:var(--t-metric-hover);}
-.mo-legend{display:flex;gap:1rem;margin-bottom:.5rem;}
-.mo-legend-item{display:flex;align-items:center;gap:5px;font-size:.65rem;color:var(--text4);}
-.mo-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-.mo-chart-box{height:160px;}
-.mo-breadth{display:grid;grid-template-columns:repeat(6,1fr);border:1px solid var(--border2);border-radius:6px;overflow:hidden;margin:.75rem 0 .5rem;}
-.mo-b-item{padding:.45rem .5rem;border-right:1px solid var(--border2);text-align:center;}
+.mo-legend{display:flex;gap:.85rem;margin-bottom:.45rem;}
+.mo-legend-item{display:flex;align-items:center;gap:5px;font-size:.62rem;color:var(--text4);}
+.mo-legend-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.mo-chart-box{height:150px;}
+.mo-breadth{display:grid;grid-template-columns:repeat(6,1fr);border:1px solid var(--border2);border-radius:6px;overflow:hidden;margin:.65rem 0 .4rem;}
+.mo-b-item{padding:.38rem .35rem;border-right:1px solid var(--border2);text-align:center;}
 .mo-b-item:last-child{border-right:none;}
-.mo-b-lbl{font-size:.55rem;text-transform:uppercase;letter-spacing:.07em;color:var(--text5);margin-bottom:2px;}
-.mo-b-val{font-family:var(--mono);font-size:.82rem;font-weight:700;}
+.mo-b-lbl{font-size:.5rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text5);margin-bottom:1px;}
+.mo-b-val{font-family:var(--mono);font-size:.76rem;font-weight:700;}
 .mo-b-val.up{color:#16a34a;}.mo-b-val.dn{color:#dc2626;}.mo-b-val.neu{color:var(--text3);}
-.mo-timestamp{font-size:.6rem;color:var(--text5);margin-bottom:.5rem;}
-.mp-row{display:flex;gap:8px;margin-top:.75rem;}
-.mp-card{flex:1;background:var(--panel);border:1px solid var(--border);border-radius:7px;padding:.6rem .75rem;}
-.mp-name{font-size:.65rem;color:var(--text4);margin-bottom:2px;}
-.mp-ret{font-family:var(--mono);font-size:.95rem;font-weight:700;}
-.mp-sub{font-size:.58rem;color:var(--text5);}
-.mp-spark{height:22px;margin-top:4px;}
-.insight-item{display:flex;gap:8px;padding:.55rem 0;border-bottom:1px solid var(--border);cursor:pointer;}
+.mo-timestamp{font-size:.57rem;color:var(--text5);margin-bottom:.35rem;}
+
+/* --- Model portfolios (in market col) --- */
+.mp-divider{border-top:1px solid var(--border2);margin:.8rem 0 .7rem;}
+.mp-row{display:flex;gap:7px;}
+.mp-card{flex:1;background:var(--panel);border:1px solid var(--border);border-radius:7px;padding:.52rem .65rem;}
+.mp-name{font-size:.61rem;color:var(--text4);margin-bottom:1px;}
+.mp-ret{font-family:var(--mono);font-size:.88rem;font-weight:700;}
+.mp-sub{font-size:.55rem;color:var(--text5);}
+.mp-spark{height:19px;margin-top:3px;}
+
+/* --- Watchlist table --- */
+.wl-table{width:100%;border-collapse:collapse;}
+.wl-table th{font-size:.53rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text5);padding:.18rem .3rem .45rem;text-align:left;border-bottom:1px solid var(--border2);}
+.wl-table th.r{text-align:right;}
+.wl-table td{padding:.38rem .3rem;border-bottom:1px solid var(--border);vertical-align:middle;}
+.wl-table tr:last-child td{border-bottom:none;}
+.wl-table tr:hover td{background:rgba(200,136,42,.03);}
+.wl-sym{font-family:var(--mono);font-size:.71rem;font-weight:700;color:var(--text2);}
+.wl-co{font-size:.57rem;color:var(--text5);margin-top:1px;}
+.wl-price{font-family:var(--mono);font-size:.71rem;font-weight:600;text-align:right;white-space:nowrap;}
+.wl-pct{font-size:.67rem;font-weight:600;text-align:right;white-space:nowrap;}
+.wl-spark{width:50px;height:18px;text-align:right;}
+.wl-star{font-size:.72rem;cursor:pointer;transition:color .14s;color:rgba(200,136,42,.35);}
+.wl-star.lit{color:#D4972E;}
+.wl-star:hover{color:#D4972E;}
+
+/* --- Analyst Signals panel --- */
+.as-wrap{display:flex;gap:.9rem;align-items:center;margin-top:.3rem;}
+.as-donut-wrap{position:relative;flex-shrink:0;width:90px;height:90px;}
+.as-donut-wrap canvas{position:absolute;top:0;left:0;}
+.as-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;}
+.as-pct{font-family:var(--mono);font-size:1.25rem;font-weight:700;color:var(--text2);line-height:1;}
+.as-lbl{font-size:.52rem;font-weight:700;color:#4ade80;text-transform:uppercase;letter-spacing:.06em;margin-top:2px;}
+.as-legend{display:flex;flex-direction:column;gap:.38rem;flex:1;}
+.as-leg-item{display:flex;align-items:center;gap:7px;}
+.as-leg-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.as-leg-pct{font-family:var(--mono);font-size:.71rem;font-weight:700;color:var(--text2);width:26px;}
+.as-leg-name{font-size:.67rem;color:var(--text4);}
+.as-note{font-size:.57rem;color:var(--text5);margin-top:.55rem;padding-top:.55rem;border-top:1px solid var(--border2);}
+
+/* --- Market Movers --- */
+.movers-tabs{display:flex;gap:3px;margin-bottom:.65rem;}
+.movers-tab{font-size:.6rem;padding:3px 8px;border-radius:4px;border:1px solid var(--border2);background:transparent;color:var(--text5);cursor:pointer;font-family:var(--sans);transition:all .12s;}
+.movers-tab.on{background:var(--gold);color:#fff;border-color:var(--gold);font-weight:700;}
+.movers-tab:hover:not(.on){background:var(--t-metric-hover);color:var(--ink);}
+#home-movers-list .mover-row{display:grid;grid-template-columns:1fr auto auto;gap:.35rem;align-items:center;padding:.35rem 0;border-bottom:1px solid var(--border);}
+#home-movers-list .mover-row:last-child{border-bottom:none;}
+.mover-sym{font-family:var(--mono);font-size:.71rem;font-weight:700;color:var(--text2);}
+.mover-co{font-size:.57rem;color:var(--text5);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100px;}
+.mover-price{font-family:var(--mono);font-size:.69rem;color:var(--text3);text-align:right;}
+.mover-pct{font-family:var(--mono);font-size:.69rem;font-weight:700;text-align:right;min-width:44px;}
+
+/* --- Insights feed --- */
+.insight-item{display:flex;gap:8px;padding:.48rem 0;border-bottom:1px solid var(--border);cursor:pointer;}
 .insight-item:last-child{border-bottom:none;}
 .insight-item:hover .insight-title{color:var(--gold);}
-.insight-thumb{width:36px;height:36px;border-radius:5px;flex-shrink:0;background:rgba(200,136,42,.08);display:flex;align-items:center;justify-content:center;font-size:15px;}
+.insight-thumb{width:33px;height:33px;border-radius:5px;flex-shrink:0;background:rgba(200,136,42,.08);display:flex;align-items:center;justify-content:center;font-size:14px;}
 .insight-body{flex:1;min-width:0;}
-.insight-cat{font-size:.55rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-d);margin-bottom:1px;}
-.insight-title{font-size:.72rem;font-weight:500;color:var(--text2);line-height:1.35;margin-bottom:2px;transition:color .14s;}
-.insight-time{font-size:.6rem;color:var(--text5);}
-.learn-item{display:flex;gap:10px;padding:.55rem 0;border-bottom:1px solid var(--border);}
+.insight-cat{font-size:.52rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-d);margin-bottom:1px;}
+.insight-title{font-size:.69rem;font-weight:500;color:var(--text2);line-height:1.35;margin-bottom:2px;transition:color .14s;}
+.insight-time{font-size:.57rem;color:var(--text5);}
+
+/* --- Home lower row (Learning + Report) --- */
+.home-lower{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--border2);}
+@media(max-width:768px){.home-lower{grid-template-columns:1fr;}}
+.hl-learning{border-right:1px solid var(--border2);}
+.learn-item{display:flex;gap:9px;padding:.48rem 0;border-bottom:1px solid var(--border);}
 .learn-item:last-child{border-bottom:none;}
-.learn-icon{width:36px;height:36px;border-radius:6px;background:rgba(200,136,42,.08);border:1px solid rgba(200,136,42,.2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:15px;}
+.learn-icon{width:33px;height:33px;border-radius:6px;background:rgba(200,136,42,.08);border:1px solid rgba(200,136,42,.2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;}
 .learn-body{flex:1;min-width:0;}
-.learn-title{font-size:.72rem;font-weight:600;color:var(--text2);margin-bottom:2px;}
-.learn-desc{font-size:.62rem;color:var(--text5);line-height:1.3;}
+.learn-title{font-size:.69rem;font-weight:600;color:var(--text2);margin-bottom:2px;}
+.learn-desc{font-size:.59rem;color:var(--text5);line-height:1.3;}
 .learn-prog-wrap{display:flex;align-items:center;gap:6px;margin-top:4px;}
 .learn-prog-bar{flex:1;height:3px;background:var(--border2);border-radius:2px;overflow:hidden;}
 .learn-prog-fill{height:100%;background:var(--gold);border-radius:2px;}
-.learn-prog-pct{font-size:.58rem;color:var(--gold);font-weight:600;font-family:var(--mono);}
-.hg-report .hc{display:flex;align-items:center;gap:1.25rem;padding:.9rem 1.25rem;flex-wrap:wrap;}
-.report-visual{width:100px;height:70px;flex-shrink:0;border-radius:8px;overflow:hidden;background:linear-gradient(135deg,#1a1208,#2d1f08);border:1px solid rgba(200,136,42,.2);}
-.report-body{flex:1;min-width:180px;}
-.report-badge{display:inline-flex;align-items:center;gap:4px;font-size:.58rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#D4972E;background:rgba(212,151,46,.12);border:1px solid rgba(212,151,46,.25);border-radius:100px;padding:2px 8px;margin-bottom:5px;}
-.report-title{font-size:.82rem;font-weight:600;color:var(--text2);margin-bottom:3px;}
-.report-desc{font-size:.65rem;color:var(--text5);line-height:1.35;margin-bottom:.5rem;}
-.report-btn{display:inline-flex;align-items:center;gap:5px;font-size:.7rem;font-weight:600;color:#D4972E;background:rgba(212,151,46,.1);border:1px solid rgba(212,151,46,.3);border-radius:5px;padding:4px 12px;cursor:pointer;text-decoration:none;font-family:var(--sans);}
+.learn-prog-pct{font-size:.55rem;color:var(--gold);font-weight:600;font-family:var(--mono);}
+.hl-report .hc{height:100%;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;}
+.report-body-wrap{display:flex;gap:1rem;align-items:flex-start;}
+.report-visual{width:88px;height:62px;flex-shrink:0;border-radius:8px;overflow:hidden;background:linear-gradient(135deg,#1a1208,#2d1f08);border:1px solid rgba(200,136,42,.2);}
+.report-body{flex:1;min-width:0;}
+.report-badge{display:inline-flex;align-items:center;gap:4px;font-size:.55rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#D4972E;background:rgba(212,151,46,.12);border:1px solid rgba(212,151,46,.25);border-radius:100px;padding:2px 8px;margin-bottom:4px;}
+.report-title{font-size:.8rem;font-weight:600;color:var(--text2);margin-bottom:3px;}
+.report-desc{font-size:.62rem;color:var(--text5);line-height:1.35;margin-bottom:.5rem;}
+.report-btn{display:inline-flex;align-items:center;gap:5px;font-size:.67rem;font-weight:600;color:#D4972E;background:rgba(212,151,46,.1);border:1px solid rgba(212,151,46,.3);border-radius:5px;padding:4px 11px;cursor:pointer;text-decoration:none;font-family:var(--sans);}
 .report-btn:hover{background:rgba(212,151,46,.2);}
-.report-indices{display:flex;align-items:center;gap:1.5rem;padding-left:1.5rem;border-left:1px solid var(--border2);}
+.report-indices{display:flex;gap:1.25rem;padding-top:.8rem;border-top:1px solid var(--border2);}
 .ri-item{text-align:center;}
-.ri-val{font-family:var(--mono);font-size:1.2rem;font-weight:700;color:var(--text2);}
-.ri-lbl{font-size:.58rem;color:var(--text5);text-transform:uppercase;letter-spacing:.07em;margin:1px 0;}
-.ri-chg{font-size:.7rem;font-weight:600;}
+.ri-val{font-family:var(--mono);font-size:1.05rem;font-weight:700;color:var(--text2);}
+.ri-lbl{font-size:.53rem;color:var(--text5);text-transform:uppercase;letter-spacing:.07em;margin:1px 0;}
+.ri-chg{font-size:.67rem;font-weight:600;}
+
+/* --- Feature strip --- */
 .home-feat-strip{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--border2);}
-@media(max-width:800px){.home-feat-strip{grid-template-columns:repeat(2,1fr);}}
-.hfs-item{padding:1rem 1.25rem;border-right:1px solid var(--border2);display:flex;align-items:flex-start;gap:.75rem;}
+@media(max-width:768px){.home-feat-strip{grid-template-columns:repeat(2,1fr);}}
+.hfs-item{padding:.85rem 1.05rem;border-right:1px solid var(--border2);display:flex;align-items:flex-start;gap:.6rem;}
 .hfs-item:last-child{border-right:none;}
-.hfs-icon{width:32px;height:32px;border-radius:7px;background:rgba(200,136,42,.1);border:1px solid rgba(200,136,42,.2);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;color:var(--gold);}
-.hfs-title{font-size:.72rem;font-weight:600;color:var(--text2);margin-bottom:2px;}
-.hfs-desc{font-size:.62rem;color:var(--text5);line-height:1.4;}
+.hfs-icon{width:29px;height:29px;border-radius:7px;background:rgba(200,136,42,.1);border:1px solid rgba(200,136,42,.2);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;color:var(--gold);}
+.hfs-title{font-size:.69rem;font-weight:600;color:var(--text2);margin-bottom:2px;}
+.hfs-desc{font-size:.59rem;color:var(--text5);line-height:1.4;}
+
+/* --- Dark-mode tweaks --- */
+html[data-theme="dark"] .hs-sidebar{background:#0f1014;}
 html[data-theme="dark"] .ht-card:hover{background:rgba(200,136,42,.07);}
 html[data-theme="dark"] .hc{background:var(--card);}
 html[data-theme="dark"] .mp-card{background:rgba(255,255,255,.04);}
@@ -1311,149 +1404,306 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
 
 <!-- ══════════ VIEW: HOME ══════════ -->
 <div id="view-home">
-  <section class="home-hero">
-    <div class="hh-left">
-      <div class="hh-badge">Live Market Data &middot; Updated in Real-Time</div>
-      <h1 class="hh-title">Turn Data Into<br><em>Better Investment Decisions</em></h1>
-      <p class="hh-sub">Actionable insights. Proven models. Confident decisions.</p>
-      <div class="hh-search">
-        <span class="hh-search-icon"><i class="ti ti-search"></i></span>
-        <input type="text" id="hero-search" placeholder="Search any stock or ETF (e.g. AAPL, TSLA, NVDA)..." autocomplete="off" spellcheck="false">
-        <button class="hh-search-btn" onclick="heroSearch()">Analyze &rarr;</button>
-      </div>
-      <div class="hh-chips">
-        <span class="hh-chip-lbl">Popular:</span>
-        <button class="hh-chip" onclick="heroLoadTicker('AAPL')">AAPL</button>
-        <button class="hh-chip" onclick="heroLoadTicker('NVDA')">NVDA</button>
-        <button class="hh-chip" onclick="heroLoadTicker('TSLA')">TSLA</button>
-        <button class="hh-chip" onclick="heroLoadTicker('MSFT')">MSFT</button>
-        <button class="hh-chip" onclick="heroLoadTicker('AMZN')">AMZN</button>
-        <button class="hh-chip" onclick="heroLoadTicker('SPY')">SPY</button>
-        <button class="hh-chip" onclick="heroLoadTicker('QQQ')">QQQ</button>
-      </div>
+<div class="home-shell">
+
+  <!-- ── Left sidebar ── -->
+  <aside class="hs-sidebar">
+    <a class="hsb-home active" href="#" onclick="navGoTo('home');return false;"><i class="ti ti-home"></i><span>Home</span></a>
+
+    <div class="hsb-section">
+      <div class="hsb-label">Analyze</div>
+      <a class="hsb-item" href="#" onclick="navGoTo('analyze');return false;"><i class="ti ti-chart-candle"></i><span>Analyze</span></a>
+      <a class="hsb-item" href="#" onclick="navGoTo('analyze');return false;"><i class="ti ti-chart-line"></i><span>Chart</span></a>
+      <a class="hsb-item" href="#" onclick="navGoTo('financials');return false;"><i class="ti ti-table"></i><span>Financials</span></a>
+      <a class="hsb-item" href="#" onclick="navGoTo('advmetrics');return false;"><i class="ti ti-report-analytics"></i><span>Metrics</span></a>
+      <a class="hsb-item" href="#" onclick="navGoTo('earnings');return false;"><i class="ti ti-calendar-event"></i><span>Earnings</span></a>
+      <a class="hsb-item" href="#" onclick="navGoTo('screener');return false;"><i class="ti ti-filter"></i><span>Screener</span></a>
     </div>
-    <div class="hh-right"><canvas id="globe-canvas" style="width:100%;height:100%;"></canvas></div>
-  </section>
 
-  <div class="home-ticker-strip" id="home-ticker-strip">
-    <div class="ht-card" style="opacity:.3;"><div class="ht-sym">Loading&hellip;</div></div>
-  </div>
+    <div class="hsb-section">
+      <div class="hsb-label">Market</div>
+      <a class="hsb-item" href="#"><i class="ti ti-chart-area"></i><span>Market Overview</span></a>
+      <a class="hsb-item" href="#"><i class="ti ti-calendar"></i><span>Earnings Calendar</span></a>
+      <a class="hsb-item" href="#"><i class="ti ti-rocket"></i><span>IPO Center</span></a>
+      <a class="hsb-item" href="#"><i class="ti ti-grid-dots"></i><span>Sector Heatmap</span></a>
+    </div>
 
-  <div class="home-grid">
-    <!-- LEFT: Market + Portfolios -->
-    <div class="hg-market hc">
-      <div class="hc-hdr">
-        <span class="hc-title">Market Performance</span>
-        <div class="mo-tabs-row">
-          <button class="mo-tab on" onclick="loadMarketOverview('1d',this)">1D</button>
-          <button class="mo-tab" onclick="loadMarketOverview('5d',this)">5D</button>
-          <button class="mo-tab" onclick="loadMarketOverview('1mo',this)">1M</button>
-          <button class="mo-tab" onclick="loadMarketOverview('3mo',this)">3M</button>
-          <button class="mo-tab" onclick="loadMarketOverview('ytd',this)">YTD</button>
-          <button class="mo-tab" onclick="loadMarketOverview('1y',this)">1Y</button>
-          <button class="mo-tab" onclick="loadMarketOverview('5y',this)">5Y</button>
+    <div class="hsb-section">
+      <div class="hsb-label">Tools</div>
+      <a class="hsb-item" href="#" onclick="navGoTo('compare');return false;"><i class="ti ti-arrows-split-2"></i><span>Compare</span></a>
+      <a class="hsb-item" href="#" onclick="navGoTo('projection');return false;"><i class="ti ti-trending-up"></i><span>Projection Builder</span></a>
+      <a class="hsb-item" href="#" onclick="navGoTo('dcf');return false;"><i class="ti ti-calculator"></i><span>DCF Calculator</span></a>
+      <a class="hsb-item" href="#"><i class="ti ti-rotate"></i><span>Backtester</span></a>
+    </div>
+
+    <div class="hsb-section">
+      <div class="hsb-label">Library</div>
+      <a class="hsb-item" href="#" onclick="navGoTo('reports');return false;"><i class="ti ti-bookmark"></i><span>Saved</span></a>
+      <a class="hsb-item" href="#" onclick="navGoTo('education');return false;"><i class="ti ti-school"></i><span>Education</span></a>
+    </div>
+
+    <div class="hsb-upgrade">
+      <div class="hsb-up-icon"><i class="ti ti-star"></i></div>
+      <div class="hsb-up-title">Upgrade to Pro</div>
+      <div class="hsb-up-sub">Unlock advanced tools &amp; data</div>
+      <a href="#" class="hsb-up-link" onclick="showUpgradeModal();return false;">Learn more &rarr;</a>
+    </div>
+  </aside>
+
+  <!-- ── Main content ── -->
+  <div class="hs-main">
+
+    <!-- Hero -->
+    <section class="home-hero">
+      <div class="hh-left">
+        <div class="hh-badge">Live Market Data &middot; Updated in Real-Time</div>
+        <h1 class="hh-title">Smarter Stock Analysis<br><em>for Confident Investors.</em></h1>
+        <p class="hh-sub">Powerful tools. Proprietary data. Actionable insights.</p>
+        <div class="hh-search">
+          <span class="hh-search-icon"><i class="ti ti-search"></i></span>
+          <input type="text" id="hero-search" placeholder="Search any stock or ETF (e.g. AAPL, TSLA, NVDA)..." autocomplete="off" spellcheck="false">
+          <button class="hh-search-btn" onclick="heroSearch()">Analyze &rarr;</button>
+        </div>
+        <div class="hh-chips">
+          <span class="hh-chip-lbl">Popular:</span>
+          <button class="hh-chip" onclick="heroLoadTicker('AAPL')">AAPL</button>
+          <button class="hh-chip" onclick="heroLoadTicker('NVDA')">NVDA</button>
+          <button class="hh-chip" onclick="heroLoadTicker('TSLA')">TSLA</button>
+          <button class="hh-chip" onclick="heroLoadTicker('MSFT')">MSFT</button>
+          <button class="hh-chip" onclick="heroLoadTicker('AMZN')">AMZN</button>
+          <button class="hh-chip" onclick="heroLoadTicker('SPY')">SPY</button>
+          <button class="hh-chip" onclick="heroLoadTicker('QQQ')">QQQ</button>
         </div>
       </div>
-      <div class="mo-legend">
-        <div class="mo-legend-item"><div class="mo-legend-dot" style="background:#4a9fd4"></div><span>S&amp;P 500</span></div>
-        <div class="mo-legend-item"><div class="mo-legend-dot" style="background:#D4972E"></div><span>Nasdaq 100</span></div>
-        <div class="mo-legend-item"><div class="mo-legend-dot" style="background:#a78bfa"></div><span>Dow Jones</span></div>
-      </div>
-      <div class="mo-chart-box"><canvas id="market-overview-chart"></canvas></div>
-      <div class="mo-breadth">
-        <div class="mo-b-item"><div class="mo-b-lbl">Advancing</div><div class="mo-b-val up" id="mo-advancing">&#8212;</div></div>
-        <div class="mo-b-item"><div class="mo-b-lbl">Declining</div><div class="mo-b-val dn" id="mo-declining">&#8212;</div></div>
-        <div class="mo-b-item"><div class="mo-b-lbl">New Highs</div><div class="mo-b-val neu" id="mo-highs">&#8212;</div></div>
-        <div class="mo-b-item"><div class="mo-b-lbl">New Lows</div><div class="mo-b-val neu" id="mo-lows">&#8212;</div></div>
-        <div class="mo-b-item"><div class="mo-b-lbl">Vol. (B)</div><div class="mo-b-val neu" id="mo-vol">&#8212;</div></div>
-        <div class="mo-b-item"><div class="mo-b-lbl">VIX</div><div class="mo-b-val neu" id="mo-vix">&#8212;</div></div>
-      </div>
-      <div class="mo-timestamp" id="mo-timestamp">Fetching market data&hellip;</div>
-      <div style="margin-top:.875rem;padding-top:.875rem;border-top:1px solid var(--border2);">
+      <div class="hh-right"><canvas id="globe-canvas" style="width:100%;height:100%;"></canvas></div>
+    </section>
+
+    <!-- Ticker strip -->
+    <div class="home-ticker-strip" id="home-ticker-strip">
+      <div class="ht-card" style="opacity:.3;"><div class="ht-sym">Loading&hellip;</div></div>
+    </div>
+
+    <!-- Dashboard grid: 3 col × 2 row -->
+    <div class="home-grid">
+
+      <!-- LEFT (spans rows 1-2): Market Performance + Model Portfolios -->
+      <div class="hg-market hc">
+        <div class="hc-hdr">
+          <span class="hc-title">Market Overview</span>
+          <div class="mo-tabs-row">
+            <button class="mo-tab on" onclick="loadMarketOverview('1d',this)">1D</button>
+            <button class="mo-tab" onclick="loadMarketOverview('5d',this)">5D</button>
+            <button class="mo-tab" onclick="loadMarketOverview('1mo',this)">1M</button>
+            <button class="mo-tab" onclick="loadMarketOverview('3mo',this)">3M</button>
+            <button class="mo-tab" onclick="loadMarketOverview('ytd',this)">YTD</button>
+            <button class="mo-tab" onclick="loadMarketOverview('1y',this)">1Y</button>
+            <button class="mo-tab" onclick="loadMarketOverview('5y',this)">5Y</button>
+          </div>
+        </div>
+        <div class="mo-legend">
+          <div class="mo-legend-item"><div class="mo-legend-dot" style="background:#4a9fd4"></div><span>S&amp;P 500</span></div>
+          <div class="mo-legend-item"><div class="mo-legend-dot" style="background:#D4972E"></div><span>Nasdaq 100</span></div>
+          <div class="mo-legend-item"><div class="mo-legend-dot" style="background:#a78bfa"></div><span>Dow Jones</span></div>
+        </div>
+        <div class="mo-chart-box"><canvas id="market-overview-chart"></canvas></div>
+        <div class="mo-breadth">
+          <div class="mo-b-item"><div class="mo-b-lbl">Advancing</div><div class="mo-b-val up" id="mo-advancing">&#8212;</div></div>
+          <div class="mo-b-item"><div class="mo-b-lbl">Declining</div><div class="mo-b-val dn" id="mo-declining">&#8212;</div></div>
+          <div class="mo-b-item"><div class="mo-b-lbl">New Highs</div><div class="mo-b-val neu" id="mo-highs">&#8212;</div></div>
+          <div class="mo-b-item"><div class="mo-b-lbl">New Lows</div><div class="mo-b-val neu" id="mo-lows">&#8212;</div></div>
+          <div class="mo-b-item"><div class="mo-b-lbl">Vol. (B)</div><div class="mo-b-val neu" id="mo-vol">&#8212;</div></div>
+          <div class="mo-b-item"><div class="mo-b-lbl">VIX</div><div class="mo-b-val neu" id="mo-vix">&#8212;</div></div>
+        </div>
+        <div class="mo-timestamp" id="mo-timestamp">Fetching market data&hellip;</div>
+
+        <!-- Model Portfolios divider -->
+        <div class="mp-divider"></div>
         <div class="hc-hdr" style="margin-bottom:.5rem;">
           <span class="hc-title">Model Portfolios</span>
           <a class="hc-link" href="#" onclick="navGoTo('screener');return false;">View all &rarr;</a>
         </div>
         <div class="mp-row">
-          <div class="mp-card"><div class="mp-name">Core Growth</div><div class="mp-ret up">+12.48%</div><div class="mp-sub">1Y Return &middot; Moderate Risk</div><div class="mp-spark" id="mp-cg"></div></div>
-          <div class="mp-card"><div class="mp-name">Dividend Income</div><div class="mp-ret up">+8.37%</div><div class="mp-sub">1Y Return &middot; Low Risk</div><div class="mp-spark" id="mp-di"></div></div>
-          <div class="mp-card"><div class="mp-name">Aggressive Tech</div><div class="mp-ret up">+18.92%</div><div class="mp-sub">1Y Return &middot; High Risk</div><div class="mp-spark" id="mp-at"></div></div>
+          <div class="mp-card">
+            <div class="mp-name">Core Growth</div>
+            <div class="mp-ret up">+12.48%</div>
+            <div class="mp-sub">1Y Return &middot; Moderate Risk</div>
+            <div class="mp-spark" id="mp-cg"></div>
+          </div>
+          <div class="mp-card">
+            <div class="mp-name">Dividend Income</div>
+            <div class="mp-ret up">+8.37%</div>
+            <div class="mp-sub">1Y Return &middot; Low Risk</div>
+            <div class="mp-spark" id="mp-di"></div>
+          </div>
+          <div class="mp-card">
+            <div class="mp-name">Aggressive Tech</div>
+            <div class="mp-ret up">+18.92%</div>
+            <div class="mp-sub">1Y Return &middot; High Risk</div>
+            <div class="mp-spark" id="mp-at"></div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- MIDDLE: Latest Insights -->
-    <div class="hg-insights hc">
-      <div class="hc-hdr">
-        <span class="hc-title">Latest Insights</span>
-        <a class="hc-link" href="#" onclick="navGoTo('analyze');return false;">View all &rarr;</a>
+      <!-- MIDDLE top: Your Watchlist -->
+      <div class="hg-watch hc">
+        <div class="hc-hdr">
+          <span class="hc-title">Your Watchlist</span>
+          <a class="hc-link" href="#" onclick="navGoTo('analyze');return false;">View all &rarr;</a>
+        </div>
+        <table class="wl-table">
+          <thead><tr>
+            <th>Symbol</th>
+            <th class="r">Price</th>
+            <th class="r">1D %</th>
+            <th class="r">Trend</th>
+            <th></th>
+          </tr></thead>
+          <tbody id="home-watchlist-body">
+            <tr><td colspan="5" style="text-align:center;padding:.9rem 0;color:var(--text5);font-size:.67rem;">Loading&hellip;</td></tr>
+          </tbody>
+        </table>
       </div>
-      <div id="home-insights-list"><div style="color:var(--text5);font-size:.72rem;text-align:center;padding:2rem 0;">Loading&hellip;</div></div>
-    </div>
 
-    <!-- RIGHT: Continue Learning -->
-    <div class="hg-learning hc">
-      <div class="hc-hdr">
-        <span class="hc-title">Continue Learning</span>
-        <a class="hc-link" href="#" onclick="navGoTo('education');return false;">View all &rarr;</a>
+      <!-- RIGHT top: Analyst Signals -->
+      <div class="hg-signals hc">
+        <div class="hc-hdr">
+          <span class="hc-title">Analyst Signals</span>
+          <a class="hc-link" href="#" onclick="navGoTo('analyze');return false;">View all &rarr;</a>
+        </div>
+        <div class="as-wrap">
+          <div class="as-donut-wrap">
+            <canvas id="analyst-donut-chart" width="90" height="90"></canvas>
+            <div class="as-center">
+              <span class="as-pct" id="analyst-bull-pct">—</span>
+              <span class="as-lbl">Bullish</span>
+            </div>
+          </div>
+          <div class="as-legend">
+            <div class="as-leg-item"><div class="as-leg-dot" style="background:#4ade80"></div><span class="as-leg-pct" id="abl-buy">—</span><span class="as-leg-name">Buy</span></div>
+            <div class="as-leg-item"><div class="as-leg-dot" style="background:#9ca3af"></div><span class="as-leg-pct" id="abl-hold">—</span><span class="as-leg-name">Hold</span></div>
+            <div class="as-leg-item"><div class="as-leg-dot" style="background:#f87171"></div><span class="as-leg-pct" id="abl-sell">—</span><span class="as-leg-name">Sell</span></div>
+          </div>
+        </div>
+        <div class="as-note" id="analyst-note">Loading analyst data&hellip;</div>
       </div>
-      <div class="learn-item"><div class="learn-icon">&#128202;</div><div class="learn-body"><div class="learn-title">DCF Valuation Masterclass</div><div class="learn-desc">Calculate intrinsic value using discounted cash flows</div><div class="learn-prog-wrap"><div class="learn-prog-bar"><div class="learn-prog-fill" style="width:65%"></div></div><span class="learn-prog-pct">65%</span></div></div></div>
-      <div class="learn-item"><div class="learn-icon">&#128200;</div><div class="learn-body"><div class="learn-title">Reading Financial Statements</div><div class="learn-desc">Income statement, balance sheet &amp; cash flow essentials</div><div class="learn-prog-wrap"><div class="learn-prog-bar"><div class="learn-prog-fill" style="width:40%"></div></div><span class="learn-prog-pct">40%</span></div></div></div>
-      <div class="learn-item"><div class="learn-icon">&#9889;</div><div class="learn-body"><div class="learn-title">Technical Analysis Fundamentals</div><div class="learn-desc">RSI, MACD, Bollinger Bands and how to use them</div><div class="learn-prog-wrap"><div class="learn-prog-bar"><div class="learn-prog-fill" style="width:20%"></div></div><span class="learn-prog-pct">20%</span></div></div></div>
-    </div>
 
-    <!-- BOTTOM SPAN: Featured Report + Index Values -->
-    <div class="hg-report hc">
-      <div class="report-visual">
-        <svg viewBox="0 0 100 70" xmlns="http://www.w3.org/2000/svg" width="100" height="70"><defs><radialGradient id="rg1" cx="50%" cy="50%"><stop offset="0%" stop-color="#D4972E" stop-opacity=".3"/><stop offset="100%" stop-color="#D4972E" stop-opacity="0"/></radialGradient></defs><circle cx="50" cy="35" r="35" fill="url(#rg1)"/><rect x="15" y="45" width="8" height="15" rx="1" fill="#4ade80" opacity=".8"/><rect x="28" y="38" width="8" height="22" rx="1" fill="#4ade80" opacity=".8"/><rect x="41" y="30" width="8" height="30" rx="1" fill="#f87171" opacity=".8"/><rect x="54" y="22" width="8" height="38" rx="1" fill="#4ade80" opacity=".8"/><rect x="67" y="14" width="8" height="46" rx="1" fill="#4ade80" opacity=".9"/><path d="M15,52 Q32,40 45,34 Q58,25 80,18" stroke="#D4972E" stroke-width="1.5" fill="none" stroke-opacity=".7"/></svg>
+      <!-- MIDDLE bottom: Latest Insights -->
+      <div class="hg-insights hc">
+        <div class="hc-hdr">
+          <span class="hc-title">Latest Insights</span>
+          <a class="hc-link" href="#" onclick="navGoTo('analyze');return false;">View all &rarr;</a>
+        </div>
+        <div id="home-insights-list"><div style="color:var(--text5);font-size:.69rem;text-align:center;padding:1.5rem 0;">Loading&hellip;</div></div>
       </div>
-      <div class="report-body">
-        <div class="report-badge">&#11088; Premium</div>
-        <div class="report-title">2025 Midyear Market Outlook</div>
-        <div class="report-desc">Key market themes, sector opportunities, and risks shaping H2 2025.</div>
-        <a class="report-btn" href="#" onclick="showUpgradeModal();return false;">Read Report &rarr;</a>
+
+      <!-- RIGHT bottom: Market Movers -->
+      <div class="hg-movers hc">
+        <div class="hc-hdr">
+          <span class="hc-title">Market Movers</span>
+          <a class="hc-link" href="#" onclick="navGoTo('screener');return false;">View all &rarr;</a>
+        </div>
+        <div class="movers-tabs">
+          <button class="movers-tab on" onclick="switchMovers('gainers',this)">Top Gainers</button>
+          <button class="movers-tab" onclick="switchMovers('losers',this)">Top Losers</button>
+          <button class="movers-tab" onclick="switchMovers('active',this)">Most Active</button>
+        </div>
+        <div id="home-movers-list"><div style="color:var(--text5);font-size:.67rem;text-align:center;padding:.8rem 0;">Loading&hellip;</div></div>
       </div>
-      <div class="report-indices">
-        <div class="ri-item"><div class="ri-val" id="ri-sp">&#8212;</div><div class="ri-lbl">S&amp;P 500</div><div class="ri-chg" id="ri-sp-c">&#8212;</div></div>
-        <div class="ri-item"><div class="ri-val" id="ri-nq">&#8212;</div><div class="ri-lbl">Nasdaq</div><div class="ri-chg" id="ri-nq-c">&#8212;</div></div>
-        <div class="ri-item"><div class="ri-val" id="ri-dj">&#8212;</div><div class="ri-lbl">Dow</div><div class="ri-chg" id="ri-dj-c">&#8212;</div></div>
+
+    </div><!-- /home-grid -->
+
+    <!-- Lower row: Continue Learning + Featured Report -->
+    <div class="home-lower">
+      <div class="hl-learning hc">
+        <div class="hc-hdr">
+          <span class="hc-title">Continue Learning</span>
+          <a class="hc-link" href="#" onclick="navGoTo('education');return false;">View all &rarr;</a>
+        </div>
+        <div class="learn-item">
+          <div class="learn-icon">&#128202;</div>
+          <div class="learn-body">
+            <div class="learn-title">Valuation Masterclass</div>
+            <div class="learn-desc">Learn advanced valuation techniques from industry experts.</div>
+            <div class="learn-prog-wrap"><div class="learn-prog-bar"><div class="learn-prog-fill" style="width:65%"></div></div><span class="learn-prog-pct">65%</span></div>
+          </div>
+        </div>
+        <div class="learn-item">
+          <div class="learn-icon">&#128200;</div>
+          <div class="learn-body">
+            <div class="learn-title">Options Strategies 101</div>
+            <div class="learn-desc">Build practical options strategies for any market condition.</div>
+            <div class="learn-prog-wrap"><div class="learn-prog-bar"><div class="learn-prog-fill" style="width:40%"></div></div><span class="learn-prog-pct">40%</span></div>
+          </div>
+        </div>
+        <div class="learn-item">
+          <div class="learn-icon">&#9889;</div>
+          <div class="learn-body">
+            <div class="learn-title">Technical Analysis Fundamentals</div>
+            <div class="learn-desc">RSI, MACD, Bollinger Bands and how to use them.</div>
+            <div class="learn-prog-wrap"><div class="learn-prog-bar"><div class="learn-prog-fill" style="width:20%"></div></div><span class="learn-prog-pct">20%</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="hl-report hc">
+        <div class="hc-hdr">
+          <span class="hc-title">Featured Report</span>
+          <span class="report-badge">&#11088; Premium</span>
+        </div>
+        <div class="report-body-wrap">
+          <div class="report-visual">
+            <svg viewBox="0 0 100 70" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"><defs><radialGradient id="rg1" cx="50%" cy="50%"><stop offset="0%" stop-color="#D4972E" stop-opacity=".3"/><stop offset="100%" stop-color="#D4972E" stop-opacity="0"/></radialGradient></defs><circle cx="50" cy="35" r="35" fill="url(#rg1)"/><rect x="15" y="45" width="8" height="15" rx="1" fill="#4ade80" opacity=".8"/><rect x="28" y="38" width="8" height="22" rx="1" fill="#4ade80" opacity=".8"/><rect x="41" y="30" width="8" height="30" rx="1" fill="#f87171" opacity=".8"/><rect x="54" y="22" width="8" height="38" rx="1" fill="#4ade80" opacity=".8"/><rect x="67" y="14" width="8" height="46" rx="1" fill="#4ade80" opacity=".9"/><path d="M15,52 Q32,40 45,34 Q58,25 80,18" stroke="#D4972E" stroke-width="1.5" fill="none" stroke-opacity=".7"/></svg>
+          </div>
+          <div class="report-body">
+            <div class="report-title">2025 Midyear Outlook</div>
+            <div class="report-desc">Key market themes, sector opportunities, and risks shaping the second half of 2025.</div>
+            <a class="report-btn" href="#" onclick="showUpgradeModal();return false;">Read Report &rarr;</a>
+          </div>
+        </div>
+        <div class="report-indices">
+          <div class="ri-item"><div class="ri-val" id="ri-sp">&#8212;</div><div class="ri-lbl">S&amp;P 500</div><div class="ri-chg" id="ri-sp-c">&#8212;</div></div>
+          <div class="ri-item"><div class="ri-val" id="ri-nq">&#8212;</div><div class="ri-lbl">Nasdaq</div><div class="ri-chg" id="ri-nq-c">&#8212;</div></div>
+          <div class="ri-item"><div class="ri-val" id="ri-dj">&#8212;</div><div class="ri-lbl">Dow</div><div class="ri-chg" id="ri-dj-c">&#8212;</div></div>
+        </div>
+      </div>
+    </div><!-- /home-lower -->
+
+    <!-- Feature strip -->
+    <div class="home-feat-strip">
+      <div class="hfs-item"><div class="hfs-icon"><i class="ti ti-shield-check"></i></div><div><div class="hfs-title">Institutional-Grade Data</div><div class="hfs-desc">Reliable, real-time, and deeply sourced.</div></div></div>
+      <div class="hfs-item"><div class="hfs-icon"><i class="ti ti-bolt"></i></div><div><div class="hfs-title">Advanced Valuation Models</div><div class="hfs-desc">DCF, DDM, Multiples &amp; more.</div></div></div>
+      <div class="hfs-item"><div class="hfs-icon"><i class="ti ti-target"></i></div><div><div class="hfs-title">Actionable Insights</div><div class="hfs-desc">Clear signals. Smarter decisions.</div></div></div>
+      <div class="hfs-item"><div class="hfs-icon"><i class="ti ti-users"></i></div><div><div class="hfs-title">Built for Investors</div><div class="hfs-desc">Tools designed for retail investors who demand more.</div></div></div>
+    </div>
+
+    <div id="pro-member-banner" style="display:none;background:var(--card);border-top:1px solid var(--border2);border-bottom:1px solid var(--border2);padding:3rem 2rem;text-align:center;">
+      <div style="max-width:560px;margin:0 auto;">
+        <div style="font-family:var(--mono);font-size:.7rem;color:var(--gold-d);text-transform:uppercase;letter-spacing:.18em;margin-bottom:.75rem;">Your plan</div>
+        <h2 id="pro-banner-title" style="font-family:var(--serif);font-size:2rem;margin-bottom:.5rem;">You&rsquo;re on <em style="color:var(--gold-d);">Pro Trial</em>.</h2>
+        <p id="pro-banner-sub" style="color:var(--ink4);font-size:.95rem;margin-bottom:1.5rem;">All Pro features are unlocked. Your trial ends in <strong id="pro-banner-days">14</strong> days.</p>
+        <a href="/api/stripe/portal" target="_blank" style="display:inline-block;padding:.75rem 1.75rem;background:var(--ink);color:var(--cream);border-radius:var(--r2);font-weight:500;text-decoration:none;font-size:.9rem;">Manage subscription &rarr;</a>
       </div>
     </div>
-  </div>
 
-  <div class="home-feat-strip">
-    <div class="hfs-item"><div class="hfs-icon"><i class="ti ti-shield-check"></i></div><div><div class="hfs-title">Proprietary Models</div><div class="hfs-desc">Institutional-grade tools you won't find anywhere else.</div></div></div>
-    <div class="hfs-item"><div class="hfs-icon"><i class="ti ti-bolt"></i></div><div><div class="hfs-title">Real-Time Intelligence</div><div class="hfs-desc">Live data and insights to help you react with confidence.</div></div></div>
-    <div class="hfs-item"><div class="hfs-icon"><i class="ti ti-target"></i></div><div><div class="hfs-title">Actionable Insights</div><div class="hfs-desc">Clear signals and expert analysis for smarter decisions.</div></div></div>
-    <div class="hfs-item"><div class="hfs-icon"><i class="ti ti-users"></i></div><div><div class="hfs-title">Built for Investors</div><div class="hfs-desc">Tools that demand more from your research process.</div></div></div>
-  </div>
+    <section id="pricing"><div class="container">
+      <span class="sec-label">Simple, honest pricing</span>
+      <h2 class="sec-h2">Start free. Upgrade when you're ready.</h2>
+      <p class="sec-sub">No Bloomberg fees. No hidden paywalls. Professional tools at a price that makes sense.</p>
+      <div class="pricing-grid">
+        <div class="pricing-card"><div class="pricing-tier">Starter</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">0</span><span class="p-per">/month</span></div><p class="p-desc">For curious investors exploring the platform.</p><ul class="p-features"><li>5 stock analyses per day</li><li>Live price &amp; key metrics</li><li>Price chart with MA overlays</li><li>RSI &amp; MACD indicators</li><li>3-scenario projection model</li></ul><button class="btn-plan btn-plan-dark" onclick="openModal()">Get started free</button></div>
+        <div class="pricing-card featured"><div class="pricing-pop">Most Popular</div><div class="pricing-tier">Pro</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">7.99</span><span class="p-per">/month</span></div><p class="p-desc" style="font-size:.8rem;opacity:.7;">or $59.99/year &mdash; save 37%</p><p class="p-desc">For serious investors who research every day.</p><ul class="p-features"><li>Unlimited stock analyses</li><li>DCF intrinsic value model</li><li>Advanced projection (6 inputs)</li><li>4-stock side-by-side comparison</li><li>Full stock screener</li><li>PDF report export</li></ul><button class="btn-plan btn-plan-gold" id="pricing-pro-btn" onclick="showUpgradeModal()">Start 7-day free trial &rarr;</button></div>
+        <div class="pricing-card" style="position:relative;"><div class="save-badge">SAVE 37%</div><div class="pricing-tier">Pro Annual</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">59.99</span><span class="p-per">/year</span></div><p class="p-desc" style="font-size:.8rem;opacity:.7;">just $5/month</p><p class="p-desc">Everything in Pro, billed once a year.</p><ul class="p-features"><li>Unlimited stock analyses</li><li>DCF intrinsic value model</li><li>4-stock comparison</li><li>Full stock screener</li><li>PDF report export</li></ul><button class="btn-plan btn-plan-gold" onclick="showUpgradeModal(true)">Start 7-day free trial &rarr;</button></div>
+      </div>
+    </div></section>
 
-  <div id="pro-member-banner" style="display:none;background:var(--card);border-top:1px solid var(--border2);border-bottom:1px solid var(--border2);padding:3rem 2rem;text-align:center;">
-    <div style="max-width:560px;margin:0 auto;">
-      <div style="font-family:var(--mono);font-size:.7rem;color:var(--gold-d);text-transform:uppercase;letter-spacing:.18em;margin-bottom:.75rem;">Your plan</div>
-      <h2 id="pro-banner-title" style="font-family:var(--serif);font-size:2rem;margin-bottom:.5rem;">You&rsquo;re on <em style="color:var(--gold-d);">Pro Trial</em>.</h2>
-      <p id="pro-banner-sub" style="color:var(--ink4);font-size:.95rem;margin-bottom:1.5rem;">All Pro features are unlocked. Your trial ends in <strong id="pro-banner-days">14</strong> days.</p>
-      <a href="/api/stripe/portal" target="_blank" style="display:inline-block;padding:.75rem 1.75rem;background:var(--ink);color:var(--cream);border-radius:var(--r2);font-weight:500;text-decoration:none;font-size:.9rem;">Manage subscription &rarr;</a>
-    </div>
-  </div>
+    <section class="cta-strip" id="cta-strip"><div class="container" style="text-align:center;">
+      <h2 class="sec-h2" style="color:inherit;margin-bottom:.5rem;">Ready to start?</h2>
+      <p style="color:inherit;opacity:.7;margin-bottom:1.5rem;">Run data-driven analysis before every trade.</p>
+      <a href="#" class="btn-primary" id="cta-btn-main" onclick="navGoTo('analyze');return false;">Try free live tool &darr;</a>
+      <a href="#pricing" class="btn-secondary" id="cta-btn-plans" style="margin-left:12px;" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'});return false;">View all plans</a>
+    </div></section>
 
-  <section id="pricing"><div class="container">
-    <span class="sec-label">Simple, honest pricing</span>
-    <h2 class="sec-h2">Start free. Upgrade when you're ready.</h2>
-    <p class="sec-sub">No Bloomberg fees. No hidden paywalls. Professional tools at a price that makes sense.</p>
-    <div class="pricing-grid">
-      <div class="pricing-card"><div class="pricing-tier">Starter</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">0</span><span class="p-per">/month</span></div><p class="p-desc">For curious investors exploring the platform.</p><ul class="p-features"><li>5 stock analyses per day</li><li>Live price &amp; key metrics</li><li>Price chart with MA overlays</li><li>RSI &amp; MACD indicators</li><li>3-scenario projection model</li></ul><button class="btn-plan btn-plan-dark" onclick="openModal()">Get started free</button></div>
-      <div class="pricing-card featured"><div class="pricing-pop">Most Popular</div><div class="pricing-tier">Pro</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">7.99</span><span class="p-per">/month</span></div><p class="p-desc" style="font-size:.8rem;opacity:.7;">or $59.99/year &mdash; save 37%</p><p class="p-desc">For serious investors who research every day.</p><ul class="p-features"><li>Unlimited stock analyses</li><li>DCF intrinsic value model</li><li>Advanced projection (6 inputs)</li><li>4-stock side-by-side comparison</li><li>Full stock screener</li><li>PDF report export</li></ul><button class="btn-plan btn-plan-gold" id="pricing-pro-btn" onclick="showUpgradeModal()">Start 7-day free trial &rarr;</button></div>
-      <div class="pricing-card" style="position:relative;"><div class="save-badge">SAVE 37%</div><div class="pricing-tier">Pro Annual</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">59.99</span><span class="p-per">/year</span></div><p class="p-desc" style="font-size:.8rem;opacity:.7;">just $5/month</p><p class="p-desc">Everything in Pro, billed once a year.</p><ul class="p-features"><li>Unlimited stock analyses</li><li>DCF intrinsic value model</li><li>4-stock comparison</li><li>Full stock screener</li><li>PDF report export</li></ul><button class="btn-plan btn-plan-gold" onclick="showUpgradeModal(true)">Start 7-day free trial &rarr;</button></div>
-    </div>
-  </div></section>
-
-  <section class="cta-strip" id="cta-strip"><div class="container" style="text-align:center;">
-    <h2 class="sec-h2" style="color:inherit;margin-bottom:.5rem;">Ready to start?</h2>
-    <p style="color:inherit;opacity:.7;margin-bottom:1.5rem;">Run data-driven analysis before every trade.</p>
-    <a href="#" class="btn-primary" id="cta-btn-main" onclick="navGoTo('analyze');return false;">Try free live tool &darr;</a>
-    <a href="#pricing" class="btn-secondary" id="cta-btn-plans" style="margin-left:12px;" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'});return false;">View all plans</a>
-  </div></section>
+  </div><!-- /hs-main -->
+</div><!-- /home-shell -->
 </div><!-- /view-home -->
 
 <div id="view-tool" style="display:none;">
@@ -4035,6 +4285,7 @@ async function loadHomeTickerStrip(){
     return`<div class="ht-card" onclick="heroLoadTicker('${t}')"><div class="ht-top">${logo}<span class="ht-sym">${t}</span></div><div class="ht-price">$${price>=1000?price.toFixed(0):price.toFixed(2)}</div><div class="ht-chg ${up?'up':'dn'}">${up?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%</div><div class="ht-spark">${buildSparklineSVG(closes,up)}</div></div>`;
   }).join('');
   loadAnalystSignals(TICKERS.slice(0,5));
+  loadHomeWatchlist(watchData);
   // populate legacy featured-grid
   const fg=document.getElementById('featured-grid');
   if(fg)fg.innerHTML=results.map((res,i)=>{const t=TICKERS[i],data=res.status==='fulfilled'?res.value:null,meta=data?.chart?.result?.[0]?.meta;if(!meta)return`<div class="fstock-card" onclick="loadTicker('${t}')"><div class="fstock-sym">${t}</div><div class="fstock-price">—</div></div>`;const price=meta.regularMarketPrice??meta.chartPreviousClose,prev=meta.chartPreviousClose||price,chg=price-prev,pct=prev?(chg/prev*100):0,up=chg>=0;return`<div class="fstock-card" onclick="loadTicker('${t}')"><div class="fstock-sym">${t}</div><div class="fstock-price">$${price>=1000?price.toFixed(0):price.toFixed(2)}</div><div class="fstock-chg ${up?'up':'dn'}">${up?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%</div></div>`;}).join('');
@@ -4104,6 +4355,46 @@ async function loadMarketMovers(){
   renderMovers(_moversActive);
 }
 function switchMovers(type,btn){_moversActive=type;document.querySelectorAll('.movers-tab').forEach(b=>b.classList.remove('on'));if(btn)btn.classList.add('on');renderMovers(type);}
+
+function renderMovers(type) {
+  const el = document.getElementById('home-movers-list'); if (!el) return;
+  const items = (_moversCache[type] || []).slice(0, 5);
+  if (!items.length) { el.innerHTML = '<div style="color:var(--text5);font-size:.67rem;text-align:center;padding:.8rem 0;">No data available</div>'; return; }
+  el.innerHTML = items.map(m => {
+    const up = m.chgPct >= 0;
+    const price = m.price >= 1000 ? m.price.toLocaleString('en-US',{maximumFractionDigits:0}) : m.price.toFixed(2);
+    return `<div class="mover-row">
+      <div><div class="mover-sym">${m.symbol}</div><div class="mover-co">${(m.name||'').substring(0,26)}</div></div>
+      <div class="mover-price">$${price}</div>
+      <div class="mover-pct ${up?'up':'dn'}">${up?'+':''}${m.chgPct.toFixed(2)}%</div>
+    </div>`;
+  }).join('');
+}
+
+function loadHomeWatchlist(watchData) {
+  const el = document.getElementById('home-watchlist-body'); if (!el) return;
+  const starred = ['AAPL','NVDA','TSLA','MSFT','AMZN'];
+  const LOGOS = {AAPL:'apple.com',NVDA:'nvidia.com',MSFT:'microsoft.com',TSLA:'tesla.com',AMZN:'amazon.com',META:'meta.com',GOOGL:'google.com',SPY:'ssga.com'};
+  const NAMES = {AAPL:'Apple Inc.',NVDA:'NVIDIA Corp.',MSFT:'Microsoft Corp.',TSLA:'Tesla, Inc.',AMZN:'Amazon.com, Inc.',META:'Meta Platforms',GOOGL:'Alphabet Inc.',SPY:'S&P 500 ETF'};
+  const rows = (watchData || []).filter(d => starred.includes(d.t)).slice(0, 5);
+  if (!rows.length) { el.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:.9rem 0;color:var(--text5);font-size:.67rem;">Sign in to see your watchlist</td></tr>'; return; }
+  el.innerHTML = rows.map(({t, meta}) => {
+    if (!meta) return '';
+    const price = meta.regularMarketPrice ?? meta.chartPreviousClose;
+    const prev = meta.chartPreviousClose || price;
+    const pct = prev ? ((price - prev) / prev * 100) : 0;
+    const up = pct >= 0;
+    const pFmt = price >= 1000 ? price.toLocaleString('en-US',{maximumFractionDigits:0}) : price.toFixed(2);
+    const svg = buildSparklineSVG([prev*0.998,prev*1.001,prev*0.999,prev*1.002,price*0.998,price],up);
+    return `<tr>
+      <td><div class="wl-sym">${t}</div><div class="wl-co">${NAMES[t]||t}</div></td>
+      <td class="wl-price">$${pFmt}</td>
+      <td class="wl-pct ${up?'up':'dn'}">${up?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%</td>
+      <td class="wl-spark">${svg}</td>
+      <td><span class="wl-star lit" title="Starred">★</span></td>
+    </tr>`;
+  }).join('');
+}
 
 const FEATURED_TICKERS = ['AAPL','NVDA','MSFT','TSLA','AMZN','META','GOOGL','SPY'];
 async function loadFeaturedGrid() {
