@@ -4276,7 +4276,7 @@ function buildSparklineSVG(data,up){if(!data||data.length<2)return'';const w=100
 async function loadHomeTickerStrip(){
   const el=document.getElementById('home-ticker-strip');if(!el)return;
   const TICKERS=['AAPL','NVDA','MSFT','TSLA','AMZN','META','GOOGL','SPY'];
-  const LOGOS={AAPL:'https://logo.clearbit.com/apple.com',NVDA:'https://logo.clearbit.com/nvidia.com',MSFT:'https://logo.clearbit.com/microsoft.com',TSLA:'https://logo.clearbit.com/tesla.com',AMZN:'https://logo.clearbit.com/amazon.com',META:'https://logo.clearbit.com/meta.com',GOOGL:'https://logo.clearbit.com/google.com',SPY:'https://logo.clearbit.com/ssga.com'};
+  const LOGOS={AAPL:'https://www.google.com/s2/favicons?sz=32&domain=apple.com',NVDA:'https://www.google.com/s2/favicons?sz=32&domain=nvidia.com',MSFT:'https://www.google.com/s2/favicons?sz=32&domain=microsoft.com',TSLA:'https://www.google.com/s2/favicons?sz=32&domain=tesla.com',AMZN:'https://www.google.com/s2/favicons?sz=32&domain=amazon.com',META:'https://www.google.com/s2/favicons?sz=32&domain=meta.com',GOOGL:'https://www.google.com/s2/favicons?sz=32&domain=google.com',SPY:'https://www.google.com/s2/favicons?sz=32&domain=ssga.com'};
   el.innerHTML=TICKERS.map(t=>`<div class="ht-card" style="opacity:.3;"><div class="ht-sym">${t}</div></div>`).join('');
   const results=await Promise.allSettled(TICKERS.map(t=>fetch(`/api/quote/${t}?range=1d`,{credentials:'same-origin'}).then(r=>r.ok?r.json():null).catch(()=>null)));
   const watchData=[];
@@ -4416,7 +4416,7 @@ async function loadFeaturedGrid() {
         .catch(() => null)
     )
   );
-  const FG_LOGOS={AAPL:'https://logo.clearbit.com/apple.com',NVDA:'https://logo.clearbit.com/nvidia.com',MSFT:'https://logo.clearbit.com/microsoft.com',TSLA:'https://logo.clearbit.com/tesla.com',AMZN:'https://logo.clearbit.com/amazon.com',META:'https://logo.clearbit.com/meta.com',GOOGL:'https://logo.clearbit.com/google.com',SPY:'https://logo.clearbit.com/ssga.com'};
+  const FG_LOGOS={AAPL:'https://www.google.com/s2/favicons?sz=32&domain=apple.com',NVDA:'https://www.google.com/s2/favicons?sz=32&domain=nvidia.com',MSFT:'https://www.google.com/s2/favicons?sz=32&domain=microsoft.com',TSLA:'https://www.google.com/s2/favicons?sz=32&domain=tesla.com',AMZN:'https://www.google.com/s2/favicons?sz=32&domain=amazon.com',META:'https://www.google.com/s2/favicons?sz=32&domain=meta.com',GOOGL:'https://www.google.com/s2/favicons?sz=32&domain=google.com',SPY:'https://www.google.com/s2/favicons?sz=32&domain=ssga.com'};
   el.innerHTML = results.map((res, i) => {
     const t = FEATURED_TICKERS[i];
     const data = res.status === 'fulfilled' ? res.value : null;
