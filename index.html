@@ -1156,6 +1156,7 @@ html:not([data-theme="dark"]) .home-hero{background:var(--ink);}
 
 /* --- Dark-mode tweaks --- */
 html[data-theme="dark"] .hs-sidebar{background:#0f1014;}
+html[data-theme="dark"] .app-sidebar{background:#0f1014!important;}
 html[data-theme="dark"] .ht-card:hover{background:rgba(200,136,42,.07);}
 html[data-theme="dark"] .hc{background:var(--card);}
 html[data-theme="dark"] .mp-card{background:rgba(255,255,255,.04);}
@@ -1800,7 +1801,7 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
               <button class="btn-search" id="search-btn" onclick="fetchAndRender()">Analyze →</button>
             </div>
             <!-- Featured stocks grid (shown before search) -->
-            <div id="featured-grid" style="display:flex;border:1px solid var(--border2);border-radius:8px;overflow:hidden;margin-bottom:1.25rem;background:var(--panel);"></div>
+            <div id="featured-grid"></div>
             <div id="limit-counter" style="display:none;align-items:center;gap:8px;margin-bottom:.75rem;flex-wrap:wrap;"></div>
             <div class="loading-bar" id="analyze-loading" style="display:none;"><div class="spinner"></div> Fetching live market data…</div>
             <div class="error-msg" id="analyze-error"></div>
@@ -2662,7 +2663,7 @@ html[data-theme="dark"] .theme-toggle-thumb{left:16px;background:var(--gold);}
 #view-tool .acc-chevron{color:var(--text5)!important;}
 #view-tool .acc-body{border-top:1px solid var(--t-acc-body-border)!important;}
 /* search */
-#view-tool .ticker-input{background:var(--t-ticker-bg)!important;border-color:var(--t-ticker-border)!important;color:var(--text)!important;}
+#view-tool .ticker-input{background:transparent!important;border:none!important;color:var(--text)!important;}
 #view-tool .ticker-input::placeholder{color:var(--text5)!important;}
 #view-tool .quick-btn{background:var(--t-acc-header-bg)!important;border-color:var(--t-acc-border)!important;color:var(--text4)!important;}
 #view-tool .quick-btn:hover{border-color:var(--gold)!important;color:var(--gold)!important;background:rgba(200,136,42,.08)!important;}
@@ -2822,7 +2823,7 @@ html[data-theme="dark"] .input-light::placeholder{color:rgba(220,225,232,.28)!im
 /* tool header strip */
 #view-tool .tool-header{background:var(--t-acc-header-bg)!important;border-bottom-color:var(--t-acc-border)!important;}
 /* search-row & quick buttons */
-#view-tool .search-row{background:var(--t-acc-header-bg)!important;border-bottom-color:var(--t-acc-border)!important;}
+#view-tool .search-row{background:rgba(255,255,255,.04)!important;border:1px solid rgba(255,255,255,.09)!important;border-radius:10px!important;}
 /* earnings table */
 #view-tool .earn-table th{color:var(--text5)!important;background:var(--t-acc-header-bg)!important;border-bottom-color:var(--t-acc-border)!important;}
 #view-tool .earn-table td{color:var(--text3)!important;border-bottom-color:var(--t-acc-body-border)!important;}
@@ -2963,7 +2964,7 @@ html[data-theme="dark"] .input-light::placeholder{color:rgba(220,225,232,.28)!im
 .inst-table tr:hover td{background:var(--t-metric-bg);}
 
 /* ── Featured stocks grid ── */
-#featured-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin:1.25rem 0 .5rem;}
+#featured-grid{display:flex;overflow-x:auto;scrollbar-width:none;border:1px solid var(--border2);border-radius:8px;overflow:hidden;margin-bottom:1.25rem;}
 .fstock-card{background:var(--panel);border-right:1px solid var(--border2);border-bottom:1px solid var(--border2);padding:.55rem .85rem;cursor:pointer;transition:background .12s;min-width:120px;flex:1;}
 .fstock-card:hover{background:rgba(200,136,42,.07);}
 .fstock-top{display:flex;align-items:center;gap:6px;margin-bottom:2px;}
