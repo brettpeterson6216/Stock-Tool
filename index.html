@@ -1217,8 +1217,7 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
     <span>Implied<em style="font-style:italic;color:var(--gold-d);">Lens</em></span>
   </a>
   <div class="nav-links" id="nav-links">
-    <a href='#' id='nav-home' class="nav-tab active-tab" onclick="navGoTo('home');return false;">Home</a>
-    <a href='#' class="nav-tab" id="nav-tool-link" data-tool="analyze" onclick="navGoTo('analyze');return false;">Tool</a>
+    <a href='#' id='nav-home' class="nav-tab active-tab" onclick="navGoTo('home');return false;">Market</a>
     <a href='#' class="nav-tab" id="nav-education-link" onclick="navGoTo('education');return false;">Education</a>
     <a href='#' class="nav-tab" id="nav-saved-link" onclick="navGoTo('reports');return false;">Saved</a>
     <a href='/blog' class="nav-tab" id="nav-blog-link">Blog</a>
@@ -1447,7 +1446,7 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
 
   <!-- ── Left sidebar ── -->
   <aside class="hs-sidebar">
-    <a class="hsb-home active" href="#" onclick="navGoTo('home');return false;"><i class="ti ti-home"></i><span>Home</span></a>
+    <a class="hsb-home active" href="#" onclick="navGoTo('home');return false;"><i class="ti ti-globe"></i><span>Market</span></a>
 
     <div class="hsb-section">
       <div class="hsb-label">Analyze</div>
@@ -1749,7 +1748,7 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
   <div class="app-shell">
     <!-- ── Left sidebar ── -->
     <div class="app-sidebar">
-      <a href="#" class="sb-home-btn" onclick="navGoTo('home');return false;"><i class="ti ti-home" aria-hidden="true"></i><span>Home</span></a>
+      <a href="#" class="sb-home-btn" onclick="navGoTo('home');return false;"><i class="ti ti-globe" aria-hidden="true"></i><span>Market</span></a>
 
       <div class="sb-group-pad">
         <div class="sb-group-label">Analyze</div>
@@ -2360,7 +2359,7 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
         <div class="asf-item"><div class="asf-l">EPS TTM</div><div class="asf-v" id="asf-eps">—</div></div>
         <div class="asf-item"><div class="asf-l">52W Hi</div><div class="asf-v pos" id="asf-52hi">—</div></div>
         <div class="asf-item"><div class="asf-l">52W Lo</div><div class="asf-v neg" id="asf-52lo">—</div></div>
-        <div class="asf-item" style="flex:0.6;"><a href="#" onclick="navGoTo('home');return false;" style="font-size:9px;color:var(--text5);text-decoration:none;">← Home</a></div>
+        <div class="asf-item" style="flex:0.6;"><a href="#" onclick="navGoTo('home');return false;" style="font-size:9px;color:var(--text5);text-decoration:none;">← Market</a></div>
       </div>
     </div><!-- /app-main -->
   </div><!-- /app-shell -->
@@ -4293,7 +4292,7 @@ function getSectorBenchmark(sector) {
 let _moversCache={},_moversActive='gainers',_marketOverviewChart=null,_globeRAF=null;
 
 function heroSearch(){const v=(document.getElementById('hero-search')||{}).value;if(!v||!v.trim())return;const mi=document.getElementById('main-ticker');if(mi)mi.value=v.trim().toUpperCase();if(typeof fetchAndRender==='function')fetchAndRender();}
-function heroLoadTicker(t){const mi=document.getElementById('main-ticker');if(mi)mi.value=t;if(typeof fetchAndRender==='function')fetchAndRender();}
+function heroLoadTicker(t){const mi=document.getElementById('main-ticker');if(mi)mi.value=t;navGoTo('analyze');if(typeof fetchAndRender==='function')fetchAndRender();}
 (function(){const hi=document.getElementById('hero-search');if(hi)hi.addEventListener('keydown',e=>{if(e.key==='Enter')heroSearch();});})();
 
 async function initGlobe(){
@@ -4557,7 +4556,7 @@ function renderMovers(type) {
   el.innerHTML = items.map(m => {
     const up = m.chgPct >= 0;
     const price = m.price >= 1000 ? m.price.toLocaleString('en-US',{maximumFractionDigits:0}) : m.price.toFixed(2);
-    return `<div class="mover-row">
+    return `<div class="mover-row" onclick="loadTicker('${m.symbol}')" style="cursor:pointer;">
       <div><div class="mover-sym">${m.symbol}</div><div class="mover-co">${(m.name||'').substring(0,26)}</div></div>
       <div class="mover-price">$${price}</div>
       <div class="mover-pct ${up?'up':'dn'}">${up?'+':''}${m.chgPct.toFixed(2)}%</div>
@@ -4632,6 +4631,7 @@ async function loadFeaturedGrid() {
 
 function loadTicker(ticker) {
   document.getElementById('main-ticker').value = ticker;
+  navGoTo('analyze');
   fetchAndRender();
 }
 
