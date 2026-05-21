@@ -1398,8 +1398,6 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
           const proBanner      = document.getElementById('pro-member-banner');
           if (pricingSection) pricingSection.style.display = 'none';
           if (proBanner)      proBanner.style.display = 'block';
-          const upgradeBox = document.getElementById('hsb-upgrade-box');
-          if (upgradeBox) upgradeBox.style.display = 'none';
 
           const ctaMain  = document.getElementById('cta-btn-main');
           const ctaPlans = document.getElementById('cta-btn-plans');
@@ -1425,7 +1423,13 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
           history.replaceState(null, '', '/');
         }
       }
-    } catch (_) { /* server not running */ } finally { _dismissVeil(); }
+    } catch (_) { /* server not running */ } finally {
+      // Show Go Pro banner only for free/guest users
+      const _plan = (typeof S !== 'undefined' && S.userPlan) || 'free';
+      const _ub = document.getElementById('hsb-upgrade-box');
+      if (_ub && _plan !== 'pro' && _plan !== 'trial') _ub.style.display = '';
+      _dismissVeil();
+    }
 
     // Logout
     if ($acctLogout) {
@@ -1482,7 +1486,7 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
       <a class="hsb-item" href="#" onclick="navGoTo('education');return false;"><i class="ti ti-school"></i><span>Education</span></a>
     </div>
 
-    <div class="hsb-upgrade" id="hsb-upgrade-box">
+    <div class="hsb-upgrade" id="hsb-upgrade-box" style="display:none;">
       <div class="hsb-up-icon"><i class="ti ti-star"></i></div>
       <div class="hsb-up-title">Upgrade to Pro</div>
       <div class="hsb-up-sub">Unlock advanced tools &amp; data</div>
@@ -5932,4 +5936,153 @@ async function loadEarnings(ticker) {
           <div style="background:var(--t-metric-bg);border-radius:6px;padding:10px 14px;margin:2px 0 4px 0;border:1px solid var(--t-metric-border);">
             <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:8px;">
               <div>
-                <div style="font-size:.65rem;color:var(--text5);text-transform:uppercase;letter-sp
+                <div style="font-size:.65rem;color:var(--text5);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">Est. EPS</div>
+                <div style="font-size:.95rem;font-family:var(--mono);color:var(--text2);">${est}</div>
+              </div>
+              <div>
+                <div style="font-size:.65rem;color:var(--text5);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">Actual EPS</div>
+                <div style="font-size:.95rem;font-family:var(--mono);color:${cls==='earn-beat'?'#4ade80':cls==='earn-miss'?'#f87171':'var(--text2)'};">${act}</div>
+              </div>
+              <div>
+                <div style="font-size:.65rem;color:var(--text5);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">Surprise</div>
+                <div style="font-size:.95rem;font-family:var(--mono);color:${cls==='earn-beat'?'#4ade80':cls==='earn-miss'?'#f87171':'var(--text2)'};">${surp}</div>
+              </div>
+            </div>
+            ${row.surprisePercent != null ? `<div style="margin-top:6px;">
+              <div style="font-size:.62rem;color:var(--text5);margin-bottom:3px;">EPS Surprise vs Estimate</div>
+              <div style="height:5px;background:var(--t-acc-border);border-radius:3px;overflow:hidden;">
+                <div style="width:${barWidth}%;background:${barColor};height:100%;border-radius:3px;transition:width .4s ease;"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:.58rem;color:var(--text5);margin-top:2px;"><span>Miss</span><span>In-Line</span><span>Beat</span></div>
+            </div>` : ''}
+          </div>
+        </td>
+      </tr>`;
+    });
+    tableHtml += '</tbody></table></div>';
+    if(loading) loading.style.display='none';
+    if(cont) cont.innerHTML = summaryHtml + tableHtml;
+  } catch(e) {
+    if(loading) loading.style.display='none';
+    if(error) { error.style.display='block'; error.textContent='Could not load earnings: '+e.message; }
+    console.error('earnings error', e);
+  }
+}
+
+function toggleEarnDetail(id) {
+  const det = document.getElementById(id);
+  const chev = document.getElementById('chev-'+id);
+  if (!det) return;
+  const open = det.style.display !== 'none';
+  det.style.display = open ? 'none' : 'table-row';
+  if (chev) chev.textContent = open ? '›' : '˅';
+}
+
+/* =====================================================
+   SEC FILINGS TAB
+===================================================== */
+var _secFilings = [];
+var _secFilter  = 'ALL';
+
+function badgeClass(form) {
+  if (form === '10-K' || form === '10-K/A') return 'sec-badge-10k';
+  if (form === '10-Q' || form === '10-Q/A') return 'sec-badge-10q';
+  if (form === '8-K')  return 'sec-badge-8k';
+  return 'sec-badge-other';
+}
+
+function filterSecFilings(type) {
+  _secFilter = type;
+  document.querySelectorAll('.sec-filter-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.form === type);
+  });
+  renderSecFilings();
+}
+
+function renderSecFilings() {
+  const list = document.getElementById('sec-filings-list');
+  if (!list) return;
+  const rows = _secFilter === 'ALL' ? _secFilings : _secFilings.filter(f => f.form === _secFilter || (f.form === _secFilter + '/A'));
+  if (!rows.length) {
+    list.innerHTML = '<div style="font-size:.8rem;color:rgba(220,225,232,.3);padding:.5rem 0;">No filings found for this filter.</div>';
+    return;
+  }
+  list.innerHTML = rows.map(f => {
+    const badge = badgeClass(f.form);
+    const desc  = f.description || f.form;
+    const url   = f.viewerUrl && f.primaryDoc ? f.viewerUrl : f.indexUrl;
+    return `<a href="${url}" target="_blank" rel="noopener" class="sec-filing-row">
+      <span class="sec-filing-badge ${badge}">${f.form}</span>
+      <span class="sec-filing-date">${f.date}</span>
+      <span class="sec-filing-desc">${desc}</span>
+      <span class="sec-filing-arrow">↗</span>
+    </a>`;
+  }).join('');
+}
+
+async function loadSecFilings(ticker) {
+  const nostock  = document.getElementById('sec-nostock');
+  const loading  = document.getElementById('sec-loading');
+  const errEl    = document.getElementById('sec-error');
+  const cont     = document.getElementById('sec-content');
+  const entityLbl= document.getElementById('sec-entity-label');
+
+  if (!ticker) {
+    if(nostock) { nostock.style.display='block'; }
+    if(cont)    { cont.style.display='none'; }
+    return;
+  }
+  if(nostock) nostock.style.display='none';
+  if(loading) loading.style.display='block';
+  if(errEl)   errEl.style.display='none';
+  if(cont)    cont.style.display='none';
+
+  try {
+    const r = await fetch('/api/sec/' + encodeURIComponent(ticker), { credentials:'same-origin' });
+    const d = await r.json();
+    if(loading) loading.style.display='none';
+    if (!r.ok || !d.filings) throw new Error(d.error || 'No filings found');
+
+    if(entityLbl) entityLbl.textContent = d.entity + (d.cik ? '  ·  CIK ' + d.cik : '');
+
+    // Store filings globally for filter
+    _secFilings = d.filings;
+    _secFilter  = 'ALL';
+    renderSecFilings();
+
+    if(cont) cont.style.display='block';
+  } catch(e) {
+    if(loading) loading.style.display='none';
+    if(errEl)   { errEl.textContent = 'Could not load SEC filings: ' + e.message; errEl.style.display='block'; }
+  }
+}
+
+
+
+// Auto-load featured grid on page open
+loadFeaturedGrid();
+loadHomeTickerStrip();
+loadMarketOverview('1d');
+loadMarketMovers();
+loadHomeInsights();
+loadPortfolioSparklines();
+initGlobe();
+
+// Prime the analysis limit counter for free/guest users
+(async () => {
+  try {
+    const r = await fetch('/api/me/limit', { credentials: 'same-origin' });
+    if (!r.ok) return;
+    const d = await r.json();
+    if (d.limit !== null) updateLimitUI(d.remaining, d.limit, d.plan);
+  } catch(_) {}
+})();
+
+// Enter key → search
+(function(){
+  var ti = document.getElementById('main-ticker');
+  if (ti) ti.addEventListener('keydown', function(e){ if(e.key==='Enter'){e.preventDefault();if(typeof fetchAndRender==='function')fetchAndRender();} });
+})();
+</script>
+</body>
+</html>
