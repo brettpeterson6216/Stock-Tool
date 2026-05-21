@@ -1031,10 +1031,10 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
 @media(max-width:960px){.hsb-label,.hsb-item span,.hsb-home span,.hsb-upgrade div,.hsb-up-link{display:none;}.hsb-item{justify-content:center;padding:.42rem;}.hsb-home{justify-content:center;padding:.55rem;}.hsb-upgrade{padding:.45rem;}.hsb-up-icon{margin:0 auto;}}
 
 /* --- Hero --- */
-.home-hero{position:relative;display:flex;align-items:center;min-height:230px;overflow:hidden;background:#0A0B0F;border-bottom:1px solid rgba(200,136,42,.15);}
+.home-hero{position:relative;display:flex;align-items:center;min-height:360px;overflow:hidden;background:#0A0B0F;border-bottom:1px solid rgba(200,136,42,.15);}
 .home-hero::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(200,136,42,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(200,136,42,.04) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;}
 .hh-left{flex:1;min-width:0;padding:1.9rem 2rem 1.9rem 2.25rem;z-index:1;}
-.hh-right{flex-shrink:0;width:360px;height:230px;position:relative;z-index:1;}
+.hh-right{flex-shrink:0;width:520px;height:360px;position:relative;z-index:1;overflow:visible;}
 @media(max-width:900px){.hh-right{display:none;}}
 .hh-badge{display:inline-flex;align-items:center;gap:6px;font-size:.61rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#D4972E;background:rgba(212,151,46,.12);border:1px solid rgba(212,151,46,.25);border-radius:100px;padding:3px 10px;margin-bottom:.75rem;}
 .hh-badge::before{content:'';width:5px;height:5px;border-radius:50%;background:#D4972E;box-shadow:0 0 6px #D4972E;animation:blink 2s infinite;flex-shrink:0;}
@@ -1507,19 +1507,8 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
           <span class="hh-search-icon"><i class="ti ti-search"></i></span>
           <input type="text" id="hero-search" placeholder="Search any stock or ETF (e.g. AAPL, TSLA, NVDA)..." autocomplete="off" spellcheck="false">
           <button class="hh-search-btn" onclick="heroSearch()">Analyze &rarr;</button>
-        </div>
-        <div class="hh-chips">
-          <span class="hh-chip-lbl">Popular:</span>
-          <button class="hh-chip" onclick="heroLoadTicker('AAPL')">AAPL</button>
-          <button class="hh-chip" onclick="heroLoadTicker('NVDA')">NVDA</button>
-          <button class="hh-chip" onclick="heroLoadTicker('TSLA')">TSLA</button>
-          <button class="hh-chip" onclick="heroLoadTicker('MSFT')">MSFT</button>
-          <button class="hh-chip" onclick="heroLoadTicker('AMZN')">AMZN</button>
-          <button class="hh-chip" onclick="heroLoadTicker('SPY')">SPY</button>
-          <button class="hh-chip" onclick="heroLoadTicker('QQQ')">QQQ</button>
-        </div>
-      </div>
-      <div class="hh-right"><canvas id="globe-canvas" style="width:100%;height:100%;"></canvas></div>
+        </div></div>
+      <div class="hh-right"><canvas id="globe-canvas" style="display:block;"></canvas></div>
     </section>
 
     <!-- Ticker strip -->
