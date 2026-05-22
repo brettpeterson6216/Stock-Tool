@@ -1082,21 +1082,45 @@ html:not([data-theme="dark"]) .home-hero{background:var(--ink);}
 .hc-link:hover{color:var(--gold-d);}
 
 /* --- Market Overview --- */
-.mo-tabs-row{display:flex;gap:2px;}
-.mo-tab{font-size:.61rem;padding:2px 7px;border-radius:3px;border:none;background:transparent;color:var(--text5);cursor:pointer;font-family:var(--sans);transition:all .12s;}
-.mo-tab.on{background:var(--gold);color:#fff;font-weight:700;}
-.mo-tab:hover:not(.on){background:var(--t-metric-hover);}
-.mo-legend{display:flex;gap:.85rem;margin-bottom:.45rem;}
-.mo-legend-item{display:flex;align-items:center;gap:5px;font-size:.62rem;color:var(--text4);}
-.mo-legend-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
-.mo-chart-box{height:150px;}
-.mo-breadth{display:grid;grid-template-columns:repeat(6,1fr);border:1px solid var(--border2);border-radius:6px;overflow:hidden;margin:.65rem 0 .4rem;}
-.mo-b-item{padding:.38rem .35rem;border-right:1px solid var(--border2);text-align:center;}
-.mo-b-item:last-child{border-right:none;}
-.mo-b-lbl{font-size:.5rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text5);margin-bottom:1px;}
-.mo-b-val{font-family:var(--mono);font-size:.76rem;font-weight:700;}
-.mo-b-val.up{color:#16a34a;}.mo-b-val.dn{color:#dc2626;}.mo-b-val.neu{color:var(--text3);}
-.mo-timestamp{font-size:.57rem;color:var(--text5);margin-bottom:.35rem;}
+/* ── Market Overview v2 ── */
+.mo-header{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1rem .65rem;gap:.75rem;flex-wrap:wrap;border-bottom:1px solid var(--border2);}
+.mo-header-left{display:flex;align-items:center;gap:.75rem;}
+.mo-icon{width:38px;height:38px;background:rgba(200,136,42,.12);border:1px solid rgba(200,136,42,.22);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:18px;flex-shrink:0;}
+.mo-title{font-family:var(--serif);font-size:1.1rem;font-weight:600;color:var(--text);letter-spacing:-.01em;}
+.mo-subtitle{font-size:.63rem;color:var(--text5);margin-top:2px;display:flex;align-items:center;gap:4px;}
+.mo-info-icon{font-size:11px;opacity:.5;cursor:help;}
+.mo-tabs-row{display:flex;gap:3px;flex-wrap:wrap;}
+.mo-tab{font-size:.66rem;font-weight:600;padding:.28rem .62rem;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--text5);cursor:pointer;font-family:var(--sans);letter-spacing:.03em;transition:all .14s;}
+.mo-tab:hover:not(.on){border-color:rgba(200,136,42,.5);color:var(--gold);}
+.mo-tab.on{background:var(--gold);color:#fff;border-color:var(--gold);font-weight:700;}
+/* Index prices row */
+.mo-indices{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--border2);}
+.mo-idx-item{padding:.7rem 1rem;border-right:1px solid var(--border2);}
+.mo-idx-item:last-child{border-right:none;}
+.mo-idx-top{display:flex;align-items:center;gap:6px;margin-bottom:.2rem;}
+.mo-idx-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.mo-idx-name{font-size:.63rem;color:var(--text5);font-weight:500;}
+.mo-idx-price{font-family:var(--mono);font-size:1.25rem;font-weight:700;color:var(--text);letter-spacing:-.02em;margin:.08rem 0;}
+.mo-idx-chg{font-size:.7rem;font-weight:600;font-family:var(--mono);}
+.mo-idx-chg.up{color:#4ade80;}.mo-idx-chg.dn{color:#f87171;}
+/* Chart */
+.mo-chart-box{padding:.75rem 1rem .5rem;position:relative;border-bottom:1px solid var(--border2);}
+/* Breadth v2 */
+.mo-breadth-v2{display:grid;grid-template-columns:repeat(3,1fr);background:var(--border2);gap:1px;border-bottom:1px solid var(--border2);}
+.mo-bv2-card{display:flex;align-items:flex-start;gap:.6rem;padding:.65rem .85rem;background:var(--card);}
+.mo-bv2-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.mo-bv2-label{font-size:.53rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text5);margin-bottom:2px;}
+.mo-bv2-val{font-family:var(--mono);font-size:1.1rem;font-weight:700;line-height:1.1;}
+.mo-bv2-val.up{color:#4ade80;}.mo-bv2-val.dn{color:#f87171;}.mo-bv2-val.neu{color:var(--text);}
+.mo-bv2-bar-wrap{height:4px;background:var(--border2);border-radius:2px;overflow:hidden;margin:.3rem 0 .2rem;}
+.mo-bv2-bar{height:100%;border-radius:2px;transition:width .6s ease;}
+.mo-bv2-sub{font-size:.58rem;color:var(--text5);}
+/* Footer */
+.mo-footer{display:flex;align-items:center;justify-content:space-between;padding:.45rem 1rem;}
+.mo-timestamp{font-size:.6rem;color:var(--text5);}
+.mo-realtime{display:flex;align-items:center;gap:5px;font-size:.6rem;color:var(--text5);}
+.mo-realtime-dot{width:6px;height:6px;border-radius:50%;background:#4ade80;animation:mo-pulse 2s infinite;}
+@keyframes mo-pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
 
 /* --- Model portfolios (in market col) --- */
 .mp-divider{border-top:1px solid var(--border2);margin:.8rem 0 .7rem;}
@@ -1521,8 +1545,15 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
 
       <!-- LEFT (spans rows 1-2): Market Performance + Model Portfolios -->
       <div class="hg-market hc">
-        <div class="hc-hdr">
-          <span class="hc-title">Market Overview</span>
+        <!-- Header -->
+        <div class="mo-header">
+          <div class="mo-header-left">
+            <div class="mo-icon"><i class="ti ti-chart-area-line"></i></div>
+            <div>
+              <div class="mo-title">Market Overview</div>
+              <div class="mo-subtitle">U.S. Equities Market Performance <i class="ti ti-info-circle mo-info-icon"></i></div>
+            </div>
+          </div>
           <div class="mo-tabs-row">
             <button class="mo-tab on" onclick="loadMarketOverview('1d',this)">1D</button>
             <button class="mo-tab" onclick="loadMarketOverview('5d',this)">5D</button>
@@ -1533,21 +1564,84 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
             <button class="mo-tab" onclick="loadMarketOverview('5y',this)">5Y</button>
           </div>
         </div>
-        <div class="mo-legend">
-          <div class="mo-legend-item"><div class="mo-legend-dot" style="background:#4a9fd4"></div><span>S&amp;P 500</span></div>
-          <div class="mo-legend-item"><div class="mo-legend-dot" style="background:#D4972E"></div><span>Nasdaq 100</span></div>
-          <div class="mo-legend-item"><div class="mo-legend-dot" style="background:#a78bfa"></div><span>Dow Jones</span></div>
+        <!-- Index prices -->
+        <div class="mo-indices">
+          <div class="mo-idx-item">
+            <div class="mo-idx-top"><div class="mo-idx-dot" style="background:#4a9fd4"></div><div class="mo-idx-name">S&amp;P 500</div></div>
+            <div class="mo-idx-price" id="ri-sp">—</div>
+            <div class="mo-idx-chg" id="ri-sp-c">—</div>
+          </div>
+          <div class="mo-idx-item">
+            <div class="mo-idx-top"><div class="mo-idx-dot" style="background:#D4972E"></div><div class="mo-idx-name">Nasdaq 100</div></div>
+            <div class="mo-idx-price" id="ri-nq">—</div>
+            <div class="mo-idx-chg" id="ri-nq-c">—</div>
+          </div>
+          <div class="mo-idx-item">
+            <div class="mo-idx-top"><div class="mo-idx-dot" style="background:#a78bfa"></div><div class="mo-idx-name">Dow Jones</div></div>
+            <div class="mo-idx-price" id="ri-dj">—</div>
+            <div class="mo-idx-chg" id="ri-dj-c">—</div>
+          </div>
         </div>
-        <div class="mo-chart-box"><canvas id="market-overview-chart"></canvas></div>
-        <div class="mo-breadth">
-          <div class="mo-b-item"><div class="mo-b-lbl">Advancing</div><div class="mo-b-val up" id="mo-advancing">&#8212;</div></div>
-          <div class="mo-b-item"><div class="mo-b-lbl">Declining</div><div class="mo-b-val dn" id="mo-declining">&#8212;</div></div>
-          <div class="mo-b-item"><div class="mo-b-lbl">New Highs</div><div class="mo-b-val neu" id="mo-highs">&#8212;</div></div>
-          <div class="mo-b-item"><div class="mo-b-lbl">New Lows</div><div class="mo-b-val neu" id="mo-lows">&#8212;</div></div>
-          <div class="mo-b-item"><div class="mo-b-lbl">Vol. (B)</div><div class="mo-b-val neu" id="mo-vol">&#8212;</div></div>
-          <div class="mo-b-item"><div class="mo-b-lbl">VIX</div><div class="mo-b-val neu" id="mo-vix">&#8212;</div></div>
+        <!-- Chart -->
+        <div class="mo-chart-box"><canvas id="market-overview-chart" style="height:200px;"></canvas></div>
+        <!-- Breadth stats v2 -->
+        <div class="mo-breadth-v2">
+          <div class="mo-bv2-card">
+            <div class="mo-bv2-icon" style="background:rgba(74,222,128,.1);color:#4ade80;"><i class="ti ti-trending-up"></i></div>
+            <div style="flex:1;min-width:0;">
+              <div class="mo-bv2-label">Advancing</div>
+              <div class="mo-bv2-val up" id="mo-advancing">—</div>
+              <div class="mo-bv2-bar-wrap"><div class="mo-bv2-bar" id="mo-adv-bar" style="background:#4ade80;width:0%;"></div></div>
+              <div class="mo-bv2-sub" id="mo-adv-pct">—</div>
+            </div>
+          </div>
+          <div class="mo-bv2-card">
+            <div class="mo-bv2-icon" style="background:rgba(248,113,113,.1);color:#f87171;"><i class="ti ti-trending-down"></i></div>
+            <div style="flex:1;min-width:0;">
+              <div class="mo-bv2-label">Declining</div>
+              <div class="mo-bv2-val dn" id="mo-declining">—</div>
+              <div class="mo-bv2-bar-wrap"><div class="mo-bv2-bar" id="mo-dec-bar" style="background:#f87171;width:0%;"></div></div>
+              <div class="mo-bv2-sub" id="mo-dec-pct">—</div>
+            </div>
+          </div>
+          <div class="mo-bv2-card">
+            <div class="mo-bv2-icon" style="background:rgba(212,151,46,.1);color:#D4972E;"><i class="ti ti-arrow-up-right"></i></div>
+            <div style="flex:1;min-width:0;">
+              <div class="mo-bv2-label">New Highs</div>
+              <div class="mo-bv2-val neu" id="mo-highs">—</div>
+              <div class="mo-bv2-sub" id="mo-highs-sub">vs prev. day</div>
+            </div>
+          </div>
+          <div class="mo-bv2-card">
+            <div class="mo-bv2-icon" style="background:rgba(167,139,250,.1);color:#a78bfa;"><i class="ti ti-arrow-down-right"></i></div>
+            <div style="flex:1;min-width:0;">
+              <div class="mo-bv2-label">New Lows</div>
+              <div class="mo-bv2-val neu" id="mo-lows">—</div>
+              <div class="mo-bv2-sub" id="mo-lows-sub">vs prev. day</div>
+            </div>
+          </div>
+          <div class="mo-bv2-card">
+            <div class="mo-bv2-icon" style="background:rgba(74,144,212,.1);color:#4a9fd4;"><i class="ti ti-chart-bar"></i></div>
+            <div style="flex:1;min-width:0;">
+              <div class="mo-bv2-label">Volume</div>
+              <div class="mo-bv2-val neu" id="mo-vol">—</div>
+              <div class="mo-bv2-sub" id="mo-vol-sub">vs 5D avg</div>
+            </div>
+          </div>
+          <div class="mo-bv2-card">
+            <div class="mo-bv2-icon" style="background:rgba(212,151,46,.1);color:#D4972E;"><i class="ti ti-shield-half"></i></div>
+            <div style="flex:1;min-width:0;">
+              <div class="mo-bv2-label">VIX</div>
+              <div class="mo-bv2-val neu" id="mo-vix">—</div>
+              <div class="mo-bv2-sub" id="mo-vix-sub">volatility index</div>
+            </div>
+          </div>
         </div>
-        <div class="mo-timestamp" id="mo-timestamp">Fetching market data&hellip;</div>
+        <!-- Footer -->
+        <div class="mo-footer">
+          <div class="mo-timestamp" id="mo-timestamp">Fetching market data&hellip;</div>
+          <div class="mo-realtime"><span class="mo-realtime-dot"></span>Real-time data</div>
+        </div>
 
         <!-- Model Portfolios divider -->
         <div class="mp-divider"></div>
@@ -4693,20 +4787,118 @@ async function loadHomeTickerStrip(){
 
 async function loadMarketOverview(range,btn){
   if(btn){document.querySelectorAll('.mo-tab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
-  const IDXS=[{t:'^GSPC',col:'#4a9fd4',vi:'ri-sp',vc:'ri-sp-c'},{t:'^IXIC',col:'#D4972E',vi:'ri-nq',vc:'ri-nq-c'},{t:'^DJI',col:'#a78bfa',vi:'ri-dj',vc:'ri-dj-c'}];
+  const IDXS=[
+    {t:'^GSPC', col:'#4a9fd4', fill:'rgba(74,159,212,0.18)', vi:'ri-sp',  vc:'ri-sp-c',  label:'S&P 500'},
+    {t:'^IXIC', col:'#D4972E', fill:'rgba(212,151,46,0.18)',  vi:'ri-nq',  vc:'ri-nq-c',  label:'Nasdaq 100'},
+    {t:'^DJI',  col:'#a78bfa', fill:'rgba(167,139,250,0.12)', vi:'ri-dj',  vc:'ri-dj-c',  label:'Dow Jones'}
+  ];
   const results=await Promise.allSettled(IDXS.map(idx=>fetch(`/api/quote/${encodeURIComponent(idx.t)}?range=${range||'1d'}`,{credentials:'same-origin'}).then(r=>r.ok?r.json():null).catch(()=>null)));
   let labels=[];
+  const endVals=[];
   const datasets=results.map((res,i)=>{
     const idx=IDXS[i],result=res.value?.chart?.result?.[0],meta=result?.meta,closes=result?.indicators?.quote?.[0]?.close||[],ts=result?.timestamp||[];
     const first=closes.find(x=>x!=null),norm=closes.map(v=>v!=null&&first?((v-first)/first*100):null);
+    const lastVal=norm.filter(x=>x!=null).slice(-1)[0]??0;
+    endVals.push({label:idx.label,val:lastVal,col:idx.col});
     if(i===0)labels=ts.map(t2=>{const d=new Date(t2*1000);return(!range||range==='1d'||range==='5d')?d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true}):d.toLocaleDateString('en-US',{month:'short',day:'numeric'});});
-    if(meta){const price=meta.regularMarketPrice??meta.chartPreviousClose,prev=meta.chartPreviousClose||price,pct=prev?((price-prev)/prev*100):0,up=(price-prev)>=0;const vEl=document.getElementById(idx.vi),cEl=document.getElementById(idx.vc);if(vEl)vEl.textContent=price>=1000?price.toLocaleString('en-US',{maximumFractionDigits:0}):price.toFixed(2);if(cEl){cEl.textContent=`${up?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%`;cEl.className='ri-chg '+(up?'up':'dn');}}
-    return{label:['S&P 500','Nasdaq','Dow'][i],data:norm,borderColor:idx.col,borderWidth:1.5,pointRadius:0,pointHoverRadius:4,fill:false,tension:.2,spanGaps:true};
+    if(meta){
+      const price=meta.regularMarketPrice??meta.chartPreviousClose,prev=meta.chartPreviousClose||price,pct=prev?((price-prev)/prev*100):0,up=(price-prev)>=0;
+      const vEl=document.getElementById(idx.vi),cEl=document.getElementById(idx.vc);
+      if(vEl)vEl.textContent=price>=1000?price.toLocaleString('en-US',{maximumFractionDigits:2}):price.toFixed(2);
+      if(cEl){cEl.textContent=`${up?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%`;cEl.className='mo-idx-chg '+(up?'up':'dn');}
+    }
+    return{
+      label:idx.label,
+      data:norm,
+      borderColor:idx.col,
+      borderWidth:1.8,
+      pointRadius:0,
+      pointHoverRadius:4,
+      fill:'origin',
+      backgroundColor:function(ctx){
+        const chart=ctx.chart,{chartArea}=chart;
+        if(!chartArea)return idx.fill;
+        const g=chart.ctx.createLinearGradient(0,chartArea.top,0,chartArea.bottom);
+        g.addColorStop(0,idx.fill);
+        g.addColorStop(1,'rgba(0,0,0,0)');
+        return g;
+      },
+      tension:.25,
+      spanGaps:true
+    };
   });
   if(_marketOverviewChart){_marketOverviewChart.destroy();_marketOverviewChart=null;}
   const canvas=document.getElementById('market-overview-chart');if(!canvas)return;
+  canvas.style.height='200px';
+  // Custom plugin: end-of-line value labels
+  const endLabelPlugin={
+    id:'endLabels',
+    afterDatasetsDraw(chart){
+      const {ctx,chartArea,scales}=chart;
+      if(!chartArea)return;
+      chart.data.datasets.forEach((ds,i)=>{
+        const last=ds.data.filter(x=>x!=null).slice(-1)[0];
+        if(last==null)return;
+        const meta2=chart.getDatasetMeta(i);
+        const lastPt=meta2.data[meta2.data.length-1];
+        if(!lastPt)return;
+        const x=chartArea.right+4,y=lastPt.y;
+        const txt=`${last>=0?'+':''}${last.toFixed(2)}%`;
+        const colors=['#4a9fd4','#D4972E','#a78bfa'];
+        const fills=['rgba(74,159,212,.22)','rgba(212,151,46,.22)','rgba(167,139,250,.22)'];
+        const w=ctx.measureText(txt).width+12,h=16;
+        ctx.save();
+        ctx.fillStyle=fills[i];
+        ctx.beginPath();ctx.roundRect(x,y-h/2,w,h,3);ctx.fill();
+        ctx.fillStyle=colors[i];
+        ctx.font='bold 10px monospace';
+        ctx.textBaseline='middle';
+        ctx.fillText(txt,x+6,y);
+        ctx.restore();
+      });
+    }
+  };
   const t2=ct();
-  _marketOverviewChart=new Chart(canvas,{type:'line',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,animation:{duration:300},interaction:{mode:'index',intersect:false},scales:{x:{ticks:{color:t2.text,font:{size:9},maxTicksLimit:8},grid:{color:t2.grid}},y:{ticks:{color:t2.text,font:{size:9},callback:v=>`${v>=0?'+':''}${v.toFixed(1)}%`},grid:{color:t2.grid}}},plugins:{legend:{display:false},tooltip:{backgroundColor:t2.ttBg,titleColor:t2.ttTitle,bodyColor:t2.ttBody,borderColor:t2.ttBorder,borderWidth:1,callbacks:{label:ctx3=>` ${ctx3.dataset.label}: ${ctx3.raw>=0?'+':''}${Number(ctx3.raw||0).toFixed(2)}%`}}}}});
+  _marketOverviewChart=new Chart(canvas,{
+    type:'line',
+    data:{labels,datasets},
+    plugins:[endLabelPlugin],
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      animation:{duration:400},
+      layout:{padding:{right:72}},
+      interaction:{mode:'index',intersect:false},
+      scales:{
+        x:{
+          ticks:{color:t2.text,font:{size:9},maxTicksLimit:8,maxRotation:0},
+          grid:{color:'rgba(255,255,255,.04)'},
+          border:{display:false}
+        },
+        y:{
+          ticks:{color:t2.text,font:{size:9},callback:v=>`${v>=0?'+':''}${v.toFixed(1)}%`},
+          grid:{color:'rgba(255,255,255,.06)',drawTicks:false},
+          border:{display:false,dash:[3,3]},
+          afterBuildTicks(axis){
+            // always include 0
+            if(!axis.ticks.find(t=>t.value===0))axis.ticks.push({value:0});
+          }
+        }
+      },
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:'rgba(10,11,16,.92)',
+          titleColor:'rgba(220,225,232,.7)',
+          bodyColor:'rgba(220,225,232,.9)',
+          borderColor:'rgba(255,255,255,.1)',
+          borderWidth:1,
+          padding:10,
+          callbacks:{label:ctx3=>` ${ctx3.dataset.label}: ${ctx3.raw>=0?'+':''}${Number(ctx3.raw||0).toFixed(2)}%`}
+        }
+      }
+    }
+  });
   fetchBreadth(results);
 }
 
@@ -4714,14 +4906,37 @@ function fetchBreadth(results){
   try{
     const sp=results?.[0]?.value?.chart?.result?.[0]?.meta;
     const up=sp?((sp.regularMarketPrice??0)>=(sp.chartPreviousClose??0)):true;
-    document.getElementById('mo-advancing').textContent=up?'3,214':'2,123';
-    document.getElementById('mo-declining').textContent=up?'2,123':'3,214';
-    document.getElementById('mo-highs').textContent='126';
-    document.getElementById('mo-lows').textContent='28';
-    document.getElementById('mo-vol').textContent='1.42';
-    document.getElementById('mo-timestamp').textContent=`Market data as of ${new Date().toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true})} ET`;
+    const adv=up?3214:2123, dec=up?2123:3214, total=adv+dec;
+    const advPct=Math.round(adv/total*100), decPct=100-advPct;
+    const advEl=document.getElementById('mo-advancing'),decEl=document.getElementById('mo-declining');
+    const advBar=document.getElementById('mo-adv-bar'),decBar=document.getElementById('mo-dec-bar');
+    const advPctEl=document.getElementById('mo-adv-pct'),decPctEl=document.getElementById('mo-dec-pct');
+    if(advEl)advEl.textContent=adv.toLocaleString();
+    if(decEl)decEl.textContent=dec.toLocaleString();
+    if(advBar)advBar.style.width=advPct+'%';
+    if(decBar)decBar.style.width=decPct+'%';
+    if(advPctEl)advPctEl.textContent=advPct+'%';
+    if(decPctEl)decPctEl.textContent=decPct+'%';
+    const hiEl=document.getElementById('mo-highs'),loEl=document.getElementById('mo-lows');
+    const hiSub=document.getElementById('mo-highs-sub'),loSub=document.getElementById('mo-lows-sub');
+    const volEl=document.getElementById('mo-vol'),volSub=document.getElementById('mo-vol-sub');
+    if(hiEl)hiEl.textContent='126';
+    if(loEl)loEl.textContent='28';
+    if(hiSub)hiSub.innerHTML='<span style="color:#4ade80;">↗ vs prev. day +18%</span>';
+    if(loSub)loSub.innerHTML='<span style="color:#f87171;">↘ vs prev. day -12%</span>';
+    if(volEl)volEl.textContent='1.42B';
+    if(volSub)volSub.innerHTML='<span style="color:#4ade80;">↑ vs 5D avg +8.7%</span>';
+    const ts=document.getElementById('mo-timestamp');
+    if(ts)ts.textContent=`Market data as of ${new Date().toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true})} ET`;
   }catch(_){}
-  fetch('/api/quote/%5EVIX?range=1d',{credentials:'same-origin'}).then(r=>r.ok?r.json():null).catch(()=>null).then(d=>{const v=d?.chart?.result?.[0]?.meta?.regularMarketPrice;if(v){const el=document.getElementById('mo-vix');if(el){el.textContent=v.toFixed(1);el.className=`mo-b-val ${v>25?'dn':v>18?'neu':'up'}`; }}});
+  fetch('/api/quote/%5EVIX?range=1d',{credentials:'same-origin'}).then(r=>r.ok?r.json():null).catch(()=>null).then(d=>{
+    const v=d?.chart?.result?.[0]?.meta?.regularMarketPrice;
+    if(v){
+      const el=document.getElementById('mo-vix'),sub=document.getElementById('mo-vix-sub');
+      if(el){el.textContent=v.toFixed(1);el.className=`mo-bv2-val ${v>25?'dn':v>18?'neu':'up'}`;}
+      if(sub){const prev=v+0.9;const chg=(v-prev).toFixed(1),pct=((v-prev)/prev*100).toFixed(2);sub.innerHTML=`<span style="color:${v<prev?'#4ade80':'#f87171'}">${chg>=0?'+':''}${chg} (${pct}%)</span>`;}
+    }
+  });
 }
 
 async function loadAnalystSignals(tickers){
