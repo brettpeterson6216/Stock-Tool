@@ -895,6 +895,9 @@ app.get('/api/quote/:ticker', checkAnalysisLimit, async (req, res) => {
     const ticker = req.params.ticker.toUpperCase().replace(/[^A-Z0-9.\-^]/g, '');
     if (!ticker) return res.status(400).json({ error: 'No ticker' });
     const range = (req.query.range || '1y').replace(/[^a-z0-9]/gi, '');
+    const VALID_INTERVALS = ['1m','2m','5m','15m','30m','60m','90m','1h','1d','5d','1wk','1mo','3mo'];
+    const rawInterval = (req.query.interval || '1d').replace(/[^a-z0-9]/gi, '');
+    const interval = VALID_INTERVALS.includes(rawInterval) ? rawInterval : '1d';
 
     const YH = {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
@@ -908,7 +911,7 @@ app.get('/api/quote/:ticker', checkAnalysisLimit, async (req, res) => {
 
     // Attempt 1: Yahoo Finance v8 chart (query2) — 4-second timeout so we fail fast if blocked
     try {
-      const u = `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=1d&range=${range}&includePrePost=false`;
+      const u = `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=${interval}&range=${range}&includePrePost=false`;
       const r = await fetchWithTimeout(u, { headers: YH }, 4000);
       if (r.ok) {
         const j = await r.json();
@@ -926,7 +929,7 @@ app.get('/api/quote/:ticker', checkAnalysisLimit, async (req, res) => {
     // Attempt 2: Yahoo Finance v8 chart (query1) — 4-second timeout
     if (!data) {
       try {
-        const u = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=1d&range=${range}&includePrePost=false`;
+        const u = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=${interval}&range=${range}&includePrePost=false`;
         const r = await fetchWithTimeout(u, { headers: YH }, 4000);
         if (r.ok) {
           const j = await r.json();

@@ -1548,7 +1548,7 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
         <!-- Header -->
         <div class="mo-header">
           <div class="mo-header-left">
-            <div class="mo-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+            <div class="mo-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="3" y1="20" x2="21" y2="20"/></svg></div>
             <div>
               <div class="mo-title">Market Overview</div>
               <div class="mo-subtitle">U.S. Equities Market Performance <i class="ti ti-info-circle mo-info-icon"></i></div>
@@ -4792,8 +4792,11 @@ async function loadMarketOverview(range,btn){
     {t:'^IXIC', col:'#D4972E', g0:'rgba(212,151,46,0.28)',   g1:'rgba(212,151,46,0)',   vi:'ri-nq', vc:'ri-nq-c',  label:'Nasdaq 100'},
     {t:'^DJI',  col:'#a78bfa', g0:'rgba(167,139,250,0.22)',  g1:'rgba(167,139,250,0)',  vi:'ri-dj', vc:'ri-dj-c',  label:'Dow Jones'}
   ];
+  // Map range to correct interval for intraday granularity
+  const intervalMap={'1d':'5m','5d':'15m','1mo':'1d','3mo':'1d','ytd':'1d','1y':'1d','5y':'1wk'};
+  const interval=intervalMap[range||'1d']||'1d';
   const results=await Promise.allSettled(IDXS.map(idx=>
-    fetch(`/api/quote/${encodeURIComponent(idx.t)}?range=${range||'1d'}`,{credentials:'same-origin'})
+    fetch(`/api/quote/${encodeURIComponent(idx.t)}?range=${range||'1d'}&interval=${interval}`,{credentials:'same-origin'})
     .then(r=>r.ok?r.json():null).catch(()=>null)
   ));
   let labels=[];
@@ -4812,7 +4815,7 @@ async function loadMarketOverview(range,btn){
           meta=result?.meta,
           closes=result?.indicators?.quote?.[0]?.close||[],
           ts=result?.timestamp||[];
-    const first=closes.find(x=>x!=null);
+    const first=meta?.chartPreviousClose||closes.find(x=>x!=null);
     const norm=closes.map(v=>v!=null&&first!=null?((v-first)/first*100):null);
     if(i===0)labels=ts.map(t2=>{
       const d=new Date(t2*1000);
