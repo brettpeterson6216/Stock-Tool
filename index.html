@@ -1548,7 +1548,7 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
         <!-- Header -->
         <div class="mo-header">
           <div class="mo-header-left">
-            <div class="mo-icon"><i class="ti ti-activity"></i></div>
+            <div class="mo-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
             <div>
               <div class="mo-title">Market Overview</div>
               <div class="mo-subtitle">U.S. Equities Market Performance <i class="ti ti-info-circle mo-info-icon"></i></div>
@@ -4802,7 +4802,7 @@ async function loadMarketOverview(range,btn){
   canvas.style.height='200px';
   // Build gradients from real canvas context NOW (before Chart instantiation)
   const ctx2d=canvas.getContext('2d');
-  const ch=canvas.offsetHeight||200;
+  canvas.style.height='200px'; const ch=200;
   const gradients=IDXS.map(idx=>{
     const g=ctx2d.createLinearGradient(0,0,0,ch);
     g.addColorStop(0,idx.g0); g.addColorStop(1,idx.g1); return g;
