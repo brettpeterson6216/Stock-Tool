@@ -136,76 +136,109 @@ app.get(["/reset-password", "/reset-password.html"], (req, res) =>
   res.sendFile(path.join(__dirname, "public", "reset-password.html"))
 );
 
-app.get("/about", (_req, res) => res.send(`<!DOCTYPE html><html lang="en"><head>
+function _page(title, content) {
+  return `<!DOCTYPE html><html lang="en"><head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>About — ImpliedLens</title>
+  <title>${title} — ImpliedLens</title>
+  <meta name="robots" content="index,follow">
+  <link rel="icon" type="image/svg+xml" href="/logo.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'Inter',sans-serif;background:#08090D;color:rgba(220,225,232,.9);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem}
-    .wrap{max-width:640px;width:100%;text-align:center}
-    .logo{font-family:'Playfair Display',serif;font-size:1.8rem;color:#fff;margin-bottom:.25rem}
-    .logo em{color:#C8882A;font-style:italic}
-    .tagline{font-size:.85rem;color:rgba(220,225,232,.4);letter-spacing:.1em;text-transform:uppercase;margin-bottom:2.5rem}
-    h1{font-family:'Playfair Display',serif;font-size:2.2rem;margin-bottom:1rem;line-height:1.3}
-    p{font-size:.95rem;color:rgba(220,225,232,.65);line-height:1.8;margin-bottom:1.25rem}
-    .socials{display:flex;gap:1rem;justify-content:center;margin:2rem 0}
-    .soc-btn{display:inline-flex;align-items:center;gap:8px;padding:.65rem 1.4rem;border-radius:8px;border:1px solid rgba(200,136,42,.35);color:#C8882A;text-decoration:none;font-size:.85rem;font-weight:500;transition:all .18s}
-    .soc-btn:hover{background:rgba(200,136,42,.1);border-color:#C8882A}
-    .back{display:inline-block;margin-top:1.5rem;color:rgba(220,225,232,.4);font-size:.8rem;text-decoration:none}
-    .back:hover{color:#C8882A}
+    body{font-family:'Inter',sans-serif;background:#08090D;color:rgba(220,225,232,.88);min-height:100vh}
+    a{color:#C8882A;text-decoration:none}a:hover{text-decoration:underline}
+    .nav{display:flex;align-items:center;justify-content:space-between;padding:1rem 2rem;border-bottom:1px solid rgba(255,255,255,.06);max-width:1100px;margin:0 auto}
+    .logo{font-family:'Playfair Display',serif;font-size:1.5rem;color:#fff}.logo em{color:#C8882A;font-style:italic}
+    .nav-links{display:flex;gap:1.5rem;font-size:.84rem}
+    .nav-links a{color:rgba(220,225,232,.5);transition:color .15s}.nav-links a:hover{color:#C8882A;text-decoration:none}
+    .wrap{max-width:780px;margin:0 auto;padding:3rem 2rem}
+    h1{font-family:'Playfair Display',serif;font-size:2rem;line-height:1.3;margin-bottom:1rem;color:#fff}
+    h2{font-family:'Playfair Display',serif;font-size:1.25rem;margin:2rem 0 .75rem;color:#fff}
+    p{font-size:.92rem;color:rgba(220,225,232,.65);line-height:1.85;margin-bottom:1.1rem}
+    .pill{display:inline-block;padding:.25rem .8rem;border-radius:100px;background:rgba(200,136,42,.12);color:#C8882A;font-size:.7rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;margin-bottom:1.75rem}
+    .features{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;margin:1.5rem 0}
+    .feat{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:1.1rem 1.2rem}
+    .feat-icon{font-size:1.4rem;margin-bottom:.5rem}
+    .feat-title{font-size:.84rem;font-weight:600;color:#fff;margin-bottom:.25rem}
+    .feat-desc{font-size:.76rem;color:rgba(220,225,232,.5);line-height:1.6}
+    .cta-row{display:flex;gap:1rem;flex-wrap:wrap;margin:2rem 0}
+    .btn-gold{display:inline-flex;align-items:center;gap:6px;padding:.7rem 1.5rem;border-radius:8px;background:#C8882A;color:#fff;font-size:.85rem;font-weight:600;transition:background .15s}
+    .btn-gold:hover{background:#A06A18;text-decoration:none}
+    .btn-outline{display:inline-flex;align-items:center;gap:6px;padding:.7rem 1.5rem;border-radius:8px;border:1px solid rgba(200,136,42,.4);color:#C8882A;font-size:.85rem;font-weight:500;transition:all .15s}
+    .btn-outline:hover{background:rgba(200,136,42,.08);text-decoration:none}
+    .socials{display:flex;gap:1rem;flex-wrap:wrap;margin:1.5rem 0}
+    .soc-btn{display:inline-flex;align-items:center;gap:8px;padding:.6rem 1.2rem;border-radius:8px;border:1px solid rgba(200,136,42,.3);color:#C8882A;font-size:.82rem;font-weight:500;transition:all .15s}
+    .soc-btn:hover{background:rgba(200,136,42,.1);text-decoration:none}
+    .footer{text-align:center;padding:2rem;font-size:.75rem;color:rgba(220,225,232,.25);border-top:1px solid rgba(255,255,255,.05);margin-top:3rem}
+    @media(max-width:600px){.nav{padding:.75rem 1rem}.wrap{padding:2rem 1rem}.features{grid-template-columns:1fr}}
   </style></head><body>
-  <div class="wrap">
-    <div class="logo">Implied<em>Lens</em></div>
-    <div class="tagline">Stock Analysis Platform</div>
-    <h1>Built for the self-directed investor.</h1>
-    <p>ImpliedLens gives individual investors access to the same analytical tools used by professional analysts — DCF valuation, financial statement analysis, earnings history, risk metrics, and more — without the Bloomberg price tag.</p>
-    <p>The platform pulls data directly from SEC EDGAR filings, Yahoo Finance, and Finnhub, so every number you see traces back to a primary source.</p>
-    <p>Follow along as we build and improve the platform.</p>
-    <div class="socials">
-      <a href="https://x.com/ImpliedLens" target="_blank" class="soc-btn">𝕏 @ImpliedLens</a>
-      <a href="https://instagram.com/ImpliedLens" target="_blank" class="soc-btn">📸 @ImpliedLens</a>
+  <div class="nav">
+    <a href="/" class="logo">Implied<em>Lens</em></a>
+    <div class="nav-links">
+      <a href="/about">About</a>
+      <a href="/blog">Blog</a>
+      <a href="/login">Sign in</a>
+      <a href="/signup">Get started</a>
     </div>
-    <a href="/" class="back">← Back to ImpliedLens</a>
   </div>
-</body></html>`));
+  ${content}
+  <div class="footer">© ${new Date().getFullYear()} ImpliedLens · Built for the self-directed investor</div>
+</body></html>`;
+}
 
-app.get("/blog", (_req, res) => res.send(`<!DOCTYPE html><html lang="en"><head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Blog — ImpliedLens</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <style>
-    *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'Inter',sans-serif;background:#08090D;color:rgba(220,225,232,.9);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem}
-    .wrap{max-width:640px;width:100%;text-align:center}
-    .logo{font-family:'Playfair Display',serif;font-size:1.8rem;color:#fff;margin-bottom:.25rem}
-    .logo em{color:#C8882A;font-style:italic}
-    .tagline{font-size:.85rem;color:rgba(220,225,232,.4);letter-spacing:.1em;text-transform:uppercase;margin-bottom:2.5rem}
-    h1{font-family:'Playfair Display',serif;font-size:2.2rem;margin-bottom:1rem;line-height:1.3}
-    p{font-size:.95rem;color:rgba(220,225,232,.65);line-height:1.8;margin-bottom:1.25rem}
-    .socials{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin:2rem 0}
-    .soc-btn{display:inline-flex;align-items:center;gap:8px;padding:.65rem 1.4rem;border-radius:8px;border:1px solid rgba(200,136,42,.35);color:#C8882A;text-decoration:none;font-size:.85rem;font-weight:500;transition:all .18s}
-    .soc-btn:hover{background:rgba(200,136,42,.1);border-color:#C8882A}
-    .pill{display:inline-block;padding:.25rem .75rem;border-radius:100px;background:rgba(200,136,42,.12);color:#C8882A;font-size:.72rem;font-weight:600;letter-spacing:.06em;margin-bottom:1.5rem}
-    .back{display:inline-block;margin-top:1.5rem;color:rgba(220,225,232,.4);font-size:.8rem;text-decoration:none}
-    .back:hover{color:#C8882A}
-  </style></head><body>
-  <div class="wrap">
-    <div class="logo">Implied<em>Lens</em></div>
-    <div class="tagline">Stock Analysis Platform</div>
-    <span class="pill">COMING SOON</span>
-    <h1>Market insights &amp; platform updates.</h1>
-    <p>The ImpliedLens blog is where we'll share analysis walkthroughs, feature updates, investing frameworks, and how to get the most out of the platform.</p>
-    <p>In the meantime, follow us on social for updates and market commentary.</p>
+app.get("/about", (_req, res) => {
+  const content = `<div class="wrap">
+    <span class="pill">About ImpliedLens</span>
+    <h1>Institutional-grade analysis,<br>built for individual investors.</h1>
+    <p>ImpliedLens gives self-directed investors access to the same analytical tools used by professional analysts — DCF valuation, SEC filing browser, earnings history, institutional holdings, analyst targets, dark pool data, and a full stock screener — without the Bloomberg price tag.</p>
+    <p>Every number on the platform traces back to a primary source: SEC EDGAR filings, Yahoo Finance, and Finnhub. No black boxes. No hand-waving.</p>
+    <div class="features">
+      <div class="feat"><div class="feat-icon">📊</div><div class="feat-title">Financial Statements</div><div class="feat-desc">Full income, balance sheet, and cash flow from SEC EDGAR.</div></div>
+      <div class="feat"><div class="feat-icon">🧮</div><div class="feat-title">DCF Valuation</div><div class="feat-desc">Multi-stage discounted cash flow model with scenario inputs.</div></div>
+      <div class="feat"><div class="feat-icon">📅</div><div class="feat-title">Earnings History</div><div class="feat-desc">EPS surprises, beat/miss streaks, and forward estimates.</div></div>
+      <div class="feat"><div class="feat-icon">🏛</div><div class="feat-title">Institutional Holdings</div><div class="feat-desc">13F data: who owns shares and how positions are changing.</div></div>
+      <div class="feat"><div class="feat-icon">🌑</div><div class="feat-title">Dark Pool Data</div><div class="feat-desc">OTC volume, short interest, and block trade flow.</div></div>
+      <div class="feat"><div class="feat-icon">🔍</div><div class="feat-title">Stock Screener</div><div class="feat-desc">Filter 200+ stocks by sector, P/E, momentum, and more.</div></div>
+    </div>
+    <h2>Why we built this</h2>
+    <p>Professional research terminals cost thousands per month. Most individual investors rely on fragmented free tools — one site for charts, another for filings, another for fundamentals. ImpliedLens brings everything into one place, with a clean interface designed for deep research, not noise.</p>
+    <div class="cta-row">
+      <a href="/signup" class="btn-gold">Start free →</a>
+      <a href="/" class="btn-outline">See the platform</a>
+    </div>
+    <h2>Follow along</h2>
+    <p>We're building in public. Follow for platform updates, market insights, and investing frameworks.</p>
     <div class="socials">
       <a href="https://x.com/ImpliedLens" target="_blank" class="soc-btn">𝕏 @ImpliedLens</a>
       <a href="https://instagram.com/ImpliedLens" target="_blank" class="soc-btn">📸 @ImpliedLens</a>
     </div>
-    <a href="/" class="back">← Back to ImpliedLens</a>
-  </div>
-</body></html>`));
+  </div>`;
+  res.send(_page('About', content));
+});
+
+app.get("/blog", (_req, res) => {
+  const content = `<div class="wrap">
+    <span class="pill">Blog — Coming Soon</span>
+    <h1>Market insights &amp;<br>platform updates.</h1>
+    <p>The ImpliedLens blog is where we'll publish analysis walkthroughs, feature updates, deep-dives on valuation frameworks, and how to get the most out of the platform.</p>
+    <h2>What to expect</h2>
+    <div class="features">
+      <div class="feat"><div class="feat-icon">📖</div><div class="feat-title">How-to guides</div><div class="feat-desc">Step-by-step walkthroughs of DCF models, screener setups, and earnings analysis.</div></div>
+      <div class="feat"><div class="feat-icon">🏗</div><div class="feat-title">Platform updates</div><div class="feat-desc">What's new, what's improved, and what's coming next on ImpliedLens.</div></div>
+      <div class="feat"><div class="feat-icon">💡</div><div class="feat-title">Investing frameworks</div><div class="feat-desc">Mental models for evaluating stocks, managing risk, and reading between the lines.</div></div>
+    </div>
+    <p>In the meantime, follow us on social for market commentary and quick platform tips.</p>
+    <div class="socials">
+      <a href="https://x.com/ImpliedLens" target="_blank" class="soc-btn">𝕏 @ImpliedLens</a>
+      <a href="https://instagram.com/ImpliedLens" target="_blank" class="soc-btn">📸 @ImpliedLens</a>
+    </div>
+    <div class="cta-row">
+      <a href="/signup" class="btn-gold">Try the platform free →</a>
+    </div>
+  </div>`;
+  res.send(_page('Blog', content));
+});
 
 // SPA catch-all — must be last
 app.get("*", (_req, res) => res.sendFile(path.join(__dirname, "index.html")));

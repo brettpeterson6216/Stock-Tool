@@ -1368,6 +1368,7 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
         if (typeof S !== 'undefined') {
           S.userPlan    = user.effectivePlan || 'free';
           S.trialEndsAt = user.trial_ends_at || null;
+          S.loggedIn    = true;
         }
 
         // Populate account dropdown
@@ -2367,7 +2368,13 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
                 <button class="sa-pill" data-type="note" onclick="setSavedTypeFilter('note')">Notes</button>
               </div>
               <!-- List -->
-              <div id="sa-list"></div>
+              <div id="sa-guest-banner" style="display:none;background:rgba(200,136,42,.08);border:1px solid rgba(200,136,42,.2);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:.78rem;color:var(--ink3);">
+  <strong>You're not signed in.</strong> Saved analyses are stored locally on this device. <a href="/signup" style="color:var(--gold);font-weight:600;">Create a free account</a> to sync across devices.
+</div>
+<div id="sa-sync-banner" style="display:none;background:rgba(200,136,42,.08);border:1px solid rgba(200,136,42,.2);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:.78rem;color:var(--ink3);">
+  <strong>Free plan:</strong> Analyses saved locally. <a href="#" onclick="showUpgradeModal();return false;" style="color:var(--gold);font-weight:600;">Upgrade to Pro</a> to sync across devices.
+</div>
+<div id="sa-list"></div>
               <div id="sa-empty" style="text-align:center;padding:2rem 0;color:var(--text5);font-size:.82rem;display:none;">
                 No saved analyses yet.<br>
                 <span style="font-size:.75rem;">Use the <strong style="color:var(--gold);">Save Analysis</strong> buttons on charts and models to bookmark results here.</span>
@@ -3603,6 +3610,108 @@ html[data-theme="dark"] #am-username-msg { color: var(--text3) !important; }
   .home-feat-strip { grid-template-columns:1fr !important; }
   .hh-title { font-size:1.3rem !important; }
 }
+
+/* ══════════════════════════════════════════════════════
+   PRO GATE CARD  — contextual upgrade prompt
+══════════════════════════════════════════════════════ */
+.pro-gate-card {
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; padding: 2.5rem 2rem;
+  max-width: 420px; margin: 2rem auto;
+  background: var(--card);
+  border: 1px solid rgba(200,136,42,.25);
+  border-radius: 14px;
+  box-shadow: 0 4px 24px rgba(0,0,0,.06);
+}
+.pgc-icon { font-size: 2.4rem; margin-bottom: .75rem; }
+.pgc-title { font-family: var(--serif); font-size: 1.15rem; font-weight: 600; color: var(--ink); margin-bottom: .5rem; }
+.pgc-sub { font-size: .82rem; color: var(--ink4); line-height: 1.6; margin-bottom: 1.5rem; max-width: 320px; }
+.pgc-btn {
+  background: var(--gold); color: #fff; border: none; border-radius: 8px;
+  padding: .7rem 1.6rem; font-size: .9rem; font-weight: 600; cursor: pointer;
+  transition: background .15s;
+}
+.pgc-btn:hover { background: var(--gold-d); }
+.pgc-note { font-size: .68rem; color: var(--ink5); margin-top: .75rem; }
+
+/* ── Section loading / error states ── */
+.sec-state-wrap {
+  display: flex; align-items: center; gap: .6rem;
+  padding: 1.5rem; font-size: .82rem; color: var(--ink4);
+}
+.sec-state-error { color: var(--red); }
+
+/* ══════════════════════════════════════════════════════
+   MOBILE POLISH  (max-width: 640px)
+══════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  /* Chart toolbar — stack on mobile */
+  #app-chart-toolbar { flex-wrap: wrap; gap: 6px; padding: 8px 10px; }
+  #app-tf-strip { overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 6px 10px; }
+  .tf-btn { padding: 4px 8px; font-size: .68rem; }
+
+  /* Analysis result header */
+  .result-header { flex-wrap: wrap; gap: 8px; padding: 12px 12px 10px; }
+  .r-price-block { width: 100%; }
+  .r-price { font-size: 1.6rem; }
+
+  /* Metric cards — 2 per row on mobile */
+  .metrics-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+  .metric-card { padding: 8px 10px !important; }
+  .metric-val { font-size: 1rem !important; }
+
+  /* Tables — horizontal scroll */
+  .fin-table, table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  /* Sidebar — hide on mobile (bottom nav used instead) */
+  .app-sidebar { display: none !important; }
+  .app-content { margin-left: 0 !important; }
+
+  /* Pro gate card on mobile */
+  .pro-gate-card { padding: 1.5rem 1.2rem; margin: 1rem auto; }
+  .pgc-title { font-size: 1rem; }
+
+  /* Upgrade modal on mobile */
+  .upgrade-modal-box { width: 94vw !important; max-height: 90vh; overflow-y: auto; padding: 20px 16px !important; }
+  .upgrade-modal-box h2 { font-size: 1.2rem; }
+  .upgrade-plan-grid { grid-template-columns: 1fr !important; }
+
+  /* Saved analyses cards */
+  .sa-card { padding: 10px 12px; }
+  .sa-card-actions { flex-wrap: wrap; gap: 6px; }
+
+  /* Screener table */
+  #screener-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .scr-table { min-width: 640px; }
+
+  /* DCF / Projection inputs */
+  .dcf-inputs, .proj-inputs { grid-template-columns: 1fr !important; }
+
+  /* News cards */
+  .news-card { flex-direction: column; }
+  .news-thumb { width: 100% !important; height: 120px !important; }
+
+  /* Market overview chart */
+  #market-overview-chart { height: 160px !important; }
+  .mo-idx-row { flex-wrap: wrap; gap: 8px; }
+  .mo-idx-item { min-width: calc(50% - 4px); }
+
+  /* Bottom nav — ensure it's above content */
+  .mobile-bottom-nav { z-index: 200; }
+
+  /* Search bar on mobile */
+  .main-ticker-form { flex-wrap: nowrap; }
+  #main-ticker { font-size: .85rem; }
+
+  /* Toast messages */
+  #toast { bottom: 80px !important; }
+}
+
+@media (max-width: 400px) {
+  .metrics-grid { grid-template-columns: 1fr !important; }
+  .pgc-btn { width: 100%; }
+}
+
 </style>
 <script>
 /* ══════════════════════════════════════════════════════
@@ -3616,6 +3725,7 @@ const S = {
   screenerData: null,
   screenerSort: { col: 'marketCap', dir: -1 },
   userPlan: 'free',   // 'free' | 'trial' | 'pro'
+  loggedIn: false,
   trialEndsAt: null,
   analystTarget: null,  // { mean, high, low } set by loadAnalyst()
 };
@@ -3627,10 +3737,82 @@ const PRO_SECTIONS = ['financials','advmetrics','projection','dcf','screener','r
 
 function isPro() { return S.userPlan === 'pro' || S.userPlan === 'trial'; }
 
+/* ══════════════════════════════════════════════════════
+   CENTRALISED SECTION HELPERS
+   sectionProGateHtml(id)   — contextual upgrade card
+   sectionLoadingHtml()     — spinner markup
+   sectionErrorHtml(msg)    — error markup
+   proAwareFetch(url,id)    — fetch that throws typed errors
+   handleSectionError(e,id,el) — routes errors to right UI
+══════════════════════════════════════════════════════ */
+const PRO_GATE_MSGS = {
+  financials:   { icon:'📊', title:'Unlock Financial Statements',   sub:'Full income statements, balance sheets &amp; cash flow from SEC EDGAR.' },
+  advmetrics:   { icon:'📈', title:'Unlock Advanced Metrics',       sub:'Sharpe, Sortino, Alpha, Beta, VaR, and 20+ institutional-grade risk stats.' },
+  earnings:     { icon:'📅', title:'Unlock Earnings History',       sub:'EPS surprises, quarterly beats/misses, and revenue trends going back years.' },
+  secfilings:   { icon:'📄', title:'Unlock SEC Filings',            sub:'Browse 10-K, 10-Q, and 8-K filings direct from EDGAR. Never miss a disclosure.' },
+  institutional:{ icon:'🏛', title:'Unlock Institutional Holdings', sub:'See which funds own shares, position concentration, and recent changes.' },
+  analyst:      { icon:'🎯', title:'Unlock Analyst Price Targets',  sub:'Consensus targets, rating breakdowns, and history from Wall Street analysts.' },
+  darkpool:     { icon:'🌑', title:'Unlock Dark Pool Data',         sub:'OTC/dark-pool volume, block trades, and institutional order flow.' },
+  projection:   { icon:'🔭', title:'Unlock Advanced Projection',    sub:'6-input scenario modelling: revenue growth, margins, multiples, and more.' },
+  dcf:          { icon:'🧮', title:'Unlock DCF Valuation',          sub:'Discounted cash flow model to find intrinsic value vs current market price.' },
+  screener:     { icon:'🔍', title:'Unlock Full Market Screener',   sub:'Filter 200+ stocks by sector, P/E, momentum, market cap, and 15+ metrics.' },
+  reports:      { icon:'🔖', title:'Cloud-Sync Saved Analyses',     sub:'Pro users get automatic cloud sync across all devices.' },
+  adveducation: { icon:'🎓', title:'Unlock Advanced Education',     sub:'In-depth guides on DCF, options, technical analysis, and portfolio theory.' },
+};
+
+function sectionProGateHtml(id) {
+  const m = PRO_GATE_MSGS[id] || { icon:'⭐', title:'Pro Feature', sub:'Upgrade to Pro to unlock this section.' };
+  return `<div class="pro-gate-card">
+    <div class="pgc-icon">${m.icon}</div>
+    <div class="pgc-title">${m.title}</div>
+    <div class="pgc-sub">${m.sub}</div>
+    <button class="pgc-btn" onclick="showUpgradeModal()">Start 7-day free trial →</button>
+    <div class="pgc-note">$7.99/mo · Cancel anytime · No credit card required for trial</div>
+  </div>`;
+}
+
+function sectionLoadingHtml() {
+  return '<div class="sec-state-wrap"><span class="spinner"></span><span style="color:var(--ink4);font-size:.82rem;">Loading…</span></div>';
+}
+
+function sectionErrorHtml(msg) {
+  return `<div class="sec-state-wrap sec-state-error"><span style="font-size:1.1rem;">⚠</span><span>${msg}</span></div>`;
+}
+
+async function proAwareFetch(url, sectionId, opts) {
+  const res = await fetch(url, { credentials: 'same-origin', ...(opts||{}) });
+  if (res.status === 401) { const e = new Error('LOGIN_REQUIRED');  e.code = 'LOGIN_REQUIRED';  throw e; }
+  if (res.status === 403) { const e = new Error('PRO_REQUIRED');    e.code = 'PRO_REQUIRED';    e.sectionId = sectionId; throw e; }
+  if (res.status === 429) { const e = new Error('LIMIT_REACHED');   e.code = 'LIMIT_REACHED';   throw e; }
+  if (!res.ok)            { throw new Error(`Request failed (${res.status})`); }
+  return res;
+}
+
+function handleSectionError(e, sectionId, container) {
+  if (!container) return;
+  if (e.code === 'PRO_REQUIRED') {
+    container.innerHTML = sectionProGateHtml(sectionId);
+    container.style.display = 'block';
+  } else if (e.code === 'LOGIN_REQUIRED') {
+    container.innerHTML = `<div class="sec-state-wrap"><span>Please <a href="/login" style="color:var(--gold);font-weight:600;">sign in</a> to view this section.</span></div>`;
+    container.style.display = 'block';
+  } else if (e.code === 'LIMIT_REACHED') {
+    container.innerHTML = `<div class="sec-state-wrap">Daily limit reached. <a href="#" onclick="showUpgradeModal();return false;" style="color:var(--gold);font-weight:600;">Upgrade to Pro</a> for unlimited access.</div>`;
+    container.style.display = 'block';
+  } else {
+    container.innerHTML = sectionErrorHtml(e.message || 'Failed to load data');
+    container.style.display = 'block';
+  }
+}
+
+
+
 // ── Accordion open/close ──
 function openSection(id, skipProCheck) {
+  // For Pro sections: open the panel and show the gate card inline
+  // (still shows modal only if user explicitly triggers upgrade button)
   if (!skipProCheck && PRO_SECTIONS.includes(id) && !isPro()) {
-    showUpgradeModal(); return;
+    // Fall through — we'll render the gate card inside the section body
   }
   // Close all sections first
   document.querySelectorAll('.app-section').forEach(el => {
@@ -3660,12 +3842,16 @@ function openSection(id, skipProCheck) {
   if (scroll) scroll.scrollTop = 0;
   // Auto-load data tabs
   const t = S.ticker;
-  if      (id === 'financials')  { if(t) loadFinancials(t); }
+  if (!isPro() && PRO_SECTIONS.includes(id) && id !== 'reports') {
+    // Show contextual gate card inline — user can dismiss and see upgrade options
+    const gateBody = document.getElementById('body-' + id);
+    if (gateBody) { gateBody.innerHTML = sectionProGateHtml(id); gateBody.style.display = 'block'; }
+  } else if (id === 'financials')  { if(t) loadFinancials(t); }
   else if (id === 'advmetrics')  { if(t) loadAdvMetrics(t); }
   else if (id === 'earnings')    { if(t) loadEarnings(t); }
   else if (id === 'secfilings')     { if(t) loadSecFilings(t); }
   else if (id === 'institutional')  { if(t) loadInstitutional(t); }
-  else if (id === 'screener')    { if(isPro()) loadScreener(); }
+  else if (id === 'screener')    { loadScreener(); }
   else if (id === 'reports')     { setTimeout(renderSavedAnalyses, 100); }
 }
 
@@ -3835,7 +4021,7 @@ function saveAnalysis(type) {
   toast('Saved ✓', 'green');
   renderSavedAnalyses();
   // Persist to DB if logged in
-  if (S.userPlan && S.userPlan !== 'free_guest') {
+  if (S.loggedIn) {
     fetch('/api/saves', {
       method: 'POST', credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
@@ -3895,6 +4081,11 @@ function renderSavedAnalyses() {
   const list = document.getElementById('sa-list');
   const empty = document.getElementById('sa-empty');
   if (!list) return;
+  // Show guest/sync notice
+  const guestBanner = document.getElementById('sa-guest-banner');
+  const syncBanner  = document.getElementById('sa-sync-banner');
+  if (guestBanner) guestBanner.style.display = !S.loggedIn ? 'block' : 'none';
+  if (syncBanner)  syncBanner.style.display  = S.loggedIn && !isPro() ? 'block' : 'none';
 
   let all = getSavedAnalyses();
   if (_savedTypeFilter !== 'ALL') all = all.filter(a => a.type === _savedTypeFilter);
@@ -4795,7 +4986,7 @@ async function loadHomeTickerStrip(){
   const TICKERS=['AAPL','NVDA','MSFT','TSLA','AMZN','META','GOOGL','SPY'];
   const LOGOS={AAPL:'https://www.google.com/s2/favicons?sz=32&domain=apple.com',NVDA:'https://www.google.com/s2/favicons?sz=32&domain=nvidia.com',MSFT:'https://www.google.com/s2/favicons?sz=32&domain=microsoft.com',TSLA:'https://www.google.com/s2/favicons?sz=32&domain=tesla.com',AMZN:'https://www.google.com/s2/favicons?sz=32&domain=amazon.com',META:'https://www.google.com/s2/favicons?sz=32&domain=meta.com',GOOGL:'https://www.google.com/s2/favicons?sz=32&domain=google.com',SPY:'https://www.google.com/s2/favicons?sz=32&domain=ssga.com'};
   el.innerHTML=TICKERS.map(t=>`<div class="ht-card" style="opacity:.3;"><div class="ht-sym">${t}</div></div>`).join('');
-  const results=await Promise.allSettled(TICKERS.map(t=>fetch(`/api/quote/${t}?range=1d`,{credentials:'same-origin'}).then(r=>r.ok?r.json():null).catch(()=>null)));
+  const results=await Promise.allSettled(TICKERS.map(t=>fetch(`/api/quote/${t}?range=1d&preview=1`,{credentials:'same-origin'}).then(r=>r.ok?r.json():null).catch(()=>null)));
   const watchData=[];
   el.innerHTML=results.map((res,i)=>{
     const t=TICKERS[i],data=res.status==='fulfilled'?res.value:null,meta=data?.chart?.result?.[0]?.meta,closes=data?.chart?.result?.[0]?.indicators?.quote?.[0]?.close?.filter(x=>x!=null)||[];
@@ -4823,7 +5014,7 @@ async function loadMarketOverview(range,btn){
   const intervalMap={'1d':'5m','5d':'15m','1mo':'1d','3mo':'1d','ytd':'1d','1y':'1d','5y':'1wk'};
   const interval=intervalMap[range||'1d']||'1d';
   const results=await Promise.allSettled(IDXS.map(idx=>
-    fetch(`/api/quote/${encodeURIComponent(idx.t)}?range=${range||'1d'}&interval=${interval}`,{credentials:'same-origin'})
+    fetch(`/api/quote/${encodeURIComponent(idx.t)}?range=${range||'1d'}&interval=${interval}&preview=1`,{credentials:'same-origin'})
     .then(r=>r.ok?r.json():null).catch(()=>null)
   ));
   let labels=[];
@@ -5973,7 +6164,7 @@ async function loadFinancials(ticker) {
   if(error)   error.style.display='none';
   if(cont)    cont.style.display='none';
   try {
-    const res  = await fetch('/api/financials/' + ticker, { credentials:'same-origin' });
+    const res  = await proAwareFetch('/api/financials/' + ticker, 'financials');
     const data = await res.json();
 
     // ETF / fund: no XBRL statements available
@@ -6074,8 +6265,8 @@ async function loadFinancials(ticker) {
     if(cont)    cont.style.display='block';
   } catch(e) {
     if(loading) loading.style.display='none';
-    if(error)   { error.style.display='block'; error.textContent='Could not load financials: ' + e.message; }
-    console.error('financials error', e);
+    handleSectionError(e, 'financials', cont);
+    if(e.code !== 'PRO_REQUIRED' && e.code !== 'LOGIN_REQUIRED') console.error('financials error', e);
   }
 }
 
@@ -6210,8 +6401,8 @@ async function loadInstitutional(ticker) {
 
   try {
     const [dpRes, instRes] = await Promise.all([
-      fetch('/api/darkpool/'+encodeURIComponent(ticker),{credentials:'same-origin'}),
-      fetch('/api/institutional/'+encodeURIComponent(ticker),{credentials:'same-origin'})
+      proAwareFetch('/api/darkpool/'+encodeURIComponent(ticker),'institutional'),
+      proAwareFetch('/api/institutional/'+encodeURIComponent(ticker),'institutional'),
     ]);
     const dpData   = await dpRes.json();
     const instData = await instRes.json();
@@ -6293,8 +6484,9 @@ async function loadInstitutional(ticker) {
     }
   } catch(e) {
     if(loading) loading.style.display='none';
-    console.error('institutional/darkpool error', e);
-    if(dpCards) dpCards.innerHTML = '<div style="color:#f87171;font-size:.8rem;">Failed to load dark pool data.</div>';
+    const instWrap = document.getElementById('body-institutional');
+    handleSectionError(e, 'institutional', instWrap);
+    if(e.code !== 'PRO_REQUIRED' && e.code !== 'LOGIN_REQUIRED') console.error('institutional/darkpool error', e);
   }
 }
 
@@ -6313,11 +6505,12 @@ async function loadEarnings(ticker) {
   try {
     // Fetch forward quarterly estimates alongside historical
     const [res, estRes] = await Promise.allSettled([
-      fetch('/api/earnings/' + ticker, {credentials:'same-origin'}),
-      fetch('/api/estimates/' + ticker, {credentials:'same-origin'}),
+      proAwareFetch('/api/earnings/' + ticker, 'earnings'),
+      proAwareFetch('/api/estimates/' + ticker, 'earnings'),
     ]);
-    const data = res.status==='fulfilled' && res.value.ok ? await res.value.json() : [];
-    const estData = estRes.status==='fulfilled' && estRes.value.ok ? await estRes.value.json() : {};
+    if (res.status === 'rejected') throw res.reason;
+    const data = res.status==='fulfilled' ? await res.value.json() : [];
+    const estData = estRes.status==='fulfilled' ? await estRes.value.json().catch(()=>({})) : {};
     const fwdQ = estData.fwdQuarterly || [];
 
     // Render forward estimates banner if available
@@ -6625,4 +6818,4 @@ document.addEventListener('click', function(e) {
     <a href="#" class="mmenu-item" onclick="navGoTo('dcf');_setMobileNav('dcf');_toggleMobileMenu();return false;"><i class="ti ti-calculator"></i><span>DCF</span></a>
     <a href="#" class="mmenu-item" onclick="navGoTo('education');_setMobileNav('education');_toggleMobileMenu();return false;"><i class="ti ti-school"></i><span>Education</span></a>
     <a href="#" class="mmenu-item" onclick="navGoTo('projection');_setMobileNav('projection');_toggleMobileMenu();return false;"><i class="ti ti-timeline"></i><span>Projection</span></a>
-    <a href="#" class="mmenu-item" onclick="navGoTo('secfilings');_setMobileNav('secfilings');_toggleMobileMenu();return false;"><i class="ti ti-file-text"></i><span>SEC</span
+    <a href="#" class="mmenu-item" onclick="navGoTo('secfilings');_setMobileNav('secfilings');_toggleMobileMenu();return false;"><i class="ti ti-file-text"></i><span>SEC</span  
