@@ -1314,7 +1314,7 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
     if (id === 'home') { showView('home'); updateNavToolLink(true); return; }
     showView('tool');
     window.scrollTo(0,0);
-    openSection(id, true);
+    openSection(id); // no skipProCheck — free users see the upgrade modal, not empty Pro panels
   }
 
   // On hard load: respect ?view=tool or ?view=home in URL
@@ -3619,9 +3619,11 @@ const S = {
   trialEndsAt: null,
   analystTarget: null,  // { mean, high, low } set by loadAnalyst()
 };
-const PROXY = 'https://api.allorigins.win/raw?url=';
 const COLORS = ['#D4972E','#4a9fd4','#4ade80','#f87171'];
-const PRO_SECTIONS = ['financials','advmetrics','projection','dcf','screener','reports','adveducation'];
+// Keep this list in sync with the requirePro-gated API routes in routes/financials.js
+// and routes/market-data.js (screener).
+const PRO_SECTIONS = ['financials','advmetrics','projection','dcf','screener','reports','adveducation',
+                      'earnings','secfilings','institutional','analyst','darkpool'];
 
 function isPro() { return S.userPlan === 'pro' || S.userPlan === 'trial'; }
 
@@ -4988,9 +4990,12 @@ function fetchBreadth(results){
 }
 
 async function loadAnalystSignals(tickers){
+  // Calls server-side proxy — Finnhub key never exposed in the browser.
   let buy=0,hold=0,sell=0;
-  const results=await Promise.allSettled(tickers.map(t=>fetch(`https://finnhub.io/api/v1/recommendation?symbol=${t}&token=d7n43rpr01qppri3flo0d7n43rpr01qppri3flog`).then(r=>r.ok?r.json():null).catch(()=>null)));
-  results.forEach(res=>{if(res.status!=='fulfilled'||!res.value?.length)return;const l=res.value[0];buy+=(l.strongBuy||0)+(l.buy||0);hold+=(l.hold||0);sell+=(l.strongSell||0)+(l.sell||0);});
+  try{
+    const r=await fetch(`/api/market/analyst-signals?tickers=${tickers.map(t=>encodeURIComponent(t)).join(',')}`,{credentials:'same-origin'});
+    if(r.ok){const d=await r.json();buy=d.buy||0;hold=d.hold||0;sell=d.sell||0;}
+  }catch(_){}
   const total=buy+hold+sell||1,buyPct=Math.round(buy/total*100),holdPct=Math.round(hold/total*100),sellPct=100-buyPct-holdPct;
   ['analyst-bull-pct','abl-buy','abl-hold','abl-sell','analyst-note'].forEach((id,i)=>{const el=document.getElementById(id);if(el)el.textContent=[buyPct+'%',buy+' Buy',hold+' Hold',sell+' Sell',`Based on ${buy+hold+sell} analyst ratings`][i];});
   const c2=document.getElementById('analyst-donut-chart');if(!c2)return;
@@ -6620,9 +6625,4 @@ document.addEventListener('click', function(e) {
     <a href="#" class="mmenu-item" onclick="navGoTo('dcf');_setMobileNav('dcf');_toggleMobileMenu();return false;"><i class="ti ti-calculator"></i><span>DCF</span></a>
     <a href="#" class="mmenu-item" onclick="navGoTo('education');_setMobileNav('education');_toggleMobileMenu();return false;"><i class="ti ti-school"></i><span>Education</span></a>
     <a href="#" class="mmenu-item" onclick="navGoTo('projection');_setMobileNav('projection');_toggleMobileMenu();return false;"><i class="ti ti-timeline"></i><span>Projection</span></a>
-    <a href="#" class="mmenu-item" onclick="navGoTo('secfilings');_setMobileNav('secfilings');_toggleMobileMenu();return false;"><i class="ti ti-file-text"></i><span>SEC</span></a>
-    <a href="#" class="mmenu-item" onclick="navGoTo('institutional');_setMobileNav('institutional');_toggleMobileMenu();return false;"><i class="ti ti-building-bank"></i><span>Inst.</span></a>
-  </div>
-</div>
-</body>
-</html>
+    <a href="#" class="mmenu-item" onclick="navGoTo('secfilings');_setMobileNav('secfilings');_toggleMobileMenu();return false;"><i class="ti ti-file-text"></i><span>SEC</span

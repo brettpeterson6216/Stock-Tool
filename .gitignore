@@ -4,3 +4,9 @@ data/
 .DS_Store
 npm-debug.log*
 *.log
+
+# Local SQLite dev database (never commit)
+local.db
+local.db-journal
+local.db-wal
+local.db-shm
