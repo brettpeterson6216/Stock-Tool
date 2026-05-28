@@ -4810,7 +4810,7 @@ function getSectorBenchmark(sector) {
 /* ══ HOME DASHBOARD JS v3 ══ */
 let _moversCache={},_moversActive='gainers',_marketOverviewChart=null,_globeRAF=null;
 
-function heroSearch(){const v=(document.getElementById('hero-search')||{}).value;if(!v||!v.trim())return;const mi=document.getElementById('main-ticker');if(mi)mi.value=v.trim().toUpperCase();if(typeof fetchAndRender==='function')fetchAndRender();}
+function heroSearch(){const v=(document.getElementById('hero-search')||{}).value;if(!v||!v.trim())return;const mi=document.getElementById('main-ticker');if(mi)mi.value=v.trim().toUpperCase();navGoTo('analyze');if(typeof fetchAndRender==='function')fetchAndRender();}
 function heroLoadTicker(t){const mi=document.getElementById('main-ticker');if(mi)mi.value=t;navGoTo('analyze');if(typeof fetchAndRender==='function')fetchAndRender();}
 (function(){const hi=document.getElementById('hero-search');if(hi)hi.addEventListener('keydown',e=>{if(e.key==='Enter')heroSearch();});})();
 
@@ -6821,6 +6821,7 @@ document.addEventListener('click', function(e) {
     <a href="#" class="mmenu-item" onclick="navGoTo('secfilings');_setMobileNav('secfilings');_toggleMobileMenu();return false;"><i class="ti ti-file-text"></i><span>SEC</span></a>
     <a href="#" class="mmenu-item" onclick="navGoTo('institutional');_setMobileNav('institutional');_toggleMobileMenu();return false;"><i class="ti ti-building-bank"></i><span>Inst.</span></a>
   </div>
+</div>
 </div>
 </body>
 </html>
