@@ -63,9 +63,12 @@ const app = express();
 app.set("trust proxy", 1);
 
 // Content-Security-Policy
-// unsafe-inline is retained for scripts/styles because index.html relies heavily
-// on inline <script> blocks and inline event handlers — a future nonce-based
-// refactor should eliminate it. All other directives are locked down.
+// unsafe-inline is required for both script-src AND script-src-attr because
+// index.html uses inline <script> blocks and inline onclick= event handlers
+// throughout. script-src-attr defaults to 'none' in Helmet, which silently
+// blocks every onclick= attribute — that was the root cause of the UI being
+// completely non-interactive after Helmet was added.
+// A future nonce-based refactor could eliminate unsafe-inline entirely.
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -73,13 +76,18 @@ app.use(helmet({
       scriptSrc:      ["'self'", "'unsafe-inline'",
                        "https://cdnjs.cloudflare.com",
                        "https://cdn.jsdelivr.net"],
+      // Must explicitly allow unsafe-inline here too — Helmet defaults this
+      // directive to 'none', which blocks all onclick= / onchange= handlers.
+      scriptSrcAttr:  ["'unsafe-inline'"],
       styleSrc:       ["'self'", "'unsafe-inline'",
                        "https://fonts.googleapis.com"],
       fontSrc:        ["'self'", "https://fonts.gstatic.com"],
       imgSrc:         ["'self'", "data:", "https:"],
       // All API calls route through our own origin. cdn.jsdelivr.net is required
-      // for the globe's world-atlas JSON fetch (index.html line ~4638).
-      connectSrc:     ["'self'", "https://cdn.jsdelivr.net"],
+      // for the globe's world-atlas JSON fetch. cdnjs.cloudflare.com is required
+      // for hammer.js (used by Chart.js touch support).
+      connectSrc:     ["'self'", "https://cdn.jsdelivr.net",
+                       "https://cdnjs.cloudflare.com"],
       objectSrc:      ["'none'"],
       frameAncestors: ["'none'"],
       formAction:     ["'self'"],

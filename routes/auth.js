@@ -15,15 +15,16 @@ const { BCRYPT_ROUNDS, APP_URL, ADMIN_SECRET } = require("../lib/config");
 
 const router = express.Router();
 
-// ---- Rate limiter (shared across all auth endpoints) ----
+// ---- Rate limiter — applied only to mutation/auth endpoints ----
+// NOT applied to /saves (GET) or /auth/me — those fire on every page load
+// and would lock users out after a few refreshes.
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 30,
+  max: 60,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: "Too many attempts. Try again in 15 minutes." },
 });
-router.use(authLimiter);
 
 // ---- Validation helpers ----
 const EMAIL_RE    = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -45,7 +46,7 @@ function validateSignup({ username, email, password }) {
 // ============================================================
 //  Signup / Login / Logout / Me
 // ============================================================
-router.post("/auth/signup", async (req, res) => {
+router.post("/auth/signup",           authLimiter, async (req, res) => {
   try {
     const username = String(req.body.username || "").trim();
     const email    = String(req.body.email    || "").trim().toLowerCase();
@@ -81,7 +82,7 @@ router.post("/auth/signup", async (req, res) => {
   }
 });
 
-router.post("/auth/login", async (req, res) => {
+router.post("/auth/login",             authLimiter, async (req, res) => {
   try {
     const identifier = String(req.body.identifier || req.body.username || req.body.email || "").trim();
     const password   = String(req.body.password || "");
@@ -196,7 +197,7 @@ router.delete("/saves", async (req, res) => {
 // ============================================================
 //  Password reset
 // ============================================================
-router.post("/auth/forgot-password", async (req, res) => {
+router.post("/auth/forgot-password",   authLimiter, async (req, res) => {
   const email = String(req.body.email || "").trim().toLowerCase();
   if (!email) return res.status(400).json({ error: "Email is required." });
   try {
@@ -229,7 +230,7 @@ router.post("/auth/forgot-password", async (req, res) => {
   }
 });
 
-router.post("/auth/reset-password", async (req, res) => {
+router.post("/auth/reset-password",    authLimiter, async (req, res) => {
   const { token, password } = req.body;
   if (!token || !password || password.length < 8)
     return res.status(400).json({ error: "Invalid request." });
@@ -253,7 +254,7 @@ router.post("/auth/reset-password", async (req, res) => {
 // ============================================================
 //  Change username / password (logged-in user)
 // ============================================================
-router.post("/auth/change-username", async (req, res) => {
+router.post("/auth/change-username",   authLimiter, async (req, res) => {
   if (!req.session.userId) return res.status(401).json({ error: "Not logged in." });
   const { username } = req.body;
   if (!username || username.length < 3) return res.status(400).json({ error: "Username must be at least 3 characters." });
@@ -272,7 +273,7 @@ router.post("/auth/change-username", async (req, res) => {
   }
 });
 
-router.post("/auth/change-password", async (req, res) => {
+router.post("/auth/change-password",   authLimiter, async (req, res) => {
   if (!req.session.userId) return res.status(401).json({ error: "Not logged in." });
   const { currentPassword, newPassword } = req.body;
   if (!currentPassword || !newPassword || newPassword.length < 8)
