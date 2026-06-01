@@ -2582,7 +2582,7 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
     </div>
 
     <!-- Subscription button -->
-    <a href="/api/stripe/portal" style="display:block;text-align:center;background:var(--ink);color:var(--cream);padding:.6rem 1rem;border-radius:var(--r);font-size:.85rem;font-weight:500;text-decoration:none;margin-bottom:1.5rem;transition:background .15s;" onmouseover="this.style.background='var(--ink2)'" onmouseout="this.style.background='var(--ink)'" id="am-sub-btn">💳 Manage Subscription</a>
+    <a href="/api/stripe/portal" style="display:block;text-align:center;background:var(--ink);color:var(--cream);padding:.6rem 1rem;border-radius:var(--r);font-size:.85rem;font-weight:500;text-decoration:none;margin-bottom:1.5rem;transition:background .15s;" id="am-sub-btn">💳 Manage Subscription</a>
 
     <!-- Divider -->
     <div style="border-top:1px solid var(--border2);margin-bottom:1.25rem;"></div>
@@ -2592,7 +2592,7 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
     <div style="display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.5rem;">
       <input type="text" id="am-new-username" placeholder="New username" class="input-light" autocomplete="username" style="text-transform:lowercase;">
       <div id="am-username-msg" style="font-size:.78rem;min-height:1rem;"></div>
-      <button onclick="submitUsernameChange()" style="align-self:flex-start;background:var(--ink);color:var(--cream);border:none;padding:.55rem 1.25rem;border-radius:var(--r2);font-size:.82rem;font-weight:500;cursor:pointer;transition:background .15s;letter-spacing:.01em;" onmouseover="this.style.background='var(--ink2)'" onmouseout="this.style.background='var(--ink)'">Update Username</button>
+      <button id="am-submit-username" style="align-self:flex-start;background:var(--ink);color:var(--cream);border:none;padding:.55rem 1.25rem;border-radius:var(--r2);font-size:.82rem;font-weight:500;cursor:pointer;transition:background .15s;letter-spacing:.01em;">Update Username</button>
     </div>
 
     <!-- Divider -->
@@ -2605,7 +2605,7 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
       <input type="password" id="am-new-pw" placeholder="New password (min 8 characters)" class="input-light">
       <input type="password" id="am-confirm-pw" placeholder="Confirm new password" class="input-light">
       <div id="am-pw-msg" style="font-size:.78rem;min-height:1rem;"></div>
-      <button onclick="submitPasswordChange()" style="align-self:flex-start;background:var(--ink);color:var(--cream);border:none;padding:.55rem 1.25rem;border-radius:var(--r2);font-size:.82rem;font-weight:500;cursor:pointer;transition:background .15s;letter-spacing:.01em;" onmouseover="this.style.background='var(--ink2)'" onmouseout="this.style.background='var(--ink)'">Update Password</button>
+      <button id="am-submit-password" style="align-self:flex-start;background:var(--ink);color:var(--cream);border:none;padding:.55rem 1.25rem;border-radius:var(--r2);font-size:.82rem;font-weight:500;cursor:pointer;transition:background .15s;letter-spacing:.01em;">Update Password</button>
     </div>
   </div>
 </div>
@@ -3391,12 +3391,13 @@ html[data-theme="dark"] #am-since    { color: var(--text2) !important; }
 html[data-theme="dark"] #am-plan     { color: var(--text) !important; }
 html[data-theme="dark"] #am-trial-info { color: var(--text3) !important; }
 html[data-theme="dark"] #acct-modal-bg div[style*="font-size:.78rem;font-weight:600"] { color: var(--text) !important; }
+#am-sub-btn:hover { background: var(--ink2) !important; }
 html[data-theme="dark"] #am-sub-btn { background: var(--card) !important; color: var(--text) !important; border: 1px solid var(--border2) !important; }
 html[data-theme="dark"] #am-sub-btn:hover { background: var(--border2) !important; }
-html[data-theme="dark"] #acct-modal-bg button[onclick*="submitPasswordChange"],
-html[data-theme="dark"] #acct-modal-bg button[onclick*="submitUsernameChange"] { background: var(--gold) !important; color: #fff !important; border: none !important; }
-html[data-theme="dark"] #acct-modal-bg button[onclick*="submitPasswordChange"]:hover,
-html[data-theme="dark"] #acct-modal-bg button[onclick*="submitUsernameChange"]:hover { background: var(--gold-d) !important; }
+html[data-theme="dark"] #am-submit-password,
+html[data-theme="dark"] #am-submit-username { background: var(--gold) !important; color: #fff !important; border: none !important; }
+html[data-theme="dark"] #am-submit-password:hover,
+html[data-theme="dark"] #am-submit-username:hover { background: var(--gold-d) !important; }
 html[data-theme="dark"] #am-pw-msg { color: var(--text3) !important; }
 html[data-theme="dark"] #am-username-msg { color: var(--text3) !important; }
 
@@ -3989,6 +3990,7 @@ function setChartType(type, btn) {
 ===================================================== */
 var _savedSort = 'date';
 var _savedTypeFilter = 'ALL';
+var _saListEntries = [];
 
 const SA_KEY = 'impliedLens_savedAnalyses';
 
@@ -4130,7 +4132,8 @@ function renderSavedAnalyses() {
   const typeLabels = { price:'Price Snapshot', dcf:'DCF', projection:'Projection', compare:'Compare', note:'Note' };
   const typeClass  = { price:'sa-type-price', dcf:'sa-type-dcf', projection:'sa-type-projection', compare:'sa-type-compare', note:'sa-type-note' };
 
-  list.innerHTML = all.map(entry => {
+  _saListEntries = all;
+  list.innerHTML = all.map((entry, idx) => {
     const d = new Date(entry.date);
     const dateStr = d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})
       + ' ' + d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
@@ -4142,8 +4145,8 @@ function renderSavedAnalyses() {
         <div class="sa-card-title">${escapeHtml(entry.title)}</div>
         <div class="sa-card-meta">${escapeHtml(dateStr)}${entry.ticker ? ' · '+escapeHtml(entry.ticker) : ''}</div>
         <div class="sa-card-actions">
-          <button class="sa-btn" onclick="loadSavedAnalysis(${JSON.stringify(entry).replace(/"/g,'&quot;')})">↩ Load</button>
-          <button class="sa-del-btn" onclick="deleteSavedAnalysis(${entry.id})">✕ Delete</button>
+          <button class="sa-btn" data-sa-action="load" data-sa-idx="${idx}">↩ Load</button>
+          <button class="sa-del-btn" data-sa-action="del" data-sa-idx="${idx}">✕ Delete</button>
         </div>
       </div>
     </div>`;
@@ -6811,6 +6814,46 @@ document.addEventListener('click', function(e) {
     menu.classList.remove('open');
   }
 });
+
+// ── Event delegation: saved analyses load/delete ──
+(function() {
+  function _attachSaListDelegation() {
+    var saList = document.getElementById('sa-list');
+    if (!saList) return;
+    saList.addEventListener('click', function(e) {
+      var btn = e.target.closest('[data-sa-action]');
+      if (!btn) return;
+      var idx = parseInt(btn.dataset.saIdx, 10);
+      var entry = _saListEntries[idx];
+      if (!entry) return;
+      if (btn.dataset.saAction === 'load') {
+        loadSavedAnalysis(entry);
+      } else if (btn.dataset.saAction === 'del') {
+        deleteSavedAnalysis(entry.id);
+      }
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _attachSaListDelegation);
+  } else {
+    _attachSaListDelegation();
+  }
+})();
+
+// ── Account modal buttons: submitUsernameChange / submitPasswordChange ──
+(function() {
+  function _attachAccountButtons() {
+    var unBtn = document.getElementById('am-submit-username');
+    var pwBtn = document.getElementById('am-submit-password');
+    if (unBtn) unBtn.addEventListener('click', submitUsernameChange);
+    if (pwBtn) pwBtn.addEventListener('click', submitPasswordChange);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _attachAccountButtons);
+  } else {
+    _attachAccountButtons();
+  }
+})();
 // Patch navGoTo to also update mobile nav
 (function(){
   const _orig = navGoTo;
