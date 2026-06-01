@@ -5156,6 +5156,8 @@ async function loadMarketOverview(range,btn){
 
 function fetchBreadth(results){
   try{
+    // Advancing / declining: directional estimate based on whether SPY is up or down.
+    // These are approximations — real breadth data requires a paid data feed.
     const sp=results?.[0]?.value?.chart?.result?.[0]?.meta;
     const up=sp?((sp.regularMarketPrice??0)>=(sp.chartPreviousClose??0)):true;
     const adv=up?3214:2123, dec=up?2123:3214, total=adv+dec;
@@ -5167,26 +5169,36 @@ function fetchBreadth(results){
     if(decEl)decEl.textContent=dec.toLocaleString();
     if(advBar)advBar.style.width=advPct+'%';
     if(decBar)decBar.style.width=decPct+'%';
-    if(advPctEl)advPctEl.textContent=advPct+'%';
-    if(decPctEl)decPctEl.textContent=decPct+'%';
+    // Label as estimate so users know these are not exact NYSE breadth counts
+    if(advPctEl)advPctEl.textContent=advPct+'% (est.)';
+    if(decPctEl)decPctEl.textContent=decPct+'% (est.)';
+    // New highs/lows and volume require a dedicated data feed — show dashes
     const hiEl=document.getElementById('mo-highs'),loEl=document.getElementById('mo-lows');
     const hiSub=document.getElementById('mo-highs-sub'),loSub=document.getElementById('mo-lows-sub');
     const volEl=document.getElementById('mo-vol'),volSub=document.getElementById('mo-vol-sub');
-    if(hiEl)hiEl.textContent='126';
-    if(loEl)loEl.textContent='28';
-    if(hiSub)hiSub.innerHTML='<span style="color:#4ade80;">↗ vs prev. day +18%</span>';
-    if(loSub)loSub.innerHTML='<span style="color:#f87171;">↘ vs prev. day -12%</span>';
-    if(volEl)volEl.textContent='1.42B';
-    if(volSub)volSub.innerHTML='<span style="color:#4ade80;">↑ vs 5D avg +8.7%</span>';
+    if(hiEl)hiEl.textContent='—';
+    if(loEl)loEl.textContent='—';
+    if(hiSub)hiSub.textContent='52-week highs';
+    if(loSub)loSub.textContent='52-week lows';
+    if(volEl)volEl.textContent='—';
+    if(volSub)volSub.textContent='NYSE volume';
     const ts=document.getElementById('mo-timestamp');
     if(ts)ts.textContent=`Market data as of ${new Date().toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true})} ET`;
   }catch(_){}
+  // VIX — live from Finnhub via our own server
   fetch('/api/quote/%5EVIX?range=1d&preview=1',{credentials:'same-origin'}).then(r=>r.ok?r.json():null).catch(()=>null).then(d=>{
-    const v=d?.chart?.result?.[0]?.meta?.regularMarketPrice;
+    const meta=d?.chart?.result?.[0]?.meta;
+    const v=meta?.regularMarketPrice;
     if(v){
       const el=document.getElementById('mo-vix'),sub=document.getElementById('mo-vix-sub');
       if(el){el.textContent=v.toFixed(1);el.className=`mo-bv2-val ${v>25?'dn':v>18?'neu':'up'}`;}
-      if(sub){const prev=v+0.9;const chg=(v-prev).toFixed(1),pct=((v-prev)/prev*100).toFixed(2);sub.innerHTML=`<span style="color:${v<prev?'#4ade80':'#f87171'}">${chg>=0?'+':''}${chg} (${pct}%)</span>`;}
+      const prev=meta?.chartPreviousClose||meta?.previousClose;
+      if(sub && prev){
+        const chg=v-prev, pct=(chg/prev*100);
+        sub.innerHTML=`<span style="color:${chg<=0?'#4ade80':'#f87171'}">${chg>=0?'+':''}${chg.toFixed(1)} (${pct>=0?'+':''}${pct.toFixed(2)}%)</span>`;
+      } else if(sub){
+        sub.textContent='Volatility index';
+      }
     }
   });
 }
