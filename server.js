@@ -232,6 +232,13 @@ app.get("*", (_req, res) => res.sendFile(path.join(__dirname, "index.html")));
 // ============================================================
 //  Start
 // ============================================================
-initDb().then(() => {
-  app.listen(PORT, () => console.log(`Implied Lens running on port ${PORT}`));
-}).catch(err => { console.error("DB init failed:", err); process.exit(1); });
+// When run directly (node server.js): initialise DB and start listening.
+// When required as a module (tests): export the app so the test can
+// call initDb() itself and app.listen() on a free port.
+if (require.main === module) {
+  initDb().then(() => {
+    app.listen(PORT, () => console.log(`Implied Lens running on port ${PORT}`));
+  }).catch(err => { console.error("DB init failed:", err); process.exit(1); });
+}
+
+module.exports = app;
