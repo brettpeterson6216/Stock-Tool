@@ -17,8 +17,7 @@
     "express-session": "^1.18.0",
     "helmet": "^7.1.0",
     "resend": "^6.12.3",
-    "stripe": "^16.0.0",
-    "yahoo-finance2": "^3.14.0"
+    "stripe": "^16.0.0"
   },
   "engines": {
     "node": ">=18"
