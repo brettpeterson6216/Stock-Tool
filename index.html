@@ -3767,7 +3767,7 @@ function sectionProGateHtml(id) {
     <div class="pgc-title">${m.title}</div>
     <div class="pgc-sub">${m.sub}</div>
     <button class="pgc-btn" onclick="showUpgradeModal()">Start 7-day free trial →</button>
-    <div class="pgc-note">$7.99/mo · Cancel anytime · No credit card required for trial</div>
+    <div class="pgc-note">7-day free trial · Card required · Cancel anytime</div>
   </div>`;
 }
 
@@ -3806,6 +3806,17 @@ function handleSectionError(e, sectionId, container) {
 }
 
 
+
+
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
 
 // ── Accordion open/close ──
 function openSection(id, skipProCheck) {
@@ -4115,10 +4126,10 @@ function renderSavedAnalyses() {
     const label = typeLabels[entry.type] || entry.type;
     const cls   = typeClass[entry.type] || 'sa-type-note';
     return `<div class="sa-card">
-      <span class="sa-type-badge ${cls}">${label}</span>
+      <span class="sa-type-badge ${cls}">${escapeHtml(label)}</span>
       <div class="sa-card-body">
-        <div class="sa-card-title">${entry.title}</div>
-        <div class="sa-card-meta">${dateStr}${entry.ticker ? ' · '+entry.ticker : ''}</div>
+        <div class="sa-card-title">${escapeHtml(entry.title)}</div>
+        <div class="sa-card-meta">${escapeHtml(dateStr)}${entry.ticker ? ' · '+escapeHtml(entry.ticker) : ''}</div>
         <div class="sa-card-actions">
           <button class="sa-btn" onclick="loadSavedAnalysis(${JSON.stringify(entry).replace(/"/g,'&quot;')})">↩ Load</button>
           <button class="sa-del-btn" onclick="deleteSavedAnalysis(${entry.id})">✕ Delete</button>
@@ -5170,7 +5181,7 @@ function fetchBreadth(results){
     const ts=document.getElementById('mo-timestamp');
     if(ts)ts.textContent=`Market data as of ${new Date().toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true})} ET`;
   }catch(_){}
-  fetch('/api/quote/%5EVIX?range=1d',{credentials:'same-origin'}).then(r=>r.ok?r.json():null).catch(()=>null).then(d=>{
+  fetch('/api/quote/%5EVIX?range=1d&preview=1',{credentials:'same-origin'}).then(r=>r.ok?r.json():null).catch(()=>null).then(d=>{
     const v=d?.chart?.result?.[0]?.meta?.regularMarketPrice;
     if(v){
       const el=document.getElementById('mo-vix'),sub=document.getElementById('mo-vix-sub');
@@ -5266,7 +5277,7 @@ async function loadFeaturedGrid() {
   // Fetch all tickers in parallel
   const results = await Promise.allSettled(
     FEATURED_TICKERS.map(t =>
-      fetch(`/api/quote/${t}?range=1d`, { credentials:'same-origin' })
+      fetch(`/api/quote/${t}?range=1d&preview=1`, { credentials:'same-origin' })
         .then(r => r.ok ? r.json() : null)
         .catch(() => null)
     )
@@ -5713,7 +5724,7 @@ async function runCompare() {
   try {
     const [results, analystArr] = await Promise.all([
       Promise.all(tickers.map(t=>yahooFetch(t,'1y'))),
-      Promise.all(tickers.map(t=>fetch('/api/analyst/'+encodeURIComponent(t),{credentials:'same-origin'}).then(r=>r.json()).catch(()=>({}))))
+      Promise.all(tickers.map(t=>proAwareFetch('/api/analyst/'+encodeURIComponent(t),'compare').then(r=>r.json()).catch(()=>({}))))
     ]);
     buildCompareTable(tickers, results, analystArr);
     buildPerfChart(tickers, results);
@@ -6140,9 +6151,9 @@ async function renderNews(ticker, name) {
       let cls = 'news-neu';
       if (item.sentiment === 'positive' || POS_WORDS.test(h)) cls = 'news-pos';
       else if (item.sentiment === 'negative' || NEG_WORDS.test(h)) cls = 'news-neg';
-      return `<a class="news-item ${cls}" href="${item.url}" target="_blank" rel="noopener">
-        <div class="news-headline">${h}</div>
-        <div class="news-meta">${item.source || ''} · ${item.datetime ? new Date(item.datetime * 1000).toLocaleDateString() : ''}</div>
+      return `<a class="news-item ${cls}" href="${escapeHtml(item.url)}" target="_blank" rel="noopener">
+        <div class="news-headline">${escapeHtml(h)}</div>
+        <div class="news-meta">${escapeHtml(item.source || '')} · ${item.datetime ? new Date(item.datetime * 1000).toLocaleDateString() : ''}</div>
       </a>`;
     }).join('');
   } catch(e) {
@@ -6298,8 +6309,8 @@ async function loadAdvMetrics(ticker) {
   if(error)   error.style.display='none';
   try {
     const [finRes, metRes] = await Promise.all([
-      fetch('/api/financials/' + ticker, {credentials:'same-origin'}),
-      fetch('/api/metrics/' + ticker, {credentials:'same-origin'}),
+      proAwareFetch('/api/financials/' + ticker, 'advmetrics'),
+      proAwareFetch('/api/metrics/' + ticker, 'advmetrics'),
     ]);
     const finData = await finRes.json();
     const metData = await metRes.json();
@@ -6381,7 +6392,7 @@ async function loadAdvMetrics(ticker) {
     if(cont) cont.innerHTML = html;
   } catch(e) {
     if(loading) loading.style.display='none';
-    if(error) { error.style.display='block'; error.textContent='Could not load metrics: '+e.message; }
+    handleSectionError(e, 'advmetrics', cont);
     console.error('advmetrics error', e);
   }
 }
@@ -6700,10 +6711,10 @@ async function loadSecFilings(ticker) {
   if(cont)    cont.style.display='none';
 
   try {
-    const r = await fetch('/api/sec/' + encodeURIComponent(ticker), { credentials:'same-origin' });
+    const r = await proAwareFetch('/api/sec/' + encodeURIComponent(ticker), 'secfilings');
     const d = await r.json();
     if(loading) loading.style.display='none';
-    if (!r.ok || !d.filings) throw new Error(d.error || 'No filings found');
+    if (!d.filings) throw new Error(d.error || 'No filings found');
 
     if(entityLbl) entityLbl.textContent = d.entity + (d.cik ? '  ·  CIK ' + d.cik : '');
 
@@ -6715,7 +6726,7 @@ async function loadSecFilings(ticker) {
     if(cont) cont.style.display='block';
   } catch(e) {
     if(loading) loading.style.display='none';
-    if(errEl)   { errEl.textContent = 'Could not load SEC filings: ' + e.message; errEl.style.display='block'; }
+    handleSectionError(e, 'secfilings', errEl || cont);
   }
 }
 

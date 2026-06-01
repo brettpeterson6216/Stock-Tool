@@ -1,11 +1,12 @@
 {
   "name": "implied-lens",
   "version": "1.0.0",
-  "description": "Implied Lens — institutional-grade stock analysis platform (Node + Express + Turso + bcryptjs).",
+  "description": "Implied Lens \u2014 institutional-grade stock analysis platform (Node + Express + Turso + bcryptjs).",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "check": "node --check server.js && node --check routes/auth.js && node --check routes/billing.js && node --check routes/market-data.js && node --check routes/financials.js && node --check lib/config.js && node --check lib/db.js && node --check lib/email.js && node --check lib/plan.js && echo \"All files OK\""
   },
   "dependencies": {
     "@libsql/client": "^0.14.0",

@@ -13,6 +13,12 @@ const { getEffectivePlan, FREE_DAILY_LIMIT, GUEST_DAILY_LIMIT } = require("../li
 const { sendEmail }        = require("../lib/email");
 const { BCRYPT_ROUNDS, APP_URL, ADMIN_SECRET } = require("../lib/config");
 
+// Fail fast if ADMIN_SECRET is missing in production
+if (process.env.NODE_ENV === "production" && !ADMIN_SECRET) {
+  console.error("[config] FATAL: ADMIN_SECRET not set in production. Refusing to start.");
+  process.exit(1);
+}
+
 const router = express.Router();
 
 // ---- Rate limiter — applied only to mutation/auth endpoints ----
@@ -129,21 +135,27 @@ router.get("/auth/me", async (req, res) => {
 // ============================================================
 //  Admin — grant/revoke Pro without Stripe
 // ============================================================
-router.post("/admin/grant-pro", async (req, res) => {
-  const secret = req.headers["x-admin-secret"] || req.body?.secret;
-  if (!secret || secret !== ADMIN_SECRET) return res.status(403).json({ error: "Forbidden" });
+router.post("/admin/grant-pro", authLimiter, async (req, res) => {
+  // Secret must come via header only — never accepted from request body
+  const secret = req.headers["x-admin-secret"];
+  if (!secret || !ADMIN_SECRET || secret !== ADMIN_SECRET) {
+    console.warn("[admin] grant-pro rejected — bad or missing secret from IP", req.ip);
+    return res.status(403).json({ error: "Forbidden" });
+  }
 
   const { email, revoke } = req.body || {};
   if (!email) return res.status(400).json({ error: "email required" });
+  const action = revoke ? "revoked" : "granted";
   try {
     if (revoke) {
       await db.execute({ sql: "UPDATE users SET plan = 'free', trial_ends_at = NULL WHERE email = ?", args: [email.toLowerCase()] });
-      return res.json({ ok: true, action: "revoked", email });
     } else {
       await db.execute({ sql: "UPDATE users SET plan = 'pro', trial_ends_at = NULL WHERE email = ?", args: [email.toLowerCase()] });
-      return res.json({ ok: true, action: "granted", email });
     }
+    console.log(`[admin] Pro ${action} for ${email} by ${req.ip} at ${new Date().toISOString()}`);
+    return res.json({ ok: true, action, email });
   } catch (err) {
+    console.error("[admin] grant-pro db error:", err.message);
     return res.status(500).json({ error: err.message });
   }
 });
