@@ -1847,7 +1847,7 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
       <h2 class="sec-h2">Start free. Upgrade when you're ready.</h2>
       <p class="sec-sub">No Bloomberg fees. No hidden paywalls. Professional tools at a price that makes sense.</p>
       <div class="pricing-grid">
-        <div class="pricing-card"><div class="pricing-tier">Starter</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">0</span><span class="p-per">/month</span></div><p class="p-desc">For curious investors exploring the platform.</p><ul class="p-features"><li>5 stock analyses per day</li><li>Live price &amp; key metrics</li><li>Price chart with MA overlays</li><li>RSI &amp; MACD indicators</li><li>3-scenario projection model</li></ul><button class="btn-plan btn-plan-dark" onclick="openModal()">Get started free</button></div>
+        <div class="pricing-card"><div class="pricing-tier">Starter</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">0</span><span class="p-per">/month</span></div><p class="p-desc">For curious investors exploring the platform.</p><ul class="p-features"><li>5 stock analyses per day</li><li>Live price &amp; key metrics</li><li>Price chart with MA overlays</li><li>RSI &amp; MACD indicators</li><li>3-scenario projection model</li><li>Cloud-saved analyses (sync across devices)</li></ul><button class="btn-plan btn-plan-dark" onclick="openModal()">Get started free</button></div>
         <div class="pricing-card featured"><div class="pricing-pop">Most Popular</div><div class="pricing-tier">Pro</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">7.99</span><span class="p-per">/month</span></div><p class="p-desc" style="font-size:.8rem;opacity:.7;">or $59.99/year &mdash; save 37%</p><p class="p-desc">For serious investors who research every day.</p><ul class="p-features"><li>Unlimited stock analyses</li><li>DCF intrinsic value model</li><li>Advanced projection (6 inputs)</li><li>4-stock side-by-side comparison</li><li>Full stock screener</li><li>PDF report export</li></ul><button class="btn-plan btn-plan-gold" id="pricing-pro-btn" onclick="showUpgradeModal()">Start 7-day free trial &rarr;</button></div>
         <div class="pricing-card" style="position:relative;"><div class="save-badge">SAVE 37%</div><div class="pricing-tier">Pro Annual</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">59.99</span><span class="p-per">/year</span></div><p class="p-desc" style="font-size:.8rem;opacity:.7;">just $5/month</p><p class="p-desc">Everything in Pro, billed once a year.</p><ul class="p-features"><li>Unlimited stock analyses</li><li>DCF intrinsic value model</li><li>4-stock comparison</li><li>Full stock screener</li><li>PDF report export</li></ul><button class="btn-plan btn-plan-gold" onclick="showUpgradeModal(true)">Start 7-day free trial &rarr;</button></div>
       </div>
@@ -2376,8 +2376,8 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
               <div id="sa-guest-banner" style="display:none;background:rgba(200,136,42,.08);border:1px solid rgba(200,136,42,.2);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:.78rem;color:var(--ink3);">
   <strong>You're not signed in.</strong> Saved analyses are stored locally on this device. <a href="/signup" style="color:var(--gold);font-weight:600;">Create a free account</a> to sync across devices.
 </div>
-<div id="sa-sync-banner" style="display:none;background:rgba(200,136,42,.08);border:1px solid rgba(200,136,42,.2);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:.78rem;color:var(--ink3);">
-  <strong>Free plan:</strong> Analyses saved locally. <a href="#" onclick="showUpgradeModal();return false;" style="color:var(--gold);font-weight:600;">Upgrade to Pro</a> to sync across devices.
+<div id="sa-sync-banner" style="display:none;background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.18);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:.78rem;color:var(--ink3);">
+  <span style="color:#4ade80;font-weight:600;">✓ Signed in</span> — your saved analyses sync across devices automatically.
 </div>
 <div id="sa-list"></div>
               <div id="sa-empty" style="text-align:center;padding:2rem 0;color:var(--text5);font-size:.82rem;display:none;">
@@ -3738,7 +3738,7 @@ const S = {
 const COLORS = ['#D4972E','#4a9fd4','#4ade80','#f87171'];
 // Keep this list in sync with the requirePro-gated API routes in routes/financials.js
 // and routes/market-data.js (screener).
-const PRO_SECTIONS = ['financials','advmetrics','projection','dcf','screener','reports','adveducation',
+const PRO_SECTIONS = ['financials','advmetrics','projection','dcf','screener','adveducation',
                       'earnings','secfilings','institutional','analyst','darkpool'];
 
 function isPro() { return S.userPlan === 'pro' || S.userPlan === 'trial'; }
@@ -3762,7 +3762,7 @@ const PRO_GATE_MSGS = {
   projection:   { icon:'🔭', title:'Unlock Advanced Projection',    sub:'6-input scenario modelling: revenue growth, margins, multiples, and more.' },
   dcf:          { icon:'🧮', title:'Unlock DCF Valuation',          sub:'Discounted cash flow model to find intrinsic value vs current market price.' },
   screener:     { icon:'🔍', title:'Unlock Full Market Screener',   sub:'Filter 200+ stocks by sector, P/E, momentum, market cap, and 15+ metrics.' },
-  reports:      { icon:'🔖', title:'Cloud-Sync Saved Analyses',     sub:'Pro users get automatic cloud sync across all devices.' },
+  // reports: removed — cloud saves are free for all registered users
   adveducation: { icon:'🎓', title:'Unlock Advanced Education',     sub:'In-depth guides on DCF, options, technical analysis, and portfolio theory.' },
 };
 
@@ -4102,7 +4102,7 @@ function renderSavedAnalyses() {
   const guestBanner = document.getElementById('sa-guest-banner');
   const syncBanner  = document.getElementById('sa-sync-banner');
   if (guestBanner) guestBanner.style.display = !S.loggedIn ? 'block' : 'none';
-  if (syncBanner)  syncBanner.style.display  = S.loggedIn && !isPro() ? 'block' : 'none';
+  if (syncBanner)  syncBanner.style.display  = S.loggedIn ? 'block' : 'none';
 
   let all = getSavedAnalyses();
   if (_savedTypeFilter !== 'ALL') all = all.filter(a => a.type === _savedTypeFilter);
