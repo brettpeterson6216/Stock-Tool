@@ -215,6 +215,17 @@ app.get("/blog", (_req, res) => res.send(`<!DOCTYPE html><html lang="en"><head>
   </div>
 </body></html>`));
 
+// ============================================================
+//  CSRF token endpoint — returns (or creates) per-session token
+// ============================================================
+const { getOrCreateToken } = require("./lib/csrf");
+app.get("/api/csrf", (req, res) => {
+  // Ensure a session exists before issuing a token
+  if (!req.session) return res.status(500).json({ error: "Session unavailable." });
+  const token = getOrCreateToken(req);
+  res.json({ token });
+});
+
 // SPA catch-all — must be last
 app.get("*", (_req, res) => res.sendFile(path.join(__dirname, "index.html")));
 

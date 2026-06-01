@@ -12,6 +12,7 @@ const { db }               = require("../lib/db");
 const { getEffectivePlan, FREE_DAILY_LIMIT, GUEST_DAILY_LIMIT } = require("../lib/plan");
 const { sendEmail }        = require("../lib/email");
 const { BCRYPT_ROUNDS, APP_URL, ADMIN_SECRET } = require("../lib/config");
+const { validateCsrf } = require("../lib/csrf");
 
 // Fail fast if ADMIN_SECRET is missing in production
 if (process.env.NODE_ENV === "production" && !ADMIN_SECRET) {
@@ -110,7 +111,7 @@ router.post("/auth/login",             authLimiter, async (req, res) => {
   }
 });
 
-router.post("/auth/logout", (req, res) => {
+router.post("/auth/logout", validateCsrf, (req, res) => {
   req.session.destroy(() => {
     res.clearCookie("il.sid");
     res.json({ ok: true });
@@ -135,7 +136,7 @@ router.get("/auth/me", async (req, res) => {
 // ============================================================
 //  Admin — grant/revoke Pro without Stripe
 // ============================================================
-router.post("/admin/grant-pro", authLimiter, async (req, res) => {
+router.post("/admin/grant-pro", authLimiter, validateCsrf, async (req, res) => {
   // Secret must come via header only — never accepted from request body
   const secret = req.headers["x-admin-secret"];
   if (!secret || !ADMIN_SECRET || secret !== ADMIN_SECRET) {
@@ -177,7 +178,7 @@ router.get("/saves", async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-router.post("/saves", async (req, res) => {
+router.post("/saves", validateCsrf, async (req, res) => {
   if (!req.session.userId) return res.status(401).json({ error: "Not logged in" });
   const { ticker, type, label, data } = req.body || {};
   if (!ticker || !data) return res.status(400).json({ error: "ticker and data required" });
@@ -190,7 +191,7 @@ router.post("/saves", async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-router.delete("/saves/:id", async (req, res) => {
+router.delete("/saves/:id", validateCsrf, async (req, res) => {
   if (!req.session.userId) return res.status(401).json({ error: "Not logged in" });
   try {
     await db.execute({ sql: "DELETE FROM saved_analyses WHERE id=? AND user_id=?", args: [req.params.id, req.session.userId] });
@@ -198,7 +199,7 @@ router.delete("/saves/:id", async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-router.delete("/saves", async (req, res) => {
+router.delete("/saves", validateCsrf, async (req, res) => {
   if (!req.session.userId) return res.status(401).json({ error: "Not logged in" });
   try {
     await db.execute({ sql: "DELETE FROM saved_analyses WHERE user_id=?", args: [req.session.userId] });
@@ -266,7 +267,7 @@ router.post("/auth/reset-password",    authLimiter, async (req, res) => {
 // ============================================================
 //  Change username / password (logged-in user)
 // ============================================================
-router.post("/auth/change-username",   authLimiter, async (req, res) => {
+router.post("/auth/change-username",   authLimiter, validateCsrf, async (req, res) => {
   if (!req.session.userId) return res.status(401).json({ error: "Not logged in." });
   const { username } = req.body;
   if (!username || username.length < 3) return res.status(400).json({ error: "Username must be at least 3 characters." });
@@ -285,7 +286,7 @@ router.post("/auth/change-username",   authLimiter, async (req, res) => {
   }
 });
 
-router.post("/auth/change-password",   authLimiter, async (req, res) => {
+router.post("/auth/change-password",   authLimiter, validateCsrf, async (req, res) => {
   if (!req.session.userId) return res.status(401).json({ error: "Not logged in." });
   const { currentPassword, newPassword } = req.body;
   if (!currentPassword || !newPassword || newPassword.length < 8)

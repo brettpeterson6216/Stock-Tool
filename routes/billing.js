@@ -5,6 +5,7 @@ const express = require("express");
 const Stripe  = require("stripe");
 
 const { db }                                                    = require("../lib/db");
+const { validateCsrf } = require("../lib/csrf");
 const { STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET,
         STRIPE_PRICE_MONTHLY, STRIPE_PRICE_ANNUAL, APP_URL }   = require("../lib/config");
 
@@ -103,9 +104,11 @@ router.post("/stripe/webhook", async (req, res) => {
         await db.execute({ sql: "UPDATE users SET plan='free' WHERE id=?", args: [r.rows[0].id] });
         break;
       }
+      default:
+        console.log(`[stripe] unhandled webhook event: ${event.type}`);
     }
   } catch (err) {
-    console.error("Webhook handler error:", err);
+    console.error(`[stripe] webhook handler error on event ${event.type}:`, err);
   }
 
   res.json({ received: true });

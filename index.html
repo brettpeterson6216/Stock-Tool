@@ -1357,8 +1357,13 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
     const $acctLogout  = document.getElementById('nav-acct-logout');
 
     try {
-      const r = await fetch('/api/auth/me', { credentials: 'same-origin' });
-      const { user } = await r.json();
+      const [meRes, csrfRes] = await Promise.all([
+        fetch('/api/auth/me', { credentials: 'same-origin' }),
+        fetch('/api/csrf',    { credentials: 'same-origin' }),
+      ]);
+      const { user } = await meRes.json();
+      const csrfData = await csrfRes.json().catch(() => ({}));
+      if (typeof S !== 'undefined' && csrfData.token) S.csrfToken = csrfData.token;
       if (user) {
         // Hide login / signup buttons
         $login.style.display  = 'none';
@@ -1460,7 +1465,7 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
     if ($acctLogout) {
       $acctLogout.addEventListener('click', async (e) => {
         e.preventDefault();
-        await fetch('/api/auth/logout', { method:'POST', credentials:'same-origin' });
+        await fetch('/api/auth/logout', { method:'POST', credentials:'same-origin', headers:{'X-CSRF-Token': S.csrfToken||''} });
         window.location.href = '/login';
       });
     }
@@ -3728,6 +3733,7 @@ const S = {
   loggedIn: false,
   trialEndsAt: null,
   analystTarget: null,  // { mean, high, low } set by loadAnalyst()
+  csrfToken: null,      // fetched from GET /api/csrf on page load
 };
 const COLORS = ['#D4972E','#4a9fd4','#4ade80','#f87171'];
 // Keep this list in sync with the requirePro-gated API routes in routes/financials.js
@@ -4035,7 +4041,7 @@ function saveAnalysis(type) {
   if (S.loggedIn) {
     fetch('/api/saves', {
       method: 'POST', credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': S.csrfToken||'' },
       body: JSON.stringify({ ticker: entry.ticker || S.ticker, type: entry.type, label: entry.title, data: entry })
     }).catch(() => {});
   }
@@ -4060,7 +4066,7 @@ function deleteSavedAnalysis(id) {
   renderSavedAnalyses();
   // Also delete from DB if it has a DB id
   if (entry && entry._dbId) {
-    fetch('/api/saves/' + entry._dbId, { method:'DELETE', credentials:'same-origin' }).catch(() => {});
+    fetch('/api/saves/' + entry._dbId, { method:'DELETE', credentials:'same-origin', headers:{'X-CSRF-Token': S.csrfToken||''} }).catch(() => {});
   }
 }
 
@@ -4068,7 +4074,7 @@ function clearAllSaved() {
   if (!confirm('Clear all saved analyses? This cannot be undone.')) return;
   putSavedAnalyses([]);
   renderSavedAnalyses();
-  fetch('/api/saves', { method:'DELETE', credentials:'same-origin' }).catch(() => {});
+  fetch('/api/saves', { method:'DELETE', credentials:'same-origin', headers:{'X-CSRF-Token': S.csrfToken||''} }).catch(() => {});
 }
 
 function loadSavedAnalysis(entry) {
@@ -4217,7 +4223,7 @@ async function submitUsernameChange() {
   try {
     const r = await fetch('/api/auth/change-username', {
       method:'POST', credentials:'same-origin',
-      headers:{'Content-Type':'application/json'},
+      headers:{'Content-Type':'application/json','X-CSRF-Token': S.csrfToken||''},
       body: JSON.stringify({ username: val }),
     });
     const data = await r.json();
@@ -4249,7 +4255,7 @@ async function submitPasswordChange() {
   try {
     const r = await fetch('/api/auth/change-password', {
       method:'POST', credentials:'same-origin',
-      headers:{'Content-Type':'application/json'},
+      headers:{'Content-Type':'application/json','X-CSRF-Token': S.csrfToken||''},
       body: JSON.stringify({ currentPassword:cur, newPassword:nw }),
     });
     const data = await r.json();
@@ -4266,7 +4272,7 @@ async function startTrial(annual) {
   try {
     const r = await fetch('/api/stripe/create-checkout', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': S.csrfToken||'' },
       credentials: 'same-origin',
       body: JSON.stringify({ annual: !!annual }),
     });
