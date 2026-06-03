@@ -3621,24 +3621,71 @@ html[data-theme="dark"] #am-username-msg { color: var(--text3) !important; }
    PRO GATE CARD  — contextual upgrade prompt
 ══════════════════════════════════════════════════════ */
 .pro-gate-card {
-  display: flex; flex-direction: column; align-items: center;
-  text-align: center; padding: 2.5rem 2rem;
-  max-width: 420px; margin: 2rem auto;
+  max-width: 520px; margin: 1.5rem auto;
   background: var(--card);
-  border: 1px solid rgba(200,136,42,.25);
-  border-radius: 14px;
-  box-shadow: 0 4px 24px rgba(0,0,0,.06);
+  border: 1px solid rgba(200,136,42,.28);
+  border-radius: 16px; overflow: hidden;
+  box-shadow: 0 2px 20px rgba(0,0,0,.09);
 }
-.pgc-icon { font-size: 2.4rem; margin-bottom: .75rem; }
-.pgc-title { font-family: var(--serif); font-size: 1.15rem; font-weight: 600; color: var(--ink); margin-bottom: .5rem; }
-.pgc-sub { font-size: .82rem; color: var(--ink4); line-height: 1.6; margin-bottom: 1.5rem; max-width: 320px; }
+/* ── Preview strip (blurred sample data) ── */
+.pgc-preview {
+  position: relative; padding: .9rem 1rem .6rem;
+  background: var(--bg); border-bottom: 1px solid var(--border2);
+  max-height: 130px; overflow: hidden;
+}
+.pgc-preview-blur { filter: blur(3px); pointer-events: none; user-select: none; opacity: .55; }
+.pgc-preview-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, transparent 10%, var(--card) 90%);
+}
+.pgc-preview-tag {
+  position: absolute; top: 7px; right: 9px;
+  font-size: .58rem; color: var(--ink5); letter-spacing: .04em;
+  background: var(--bg2); border: 1px solid var(--border2);
+  border-radius: 4px; padding: 2px 7px;
+}
+/* ── Body ── */
+.pgc-body { padding: 1.4rem 1.75rem 1.35rem; text-align: center; }
+.pgc-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: linear-gradient(135deg, var(--gold) 0%, #b87c10 100%);
+  color: #fff; font-size: .63rem; font-weight: 700;
+  letter-spacing: .07em; text-transform: uppercase;
+  padding: 3px 11px; border-radius: 100px; margin-bottom: .8rem;
+}
+.pgc-title {
+  font-family: var(--serif); font-size: 1.18rem; font-weight: 700;
+  color: var(--ink); margin-bottom: .9rem; line-height: 1.35;
+}
+.pgc-bullets {
+  list-style: none; padding: 0; margin: 0 0 1.35rem; text-align: left;
+}
+.pgc-bullets li {
+  font-size: .8rem; color: var(--ink3); line-height: 1.55;
+  padding: .2rem 0 .2rem 1.5rem; position: relative;
+}
+.pgc-bullets li::before {
+  content: "✓"; color: var(--gold); font-weight: 800;
+  position: absolute; left: 0; top: .2rem;
+}
 .pgc-btn {
-  background: var(--gold); color: #fff; border: none; border-radius: 8px;
-  padding: .7rem 1.6rem; font-size: .9rem; font-weight: 600; cursor: pointer;
-  transition: background .15s;
+  display: block; width: 100%; background: var(--gold); color: #fff;
+  border: none; border-radius: 9px; padding: .82rem 1.6rem;
+  font-size: .92rem; font-weight: 700; cursor: pointer;
+  transition: background .15s, transform .1s; letter-spacing: .01em;
 }
-.pgc-btn:hover { background: var(--gold-d); }
-.pgc-note { font-size: .68rem; color: var(--ink5); margin-top: .75rem; }
+.pgc-btn:hover { background: var(--gold-d); transform: translateY(-1px); }
+.pgc-btn:active { transform: translateY(0); }
+.pgc-note { font-size: .68rem; color: var(--ink5); margin-top: .7rem; }
+/* ── Mini preview components ── */
+.pgc-tbl { width: 100%; border-collapse: collapse; font-size: .71rem; }
+.pgc-tbl th { color: var(--ink5); font-weight: 500; text-align: left; padding: 3px 6px 4px; border-bottom: 1px solid var(--border2); }
+.pgc-tbl td { color: var(--ink3); padding: 4px 6px; border-bottom: 1px solid rgba(200,200,200,.12); font-family: var(--mono); }
+.pgc-tbl td:first-child { font-family: var(--sans); color: var(--ink4); }
+.pgc-row { display: flex; justify-content: space-between; align-items: center; padding: 3px 2px; font-size: .71rem; border-bottom: 1px solid rgba(200,200,200,.12); }
+.pgc-row:last-child { border-bottom: none; }
+.pgc-row-label { color: var(--ink5); }
+.pgc-row-val { font-family: var(--mono); color: var(--ink); }
 
 /* ── Section loading / error states ── */
 .sec-state-wrap {
@@ -3674,8 +3721,11 @@ html[data-theme="dark"] #am-username-msg { color: var(--text3) !important; }
   .app-content { margin-left: 0 !important; }
 
   /* Pro gate card on mobile */
-  .pro-gate-card { padding: 1.5rem 1.2rem; margin: 1rem auto; }
+  .pro-gate-card { max-width: 100%; margin: .75rem 0; border-radius: 12px; }
+  .pgc-body { padding: 1.1rem 1.1rem 1rem; }
   .pgc-title { font-size: 1rem; }
+  .pgc-bullets li { font-size: .76rem; }
+  .pgc-btn { font-size: .85rem; padding: .75rem; }
 
   /* Upgrade modal on mobile */
   /* All .modal dialogs on mobile: full-width, scrollable, less padding */
@@ -3757,29 +3807,201 @@ function isPro() { return S.userPlan === 'pro' || S.userPlan === 'trial'; }
    proAwareFetch(url,id)    — fetch that throws typed errors
    handleSectionError(e,id,el) — routes errors to right UI
 ══════════════════════════════════════════════════════ */
-const PRO_GATE_MSGS = {
-  financials:   { icon:'📊', title:'Unlock Financial Statements',   sub:'Full income statements, balance sheets &amp; cash flow from SEC EDGAR.' },
-  advmetrics:   { icon:'📈', title:'Unlock Advanced Metrics',       sub:'Sharpe, Sortino, Alpha, Beta, VaR, and 20+ institutional-grade risk stats.' },
-  earnings:     { icon:'📅', title:'Unlock Earnings History',       sub:'EPS surprises, quarterly beats/misses, and revenue trends going back years.' },
-  secfilings:   { icon:'📄', title:'Unlock SEC Filings',            sub:'Browse 10-K, 10-Q, and 8-K filings direct from EDGAR. Never miss a disclosure.' },
-  institutional:{ icon:'🏛', title:'Unlock Institutional Holdings', sub:'See which funds own shares, position concentration, and recent changes.' },
-  analyst:      { icon:'🎯', title:'Unlock Analyst Price Targets',  sub:'Consensus targets, rating breakdowns, and history from Wall Street analysts.' },
-  darkpool:     { icon:'🌑', title:'Unlock Dark Pool Data',         sub:'OTC/dark-pool volume, block trades, and institutional order flow.' },
-  projection:   { icon:'🔭', title:'Unlock Advanced Projection',    sub:'6-input scenario modelling: revenue growth, margins, multiples, and more.' },
-  dcf:          { icon:'🧮', title:'Unlock DCF Valuation',          sub:'Discounted cash flow model to find intrinsic value vs current market price.' },
-  screener:     { icon:'🔍', title:'Unlock Full Market Screener',   sub:'Filter 200+ stocks by sector, P/E, momentum, market cap, and 15+ metrics.' },
-  // reports: removed — cloud saves are free for all registered users
-  adveducation: { icon:'🎓', title:'Unlock Advanced Education',     sub:'In-depth guides on DCF, options, technical analysis, and portfolio theory.' },
+/* ── Rich contextual Pro gate config ── */
+const PRO_GATE_CONFIG = {
+  financials: {
+    title: 'Full Financial Statements',
+    bullets: [
+      'Annual &amp; quarterly income statements — revenue, gross profit, net income',
+      'Balance sheet: assets, liabilities, and shareholder equity breakdown',
+      'Cash flow statement: operating, investing &amp; financing activities',
+      '5-year trend view to spot growth acceleration or deterioration early',
+    ],
+    preview: `<table class="pgc-tbl"><thead><tr><th>Income Statement</th><th>FY2023</th><th>FY2024</th></tr></thead><tbody>
+      <tr><td>Revenue</td><td>$383.3B</td><td>$391.0B</td></tr>
+      <tr><td>Gross Profit</td><td>$169.1B</td><td>$180.7B</td></tr>
+      <tr><td>Operating Income</td><td>$114.3B</td><td>$123.2B</td></tr>
+      <tr><td>Net Income</td><td>$97.0B</td><td>$93.7B</td></tr>
+      <tr><td>EPS (diluted)</td><td>$6.16</td><td>$6.11</td></tr>
+    </tbody></table>`,
+    previewLabel: 'AAPL FY2023–2024 · sample',
+  },
+  advmetrics: {
+    title: 'Advanced Risk &amp; Performance Metrics',
+    bullets: [
+      'Sharpe &amp; Sortino ratios, Alpha, Beta vs S&amp;P 500 benchmark',
+      'Value at Risk (VaR), Max Drawdown, and annualised volatility',
+      'Valuation history: P/E, P/B, P/S, EV/EBITDA trends over time',
+      'Identify over/undervalued conditions with full historical context',
+    ],
+    preview: `<div>
+      <div class="pgc-row"><span class="pgc-row-label">Sharpe Ratio (1Y)</span><span class="pgc-row-val">1.43</span></div>
+      <div class="pgc-row"><span class="pgc-row-label">Beta vs S&amp;P 500</span><span class="pgc-row-val">1.21</span></div>
+      <div class="pgc-row"><span class="pgc-row-label">Max Drawdown</span><span class="pgc-row-val">−18.2%</span></div>
+      <div class="pgc-row"><span class="pgc-row-label">Annualised Volatility</span><span class="pgc-row-val">22.4%</span></div>
+      <div class="pgc-row"><span class="pgc-row-label">P/E Ratio (TTM)</span><span class="pgc-row-val">28.4×</span></div>
+    </div>`,
+    previewLabel: 'AAPL · illustrative sample',
+  },
+  earnings: {
+    title: 'EPS History &amp; Beat/Miss Tracker',
+    bullets: [
+      'Quarterly EPS actuals vs Wall Street consensus estimates — every quarter',
+      'Beat/miss percentage and streak — how consistently it surprises',
+      'Revenue trend across the last 8+ reporting periods',
+      'Forward EPS estimates and analyst guidance revision history',
+    ],
+    preview: `<table class="pgc-tbl"><thead><tr><th>Quarter</th><th>Est. EPS</th><th>Act. EPS</th><th>Surprise</th></tr></thead><tbody>
+      <tr><td>Q1 FY25</td><td>$2.35</td><td>$2.40</td><td style="color:#4ade80">+2.1%</td></tr>
+      <tr><td>Q4 FY24</td><td>$1.60</td><td>$1.64</td><td style="color:#4ade80">+2.5%</td></tr>
+      <tr><td>Q3 FY24</td><td>$1.34</td><td>$1.40</td><td style="color:#4ade80">+4.5%</td></tr>
+      <tr><td>Q2 FY24</td><td>$1.50</td><td>$1.53</td><td style="color:#4ade80">+2.0%</td></tr>
+    </tbody></table>`,
+    previewLabel: 'AAPL recent quarters · sample',
+  },
+  secfilings: {
+    title: 'SEC EDGAR Filings — Direct Access',
+    bullets: [
+      'Annual reports (10-K): complete financials and business overview',
+      'Quarterly reports (10-Q): interim results every 3 months',
+      'Material event filings (8-K): immediate disclosure of major news',
+      'Proxy statements (DEF 14A): executive pay, board votes, governance',
+    ],
+    preview: `<table class="pgc-tbl"><tbody>
+      <tr><td>10-K</td><td>Annual Report</td><td>Nov 1, 2024</td></tr>
+      <tr><td>10-Q</td><td>Quarterly Report</td><td>Aug 2, 2024</td></tr>
+      <tr><td>8-K</td><td>Earnings Release</td><td>Aug 1, 2024</td></tr>
+      <tr><td>10-Q</td><td>Quarterly Report</td><td>May 3, 2024</td></tr>
+      <tr><td>DEF 14A</td><td>Proxy Statement</td><td>Jan 15, 2024</td></tr>
+    </tbody></table>`,
+    previewLabel: 'AAPL recent filings · sample',
+  },
+  institutional: {
+    title: 'Institutional Holdings &amp; Fund Activity',
+    bullets: [
+      'Top institutional holders with exact share counts and % of float owned',
+      'Recent additions, reductions, and newly opened positions each quarter',
+      'Total institutional ownership % and concentration risk at a glance',
+      'Dark pool OTC volume paired for a complete smart-money picture',
+    ],
+    preview: `<table class="pgc-tbl"><thead><tr><th>Institution</th><th>Shares</th><th>% Float</th></tr></thead><tbody>
+      <tr><td>Vanguard Group</td><td>1.29B</td><td>8.2%</td></tr>
+      <tr><td>BlackRock</td><td>1.02B</td><td>6.5%</td></tr>
+      <tr><td>Berkshire Hathaway</td><td>789M</td><td>5.0%</td></tr>
+      <tr><td>State Street</td><td>598M</td><td>3.8%</td></tr>
+    </tbody></table>`,
+    previewLabel: 'AAPL top holders · sample',
+  },
+  analyst: {
+    title: 'Analyst Price Targets &amp; Ratings',
+    bullets: [
+      'Consensus price target with upside/downside % from today\'s price',
+      'Buy / Hold / Sell breakdown across all covering Wall Street analysts',
+      'Individual firm targets — Goldman, Morgan Stanley, JPMorgan, and more',
+      'Historical target trend — where analysts stood 3, 6, and 12 months ago',
+    ],
+    preview: null,
+  },
+  darkpool: {
+    title: 'Dark Pool &amp; Institutional Order Flow',
+    bullets: [
+      'OTC dark pool volume as a % of total daily trading — updated daily',
+      'Large block trade alerts: institutions moving serious size',
+      'Dark pool ratio trend — a rising ratio signals institutional accumulation',
+      'Combine with holdings data for the fullest smart-money picture available',
+    ],
+    preview: null,
+  },
+  projection: {
+    title: '6-Input Advanced Projection Builder',
+    bullets: [
+      'Model bull, base, and bear price scenarios simultaneously',
+      'Six inputs: revenue growth, operating margin, P/E target, share count, and more',
+      '5-year forward price projection with annualised return estimates',
+      'Save projections and revisit them as the story changes quarter to quarter',
+    ],
+    preview: null,
+  },
+  dcf: {
+    title: 'DCF Intrinsic Value Model',
+    bullets: [
+      'Set your own revenue growth rate, margin, and discount rate (WACC)',
+      'Calculates fair value per share using discounted free cash flows',
+      'Shows whether the stock is over or undervalued at today\'s price',
+      'Sensitivity table: see exactly how fair value shifts with each assumption',
+    ],
+    preview: `<div style="text-align:center;padding:.4rem 0 .2rem;">
+      <div style="font-size:.63rem;color:var(--ink5);letter-spacing:.06em;text-transform:uppercase;margin-bottom:.3rem">Intrinsic Value Estimate</div>
+      <div style="font-size:1.9rem;font-family:var(--serif);color:var(--gold);font-weight:700;line-height:1">$198.40</div>
+      <div style="font-size:.7rem;color:var(--ink4);margin-top:.25rem">vs market $219.86 · <span style="color:#f87171">−9.8% overvalued</span></div>
+      <div style="margin-top:.65rem;display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;font-size:.67rem">
+        <div style="background:var(--bg2);border-radius:5px;padding:4px 3px"><div style="color:var(--ink5)">Growth</div><div style="color:var(--ink)">8.0%</div></div>
+        <div style="background:var(--bg2);border-radius:5px;padding:4px 3px"><div style="color:var(--ink5)">Margin</div><div style="color:var(--ink)">25%</div></div>
+        <div style="background:var(--bg2);border-radius:5px;padding:4px 3px"><div style="color:var(--ink5)">WACC</div><div style="color:var(--ink)">9.0%</div></div>
+      </div>
+    </div>`,
+    previewLabel: 'AAPL · illustrative DCF sample',
+  },
+  screener: {
+    title: 'Full Market Screener — 200+ Stocks',
+    bullets: [
+      'Filter by sector, market cap, P/E, P/B, beta, momentum, and 15+ metrics',
+      'Sort by revenue growth, dividend yield, or 1-year price performance',
+      'Click any result to instantly load the full stock analysis',
+      'Updated daily — always fresh fundamentals, never stale snapshots',
+    ],
+    preview: `<table class="pgc-tbl"><thead><tr><th>Stock</th><th>Sector</th><th>P/E</th><th>1Y Chg</th></tr></thead><tbody>
+      <tr><td>AAPL</td><td>Technology</td><td>28.4×</td><td style="color:#4ade80">+22%</td></tr>
+      <tr><td>MSFT</td><td>Technology</td><td>34.1×</td><td style="color:#4ade80">+18%</td></tr>
+      <tr><td>NVDA</td><td>Semiconductors</td><td>65.2×</td><td style="color:#4ade80">+82%</td></tr>
+      <tr><td>JPM</td><td>Financials</td><td>12.3×</td><td style="color:#4ade80">+41%</td></tr>
+    </tbody></table>`,
+    previewLabel: 'Sample screener results',
+  },
+  adveducation: {
+    title: 'Advanced Investor Education',
+    bullets: [
+      'Detailed DCF &amp; relative valuation modelling guides with worked examples',
+      'Options strategies: covered calls, protective puts, vertical spreads',
+      'Advanced technical analysis: volume profile, market structure, Fibonacci',
+      'Portfolio theory: correlation, position sizing, and risk-adjusted returns',
+    ],
+    preview: null,
+  },
 };
 
 function sectionProGateHtml(id) {
-  const m = PRO_GATE_MSGS[id] || { icon:'⭐', title:'Pro Feature', sub:'Upgrade to Pro to unlock this section.' };
+  const cfg = PRO_GATE_CONFIG[id];
+  const ticker = (S && S.ticker) ? S.ticker : '';
+  const titleSuffix = ticker ? ' — ' + ticker : '';
+
+  if (!cfg) {
+    return `<div class="pro-gate-card"><div class="pgc-body">
+      <div class="pgc-badge">⚡ Pro Feature</div>
+      <div class="pgc-title">Pro Feature${titleSuffix}</div>
+      <button class="pgc-btn js-pgc-upgrade">Start 7-day free trial →</button>
+      <div class="pgc-note">7-day free trial · Card required · Cancel anytime</div>
+    </div></div>`;
+  }
+
+  const previewHtml = cfg.preview ? `
+    <div class="pgc-preview">
+      <div class="pgc-preview-blur">${cfg.preview}</div>
+      <div class="pgc-preview-overlay"></div>
+      ${cfg.previewLabel ? `<div class="pgc-preview-tag">${cfg.previewLabel}</div>` : ''}
+    </div>` : '';
+
   return `<div class="pro-gate-card">
-    <div class="pgc-icon">${m.icon}</div>
-    <div class="pgc-title">${m.title}</div>
-    <div class="pgc-sub">${m.sub}</div>
-    <button class="pgc-btn" onclick="showUpgradeModal()">Start 7-day free trial →</button>
-    <div class="pgc-note">7-day free trial · Card required · Cancel anytime</div>
+    ${previewHtml}
+    <div class="pgc-body">
+      <div class="pgc-badge">⚡ Pro Feature</div>
+      <div class="pgc-title">${cfg.title}${titleSuffix}</div>
+      <ul class="pgc-bullets">
+        ${cfg.bullets.map(b => `<li>${b}</li>`).join('\n        ')}
+      </ul>
+      <button class="pgc-btn js-pgc-upgrade">Start 7-day free trial →</button>
+      <div class="pgc-note">7-day free trial · Card required · Cancel anytime</div>
+    </div>
   </div>`;
 }
 
@@ -3806,10 +4028,31 @@ function handleSectionError(e, sectionId, container) {
     container.innerHTML = sectionProGateHtml(sectionId);
     container.style.display = 'block';
   } else if (e.code === 'LOGIN_REQUIRED') {
-    container.innerHTML = `<div class="sec-state-wrap"><span>Please <a href="/login" style="color:var(--gold);font-weight:600;">sign in</a> to view this section.</span></div>`;
+    container.innerHTML = `<div class="pro-gate-card"><div class="pgc-body" style="padding:1.5rem 1.75rem">
+      <div class="pgc-badge" style="background:var(--ink2)">🔒 Sign in required</div>
+      <div class="pgc-title" style="font-size:1rem">Create a free account to continue</div>
+      <ul class="pgc-bullets">
+        <li>Free account: 5 analyses per day, price charts, projections</li>
+        <li>Cloud-saved analyses that sync across all your devices</li>
+        <li>Upgrade to Pro anytime for full access — no pressure</li>
+      </ul>
+      <a href="/signup" style="display:block;background:var(--ink);color:var(--cream);border-radius:9px;padding:.8rem 1.6rem;font-size:.9rem;font-weight:700;text-decoration:none;text-align:center;margin-bottom:.5rem;">Create free account →</a>
+      <div style="font-size:.75rem;color:var(--ink4);text-align:center">Already have an account? <a href="/login" style="color:var(--gold);font-weight:600;">Sign in</a></div>
+    </div></div>`;
     container.style.display = 'block';
   } else if (e.code === 'LIMIT_REACHED') {
-    container.innerHTML = `<div class="sec-state-wrap">Daily limit reached. <a href="#" onclick="showUpgradeModal();return false;" style="color:var(--gold);font-weight:600;">Upgrade to Pro</a> for unlimited access.</div>`;
+    container.innerHTML = `<div class="pro-gate-card"><div class="pgc-body">
+      <div class="pgc-badge">⚡ Daily limit reached</div>
+      <div class="pgc-title">You've used your 5 free analyses today</div>
+      <ul class="pgc-bullets">
+        <li>Unlimited stock analyses — no daily cap, ever</li>
+        <li>All Pro sections: Financials, DCF, Screener, SEC filings &amp; more</li>
+        <li>Advanced projections, institutional data, and analyst targets</li>
+        <li>Comes back tomorrow free, or unlock everything now</li>
+      </ul>
+      <button class="pgc-btn js-pgc-upgrade">Start 7-day free trial →</button>
+      <div class="pgc-note">7-day free trial · Card required · Cancel anytime</div>
+    </div></div>`;
     container.style.display = 'block';
   } else {
     container.innerHTML = sectionErrorHtml(e.message || 'Failed to load data');
@@ -6813,6 +7056,8 @@ document.addEventListener('click', function(e) {
   if (menu && menu.classList.contains('open') && !menu.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
     menu.classList.remove('open');
   }
+  // Pro gate upgrade CTAs (dynamically injected .js-pgc-upgrade buttons)
+  if (e.target.closest('.js-pgc-upgrade')) showUpgradeModal();
 });
 
 // ── Event delegation: saved analyses load/delete ──
