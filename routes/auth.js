@@ -13,6 +13,7 @@ const { getEffectivePlan, FREE_DAILY_LIMIT, GUEST_DAILY_LIMIT } = require("../li
 const { sendEmail }        = require("../lib/email");
 const { BCRYPT_ROUNDS, APP_URL, ADMIN_SECRET } = require("../lib/config");
 const { validateCsrf } = require("../lib/csrf");
+const { track }        = require("../lib/analytics");
 
 // Fail fast if ADMIN_SECRET is missing in production
 if (process.env.NODE_ENV === "production" && !ADMIN_SECRET) {
@@ -82,6 +83,8 @@ router.post("/auth/signup",           authLimiter, async (req, res) => {
     const userId  = Number(ins.lastInsertRowid);
     const userRow = await db.execute({ sql: "SELECT id, username, email, created_at FROM users WHERE id = ?", args: [userId] });
     req.session.userId = userId;
+    // Fire-and-forget analytics
+    track("signup_completed", { username, plan: "free" }, req.sessionID, userId).catch(() => {});
     return res.status(201).json({ user: userRow.rows[0] || null });
   } catch (err) {
     console.error("signup error:", err);
@@ -104,6 +107,7 @@ router.post("/auth/login",             authLimiter, async (req, res) => {
     if (!ok) return res.status(401).json({ error: "Incorrect password." });
 
     req.session.userId = Number(row.id);
+    track("login_completed", {}, req.sessionID, Number(row.id)).catch(() => {});
     return res.json({ user: { id: Number(row.id), username: row.username, email: row.email } });
   } catch (err) {
     console.error("login error:", err);

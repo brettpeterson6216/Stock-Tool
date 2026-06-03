@@ -6,6 +6,7 @@ const Stripe  = require("stripe");
 
 const { db }                                                    = require("../lib/db");
 const { validateCsrf } = require("../lib/csrf");
+const { track }        = require("../lib/analytics");
 const { STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET,
         STRIPE_PRICE_MONTHLY, STRIPE_PRICE_ANNUAL, APP_URL }   = require("../lib/config");
 
@@ -43,6 +44,8 @@ router.post("/stripe/create-checkout", async (req, res) => {
     }
 
     const checkoutSession = await stripe.checkout.sessions.create(params);
+    track("checkout_started", { annual: !!req.body.annual, plan: req.body.annual ? "annual" : "monthly" },
+          req.sessionID, req.session.userId).catch(() => {});
     res.json({ url: checkoutSession.url });
   } catch (err) {
     console.error("Stripe checkout error:", err);
@@ -77,6 +80,7 @@ router.post("/stripe/webhook", async (req, res) => {
           sql:  "UPDATE users SET plan=?, trial_ends_at=?, stripe_customer_id=?, stripe_subscription_id=? WHERE id=?",
           args: [plan, trialEnd, sess.customer, sess.subscription, userId],
         });
+        track("checkout_completed", { plan, trial: plan === "trial" }, null, Number(userId)).catch(() => {});
         break;
       }
       case "customer.subscription.updated": {

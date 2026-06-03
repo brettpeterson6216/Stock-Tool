@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>About — ImpliedLens</title>
+  <meta name="description" content="ImpliedLens is a professional-grade stock analysis platform built for self-directed investors. DCF valuation, financial statements, analyst data, and more.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Inter',sans-serif;background:#08090D;color:rgba(220,225,232,.9);min-height:100vh}
+    a{color:#C8882A;text-decoration:none}
+    a:hover{text-decoration:underline}
+    .top-bar{background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.06);padding:.85rem 2rem;display:flex;align-items:center;gap:1rem}
+    .logo{font-family:'Playfair Display',serif;font-size:1.3rem;color:#fff;text-decoration:none}
+    .logo em{color:#C8882A;font-style:italic}
+    .top-bar a.back{font-size:.8rem;color:rgba(220,225,232,.4);margin-left:auto}
+    .top-bar a.back:hover{color:#C8882A}
+    .hero{text-align:center;padding:4rem 2rem 3rem;max-width:680px;margin:0 auto}
+    .tagline{font-size:.8rem;color:rgba(220,225,232,.35);letter-spacing:.12em;text-transform:uppercase;margin-bottom:1.25rem}
+    h1{font-family:'Playfair Display',serif;font-size:2.4rem;color:#fff;line-height:1.25;margin-bottom:1.1rem}
+    h1 em{color:#C8882A;font-style:italic}
+    .hero-sub{font-size:1rem;color:rgba(220,225,232,.55);line-height:1.75;max-width:560px;margin:0 auto 2rem}
+    .cta-row{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;margin-bottom:1rem}
+    .btn-primary{display:inline-block;background:#C8882A;color:#08090D;padding:.7rem 1.6rem;border-radius:9px;font-size:.88rem;font-weight:700;transition:opacity .15s}
+    .btn-primary:hover{opacity:.85;text-decoration:none}
+    .btn-ghost{display:inline-block;border:1px solid rgba(200,136,42,.4);color:#C8882A;padding:.7rem 1.6rem;border-radius:9px;font-size:.88rem;font-weight:600;transition:all .15s}
+    .btn-ghost:hover{background:rgba(200,136,42,.08);text-decoration:none}
+    .features{max-width:780px;margin:0 auto;padding:0 2rem 3rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem}
+    .feat{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:1.25rem 1.4rem}
+    .feat-icon{font-size:1.4rem;margin-bottom:.6rem}
+    .feat-title{font-weight:600;font-size:.9rem;color:#fff;margin-bottom:.3rem}
+    .feat-desc{font-size:.8rem;color:rgba(220,225,232,.5);line-height:1.6}
+    .section{max-width:680px;margin:0 auto;padding:1rem 2rem 2.5rem;text-align:center}
+    h2{font-family:'Playfair Display',serif;font-size:1.5rem;color:#fff;margin-bottom:.75rem}
+    p{font-size:.92rem;color:rgba(220,225,232,.6);line-height:1.8;margin-bottom:1rem}
+    .socials{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;margin:1.5rem 0}
+    .soc-btn{display:inline-flex;align-items:center;gap:8px;padding:.6rem 1.3rem;border-radius:8px;border:1px solid rgba(200,136,42,.3);color:#C8882A;font-size:.82rem;font-weight:500;transition:all .18s}
+    .soc-btn:hover{background:rgba(200,136,42,.08);border-color:#C8882A;text-decoration:none}
+    footer{border-top:1px solid rgba(255,255,255,.07);padding:1.5rem 2rem;text-align:center;display:flex;gap:1.25rem;flex-wrap:wrap;justify-content:center;font-size:.78rem}
+    footer a{color:rgba(220,225,232,.35)}
+    footer a:hover{color:#C8882A}
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="/" class="logo">Implied<em>Lens</em></a>
+    <a href="/" class="back">← Back to the platform</a>
+  </div>
+
+  <div class="hero">
+    <div class="tagline">Stock Analysis Platform</div>
+    <h1>Built for the <em>self-directed</em> investor.</h1>
+    <p class="hero-sub">ImpliedLens gives you the tools professional analysts rely on — DCF valuation, financial statement analysis, SEC filings, earnings history, institutional data, and more — without the Bloomberg price tag.</p>
+    <div class="cta-row">
+      <a href="/signup" class="btn-primary">Start free →</a>
+      <a href="/" class="btn-ghost">Open the platform</a>
+    </div>
+  </div>
+
+  <div class="features">
+    <div class="feat">
+      <div class="feat-icon">📊</div>
+      <div class="feat-title">Deep financial analysis</div>
+      <div class="feat-desc">Income statements, balance sheets, cash flows, and 30+ calculated ratios from reported SEC data.</div>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">🧮</div>
+      <div class="feat-title">DCF valuation</div>
+      <div class="feat-desc">Customizable discounted cash flow models with live inputs pulled directly from filings.</div>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">🏛️</div>
+      <div class="feat-title">Primary-source data</div>
+      <div class="feat-desc">Every number traces to SEC EDGAR, Yahoo Finance, or Finnhub. Nothing fabricated or estimated.</div>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">🔍</div>
+      <div class="feat-title">Analyst consensus</div>
+      <div class="feat-desc">Price targets, recommendation breakdowns, earnings surprises, and estimate revisions.</div>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">🏦</div>
+      <div class="feat-title">Institutional footprints</div>
+      <div class="feat-desc">13F ownership data, dark pool prints, and insider transactions in one place.</div>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">🌐</div>
+      <div class="feat-title">Market overview</div>
+      <div class="feat-desc">Live indices, sector performance, top movers, and volatility data — all in the sidebar.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Follow along as we build.</h2>
+    <p>ImpliedLens is actively developed. New sections, screener filters, and analytical tools ship regularly. Follow us for updates and market commentary.</p>
+    <div class="socials">
+      <a href="https://x.com/ImpliedLens" target="_blank" rel="noopener" class="soc-btn">𝕏 @ImpliedLens</a>
+      <a href="https://instagram.com/ImpliedLens" target="_blank" rel="noopener" class="soc-btn">📸 @ImpliedLens</a>
+    </div>
+  </div>
+
+  <footer>
+    <a href="/privacy">Privacy Policy</a>
+    <a href="/terms">Terms of Service</a>
+    <a href="/data-sources">Data Sources</a>
+    <a href="/blog">Blog</a>
+    <a href="/">ImpliedLens</a>
+  </footer>
+</body>
+</html>

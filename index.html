@@ -1451,7 +1451,9 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
         if (window.location.search.includes('upgraded=1')) {
           if (typeof toast !== 'undefined') toast('Welcome to Pro! All features unlocked.', 'ok');
           history.replaceState(null, '', '/');
+          track('checkout_redirect', { source: 'stripe_success' });
         }
+        track('page_view', { path: window.location.pathname });
       }
     } catch (_) { /* server not running */ } finally {
       // Show Go Pro banner only for free/guest users
@@ -2525,11 +2527,11 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
     <div class="footer-inner">
       <div class="f-logo">Implied<em style="font-style:italic;color:var(--gold-d);">Lens</em></div>
       <div class="f-links">
-        <a href="#">Privacy Policy</a>
-        <a href="#">Terms of Service</a>
-        <a href="#">Disclaimer</a>
-        <a href="#">Contact</a>
-        <a href="#">Blog</a>
+        <a href="/privacy">Privacy Policy</a>
+        <a href="/terms">Terms of Service</a>
+        <a href="/data-sources">Data Sources</a>
+        <a href="/about">About</a>
+        <a href="/blog">Blog</a>
       </div>
       <div class="f-copy">© 2026 Implied Lens. Not financial advice.</div>
     </div>
@@ -3778,6 +3780,27 @@ html[data-theme="dark"] #am-username-msg { color: var(--text3) !important; }
 /* ══════════════════════════════════════════════════════
    STATE
 ══════════════════════════════════════════════════════ */
+
+/* ── Client analytics ─────────────────────────────────────────────────── */
+const _trackQueue = [];
+let _csrfForTrack = null;
+
+async function track(event, props = {}) {
+  try {
+    // Reuse the CSRF token already stored in session (fetched at page load)
+    if (!_csrfForTrack) {
+      const r = await fetch('/api/csrf');
+      if (r.ok) { const d = await r.json(); _csrfForTrack = d.token || null; }
+    }
+    await fetch('/api/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': _csrfForTrack || '' },
+      body: JSON.stringify({ event, properties: props }),
+      keepalive: true,
+    });
+  } catch (_) { /* never crash the caller */ }
+}
+
 const S = {
   ticker: null, data: null, range: '1y',
   charts: {},
@@ -4027,6 +4050,7 @@ function handleSectionError(e, sectionId, container) {
   if (e.code === 'PRO_REQUIRED') {
     container.innerHTML = sectionProGateHtml(sectionId);
     container.style.display = 'block';
+    track('pro_gate_viewed', { section: sectionId, ticker: S.ticker || null });
   } else if (e.code === 'LOGIN_REQUIRED') {
     container.innerHTML = `<div class="pro-gate-card"><div class="pgc-body" style="padding:1.5rem 1.75rem">
       <div class="pgc-badge" style="background:var(--ink2)">🔒 Sign in required</div>
@@ -4406,7 +4430,11 @@ function exportPDF() {
 
 // switchTab → now handled by toggleSection/openSection above
 
-function showUpgradeModal(annual) { document.getElementById('upgrade-modal-bg').classList.add('show'); if(annual) selectUpgradePlan('annual'); else selectUpgradePlan('monthly'); }
+function showUpgradeModal(annual, source) {
+  document.getElementById('upgrade-modal-bg').classList.add('show');
+  if(annual) selectUpgradePlan('annual'); else selectUpgradePlan('monthly');
+  track('upgrade_modal_opened', { source: source || 'unknown', ticker: S.ticker || null });
+}
 function closeUpgradeModal() { document.getElementById('upgrade-modal-bg').classList.remove('show'); }
 
 /* ── Account Settings modal ── */
@@ -4818,13 +4846,16 @@ async function fetchAndRender() {
   document.getElementById('analyze-loading').style.display='flex';
   document.getElementById('analyze-error').style.display='none';
   document.getElementById('stock-result').style.display='none';
+  track('analyze_started', { ticker });
   try {
     const result=await yahooFetch(ticker,S.range);
     S.ticker=ticker; S.data=result; S.analystTarget=null;
     renderStock(result,ticker);
+    track('analyze_completed', { ticker });
     toast(`${ticker} loaded ✓`,'green'); const _fg=document.getElementById('featured-grid'); if(_fg) _fg.style.display='none'; const _tw=document.getElementById('tool-welcome'); if(_tw) _tw.style.display='none'; const _fl=document.getElementById('fg-label'); if(_fl) _fl.style.display='none';
   } catch(e) {
     if (e.message === 'LIMIT_REACHED') {
+      track('daily_limit_reached', { ticker });
       showUpgradeModal();
       const err=document.getElementById('analyze-error');
       err.innerHTML=`<span>You've used all <strong>${e.limitData?.limit||5} free analyses</strong> for today. <a href="#" onclick="showUpgradeModal();return false;" style="color:var(--gold);font-weight:600;">Upgrade to Pro</a> for unlimited access.</span>`;
@@ -7057,7 +7088,11 @@ document.addEventListener('click', function(e) {
     menu.classList.remove('open');
   }
   // Pro gate upgrade CTAs (dynamically injected .js-pgc-upgrade buttons)
-  if (e.target.closest('.js-pgc-upgrade')) showUpgradeModal();
+  if (e.target.closest('.js-pgc-upgrade')) {
+    const card = e.target.closest('[data-sec]') || e.target.closest('.section-content') || e.target.closest('.pro-gate-card');
+    const sec = card ? (card.dataset.sec || card.id || 'gate_card') : 'gate_card';
+    showUpgradeModal(false, 'pro_gate_' + sec);
+  }
 });
 
 // ── Event delegation: saved analyses load/delete ──
