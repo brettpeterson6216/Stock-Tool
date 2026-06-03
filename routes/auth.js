@@ -310,4 +310,95 @@ router.post("/auth/change-password",   authLimiter, validateCsrf, async (req, re
   }
 });
 
+
+// ============================================================
+//  GET /api/admin/analytics
+//  Admin-only. Requires X-Admin-Secret header.
+//  Returns aggregated metrics from analytics_events for the
+//  last 30 days plus all-time totals.
+// ============================================================
+router.get("/admin/analytics", async (req, res) => {
+  const secret = req.headers["x-admin-secret"];
+  if (!secret || secret !== ADMIN_SECRET) {
+    return res.status(403).json({ error: "Forbidden." });
+  }
+
+  try {
+    // ── Daily event counts for the last 30 days ──────────────
+    const daily = await db.execute(`
+      SELECT
+        substr(created_at, 1, 10) AS day,
+        event,
+        COUNT(*)                  AS cnt
+      FROM analytics_events
+      WHERE created_at >= datetime('now', '-30 days')
+      GROUP BY day, event
+      ORDER BY day ASC
+    `);
+
+    // ── Pro gate views by section (all time + last 30d) ──────
+    const gatesBySection = await db.execute(`
+      SELECT
+        json_extract(properties, '$.section') AS section,
+        COUNT(*)                               AS total,
+        SUM(CASE WHEN created_at >= datetime('now', '-30 days') THEN 1 ELSE 0 END) AS last30
+      FROM analytics_events
+      WHERE event = 'pro_gate_viewed'
+        AND json_extract(properties, '$.section') IS NOT NULL
+      GROUP BY section
+      ORDER BY total DESC
+    `);
+
+    // ── Upgrade modal source breakdown ───────────────────────
+    const modalSources = await db.execute(`
+      SELECT
+        json_extract(properties, '$.source') AS source,
+        COUNT(*)                              AS cnt
+      FROM analytics_events
+      WHERE event = 'upgrade_modal_opened'
+      GROUP BY source
+      ORDER BY cnt DESC
+      LIMIT 20
+    `);
+
+    // ── All-time totals ───────────────────────────────────────
+    const totals = await db.execute(`
+      SELECT event, COUNT(*) AS cnt
+      FROM analytics_events
+      GROUP BY event
+      ORDER BY cnt DESC
+    `);
+
+    // ── Total registered users + new last 30d ─────────────────
+    const users = await db.execute(`
+      SELECT
+        COUNT(*)                                                               AS total,
+        SUM(CASE WHEN created_at >= datetime('now', '-30 days') THEN 1 ELSE 0 END) AS last30,
+        SUM(CASE WHEN plan = 'pro'   THEN 1 ELSE 0 END)                       AS pro_count,
+        SUM(CASE WHEN plan = 'trial' THEN 1 ELSE 0 END)                       AS trial_count
+      FROM users
+    `);
+
+    // ── Recent events (last 100) ──────────────────────────────
+    const recent = await db.execute(`
+      SELECT id, event, session_id, user_id, properties, created_at
+      FROM analytics_events
+      ORDER BY id DESC
+      LIMIT 100
+    `);
+
+    res.json({
+      daily:          daily.rows,
+      gatesBySection: gatesBySection.rows,
+      modalSources:   modalSources.rows,
+      totals:         totals.rows,
+      users:          users.rows[0] || {},
+      recent:         recent.rows,
+    });
+  } catch (err) {
+    console.error("[admin/analytics] error:", err);
+    res.status(500).json({ error: "Query failed." });
+  }
+});
+
 module.exports = router;

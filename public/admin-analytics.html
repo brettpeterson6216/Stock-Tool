@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Analytics — ImpliedLens Admin</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Inter',system-ui,sans-serif;background:#08090D;color:rgba(220,225,232,.9);min-height:100vh}
+    a{color:#C8882A;text-decoration:none}
+
+    /* ── Auth gate ── */
+    #auth-gate{display:flex;align-items:center;justify-content:center;min-height:100vh}
+    .auth-box{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:2.5rem;width:100%;max-width:380px;text-align:center}
+    .auth-box h2{font-size:1.3rem;color:#fff;margin-bottom:.4rem}
+    .auth-box p{font-size:.82rem;color:rgba(220,225,232,.4);margin-bottom:1.5rem}
+    .auth-input{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:.7rem 1rem;color:#fff;font-size:.9rem;margin-bottom:.75rem;outline:none}
+    .auth-input:focus{border-color:#C8882A}
+    .auth-btn{width:100%;background:#C8882A;color:#08090D;border:none;border-radius:8px;padding:.75rem;font-size:.9rem;font-weight:700;cursor:pointer}
+    .auth-btn:hover{opacity:.85}
+    #auth-err{font-size:.78rem;color:#e05a5a;margin-top:.5rem;display:none}
+
+    /* ── Dashboard ── */
+    #dashboard{display:none;padding:0 0 4rem}
+    .top-bar{background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.07);padding:.8rem 2rem;display:flex;align-items:center;justify-content:space-between}
+    .logo{font-size:1.1rem;color:#fff;font-weight:600}
+    .logo em{color:#C8882A;font-style:italic}
+    .top-actions{display:flex;gap:.75rem;align-items:center}
+    .refresh-btn{background:rgba(200,136,42,.1);border:1px solid rgba(200,136,42,.3);color:#C8882A;padding:.4rem .9rem;border-radius:7px;font-size:.78rem;cursor:pointer;transition:all .15s}
+    .refresh-btn:hover{background:rgba(200,136,42,.2)}
+    .last-updated{font-size:.72rem;color:rgba(220,225,232,.3)}
+
+    .content{max-width:1100px;margin:0 auto;padding:2rem}
+
+    /* ── Stat cards ── */
+    .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:2rem}
+    .stat-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:1.1rem 1.25rem}
+    .stat-label{font-size:.7rem;color:rgba(220,225,232,.4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.35rem}
+    .stat-val{font-size:1.8rem;font-weight:700;color:#fff;line-height:1}
+    .stat-sub{font-size:.72rem;color:rgba(220,225,232,.4);margin-top:.25rem}
+    .stat-card.gold .stat-val{color:#C8882A}
+    .stat-card.green .stat-val{color:#52d18a}
+
+    /* ── Section headers ── */
+    h2{font-size:.88rem;font-weight:600;color:rgba(220,225,232,.5);text-transform:uppercase;letter-spacing:.08em;margin:2rem 0 .85rem;padding-bottom:.5rem;border-bottom:1px solid rgba(255,255,255,.06)}
+
+    /* ── Funnel ── */
+    .funnel{display:flex;gap:0;margin-bottom:2rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:11px;overflow:hidden}
+    .funnel-step{flex:1;padding:1.1rem 1rem;text-align:center;border-right:1px solid rgba(255,255,255,.06)}
+    .funnel-step:last-child{border-right:none}
+    .funnel-name{font-size:.72rem;color:rgba(220,225,232,.45);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.4rem}
+    .funnel-val{font-size:1.5rem;font-weight:700;color:#fff}
+    .funnel-rate{font-size:.72rem;margin-top:.25rem}
+    .funnel-rate.good{color:#52d18a}
+    .funnel-rate.warn{color:#C8882A}
+    .funnel-rate.bad{color:#e05a5a}
+
+    /* ── Chart ── */
+    .chart-wrap{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:1.25rem;margin-bottom:2rem}
+    .chart-title{font-size:.82rem;color:rgba(220,225,232,.6);font-weight:600;margin-bottom:1rem}
+
+    /* ── Tables ── */
+    .tbl-wrap{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:11px;overflow:hidden;margin-bottom:2rem}
+    table{width:100%;border-collapse:collapse}
+    th{font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:rgba(220,225,232,.4);padding:.65rem 1rem;text-align:left;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02)}
+    td{font-size:.82rem;padding:.6rem 1rem;border-bottom:1px solid rgba(255,255,255,.04);color:rgba(220,225,232,.75)}
+    tr:last-child td{border-bottom:none}
+    tr:hover td{background:rgba(255,255,255,.02)}
+    .badge{display:inline-block;padding:.15rem .55rem;border-radius:100px;font-size:.68rem;font-weight:600;background:rgba(200,136,42,.12);color:#C8882A}
+    .badge.blue{background:rgba(80,130,255,.1);color:#6aa3ff}
+    .badge.green{background:rgba(82,209,138,.1);color:#52d18a}
+
+    /* ── Two-col layout ── */
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:2rem}
+    @media(max-width:700px){.two-col{grid-template-columns:1fr}.funnel{flex-direction:column}.funnel-step{border-right:none;border-bottom:1px solid rgba(255,255,255,.06)}.funnel-step:last-child{border-bottom:none}}
+  </style>
+</head>
+<body>
+
+<!-- Auth gate -->
+<div id="auth-gate">
+  <div class="auth-box">
+    <h2>ImpliedLens Admin</h2>
+    <p>Enter your admin secret to access the analytics dashboard.</p>
+    <input id="secret-input" class="auth-input" type="password" placeholder="Admin secret" autocomplete="off">
+    <button class="auth-btn" onclick="attemptLogin()">View Dashboard →</button>
+    <div id="auth-err">Incorrect secret — check your ADMIN_SECRET env var.</div>
+  </div>
+</div>
+
+<!-- Dashboard -->
+<div id="dashboard">
+  <div class="top-bar">
+    <div class="logo">Implied<em>Lens</em> <span style="font-size:.75rem;color:rgba(220,225,232,.3);font-weight:400;margin-left:.5rem">Analytics</span></div>
+    <div class="top-actions">
+      <span class="last-updated" id="last-updated"></span>
+      <button class="refresh-btn" onclick="loadData()">↻ Refresh</button>
+      <a href="/" style="font-size:.78rem;color:rgba(220,225,232,.35)">← Platform</a>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- KPI row -->
+    <div class="stat-grid" id="stat-grid"></div>
+
+    <!-- Conversion funnel -->
+    <h2>Conversion Funnel — Last 30 Days</h2>
+    <div class="funnel" id="funnel"></div>
+
+    <!-- Daily activity chart -->
+    <h2>Daily Activity — Last 30 Days</h2>
+    <div class="chart-wrap">
+      <div class="chart-title">Events per day</div>
+      <canvas id="daily-chart" height="90"></canvas>
+    </div>
+
+    <!-- Two-col: gates + modal sources -->
+    <div class="two-col">
+      <div>
+        <h2 style="margin-top:0">Pro Gate Views by Section</h2>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Section</th><th>Last 30d</th><th>All time</th></tr></thead>
+            <tbody id="gates-body"></tbody>
+          </table>
+        </div>
+      </div>
+      <div>
+        <h2 style="margin-top:0">Upgrade Modal Sources</h2>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Source</th><th>Opens</th></tr></thead>
+            <tbody id="sources-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent events -->
+    <h2>Recent Events (last 100)</h2>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Time</th><th>Event</th><th>User</th><th>Properties</th></tr></thead>
+        <tbody id="recent-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+let _secret = '';
+let _chart  = null;
+
+function attemptLogin() {
+  _secret = document.getElementById('secret-input').value.trim();
+  if (!_secret) return;
+  loadData();
+}
+
+document.getElementById('secret-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') attemptLogin();
+});
+
+async function loadData() {
+  try {
+    const r = await fetch('/api/admin/analytics', {
+      headers: { 'X-Admin-Secret': _secret }
+    });
+    if (r.status === 403) {
+      document.getElementById('auth-err').style.display = 'block';
+      return;
+    }
+    if (!r.ok) throw new Error('Server error ' + r.status);
+    const data = await r.json();
+    document.getElementById('auth-gate').style.display  = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    document.getElementById('auth-err').style.display  = 'none';
+    render(data);
+    document.getElementById('last-updated').textContent =
+      'Updated ' + new Date().toLocaleTimeString();
+  } catch(e) {
+    alert('Failed to load analytics: ' + e.message);
+  }
+}
+
+function getTotal(totals, event) {
+  const row = totals.find(r => r.event === event);
+  return row ? Number(row.cnt) : 0;
+}
+
+function getDaily30(daily, event) {
+  return daily.filter(r => r.event === event).reduce((s,r) => s + Number(r.cnt), 0);
+}
+
+function render(data) {
+  const { daily, gatesBySection, modalSources, totals, users, recent } = data;
+
+  // ── KPI cards ──────────────────────────────────────────────────────────
+  const pv30    = getDaily30(daily, 'page_view');
+  const sig30   = getDaily30(daily, 'signup_completed');
+  const an30    = getDaily30(daily, 'analyze_started');
+  const co30    = getDaily30(daily, 'checkout_started');
+  const comp30  = getDaily30(daily, 'checkout_completed');
+  const gate30  = getDaily30(daily, 'pro_gate_viewed');
+  const pvAll   = getTotal(totals, 'page_view');
+  const sigAll  = getTotal(totals, 'signup_completed');
+
+  const statGrid = document.getElementById('stat-grid');
+  statGrid.innerHTML = [
+    { label:'Total Users', val: fmt(users.total||0), sub:'all time', cls:'' },
+    { label:'Pro / Trial',  val: fmt((users.pro_count||0)+(users.trial_count||0)),
+      sub:`${users.pro_count||0} pro · ${users.trial_count||0} trial`, cls:'gold' },
+    { label:'New Signups 30d', val: fmt(sig30), sub:`${fmt(sigAll)} all time`, cls:'' },
+    { label:'Page Views 30d',  val: fmt(pv30),  sub:`${fmt(pvAll)} all time`, cls:'' },
+    { label:'Analyses 30d',   val: fmt(an30),  sub:'analyze_started', cls:'' },
+    { label:'Gates Shown 30d',val: fmt(gate30),sub:'pro_gate_viewed', cls:'' },
+    { label:'Checkout Starts 30d', val: fmt(co30),   sub:'checkout_started', cls:'gold' },
+    { label:'Conversions 30d',     val: fmt(comp30), sub:'checkout_completed', cls:'green' },
+  ].map(s => `<div class="stat-card ${s.cls}">
+    <div class="stat-label">${s.label}</div>
+    <div class="stat-val">${s.val}</div>
+    <div class="stat-sub">${s.sub}</div>
+  </div>`).join('');
+
+  // ── Funnel ──────────────────────────────────────────────────────────────
+  const steps = [
+    { name:'Page Views', key:'page_view' },
+    { name:'Analyses',   key:'analyze_started' },
+    { name:'Gates Seen', key:'pro_gate_viewed' },
+    { name:'Modal Open', key:'upgrade_modal_opened' },
+    { name:'Checkout',   key:'checkout_started' },
+    { name:'Converted',  key:'checkout_completed' },
+  ];
+  const funnelVals = steps.map(s => getDaily30(daily, s.key));
+  document.getElementById('funnel').innerHTML = steps.map((s, i) => {
+    const val  = funnelVals[i];
+    const prev = i === 0 ? val : funnelVals[i-1];
+    const pct  = prev > 0 ? Math.round(val / prev * 100) : 0;
+    const cls  = pct >= 50 ? 'good' : pct >= 20 ? 'warn' : 'bad';
+    const rate = i === 0 ? '' : `<div class="funnel-rate ${cls}">${pct}% of prev</div>`;
+    return `<div class="funnel-step">
+      <div class="funnel-name">${s.name}</div>
+      <div class="funnel-val">${fmt(val)}</div>
+      ${rate}
+    </div>`;
+  }).join('');
+
+  // ── Daily chart ─────────────────────────────────────────────────────────
+  const days = [...new Set(daily.map(r => r.day))].sort();
+  const keyColors = {
+    page_view:           'rgba(200,136,42,0.7)',
+    analyze_started:     'rgba(82,209,138,0.7)',
+    signup_completed:    'rgba(106,163,255,0.7)',
+    pro_gate_viewed:     'rgba(220,100,100,0.7)',
+    checkout_started:    'rgba(255,200,80,0.7)',
+    checkout_completed:  'rgba(255,255,255,0.5)',
+  };
+  const chartKeys = Object.keys(keyColors);
+  const datasets = chartKeys.map(key => ({
+    label: key.replace(/_/g,' '),
+    data:  days.map(day => {
+      const row = daily.find(r => r.day === day && r.event === key);
+      return row ? Number(row.cnt) : 0;
+    }),
+    borderColor: keyColors[key],
+    backgroundColor: keyColors[key].replace('0.7','0.12'),
+    tension: 0.3, borderWidth: 2, pointRadius: 2, fill: false,
+  }));
+
+  if (_chart) _chart.destroy();
+  _chart = new Chart(document.getElementById('daily-chart'), {
+    type: 'line',
+    data: { labels: days, datasets },
+    options: {
+      responsive: true,
+      interaction: { mode:'index', intersect:false },
+      plugins: {
+        legend: { labels: { color:'rgba(220,225,232,.55)', font:{size:11}, boxWidth:12 } },
+      },
+      scales: {
+        x: { ticks:{color:'rgba(220,225,232,.35)',maxTicksLimit:10}, grid:{color:'rgba(255,255,255,.04)'} },
+        y: { ticks:{color:'rgba(220,225,232,.35)'}, grid:{color:'rgba(255,255,255,.04)'} },
+      },
+    },
+  });
+
+  // ── Gate sections ────────────────────────────────────────────────────────
+  document.getElementById('gates-body').innerHTML = gatesBySection.length
+    ? gatesBySection.map(r => `<tr>
+        <td>${r.section || '—'}</td>
+        <td>${fmt(r.last30)}</td>
+        <td>${fmt(r.total)}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="3" style="color:rgba(220,225,232,.3);text-align:center;padding:1.5rem">No gate views yet</td></tr>';
+
+  // ── Modal sources ────────────────────────────────────────────────────────
+  document.getElementById('sources-body').innerHTML = modalSources.length
+    ? modalSources.map(r => `<tr>
+        <td><span class="badge">${r.source || 'unknown'}</span></td>
+        <td>${fmt(r.cnt)}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="2" style="color:rgba(220,225,232,.3);text-align:center;padding:1.5rem">No modal opens yet</td></tr>';
+
+  // ── Recent events ────────────────────────────────────────────────────────
+  const badgeCls = { signup_completed:'green', checkout_completed:'green',
+                     checkout_started:'', pro_gate_viewed:'', page_view:'blue' };
+  document.getElementById('recent-body').innerHTML = recent.map(r => {
+    const ts   = r.created_at ? r.created_at.replace('T',' ').slice(0,19) : '—';
+    const cls  = badgeCls[r.event] || '';
+    let props = '';
+    try { props = JSON.stringify(JSON.parse(r.properties||'{}'), null, 0).slice(1,-1); } catch(_) {}
+    return `<tr>
+      <td style="color:rgba(220,225,232,.4);white-space:nowrap">${ts}</td>
+      <td><span class="badge ${cls}">${r.event}</span></td>
+      <td style="color:rgba(220,225,232,.4)">${r.user_id ? '#'+r.user_id : '—'}</td>
+      <td style="color:rgba(220,225,232,.4);font-size:.75rem;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(props)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function fmt(n) {
+  return Number(n).toLocaleString();
+}
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+</script>
+</body>
+</html>
