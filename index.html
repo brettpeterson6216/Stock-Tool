@@ -1253,14 +1253,14 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
     <span class="ntb-chg" id="ntb-chg"></span>
   </div>
   <div class="nav-right" id="nav-right">
-    <button class="theme-toggle" id="theme-toggle-btn" onclick="toggleTheme()" title="Switch light / dark theme"><span class="theme-toggle-track"><span class="theme-toggle-thumb"></span></span></button>
+    <button class="theme-toggle" id="theme-toggle-btn" title="Switch light / dark theme"><span class="theme-toggle-track"><span class="theme-toggle-thumb"></span></span></button>
     <span class="nav-live" title="ImpliedLens is live">Live</span>
     <a class="btn-nav-outline" id="nav-login" href="/login">Log in</a>
     <a class="btn-nav" id="nav-signup" href="/signup">Start Free Trial</a>
     <a class="btn-nav" id="nav-upgrade" href="/signup" style="display:none; background:var(--gold-d); font-size:.78rem; padding:.35rem .9rem;">Upgrade to Pro</a>
     <!-- Account dropdown (shown when logged in) -->
     <div class="nav-acct-wrap" id="nav-acct-wrap" style="display:none;">
-      <button class="nav-acct-btn" id="nav-acct-btn" onclick="toggleAcctMenu(event)">
+      <button class="nav-acct-btn" id="nav-acct-btn">
         <span id="nav-acct-name">Account</span>
         <span class="nav-acct-badge" id="nav-acct-badge" style="display:none;"></span>
         <span class="nav-acct-chevron">▾</span>
@@ -1270,7 +1270,7 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
           <div class="nav-acct-header-name" id="nav-acct-header-name"></div>
           <div class="nav-acct-header-plan" id="nav-acct-header-plan"></div>
         </div>
-        <a href="#" class="nav-acct-item" onclick="openAccountModal();document.getElementById('nav-acct-wrap').classList.remove('open');return false;">⚙️ Account Settings</a>
+        <a href="#" class="nav-acct-item" id="nav-acct-settings">⚙️ Account Settings</a>
         <a href="/api/stripe/portal" class="nav-acct-item">💳 Subscription</a>
         <div class="nav-acct-divider"></div>
         <a href="#" class="nav-acct-item danger" id="nav-acct-logout">↩ Log out</a>
@@ -1520,7 +1520,7 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
       <div class="hsb-up-icon"><i class="ti ti-star"></i></div>
       <div class="hsb-up-title">Upgrade to Pro</div>
       <div class="hsb-up-sub">Unlock advanced tools &amp; data</div>
-      <a href="#" class="hsb-up-link" onclick="showUpgradeModal();return false;">Learn more &rarr;</a>
+      <a href="#" class="hsb-up-link" id="hsb-up-link">Learn more &rarr;</a>
     </div>
   </aside>
 
@@ -1814,7 +1814,7 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
           <div class="report-body">
             <div class="report-title">2025 Midyear Outlook</div>
             <div class="report-desc">Key market themes, sector opportunities, and risks shaping the second half of 2025.</div>
-            <a class="report-btn" href="#" onclick="showUpgradeModal();return false;">Read Report &rarr;</a>
+            <a class="report-btn" href="#" id="report-btn">Read Report &rarr;</a>
           </div>
         </div>
         <div class="report-indices">
@@ -1847,17 +1847,17 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
       <h2 class="sec-h2">Start free. Upgrade when you're ready.</h2>
       <p class="sec-sub">No Bloomberg fees. No hidden paywalls. Professional tools at a price that makes sense.</p>
       <div class="pricing-grid">
-        <div class="pricing-card"><div class="pricing-tier">Starter</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">0</span><span class="p-per">/month</span></div><p class="p-desc">For curious investors exploring the platform.</p><ul class="p-features"><li>5 stock analyses per day</li><li>Live price &amp; key metrics</li><li>Price chart with MA overlays</li><li>RSI &amp; MACD indicators</li><li>3-scenario projection model</li><li>Cloud-saved analyses (sync across devices)</li></ul><button class="btn-plan btn-plan-dark" onclick="openModal()">Get started free</button></div>
-        <div class="pricing-card featured"><div class="pricing-pop">Most Popular</div><div class="pricing-tier">Pro</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">7.99</span><span class="p-per">/month</span></div><p class="p-desc" style="font-size:.8rem;opacity:.7;">or $59.99/year &mdash; save 37%</p><p class="p-desc">For serious investors who research every day.</p><ul class="p-features"><li>Unlimited stock analyses</li><li>DCF intrinsic value model</li><li>Advanced projection (6 inputs)</li><li>4-stock side-by-side comparison</li><li>Full stock screener</li><li>PDF report export</li></ul><button class="btn-plan btn-plan-gold" id="pricing-pro-btn" onclick="showUpgradeModal()">Start 7-day free trial &rarr;</button></div>
-        <div class="pricing-card" style="position:relative;"><div class="save-badge">SAVE 37%</div><div class="pricing-tier">Pro Annual</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">59.99</span><span class="p-per">/year</span></div><p class="p-desc" style="font-size:.8rem;opacity:.7;">just $5/month</p><p class="p-desc">Everything in Pro, billed once a year.</p><ul class="p-features"><li>Unlimited stock analyses</li><li>DCF intrinsic value model</li><li>4-stock comparison</li><li>Full stock screener</li><li>PDF report export</li></ul><button class="btn-plan btn-plan-gold" onclick="showUpgradeModal(true)">Start 7-day free trial &rarr;</button></div>
+        <div class="pricing-card"><div class="pricing-tier">Starter</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">0</span><span class="p-per">/month</span></div><p class="p-desc">For curious investors exploring the platform.</p><ul class="p-features"><li>5 stock analyses per day</li><li>Live price &amp; key metrics</li><li>Price chart with MA overlays</li><li>RSI &amp; MACD indicators</li><li>3-scenario projection model</li><li>Cloud-saved analyses (sync across devices)</li></ul><button class="btn-plan btn-plan-dark" id="pricing-free-btn">Get started free</button></div>
+        <div class="pricing-card featured"><div class="pricing-pop">Most Popular</div><div class="pricing-tier">Pro</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">7.99</span><span class="p-per">/month</span></div><p class="p-desc" style="font-size:.8rem;opacity:.7;">or $59.99/year &mdash; save 37%</p><p class="p-desc">For serious investors who research every day.</p><ul class="p-features"><li>Unlimited stock analyses</li><li>DCF intrinsic value model</li><li>Advanced projection (6 inputs)</li><li>4-stock side-by-side comparison</li><li>Full stock screener</li><li>PDF report export</li></ul><button class="btn-plan btn-plan-gold" id="pricing-pro-btn">Start 7-day free trial &rarr;</button></div>
+        <div class="pricing-card" style="position:relative;"><div class="save-badge">SAVE 37%</div><div class="pricing-tier">Pro Annual</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">59.99</span><span class="p-per">/year</span></div><p class="p-desc" style="font-size:.8rem;opacity:.7;">just $5/month</p><p class="p-desc">Everything in Pro, billed once a year.</p><ul class="p-features"><li>Unlimited stock analyses</li><li>DCF intrinsic value model</li><li>4-stock comparison</li><li>Full stock screener</li><li>PDF report export</li></ul><button class="btn-plan btn-plan-gold" id="pricing-annual-btn">Start 7-day free trial &rarr;</button></div>
       </div>
     </div></section>
 
     <section class="cta-strip" id="cta-strip"><div class="container" style="text-align:center;">
       <h2 class="sec-h2" style="color:inherit;margin-bottom:.5rem;">Ready to start?</h2>
       <p style="color:inherit;opacity:.7;margin-bottom:1.5rem;">Run data-driven analysis before every trade.</p>
-      <a href="#" class="btn-primary" id="cta-btn-main" onclick="navGoTo('analyze');return false;">Try free live tool &darr;</a>
-      <a href="#pricing" class="btn-secondary" id="cta-btn-plans" style="margin-left:12px;" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'});return false;">View all plans</a>
+      <a href="#" class="btn-primary" id="cta-btn-main">Try free live tool &darr;</a>
+      <a href="#pricing" class="btn-secondary" id="cta-btn-plans" style="margin-left:12px;">View all plans</a>
     </div></section>
 
   </div><!-- /hs-main -->
@@ -1868,39 +1868,39 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
   <div class="app-shell">
     <!-- ── Left sidebar ── -->
     <div class="app-sidebar">
-      <a href="#" class="sb-home-btn" onclick="navGoTo('home');return false;"><i class="ti ti-globe" aria-hidden="true"></i><span>Market</span></a>
+      <a href="#" class="sb-home-btn" id="sb-home-btn"><i class="ti ti-globe" aria-hidden="true"></i><span>Market</span></a>
 
       <div class="sb-group-pad">
         <div class="sb-group-label">Analyze</div>
-        <div class="sb-item active" data-sec="analyze" onclick="openSection('analyze')"><i class="ti ti-chart-candle sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Chart</span></div>
-        <div class="sb-item" data-sec="financials" onclick="openSection('financials')"><i class="ti ti-table sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Financials</span></div>
-        <div class="sb-item" data-sec="advmetrics" onclick="openSection('advmetrics')"><i class="ti ti-report-analytics sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Metrics</span></div>
-        <div class="sb-item" data-sec="earnings" onclick="openSection('earnings')"><i class="ti ti-trending-up sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Earnings</span></div>
-        <div class="sb-item" data-sec="secfilings" onclick="openSection('secfilings')"><i class="ti ti-file-text sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">SEC Filings</span></div>
-        <div class="sb-item" data-sec="institutional" onclick="openSection('institutional')"><i class="ti ti-building-bank sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Institutional</span></div>
+        <div class="sb-item active" data-sec="analyze"><i class="ti ti-chart-candle sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Chart</span></div>
+        <div class="sb-item" data-sec="financials"><i class="ti ti-table sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Financials</span></div>
+        <div class="sb-item" data-sec="advmetrics"><i class="ti ti-report-analytics sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Metrics</span></div>
+        <div class="sb-item" data-sec="earnings"><i class="ti ti-trending-up sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Earnings</span></div>
+        <div class="sb-item" data-sec="secfilings"><i class="ti ti-file-text sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">SEC Filings</span></div>
+        <div class="sb-item" data-sec="institutional"><i class="ti ti-building-bank sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Institutional</span></div>
       </div>
 
       <div class="sb-sep"></div>
 
       <div class="sb-group-pad">
         <div class="sb-group-label">Tools</div>
-        <div class="sb-item" data-sec="compare" onclick="openSection('compare')"><i class="ti ti-adjustments-horizontal sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Compare</span></div>
-        <div class="sb-item" data-sec="projection" onclick="openSection('projection')"><i class="ti ti-timeline sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Projection</span></div>
-        <div class="sb-item" data-sec="dcf" onclick="openSection('dcf')"><i class="ti ti-calculator sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">DCF</span></div>
-        <div class="sb-item" data-sec="screener" onclick="openSection('screener')"><i class="ti ti-filter sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Screener</span></div>
+        <div class="sb-item" data-sec="compare"><i class="ti ti-adjustments-horizontal sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Compare</span></div>
+        <div class="sb-item" data-sec="projection"><i class="ti ti-timeline sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Projection</span></div>
+        <div class="sb-item" data-sec="dcf"><i class="ti ti-calculator sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">DCF</span></div>
+        <div class="sb-item" data-sec="screener"><i class="ti ti-filter sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Screener</span></div>
       </div>
 
       <div class="sb-sep"></div>
 
       <div class="sb-group-pad">
         <div class="sb-group-label">Library</div>
-        <div class="sb-item" data-sec="reports" onclick="openSection('reports')"><i class="ti ti-bookmark sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Saved</span></div>
-        <div class="sb-item" data-sec="education" onclick="openSection('education')"><i class="ti ti-school sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Education</span></div>
-        <div class="sb-item" data-sec="adveducation" onclick="openSection('adveducation')"><i class="ti ti-certificate sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Adv. Learn</span></div>
+        <div class="sb-item" data-sec="reports"><i class="ti ti-bookmark sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Saved</span></div>
+        <div class="sb-item" data-sec="education"><i class="ti ti-school sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Education</span></div>
+        <div class="sb-item" data-sec="adveducation"><i class="ti ti-certificate sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Adv. Learn</span></div>
       </div>
 
       <div class="sb-bottom">
-        <div class="sb-pro-card" onclick="showUpgradeModal()">
+        <div class="sb-pro-card" id="sb-pro-card">
           <div class="sb-pro-title">⚡ Go Pro</div>
           <div class="sb-pro-sub">Unlimited access</div>
         </div>
@@ -1957,15 +1957,15 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
       <!-- Scrollable content area -->
       <!-- Mobile section tabs (visible only on ≤640px) -->
       <div class="mobile-sec-tabs" id="mobile-sec-tabs">
-        <button class="mst-btn active" onclick="openSection('analyze');setMobileTab(this)" data-sec="analyze">Chart</button>
-        <button class="mst-btn" onclick="openSection('financials');setMobileTab(this)" data-sec="financials">Financials</button>
-        <button class="mst-btn" onclick="openSection('advmetrics');setMobileTab(this)" data-sec="advmetrics">Metrics</button>
-        <button class="mst-btn" onclick="openSection('earnings');setMobileTab(this)" data-sec="earnings">Earnings</button>
-        <button class="mst-btn" onclick="openSection('secfilings');setMobileTab(this)" data-sec="secfilings">SEC</button>
-        <button class="mst-btn" onclick="openSection('institutional');setMobileTab(this)" data-sec="institutional">Inst.</button>
-        <button class="mst-btn" onclick="openSection('compare');setMobileTab(this)" data-sec="compare">Compare</button>
-        <button class="mst-btn" onclick="openSection('dcf');setMobileTab(this)" data-sec="dcf">DCF</button>
-        <button class="mst-btn" onclick="openSection('screener');setMobileTab(this)" data-sec="screener">Screener</button>
+        <button class="mst-btn active" data-sec="analyze">Chart</button>
+        <button class="mst-btn" data-sec="financials">Financials</button>
+        <button class="mst-btn" data-sec="advmetrics">Metrics</button>
+        <button class="mst-btn" data-sec="earnings">Earnings</button>
+        <button class="mst-btn" data-sec="secfilings">SEC</button>
+        <button class="mst-btn" data-sec="institutional">Inst.</button>
+        <button class="mst-btn" data-sec="compare">Compare</button>
+        <button class="mst-btn" data-sec="dcf">DCF</button>
+        <button class="mst-btn" data-sec="screener">Screener</button>
       </div>
       <div class="app-content-scroll">
 
@@ -2194,11 +2194,11 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.75rem;">
                   <div style="font-family:var(--mono);font-size:.7rem;color:rgba(220,225,232,.35);letter-spacing:.05em;" id="sec-entity-label"></div>
                   <div style="display:flex;gap:.4rem;flex-wrap:wrap;" id="sec-filter-row">
-                    <button class="sec-filter-btn active" data-form="ALL" onclick="filterSecFilings('ALL')">All</button>
-                    <button class="sec-filter-btn" data-form="10-K" onclick="filterSecFilings('10-K')">10-K</button>
-                    <button class="sec-filter-btn" data-form="10-Q" onclick="filterSecFilings('10-Q')">10-Q</button>
-                    <button class="sec-filter-btn" data-form="8-K" onclick="filterSecFilings('8-K')">8-K</button>
-                    <button class="sec-filter-btn" data-form="DEF 14A" onclick="filterSecFilings('DEF 14A')">Proxy</button>
+                    <button class="sec-filter-btn active" data-form="ALL">All</button>
+                    <button class="sec-filter-btn" data-form="10-K">10-K</button>
+                    <button class="sec-filter-btn" data-form="10-Q">10-Q</button>
+                    <button class="sec-filter-btn" data-form="8-K">8-K</button>
+                    <button class="sec-filter-btn" data-form="DEF 14A">Proxy</button>
                   </div>
                 </div>
                 <div id="sec-filings-list" style="display:flex;flex-direction:column;gap:.5rem;"></div>
@@ -2357,20 +2357,20 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
               <!-- Sort/Filter controls -->
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
                 <span style="font-size:.72rem;color:var(--text5);text-transform:uppercase;letter-spacing:.07em;">Sort by:</span>
-                <button class="sa-sort-btn active" id="sa-sort-date" onclick="setSavedSort('date')">Date</button>
-                <button class="sa-sort-btn" id="sa-sort-stock" onclick="setSavedSort('stock')">Stock</button>
-                <button class="sa-sort-btn" id="sa-sort-type" onclick="setSavedSort('type')">Type</button>
+                <button class="sa-sort-btn active" id="sa-sort-date">Date</button>
+                <button class="sa-sort-btn" id="sa-sort-stock">Stock</button>
+                <button class="sa-sort-btn" id="sa-sort-type">Type</button>
                 <div style="flex:1;"></div>
-                <button class="sa-clear-btn" onclick="clearAllSaved()">Clear All</button>
+                <button class="sa-clear-btn" id="sa-clear-all-btn">Clear All</button>
               </div>
               <!-- Filter pills -->
               <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;" id="sa-type-filters">
-                <button class="sa-pill active" data-type="ALL" onclick="setSavedTypeFilter('ALL')">All</button>
-                <button class="sa-pill" data-type="price" onclick="setSavedTypeFilter('price')">Price Snapshot</button>
-                <button class="sa-pill" data-type="dcf" onclick="setSavedTypeFilter('dcf')">DCF</button>
-                <button class="sa-pill" data-type="projection" onclick="setSavedTypeFilter('projection')">Projection</button>
-                <button class="sa-pill" data-type="compare" onclick="setSavedTypeFilter('compare')">Compare</button>
-                <button class="sa-pill" data-type="note" onclick="setSavedTypeFilter('note')">Notes</button>
+                <button class="sa-pill active" data-type="ALL">All</button>
+                <button class="sa-pill" data-type="price">Price Snapshot</button>
+                <button class="sa-pill" data-type="dcf">DCF</button>
+                <button class="sa-pill" data-type="projection">Projection</button>
+                <button class="sa-pill" data-type="compare">Compare</button>
+                <button class="sa-pill" data-type="note">Notes</button>
               </div>
               <!-- List -->
               <div id="sa-guest-banner" style="display:none;background:rgba(200,136,42,.08);border:1px solid rgba(200,136,42,.2);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:.78rem;color:var(--ink3);">
@@ -2541,10 +2541,10 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
 <!-- Legacy modal (kept for openModal() calls) -->
 <div class="modal-bg" id="modal-bg" onclick="if(event.target===this)closeModal()">
   <div class="modal">
-    <button class="modal-close" onclick="closeModal()">✕</button>
+    <button class="modal-close" id="modal-close-btn">✕</button>
     <h3>Upgrade to Pro</h3>
     <p>Get full access to all Pro features with a 7-day free trial.</p>
-    <button class="btn-modal-cta" onclick="closeModal(); showUpgradeModal();">See plans →</button>
+    <button class="btn-modal-cta" id="modal-see-plans-btn">See plans →</button>
   </div>
 </div>
 
@@ -2613,7 +2613,7 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
 <!-- Upgrade modal -->
 <div class="modal-bg" id="upgrade-modal-bg" onclick="if(event.target===this)closeUpgradeModal()">
   <div class="modal" style="max-width:480px;">
-    <button class="modal-close" onclick="closeUpgradeModal()">✕</button>
+    <button class="modal-close" id="upgrade-modal-close-btn">✕</button>
     <div style="font-family:var(--mono);font-size:.68rem;color:var(--gold-d);text-transform:uppercase;letter-spacing:.14em;margin-bottom:.5rem;">Pro Plan</div>
     <h3 style="font-family:var(--serif);font-size:1.6rem;letter-spacing:-.01em;margin-bottom:.5rem;">Unlock <em style="color:var(--gold-d);font-style:italic;">all</em> the tools.</h3>
     <p style="font-size:.9rem;color:var(--ink4);margin-bottom:1.5rem;">7-day free trial. No charge until day 8. Cancel anytime.</p>
@@ -6852,6 +6852,118 @@ document.addEventListener('click', function(e) {
     document.addEventListener('DOMContentLoaded', _attachAccountButtons);
   } else {
     _attachAccountButtons();
+  }
+})();
+
+// ── Batch 2 event wires ──
+(function() {
+  function _attachBatch2() {
+    // --- Sidebar section navigation ---
+    var sidebar = document.querySelector('.app-sidebar');
+    if (sidebar) {
+      sidebar.addEventListener('click', function(e) {
+        var item = e.target.closest('.sb-item');
+        if (item && item.dataset.sec) { e.preventDefault(); openSection(item.dataset.sec); }
+        var homeBtn = e.target.closest('#sb-home-btn');
+        if (homeBtn) { e.preventDefault(); navGoTo('home'); }
+        var proCard = e.target.closest('#sb-pro-card');
+        if (proCard) showUpgradeModal();
+      });
+    }
+
+    // --- Mobile section tabs ---
+    var mstContainer = document.getElementById('mobile-sec-tabs');
+    if (mstContainer) {
+      mstContainer.addEventListener('click', function(e) {
+        var btn = e.target.closest('.mst-btn');
+        if (btn && btn.dataset.sec) { openSection(btn.dataset.sec); setMobileTab(btn); }
+      });
+    }
+
+    // --- SEC filings filter ---
+    var secFilterRow = document.getElementById('sec-filter-row');
+    if (secFilterRow) {
+      secFilterRow.addEventListener('click', function(e) {
+        var btn = e.target.closest('.sec-filter-btn');
+        if (btn && btn.dataset.form) filterSecFilings(btn.dataset.form);
+      });
+    }
+
+    // --- Saved analyses type filter pills ---
+    var saTypeFilters = document.getElementById('sa-type-filters');
+    if (saTypeFilters) {
+      saTypeFilters.addEventListener('click', function(e) {
+        var btn = e.target.closest('.sa-pill');
+        if (btn && btn.dataset.type) setSavedTypeFilter(btn.dataset.type);
+      });
+    }
+
+    // --- Saved analyses sort buttons ---
+    var sdDate  = document.getElementById('sa-sort-date');
+    var sdStock = document.getElementById('sa-sort-stock');
+    var sdType  = document.getElementById('sa-sort-type');
+    if (sdDate)  sdDate.addEventListener('click',  function() { setSavedSort('date'); });
+    if (sdStock) sdStock.addEventListener('click', function() { setSavedSort('stock'); });
+    if (sdType)  sdType.addEventListener('click',  function() { setSavedSort('type'); });
+
+    // --- Saved analyses clear all ---
+    var clearBtn = document.getElementById('sa-clear-all-btn');
+    if (clearBtn) clearBtn.addEventListener('click', clearAllSaved);
+
+    // --- Theme toggle ---
+    var themeBtn = document.getElementById('theme-toggle-btn');
+    if (themeBtn) themeBtn.addEventListener('click', toggleTheme);
+
+    // --- Account dropdown ---
+    var acctBtn = document.getElementById('nav-acct-btn');
+    if (acctBtn) acctBtn.addEventListener('click', toggleAcctMenu);
+
+    // --- Account settings link ---
+    var acctSettings = document.getElementById('nav-acct-settings');
+    if (acctSettings) acctSettings.addEventListener('click', function(e) {
+      e.preventDefault();
+      openAccountModal();
+      var wrap = document.getElementById('nav-acct-wrap');
+      if (wrap) wrap.classList.remove('open');
+    });
+
+    // --- Login modal close ---
+    var loginClose = document.getElementById('modal-close-btn');
+    if (loginClose) loginClose.addEventListener('click', closeModal);
+
+    // --- "See plans" in login modal ---
+    var seePlans = document.getElementById('modal-see-plans-btn');
+    if (seePlans) seePlans.addEventListener('click', function() { closeModal(); showUpgradeModal(); });
+
+    // --- Upgrade modal close ---
+    var upClose = document.getElementById('upgrade-modal-close-btn');
+    if (upClose) upClose.addEventListener('click', closeUpgradeModal);
+
+    // --- Pricing buttons ---
+    var pricingPro    = document.getElementById('pricing-pro-btn');
+    var pricingAnnual = document.getElementById('pricing-annual-btn');
+    var pricingFree   = document.getElementById('pricing-free-btn');
+    if (pricingPro)    pricingPro.addEventListener('click',    function() { showUpgradeModal(); });
+    if (pricingAnnual) pricingAnnual.addEventListener('click', function() { showUpgradeModal(true); });
+    if (pricingFree)   pricingFree.addEventListener('click',   function() { openModal(); });
+
+    // --- Horizontal sub-bar upgrade + report links ---
+    var hsbUp = document.getElementById('hsb-up-link');
+    if (hsbUp) hsbUp.addEventListener('click', function(e) { e.preventDefault(); showUpgradeModal(); });
+    var reportBtn = document.getElementById('report-btn');
+    if (reportBtn) reportBtn.addEventListener('click', function(e) { e.preventDefault(); showUpgradeModal(); });
+
+    // --- Hero CTAs ---
+    var ctaMain  = document.getElementById('cta-btn-main');
+    var ctaPlans = document.getElementById('cta-btn-plans');
+    if (ctaMain)  ctaMain.addEventListener('click',  function(e) { e.preventDefault(); navGoTo('analyze'); });
+    if (ctaPlans) ctaPlans.addEventListener('click', function(e) { e.preventDefault(); document.getElementById('pricing').scrollIntoView({behavior:'smooth'}); });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _attachBatch2);
+  } else {
+    _attachBatch2();
   }
 })();
 // Patch navGoTo to also update mobile nav
