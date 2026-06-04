@@ -1501,6 +1501,20 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
         }
       }
       _dismissVeil();
+      // Auto-load analyzer from ?ticker= query param (landing page CTA flow)
+      (function _handleTickerParam() {
+        const _t = new URLSearchParams(window.location.search).get('ticker');
+        if (!_t) return;
+        const _clean = _t.toUpperCase().replace(/[^A-Z0-9.\-^]/g, '').slice(0, 10);
+        if (!_clean) return;
+        const _mi = document.getElementById('main-ticker');
+        if (_mi) _mi.value = _clean;
+        history.replaceState(null, '', '/');
+        navGoTo('analyze');
+        if (typeof fetchAndRender === 'function') {
+          setTimeout(() => fetchAndRender(), 200);
+        }
+      })();
     }
 
     // Logout

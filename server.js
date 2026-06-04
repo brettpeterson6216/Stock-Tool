@@ -56,6 +56,7 @@ const authRouter        = require("./routes/auth");
 const billingRouter     = require("./routes/billing");
 const marketDataRouter  = require("./routes/market-data");
 const financialsRouter  = require("./routes/financials");
+const stockLandingRouter = require("./routes/stock-landing");
 
 // ============================================================
 //  App setup
@@ -214,6 +215,9 @@ app.get("/verify-email", (req, res) => {
 app.get(["/privacy", "/privacy.html"],         (_req, res) => res.sendFile(path.join(__dirname, "public", "privacy.html")));
 app.get(["/terms",   "/terms.html"],            (_req, res) => res.sendFile(path.join(__dirname, "public", "terms.html")));
 app.get(["/data-sources", "/data-sources.html"],(_req, res) => res.sendFile(path.join(__dirname, "public", "data-sources.html")));
+
+// Ticker landing pages — server-rendered SEO pages for /stock/:ticker
+app.use("/", stockLandingRouter);
 
 // SPA catch-all — must be last
 app.get("*", (_req, res) => res.sendFile(path.join(__dirname, "index.html")));
