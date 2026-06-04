@@ -1371,9 +1371,15 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
 
         // Store plan state globally
         if (typeof S !== 'undefined') {
-          S.userPlan    = user.effectivePlan || 'free';
-          S.trialEndsAt = user.trial_ends_at || null;
-          S.loggedIn    = true;
+          S.userPlan      = user.effectivePlan || 'free';
+          S.trialEndsAt   = user.trial_ends_at || null;
+          S.loggedIn      = true;
+          S.emailVerified = user.email_verified ? true : false;
+        }
+        // Show verification banner if email unverified
+        if (!user.email_verified) {
+          const _vb = document.getElementById('verif-banner');
+          if (_vb) _vb.style.display = 'flex';
         }
 
         // Populate account dropdown
@@ -1453,13 +1459,47 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
           history.replaceState(null, '', '/');
           track('checkout_redirect', { source: 'stripe_success' });
         }
+        // Email verification result toasts
+        const _verifParam = new URLSearchParams(window.location.search).get('verif');
+        if (_verifParam === 'ok') {
+          toast('Email verified! You can now start your trial.', 'ok');
+          if (typeof S !== 'undefined') S.emailVerified = true;
+          const _vb = document.getElementById('verif-banner');
+          if (_vb) _vb.style.display = 'none';
+          history.replaceState(null, '', '/');
+        } else if (_verifParam === 'expired') {
+          toast('Verification link expired. Please request a new one.', 'err');
+          history.replaceState(null, '', '/');
+        } else if (_verifParam === 'invalid') {
+          toast('Invalid verification link.', 'err');
+          history.replaceState(null, '', '/');
+        } else if (_verifParam === 'already') {
+          toast('Email already verified.', 'ok');
+          history.replaceState(null, '', '/');
+        }
+        // Resume checkout after auth (from upgrade modal → signup/login)
+        const _resumePlan = sessionStorage.getItem('pendingUpgradePlan');
+        if (_resumePlan && window.location.search.includes('resume_checkout=1')) {
+          sessionStorage.removeItem('pendingUpgradePlan');
+          history.replaceState(null, '', '/');
+          track('checkout_resumed_after_auth', { plan: _resumePlan });
+          if (typeof startTrial === 'function') {
+            setTimeout(() => startTrial(_resumePlan === 'annual'), 800);
+          }
+        }
         track('page_view', { path: window.location.pathname });
       }
     } catch (_) { /* server not running */ } finally {
       // Show Go Pro banner only for free/guest users
       const _plan = (typeof S !== 'undefined' && S.userPlan) || 'free';
       const _ub = document.getElementById('hsb-upgrade-box');
-      if (_ub && _plan !== 'pro' && _plan !== 'trial') _ub.style.display = '';
+      if (_ub) {
+        if (_plan === 'pro' || _plan === 'trial') {
+          _ub.style.display = 'none'; // explicitly hide for paying users
+        } else {
+          _ub.style.display = ''; // show for free/guest
+        }
+      }
       _dismissVeil();
     }
 
@@ -2644,11 +2684,34 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
 
     <button id="upgrade-cta-btn" class="btn-modal-cta" onclick="handleUpgradeClick()">Start 7-day free trial →</button>
     <div class="modal-note" style="margin-top:.75rem;">Card required to hold trial. You won't be charged until day 8.</div>
+
+    <!-- Shown instead of CTA when user is not logged in -->
+    <div id="upgrade-modal-auth" style="display:none;margin-top:.75rem;">
+      <div style="font-size:.8rem;color:var(--ink4);margin-bottom:.75rem;text-align:center;">Create a free account to start your trial.</div>
+      <div style="display:flex;flex-direction:column;gap:.5rem;">
+        <a id="upgrade-signup-btn" href="/signup" class="btn-modal-cta" style="text-align:center;text-decoration:none;">Create free account →</a>
+        <a id="upgrade-login-btn" href="/login" style="display:block;text-align:center;font-size:.82rem;color:var(--gold-d);margin-top:.25rem;">Already have an account? Sign in</a>
+      </div>
+      <div class="modal-note" style="margin-top:.75rem;">Free to join · No card required for the free plan</div>
+    </div>
+
+    <!-- Shown when email is not verified -->
+    <div id="upgrade-modal-unverified" style="display:none;margin-top:.75rem;background:rgba(255,160,0,.08);border:1px solid rgba(255,160,0,.25);border-radius:8px;padding:.85rem 1rem;font-size:.82rem;color:rgba(220,225,232,.8);">
+      ⚠️ Please verify your email before starting a trial.
+      <button onclick="resendVerification()" style="margin-left:.5rem;background:none;border:none;color:var(--gold-d);cursor:pointer;font-size:.82rem;font-weight:600;text-decoration:underline;">Resend email</button>
+    </div>
   </div>
 </div>
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
+
+<!-- Email verification banner -->
+<div id="verif-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:#2a1f00;border-bottom:1px solid rgba(200,136,42,.4);padding:.55rem 1rem;font-size:.8rem;color:rgba(220,225,232,.85);display:flex;align-items:center;justify-content:center;gap:.75rem;">
+  <span>📧 Please verify your email address to unlock all features.</span>
+  <button onclick="resendVerification()" style="background:rgba(200,136,42,.2);border:1px solid rgba(200,136,42,.4);color:#C8882A;border-radius:5px;padding:.2rem .65rem;font-size:.75rem;cursor:pointer;font-weight:600;">Resend email</button>
+  <button onclick="document.getElementById('verif-banner').style.display='none'" style="background:none;border:none;color:rgba(220,225,232,.35);cursor:pointer;font-size:1rem;line-height:1;padding:0 .25rem;">✕</button>
+</div>
 
 <style>
 
@@ -4435,7 +4498,10 @@ function showUpgradeModal(annual, source) {
   if(annual) selectUpgradePlan('annual'); else selectUpgradePlan('monthly');
   track('upgrade_modal_opened', { source: source || 'unknown', ticker: S.ticker || null });
 }
-function closeUpgradeModal() { document.getElementById('upgrade-modal-bg').classList.remove('show'); }
+function closeUpgradeModal() {
+  document.getElementById('upgrade-modal-bg').classList.remove('show');
+  _resetUpgradeModal();
+}
 
 /* ── Account Settings modal ── */
 async function openAccountModal() {
@@ -4600,10 +4666,49 @@ function selectUpgradePlan(plan) {
   document.getElementById('plan-annual').classList.toggle('sel', plan === 'annual');
 }
 async function handleUpgradeClick() {
+  // Guest: show inline auth instead of failing at Stripe
+  if (!S.loggedIn) {
+    track('checkout_requires_login', { plan: _upgradePlan });
+    sessionStorage.setItem('pendingUpgradePlan', _upgradePlan);
+    // Attach plan to signup/login links so they redirect back
+    const signupBtn = document.getElementById('upgrade-signup-btn');
+    const loginBtn  = document.getElementById('upgrade-login-btn');
+    if (signupBtn) {
+      signupBtn.href = `/signup?next=${encodeURIComponent('/?resume_checkout=1')}`;
+      signupBtn.onclick = () => track('signup_started_from_upgrade', { plan: _upgradePlan });
+    }
+    if (loginBtn) {
+      loginBtn.href = `/login?next=${encodeURIComponent('/?resume_checkout=1')}`;
+      loginBtn.onclick = () => track('login_started_from_upgrade', { plan: _upgradePlan });
+    }
+    document.getElementById('upgrade-cta-btn').style.display = 'none';
+    document.querySelector('#upgrade-modal-bg .modal-note').style.display = 'none';
+    document.getElementById('upgrade-modal-auth').style.display = 'block';
+    document.getElementById('upgrade-modal-unverified').style.display = 'none';
+    return;
+  }
+  // Logged in but email not verified
+  if (!S.emailVerified) {
+    track('checkout_blocked_unverified', { plan: _upgradePlan });
+    document.getElementById('upgrade-modal-unverified').style.display = 'block';
+    return;
+  }
   const btn = document.getElementById('upgrade-cta-btn');
   btn.disabled = true; btn.textContent = 'Redirecting to checkout…';
   await startTrial(_upgradePlan === 'annual');
   btn.disabled = false; btn.textContent = 'Start 7-day free trial →';
+}
+
+// Reset modal state when closed
+function _resetUpgradeModal() {
+  const cta = document.getElementById('upgrade-cta-btn');
+  const note = document.querySelector('#upgrade-modal-bg .modal-note');
+  if (cta)  { cta.style.display = ''; cta.disabled = false; cta.textContent = 'Start 7-day free trial →'; }
+  if (note) note.style.display = '';
+  const authDiv  = document.getElementById('upgrade-modal-auth');
+  const unverifDiv = document.getElementById('upgrade-modal-unverified');
+  if (authDiv)    authDiv.style.display = 'none';
+  if (unverifDiv) unverifDiv.style.display = 'none';
 }
 
 /* ══════════════════════════════════════════════════════
@@ -4613,6 +4718,19 @@ function toast(msg, type='') {
   const t=document.getElementById('toast');
   t.textContent=msg; t.className='toast show '+type;
   setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+async function resendVerification() {
+  try {
+    const r = await fetch('/api/auth/resend-verification', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': S.csrfToken||'' },
+      credentials: 'same-origin',
+    });
+    const d = await r.json();
+    if (r.ok) toast('Verification email sent! Check your inbox.', 'ok');
+    else      toast(d.error || 'Could not send email.', 'err');
+  } catch(_) { toast('Network error.', 'err'); }
 }
 
 /* ══════════════════════════════════════════════════════

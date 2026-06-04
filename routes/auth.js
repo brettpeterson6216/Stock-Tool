@@ -23,6 +23,24 @@ if (process.env.NODE_ENV === "production" && !ADMIN_SECRET) {
 
 const router = express.Router();
 
+// ── Email verification helpers ───────────────────────────────
+function _verifToken() {
+  return crypto.randomBytes(32).toString("hex");
+}
+
+async function _sendVerificationEmail(email, token) {
+  const link = `${APP_URL}/verify-email?token=${token}`;
+  await sendEmail({
+    to:      email,
+    subject: "Verify your ImpliedLens email",
+    html:    `<p>Thanks for signing up to ImpliedLens.</p>
+<p>Click the link below to verify your email address. The link expires in 24 hours.</p>
+<p><a href="${link}" style="background:#C8882A;color:#fff;padding:10px 20px;text-decoration:none;border-radius:6px;display:inline-block;">Verify Email →</a></p>
+<p style="color:#888;font-size:12px;">Or copy this URL: ${link}</p>
+<p style="color:#888;font-size:12px;">If you did not create an account, you can safely ignore this email.</p>`,
+  });
+}
+
 // ---- Rate limiter — applied only to mutation/auth endpoints ----
 // NOT applied to /saves (GET) or /auth/me — those fire on every page load
 // and would lock users out after a few refreshes.
@@ -85,7 +103,14 @@ router.post("/auth/signup",           authLimiter, async (req, res) => {
     req.session.userId = userId;
     // Fire-and-forget analytics
     track("signup_completed", { username, plan: "free" }, req.sessionID, userId).catch(() => {});
-    return res.status(201).json({ user: userRow.rows[0] || null });
+    // Send verification email (fire-and-forget — don't fail signup if email fails)
+    const verifToken = _verifToken();
+    const verifExpiry = Date.now() + 24 * 60 * 60 * 1000; // 24h
+    db.execute({
+      sql:  "INSERT INTO email_verif_tokens (token, user_id, expires_at) VALUES (?, ?, ?)",
+      args: [verifToken, userId, verifExpiry],
+    }).then(() => _sendVerificationEmail(email, verifToken)).catch(e => console.error("[verif] token/email error:", e));
+    return res.status(201).json({ user: { ...(userRow.rows[0] || {}), email_verified: 0 } });
   } catch (err) {
     console.error("signup error:", err);
     return res.status(500).json({ error: "Could not create account." });
@@ -126,7 +151,7 @@ router.get("/auth/me", async (req, res) => {
   if (!req.session.userId) return res.json({ user: null });
   try {
     const result = await db.execute({
-      sql:  "SELECT id, username, email, created_at, plan, trial_ends_at FROM users WHERE id = ?",
+      sql:  "SELECT id, username, email, created_at, plan, trial_ends_at, email_verified FROM users WHERE id = ?",
       args: [req.session.userId],
     });
     const user = result.rows[0] || null;
@@ -398,6 +423,86 @@ router.get("/admin/analytics", async (req, res) => {
   } catch (err) {
     console.error("[admin/analytics] error:", err);
     res.status(500).json({ error: "Query failed." });
+  }
+});
+
+
+// ============================================================
+//  GET /verify-email?token=...
+//  Verifies the token, marks user email_verified=1
+// ============================================================
+router.get("/verify-email", async (req, res) => {
+  const token = String(req.query.token || "").trim();
+  if (!token) return res.redirect("/?verif=invalid");
+  try {
+    const r = await db.execute({
+      sql:  "SELECT user_id, expires_at, used FROM email_verif_tokens WHERE token = ?",
+      args: [token],
+    });
+    const row = r.rows[0];
+    if (!row)              return res.redirect("/?verif=invalid");
+    if (row.used)          return res.redirect("/?verif=already");
+    if (Number(row.expires_at) < Date.now()) return res.redirect("/?verif=expired");
+
+    await db.execute({
+      sql:  "UPDATE users SET email_verified = 1 WHERE id = ?",
+      args: [row.user_id],
+    });
+    await db.execute({
+      sql:  "UPDATE email_verif_tokens SET used = 1 WHERE token = ?",
+      args: [token],
+    });
+    // If this user is currently logged in, refresh their session info
+    if (req.session.userId && Number(req.session.userId) === Number(row.user_id)) {
+      // Session is live — redirect to app with success flag
+    }
+    return res.redirect("/?verif=ok");
+  } catch (err) {
+    console.error("[verif] verify-email error:", err);
+    return res.redirect("/?verif=error");
+  }
+});
+
+// ============================================================
+//  POST /auth/resend-verification
+//  Resend verification email. Rate-limited to 3/15min per user.
+// ============================================================
+const resendVerifLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 3,
+  keyGenerator: (req) => String(req.session.userId || req.ip),
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many resend requests. Try again in 15 minutes." },
+});
+
+router.post("/auth/resend-verification", resendVerifLimiter, async (req, res) => {
+  if (!req.session.userId) return res.status(401).json({ error: "Login required." });
+  try {
+    const r = await db.execute({
+      sql:  "SELECT email, email_verified FROM users WHERE id = ?",
+      args: [req.session.userId],
+    });
+    const user = r.rows[0];
+    if (!user)             return res.status(404).json({ error: "User not found." });
+    if (user.email_verified) return res.json({ ok: true, message: "Already verified." });
+
+    const token  = _verifToken();
+    const expiry = Date.now() + 24 * 60 * 60 * 1000;
+    // Invalidate old tokens for this user
+    await db.execute({
+      sql:  "UPDATE email_verif_tokens SET used = 1 WHERE user_id = ? AND used = 0",
+      args: [req.session.userId],
+    });
+    await db.execute({
+      sql:  "INSERT INTO email_verif_tokens (token, user_id, expires_at) VALUES (?, ?, ?)",
+      args: [token, req.session.userId, expiry],
+    });
+    await _sendVerificationEmail(user.email, token);
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error("[verif] resend error:", err);
+    return res.status(500).json({ error: "Could not send email." });
   }
 });
 

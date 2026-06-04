@@ -49,6 +49,7 @@ const session = require("express-session");
 const helmet  = require("helmet");
 
 const { TursoStore, initDb } = require("./lib/db");
+const { guestIdMiddleware }  = require("./lib/plan");
 
 // ---- Route modules ----
 const authRouter        = require("./routes/auth");
@@ -110,6 +111,9 @@ app.use(express.static(path.join(__dirname, "public"), {
 // Raw-body capture for Stripe webhook signature verification
 app.use(express.json({ limit: "64kb", verify: (req, _res, buf) => { req.rawBody = buf; } }));
 app.use(express.urlencoded({ extended: false, limit: "64kb" }));
+
+// Durable guest-ID cookie — must come before session middleware
+app.use(guestIdMiddleware);
 
 app.use(session({
   store: new TursoStore(),
@@ -191,6 +195,17 @@ app.post("/api/track", trackLimiter, async (req, res) => {
   delete props.user_id;
   track(event, props, req.sessionID, req.session.userId || null).catch(() => {});
   res.json({ ok: true });
+});
+
+// ============================================================
+//  Email verification — top-level route (handler in routes/auth.js)
+// ============================================================
+// The verify-email handler lives in routes/auth.js (mounted at /api),
+// so the canonical URL is /api/verify-email?token=...
+// Provide a top-level alias so verification links work without /api prefix.
+app.get("/verify-email", (req, res) => {
+  const qs = req.url.includes("?") ? req.url.slice(req.url.indexOf("?")) : "";
+  res.redirect(301, "/api/verify-email" + qs);
 });
 
 // ============================================================
