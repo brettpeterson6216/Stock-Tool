@@ -12,6 +12,25 @@ const { FINNHUB_KEY }              = require("../lib/config");
 const { requirePro, checkAnalysisLimit } = require("../lib/plan");
 
 const router = express.Router();
+const _responseCache = new Map();
+const MAX_CACHE_ENTRIES = 500;
+
+function getCached(key, ttlMs) {
+  const entry = _responseCache.get(key);
+  if (!entry || Date.now() - entry.ts >= ttlMs) {
+    if (entry) _responseCache.delete(key);
+    return null;
+  }
+  return entry.data;
+}
+
+function setCached(key, data) {
+  if (_responseCache.size >= MAX_CACHE_ENTRIES) {
+    const oldest = _responseCache.keys().next().value;
+    if (oldest) _responseCache.delete(oldest);
+  }
+  _responseCache.set(key, { data, ts: Date.now() });
+}
 
 // ---- Fetch with timeout helper ----
 async function fetchWithTimeout(url, options = {}, timeoutMs = 5000) {
@@ -31,15 +50,20 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 5000) {
 //  News
 // ============================================================
 router.get("/news/:ticker", async (req, res) => {
+  const ticker = req.params.ticker.toUpperCase();
   try {
-    const ticker = req.params.ticker.toUpperCase();
+    const cacheKey = `news:${ticker}`;
+    const cached = getCached(cacheKey, 5 * 60 * 1000);
+    if (cached) return res.json(cached);
     const to     = new Date().toISOString().split("T")[0];
     const from   = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
     const url    = `https://finnhub.io/api/v1/company-news?symbol=${ticker}&from=${from}&to=${to}&token=${FINNHUB_KEY}`;
-    const r      = await fetch(url);
+    const r      = await fetchWithTimeout(url);
     if (!r.ok) console.warn(`[news] Finnhub returned ${r.status} for ${ticker}`);
     const data   = await r.json();
-    res.json(Array.isArray(data) ? data.slice(0, 10) : []);
+    const items = Array.isArray(data) ? data.slice(0, 10) : [];
+    setCached(cacheKey, items);
+    res.json(items);
   } catch (e) {
     console.error(`[news] error for ${ticker}:`, e.message);
     res.json([]);
@@ -135,8 +159,8 @@ router.get("/screener", requirePro, async (req, res) => {
       const results = await Promise.allSettled(
         chunk.map(async (ticker) => {
           const [qRes, mRes] = await Promise.all([
-            fetch(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_KEY}`),
-            fetch(`https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FINNHUB_KEY}`),
+            fetchWithTimeout(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_KEY}`),
+            fetchWithTimeout(`https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FINNHUB_KEY}`),
           ]);
           const [q, md] = await Promise.all([qRes.json(), mRes.json()]);
           const m = md.metric || {};
@@ -188,6 +212,9 @@ router.get("/quote/:ticker", checkAnalysisLimit, async (req, res) => {
     const VALID_INTERVALS = ["1m","2m","5m","15m","30m","60m","90m","1h","1d","5d","1wk","1mo","3mo"];
     const rawInterval = (req.query.interval || "1d").replace(/[^a-z0-9]/gi, "");
     const interval = VALID_INTERVALS.includes(rawInterval) ? rawInterval : "1d";
+    const cacheKey = `quote:${ticker}:${range}:${interval}`;
+    const cached = getCached(cacheKey, 60 * 1000);
+    if (cached) return res.json(cached);
 
     const YH = {
       "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
@@ -360,6 +387,7 @@ router.get("/quote/:ticker", checkAnalysisLimit, async (req, res) => {
       } catch (_) {}
     }
 
+    setCached(cacheKey, data);
     res.json(data);
   } catch (e) {
     console.error("[quote] proxy error:", e.message);
@@ -374,10 +402,13 @@ router.get("/market/analyst-signals", async (req, res) => {
   const raw     = String(req.query.tickers || "");
   const tickers = raw.split(",").map(t => t.toUpperCase().replace(/[^A-Z0-9.]/g, "")).filter(Boolean).slice(0, 10);
   if (!tickers.length) return res.json({ buy: 0, hold: 0, sell: 0 });
+  const cacheKey = `signals:${tickers.sort().join(",")}`;
+  const cached = getCached(cacheKey, 10 * 60 * 1000);
+  if (cached) return res.json(cached);
   try {
     const results = await Promise.allSettled(
       tickers.map(t =>
-        fetch(`https://finnhub.io/api/v1/stock/recommendation?symbol=${t}&token=${FINNHUB_KEY}`)
+        fetchWithTimeout(`https://finnhub.io/api/v1/stock/recommendation?symbol=${t}&token=${FINNHUB_KEY}`)
           .then(r => r.ok ? r.json() : null).catch(() => null)
       )
     );
@@ -389,7 +420,9 @@ router.get("/market/analyst-signals", async (req, res) => {
       hold += (l.hold       || 0);
       sell += (l.strongSell || 0) + (l.sell  || 0);
     });
-    res.json({ buy, hold, sell });
+    const result = { buy, hold, sell };
+    setCached(cacheKey, result);
+    res.json(result);
   } catch (e) {
     console.error("analyst-signals error:", e.message);
     res.json({ buy: 0, hold: 0, sell: 0 });
@@ -401,6 +434,9 @@ router.get("/market/analyst-signals", async (req, res) => {
 // ============================================================
 router.get("/market/movers", async (req, res) => {
   const type   = req.query.type || "gainers";
+  const cacheKey = `movers:${type}`;
+  const cached = getCached(cacheKey, 2 * 60 * 1000);
+  if (cached) return res.json(cached);
   const scrIds = type === "losers" ? "day_losers" : type === "active" ? "most_actives" : "day_gainers";
   try {
     const url = `https://query1.finance.yahoo.com/v1/finance/screener/predefined/saved?formatted=true&scrIds=${scrIds}&start=0&count=6`;
@@ -413,6 +449,7 @@ router.get("/market/movers", async (req, res) => {
       price:  q.regularMarketPrice?.raw ?? q.regularMarketPrice ?? 0,
       chgPct: q.regularMarketChangePercent?.raw ?? q.regularMarketChangePercent ?? 0,
     }));
+    setCached(cacheKey, items);
     return res.json(items);
   } catch (e) {
     return res.json([]);

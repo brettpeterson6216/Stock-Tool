@@ -288,7 +288,7 @@ function render(data) {
   // ── Gate sections ────────────────────────────────────────────────────────
   document.getElementById('gates-body').innerHTML = gatesBySection.length
     ? gatesBySection.map(r => `<tr>
-        <td>${r.section || '—'}</td>
+        <td>${esc(r.section || '—')}</td>
         <td>${fmt(r.last30)}</td>
         <td>${fmt(r.total)}</td>
       </tr>`).join('')
@@ -297,7 +297,7 @@ function render(data) {
   // ── Modal sources ────────────────────────────────────────────────────────
   document.getElementById('sources-body').innerHTML = modalSources.length
     ? modalSources.map(r => `<tr>
-        <td><span class="badge">${r.source || 'unknown'}</span></td>
+        <td><span class="badge">${esc(r.source || 'unknown')}</span></td>
         <td>${fmt(r.cnt)}</td>
       </tr>`).join('')
     : '<tr><td colspan="2" style="color:rgba(220,225,232,.3);text-align:center;padding:1.5rem">No modal opens yet</td></tr>';
@@ -312,7 +312,7 @@ function render(data) {
     try { props = JSON.stringify(JSON.parse(r.properties||'{}'), null, 0).slice(1,-1); } catch(_) {}
     return `<tr>
       <td style="color:rgba(220,225,232,.4);white-space:nowrap">${ts}</td>
-      <td><span class="badge ${cls}">${r.event}</span></td>
+      <td><span class="badge ${cls}">${esc(r.event)}</span></td>
       <td style="color:rgba(220,225,232,.4)">${r.user_id ? '#'+r.user_id : '—'}</td>
       <td style="color:rgba(220,225,232,.4);font-size:.75rem;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(props)}</td>
     </tr>`;

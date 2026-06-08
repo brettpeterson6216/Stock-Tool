@@ -303,6 +303,17 @@ test("Free user is locked out after exactly 5 distinct tickers", async () => {
   assert.equal(statuses[5], 429, "6th distinct ticker should return 429");
 });
 
+test("Free user can reopen an already-counted ticker after reaching the limit", async () => {
+  const { cookie } = await makeSession("quota_reopen", "quotareopen@test.com");
+  for (const ticker of ["AA", "BB", "CC", "DD", "EE"]) {
+    const res = await req(`/api/quote/${ticker}?range=1y`, { headers: { cookie } });
+    assert.notEqual(res.status, 429);
+  }
+  const reopened = await req("/api/quote/AA?range=1y", { headers: { cookie } });
+  assert.notEqual(reopened.status, 429, "Previously counted ticker should remain accessible");
+  assert.equal(Number(reopened.headers.get("X-Analyses-Used")), 5);
+});
+
 test("Guest gid cookie is set on first request", async () => {
   const res = await req("/api/csrf");
   const setCookie = res.headers.get("set-cookie") || "";
@@ -357,6 +368,16 @@ test("Checkout is blocked for unverified email", async () => {
   assert.equal(res.status, 403, "Checkout should be blocked for unverified email");
   const body = await res.json();
   assert.ok(body.requiresEmailVerification, "Response should set requiresEmailVerification flag");
+});
+
+test("Checkout rejects requests without a CSRF token", async () => {
+  const { cookie } = await makeSession("checkout_csrf1", "checkoutcsrf1@test.com");
+  const res = await req("/api/stripe/create-checkout", {
+    method: "POST",
+    headers: { cookie },
+    body: { annual: false },
+  });
+  assert.equal(res.status, 403);
 });
 
 test("Verification token flow: valid token marks user verified", async () => {

@@ -745,6 +745,8 @@ footer { background:#080808; padding:3rem 2rem; }
   section { padding:4rem 1.25rem; }
 }
 @media(max-width:640px){
+  body.has-verif-banner { padding-top:58px; }
+  .mo-tab, .movers-tab, .tf-pill, .rpill, .tf-tog { min-height:44px; }
   .nav-links { display:none; }
   nav { padding:0 .9rem; }
 }
@@ -1379,7 +1381,10 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
         // Show verification banner if email unverified
         if (!user.email_verified) {
           const _vb = document.getElementById('verif-banner');
-          if (_vb) _vb.style.display = 'flex';
+          if (_vb) {
+            _vb.style.display = 'flex';
+            document.body.classList.add('has-verif-banner');
+          }
         }
 
         // Populate account dropdown
@@ -1466,6 +1471,7 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
           if (typeof S !== 'undefined') S.emailVerified = true;
           const _vb = document.getElementById('verif-banner');
           if (_vb) _vb.style.display = 'none';
+          document.body.classList.remove('has-verif-banner');
           history.replaceState(null, '', '/');
         } else if (_verifParam === 'expired') {
           toast('Verification link expired. Please request a new one.', 'err');
@@ -1586,7 +1592,7 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
     <!-- Hero -->
     <section class="home-hero">
       <div class="hh-left">
-        <div class="hh-badge">Live Market Data &middot; Updated in Real-Time</div>
+        <div class="hh-badge">Live &amp; delayed market data</div>
         <h1 class="hh-title">Smarter Stock Analysis<br><em>for Confident Investors.</em></h1>
         <p class="hh-sub">Powerful tools. Proprietary data. Actionable insights.</p>
         <div class="hh-search">
@@ -1727,32 +1733,32 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
         <!-- Footer -->
         <div class="mo-footer">
           <div class="mo-timestamp" id="mo-timestamp">Fetching market data&hellip;</div>
-          <div class="mo-realtime"><span class="mo-realtime-dot"></span>Real-time data</div>
+          <div class="mo-realtime"><span class="mo-realtime-dot"></span>Live &amp; delayed sources</div>
         </div>
 
         <!-- Model Portfolios divider -->
         <div class="mp-divider"></div>
         <div class="hc-hdr" style="margin-bottom:.5rem;">
-          <span class="hc-title">Model Portfolios</span>
+          <span class="hc-title">Illustrative Portfolios</span>
           <a class="hc-link" href="#" onclick="navGoTo('screener');return false;">View all &rarr;</a>
         </div>
         <div class="mp-row">
           <div class="mp-card">
             <div class="mp-name">Core Growth</div>
             <div class="mp-ret up">+12.48%</div>
-            <div class="mp-sub">1Y Return &middot; Moderate Risk</div>
+            <div class="mp-sub">Sample return &middot; Moderate Risk</div>
             <div class="mp-spark" id="mp-cg"></div>
           </div>
           <div class="mp-card">
             <div class="mp-name">Dividend Income</div>
             <div class="mp-ret up">+8.37%</div>
-            <div class="mp-sub">1Y Return &middot; Low Risk</div>
+            <div class="mp-sub">Sample return &middot; Low Risk</div>
             <div class="mp-spark" id="mp-di"></div>
           </div>
           <div class="mp-card">
             <div class="mp-name">Aggressive Tech</div>
             <div class="mp-ret up">+18.92%</div>
-            <div class="mp-sub">1Y Return &middot; High Risk</div>
+            <div class="mp-sub">Sample return &middot; High Risk</div>
             <div class="mp-spark" id="mp-at"></div>
           </div>
         </div>
@@ -1868,9 +1874,9 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
             <svg viewBox="0 0 100 70" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"><defs><radialGradient id="rg1" cx="50%" cy="50%"><stop offset="0%" stop-color="#D4972E" stop-opacity=".3"/><stop offset="100%" stop-color="#D4972E" stop-opacity="0"/></radialGradient></defs><circle cx="50" cy="35" r="35" fill="url(#rg1)"/><rect x="15" y="45" width="8" height="15" rx="1" fill="#4ade80" opacity=".8"/><rect x="28" y="38" width="8" height="22" rx="1" fill="#4ade80" opacity=".8"/><rect x="41" y="30" width="8" height="30" rx="1" fill="#f87171" opacity=".8"/><rect x="54" y="22" width="8" height="38" rx="1" fill="#4ade80" opacity=".8"/><rect x="67" y="14" width="8" height="46" rx="1" fill="#4ade80" opacity=".9"/><path d="M15,52 Q32,40 45,34 Q58,25 80,18" stroke="#D4972E" stroke-width="1.5" fill="none" stroke-opacity=".7"/></svg>
           </div>
           <div class="report-body">
-            <div class="report-title">2025 Midyear Outlook</div>
-            <div class="report-desc">Key market themes, sector opportunities, and risks shaping the second half of 2025.</div>
-            <a class="report-btn" href="#" id="report-btn">Read Report &rarr;</a>
+            <div class="report-title">Research Library</div>
+            <div class="report-desc">Original market outlooks and sector research are in development.</div>
+            <span class="report-btn" aria-disabled="true">Coming soon</span>
           </div>
         </div>
         <div class="report-indices">
@@ -2724,7 +2730,7 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
 <div id="verif-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:#2a1f00;border-bottom:1px solid rgba(200,136,42,.4);padding:.55rem 1rem;font-size:.8rem;color:rgba(220,225,232,.85);display:flex;align-items:center;justify-content:center;gap:.75rem;">
   <span>📧 Please verify your email address to unlock all features.</span>
   <button onclick="resendVerification()" style="background:rgba(200,136,42,.2);border:1px solid rgba(200,136,42,.4);color:#C8882A;border-radius:5px;padding:.2rem .65rem;font-size:.75rem;cursor:pointer;font-weight:600;">Resend email</button>
-  <button onclick="document.getElementById('verif-banner').style.display='none'" style="background:none;border:none;color:rgba(220,225,232,.35);cursor:pointer;font-size:1rem;line-height:1;padding:0 .25rem;">✕</button>
+  <button onclick="document.getElementById('verif-banner').style.display='none';document.body.classList.remove('has-verif-banner')" style="background:none;border:none;color:rgba(220,225,232,.35);cursor:pointer;font-size:1rem;line-height:1;padding:0 .25rem;">✕</button>
 </div>
 
 <style>
@@ -3506,6 +3512,7 @@ html[data-theme="dark"] #am-username-msg { color: var(--text3) !important; }
 
 /* Mobile section tabs — hidden on desktop */
 .mobile-sec-tabs { display:none; }
+body.has-verif-banner { padding-top:42px; }
 
 @media(max-width:640px){
 
@@ -4110,7 +4117,7 @@ function sectionLoadingHtml() {
 }
 
 function sectionErrorHtml(msg) {
-  return `<div class="sec-state-wrap sec-state-error"><span style="font-size:1.1rem;">⚠</span><span>${msg}</span></div>`;
+  return `<div class="sec-state-wrap sec-state-error"><span style="font-size:1.1rem;">⚠</span><span>${escapeHtml(msg)}</span></div>`;
 }
 
 async function proAwareFetch(url, sectionId, opts) {
@@ -4172,6 +4179,15 @@ function escapeHtml(s) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+
+function safeExternalUrl(value) {
+  try {
+    const url = new URL(String(value || ''), window.location.origin);
+    return url.protocol === 'https:' || url.protocol === 'http:' ? escapeHtml(url.href) : '';
+  } catch (_) {
+    return '';
+  }
 }
 
 // ── Accordion open/close ──
@@ -5576,22 +5592,15 @@ async function loadMarketOverview(range,btn){
 
 function fetchBreadth(results){
   try{
-    // Advancing / declining: directional estimate based on whether SPY is up or down.
-    // These are approximations — real breadth data requires a paid data feed.
-    const sp=results?.[0]?.value?.chart?.result?.[0]?.meta;
-    const up=sp?((sp.regularMarketPrice??0)>=(sp.chartPreviousClose??0)):true;
-    const adv=up?3214:2123, dec=up?2123:3214, total=adv+dec;
-    const advPct=Math.round(adv/total*100), decPct=100-advPct;
     const advEl=document.getElementById('mo-advancing'),decEl=document.getElementById('mo-declining');
     const advBar=document.getElementById('mo-adv-bar'),decBar=document.getElementById('mo-dec-bar');
     const advPctEl=document.getElementById('mo-adv-pct'),decPctEl=document.getElementById('mo-dec-pct');
-    if(advEl)advEl.textContent=adv.toLocaleString();
-    if(decEl)decEl.textContent=dec.toLocaleString();
-    if(advBar)advBar.style.width=advPct+'%';
-    if(decBar)decBar.style.width=decPct+'%';
-    // Label as estimate so users know these are not exact NYSE breadth counts
-    if(advPctEl)advPctEl.textContent=advPct+'% (est.)';
-    if(decPctEl)decPctEl.textContent=decPct+'% (est.)';
+    if(advEl)advEl.textContent='—';
+    if(decEl)decEl.textContent='—';
+    if(advBar)advBar.style.width='0%';
+    if(decBar)decBar.style.width='0%';
+    if(advPctEl)advPctEl.textContent='Dedicated feed required';
+    if(decPctEl)decPctEl.textContent='Dedicated feed required';
     // New highs/lows and volume require a dedicated data feed — show dashes
     const hiEl=document.getElementById('mo-highs'),loEl=document.getElementById('mo-lows');
     const hiSub=document.getElementById('mo-highs-sub'),loSub=document.getElementById('mo-lows-sub');
@@ -5642,7 +5651,7 @@ async function loadHomeInsights(){
   try{
     const r=await fetch('/api/news/SPY',{credentials:'same-origin'});if(!r.ok)throw new Error();
     const news=await r.json();const items=(Array.isArray(news)?news:news.data||[]).slice(0,4);if(!items.length)throw new Error();
-    el.innerHTML=items.map((n,i)=>{const title=(n.headline||n.title||'Market Update').substring(0,68);const ts=n.datetime?timeAgo(n.datetime*1000):'Recently';return`<div class="insight-item" ${n.url?`onclick="window.open('${n.url}','_blank')"`:''}><div class="insight-thumb">${icons[i%4]}</div><div class="insight-body"><div class="insight-cat">${cats[i%4]}</div><div class="insight-title">${title}</div><div class="insight-time">${ts}</div></div></div>`;}).join('');
+    el.innerHTML=items.map((n,i)=>{const title=escapeHtml((n.headline||n.title||'Market Update').substring(0,68));const ts=escapeHtml(n.datetime?timeAgo(n.datetime*1000):'Recently');const url=safeExternalUrl(n.url);const tag=url?'a':'div';const attrs=url?` href="${url}" target="_blank" rel="noopener noreferrer"`:'';return`<${tag} class="insight-item"${attrs}><div class="insight-thumb">${icons[i%4]}</div><div class="insight-body"><div class="insight-cat">${cats[i%4]}</div><div class="insight-title">${title}</div><div class="insight-time">${ts}</div></div></${tag}>`;}).join('');
   }catch(_){el.innerHTML=['AI Momentum Drives Markets Higher','Why NVDA Valuation Still Makes Sense','Semiconductors Rally on Strong Demand','What to Watch in Earnings Season'].map((t,i)=>`<div class="insight-item"><div class="insight-thumb">${icons[i]}</div><div class="insight-body"><div class="insight-cat">${cats[i]}</div><div class="insight-title">${t}</div><div class="insight-time">${['2h ago','5h ago','1d ago','1d ago'][i]}</div></div></div>`).join('');}
 }
 function timeAgo(ms){const d=(Date.now()-ms)/1000;if(d<3600)return`${Math.round(d/60)}m ago`;if(d<86400)return`${Math.round(d/3600)}h ago`;return`${Math.round(d/86400)}d ago`;}
@@ -5665,8 +5674,9 @@ function renderMovers(type) {
   el.innerHTML = items.map(m => {
     const up = m.chgPct >= 0;
     const price = m.price >= 1000 ? m.price.toLocaleString('en-US',{maximumFractionDigits:0}) : m.price.toFixed(2);
-    return `<div class="mover-row" onclick="loadTicker('${m.symbol}')" style="cursor:pointer;">
-      <div><div class="mover-sym">${m.symbol}</div><div class="mover-co">${(m.name||'').substring(0,26)}</div></div>
+    const symbol = escapeHtml(m.symbol);
+    return `<div class="mover-row" data-ticker="${symbol}" onclick="loadTicker(this.dataset.ticker)" style="cursor:pointer;">
+      <div><div class="mover-sym">${symbol}</div><div class="mover-co">${escapeHtml((m.name||'').substring(0,26))}</div></div>
       <div class="mover-price">$${price}</div>
       <div class="mover-pct ${up?'up':'dn'}">${up?'+':''}${m.chgPct.toFixed(2)}%</div>
     </div>`;
@@ -6434,11 +6444,12 @@ function renderScreenerTable(stocks) {
     var chg1Y=s.change1Y;
     var revGr=s.revenueGrowth;
     var cap=s.marketCap?fmtBig(s.marketCap):'--';
-    var sector=s.sector||'--';
+    var ticker=escapeHtml(s.ticker||'');
+    var sector=escapeHtml(s.sector||'--');
     var revGrStr=revGr==null?'--':(revGr>0?'<span style="color:#4ade80">+'+revGr.toFixed(1)+'%</span>':'<span style="color:#f87171">'+revGr.toFixed(1)+'%</span>');
     var signal=chg1Y==null?'--':chg1Y>20?'<span class="tag tag-up">Bullish</span>':chg1Y<-15?'<span class="tag tag-dn">Bearish</span>':'<span class="tag tag-neu">Neutral</span>';
-    return '<tr style="cursor:pointer" onclick="loadFromScreener(this)" data-ticker="'+s.ticker+'">'
-      +'<td><span class="scr-ticker">'+s.ticker+'</span></td>'
+    return '<tr style="cursor:pointer" onclick="loadFromScreener(this)" data-ticker="'+ticker+'">'
+      +'<td><span class="scr-ticker">'+ticker+'</span></td>'
       +'<td style="font-size:.72rem;color:var(--text4)">'+sector+'</td>'
       +'<td>$'+(s.price||0).toFixed(2)+'</td>'
       +'<td style="color:'+(chg1D>=0?'#4ade80':'#f87171')+'">'+(chg1D>=0?'+':'')+chg1D.toFixed(2)+'%</td>'
@@ -6583,7 +6594,9 @@ async function renderNews(ticker, name) {
       let cls = 'news-neu';
       if (item.sentiment === 'positive' || POS_WORDS.test(h)) cls = 'news-pos';
       else if (item.sentiment === 'negative' || NEG_WORDS.test(h)) cls = 'news-neg';
-      return `<a class="news-item ${cls}" href="${escapeHtml(item.url)}" target="_blank" rel="noopener">
+      const url = safeExternalUrl(item.url);
+      if (!url) return '';
+      return `<a class="news-item ${cls}" href="${url}" target="_blank" rel="noopener noreferrer">
         <div class="news-headline">${escapeHtml(h)}</div>
         <div class="news-meta">${escapeHtml(item.source || '')} · ${item.datetime ? new Date(item.datetime * 1000).toLocaleDateString() : ''}</div>
       </a>`;
@@ -6916,11 +6929,11 @@ async function loadInstitutional(ticker) {
           const chgColor  = change>0?'#4ade80':change<0?'#f87171':'var(--text4)';
           const chgStr    = change!=null ? `<span style="color:${chgColor}">${change>0?'+':''}${fmtBig(change).replace('$','')}</span>` : '—';
           return `<tr>
-            <td>${h.holderName||h.name||'—'}</td>
-            <td>${shares}</td>
-            <td>${pct}</td>
+            <td>${escapeHtml(h.holderName||h.name||'—')}</td>
+            <td>${escapeHtml(shares)}</td>
+            <td>${escapeHtml(pct)}</td>
             <td>${chgStr}</td>
-            <td style="font-size:.68rem;color:var(--text5);">${h.reportDate||h.date||'—'}</td>
+            <td style="font-size:.68rem;color:var(--text5);">${escapeHtml(h.reportDate||h.date||'—')}</td>
           </tr>`;
         }).join('');
       }
@@ -7115,11 +7128,12 @@ function renderSecFilings() {
   list.innerHTML = rows.map(f => {
     const badge = badgeClass(f.form);
     const desc  = f.description || f.form;
-    const url   = f.viewerUrl && f.primaryDoc ? f.viewerUrl : f.indexUrl;
+    const url   = safeExternalUrl(f.viewerUrl && f.primaryDoc ? f.viewerUrl : f.indexUrl);
+    if (!url) return '';
     return `<a href="${url}" target="_blank" rel="noopener" class="sec-filing-row">
-      <span class="sec-filing-badge ${badge}">${f.form}</span>
-      <span class="sec-filing-date">${f.date}</span>
-      <span class="sec-filing-desc">${desc}</span>
+      <span class="sec-filing-badge ${badge}">${escapeHtml(f.form)}</span>
+      <span class="sec-filing-date">${escapeHtml(f.date)}</span>
+      <span class="sec-filing-desc">${escapeHtml(desc)}</span>
       <span class="sec-filing-arrow">↗</span>
     </a>`;
   }).join('');
