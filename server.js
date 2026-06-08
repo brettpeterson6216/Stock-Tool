@@ -49,12 +49,14 @@ const session = require("express-session");
 const helmet  = require("helmet");
 
 const { TursoStore, initDb } = require("./lib/db");
+const { guestIdMiddleware }  = require("./lib/plan");
 
 // ---- Route modules ----
 const authRouter        = require("./routes/auth");
 const billingRouter     = require("./routes/billing");
 const marketDataRouter  = require("./routes/market-data");
 const financialsRouter  = require("./routes/financials");
+const stockLandingRouter = require("./routes/stock-landing");
 
 // ============================================================
 //  App setup
@@ -63,9 +65,12 @@ const app = express();
 app.set("trust proxy", 1);
 
 // Content-Security-Policy
-// unsafe-inline is retained for scripts/styles because index.html relies heavily
-// on inline <script> blocks and inline event handlers — a future nonce-based
-// refactor should eliminate it. All other directives are locked down.
+// unsafe-inline is required for both script-src AND script-src-attr because
+// index.html uses inline <script> blocks and inline onclick= event handlers
+// throughout. script-src-attr defaults to 'none' in Helmet, which silently
+// blocks every onclick= attribute — that was the root cause of the UI being
+// completely non-interactive after Helmet was added.
+// A future nonce-based refactor could eliminate unsafe-inline entirely.
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -73,13 +78,18 @@ app.use(helmet({
       scriptSrc:      ["'self'", "'unsafe-inline'",
                        "https://cdnjs.cloudflare.com",
                        "https://cdn.jsdelivr.net"],
+      // Must explicitly allow unsafe-inline here too — Helmet defaults this
+      // directive to 'none', which blocks all onclick= / onchange= handlers.
+      scriptSrcAttr:  ["'unsafe-inline'"],
       styleSrc:       ["'self'", "'unsafe-inline'",
                        "https://fonts.googleapis.com"],
       fontSrc:        ["'self'", "https://fonts.gstatic.com"],
       imgSrc:         ["'self'", "data:", "https:"],
       // All API calls route through our own origin. cdn.jsdelivr.net is required
-      // for the globe's world-atlas JSON fetch (index.html line ~4638).
-      connectSrc:     ["'self'", "https://cdn.jsdelivr.net"],
+      // for the globe's world-atlas JSON fetch. cdnjs.cloudflare.com is required
+      // for hammer.js (used by Chart.js touch support).
+      connectSrc:     ["'self'", "https://cdn.jsdelivr.net",
+                       "https://cdnjs.cloudflare.com"],
       objectSrc:      ["'none'"],
       frameAncestors: ["'none'"],
       formAction:     ["'self'"],
@@ -102,6 +112,9 @@ app.use(express.static(path.join(__dirname, "public"), {
 // Raw-body capture for Stripe webhook signature verification
 app.use(express.json({ limit: "64kb", verify: (req, _res, buf) => { req.rawBody = buf; } }));
 app.use(express.urlencoded({ extended: false, limit: "64kb" }));
+
+// Durable guest-ID cookie — must come before session middleware
+app.use(guestIdMiddleware);
 
 app.use(session({
   store: new TursoStore(),
@@ -136,76 +149,75 @@ app.get(["/reset-password", "/reset-password.html"], (req, res) =>
   res.sendFile(path.join(__dirname, "public", "reset-password.html"))
 );
 
-app.get("/about", (_req, res) => res.send(`<!DOCTYPE html><html lang="en"><head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>About — ImpliedLens</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <style>
-    *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'Inter',sans-serif;background:#08090D;color:rgba(220,225,232,.9);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem}
-    .wrap{max-width:640px;width:100%;text-align:center}
-    .logo{font-family:'Playfair Display',serif;font-size:1.8rem;color:#fff;margin-bottom:.25rem}
-    .logo em{color:#C8882A;font-style:italic}
-    .tagline{font-size:.85rem;color:rgba(220,225,232,.4);letter-spacing:.1em;text-transform:uppercase;margin-bottom:2.5rem}
-    h1{font-family:'Playfair Display',serif;font-size:2.2rem;margin-bottom:1rem;line-height:1.3}
-    p{font-size:.95rem;color:rgba(220,225,232,.65);line-height:1.8;margin-bottom:1.25rem}
-    .socials{display:flex;gap:1rem;justify-content:center;margin:2rem 0}
-    .soc-btn{display:inline-flex;align-items:center;gap:8px;padding:.65rem 1.4rem;border-radius:8px;border:1px solid rgba(200,136,42,.35);color:#C8882A;text-decoration:none;font-size:.85rem;font-weight:500;transition:all .18s}
-    .soc-btn:hover{background:rgba(200,136,42,.1);border-color:#C8882A}
-    .back{display:inline-block;margin-top:1.5rem;color:rgba(220,225,232,.4);font-size:.8rem;text-decoration:none}
-    .back:hover{color:#C8882A}
-  </style></head><body>
-  <div class="wrap">
-    <div class="logo">Implied<em>Lens</em></div>
-    <div class="tagline">Stock Analysis Platform</div>
-    <h1>Built for the self-directed investor.</h1>
-    <p>ImpliedLens gives individual investors access to the same analytical tools used by professional analysts — DCF valuation, financial statement analysis, earnings history, risk metrics, and more — without the Bloomberg price tag.</p>
-    <p>The platform pulls data directly from SEC EDGAR filings, Yahoo Finance, and Finnhub, so every number you see traces back to a primary source.</p>
-    <p>Follow along as we build and improve the platform.</p>
-    <div class="socials">
-      <a href="https://x.com/ImpliedLens" target="_blank" class="soc-btn">𝕏 @ImpliedLens</a>
-      <a href="https://instagram.com/ImpliedLens" target="_blank" class="soc-btn">📸 @ImpliedLens</a>
-    </div>
-    <a href="/" class="back">← Back to ImpliedLens</a>
-  </div>
-</body></html>`));
+app.get(["/about", "/about.html"], (_req, res) => res.sendFile(path.join(__dirname, "public", "about.html")));
 
-app.get("/blog", (_req, res) => res.send(`<!DOCTYPE html><html lang="en"><head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Blog — ImpliedLens</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <style>
-    *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'Inter',sans-serif;background:#08090D;color:rgba(220,225,232,.9);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem}
-    .wrap{max-width:640px;width:100%;text-align:center}
-    .logo{font-family:'Playfair Display',serif;font-size:1.8rem;color:#fff;margin-bottom:.25rem}
-    .logo em{color:#C8882A;font-style:italic}
-    .tagline{font-size:.85rem;color:rgba(220,225,232,.4);letter-spacing:.1em;text-transform:uppercase;margin-bottom:2.5rem}
-    h1{font-family:'Playfair Display',serif;font-size:2.2rem;margin-bottom:1rem;line-height:1.3}
-    p{font-size:.95rem;color:rgba(220,225,232,.65);line-height:1.8;margin-bottom:1.25rem}
-    .socials{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin:2rem 0}
-    .soc-btn{display:inline-flex;align-items:center;gap:8px;padding:.65rem 1.4rem;border-radius:8px;border:1px solid rgba(200,136,42,.35);color:#C8882A;text-decoration:none;font-size:.85rem;font-weight:500;transition:all .18s}
-    .soc-btn:hover{background:rgba(200,136,42,.1);border-color:#C8882A}
-    .pill{display:inline-block;padding:.25rem .75rem;border-radius:100px;background:rgba(200,136,42,.12);color:#C8882A;font-size:.72rem;font-weight:600;letter-spacing:.06em;margin-bottom:1.5rem}
-    .back{display:inline-block;margin-top:1.5rem;color:rgba(220,225,232,.4);font-size:.8rem;text-decoration:none}
-    .back:hover{color:#C8882A}
-  </style></head><body>
-  <div class="wrap">
-    <div class="logo">Implied<em>Lens</em></div>
-    <div class="tagline">Stock Analysis Platform</div>
-    <span class="pill">COMING SOON</span>
-    <h1>Market insights &amp; platform updates.</h1>
-    <p>The ImpliedLens blog is where we'll share analysis walkthroughs, feature updates, investing frameworks, and how to get the most out of the platform.</p>
-    <p>In the meantime, follow us on social for updates and market commentary.</p>
-    <div class="socials">
-      <a href="https://x.com/ImpliedLens" target="_blank" class="soc-btn">𝕏 @ImpliedLens</a>
-      <a href="https://instagram.com/ImpliedLens" target="_blank" class="soc-btn">📸 @ImpliedLens</a>
-    </div>
-    <a href="/" class="back">← Back to ImpliedLens</a>
-  </div>
-</body></html>`));
+app.get(["/blog",  "/blog.html"],  (_req, res) => res.sendFile(path.join(__dirname, "public", "blog.html")));
+
+// ============================================================
+//  CSRF token endpoint — returns (or creates) per-session token
+// ============================================================
+const { getOrCreateToken } = require("./lib/csrf");
+const { track }            = require("./lib/analytics");
+const rateLimit            = require("express-rate-limit");
+app.get("/api/csrf", (req, res) => {
+  // Ensure a session exists before issuing a token
+  if (!req.session) return res.status(500).json({ error: "Session unavailable." });
+  const token = getOrCreateToken(req);
+  res.json({ token });
+});
+
+// ============================================================
+//  Conversion / analytics tracking endpoint
+// ============================================================
+const trackLimiter = rateLimit({
+  windowMs: 60 * 1000,      // 1 minute
+  max: 60,                   // 60 events per minute per IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Rate limit exceeded." },
+});
+
+app.post("/api/track", trackLimiter, async (req, res) => {
+  const { event, properties } = req.body;
+  if (!event || typeof event !== "string") {
+    return res.status(400).json({ error: "event required" });
+  }
+  // Allowlist of events the client is permitted to send
+  const CLIENT_EVENTS = new Set([
+    "page_view", "analyze_started", "analyze_completed",
+    "pro_gate_viewed", "upgrade_modal_opened", "daily_limit_reached",
+    "checkout_redirect", "plan_badge_clicked", "pricing_viewed",
+  ]);
+  if (!CLIENT_EVENTS.has(event)) {
+    return res.status(400).json({ error: "Unknown event." });
+  }
+  const props = (properties && typeof properties === "object") ? properties : {};
+  // Strip any user-supplied ids — we derive them server-side
+  delete props.user_id;
+  track(event, props, req.sessionID, req.session.userId || null).catch(() => {});
+  res.json({ ok: true });
+});
+
+// ============================================================
+//  Email verification — top-level route (handler in routes/auth.js)
+// ============================================================
+// The verify-email handler lives in routes/auth.js (mounted at /api),
+// so the canonical URL is /api/verify-email?token=...
+// Provide a top-level alias so verification links work without /api prefix.
+app.get("/verify-email", (req, res) => {
+  const qs = req.url.includes("?") ? req.url.slice(req.url.indexOf("?")) : "";
+  res.redirect(301, "/api/verify-email" + qs);
+});
+
+// ============================================================
+//  Trust & legal pages
+// ============================================================
+app.get(["/privacy", "/privacy.html"],         (_req, res) => res.sendFile(path.join(__dirname, "public", "privacy.html")));
+app.get(["/terms",   "/terms.html"],            (_req, res) => res.sendFile(path.join(__dirname, "public", "terms.html")));
+app.get(["/data-sources", "/data-sources.html"],(_req, res) => res.sendFile(path.join(__dirname, "public", "data-sources.html")));
+
+// Ticker landing pages — server-rendered SEO pages for /stock/:ticker
+app.use("/", stockLandingRouter);
 
 // SPA catch-all — must be last
 app.get("*", (_req, res) => res.sendFile(path.join(__dirname, "index.html")));
@@ -213,6 +225,13 @@ app.get("*", (_req, res) => res.sendFile(path.join(__dirname, "index.html")));
 // ============================================================
 //  Start
 // ============================================================
-initDb().then(() => {
-  app.listen(PORT, () => console.log(`Implied Lens running on port ${PORT}`));
-}).catch(err => { console.error("DB init failed:", err); process.exit(1); });
+// When run directly (node server.js): initialise DB and start listening.
+// When required as a module (tests): export the app so the test can
+// call initDb() itself and app.listen() on a free port.
+if (require.main === module) {
+  initDb().then(() => {
+    app.listen(PORT, () => console.log(`Implied Lens running on port ${PORT}`));
+  }).catch(err => { console.error("DB init failed:", err); process.exit(1); });
+}
+
+module.exports = app;

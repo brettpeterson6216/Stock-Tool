@@ -5,6 +5,8 @@ const express = require("express");
 const Stripe  = require("stripe");
 
 const { db }                                                    = require("../lib/db");
+const { validateCsrf } = require("../lib/csrf");
+const { track }        = require("../lib/analytics");
 const { STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET,
         STRIPE_PRICE_MONTHLY, STRIPE_PRICE_ANNUAL, APP_URL }   = require("../lib/config");
 
@@ -15,16 +17,23 @@ const router = express.Router();
 //  POST /api/stripe/create-checkout
 // ============================================================
 router.post("/stripe/create-checkout", async (req, res) => {
-  if (!stripe)                return res.status(503).json({ error: "Payments not configured yet." });
   if (!req.session.userId)    return res.status(401).json({ error: "Login required." });
 
-  const priceId = req.body.annual ? STRIPE_PRICE_ANNUAL : STRIPE_PRICE_MONTHLY;
-  if (!priceId)               return res.status(503).json({ error: "Price not configured." });
-
   try {
-    const userRow  = await db.execute({ sql: "SELECT id, email, stripe_customer_id FROM users WHERE id = ?", args: [req.session.userId] });
+    const userRow  = await db.execute({ sql: "SELECT id, email, stripe_customer_id, email_verified FROM users WHERE id = ?", args: [req.session.userId] });
     const user     = userRow.rows[0];
     if (!user)     return res.status(404).json({ error: "User not found." });
+    if (!user.email_verified) {
+      return res.status(403).json({
+        error: "Please verify your email before starting a trial. Check your inbox or resend from account settings.",
+        requiresEmailVerification: true,
+      });
+    }
+
+    if (!stripe) return res.status(503).json({ error: "Payments not configured yet." });
+
+    const priceId = req.body.annual ? STRIPE_PRICE_ANNUAL : STRIPE_PRICE_MONTHLY;
+    if (!priceId) return res.status(503).json({ error: "Price not configured." });
 
     const params = {
       mode: "subscription",
@@ -42,6 +51,8 @@ router.post("/stripe/create-checkout", async (req, res) => {
     }
 
     const checkoutSession = await stripe.checkout.sessions.create(params);
+    track("checkout_started", { annual: !!req.body.annual, plan: req.body.annual ? "annual" : "monthly" },
+          req.sessionID, req.session.userId).catch(() => {});
     res.json({ url: checkoutSession.url });
   } catch (err) {
     console.error("Stripe checkout error:", err);
@@ -76,6 +87,7 @@ router.post("/stripe/webhook", async (req, res) => {
           sql:  "UPDATE users SET plan=?, trial_ends_at=?, stripe_customer_id=?, stripe_subscription_id=? WHERE id=?",
           args: [plan, trialEnd, sess.customer, sess.subscription, userId],
         });
+        track("checkout_completed", { plan, trial: plan === "trial" }, null, Number(userId)).catch(() => {});
         break;
       }
       case "customer.subscription.updated": {
@@ -103,9 +115,11 @@ router.post("/stripe/webhook", async (req, res) => {
         await db.execute({ sql: "UPDATE users SET plan='free' WHERE id=?", args: [r.rows[0].id] });
         break;
       }
+      default:
+        console.log(`[stripe] unhandled webhook event: ${event.type}`);
     }
   } catch (err) {
-    console.error("Webhook handler error:", err);
+    console.error(`[stripe] webhook handler error on event ${event.type}:`, err);
   }
 
   res.json({ received: true });

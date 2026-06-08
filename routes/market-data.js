@@ -37,10 +37,11 @@ router.get("/news/:ticker", async (req, res) => {
     const from   = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
     const url    = `https://finnhub.io/api/v1/company-news?symbol=${ticker}&from=${from}&to=${to}&token=${FINNHUB_KEY}`;
     const r      = await fetch(url);
+    if (!r.ok) console.warn(`[news] Finnhub returned ${r.status} for ${ticker}`);
     const data   = await r.json();
     res.json(Array.isArray(data) ? data.slice(0, 10) : []);
   } catch (e) {
-    console.error("news error:", e);
+    console.error(`[news] error for ${ticker}:`, e.message);
     res.json([]);
   }
 });

@@ -12,18 +12,45 @@ const { db }               = require("../lib/db");
 const { getEffectivePlan, FREE_DAILY_LIMIT, GUEST_DAILY_LIMIT } = require("../lib/plan");
 const { sendEmail }        = require("../lib/email");
 const { BCRYPT_ROUNDS, APP_URL, ADMIN_SECRET } = require("../lib/config");
+const { validateCsrf } = require("../lib/csrf");
+const { track }        = require("../lib/analytics");
+
+// Fail fast if ADMIN_SECRET is missing in production
+if (process.env.NODE_ENV === "production" && !ADMIN_SECRET) {
+  console.error("[config] FATAL: ADMIN_SECRET not set in production. Refusing to start.");
+  process.exit(1);
+}
 
 const router = express.Router();
 
-// ---- Rate limiter (shared across all auth endpoints) ----
+// ── Email verification helpers ───────────────────────────────
+function _verifToken() {
+  return crypto.randomBytes(32).toString("hex");
+}
+
+async function _sendVerificationEmail(email, token) {
+  const link = `${APP_URL}/verify-email?token=${token}`;
+  await sendEmail({
+    to:      email,
+    subject: "Verify your ImpliedLens email",
+    html:    `<p>Thanks for signing up to ImpliedLens.</p>
+<p>Click the link below to verify your email address. The link expires in 24 hours.</p>
+<p><a href="${link}" style="background:#C8882A;color:#fff;padding:10px 20px;text-decoration:none;border-radius:6px;display:inline-block;">Verify Email →</a></p>
+<p style="color:#888;font-size:12px;">Or copy this URL: ${link}</p>
+<p style="color:#888;font-size:12px;">If you did not create an account, you can safely ignore this email.</p>`,
+  });
+}
+
+// ---- Rate limiter — applied only to mutation/auth endpoints ----
+// NOT applied to /saves (GET) or /auth/me — those fire on every page load
+// and would lock users out after a few refreshes.
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 30,
+  max: 60,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: "Too many attempts. Try again in 15 minutes." },
 });
-router.use(authLimiter);
 
 // ---- Validation helpers ----
 const EMAIL_RE    = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -45,7 +72,7 @@ function validateSignup({ username, email, password }) {
 // ============================================================
 //  Signup / Login / Logout / Me
 // ============================================================
-router.post("/auth/signup", async (req, res) => {
+router.post("/auth/signup",           authLimiter, async (req, res) => {
   try {
     const username = String(req.body.username || "").trim();
     const email    = String(req.body.email    || "").trim().toLowerCase();
@@ -74,14 +101,23 @@ router.post("/auth/signup", async (req, res) => {
     const userId  = Number(ins.lastInsertRowid);
     const userRow = await db.execute({ sql: "SELECT id, username, email, created_at FROM users WHERE id = ?", args: [userId] });
     req.session.userId = userId;
-    return res.status(201).json({ user: userRow.rows[0] || null });
+    // Fire-and-forget analytics
+    track("signup_completed", { username, plan: "free" }, req.sessionID, userId).catch(() => {});
+    // Send verification email (fire-and-forget — don't fail signup if email fails)
+    const verifToken = _verifToken();
+    const verifExpiry = Date.now() + 24 * 60 * 60 * 1000; // 24h
+    db.execute({
+      sql:  "INSERT INTO email_verif_tokens (token, user_id, expires_at) VALUES (?, ?, ?)",
+      args: [verifToken, userId, verifExpiry],
+    }).then(() => _sendVerificationEmail(email, verifToken)).catch(e => console.error("[verif] token/email error:", e));
+    return res.status(201).json({ user: { ...(userRow.rows[0] || {}), email_verified: 0 } });
   } catch (err) {
     console.error("signup error:", err);
     return res.status(500).json({ error: "Could not create account." });
   }
 });
 
-router.post("/auth/login", async (req, res) => {
+router.post("/auth/login",             authLimiter, async (req, res) => {
   try {
     const identifier = String(req.body.identifier || req.body.username || req.body.email || "").trim();
     const password   = String(req.body.password || "");
@@ -96,6 +132,7 @@ router.post("/auth/login", async (req, res) => {
     if (!ok) return res.status(401).json({ error: "Incorrect password." });
 
     req.session.userId = Number(row.id);
+    track("login_completed", {}, req.sessionID, Number(row.id)).catch(() => {});
     return res.json({ user: { id: Number(row.id), username: row.username, email: row.email } });
   } catch (err) {
     console.error("login error:", err);
@@ -103,7 +140,7 @@ router.post("/auth/login", async (req, res) => {
   }
 });
 
-router.post("/auth/logout", (req, res) => {
+router.post("/auth/logout", validateCsrf, (req, res) => {
   req.session.destroy(() => {
     res.clearCookie("il.sid");
     res.json({ ok: true });
@@ -114,7 +151,7 @@ router.get("/auth/me", async (req, res) => {
   if (!req.session.userId) return res.json({ user: null });
   try {
     const result = await db.execute({
-      sql:  "SELECT id, username, email, created_at, plan, trial_ends_at FROM users WHERE id = ?",
+      sql:  "SELECT id, username, email, created_at, plan, trial_ends_at, email_verified FROM users WHERE id = ?",
       args: [req.session.userId],
     });
     const user = result.rows[0] || null;
@@ -128,21 +165,27 @@ router.get("/auth/me", async (req, res) => {
 // ============================================================
 //  Admin — grant/revoke Pro without Stripe
 // ============================================================
-router.post("/admin/grant-pro", async (req, res) => {
-  const secret = req.headers["x-admin-secret"] || req.body?.secret;
-  if (!secret || secret !== ADMIN_SECRET) return res.status(403).json({ error: "Forbidden" });
+router.post("/admin/grant-pro", authLimiter, validateCsrf, async (req, res) => {
+  // Secret must come via header only — never accepted from request body
+  const secret = req.headers["x-admin-secret"];
+  if (!secret || !ADMIN_SECRET || secret !== ADMIN_SECRET) {
+    console.warn("[admin] grant-pro rejected — bad or missing secret from IP", req.ip);
+    return res.status(403).json({ error: "Forbidden" });
+  }
 
   const { email, revoke } = req.body || {};
   if (!email) return res.status(400).json({ error: "email required" });
+  const action = revoke ? "revoked" : "granted";
   try {
     if (revoke) {
       await db.execute({ sql: "UPDATE users SET plan = 'free', trial_ends_at = NULL WHERE email = ?", args: [email.toLowerCase()] });
-      return res.json({ ok: true, action: "revoked", email });
     } else {
       await db.execute({ sql: "UPDATE users SET plan = 'pro', trial_ends_at = NULL WHERE email = ?", args: [email.toLowerCase()] });
-      return res.json({ ok: true, action: "granted", email });
     }
+    console.log(`[admin] Pro ${action} for ${email} by ${req.ip} at ${new Date().toISOString()}`);
+    return res.json({ ok: true, action, email });
   } catch (err) {
+    console.error("[admin] grant-pro db error:", err.message);
     return res.status(500).json({ error: err.message });
   }
 });
@@ -164,7 +207,7 @@ router.get("/saves", async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-router.post("/saves", async (req, res) => {
+router.post("/saves", validateCsrf, async (req, res) => {
   if (!req.session.userId) return res.status(401).json({ error: "Not logged in" });
   const { ticker, type, label, data } = req.body || {};
   if (!ticker || !data) return res.status(400).json({ error: "ticker and data required" });
@@ -177,7 +220,7 @@ router.post("/saves", async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-router.delete("/saves/:id", async (req, res) => {
+router.delete("/saves/:id", validateCsrf, async (req, res) => {
   if (!req.session.userId) return res.status(401).json({ error: "Not logged in" });
   try {
     await db.execute({ sql: "DELETE FROM saved_analyses WHERE id=? AND user_id=?", args: [req.params.id, req.session.userId] });
@@ -185,7 +228,7 @@ router.delete("/saves/:id", async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-router.delete("/saves", async (req, res) => {
+router.delete("/saves", validateCsrf, async (req, res) => {
   if (!req.session.userId) return res.status(401).json({ error: "Not logged in" });
   try {
     await db.execute({ sql: "DELETE FROM saved_analyses WHERE user_id=?", args: [req.session.userId] });
@@ -196,7 +239,7 @@ router.delete("/saves", async (req, res) => {
 // ============================================================
 //  Password reset
 // ============================================================
-router.post("/auth/forgot-password", async (req, res) => {
+router.post("/auth/forgot-password",   authLimiter, async (req, res) => {
   const email = String(req.body.email || "").trim().toLowerCase();
   if (!email) return res.status(400).json({ error: "Email is required." });
   try {
@@ -229,7 +272,7 @@ router.post("/auth/forgot-password", async (req, res) => {
   }
 });
 
-router.post("/auth/reset-password", async (req, res) => {
+router.post("/auth/reset-password",    authLimiter, async (req, res) => {
   const { token, password } = req.body;
   if (!token || !password || password.length < 8)
     return res.status(400).json({ error: "Invalid request." });
@@ -253,7 +296,7 @@ router.post("/auth/reset-password", async (req, res) => {
 // ============================================================
 //  Change username / password (logged-in user)
 // ============================================================
-router.post("/auth/change-username", async (req, res) => {
+router.post("/auth/change-username",   authLimiter, validateCsrf, async (req, res) => {
   if (!req.session.userId) return res.status(401).json({ error: "Not logged in." });
   const { username } = req.body;
   if (!username || username.length < 3) return res.status(400).json({ error: "Username must be at least 3 characters." });
@@ -272,7 +315,7 @@ router.post("/auth/change-username", async (req, res) => {
   }
 });
 
-router.post("/auth/change-password", async (req, res) => {
+router.post("/auth/change-password",   authLimiter, validateCsrf, async (req, res) => {
   if (!req.session.userId) return res.status(401).json({ error: "Not logged in." });
   const { currentPassword, newPassword } = req.body;
   if (!currentPassword || !newPassword || newPassword.length < 8)
@@ -289,6 +332,177 @@ router.post("/auth/change-password", async (req, res) => {
   } catch (err) {
     console.error("change-password error:", err);
     return res.status(500).json({ error: "Something went wrong." });
+  }
+});
+
+
+// ============================================================
+//  GET /api/admin/analytics
+//  Admin-only. Requires X-Admin-Secret header.
+//  Returns aggregated metrics from analytics_events for the
+//  last 30 days plus all-time totals.
+// ============================================================
+router.get("/admin/analytics", async (req, res) => {
+  const secret = req.headers["x-admin-secret"];
+  if (!secret || secret !== ADMIN_SECRET) {
+    return res.status(403).json({ error: "Forbidden." });
+  }
+
+  try {
+    // ── Daily event counts for the last 30 days ──────────────
+    const daily = await db.execute(`
+      SELECT
+        substr(created_at, 1, 10) AS day,
+        event,
+        COUNT(*)                  AS cnt
+      FROM analytics_events
+      WHERE created_at >= datetime('now', '-30 days')
+      GROUP BY day, event
+      ORDER BY day ASC
+    `);
+
+    // ── Pro gate views by section (all time + last 30d) ──────
+    const gatesBySection = await db.execute(`
+      SELECT
+        json_extract(properties, '$.section') AS section,
+        COUNT(*)                               AS total,
+        SUM(CASE WHEN created_at >= datetime('now', '-30 days') THEN 1 ELSE 0 END) AS last30
+      FROM analytics_events
+      WHERE event = 'pro_gate_viewed'
+        AND json_extract(properties, '$.section') IS NOT NULL
+      GROUP BY section
+      ORDER BY total DESC
+    `);
+
+    // ── Upgrade modal source breakdown ───────────────────────
+    const modalSources = await db.execute(`
+      SELECT
+        json_extract(properties, '$.source') AS source,
+        COUNT(*)                              AS cnt
+      FROM analytics_events
+      WHERE event = 'upgrade_modal_opened'
+      GROUP BY source
+      ORDER BY cnt DESC
+      LIMIT 20
+    `);
+
+    // ── All-time totals ───────────────────────────────────────
+    const totals = await db.execute(`
+      SELECT event, COUNT(*) AS cnt
+      FROM analytics_events
+      GROUP BY event
+      ORDER BY cnt DESC
+    `);
+
+    // ── Total registered users + new last 30d ─────────────────
+    const users = await db.execute(`
+      SELECT
+        COUNT(*)                                                               AS total,
+        SUM(CASE WHEN created_at >= datetime('now', '-30 days') THEN 1 ELSE 0 END) AS last30,
+        SUM(CASE WHEN plan = 'pro'   THEN 1 ELSE 0 END)                       AS pro_count,
+        SUM(CASE WHEN plan = 'trial' THEN 1 ELSE 0 END)                       AS trial_count
+      FROM users
+    `);
+
+    // ── Recent events (last 100) ──────────────────────────────
+    const recent = await db.execute(`
+      SELECT id, event, session_id, user_id, properties, created_at
+      FROM analytics_events
+      ORDER BY id DESC
+      LIMIT 100
+    `);
+
+    res.json({
+      daily:          daily.rows,
+      gatesBySection: gatesBySection.rows,
+      modalSources:   modalSources.rows,
+      totals:         totals.rows,
+      users:          users.rows[0] || {},
+      recent:         recent.rows,
+    });
+  } catch (err) {
+    console.error("[admin/analytics] error:", err);
+    res.status(500).json({ error: "Query failed." });
+  }
+});
+
+
+// ============================================================
+//  GET /verify-email?token=...
+//  Verifies the token, marks user email_verified=1
+// ============================================================
+router.get("/verify-email", async (req, res) => {
+  const token = String(req.query.token || "").trim();
+  if (!token) return res.redirect("/?verif=invalid");
+  try {
+    const r = await db.execute({
+      sql:  "SELECT user_id, expires_at, used FROM email_verif_tokens WHERE token = ?",
+      args: [token],
+    });
+    const row = r.rows[0];
+    if (!row)              return res.redirect("/?verif=invalid");
+    if (row.used)          return res.redirect("/?verif=already");
+    if (Number(row.expires_at) < Date.now()) return res.redirect("/?verif=expired");
+
+    await db.execute({
+      sql:  "UPDATE users SET email_verified = 1 WHERE id = ?",
+      args: [row.user_id],
+    });
+    await db.execute({
+      sql:  "UPDATE email_verif_tokens SET used = 1 WHERE token = ?",
+      args: [token],
+    });
+    // If this user is currently logged in, refresh their session info
+    if (req.session.userId && Number(req.session.userId) === Number(row.user_id)) {
+      // Session is live — redirect to app with success flag
+    }
+    return res.redirect("/?verif=ok");
+  } catch (err) {
+    console.error("[verif] verify-email error:", err);
+    return res.redirect("/?verif=error");
+  }
+});
+
+// ============================================================
+//  POST /auth/resend-verification
+//  Resend verification email. Rate-limited to 3/15min per user.
+// ============================================================
+const resendVerifLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 3,
+  keyGenerator: (req) => String(req.session.userId || req.ip),
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many resend requests. Try again in 15 minutes." },
+});
+
+router.post("/auth/resend-verification", resendVerifLimiter, async (req, res) => {
+  if (!req.session.userId) return res.status(401).json({ error: "Login required." });
+  try {
+    const r = await db.execute({
+      sql:  "SELECT email, email_verified FROM users WHERE id = ?",
+      args: [req.session.userId],
+    });
+    const user = r.rows[0];
+    if (!user)             return res.status(404).json({ error: "User not found." });
+    if (user.email_verified) return res.json({ ok: true, message: "Already verified." });
+
+    const token  = _verifToken();
+    const expiry = Date.now() + 24 * 60 * 60 * 1000;
+    // Invalidate old tokens for this user
+    await db.execute({
+      sql:  "UPDATE email_verif_tokens SET used = 1 WHERE user_id = ? AND used = 0",
+      args: [req.session.userId],
+    });
+    await db.execute({
+      sql:  "INSERT INTO email_verif_tokens (token, user_id, expires_at) VALUES (?, ?, ?)",
+      args: [token, req.session.userId, expiry],
+    });
+    await _sendVerificationEmail(user.email, token);
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error("[verif] resend error:", err);
+    return res.status(500).json({ error: "Could not send email." });
   }
 });
 

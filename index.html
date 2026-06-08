@@ -1253,14 +1253,14 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
     <span class="ntb-chg" id="ntb-chg"></span>
   </div>
   <div class="nav-right" id="nav-right">
-    <button class="theme-toggle" id="theme-toggle-btn" onclick="toggleTheme()" title="Switch light / dark theme"><span class="theme-toggle-track"><span class="theme-toggle-thumb"></span></span></button>
+    <button class="theme-toggle" id="theme-toggle-btn" title="Switch light / dark theme"><span class="theme-toggle-track"><span class="theme-toggle-thumb"></span></span></button>
     <span class="nav-live" title="ImpliedLens is live">Live</span>
     <a class="btn-nav-outline" id="nav-login" href="/login">Log in</a>
     <a class="btn-nav" id="nav-signup" href="/signup">Start Free Trial</a>
     <a class="btn-nav" id="nav-upgrade" href="/signup" style="display:none; background:var(--gold-d); font-size:.78rem; padding:.35rem .9rem;">Upgrade to Pro</a>
     <!-- Account dropdown (shown when logged in) -->
     <div class="nav-acct-wrap" id="nav-acct-wrap" style="display:none;">
-      <button class="nav-acct-btn" id="nav-acct-btn" onclick="toggleAcctMenu(event)">
+      <button class="nav-acct-btn" id="nav-acct-btn">
         <span id="nav-acct-name">Account</span>
         <span class="nav-acct-badge" id="nav-acct-badge" style="display:none;"></span>
         <span class="nav-acct-chevron">▾</span>
@@ -1270,7 +1270,7 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
           <div class="nav-acct-header-name" id="nav-acct-header-name"></div>
           <div class="nav-acct-header-plan" id="nav-acct-header-plan"></div>
         </div>
-        <a href="#" class="nav-acct-item" onclick="openAccountModal();document.getElementById('nav-acct-wrap').classList.remove('open');return false;">⚙️ Account Settings</a>
+        <a href="#" class="nav-acct-item" id="nav-acct-settings">⚙️ Account Settings</a>
         <a href="/api/stripe/portal" class="nav-acct-item">💳 Subscription</a>
         <div class="nav-acct-divider"></div>
         <a href="#" class="nav-acct-item danger" id="nav-acct-logout">↩ Log out</a>
@@ -1357,8 +1357,13 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
     const $acctLogout  = document.getElementById('nav-acct-logout');
 
     try {
-      const r = await fetch('/api/auth/me', { credentials: 'same-origin' });
-      const { user } = await r.json();
+      const [meRes, csrfRes] = await Promise.all([
+        fetch('/api/auth/me', { credentials: 'same-origin' }),
+        fetch('/api/csrf',    { credentials: 'same-origin' }),
+      ]);
+      const { user } = await meRes.json();
+      const csrfData = await csrfRes.json().catch(() => ({}));
+      if (typeof S !== 'undefined' && csrfData.token) S.csrfToken = csrfData.token;
       if (user) {
         // Hide login / signup buttons
         $login.style.display  = 'none';
@@ -1366,8 +1371,15 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
 
         // Store plan state globally
         if (typeof S !== 'undefined') {
-          S.userPlan    = user.effectivePlan || 'free';
-          S.trialEndsAt = user.trial_ends_at || null;
+          S.userPlan      = user.effectivePlan || 'free';
+          S.trialEndsAt   = user.trial_ends_at || null;
+          S.loggedIn      = true;
+          S.emailVerified = user.email_verified ? true : false;
+        }
+        // Show verification banner if email unverified
+        if (!user.email_verified) {
+          const _vb = document.getElementById('verif-banner');
+          if (_vb) _vb.style.display = 'flex';
         }
 
         // Populate account dropdown
@@ -1445,21 +1457,71 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
         if (window.location.search.includes('upgraded=1')) {
           if (typeof toast !== 'undefined') toast('Welcome to Pro! All features unlocked.', 'ok');
           history.replaceState(null, '', '/');
+          track('checkout_redirect', { source: 'stripe_success' });
         }
+        // Email verification result toasts
+        const _verifParam = new URLSearchParams(window.location.search).get('verif');
+        if (_verifParam === 'ok') {
+          toast('Email verified! You can now start your trial.', 'ok');
+          if (typeof S !== 'undefined') S.emailVerified = true;
+          const _vb = document.getElementById('verif-banner');
+          if (_vb) _vb.style.display = 'none';
+          history.replaceState(null, '', '/');
+        } else if (_verifParam === 'expired') {
+          toast('Verification link expired. Please request a new one.', 'err');
+          history.replaceState(null, '', '/');
+        } else if (_verifParam === 'invalid') {
+          toast('Invalid verification link.', 'err');
+          history.replaceState(null, '', '/');
+        } else if (_verifParam === 'already') {
+          toast('Email already verified.', 'ok');
+          history.replaceState(null, '', '/');
+        }
+        // Resume checkout after auth (from upgrade modal → signup/login)
+        const _resumePlan = sessionStorage.getItem('pendingUpgradePlan');
+        if (_resumePlan && window.location.search.includes('resume_checkout=1')) {
+          sessionStorage.removeItem('pendingUpgradePlan');
+          history.replaceState(null, '', '/');
+          track('checkout_resumed_after_auth', { plan: _resumePlan });
+          if (typeof startTrial === 'function') {
+            setTimeout(() => startTrial(_resumePlan === 'annual'), 800);
+          }
+        }
+        track('page_view', { path: window.location.pathname });
       }
     } catch (_) { /* server not running */ } finally {
       // Show Go Pro banner only for free/guest users
       const _plan = (typeof S !== 'undefined' && S.userPlan) || 'free';
       const _ub = document.getElementById('hsb-upgrade-box');
-      if (_ub && _plan !== 'pro' && _plan !== 'trial') _ub.style.display = '';
+      if (_ub) {
+        if (_plan === 'pro' || _plan === 'trial') {
+          _ub.style.display = 'none'; // explicitly hide for paying users
+        } else {
+          _ub.style.display = ''; // show for free/guest
+        }
+      }
       _dismissVeil();
+      // Auto-load analyzer from ?ticker= query param (landing page CTA flow)
+      (function _handleTickerParam() {
+        const _t = new URLSearchParams(window.location.search).get('ticker');
+        if (!_t) return;
+        const _clean = _t.toUpperCase().replace(/[^A-Z0-9.\-^]/g, '').slice(0, 10);
+        if (!_clean) return;
+        const _mi = document.getElementById('main-ticker');
+        if (_mi) _mi.value = _clean;
+        history.replaceState(null, '', '/');
+        navGoTo('analyze');
+        if (typeof fetchAndRender === 'function') {
+          setTimeout(() => fetchAndRender(), 200);
+        }
+      })();
     }
 
     // Logout
     if ($acctLogout) {
       $acctLogout.addEventListener('click', async (e) => {
         e.preventDefault();
-        await fetch('/api/auth/logout', { method:'POST', credentials:'same-origin' });
+        await fetch('/api/auth/logout', { method:'POST', credentials:'same-origin', headers:{'X-CSRF-Token': S.csrfToken||''} });
         window.location.href = '/login';
       });
     }
@@ -1514,7 +1576,7 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
       <div class="hsb-up-icon"><i class="ti ti-star"></i></div>
       <div class="hsb-up-title">Upgrade to Pro</div>
       <div class="hsb-up-sub">Unlock advanced tools &amp; data</div>
-      <a href="#" class="hsb-up-link" onclick="showUpgradeModal();return false;">Learn more &rarr;</a>
+      <a href="#" class="hsb-up-link" id="hsb-up-link">Learn more &rarr;</a>
     </div>
   </aside>
 
@@ -1808,7 +1870,7 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
           <div class="report-body">
             <div class="report-title">2025 Midyear Outlook</div>
             <div class="report-desc">Key market themes, sector opportunities, and risks shaping the second half of 2025.</div>
-            <a class="report-btn" href="#" onclick="showUpgradeModal();return false;">Read Report &rarr;</a>
+            <a class="report-btn" href="#" id="report-btn">Read Report &rarr;</a>
           </div>
         </div>
         <div class="report-indices">
@@ -1841,17 +1903,17 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
       <h2 class="sec-h2">Start free. Upgrade when you're ready.</h2>
       <p class="sec-sub">No Bloomberg fees. No hidden paywalls. Professional tools at a price that makes sense.</p>
       <div class="pricing-grid">
-        <div class="pricing-card"><div class="pricing-tier">Starter</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">0</span><span class="p-per">/month</span></div><p class="p-desc">For curious investors exploring the platform.</p><ul class="p-features"><li>5 stock analyses per day</li><li>Live price &amp; key metrics</li><li>Price chart with MA overlays</li><li>RSI &amp; MACD indicators</li><li>3-scenario projection model</li></ul><button class="btn-plan btn-plan-dark" onclick="openModal()">Get started free</button></div>
-        <div class="pricing-card featured"><div class="pricing-pop">Most Popular</div><div class="pricing-tier">Pro</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">7.99</span><span class="p-per">/month</span></div><p class="p-desc" style="font-size:.8rem;opacity:.7;">or $59.99/year &mdash; save 37%</p><p class="p-desc">For serious investors who research every day.</p><ul class="p-features"><li>Unlimited stock analyses</li><li>DCF intrinsic value model</li><li>Advanced projection (6 inputs)</li><li>4-stock side-by-side comparison</li><li>Full stock screener</li><li>PDF report export</li></ul><button class="btn-plan btn-plan-gold" id="pricing-pro-btn" onclick="showUpgradeModal()">Start 7-day free trial &rarr;</button></div>
-        <div class="pricing-card" style="position:relative;"><div class="save-badge">SAVE 37%</div><div class="pricing-tier">Pro Annual</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">59.99</span><span class="p-per">/year</span></div><p class="p-desc" style="font-size:.8rem;opacity:.7;">just $5/month</p><p class="p-desc">Everything in Pro, billed once a year.</p><ul class="p-features"><li>Unlimited stock analyses</li><li>DCF intrinsic value model</li><li>4-stock comparison</li><li>Full stock screener</li><li>PDF report export</li></ul><button class="btn-plan btn-plan-gold" onclick="showUpgradeModal(true)">Start 7-day free trial &rarr;</button></div>
+        <div class="pricing-card"><div class="pricing-tier">Starter</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">0</span><span class="p-per">/month</span></div><p class="p-desc">For curious investors exploring the platform.</p><ul class="p-features"><li>5 stock analyses per day</li><li>Live price &amp; key metrics</li><li>Price chart with MA overlays</li><li>RSI &amp; MACD indicators</li><li>3-scenario projection model</li><li>Cloud-saved analyses (sync across devices)</li></ul><button class="btn-plan btn-plan-dark" id="pricing-free-btn">Get started free</button></div>
+        <div class="pricing-card featured"><div class="pricing-pop">Most Popular</div><div class="pricing-tier">Pro</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">7.99</span><span class="p-per">/month</span></div><p class="p-desc" style="font-size:.8rem;opacity:.7;">or $59.99/year &mdash; save 37%</p><p class="p-desc">For serious investors who research every day.</p><ul class="p-features"><li>Unlimited stock analyses</li><li>DCF intrinsic value model</li><li>Advanced projection (6 inputs)</li><li>4-stock side-by-side comparison</li><li>Full stock screener</li><li>PDF report export</li></ul><button class="btn-plan btn-plan-gold" id="pricing-pro-btn">Start 7-day free trial &rarr;</button></div>
+        <div class="pricing-card" style="position:relative;"><div class="save-badge">SAVE 37%</div><div class="pricing-tier">Pro Annual</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">59.99</span><span class="p-per">/year</span></div><p class="p-desc" style="font-size:.8rem;opacity:.7;">just $5/month</p><p class="p-desc">Everything in Pro, billed once a year.</p><ul class="p-features"><li>Unlimited stock analyses</li><li>DCF intrinsic value model</li><li>4-stock comparison</li><li>Full stock screener</li><li>PDF report export</li></ul><button class="btn-plan btn-plan-gold" id="pricing-annual-btn">Start 7-day free trial &rarr;</button></div>
       </div>
     </div></section>
 
     <section class="cta-strip" id="cta-strip"><div class="container" style="text-align:center;">
       <h2 class="sec-h2" style="color:inherit;margin-bottom:.5rem;">Ready to start?</h2>
       <p style="color:inherit;opacity:.7;margin-bottom:1.5rem;">Run data-driven analysis before every trade.</p>
-      <a href="#" class="btn-primary" id="cta-btn-main" onclick="navGoTo('analyze');return false;">Try free live tool &darr;</a>
-      <a href="#pricing" class="btn-secondary" id="cta-btn-plans" style="margin-left:12px;" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'});return false;">View all plans</a>
+      <a href="#" class="btn-primary" id="cta-btn-main">Try free live tool &darr;</a>
+      <a href="#pricing" class="btn-secondary" id="cta-btn-plans" style="margin-left:12px;">View all plans</a>
     </div></section>
 
   </div><!-- /hs-main -->
@@ -1862,39 +1924,39 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
   <div class="app-shell">
     <!-- ── Left sidebar ── -->
     <div class="app-sidebar">
-      <a href="#" class="sb-home-btn" onclick="navGoTo('home');return false;"><i class="ti ti-globe" aria-hidden="true"></i><span>Market</span></a>
+      <a href="#" class="sb-home-btn" id="sb-home-btn"><i class="ti ti-globe" aria-hidden="true"></i><span>Market</span></a>
 
       <div class="sb-group-pad">
         <div class="sb-group-label">Analyze</div>
-        <div class="sb-item active" data-sec="analyze" onclick="openSection('analyze')"><i class="ti ti-chart-candle sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Chart</span></div>
-        <div class="sb-item" data-sec="financials" onclick="openSection('financials')"><i class="ti ti-table sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Financials</span></div>
-        <div class="sb-item" data-sec="advmetrics" onclick="openSection('advmetrics')"><i class="ti ti-report-analytics sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Metrics</span></div>
-        <div class="sb-item" data-sec="earnings" onclick="openSection('earnings')"><i class="ti ti-trending-up sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Earnings</span></div>
-        <div class="sb-item" data-sec="secfilings" onclick="openSection('secfilings')"><i class="ti ti-file-text sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">SEC Filings</span></div>
-        <div class="sb-item" data-sec="institutional" onclick="openSection('institutional')"><i class="ti ti-building-bank sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Institutional</span></div>
+        <div class="sb-item active" data-sec="analyze"><i class="ti ti-chart-candle sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Chart</span></div>
+        <div class="sb-item" data-sec="financials"><i class="ti ti-table sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Financials</span></div>
+        <div class="sb-item" data-sec="advmetrics"><i class="ti ti-report-analytics sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Metrics</span></div>
+        <div class="sb-item" data-sec="earnings"><i class="ti ti-trending-up sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Earnings</span></div>
+        <div class="sb-item" data-sec="secfilings"><i class="ti ti-file-text sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">SEC Filings</span></div>
+        <div class="sb-item" data-sec="institutional"><i class="ti ti-building-bank sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Institutional</span></div>
       </div>
 
       <div class="sb-sep"></div>
 
       <div class="sb-group-pad">
         <div class="sb-group-label">Tools</div>
-        <div class="sb-item" data-sec="compare" onclick="openSection('compare')"><i class="ti ti-adjustments-horizontal sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Compare</span></div>
-        <div class="sb-item" data-sec="projection" onclick="openSection('projection')"><i class="ti ti-timeline sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Projection</span></div>
-        <div class="sb-item" data-sec="dcf" onclick="openSection('dcf')"><i class="ti ti-calculator sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">DCF</span></div>
-        <div class="sb-item" data-sec="screener" onclick="openSection('screener')"><i class="ti ti-filter sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Screener</span></div>
+        <div class="sb-item" data-sec="compare"><i class="ti ti-adjustments-horizontal sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Compare</span></div>
+        <div class="sb-item" data-sec="projection"><i class="ti ti-timeline sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Projection</span></div>
+        <div class="sb-item" data-sec="dcf"><i class="ti ti-calculator sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">DCF</span></div>
+        <div class="sb-item" data-sec="screener"><i class="ti ti-filter sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Screener</span></div>
       </div>
 
       <div class="sb-sep"></div>
 
       <div class="sb-group-pad">
         <div class="sb-group-label">Library</div>
-        <div class="sb-item" data-sec="reports" onclick="openSection('reports')"><i class="ti ti-bookmark sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Saved</span></div>
-        <div class="sb-item" data-sec="education" onclick="openSection('education')"><i class="ti ti-school sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Education</span></div>
-        <div class="sb-item" data-sec="adveducation" onclick="openSection('adveducation')"><i class="ti ti-certificate sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Adv. Learn</span></div>
+        <div class="sb-item" data-sec="reports"><i class="ti ti-bookmark sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Saved</span></div>
+        <div class="sb-item" data-sec="education"><i class="ti ti-school sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Education</span></div>
+        <div class="sb-item" data-sec="adveducation"><i class="ti ti-certificate sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Adv. Learn</span></div>
       </div>
 
       <div class="sb-bottom">
-        <div class="sb-pro-card" onclick="showUpgradeModal()">
+        <div class="sb-pro-card" id="sb-pro-card">
           <div class="sb-pro-title">⚡ Go Pro</div>
           <div class="sb-pro-sub">Unlimited access</div>
         </div>
@@ -1951,15 +2013,15 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
       <!-- Scrollable content area -->
       <!-- Mobile section tabs (visible only on ≤640px) -->
       <div class="mobile-sec-tabs" id="mobile-sec-tabs">
-        <button class="mst-btn active" onclick="openSection('analyze');setMobileTab(this)" data-sec="analyze">Chart</button>
-        <button class="mst-btn" onclick="openSection('financials');setMobileTab(this)" data-sec="financials">Financials</button>
-        <button class="mst-btn" onclick="openSection('advmetrics');setMobileTab(this)" data-sec="advmetrics">Metrics</button>
-        <button class="mst-btn" onclick="openSection('earnings');setMobileTab(this)" data-sec="earnings">Earnings</button>
-        <button class="mst-btn" onclick="openSection('secfilings');setMobileTab(this)" data-sec="secfilings">SEC</button>
-        <button class="mst-btn" onclick="openSection('institutional');setMobileTab(this)" data-sec="institutional">Inst.</button>
-        <button class="mst-btn" onclick="openSection('compare');setMobileTab(this)" data-sec="compare">Compare</button>
-        <button class="mst-btn" onclick="openSection('dcf');setMobileTab(this)" data-sec="dcf">DCF</button>
-        <button class="mst-btn" onclick="openSection('screener');setMobileTab(this)" data-sec="screener">Screener</button>
+        <button class="mst-btn active" data-sec="analyze">Chart</button>
+        <button class="mst-btn" data-sec="financials">Financials</button>
+        <button class="mst-btn" data-sec="advmetrics">Metrics</button>
+        <button class="mst-btn" data-sec="earnings">Earnings</button>
+        <button class="mst-btn" data-sec="secfilings">SEC</button>
+        <button class="mst-btn" data-sec="institutional">Inst.</button>
+        <button class="mst-btn" data-sec="compare">Compare</button>
+        <button class="mst-btn" data-sec="dcf">DCF</button>
+        <button class="mst-btn" data-sec="screener">Screener</button>
       </div>
       <div class="app-content-scroll">
 
@@ -2188,11 +2250,11 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.75rem;">
                   <div style="font-family:var(--mono);font-size:.7rem;color:rgba(220,225,232,.35);letter-spacing:.05em;" id="sec-entity-label"></div>
                   <div style="display:flex;gap:.4rem;flex-wrap:wrap;" id="sec-filter-row">
-                    <button class="sec-filter-btn active" data-form="ALL" onclick="filterSecFilings('ALL')">All</button>
-                    <button class="sec-filter-btn" data-form="10-K" onclick="filterSecFilings('10-K')">10-K</button>
-                    <button class="sec-filter-btn" data-form="10-Q" onclick="filterSecFilings('10-Q')">10-Q</button>
-                    <button class="sec-filter-btn" data-form="8-K" onclick="filterSecFilings('8-K')">8-K</button>
-                    <button class="sec-filter-btn" data-form="DEF 14A" onclick="filterSecFilings('DEF 14A')">Proxy</button>
+                    <button class="sec-filter-btn active" data-form="ALL">All</button>
+                    <button class="sec-filter-btn" data-form="10-K">10-K</button>
+                    <button class="sec-filter-btn" data-form="10-Q">10-Q</button>
+                    <button class="sec-filter-btn" data-form="8-K">8-K</button>
+                    <button class="sec-filter-btn" data-form="DEF 14A">Proxy</button>
                   </div>
                 </div>
                 <div id="sec-filings-list" style="display:flex;flex-direction:column;gap:.5rem;"></div>
@@ -2351,23 +2413,29 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
               <!-- Sort/Filter controls -->
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
                 <span style="font-size:.72rem;color:var(--text5);text-transform:uppercase;letter-spacing:.07em;">Sort by:</span>
-                <button class="sa-sort-btn active" id="sa-sort-date" onclick="setSavedSort('date')">Date</button>
-                <button class="sa-sort-btn" id="sa-sort-stock" onclick="setSavedSort('stock')">Stock</button>
-                <button class="sa-sort-btn" id="sa-sort-type" onclick="setSavedSort('type')">Type</button>
+                <button class="sa-sort-btn active" id="sa-sort-date">Date</button>
+                <button class="sa-sort-btn" id="sa-sort-stock">Stock</button>
+                <button class="sa-sort-btn" id="sa-sort-type">Type</button>
                 <div style="flex:1;"></div>
-                <button class="sa-clear-btn" onclick="clearAllSaved()">Clear All</button>
+                <button class="sa-clear-btn" id="sa-clear-all-btn">Clear All</button>
               </div>
               <!-- Filter pills -->
               <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;" id="sa-type-filters">
-                <button class="sa-pill active" data-type="ALL" onclick="setSavedTypeFilter('ALL')">All</button>
-                <button class="sa-pill" data-type="price" onclick="setSavedTypeFilter('price')">Price Snapshot</button>
-                <button class="sa-pill" data-type="dcf" onclick="setSavedTypeFilter('dcf')">DCF</button>
-                <button class="sa-pill" data-type="projection" onclick="setSavedTypeFilter('projection')">Projection</button>
-                <button class="sa-pill" data-type="compare" onclick="setSavedTypeFilter('compare')">Compare</button>
-                <button class="sa-pill" data-type="note" onclick="setSavedTypeFilter('note')">Notes</button>
+                <button class="sa-pill active" data-type="ALL">All</button>
+                <button class="sa-pill" data-type="price">Price Snapshot</button>
+                <button class="sa-pill" data-type="dcf">DCF</button>
+                <button class="sa-pill" data-type="projection">Projection</button>
+                <button class="sa-pill" data-type="compare">Compare</button>
+                <button class="sa-pill" data-type="note">Notes</button>
               </div>
               <!-- List -->
-              <div id="sa-list"></div>
+              <div id="sa-guest-banner" style="display:none;background:rgba(200,136,42,.08);border:1px solid rgba(200,136,42,.2);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:.78rem;color:var(--ink3);">
+  <strong>You're not signed in.</strong> Saved analyses are stored locally on this device. <a href="/signup" style="color:var(--gold);font-weight:600;">Create a free account</a> to sync across devices.
+</div>
+<div id="sa-sync-banner" style="display:none;background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.18);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:.78rem;color:var(--ink3);">
+  <span style="color:#4ade80;font-weight:600;">✓ Signed in</span> — your saved analyses sync across devices automatically.
+</div>
+<div id="sa-list"></div>
               <div id="sa-empty" style="text-align:center;padding:2rem 0;color:var(--text5);font-size:.82rem;display:none;">
                 No saved analyses yet.<br>
                 <span style="font-size:.75rem;">Use the <strong style="color:var(--gold);">Save Analysis</strong> buttons on charts and models to bookmark results here.</span>
@@ -2513,11 +2581,11 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
     <div class="footer-inner">
       <div class="f-logo">Implied<em style="font-style:italic;color:var(--gold-d);">Lens</em></div>
       <div class="f-links">
-        <a href="#">Privacy Policy</a>
-        <a href="#">Terms of Service</a>
-        <a href="#">Disclaimer</a>
-        <a href="#">Contact</a>
-        <a href="#">Blog</a>
+        <a href="/privacy">Privacy Policy</a>
+        <a href="/terms">Terms of Service</a>
+        <a href="/data-sources">Data Sources</a>
+        <a href="/about">About</a>
+        <a href="/blog">Blog</a>
       </div>
       <div class="f-copy">© 2026 Implied Lens. Not financial advice.</div>
     </div>
@@ -2529,10 +2597,10 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
 <!-- Legacy modal (kept for openModal() calls) -->
 <div class="modal-bg" id="modal-bg" onclick="if(event.target===this)closeModal()">
   <div class="modal">
-    <button class="modal-close" onclick="closeModal()">✕</button>
+    <button class="modal-close" id="modal-close-btn">✕</button>
     <h3>Upgrade to Pro</h3>
     <p>Get full access to all Pro features with a 7-day free trial.</p>
-    <button class="btn-modal-cta" onclick="closeModal(); showUpgradeModal();">See plans →</button>
+    <button class="btn-modal-cta" id="modal-see-plans-btn">See plans →</button>
   </div>
 </div>
 
@@ -2545,7 +2613,7 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
 
     <!-- User info -->
     <div style="background:var(--cream2);border:1px solid var(--border2);border-radius:var(--r2);padding:1rem 1.25rem;margin-bottom:1.5rem;">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
+      <div class="modal-2col" style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
         <div>
           <div style="font-size:.65rem;font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);margin-bottom:.25rem;">Username</div>
           <div style="font-size:.9rem;font-weight:600;color:var(--ink);" id="am-username">—</div>
@@ -2570,7 +2638,7 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
     </div>
 
     <!-- Subscription button -->
-    <a href="/api/stripe/portal" style="display:block;text-align:center;background:var(--ink);color:var(--cream);padding:.6rem 1rem;border-radius:var(--r);font-size:.85rem;font-weight:500;text-decoration:none;margin-bottom:1.5rem;transition:background .15s;" onmouseover="this.style.background='var(--ink2)'" onmouseout="this.style.background='var(--ink)'" id="am-sub-btn">💳 Manage Subscription</a>
+    <a href="/api/stripe/portal" style="display:block;text-align:center;background:var(--ink);color:var(--cream);padding:.6rem 1rem;border-radius:var(--r);font-size:.85rem;font-weight:500;text-decoration:none;margin-bottom:1.5rem;transition:background .15s;" id="am-sub-btn">💳 Manage Subscription</a>
 
     <!-- Divider -->
     <div style="border-top:1px solid var(--border2);margin-bottom:1.25rem;"></div>
@@ -2580,7 +2648,7 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
     <div style="display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.5rem;">
       <input type="text" id="am-new-username" placeholder="New username" class="input-light" autocomplete="username" style="text-transform:lowercase;">
       <div id="am-username-msg" style="font-size:.78rem;min-height:1rem;"></div>
-      <button onclick="submitUsernameChange()" style="align-self:flex-start;background:var(--ink);color:var(--cream);border:none;padding:.55rem 1.25rem;border-radius:var(--r2);font-size:.82rem;font-weight:500;cursor:pointer;transition:background .15s;letter-spacing:.01em;" onmouseover="this.style.background='var(--ink2)'" onmouseout="this.style.background='var(--ink)'">Update Username</button>
+      <button id="am-submit-username" style="align-self:flex-start;background:var(--ink);color:var(--cream);border:none;padding:.55rem 1.25rem;border-radius:var(--r2);font-size:.82rem;font-weight:500;cursor:pointer;transition:background .15s;letter-spacing:.01em;">Update Username</button>
     </div>
 
     <!-- Divider -->
@@ -2593,7 +2661,7 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
       <input type="password" id="am-new-pw" placeholder="New password (min 8 characters)" class="input-light">
       <input type="password" id="am-confirm-pw" placeholder="Confirm new password" class="input-light">
       <div id="am-pw-msg" style="font-size:.78rem;min-height:1rem;"></div>
-      <button onclick="submitPasswordChange()" style="align-self:flex-start;background:var(--ink);color:var(--cream);border:none;padding:.55rem 1.25rem;border-radius:var(--r2);font-size:.82rem;font-weight:500;cursor:pointer;transition:background .15s;letter-spacing:.01em;" onmouseover="this.style.background='var(--ink2)'" onmouseout="this.style.background='var(--ink)'">Update Password</button>
+      <button id="am-submit-password" style="align-self:flex-start;background:var(--ink);color:var(--cream);border:none;padding:.55rem 1.25rem;border-radius:var(--r2);font-size:.82rem;font-weight:500;cursor:pointer;transition:background .15s;letter-spacing:.01em;">Update Password</button>
     </div>
   </div>
 </div>
@@ -2601,12 +2669,12 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
 <!-- Upgrade modal -->
 <div class="modal-bg" id="upgrade-modal-bg" onclick="if(event.target===this)closeUpgradeModal()">
   <div class="modal" style="max-width:480px;">
-    <button class="modal-close" onclick="closeUpgradeModal()">✕</button>
+    <button class="modal-close" id="upgrade-modal-close-btn">✕</button>
     <div style="font-family:var(--mono);font-size:.68rem;color:var(--gold-d);text-transform:uppercase;letter-spacing:.14em;margin-bottom:.5rem;">Pro Plan</div>
     <h3 style="font-family:var(--serif);font-size:1.6rem;letter-spacing:-.01em;margin-bottom:.5rem;">Unlock <em style="color:var(--gold-d);font-style:italic;">all</em> the tools.</h3>
     <p style="font-size:.9rem;color:var(--ink4);margin-bottom:1.5rem;">7-day free trial. No charge until day 8. Cancel anytime.</p>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1.25rem;">
+    <div class="modal-2col" style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1.25rem;">
       <div id="plan-monthly" class="plan-opt sel" onclick="selectUpgradePlan('monthly')" style="cursor:pointer;">
         <div class="plan-opt-name">Monthly</div>
         <div class="plan-opt-price">$7.99<span class="plan-opt-per">/mo</span></div>
@@ -2619,7 +2687,7 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
       </div>
     </div>
 
-    <ul style="list-style:none;margin-bottom:1.25rem;display:grid;grid-template-columns:1fr 1fr;gap:.3rem .75rem;">
+    <ul class="modal-2col" style="list-style:none;margin-bottom:1.25rem;display:grid;grid-template-columns:1fr 1fr;gap:.3rem .75rem;">
       <li style="font-size:.82rem;color:var(--ink3);">✓ DCF Valuation model</li>
       <li style="font-size:.82rem;color:var(--ink3);">✓ Advanced Projection</li>
       <li style="font-size:.82rem;color:var(--ink3);">✓ Stock Screener</li>
@@ -2630,11 +2698,34 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
 
     <button id="upgrade-cta-btn" class="btn-modal-cta" onclick="handleUpgradeClick()">Start 7-day free trial →</button>
     <div class="modal-note" style="margin-top:.75rem;">Card required to hold trial. You won't be charged until day 8.</div>
+
+    <!-- Shown instead of CTA when user is not logged in -->
+    <div id="upgrade-modal-auth" style="display:none;margin-top:.75rem;">
+      <div style="font-size:.8rem;color:var(--ink4);margin-bottom:.75rem;text-align:center;">Create a free account to start your trial.</div>
+      <div style="display:flex;flex-direction:column;gap:.5rem;">
+        <a id="upgrade-signup-btn" href="/signup" class="btn-modal-cta" style="text-align:center;text-decoration:none;">Create free account →</a>
+        <a id="upgrade-login-btn" href="/login" style="display:block;text-align:center;font-size:.82rem;color:var(--gold-d);margin-top:.25rem;">Already have an account? Sign in</a>
+      </div>
+      <div class="modal-note" style="margin-top:.75rem;">Free to join · No card required for the free plan</div>
+    </div>
+
+    <!-- Shown when email is not verified -->
+    <div id="upgrade-modal-unverified" style="display:none;margin-top:.75rem;background:rgba(255,160,0,.08);border:1px solid rgba(255,160,0,.25);border-radius:8px;padding:.85rem 1rem;font-size:.82rem;color:rgba(220,225,232,.8);">
+      ⚠️ Please verify your email before starting a trial.
+      <button onclick="resendVerification()" style="margin-left:.5rem;background:none;border:none;color:var(--gold-d);cursor:pointer;font-size:.82rem;font-weight:600;text-decoration:underline;">Resend email</button>
+    </div>
   </div>
 </div>
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
+
+<!-- Email verification banner -->
+<div id="verif-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:#2a1f00;border-bottom:1px solid rgba(200,136,42,.4);padding:.55rem 1rem;font-size:.8rem;color:rgba(220,225,232,.85);display:flex;align-items:center;justify-content:center;gap:.75rem;">
+  <span>📧 Please verify your email address to unlock all features.</span>
+  <button onclick="resendVerification()" style="background:rgba(200,136,42,.2);border:1px solid rgba(200,136,42,.4);color:#C8882A;border-radius:5px;padding:.2rem .65rem;font-size:.75rem;cursor:pointer;font-weight:600;">Resend email</button>
+  <button onclick="document.getElementById('verif-banner').style.display='none'" style="background:none;border:none;color:rgba(220,225,232,.35);cursor:pointer;font-size:1rem;line-height:1;padding:0 .25rem;">✕</button>
+</div>
 
 <style>
 
@@ -3305,10 +3396,10 @@ html[data-theme="dark"] .input-light::placeholder{color:rgba(220,225,232,.28)!im
 #nav-ticker-bar { display:none; align-items:center; gap:8px; }
 #nav-ticker-bar.visible { display:flex; }
 .ntb-sym { font-family:var(--mono); font-size:.82rem; font-weight:500; color:var(--gold); }
-.ntb-price { font-family:var(--mono); font-size:.82rem; color:var(--text); }
+.ntb-price { font-family:var(--mono); font-size:.82rem; color:rgba(220,225,232,.88); }
 .ntb-chg { font-family:var(--mono); font-size:.75rem; padding:2px 6px; border-radius:4px; }
-.ntb-pos { color:var(--green); background:var(--green-t); }
-.ntb-neg { color:var(--red); background:var(--red-t); }
+.ntb-pos { color:#4ade80; background:rgba(74,222,128,.12); }
+.ntb-neg { color:#f87171; background:rgba(248,113,113,.12); }
 
 /* Hide old accordion chrome in app-shell context */
 .app-section .acc-header { display:none!important; }
@@ -3379,12 +3470,13 @@ html[data-theme="dark"] #am-since    { color: var(--text2) !important; }
 html[data-theme="dark"] #am-plan     { color: var(--text) !important; }
 html[data-theme="dark"] #am-trial-info { color: var(--text3) !important; }
 html[data-theme="dark"] #acct-modal-bg div[style*="font-size:.78rem;font-weight:600"] { color: var(--text) !important; }
+#am-sub-btn:hover { background: var(--ink2) !important; }
 html[data-theme="dark"] #am-sub-btn { background: var(--card) !important; color: var(--text) !important; border: 1px solid var(--border2) !important; }
 html[data-theme="dark"] #am-sub-btn:hover { background: var(--border2) !important; }
-html[data-theme="dark"] #acct-modal-bg button[onclick*="submitPasswordChange"],
-html[data-theme="dark"] #acct-modal-bg button[onclick*="submitUsernameChange"] { background: var(--gold) !important; color: #fff !important; border: none !important; }
-html[data-theme="dark"] #acct-modal-bg button[onclick*="submitPasswordChange"]:hover,
-html[data-theme="dark"] #acct-modal-bg button[onclick*="submitUsernameChange"]:hover { background: var(--gold-d) !important; }
+html[data-theme="dark"] #am-submit-password,
+html[data-theme="dark"] #am-submit-username { background: var(--gold) !important; color: #fff !important; border: none !important; }
+html[data-theme="dark"] #am-submit-password:hover,
+html[data-theme="dark"] #am-submit-username:hover { background: var(--gold-d) !important; }
 html[data-theme="dark"] #am-pw-msg { color: var(--text3) !important; }
 html[data-theme="dark"] #am-username-msg { color: var(--text3) !important; }
 
@@ -3603,11 +3695,189 @@ html[data-theme="dark"] #am-username-msg { color: var(--text3) !important; }
   .home-feat-strip { grid-template-columns:1fr !important; }
   .hh-title { font-size:1.3rem !important; }
 }
+
+/* ══════════════════════════════════════════════════════
+   PRO GATE CARD  — contextual upgrade prompt
+══════════════════════════════════════════════════════ */
+.pro-gate-card {
+  max-width: 520px; margin: 1.5rem auto;
+  background: var(--card);
+  border: 1px solid rgba(200,136,42,.28);
+  border-radius: 16px; overflow: hidden;
+  box-shadow: 0 2px 20px rgba(0,0,0,.09);
+}
+/* ── Preview strip (blurred sample data) ── */
+.pgc-preview {
+  position: relative; padding: .9rem 1rem .6rem;
+  background: var(--bg); border-bottom: 1px solid var(--border2);
+  max-height: 130px; overflow: hidden;
+}
+.pgc-preview-blur { filter: blur(3px); pointer-events: none; user-select: none; opacity: .55; }
+.pgc-preview-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, transparent 10%, var(--card) 90%);
+}
+.pgc-preview-tag {
+  position: absolute; top: 7px; right: 9px;
+  font-size: .58rem; color: var(--ink5); letter-spacing: .04em;
+  background: var(--bg2); border: 1px solid var(--border2);
+  border-radius: 4px; padding: 2px 7px;
+}
+/* ── Body ── */
+.pgc-body { padding: 1.4rem 1.75rem 1.35rem; text-align: center; }
+.pgc-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: linear-gradient(135deg, var(--gold) 0%, #b87c10 100%);
+  color: #fff; font-size: .63rem; font-weight: 700;
+  letter-spacing: .07em; text-transform: uppercase;
+  padding: 3px 11px; border-radius: 100px; margin-bottom: .8rem;
+}
+.pgc-title {
+  font-family: var(--serif); font-size: 1.18rem; font-weight: 700;
+  color: var(--ink); margin-bottom: .9rem; line-height: 1.35;
+}
+.pgc-bullets {
+  list-style: none; padding: 0; margin: 0 0 1.35rem; text-align: left;
+}
+.pgc-bullets li {
+  font-size: .8rem; color: var(--ink3); line-height: 1.55;
+  padding: .2rem 0 .2rem 1.5rem; position: relative;
+}
+.pgc-bullets li::before {
+  content: "✓"; color: var(--gold); font-weight: 800;
+  position: absolute; left: 0; top: .2rem;
+}
+.pgc-btn {
+  display: block; width: 100%; background: var(--gold); color: #fff;
+  border: none; border-radius: 9px; padding: .82rem 1.6rem;
+  font-size: .92rem; font-weight: 700; cursor: pointer;
+  transition: background .15s, transform .1s; letter-spacing: .01em;
+}
+.pgc-btn:hover { background: var(--gold-d); transform: translateY(-1px); }
+.pgc-btn:active { transform: translateY(0); }
+.pgc-note { font-size: .68rem; color: var(--ink5); margin-top: .7rem; }
+/* ── Mini preview components ── */
+.pgc-tbl { width: 100%; border-collapse: collapse; font-size: .71rem; }
+.pgc-tbl th { color: var(--ink5); font-weight: 500; text-align: left; padding: 3px 6px 4px; border-bottom: 1px solid var(--border2); }
+.pgc-tbl td { color: var(--ink3); padding: 4px 6px; border-bottom: 1px solid rgba(200,200,200,.12); font-family: var(--mono); }
+.pgc-tbl td:first-child { font-family: var(--sans); color: var(--ink4); }
+.pgc-row { display: flex; justify-content: space-between; align-items: center; padding: 3px 2px; font-size: .71rem; border-bottom: 1px solid rgba(200,200,200,.12); }
+.pgc-row:last-child { border-bottom: none; }
+.pgc-row-label { color: var(--ink5); }
+.pgc-row-val { font-family: var(--mono); color: var(--ink); }
+
+/* ── Section loading / error states ── */
+.sec-state-wrap {
+  display: flex; align-items: center; gap: .6rem;
+  padding: 1.5rem; font-size: .82rem; color: var(--ink4);
+}
+.sec-state-error { color: var(--red); }
+
+/* ══════════════════════════════════════════════════════
+   MOBILE POLISH  (max-width: 640px)
+══════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  /* Chart toolbar — stack on mobile */
+  #app-chart-toolbar { flex-wrap: wrap; gap: 6px; padding: 8px 10px; }
+  #app-tf-strip { overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 6px 10px; }
+  .tf-btn { padding: 4px 8px; font-size: .68rem; }
+
+  /* Analysis result header */
+  .result-header { flex-wrap: wrap; gap: 8px; padding: 12px 12px 10px; }
+  .r-price-block { width: 100%; }
+  .r-price { font-size: 1.6rem; }
+
+  /* Metric cards — 2 per row on mobile */
+  .metrics-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+  .metric-card { padding: 8px 10px !important; }
+  .metric-val { font-size: 1rem !important; }
+
+  /* Tables — horizontal scroll */
+  .fin-table, table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  /* Sidebar — hide on mobile (bottom nav used instead) */
+  .app-sidebar { display: none !important; }
+  .app-content { margin-left: 0 !important; }
+
+  /* Pro gate card on mobile */
+  .pro-gate-card { max-width: 100%; margin: .75rem 0; border-radius: 12px; }
+  .pgc-body { padding: 1.1rem 1.1rem 1rem; }
+  .pgc-title { font-size: 1rem; }
+  .pgc-bullets li { font-size: .76rem; }
+  .pgc-btn { font-size: .85rem; padding: .75rem; }
+
+  /* Upgrade modal on mobile */
+  /* All .modal dialogs on mobile: full-width, scrollable, less padding */
+  .modal { width: calc(100% - 1.5rem) !important; max-height: 88vh; overflow-y: auto;
+           padding: 1.5rem 1.25rem !important; }
+  .modal h3 { font-size: 1.2rem !important; }
+  /* Collapse 2-column grids inside modals to single column */
+  .modal-2col { grid-template-columns: 1fr !important; }
+
+  /* Saved analyses cards */
+  .sa-card { padding: 10px 12px; }
+  .sa-card-actions { flex-wrap: wrap; gap: 6px; }
+
+  /* Screener table */
+  #screener-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .scr-table { min-width: 640px; }
+
+  /* DCF / Projection inputs */
+  .dcf-inputs, .proj-inputs { grid-template-columns: 1fr !important; }
+
+  /* News cards */
+  .news-card { flex-direction: column; }
+  .news-thumb { width: 100% !important; height: 120px !important; }
+
+  /* Market overview chart */
+  #market-overview-chart { height: 160px !important; }
+  .mo-idx-row { flex-wrap: wrap; gap: 8px; }
+  .mo-idx-item { min-width: calc(50% - 4px); }
+
+  /* Bottom nav — ensure it's above content, clear iPhone home bar */
+  .mobile-bottom-nav { z-index: 200;
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+    height: calc(56px + max(0px, env(safe-area-inset-bottom))); }
+  /* Toast: clear bottom nav + safe area */
+  #toast { bottom: calc(68px + max(0px, env(safe-area-inset-bottom))) !important; }
+
+  /* Search bar on mobile */
+  .main-ticker-form { flex-wrap: nowrap; }
+  #main-ticker { font-size: .85rem; }
+
+}
+
+@media (max-width: 400px) {
+  .metrics-grid { grid-template-columns: 1fr !important; }
+  .pgc-btn { width: 100%; }
+}
+
 </style>
 <script>
 /* ══════════════════════════════════════════════════════
    STATE
 ══════════════════════════════════════════════════════ */
+
+/* ── Client analytics ─────────────────────────────────────────────────── */
+const _trackQueue = [];
+let _csrfForTrack = null;
+
+async function track(event, props = {}) {
+  try {
+    // Reuse the CSRF token already stored in session (fetched at page load)
+    if (!_csrfForTrack) {
+      const r = await fetch('/api/csrf');
+      if (r.ok) { const d = await r.json(); _csrfForTrack = d.token || null; }
+    }
+    await fetch('/api/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': _csrfForTrack || '' },
+      body: JSON.stringify({ event, properties: props }),
+      keepalive: true,
+    });
+  } catch (_) { /* never crash the caller */ }
+}
+
 const S = {
   ticker: null, data: null, range: '1y',
   charts: {},
@@ -3616,21 +3886,300 @@ const S = {
   screenerData: null,
   screenerSort: { col: 'marketCap', dir: -1 },
   userPlan: 'free',   // 'free' | 'trial' | 'pro'
+  loggedIn: false,
   trialEndsAt: null,
   analystTarget: null,  // { mean, high, low } set by loadAnalyst()
+  csrfToken: null,      // fetched from GET /api/csrf on page load
 };
 const COLORS = ['#D4972E','#4a9fd4','#4ade80','#f87171'];
 // Keep this list in sync with the requirePro-gated API routes in routes/financials.js
 // and routes/market-data.js (screener).
-const PRO_SECTIONS = ['financials','advmetrics','projection','dcf','screener','reports','adveducation',
+const PRO_SECTIONS = ['financials','advmetrics','projection','dcf','screener','adveducation',
                       'earnings','secfilings','institutional','analyst','darkpool'];
 
 function isPro() { return S.userPlan === 'pro' || S.userPlan === 'trial'; }
 
+/* ══════════════════════════════════════════════════════
+   CENTRALISED SECTION HELPERS
+   sectionProGateHtml(id)   — contextual upgrade card
+   sectionLoadingHtml()     — spinner markup
+   sectionErrorHtml(msg)    — error markup
+   proAwareFetch(url,id)    — fetch that throws typed errors
+   handleSectionError(e,id,el) — routes errors to right UI
+══════════════════════════════════════════════════════ */
+/* ── Rich contextual Pro gate config ── */
+const PRO_GATE_CONFIG = {
+  financials: {
+    title: 'Full Financial Statements',
+    bullets: [
+      'Annual &amp; quarterly income statements — revenue, gross profit, net income',
+      'Balance sheet: assets, liabilities, and shareholder equity breakdown',
+      'Cash flow statement: operating, investing &amp; financing activities',
+      '5-year trend view to spot growth acceleration or deterioration early',
+    ],
+    preview: `<table class="pgc-tbl"><thead><tr><th>Income Statement</th><th>FY2023</th><th>FY2024</th></tr></thead><tbody>
+      <tr><td>Revenue</td><td>$383.3B</td><td>$391.0B</td></tr>
+      <tr><td>Gross Profit</td><td>$169.1B</td><td>$180.7B</td></tr>
+      <tr><td>Operating Income</td><td>$114.3B</td><td>$123.2B</td></tr>
+      <tr><td>Net Income</td><td>$97.0B</td><td>$93.7B</td></tr>
+      <tr><td>EPS (diluted)</td><td>$6.16</td><td>$6.11</td></tr>
+    </tbody></table>`,
+    previewLabel: 'AAPL FY2023–2024 · sample',
+  },
+  advmetrics: {
+    title: 'Advanced Risk &amp; Performance Metrics',
+    bullets: [
+      'Sharpe &amp; Sortino ratios, Alpha, Beta vs S&amp;P 500 benchmark',
+      'Value at Risk (VaR), Max Drawdown, and annualised volatility',
+      'Valuation history: P/E, P/B, P/S, EV/EBITDA trends over time',
+      'Identify over/undervalued conditions with full historical context',
+    ],
+    preview: `<div>
+      <div class="pgc-row"><span class="pgc-row-label">Sharpe Ratio (1Y)</span><span class="pgc-row-val">1.43</span></div>
+      <div class="pgc-row"><span class="pgc-row-label">Beta vs S&amp;P 500</span><span class="pgc-row-val">1.21</span></div>
+      <div class="pgc-row"><span class="pgc-row-label">Max Drawdown</span><span class="pgc-row-val">−18.2%</span></div>
+      <div class="pgc-row"><span class="pgc-row-label">Annualised Volatility</span><span class="pgc-row-val">22.4%</span></div>
+      <div class="pgc-row"><span class="pgc-row-label">P/E Ratio (TTM)</span><span class="pgc-row-val">28.4×</span></div>
+    </div>`,
+    previewLabel: 'AAPL · illustrative sample',
+  },
+  earnings: {
+    title: 'EPS History &amp; Beat/Miss Tracker',
+    bullets: [
+      'Quarterly EPS actuals vs Wall Street consensus estimates — every quarter',
+      'Beat/miss percentage and streak — how consistently it surprises',
+      'Revenue trend across the last 8+ reporting periods',
+      'Forward EPS estimates and analyst guidance revision history',
+    ],
+    preview: `<table class="pgc-tbl"><thead><tr><th>Quarter</th><th>Est. EPS</th><th>Act. EPS</th><th>Surprise</th></tr></thead><tbody>
+      <tr><td>Q1 FY25</td><td>$2.35</td><td>$2.40</td><td style="color:#4ade80">+2.1%</td></tr>
+      <tr><td>Q4 FY24</td><td>$1.60</td><td>$1.64</td><td style="color:#4ade80">+2.5%</td></tr>
+      <tr><td>Q3 FY24</td><td>$1.34</td><td>$1.40</td><td style="color:#4ade80">+4.5%</td></tr>
+      <tr><td>Q2 FY24</td><td>$1.50</td><td>$1.53</td><td style="color:#4ade80">+2.0%</td></tr>
+    </tbody></table>`,
+    previewLabel: 'AAPL recent quarters · sample',
+  },
+  secfilings: {
+    title: 'SEC EDGAR Filings — Direct Access',
+    bullets: [
+      'Annual reports (10-K): complete financials and business overview',
+      'Quarterly reports (10-Q): interim results every 3 months',
+      'Material event filings (8-K): immediate disclosure of major news',
+      'Proxy statements (DEF 14A): executive pay, board votes, governance',
+    ],
+    preview: `<table class="pgc-tbl"><tbody>
+      <tr><td>10-K</td><td>Annual Report</td><td>Nov 1, 2024</td></tr>
+      <tr><td>10-Q</td><td>Quarterly Report</td><td>Aug 2, 2024</td></tr>
+      <tr><td>8-K</td><td>Earnings Release</td><td>Aug 1, 2024</td></tr>
+      <tr><td>10-Q</td><td>Quarterly Report</td><td>May 3, 2024</td></tr>
+      <tr><td>DEF 14A</td><td>Proxy Statement</td><td>Jan 15, 2024</td></tr>
+    </tbody></table>`,
+    previewLabel: 'AAPL recent filings · sample',
+  },
+  institutional: {
+    title: 'Institutional Holdings &amp; Fund Activity',
+    bullets: [
+      'Top institutional holders with exact share counts and % of float owned',
+      'Recent additions, reductions, and newly opened positions each quarter',
+      'Total institutional ownership % and concentration risk at a glance',
+      'Dark pool OTC volume paired for a complete smart-money picture',
+    ],
+    preview: `<table class="pgc-tbl"><thead><tr><th>Institution</th><th>Shares</th><th>% Float</th></tr></thead><tbody>
+      <tr><td>Vanguard Group</td><td>1.29B</td><td>8.2%</td></tr>
+      <tr><td>BlackRock</td><td>1.02B</td><td>6.5%</td></tr>
+      <tr><td>Berkshire Hathaway</td><td>789M</td><td>5.0%</td></tr>
+      <tr><td>State Street</td><td>598M</td><td>3.8%</td></tr>
+    </tbody></table>`,
+    previewLabel: 'AAPL top holders · sample',
+  },
+  analyst: {
+    title: 'Analyst Price Targets &amp; Ratings',
+    bullets: [
+      'Consensus price target with upside/downside % from today\'s price',
+      'Buy / Hold / Sell breakdown across all covering Wall Street analysts',
+      'Individual firm targets — Goldman, Morgan Stanley, JPMorgan, and more',
+      'Historical target trend — where analysts stood 3, 6, and 12 months ago',
+    ],
+    preview: null,
+  },
+  darkpool: {
+    title: 'Dark Pool &amp; Institutional Order Flow',
+    bullets: [
+      'OTC dark pool volume as a % of total daily trading — updated daily',
+      'Large block trade alerts: institutions moving serious size',
+      'Dark pool ratio trend — a rising ratio signals institutional accumulation',
+      'Combine with holdings data for the fullest smart-money picture available',
+    ],
+    preview: null,
+  },
+  projection: {
+    title: '6-Input Advanced Projection Builder',
+    bullets: [
+      'Model bull, base, and bear price scenarios simultaneously',
+      'Six inputs: revenue growth, operating margin, P/E target, share count, and more',
+      '5-year forward price projection with annualised return estimates',
+      'Save projections and revisit them as the story changes quarter to quarter',
+    ],
+    preview: null,
+  },
+  dcf: {
+    title: 'DCF Intrinsic Value Model',
+    bullets: [
+      'Set your own revenue growth rate, margin, and discount rate (WACC)',
+      'Calculates fair value per share using discounted free cash flows',
+      'Shows whether the stock is over or undervalued at today\'s price',
+      'Sensitivity table: see exactly how fair value shifts with each assumption',
+    ],
+    preview: `<div style="text-align:center;padding:.4rem 0 .2rem;">
+      <div style="font-size:.63rem;color:var(--ink5);letter-spacing:.06em;text-transform:uppercase;margin-bottom:.3rem">Intrinsic Value Estimate</div>
+      <div style="font-size:1.9rem;font-family:var(--serif);color:var(--gold);font-weight:700;line-height:1">$198.40</div>
+      <div style="font-size:.7rem;color:var(--ink4);margin-top:.25rem">vs market $219.86 · <span style="color:#f87171">−9.8% overvalued</span></div>
+      <div style="margin-top:.65rem;display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;font-size:.67rem">
+        <div style="background:var(--bg2);border-radius:5px;padding:4px 3px"><div style="color:var(--ink5)">Growth</div><div style="color:var(--ink)">8.0%</div></div>
+        <div style="background:var(--bg2);border-radius:5px;padding:4px 3px"><div style="color:var(--ink5)">Margin</div><div style="color:var(--ink)">25%</div></div>
+        <div style="background:var(--bg2);border-radius:5px;padding:4px 3px"><div style="color:var(--ink5)">WACC</div><div style="color:var(--ink)">9.0%</div></div>
+      </div>
+    </div>`,
+    previewLabel: 'AAPL · illustrative DCF sample',
+  },
+  screener: {
+    title: 'Full Market Screener — 200+ Stocks',
+    bullets: [
+      'Filter by sector, market cap, P/E, P/B, beta, momentum, and 15+ metrics',
+      'Sort by revenue growth, dividend yield, or 1-year price performance',
+      'Click any result to instantly load the full stock analysis',
+      'Updated daily — always fresh fundamentals, never stale snapshots',
+    ],
+    preview: `<table class="pgc-tbl"><thead><tr><th>Stock</th><th>Sector</th><th>P/E</th><th>1Y Chg</th></tr></thead><tbody>
+      <tr><td>AAPL</td><td>Technology</td><td>28.4×</td><td style="color:#4ade80">+22%</td></tr>
+      <tr><td>MSFT</td><td>Technology</td><td>34.1×</td><td style="color:#4ade80">+18%</td></tr>
+      <tr><td>NVDA</td><td>Semiconductors</td><td>65.2×</td><td style="color:#4ade80">+82%</td></tr>
+      <tr><td>JPM</td><td>Financials</td><td>12.3×</td><td style="color:#4ade80">+41%</td></tr>
+    </tbody></table>`,
+    previewLabel: 'Sample screener results',
+  },
+  adveducation: {
+    title: 'Advanced Investor Education',
+    bullets: [
+      'Detailed DCF &amp; relative valuation modelling guides with worked examples',
+      'Options strategies: covered calls, protective puts, vertical spreads',
+      'Advanced technical analysis: volume profile, market structure, Fibonacci',
+      'Portfolio theory: correlation, position sizing, and risk-adjusted returns',
+    ],
+    preview: null,
+  },
+};
+
+function sectionProGateHtml(id) {
+  const cfg = PRO_GATE_CONFIG[id];
+  const ticker = (S && S.ticker) ? S.ticker : '';
+  const titleSuffix = ticker ? ' — ' + ticker : '';
+
+  if (!cfg) {
+    return `<div class="pro-gate-card"><div class="pgc-body">
+      <div class="pgc-badge">⚡ Pro Feature</div>
+      <div class="pgc-title">Pro Feature${titleSuffix}</div>
+      <button class="pgc-btn js-pgc-upgrade">Start 7-day free trial →</button>
+      <div class="pgc-note">7-day free trial · Card required · Cancel anytime</div>
+    </div></div>`;
+  }
+
+  const previewHtml = cfg.preview ? `
+    <div class="pgc-preview">
+      <div class="pgc-preview-blur">${cfg.preview}</div>
+      <div class="pgc-preview-overlay"></div>
+      ${cfg.previewLabel ? `<div class="pgc-preview-tag">${cfg.previewLabel}</div>` : ''}
+    </div>` : '';
+
+  return `<div class="pro-gate-card">
+    ${previewHtml}
+    <div class="pgc-body">
+      <div class="pgc-badge">⚡ Pro Feature</div>
+      <div class="pgc-title">${cfg.title}${titleSuffix}</div>
+      <ul class="pgc-bullets">
+        ${cfg.bullets.map(b => `<li>${b}</li>`).join('\n        ')}
+      </ul>
+      <button class="pgc-btn js-pgc-upgrade">Start 7-day free trial →</button>
+      <div class="pgc-note">7-day free trial · Card required · Cancel anytime</div>
+    </div>
+  </div>`;
+}
+
+function sectionLoadingHtml() {
+  return '<div class="sec-state-wrap"><span class="spinner"></span><span style="color:var(--ink4);font-size:.82rem;">Loading…</span></div>';
+}
+
+function sectionErrorHtml(msg) {
+  return `<div class="sec-state-wrap sec-state-error"><span style="font-size:1.1rem;">⚠</span><span>${msg}</span></div>`;
+}
+
+async function proAwareFetch(url, sectionId, opts) {
+  const res = await fetch(url, { credentials: 'same-origin', ...(opts||{}) });
+  if (res.status === 401) { const e = new Error('LOGIN_REQUIRED');  e.code = 'LOGIN_REQUIRED';  throw e; }
+  if (res.status === 403) { const e = new Error('PRO_REQUIRED');    e.code = 'PRO_REQUIRED';    e.sectionId = sectionId; throw e; }
+  if (res.status === 429) { const e = new Error('LIMIT_REACHED');   e.code = 'LIMIT_REACHED';   throw e; }
+  if (!res.ok)            { throw new Error(`Request failed (${res.status})`); }
+  return res;
+}
+
+function handleSectionError(e, sectionId, container) {
+  if (!container) return;
+  if (e.code === 'PRO_REQUIRED') {
+    container.innerHTML = sectionProGateHtml(sectionId);
+    container.style.display = 'block';
+    track('pro_gate_viewed', { section: sectionId, ticker: S.ticker || null });
+  } else if (e.code === 'LOGIN_REQUIRED') {
+    container.innerHTML = `<div class="pro-gate-card"><div class="pgc-body" style="padding:1.5rem 1.75rem">
+      <div class="pgc-badge" style="background:var(--ink2)">🔒 Sign in required</div>
+      <div class="pgc-title" style="font-size:1rem">Create a free account to continue</div>
+      <ul class="pgc-bullets">
+        <li>Free account: 5 analyses per day, price charts, projections</li>
+        <li>Cloud-saved analyses that sync across all your devices</li>
+        <li>Upgrade to Pro anytime for full access — no pressure</li>
+      </ul>
+      <a href="/signup" style="display:block;background:var(--ink);color:var(--cream);border-radius:9px;padding:.8rem 1.6rem;font-size:.9rem;font-weight:700;text-decoration:none;text-align:center;margin-bottom:.5rem;">Create free account →</a>
+      <div style="font-size:.75rem;color:var(--ink4);text-align:center">Already have an account? <a href="/login" style="color:var(--gold);font-weight:600;">Sign in</a></div>
+    </div></div>`;
+    container.style.display = 'block';
+  } else if (e.code === 'LIMIT_REACHED') {
+    container.innerHTML = `<div class="pro-gate-card"><div class="pgc-body">
+      <div class="pgc-badge">⚡ Daily limit reached</div>
+      <div class="pgc-title">You've used your 5 free analyses today</div>
+      <ul class="pgc-bullets">
+        <li>Unlimited stock analyses — no daily cap, ever</li>
+        <li>All Pro sections: Financials, DCF, Screener, SEC filings &amp; more</li>
+        <li>Advanced projections, institutional data, and analyst targets</li>
+        <li>Comes back tomorrow free, or unlock everything now</li>
+      </ul>
+      <button class="pgc-btn js-pgc-upgrade">Start 7-day free trial →</button>
+      <div class="pgc-note">7-day free trial · Card required · Cancel anytime</div>
+    </div></div>`;
+    container.style.display = 'block';
+  } else {
+    container.innerHTML = sectionErrorHtml(e.message || 'Failed to load data');
+    container.style.display = 'block';
+  }
+}
+
+
+
+
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 // ── Accordion open/close ──
 function openSection(id, skipProCheck) {
+  // For Pro sections: open the panel and show the gate card inline
+  // (still shows modal only if user explicitly triggers upgrade button)
   if (!skipProCheck && PRO_SECTIONS.includes(id) && !isPro()) {
-    showUpgradeModal(); return;
+    // Fall through — we'll render the gate card inside the section body
   }
   // Close all sections first
   document.querySelectorAll('.app-section').forEach(el => {
@@ -3660,12 +4209,16 @@ function openSection(id, skipProCheck) {
   if (scroll) scroll.scrollTop = 0;
   // Auto-load data tabs
   const t = S.ticker;
-  if      (id === 'financials')  { if(t) loadFinancials(t); }
+  if (!isPro() && PRO_SECTIONS.includes(id) && id !== 'reports') {
+    // Show contextual gate card inline — user can dismiss and see upgrade options
+    const gateBody = document.getElementById('body-' + id);
+    if (gateBody) { gateBody.innerHTML = sectionProGateHtml(id); gateBody.style.display = 'block'; }
+  } else if (id === 'financials')  { if(t) loadFinancials(t); }
   else if (id === 'advmetrics')  { if(t) loadAdvMetrics(t); }
   else if (id === 'earnings')    { if(t) loadEarnings(t); }
   else if (id === 'secfilings')     { if(t) loadSecFilings(t); }
   else if (id === 'institutional')  { if(t) loadInstitutional(t); }
-  else if (id === 'screener')    { if(isPro()) loadScreener(); }
+  else if (id === 'screener')    { loadScreener(); }
   else if (id === 'reports')     { setTimeout(renderSavedAnalyses, 100); }
 }
 
@@ -3781,6 +4334,7 @@ function setChartType(type, btn) {
 ===================================================== */
 var _savedSort = 'date';
 var _savedTypeFilter = 'ALL';
+var _saListEntries = [];
 
 const SA_KEY = 'impliedLens_savedAnalyses';
 
@@ -3835,10 +4389,10 @@ function saveAnalysis(type) {
   toast('Saved ✓', 'green');
   renderSavedAnalyses();
   // Persist to DB if logged in
-  if (S.userPlan && S.userPlan !== 'free_guest') {
+  if (S.loggedIn) {
     fetch('/api/saves', {
       method: 'POST', credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': S.csrfToken||'' },
       body: JSON.stringify({ ticker: entry.ticker || S.ticker, type: entry.type, label: entry.title, data: entry })
     }).catch(() => {});
   }
@@ -3863,7 +4417,7 @@ function deleteSavedAnalysis(id) {
   renderSavedAnalyses();
   // Also delete from DB if it has a DB id
   if (entry && entry._dbId) {
-    fetch('/api/saves/' + entry._dbId, { method:'DELETE', credentials:'same-origin' }).catch(() => {});
+    fetch('/api/saves/' + entry._dbId, { method:'DELETE', credentials:'same-origin', headers:{'X-CSRF-Token': S.csrfToken||''} }).catch(() => {});
   }
 }
 
@@ -3871,7 +4425,7 @@ function clearAllSaved() {
   if (!confirm('Clear all saved analyses? This cannot be undone.')) return;
   putSavedAnalyses([]);
   renderSavedAnalyses();
-  fetch('/api/saves', { method:'DELETE', credentials:'same-origin' }).catch(() => {});
+  fetch('/api/saves', { method:'DELETE', credentials:'same-origin', headers:{'X-CSRF-Token': S.csrfToken||''} }).catch(() => {});
 }
 
 function loadSavedAnalysis(entry) {
@@ -3895,6 +4449,11 @@ function renderSavedAnalyses() {
   const list = document.getElementById('sa-list');
   const empty = document.getElementById('sa-empty');
   if (!list) return;
+  // Show guest/sync notice
+  const guestBanner = document.getElementById('sa-guest-banner');
+  const syncBanner  = document.getElementById('sa-sync-banner');
+  if (guestBanner) guestBanner.style.display = !S.loggedIn ? 'block' : 'none';
+  if (syncBanner)  syncBanner.style.display  = S.loggedIn ? 'block' : 'none';
 
   let all = getSavedAnalyses();
   if (_savedTypeFilter !== 'ALL') all = all.filter(a => a.type === _savedTypeFilter);
@@ -3917,20 +4476,21 @@ function renderSavedAnalyses() {
   const typeLabels = { price:'Price Snapshot', dcf:'DCF', projection:'Projection', compare:'Compare', note:'Note' };
   const typeClass  = { price:'sa-type-price', dcf:'sa-type-dcf', projection:'sa-type-projection', compare:'sa-type-compare', note:'sa-type-note' };
 
-  list.innerHTML = all.map(entry => {
+  _saListEntries = all;
+  list.innerHTML = all.map((entry, idx) => {
     const d = new Date(entry.date);
     const dateStr = d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})
       + ' ' + d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
     const label = typeLabels[entry.type] || entry.type;
     const cls   = typeClass[entry.type] || 'sa-type-note';
     return `<div class="sa-card">
-      <span class="sa-type-badge ${cls}">${label}</span>
+      <span class="sa-type-badge ${cls}">${escapeHtml(label)}</span>
       <div class="sa-card-body">
-        <div class="sa-card-title">${entry.title}</div>
-        <div class="sa-card-meta">${dateStr}${entry.ticker ? ' · '+entry.ticker : ''}</div>
+        <div class="sa-card-title">${escapeHtml(entry.title)}</div>
+        <div class="sa-card-meta">${escapeHtml(dateStr)}${entry.ticker ? ' · '+escapeHtml(entry.ticker) : ''}</div>
         <div class="sa-card-actions">
-          <button class="sa-btn" onclick="loadSavedAnalysis(${JSON.stringify(entry).replace(/"/g,'&quot;')})">↩ Load</button>
-          <button class="sa-del-btn" onclick="deleteSavedAnalysis(${entry.id})">✕ Delete</button>
+          <button class="sa-btn" data-sa-action="load" data-sa-idx="${idx}">↩ Load</button>
+          <button class="sa-del-btn" data-sa-action="del" data-sa-idx="${idx}">✕ Delete</button>
         </div>
       </div>
     </div>`;
@@ -3947,8 +4507,15 @@ function exportPDF() {
 
 // switchTab → now handled by toggleSection/openSection above
 
-function showUpgradeModal(annual) { document.getElementById('upgrade-modal-bg').classList.add('show'); if(annual) selectUpgradePlan('annual'); else selectUpgradePlan('monthly'); }
-function closeUpgradeModal() { document.getElementById('upgrade-modal-bg').classList.remove('show'); }
+function showUpgradeModal(annual, source) {
+  document.getElementById('upgrade-modal-bg').classList.add('show');
+  if(annual) selectUpgradePlan('annual'); else selectUpgradePlan('monthly');
+  track('upgrade_modal_opened', { source: source || 'unknown', ticker: S.ticker || null });
+}
+function closeUpgradeModal() {
+  document.getElementById('upgrade-modal-bg').classList.remove('show');
+  _resetUpgradeModal();
+}
 
 /* ── Account Settings modal ── */
 async function openAccountModal() {
@@ -4015,7 +4582,7 @@ async function submitUsernameChange() {
   try {
     const r = await fetch('/api/auth/change-username', {
       method:'POST', credentials:'same-origin',
-      headers:{'Content-Type':'application/json'},
+      headers:{'Content-Type':'application/json','X-CSRF-Token': S.csrfToken||''},
       body: JSON.stringify({ username: val }),
     });
     const data = await r.json();
@@ -4047,7 +4614,7 @@ async function submitPasswordChange() {
   try {
     const r = await fetch('/api/auth/change-password', {
       method:'POST', credentials:'same-origin',
-      headers:{'Content-Type':'application/json'},
+      headers:{'Content-Type':'application/json','X-CSRF-Token': S.csrfToken||''},
       body: JSON.stringify({ currentPassword:cur, newPassword:nw }),
     });
     const data = await r.json();
@@ -4064,7 +4631,7 @@ async function startTrial(annual) {
   try {
     const r = await fetch('/api/stripe/create-checkout', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': S.csrfToken||'' },
       credentials: 'same-origin',
       body: JSON.stringify({ annual: !!annual }),
     });
@@ -4113,10 +4680,49 @@ function selectUpgradePlan(plan) {
   document.getElementById('plan-annual').classList.toggle('sel', plan === 'annual');
 }
 async function handleUpgradeClick() {
+  // Guest: show inline auth instead of failing at Stripe
+  if (!S.loggedIn) {
+    track('checkout_requires_login', { plan: _upgradePlan });
+    sessionStorage.setItem('pendingUpgradePlan', _upgradePlan);
+    // Attach plan to signup/login links so they redirect back
+    const signupBtn = document.getElementById('upgrade-signup-btn');
+    const loginBtn  = document.getElementById('upgrade-login-btn');
+    if (signupBtn) {
+      signupBtn.href = `/signup?next=${encodeURIComponent('/?resume_checkout=1')}`;
+      signupBtn.onclick = () => track('signup_started_from_upgrade', { plan: _upgradePlan });
+    }
+    if (loginBtn) {
+      loginBtn.href = `/login?next=${encodeURIComponent('/?resume_checkout=1')}`;
+      loginBtn.onclick = () => track('login_started_from_upgrade', { plan: _upgradePlan });
+    }
+    document.getElementById('upgrade-cta-btn').style.display = 'none';
+    document.querySelector('#upgrade-modal-bg .modal-note').style.display = 'none';
+    document.getElementById('upgrade-modal-auth').style.display = 'block';
+    document.getElementById('upgrade-modal-unverified').style.display = 'none';
+    return;
+  }
+  // Logged in but email not verified
+  if (!S.emailVerified) {
+    track('checkout_blocked_unverified', { plan: _upgradePlan });
+    document.getElementById('upgrade-modal-unverified').style.display = 'block';
+    return;
+  }
   const btn = document.getElementById('upgrade-cta-btn');
   btn.disabled = true; btn.textContent = 'Redirecting to checkout…';
   await startTrial(_upgradePlan === 'annual');
   btn.disabled = false; btn.textContent = 'Start 7-day free trial →';
+}
+
+// Reset modal state when closed
+function _resetUpgradeModal() {
+  const cta = document.getElementById('upgrade-cta-btn');
+  const note = document.querySelector('#upgrade-modal-bg .modal-note');
+  if (cta)  { cta.style.display = ''; cta.disabled = false; cta.textContent = 'Start 7-day free trial →'; }
+  if (note) note.style.display = '';
+  const authDiv  = document.getElementById('upgrade-modal-auth');
+  const unverifDiv = document.getElementById('upgrade-modal-unverified');
+  if (authDiv)    authDiv.style.display = 'none';
+  if (unverifDiv) unverifDiv.style.display = 'none';
 }
 
 /* ══════════════════════════════════════════════════════
@@ -4126,6 +4732,19 @@ function toast(msg, type='') {
   const t=document.getElementById('toast');
   t.textContent=msg; t.className='toast show '+type;
   setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+async function resendVerification() {
+  try {
+    const r = await fetch('/api/auth/resend-verification', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': S.csrfToken||'' },
+      credentials: 'same-origin',
+    });
+    const d = await r.json();
+    if (r.ok) toast('Verification email sent! Check your inbox.', 'ok');
+    else      toast(d.error || 'Could not send email.', 'err');
+  } catch(_) { toast('Network error.', 'err'); }
 }
 
 /* ══════════════════════════════════════════════════════
@@ -4359,13 +4978,16 @@ async function fetchAndRender() {
   document.getElementById('analyze-loading').style.display='flex';
   document.getElementById('analyze-error').style.display='none';
   document.getElementById('stock-result').style.display='none';
+  track('analyze_started', { ticker });
   try {
     const result=await yahooFetch(ticker,S.range);
     S.ticker=ticker; S.data=result; S.analystTarget=null;
     renderStock(result,ticker);
+    track('analyze_completed', { ticker });
     toast(`${ticker} loaded ✓`,'green'); const _fg=document.getElementById('featured-grid'); if(_fg) _fg.style.display='none'; const _tw=document.getElementById('tool-welcome'); if(_tw) _tw.style.display='none'; const _fl=document.getElementById('fg-label'); if(_fl) _fl.style.display='none';
   } catch(e) {
     if (e.message === 'LIMIT_REACHED') {
+      track('daily_limit_reached', { ticker });
       showUpgradeModal();
       const err=document.getElementById('analyze-error');
       err.innerHTML=`<span>You've used all <strong>${e.limitData?.limit||5} free analyses</strong> for today. <a href="#" onclick="showUpgradeModal();return false;" style="color:var(--gold);font-weight:600;">Upgrade to Pro</a> for unlimited access.</span>`;
@@ -4619,7 +5241,7 @@ function getSectorBenchmark(sector) {
 /* ══ HOME DASHBOARD JS v3 ══ */
 let _moversCache={},_moversActive='gainers',_marketOverviewChart=null,_globeRAF=null;
 
-function heroSearch(){const v=(document.getElementById('hero-search')||{}).value;if(!v||!v.trim())return;const mi=document.getElementById('main-ticker');if(mi)mi.value=v.trim().toUpperCase();if(typeof fetchAndRender==='function')fetchAndRender();}
+function heroSearch(){const v=(document.getElementById('hero-search')||{}).value;if(!v||!v.trim())return;const mi=document.getElementById('main-ticker');if(mi)mi.value=v.trim().toUpperCase();navGoTo('analyze');if(typeof fetchAndRender==='function')fetchAndRender();}
 function heroLoadTicker(t){const mi=document.getElementById('main-ticker');if(mi)mi.value=t;navGoTo('analyze');if(typeof fetchAndRender==='function')fetchAndRender();}
 (function(){const hi=document.getElementById('hero-search');if(hi)hi.addEventListener('keydown',e=>{if(e.key==='Enter')heroSearch();});})();
 
@@ -4795,7 +5417,7 @@ async function loadHomeTickerStrip(){
   const TICKERS=['AAPL','NVDA','MSFT','TSLA','AMZN','META','GOOGL','SPY'];
   const LOGOS={AAPL:'https://www.google.com/s2/favicons?sz=32&domain=apple.com',NVDA:'https://www.google.com/s2/favicons?sz=32&domain=nvidia.com',MSFT:'https://www.google.com/s2/favicons?sz=32&domain=microsoft.com',TSLA:'https://www.google.com/s2/favicons?sz=32&domain=tesla.com',AMZN:'https://www.google.com/s2/favicons?sz=32&domain=amazon.com',META:'https://www.google.com/s2/favicons?sz=32&domain=meta.com',GOOGL:'https://www.google.com/s2/favicons?sz=32&domain=google.com',SPY:'https://www.google.com/s2/favicons?sz=32&domain=ssga.com'};
   el.innerHTML=TICKERS.map(t=>`<div class="ht-card" style="opacity:.3;"><div class="ht-sym">${t}</div></div>`).join('');
-  const results=await Promise.allSettled(TICKERS.map(t=>fetch(`/api/quote/${t}?range=1d`,{credentials:'same-origin'}).then(r=>r.ok?r.json():null).catch(()=>null)));
+  const results=await Promise.allSettled(TICKERS.map(t=>fetch(`/api/quote/${t}?range=1d&preview=1`,{credentials:'same-origin'}).then(r=>r.ok?r.json():null).catch(()=>null)));
   const watchData=[];
   el.innerHTML=results.map((res,i)=>{
     const t=TICKERS[i],data=res.status==='fulfilled'?res.value:null,meta=data?.chart?.result?.[0]?.meta,closes=data?.chart?.result?.[0]?.indicators?.quote?.[0]?.close?.filter(x=>x!=null)||[];
@@ -4823,7 +5445,7 @@ async function loadMarketOverview(range,btn){
   const intervalMap={'1d':'5m','5d':'15m','1mo':'1d','3mo':'1d','ytd':'1d','1y':'1d','5y':'1wk'};
   const interval=intervalMap[range||'1d']||'1d';
   const results=await Promise.allSettled(IDXS.map(idx=>
-    fetch(`/api/quote/${encodeURIComponent(idx.t)}?range=${range||'1d'}&interval=${interval}`,{credentials:'same-origin'})
+    fetch(`/api/quote/${encodeURIComponent(idx.t)}?range=${range||'1d'}&interval=${interval}&preview=1`,{credentials:'same-origin'})
     .then(r=>r.ok?r.json():null).catch(()=>null)
   ));
   let labels=[];
@@ -4954,6 +5576,8 @@ async function loadMarketOverview(range,btn){
 
 function fetchBreadth(results){
   try{
+    // Advancing / declining: directional estimate based on whether SPY is up or down.
+    // These are approximations — real breadth data requires a paid data feed.
     const sp=results?.[0]?.value?.chart?.result?.[0]?.meta;
     const up=sp?((sp.regularMarketPrice??0)>=(sp.chartPreviousClose??0)):true;
     const adv=up?3214:2123, dec=up?2123:3214, total=adv+dec;
@@ -4965,26 +5589,36 @@ function fetchBreadth(results){
     if(decEl)decEl.textContent=dec.toLocaleString();
     if(advBar)advBar.style.width=advPct+'%';
     if(decBar)decBar.style.width=decPct+'%';
-    if(advPctEl)advPctEl.textContent=advPct+'%';
-    if(decPctEl)decPctEl.textContent=decPct+'%';
+    // Label as estimate so users know these are not exact NYSE breadth counts
+    if(advPctEl)advPctEl.textContent=advPct+'% (est.)';
+    if(decPctEl)decPctEl.textContent=decPct+'% (est.)';
+    // New highs/lows and volume require a dedicated data feed — show dashes
     const hiEl=document.getElementById('mo-highs'),loEl=document.getElementById('mo-lows');
     const hiSub=document.getElementById('mo-highs-sub'),loSub=document.getElementById('mo-lows-sub');
     const volEl=document.getElementById('mo-vol'),volSub=document.getElementById('mo-vol-sub');
-    if(hiEl)hiEl.textContent='126';
-    if(loEl)loEl.textContent='28';
-    if(hiSub)hiSub.innerHTML='<span style="color:#4ade80;">↗ vs prev. day +18%</span>';
-    if(loSub)loSub.innerHTML='<span style="color:#f87171;">↘ vs prev. day -12%</span>';
-    if(volEl)volEl.textContent='1.42B';
-    if(volSub)volSub.innerHTML='<span style="color:#4ade80;">↑ vs 5D avg +8.7%</span>';
+    if(hiEl)hiEl.textContent='—';
+    if(loEl)loEl.textContent='—';
+    if(hiSub)hiSub.textContent='52-week highs';
+    if(loSub)loSub.textContent='52-week lows';
+    if(volEl)volEl.textContent='—';
+    if(volSub)volSub.textContent='NYSE volume';
     const ts=document.getElementById('mo-timestamp');
     if(ts)ts.textContent=`Market data as of ${new Date().toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true})} ET`;
   }catch(_){}
-  fetch('/api/quote/%5EVIX?range=1d',{credentials:'same-origin'}).then(r=>r.ok?r.json():null).catch(()=>null).then(d=>{
-    const v=d?.chart?.result?.[0]?.meta?.regularMarketPrice;
+  // VIX — live from Finnhub via our own server
+  fetch('/api/quote/%5EVIX?range=1d&preview=1',{credentials:'same-origin'}).then(r=>r.ok?r.json():null).catch(()=>null).then(d=>{
+    const meta=d?.chart?.result?.[0]?.meta;
+    const v=meta?.regularMarketPrice;
     if(v){
       const el=document.getElementById('mo-vix'),sub=document.getElementById('mo-vix-sub');
       if(el){el.textContent=v.toFixed(1);el.className=`mo-bv2-val ${v>25?'dn':v>18?'neu':'up'}`;}
-      if(sub){const prev=v+0.9;const chg=(v-prev).toFixed(1),pct=((v-prev)/prev*100).toFixed(2);sub.innerHTML=`<span style="color:${v<prev?'#4ade80':'#f87171'}">${chg>=0?'+':''}${chg} (${pct}%)</span>`;}
+      const prev=meta?.chartPreviousClose||meta?.previousClose;
+      if(sub && prev){
+        const chg=v-prev, pct=(chg/prev*100);
+        sub.innerHTML=`<span style="color:${chg<=0?'#4ade80':'#f87171'}">${chg>=0?'+':''}${chg.toFixed(1)} (${pct>=0?'+':''}${pct.toFixed(2)}%)</span>`;
+      } else if(sub){
+        sub.textContent='Volatility index';
+      }
     }
   });
 }
@@ -5075,7 +5709,7 @@ async function loadFeaturedGrid() {
   // Fetch all tickers in parallel
   const results = await Promise.allSettled(
     FEATURED_TICKERS.map(t =>
-      fetch(`/api/quote/${t}?range=1d`, { credentials:'same-origin' })
+      fetch(`/api/quote/${t}?range=1d&preview=1`, { credentials:'same-origin' })
         .then(r => r.ok ? r.json() : null)
         .catch(() => null)
     )
@@ -5522,7 +6156,7 @@ async function runCompare() {
   try {
     const [results, analystArr] = await Promise.all([
       Promise.all(tickers.map(t=>yahooFetch(t,'1y'))),
-      Promise.all(tickers.map(t=>fetch('/api/analyst/'+encodeURIComponent(t),{credentials:'same-origin'}).then(r=>r.json()).catch(()=>({}))))
+      Promise.all(tickers.map(t=>proAwareFetch('/api/analyst/'+encodeURIComponent(t),'compare').then(r=>r.json()).catch(()=>({}))))
     ]);
     buildCompareTable(tickers, results, analystArr);
     buildPerfChart(tickers, results);
@@ -5949,9 +6583,9 @@ async function renderNews(ticker, name) {
       let cls = 'news-neu';
       if (item.sentiment === 'positive' || POS_WORDS.test(h)) cls = 'news-pos';
       else if (item.sentiment === 'negative' || NEG_WORDS.test(h)) cls = 'news-neg';
-      return `<a class="news-item ${cls}" href="${item.url}" target="_blank" rel="noopener">
-        <div class="news-headline">${h}</div>
-        <div class="news-meta">${item.source || ''} · ${item.datetime ? new Date(item.datetime * 1000).toLocaleDateString() : ''}</div>
+      return `<a class="news-item ${cls}" href="${escapeHtml(item.url)}" target="_blank" rel="noopener">
+        <div class="news-headline">${escapeHtml(h)}</div>
+        <div class="news-meta">${escapeHtml(item.source || '')} · ${item.datetime ? new Date(item.datetime * 1000).toLocaleDateString() : ''}</div>
       </a>`;
     }).join('');
   } catch(e) {
@@ -5973,7 +6607,7 @@ async function loadFinancials(ticker) {
   if(error)   error.style.display='none';
   if(cont)    cont.style.display='none';
   try {
-    const res  = await fetch('/api/financials/' + ticker, { credentials:'same-origin' });
+    const res  = await proAwareFetch('/api/financials/' + ticker, 'financials');
     const data = await res.json();
 
     // ETF / fund: no XBRL statements available
@@ -6074,8 +6708,8 @@ async function loadFinancials(ticker) {
     if(cont)    cont.style.display='block';
   } catch(e) {
     if(loading) loading.style.display='none';
-    if(error)   { error.style.display='block'; error.textContent='Could not load financials: ' + e.message; }
-    console.error('financials error', e);
+    handleSectionError(e, 'financials', cont);
+    if(e.code !== 'PRO_REQUIRED' && e.code !== 'LOGIN_REQUIRED') console.error('financials error', e);
   }
 }
 
@@ -6107,8 +6741,8 @@ async function loadAdvMetrics(ticker) {
   if(error)   error.style.display='none';
   try {
     const [finRes, metRes] = await Promise.all([
-      fetch('/api/financials/' + ticker, {credentials:'same-origin'}),
-      fetch('/api/metrics/' + ticker, {credentials:'same-origin'}),
+      proAwareFetch('/api/financials/' + ticker, 'advmetrics'),
+      proAwareFetch('/api/metrics/' + ticker, 'advmetrics'),
     ]);
     const finData = await finRes.json();
     const metData = await metRes.json();
@@ -6190,7 +6824,7 @@ async function loadAdvMetrics(ticker) {
     if(cont) cont.innerHTML = html;
   } catch(e) {
     if(loading) loading.style.display='none';
-    if(error) { error.style.display='block'; error.textContent='Could not load metrics: '+e.message; }
+    handleSectionError(e, 'advmetrics', cont);
     console.error('advmetrics error', e);
   }
 }
@@ -6210,8 +6844,8 @@ async function loadInstitutional(ticker) {
 
   try {
     const [dpRes, instRes] = await Promise.all([
-      fetch('/api/darkpool/'+encodeURIComponent(ticker),{credentials:'same-origin'}),
-      fetch('/api/institutional/'+encodeURIComponent(ticker),{credentials:'same-origin'})
+      proAwareFetch('/api/darkpool/'+encodeURIComponent(ticker),'institutional'),
+      proAwareFetch('/api/institutional/'+encodeURIComponent(ticker),'institutional'),
     ]);
     const dpData   = await dpRes.json();
     const instData = await instRes.json();
@@ -6293,8 +6927,9 @@ async function loadInstitutional(ticker) {
     }
   } catch(e) {
     if(loading) loading.style.display='none';
-    console.error('institutional/darkpool error', e);
-    if(dpCards) dpCards.innerHTML = '<div style="color:#f87171;font-size:.8rem;">Failed to load dark pool data.</div>';
+    const instWrap = document.getElementById('body-institutional');
+    handleSectionError(e, 'institutional', instWrap);
+    if(e.code !== 'PRO_REQUIRED' && e.code !== 'LOGIN_REQUIRED') console.error('institutional/darkpool error', e);
   }
 }
 
@@ -6313,11 +6948,12 @@ async function loadEarnings(ticker) {
   try {
     // Fetch forward quarterly estimates alongside historical
     const [res, estRes] = await Promise.allSettled([
-      fetch('/api/earnings/' + ticker, {credentials:'same-origin'}),
-      fetch('/api/estimates/' + ticker, {credentials:'same-origin'}),
+      proAwareFetch('/api/earnings/' + ticker, 'earnings'),
+      proAwareFetch('/api/estimates/' + ticker, 'earnings'),
     ]);
-    const data = res.status==='fulfilled' && res.value.ok ? await res.value.json() : [];
-    const estData = estRes.status==='fulfilled' && estRes.value.ok ? await estRes.value.json() : {};
+    if (res.status === 'rejected') throw res.reason;
+    const data = res.status==='fulfilled' ? await res.value.json() : [];
+    const estData = estRes.status==='fulfilled' ? await estRes.value.json().catch(()=>({})) : {};
     const fwdQ = estData.fwdQuarterly || [];
 
     // Render forward estimates banner if available
@@ -6507,10 +7143,10 @@ async function loadSecFilings(ticker) {
   if(cont)    cont.style.display='none';
 
   try {
-    const r = await fetch('/api/sec/' + encodeURIComponent(ticker), { credentials:'same-origin' });
+    const r = await proAwareFetch('/api/sec/' + encodeURIComponent(ticker), 'secfilings');
     const d = await r.json();
     if(loading) loading.style.display='none';
-    if (!r.ok || !d.filings) throw new Error(d.error || 'No filings found');
+    if (!d.filings) throw new Error(d.error || 'No filings found');
 
     if(entityLbl) entityLbl.textContent = d.entity + (d.cik ? '  ·  CIK ' + d.cik : '');
 
@@ -6522,7 +7158,7 @@ async function loadSecFilings(ticker) {
     if(cont) cont.style.display='block';
   } catch(e) {
     if(loading) loading.style.display='none';
-    if(errEl)   { errEl.textContent = 'Could not load SEC filings: ' + e.message; errEl.style.display='block'; }
+    handleSectionError(e, 'secfilings', errEl || cont);
   }
 }
 
@@ -6583,7 +7219,165 @@ document.addEventListener('click', function(e) {
   if (menu && menu.classList.contains('open') && !menu.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
     menu.classList.remove('open');
   }
+  // Pro gate upgrade CTAs (dynamically injected .js-pgc-upgrade buttons)
+  if (e.target.closest('.js-pgc-upgrade')) {
+    const card = e.target.closest('[data-sec]') || e.target.closest('.section-content') || e.target.closest('.pro-gate-card');
+    const sec = card ? (card.dataset.sec || card.id || 'gate_card') : 'gate_card';
+    showUpgradeModal(false, 'pro_gate_' + sec);
+  }
 });
+
+// ── Event delegation: saved analyses load/delete ──
+(function() {
+  function _attachSaListDelegation() {
+    var saList = document.getElementById('sa-list');
+    if (!saList) return;
+    saList.addEventListener('click', function(e) {
+      var btn = e.target.closest('[data-sa-action]');
+      if (!btn) return;
+      var idx = parseInt(btn.dataset.saIdx, 10);
+      var entry = _saListEntries[idx];
+      if (!entry) return;
+      if (btn.dataset.saAction === 'load') {
+        loadSavedAnalysis(entry);
+      } else if (btn.dataset.saAction === 'del') {
+        deleteSavedAnalysis(entry.id);
+      }
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _attachSaListDelegation);
+  } else {
+    _attachSaListDelegation();
+  }
+})();
+
+// ── Account modal buttons: submitUsernameChange / submitPasswordChange ──
+(function() {
+  function _attachAccountButtons() {
+    var unBtn = document.getElementById('am-submit-username');
+    var pwBtn = document.getElementById('am-submit-password');
+    if (unBtn) unBtn.addEventListener('click', submitUsernameChange);
+    if (pwBtn) pwBtn.addEventListener('click', submitPasswordChange);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _attachAccountButtons);
+  } else {
+    _attachAccountButtons();
+  }
+})();
+
+// ── Batch 2 event wires ──
+(function() {
+  function _attachBatch2() {
+    // --- Sidebar section navigation ---
+    var sidebar = document.querySelector('.app-sidebar');
+    if (sidebar) {
+      sidebar.addEventListener('click', function(e) {
+        var item = e.target.closest('.sb-item');
+        if (item && item.dataset.sec) { e.preventDefault(); openSection(item.dataset.sec); }
+        var homeBtn = e.target.closest('#sb-home-btn');
+        if (homeBtn) { e.preventDefault(); navGoTo('home'); }
+        var proCard = e.target.closest('#sb-pro-card');
+        if (proCard) showUpgradeModal();
+      });
+    }
+
+    // --- Mobile section tabs ---
+    var mstContainer = document.getElementById('mobile-sec-tabs');
+    if (mstContainer) {
+      mstContainer.addEventListener('click', function(e) {
+        var btn = e.target.closest('.mst-btn');
+        if (btn && btn.dataset.sec) { openSection(btn.dataset.sec); setMobileTab(btn); }
+      });
+    }
+
+    // --- SEC filings filter ---
+    var secFilterRow = document.getElementById('sec-filter-row');
+    if (secFilterRow) {
+      secFilterRow.addEventListener('click', function(e) {
+        var btn = e.target.closest('.sec-filter-btn');
+        if (btn && btn.dataset.form) filterSecFilings(btn.dataset.form);
+      });
+    }
+
+    // --- Saved analyses type filter pills ---
+    var saTypeFilters = document.getElementById('sa-type-filters');
+    if (saTypeFilters) {
+      saTypeFilters.addEventListener('click', function(e) {
+        var btn = e.target.closest('.sa-pill');
+        if (btn && btn.dataset.type) setSavedTypeFilter(btn.dataset.type);
+      });
+    }
+
+    // --- Saved analyses sort buttons ---
+    var sdDate  = document.getElementById('sa-sort-date');
+    var sdStock = document.getElementById('sa-sort-stock');
+    var sdType  = document.getElementById('sa-sort-type');
+    if (sdDate)  sdDate.addEventListener('click',  function() { setSavedSort('date'); });
+    if (sdStock) sdStock.addEventListener('click', function() { setSavedSort('stock'); });
+    if (sdType)  sdType.addEventListener('click',  function() { setSavedSort('type'); });
+
+    // --- Saved analyses clear all ---
+    var clearBtn = document.getElementById('sa-clear-all-btn');
+    if (clearBtn) clearBtn.addEventListener('click', clearAllSaved);
+
+    // --- Theme toggle ---
+    var themeBtn = document.getElementById('theme-toggle-btn');
+    if (themeBtn) themeBtn.addEventListener('click', toggleTheme);
+
+    // --- Account dropdown ---
+    var acctBtn = document.getElementById('nav-acct-btn');
+    if (acctBtn) acctBtn.addEventListener('click', toggleAcctMenu);
+
+    // --- Account settings link ---
+    var acctSettings = document.getElementById('nav-acct-settings');
+    if (acctSettings) acctSettings.addEventListener('click', function(e) {
+      e.preventDefault();
+      openAccountModal();
+      var wrap = document.getElementById('nav-acct-wrap');
+      if (wrap) wrap.classList.remove('open');
+    });
+
+    // --- Login modal close ---
+    var loginClose = document.getElementById('modal-close-btn');
+    if (loginClose) loginClose.addEventListener('click', closeModal);
+
+    // --- "See plans" in login modal ---
+    var seePlans = document.getElementById('modal-see-plans-btn');
+    if (seePlans) seePlans.addEventListener('click', function() { closeModal(); showUpgradeModal(); });
+
+    // --- Upgrade modal close ---
+    var upClose = document.getElementById('upgrade-modal-close-btn');
+    if (upClose) upClose.addEventListener('click', closeUpgradeModal);
+
+    // --- Pricing buttons ---
+    var pricingPro    = document.getElementById('pricing-pro-btn');
+    var pricingAnnual = document.getElementById('pricing-annual-btn');
+    var pricingFree   = document.getElementById('pricing-free-btn');
+    if (pricingPro)    pricingPro.addEventListener('click',    function() { showUpgradeModal(); });
+    if (pricingAnnual) pricingAnnual.addEventListener('click', function() { showUpgradeModal(true); });
+    if (pricingFree)   pricingFree.addEventListener('click',   function() { openModal(); });
+
+    // --- Horizontal sub-bar upgrade + report links ---
+    var hsbUp = document.getElementById('hsb-up-link');
+    if (hsbUp) hsbUp.addEventListener('click', function(e) { e.preventDefault(); showUpgradeModal(); });
+    var reportBtn = document.getElementById('report-btn');
+    if (reportBtn) reportBtn.addEventListener('click', function(e) { e.preventDefault(); showUpgradeModal(); });
+
+    // --- Hero CTAs ---
+    var ctaMain  = document.getElementById('cta-btn-main');
+    var ctaPlans = document.getElementById('cta-btn-plans');
+    if (ctaMain)  ctaMain.addEventListener('click',  function(e) { e.preventDefault(); navGoTo('analyze'); });
+    if (ctaPlans) ctaPlans.addEventListener('click', function(e) { e.preventDefault(); document.getElementById('pricing').scrollIntoView({behavior:'smooth'}); });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _attachBatch2);
+  } else {
+    _attachBatch2();
+  }
+})();
 // Patch navGoTo to also update mobile nav
 (function(){
   const _orig = navGoTo;
@@ -6625,4 +7419,10 @@ document.addEventListener('click', function(e) {
     <a href="#" class="mmenu-item" onclick="navGoTo('dcf');_setMobileNav('dcf');_toggleMobileMenu();return false;"><i class="ti ti-calculator"></i><span>DCF</span></a>
     <a href="#" class="mmenu-item" onclick="navGoTo('education');_setMobileNav('education');_toggleMobileMenu();return false;"><i class="ti ti-school"></i><span>Education</span></a>
     <a href="#" class="mmenu-item" onclick="navGoTo('projection');_setMobileNav('projection');_toggleMobileMenu();return false;"><i class="ti ti-timeline"></i><span>Projection</span></a>
-    <a href="#" class="mmenu-item" onclick="navGoTo('secfilings');_setMobileNav('secfilings');_toggleMobileMenu();return false;"><i class="ti ti-file-text"></i><span>SEC</span
+    <a href="#" class="mmenu-item" onclick="navGoTo('secfilings');_setMobileNav('secfilings');_toggleMobileMenu();return false;"><i class="ti ti-file-text"></i><span>SEC</span></a>
+    <a href="#" class="mmenu-item" onclick="navGoTo('institutional');_setMobileNav('institutional');_toggleMobileMenu();return false;"><i class="ti ti-building-bank"></i><span>Inst.</span></a>
+  </div>
+</div>
+</div>
+</body>
+</html>

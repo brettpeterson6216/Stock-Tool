@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Data Sources — ImpliedLens</title>
+  <meta name="description" content="Where ImpliedLens gets its data — Finnhub, SEC EDGAR, Yahoo Finance, and how each source is used.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Inter',sans-serif;background:#08090D;color:rgba(220,225,232,.85);min-height:100vh;padding:0}
+    a{color:#C8882A;text-decoration:none}
+    a:hover{text-decoration:underline}
+    .top-bar{background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.06);padding:.85rem 2rem;display:flex;align-items:center;gap:1rem}
+    .logo{font-family:'Playfair Display',serif;font-size:1.3rem;color:#fff;text-decoration:none}
+    .logo em{color:#C8882A;font-style:italic}
+    .top-bar a.back{font-size:.8rem;color:rgba(220,225,232,.4);margin-left:auto}
+    .top-bar a.back:hover{color:#C8882A}
+    .wrap{max-width:760px;margin:0 auto;padding:3rem 2rem 5rem}
+    .eyebrow{font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#C8882A;margin-bottom:.75rem}
+    h1{font-family:'Playfair Display',serif;font-size:2.1rem;color:#fff;margin-bottom:.5rem;line-height:1.25}
+    .subtitle{font-size:1rem;color:rgba(220,225,232,.5);margin-bottom:2.5rem;line-height:1.6}
+    .source-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:1.5rem 1.75rem;margin-bottom:1.25rem}
+    .source-card:hover{border-color:rgba(200,136,42,.3)}
+    .src-head{display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem}
+    .src-icon{width:36px;height:36px;border-radius:8px;background:rgba(200,136,42,.12);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+    .src-name{font-family:'Playfair Display',serif;font-size:1.05rem;color:#fff;font-weight:600}
+    .src-url{font-size:.75rem;color:rgba(220,225,232,.35);margin-top:.1rem}
+    .src-desc{font-size:.88rem;line-height:1.75;color:rgba(220,225,232,.65);margin-bottom:.75rem}
+    .src-tags{display:flex;flex-wrap:wrap;gap:.4rem}
+    .tag{display:inline-block;padding:.2rem .65rem;border-radius:100px;background:rgba(255,255,255,.05);font-size:.7rem;color:rgba(220,225,232,.5);font-weight:500}
+    .tag.gold{background:rgba(200,136,42,.1);color:#C8882A}
+    h2{font-family:'Playfair Display',serif;font-size:1.1rem;color:#fff;margin:2.5rem 0 1rem;padding-bottom:.4rem;border-bottom:1px solid rgba(255,255,255,.07)}
+    p{font-size:.92rem;line-height:1.8;color:rgba(220,225,232,.65);margin-bottom:1rem}
+    .caveat{background:rgba(200,136,42,.07);border:1px solid rgba(200,136,42,.2);border-radius:10px;padding:1rem 1.25rem;margin:1.5rem 0}
+    .caveat p{margin-bottom:0;font-size:.85rem;color:rgba(220,225,232,.7)}
+    .footer-links{margin-top:3rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,.07);display:flex;gap:1.5rem;flex-wrap:wrap;font-size:.8rem}
+    .footer-links a{color:rgba(220,225,232,.4)}
+    .footer-links a:hover{color:#C8882A}
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <a href="/" class="logo">Implied<em>Lens</em></a>
+    <a href="/" class="back">← Back to ImpliedLens</a>
+  </div>
+  <div class="wrap">
+    <div class="eyebrow">Transparency</div>
+    <h1>Data Sources</h1>
+    <p class="subtitle">Every number on ImpliedLens traces back to a primary source. Here's exactly where each piece of data comes from and how it's used.</p>
+
+    <div class="source-card">
+      <div class="src-head">
+        <div class="src-icon">📈</div>
+        <div>
+          <div class="src-name">Yahoo Finance</div>
+          <div class="src-url">finance.yahoo.com</div>
+        </div>
+      </div>
+      <p class="src-desc">The primary source for price history, OHLCV candles, real-time quotes, key statistics, earnings summaries, and financial statements. Used for the main stock analysis, price charts, projection models, and DCF inputs. Data is fetched live on each analysis request.</p>
+      <div class="src-tags">
+        <span class="tag gold">Price Charts</span>
+        <span class="tag gold">Financials</span>
+        <span class="tag gold">DCF Inputs</span>
+        <span class="tag gold">Projections</span>
+        <span class="tag">Real-time quotes</span>
+        <span class="tag">Earnings history</span>
+        <span class="tag">Key statistics</span>
+      </div>
+    </div>
+
+    <div class="source-card">
+      <div class="src-head">
+        <div class="src-icon">🦉</div>
+        <div>
+          <div class="src-name">Finnhub</div>
+          <div class="src-url">finnhub.io</div>
+        </div>
+      </div>
+      <p class="src-desc">Used for analyst price targets, earnings surprises, recommendation trends, news feeds, institutional ownership, dark pool data, insider transactions, and market-wide data (movers, sector performance, VIX). All calls are server-side — your API key is never exposed to the browser.</p>
+      <div class="src-tags">
+        <span class="tag gold">Analyst Targets</span>
+        <span class="tag gold">Institutional</span>
+        <span class="tag gold">Dark Pool</span>
+        <span class="tag gold">News</span>
+        <span class="tag">Insider transactions</span>
+        <span class="tag">Recommendations</span>
+        <span class="tag">Market movers</span>
+        <span class="tag">VIX / macro data</span>
+      </div>
+    </div>
+
+    <div class="source-card">
+      <div class="src-head">
+        <div class="src-icon">🏛️</div>
+        <div>
+          <div class="src-name">SEC EDGAR</div>
+          <div class="src-url">sec.gov/cgi-bin/browse-edgar</div>
+        </div>
+      </div>
+      <p class="src-desc">Direct access to official SEC filing data. Used for the SEC Filings section, which links to 10-K annual reports, 10-Q quarterly filings, 8-K current reports, DEF 14A proxy statements, and Form 4 insider transactions. All links point directly to SEC.gov — we do not store or proxy filing documents.</p>
+      <div class="src-tags">
+        <span class="tag gold">SEC Filings</span>
+        <span class="tag">10-K / 10-Q</span>
+        <span class="tag">8-K / DEF 14A</span>
+        <span class="tag">Form 4</span>
+        <span class="tag">Primary source</span>
+      </div>
+    </div>
+
+    <h2>Data Freshness and Delays</h2>
+    <p>Quote data from Yahoo Finance is typically delayed 15 minutes for most exchanges during market hours. Pre-market and after-hours data is available where provided by Yahoo Finance. Historical OHLCV data is end-of-day. Analyst consensus figures are updated periodically and may lag by 24–48 hours. Institutional ownership data from Finnhub reflects the most recent 13F filings, which are filed quarterly.</p>
+
+    <h2>What We Do Not Fabricate</h2>
+    <p>All financial figures, ratios, analyst estimates, and price data shown on ImpliedLens are pulled directly from the above sources at request time. We do not generate, estimate, or fill in missing data points. If a data field is unavailable, it is shown as "—" or omitted rather than substituted. DCF models use inputs drawn from reported financials — the model itself is a calculation, not a prediction.</p>
+
+    <div class="caveat">
+      <p><strong>Important:</strong> Data accuracy depends on the upstream providers. ImpliedLens is not responsible for errors, delays, or omissions in data supplied by Finnhub, Yahoo Finance, or SEC EDGAR. Always verify critical figures against primary sources before making investment decisions.</p>
+    </div>
+
+    <h2>Screener Data</h2>
+    <p>The stock screener uses Finnhub's market screener API, filtered and sorted server-side. Screener results include metrics available at the time of the API call and may not reflect intraday changes.</p>
+
+    <h2>Market Overview and Movers</h2>
+    <p>The homepage market overview (indices, movers, sector performance) pulls live data from Finnhub. VIX and macro indicators use Finnhub's symbol data for <code>^VIX</code> and related tickers. This data is marked as preview and does not count toward the daily analysis limit.</p>
+
+    <div class="footer-links">
+      <a href="/privacy">Privacy Policy</a>
+      <a href="/terms">Terms of Service</a>
+      <a href="/about">About</a>
+      <a href="/">← ImpliedLens</a>
+    </div>
+  </div>
+</body>
+</html>
