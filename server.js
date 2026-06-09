@@ -83,8 +83,10 @@ app.use(helmet({
       // directive to 'none', which blocks all onclick= / onchange= handlers.
       scriptSrcAttr:  ["'unsafe-inline'"],
       styleSrc:       ["'self'", "'unsafe-inline'",
-                       "https://fonts.googleapis.com"],
-      fontSrc:        ["'self'", "https://fonts.gstatic.com"],
+                       "https://fonts.googleapis.com",
+                       "https://cdn.jsdelivr.net"],
+      fontSrc:        ["'self'", "https://fonts.gstatic.com",
+                       "https://cdn.jsdelivr.net"],
       imgSrc:         ["'self'", "data:", "https:"],
       // All API calls route through our own origin. cdn.jsdelivr.net is required
       // for the globe's world-atlas JSON fetch. cdnjs.cloudflare.com is required

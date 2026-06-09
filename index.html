@@ -65,6 +65,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.44.0/dist/tabler-icons.min.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-zoom/1.2.1/chartjs-plugin-zoom.min.js"></script>
@@ -686,14 +687,19 @@ footer { background:#080808; padding:3rem 2rem; }
 /* ═══════════════════════════════ TOAST & MODAL ═══════════════════════════════ */
 .toast {
   position:fixed; bottom:24px; right:24px; z-index:9999;
-  background:var(--ink); color:var(--cream);
+  background:#171a20; color:#f7f4ee;
   border:1px solid rgba(255,255,255,.1); border-radius:var(--r2);
-  padding:12px 18px; font-size:.82rem;
-  transform:translateY(60px); opacity:0; transition:all .3s; pointer-events:none;
+  padding:12px 16px; font-size:.82rem;
+  transform:translateY(60px); opacity:0; transition:transform .3s,opacity .3s; pointer-events:none;
+  display:flex;align-items:center;gap:9px;min-width:180px;max-width:min(420px,calc(100vw - 32px));
 }
 .toast.show { transform:translateY(0); opacity:1; }
 .toast.green { border-color:rgba(74,222,128,.25); }
 .toast.red { border-color:rgba(248,113,113,.25); }
+.toast-icon{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto;background:rgba(255,255,255,.08);color:#f7f4ee;font-size:12px}
+.toast.ok,.toast.green{background:#0f2a1c!important;border-color:rgba(74,222,128,.3)!important;color:#e9fff2!important}.toast.ok .toast-icon,.toast.green .toast-icon{background:rgba(74,222,128,.16);color:#6ee7a6}
+.toast.err,.toast.red{background:#2a0f0f!important;border-color:rgba(248,113,113,.3)!important;color:#fff0f0!important}.toast.err .toast-icon,.toast.red .toast-icon{background:rgba(248,113,113,.16);color:#fca5a5}
+.toast-msg{line-height:1.35;color:inherit}
 
 .modal-bg {
   position:fixed; inset:0; z-index:900; display:none;
@@ -2103,7 +2109,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
 
               <!-- Main price chart -->
               <div class="chart-wrap">
-                <button class="chart-exp-btn" onclick="expandChart('price-chart','Price Chart')" title="Expand chart">⤢</button>
+                <button class="chart-exp-btn" onclick="expandChart('price-chart','Price Chart')" title="Expand and mark up chart" aria-label="Expand and mark up price chart"><i class="ti ti-maximize"></i></button>
                 <div class="chart-header">
                   <div>
                     <div class="chart-title">Price Chart</div>
@@ -2129,12 +2135,12 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
               <!-- RSI + MACD -->
               <div class="g2">
                 <div class="chart-wrap">
-                  <button class="chart-exp-btn" onclick="expandChart('rsi-chart','RSI (14)')" title="Expand chart">⤢</button>
+                  <button class="chart-exp-btn" onclick="expandChart('rsi-chart','RSI (14)')" title="Expand and mark up chart" aria-label="Expand and mark up RSI chart"><i class="ti ti-maximize"></i></button>
                   <div class="chart-header"><div class="chart-title">RSI (14)</div><div id="rsi-readout" style="font-family:var(--mono);font-size:.68rem;color:var(--text4);"></div></div>
                   <div class="h150"><canvas id="rsi-chart"></canvas></div>
                 </div>
                 <div class="chart-wrap">
-                  <button class="chart-exp-btn" onclick="expandChart('macd-chart','MACD (12,26,9)')" title="Expand chart">⤢</button>
+                  <button class="chart-exp-btn" onclick="expandChart('macd-chart','MACD (12,26,9)')" title="Expand and mark up chart" aria-label="Expand and mark up MACD chart"><i class="ti ti-maximize"></i></button>
                   <div class="chart-header"><div class="chart-title">MACD (12,26,9)</div><div id="macd-readout" style="font-family:var(--mono);font-size:.68rem;color:var(--text4);"></div></div>
                   <div class="h150"><canvas id="macd-chart"></canvas></div>
                 </div>
@@ -2143,12 +2149,12 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
               <!-- Volume + Returns Distribution -->
               <div class="g2">
                 <div class="chart-wrap">
-                  <button class="chart-exp-btn" onclick="expandChart('vol-chart','Volume')" title="Expand chart">⤢</button>
+                  <button class="chart-exp-btn" onclick="expandChart('vol-chart','Volume')" title="Expand and mark up chart" aria-label="Expand and mark up volume chart"><i class="ti ti-maximize"></i></button>
                   <div class="chart-header"><div class="chart-title">Volume</div></div>
                   <div class="h150"><canvas id="vol-chart"></canvas></div>
                 </div>
                 <div class="chart-wrap">
-                  <button class="chart-exp-btn" onclick="expandChart('dist-chart','Daily Returns Distribution')" title="Expand chart">⤢</button>
+                  <button class="chart-exp-btn" onclick="expandChart('dist-chart','Daily Returns Distribution')" title="Expand and mark up chart" aria-label="Expand and mark up returns distribution"><i class="ti ti-maximize"></i></button>
                   <div class="chart-header"><div class="chart-title">Daily Returns Distribution</div></div>
                   <div class="h150"><canvas id="dist-chart"></canvas></div>
                 </div>
@@ -2157,12 +2163,12 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
               <!-- OBV + ATR -->
               <div class="g2">
                 <div class="chart-wrap">
-                  <button class="chart-exp-btn" onclick="expandChart('obv-chart','On Balance Volume')" title="Expand chart">⤢</button>
+                  <button class="chart-exp-btn" onclick="expandChart('obv-chart','On Balance Volume')" title="Expand and mark up chart" aria-label="Expand and mark up OBV chart"><i class="ti ti-maximize"></i></button>
                   <div class="chart-header"><div class="chart-title">On Balance Volume</div><div id="obv-readout" style="font-family:var(--mono);font-size:.68rem;color:var(--text4);"></div></div>
                   <div class="h150"><canvas id="obv-chart"></canvas></div>
                 </div>
                 <div class="chart-wrap">
-                  <button class="chart-exp-btn" onclick="expandChart('atr-chart','ATR (14)')" title="Expand chart">⤢</button>
+                  <button class="chart-exp-btn" onclick="expandChart('atr-chart','ATR (14)')" title="Expand and mark up chart" aria-label="Expand and mark up ATR chart"><i class="ti ti-maximize"></i></button>
                   <div class="chart-header"><div class="chart-title">ATR (14) — Volatility</div><div id="atr-readout" style="font-family:var(--mono);font-size:.68rem;color:var(--text4);"></div></div>
                   <div class="h150"><canvas id="atr-chart"></canvas></div>
                 </div>
@@ -2631,13 +2637,31 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
     <div class="cex-header">
       <span class="cex-title" id="cex-title">Chart</span>
       <div class="cex-controls">
-        <span class="cex-hint">Scroll to zoom · Drag to pan</span>
-        <button class="cex-btn" onclick="resetExpandZoom()">Reset Zoom</button>
-        <button class="cex-btn gold" onclick="closeExpandModal()">✕ Close</button>
+        <span class="cex-hint">Scroll to zoom &middot; Drag to pan</span>
+        <button class="cex-btn" onclick="resetExpandZoom()" title="Reset zoom"><i class="ti ti-focus-2"></i> <span>Reset zoom</span></button>
+        <button class="cex-btn gold" onclick="closeExpandModal()" title="Close expanded chart"><i class="ti ti-x"></i> <span>Close</span></button>
       </div>
     </div>
+    <div class="cex-toolbar" aria-label="Chart markup tools">
+      <span class="cex-tool-label">MARKUP</span>
+      <button class="cex-tool active" data-markup-tool="cursor" onclick="setMarkupTool('cursor')" title="Pan and zoom"><i class="ti ti-pointer"></i></button>
+      <button class="cex-tool" data-markup-tool="line" onclick="setMarkupTool('line')" title="Trend line"><i class="ti ti-line"></i></button>
+      <button class="cex-tool" data-markup-tool="horizontal" onclick="setMarkupTool('horizontal')" title="Horizontal level"><i class="ti ti-minus"></i></button>
+      <button class="cex-tool" data-markup-tool="freehand" onclick="setMarkupTool('freehand')" title="Freehand drawing"><i class="ti ti-pencil"></i></button>
+      <button class="cex-tool" data-markup-tool="eraser" onclick="setMarkupTool('eraser')" title="Erase nearest mark"><i class="ti ti-eraser"></i></button>
+      <span class="cex-tool-sep"></span>
+      <button class="cex-color active" data-markup-color="#d4972e" onclick="setMarkupColor('#d4972e')" style="background:#d4972e" title="Gold"></button>
+      <button class="cex-color" data-markup-color="#4a9fd4" onclick="setMarkupColor('#4a9fd4')" style="background:#4a9fd4" title="Blue"></button>
+      <button class="cex-color" data-markup-color="#f87171" onclick="setMarkupColor('#f87171')" style="background:#f87171" title="Red"></button>
+      <span class="cex-tool-sep"></span>
+      <button class="cex-tool" onclick="undoMarkup()" title="Undo markup"><i class="ti ti-arrow-back-up"></i></button>
+      <button class="cex-tool" onclick="clearMarkup()" title="Clear all markup"><i class="ti ti-trash"></i></button>
+    </div>
     <div class="cex-body">
-      <canvas id="chart-expanded"></canvas>
+      <div class="cex-workspace">
+        <canvas id="chart-expanded"></canvas>
+        <canvas id="chart-markup" aria-label="Chart markup layer"></canvas>
+      </div>
     </div>
   </div>
 </div>
@@ -3011,7 +3035,7 @@ html[data-theme="dark"] .theme-toggle-thumb{left:16px;background:var(--gold);}
 #view-tool .m-sub{color:var(--text5)!important;}
 /* charts */
 #view-tool .chart-wrap{background:var(--t-chart-bg)!important;border-color:var(--t-chart-border)!important;}
-#view-tool .chart-title{color:var(--text5)!important;}
+#view-tool .chart-title{color:var(--text3)!important;}
 #view-tool .rpill{border-color:var(--t-rpill-border)!important;color:var(--text5)!important;}
 #view-tool .rpill.active,#view-tool .rpill:hover{background:var(--gold)!important;color:#0A0800!important;border-color:var(--gold)!important;}
 #view-tool .ind-pill{border-color:var(--t-rpill-border)!important;color:var(--text5)!important;}
@@ -3210,6 +3234,7 @@ html[data-theme="dark"] .input-light::placeholder{color:rgba(220,225,232,.28)!im
 }
 .chart-wrap:hover .chart-exp-btn{opacity:1;}
 .chart-exp-btn:hover{background:var(--gold)!important;color:#0A0800!important;border-color:var(--gold)!important;}
+.chart-exp-btn i,.cex-btn i,.cex-tool i,.ash-btn i,.act-btn i{color:currentColor!important;font-size:1em;line-height:1}
 
 /* ══ CHART EXPAND MODAL ══ */
 #chart-expand-modal{
@@ -3241,6 +3266,17 @@ html[data-theme="dark"] .input-light::placeholder{color:rgba(220,225,232,.28)!im
 .cex-hint{font-size:.68rem;color:var(--text5);font-family:var(--mono);}
 .cex-body{flex:1;position:relative;padding:1rem 1.25rem;min-height:0;}
 .cex-body canvas{width:100%!important;height:100%!important;}
+.cex-workspace{position:relative;width:100%;height:100%;min-height:0}
+#chart-markup{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none;touch-action:none}
+#chart-markup.drawing{pointer-events:auto;cursor:crosshair}
+.cex-toolbar{display:flex;align-items:center;gap:4px;padding:.38rem .55rem;border-bottom:1px solid var(--border);background:var(--panel);overflow-x:auto;flex-shrink:0}
+.cex-tool{width:32px;height:30px;border:1px solid transparent;border-radius:5px;background:transparent;color:var(--text4);display:grid;place-items:center;cursor:pointer;flex:0 0 auto}
+.cex-tool:hover{background:var(--t-acc-header-hover);color:var(--text)}
+.cex-tool.active{background:rgba(200,136,42,.14);border-color:rgba(200,136,42,.38);color:var(--gold)}
+.cex-tool-sep{width:1px;height:20px;background:var(--border2);margin:0 3px;flex:0 0 auto}
+.cex-color{width:22px;height:22px;border:2px solid var(--panel);border-radius:50%;box-shadow:0 0 0 1px var(--border2);cursor:pointer;flex:0 0 auto}
+.cex-color.active{box-shadow:0 0 0 2px var(--gold)}
+.cex-tool-label{font:600 .61rem var(--sans);color:var(--text5);white-space:nowrap;margin:0 4px}
 
 /* ══ ANALYST PANEL ══ */
 .analyst-panel{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:14px;}
@@ -4036,7 +4072,7 @@ body.has-verif-banner #main-nav{top:42px}
   .chart-exp-btn{opacity:1;top:5px;right:5px}
   .h240{height:250px!important}.h200{height:220px!important}.h150{height:165px!important}
   .cex-box{width:100vw;height:100dvh;max-height:none;border-radius:0;border:0}
-  .cex-header{padding:.65rem .75rem}.cex-hint{display:none}.cex-body{padding:.5rem}
+  .cex-header{padding:.65rem .75rem}.cex-hint{display:none}.cex-body{padding:.5rem}.cex-btn span{display:none}.cex-toolbar{padding:.35rem}
   .edu-hero{padding:1rem}.edu-hero h2{font-size:1.15rem}
   .edu-path-grid,.edu-glossary-grid{grid-template-columns:1fr}
   .edu-path{min-height:125px}
@@ -4933,7 +4969,16 @@ function _resetUpgradeModal() {
 ══════════════════════════════════════════════════════ */
 function toast(msg, type='') {
   const t=document.getElementById('toast');
-  t.textContent=msg; t.className='toast show '+type;
+  const kind = type === 'green' || type === 'ok' ? 'ok' : type === 'red' || type === 'err' ? 'err' : '';
+  const icon = kind === 'ok' ? 'ti-check' : kind === 'err' ? 'ti-alert-triangle' : 'ti-info-circle';
+  t.className='toast show '+kind;
+  t.style.setProperty('background-color',kind==='ok'?'#0f2a1c':kind==='err'?'#2a0f0f':'#171a20','important');
+  t.style.setProperty('color',kind==='ok'?'#e9fff2':kind==='err'?'#fff0f0':'#f7f4ee','important');
+  t.replaceChildren();
+  const iconWrap=document.createElement('span');iconWrap.className='toast-icon';iconWrap.setAttribute('aria-hidden','true');
+  const iconEl=document.createElement('i');iconEl.className='ti '+icon;iconWrap.appendChild(iconEl);
+  const text=document.createElement('span');text.className='toast-msg';text.textContent=msg;
+  t.append(iconWrap,text);
   setTimeout(()=>t.classList.remove('show'),3000);
 }
 
@@ -5029,9 +5074,9 @@ function ttborder(){ return isDark() ? 'rgba(255,255,255,.12)' : 'rgba(0,0,0,.12
 function ct() {
   const dark = isDark();
   return {
-    text:     dark ? 'rgba(210,218,228,.75)' : 'rgba(40,44,55,.75)',
-    muted:    dark ? 'rgba(210,218,228,.35)' : 'rgba(40,44,55,.38)',
-    grid:     dark ? 'rgba(255,255,255,.06)'  : 'rgba(0,0,0,.07)',
+    text:     dark ? 'rgba(226,231,238,.82)' : 'rgba(30,34,42,.82)',
+    muted:    dark ? 'rgba(210,218,228,.52)' : 'rgba(40,44,55,.52)',
+    grid:     dark ? 'rgba(255,255,255,.075)' : 'rgba(20,24,32,.085)',
     zeroline: dark ? 'rgba(255,255,255,.18)'  : 'rgba(0,0,0,.18)',
     ttBg:     dark ? 'rgba(16,20,32,.97)'     : 'rgba(255,255,255,.98)',
     ttTitle:  dark ? 'rgba(210,218,228,.5)'   : 'rgba(40,44,55,.5)',
@@ -5069,30 +5114,36 @@ const crosshairPlugin = {
   }
 };
 Chart.register(crosshairPlugin);
+Chart.defaults.font.family = 'Inter';
+Chart.defaults.font.size = 11;
+Chart.defaults.color = ct().text;
 
 const baseOpts = (extraScales={}) => {
   const t = ct();
   return {
     responsive:true, maintainAspectRatio:false,
     interaction:{mode:'index',intersect:false},
+    layout:{padding:{top:3,right:4,bottom:2,left:2}},
     plugins:{
       legend:{display:false},
       tooltip:{
         mode:'index', intersect:false,
         backgroundColor:t.ttBg, titleColor:t.ttTitle, bodyColor:t.ttBody,
         borderColor:t.ttBorder, borderWidth:1, padding:11, caretSize:5,
+        titleFont:{family:'JetBrains Mono',size:11,weight:'500'},bodyFont:{family:'Inter',size:12,weight:'500'},
         callbacks:{ label: ctx => ` ${ctx.dataset.label||''}: ${ctx.formattedValue}` }
       }
     },
     scales:{
-      x:{ ticks:{color:t.text,font:{size:10},maxTicksLimit:8}, grid:{color:t.grid}, ...(extraScales.x||{}) },
-      y:{ ticks:{color:t.text,font:{size:10}}, grid:{color:t.grid}, ...(extraScales.y||{}) }
+      x:{ border:{color:t.grid}, ticks:{color:t.text,font:{family:'JetBrains Mono',size:10,weight:'400'},maxTicksLimit:8,padding:6}, grid:{color:t.grid,tickLength:4}, ...(extraScales.x||{}) },
+      y:{ border:{color:t.grid}, ticks:{color:t.text,font:{family:'JetBrains Mono',size:10,weight:'400'},padding:6}, grid:{color:t.grid,tickLength:4}, ...(extraScales.y||{}) }
     }
   };
 };
 
 /* ══ CHART EXPAND MODAL ══ */
 var _expandedChart = null;
+var _markup = {tool:'cursor',color:'#d4972e',items:[],draft:null,ready:false,observer:null};
 
 function expandChart(chartId, title) {
   const src = S.charts[chartId];
@@ -5101,6 +5152,8 @@ function expandChart(chartId, title) {
   const modal = document.getElementById('chart-expand-modal');
   modal.classList.add('open');
   document.body.style.overflow = 'hidden';
+  setMarkupTool('cursor');
+  clearMarkup();
 
   if(_expandedChart){ _expandedChart.destroy(); _expandedChart = null; }
 
@@ -5117,6 +5170,7 @@ function expandChart(chartId, title) {
     pointHoverBorderColor: '#fff',
   }));
 
+  const theme = ct();
   _expandedChart = new Chart(canvas, {
     type: srcCfg.type,
     data: { labels:[...srcCfg.data.labels], datasets },
@@ -5127,11 +5181,12 @@ function expandChart(chartId, title) {
       animation: false,
       plugins: {
         ...(srcCfg.options?.plugins||{}),
-        legend: { display: true, labels: { color: 'var(--text4)', font:{size:11}, boxWidth:16, padding:16 } },
+        legend: { display: true, labels: { color:theme.text, font:{family:'Inter',size:11,weight:'500'}, boxWidth:16, padding:16, usePointStyle:true, pointStyleWidth:9 } },
         tooltip: {
           mode:'index', intersect:false,
           backgroundColor:ttbg(), titleColor:'#888', bodyColor:ttbody(),
-          borderColor:ttborder(), borderWidth:1, padding:12, caretSize:5
+          borderColor:ttborder(), borderWidth:1, padding:12, caretSize:5,
+          titleFont:{family:'JetBrains Mono',size:11,weight:'500'},bodyFont:{family:'Inter',size:12,weight:'500'}
         },
         zoom: {
           zoom: { wheel:{enabled:true,speed:0.08}, pinch:{enabled:true}, mode:'x', onZoom(){_expandedChart?.update('none');} },
@@ -5143,17 +5198,18 @@ function expandChart(chartId, title) {
         ...(srcCfg.options?.scales||{}),
         x: {
           ...(srcCfg.options?.scales?.x||{}),
-          ticks:{color:'var(--text5)',font:{size:11},...(srcCfg.options?.scales?.x?.ticks||{})},
+          ticks:{...(srcCfg.options?.scales?.x?.ticks||{}),color:theme.text,font:{family:'JetBrains Mono',size:11,weight:'400'}},
           grid:{color:gcol()}
         },
         y: {
           ...(srcCfg.options?.scales?.y||{}),
-          ticks:{color:'var(--text5)',font:{size:11},...(srcCfg.options?.scales?.y?.ticks||{})},
+          ticks:{...(srcCfg.options?.scales?.y?.ticks||{}),color:theme.text,font:{family:'JetBrains Mono',size:11,weight:'400'}},
           grid:{color:gcol()}
         }
       }
     }
   });
+  initMarkupCanvas();
 }
 
 function resetExpandZoom(){
@@ -5165,6 +5221,69 @@ function closeExpandModal(){
   document.body.style.overflow = '';
   if(_expandedChart){ _expandedChart.destroy(); _expandedChart = null; }
 }
+
+function setMarkupTool(tool){
+  _markup.tool=tool;
+  document.querySelectorAll('[data-markup-tool]').forEach(btn=>btn.classList.toggle('active',btn.dataset.markupTool===tool));
+  const canvas=document.getElementById('chart-markup');
+  if(canvas)canvas.classList.toggle('drawing',tool!=='cursor');
+}
+function setMarkupColor(color){
+  _markup.color=color;
+  document.querySelectorAll('[data-markup-color]').forEach(btn=>btn.classList.toggle('active',btn.dataset.markupColor===color));
+}
+function markupPoint(canvas,event){
+  const r=canvas.getBoundingClientRect();
+  return{x:Math.max(0,Math.min(1,(event.clientX-r.left)/r.width)),y:Math.max(0,Math.min(1,(event.clientY-r.top)/r.height))};
+}
+function resizeMarkupCanvas(){
+  const canvas=document.getElementById('chart-markup');if(!canvas)return;
+  const r=canvas.getBoundingClientRect(),dpr=window.devicePixelRatio||1;
+  canvas.width=Math.max(1,Math.round(r.width*dpr));canvas.height=Math.max(1,Math.round(r.height*dpr));
+  drawMarkup();
+}
+function drawMarkup(){
+  const canvas=document.getElementById('chart-markup');if(!canvas)return;
+  const ctx2=canvas.getContext('2d'),dpr=window.devicePixelRatio||1,w=canvas.width/dpr,h=canvas.height/dpr;
+  ctx2.setTransform(dpr,0,0,dpr,0,0);ctx2.clearRect(0,0,w,h);ctx2.lineCap='round';ctx2.lineJoin='round';
+  [..._markup.items,...(_markup.draft?[_markup.draft]:[])].forEach(item=>{
+    ctx2.strokeStyle=item.color;ctx2.lineWidth=2;ctx2.beginPath();
+    if(item.type==='horizontal'){ctx2.moveTo(0,item.a.y*h);ctx2.lineTo(w,item.a.y*h);}
+    else if(item.type==='line'){ctx2.moveTo(item.a.x*w,item.a.y*h);ctx2.lineTo(item.b.x*w,item.b.y*h);}
+    else if(item.type==='freehand'&&item.points.length){ctx2.moveTo(item.points[0].x*w,item.points[0].y*h);item.points.slice(1).forEach(p=>ctx2.lineTo(p.x*w,p.y*h));}
+    ctx2.stroke();
+  });
+}
+function eraseMarkupAt(point){
+  let best=-1,bestD=.055;
+  _markup.items.forEach((item,i)=>{
+    const pts=item.type==='freehand'?item.points:item.type==='horizontal'?[{x:point.x,y:item.a.y}]:[item.a,item.b];
+    pts.forEach(p=>{const d=Math.hypot(p.x-point.x,p.y-point.y);if(d<bestD){bestD=d;best=i;}});
+  });
+  if(best>=0)_markup.items.splice(best,1);drawMarkup();
+}
+function initMarkupCanvas(){
+  const canvas=document.getElementById('chart-markup');if(!canvas)return;
+  resizeMarkupCanvas();
+  if(_markup.ready)return;_markup.ready=true;
+  _markup.observer=new ResizeObserver(resizeMarkupCanvas);_markup.observer.observe(canvas.parentElement);
+  canvas.addEventListener('pointerdown',event=>{
+    if(_markup.tool==='cursor')return;
+    const p=markupPoint(canvas,event);canvas.setPointerCapture(event.pointerId);
+    if(_markup.tool==='eraser'){eraseMarkupAt(p);return;}
+    _markup.draft=_markup.tool==='freehand'?{type:'freehand',color:_markup.color,points:[p]}:{type:_markup.tool,color:_markup.color,a:p,b:p};
+    drawMarkup();
+  });
+  canvas.addEventListener('pointermove',event=>{
+    if(!_markup.draft)return;const p=markupPoint(canvas,event);
+    if(_markup.draft.type==='freehand')_markup.draft.points.push(p);else _markup.draft.b=p;
+    drawMarkup();
+  });
+  const finish=()=>{if(!_markup.draft)return;_markup.items.push(_markup.draft);_markup.draft=null;drawMarkup();};
+  canvas.addEventListener('pointerup',finish);canvas.addEventListener('pointercancel',finish);
+}
+function undoMarkup(){_markup.items.pop();_markup.draft=null;drawMarkup();}
+function clearMarkup(){_markup.items=[];_markup.draft=null;drawMarkup();}
 
 document.addEventListener('keydown', e => { if(e.key==='Escape') closeExpandModal(); });
 
@@ -5396,6 +5515,8 @@ function renderStock(result, ticker) {
     } catch(_) {}
   })();
 
+  // Chart.js must measure a visible container; reveal results before creating canvases.
+  document.getElementById('stock-result').style.display='block';
   buildPriceChart(result,c,ts);
   buildRSIChart(rsiVals,ts);
   buildMACDChart(c,ts);
@@ -5411,7 +5532,6 @@ function renderStock(result, ticker) {
   renderNews(ticker,meta.longName||ticker);
   loadAnalyst(ticker);
 
-  document.getElementById('stock-result').style.display='block';
   document.getElementById('proj-results').style.display='none';
   renderSavedAnalyses();
 }
@@ -6040,26 +6160,33 @@ function toggleTheme() {
   }
   updateThemeControl();
   requestAnimationFrame(() => {
+    Chart.defaults.color = ct().text;
     const themeCharts = [...new Set([...Object.values(S.charts || {}), _marketOverviewChart].filter(Boolean))];
     themeCharts.forEach(chart => {
       if (!chart) return;
       const t = ct();
-      if (chart.options?.scales?.x) {
-        chart.options.scales.x.ticks.color = t.text;
-        chart.options.scales.x.grid.color = t.grid;
-      }
-      if (chart.options?.scales?.y) {
-        chart.options.scales.y.ticks.color = t.text;
-        chart.options.scales.y.grid.color = t.grid;
-      }
+      Object.values(chart.options?.scales||{}).forEach(scale=>{
+        if(scale?.ticks)scale.ticks.color=t.text;
+        if(scale?.grid)scale.grid.color=t.grid;
+        if(scale?.border)scale.border.color=t.grid;
+        if(scale?.title)scale.title.color=t.muted;
+        if(scale?.pointLabels)scale.pointLabels.color=t.text;
+      });
       if (chart.options?.plugins?.tooltip) {
         chart.options.plugins.tooltip.backgroundColor = t.ttBg;
         chart.options.plugins.tooltip.titleColor = t.ttTitle;
         chart.options.plugins.tooltip.bodyColor = t.ttBody;
         chart.options.plugins.tooltip.borderColor = t.ttBorder;
       }
+      if(chart.options?.plugins?.legend?.labels)chart.options.plugins.legend.labels.color=t.text;
       chart.update('none');
     });
+    if(_expandedChart){
+      const t=ct();
+      Object.values(_expandedChart.options?.scales||{}).forEach(scale=>{if(scale?.ticks)scale.ticks.color=t.text;if(scale?.grid)scale.grid.color=t.grid;if(scale?.border)scale.border.color=t.grid;});
+      if(_expandedChart.options?.plugins?.legend?.labels)_expandedChart.options.plugins.legend.labels.color=t.text;
+      _expandedChart.update('none');
+    }
   });
 }
 
@@ -6255,8 +6382,8 @@ function buildPriceChart(result,closes,timestamps) {
   });
   opts.plugins.legend={display:true,position:'top',align:'end',labels:{color:t.text,font:{size:10},boxWidth:12,padding:10,filter:i=>i.text&&i.text.length>0,usePointStyle:true,pointStyleWidth:8}};
   opts.plugins.tooltip={...opts.plugins.tooltip,callbacks:{
-    title:items=>`📅 ${items[0]?.label||''}`,
-    label:ctx=>` ${ctx.dataset.label||''}: $${Number(ctx.raw).toFixed(2)}`
+    title:items=>items[0]?.label||'',
+    label:ctx=>{const raw=Array.isArray(ctx.raw)?ctx.raw[ctx.raw.length-1]:ctx.raw;return ` ${ctx.dataset.label||''}: $${Number(raw||0).toFixed(2)}`;}
   }};
   const chartJsType = S.chartType==='candle' ? 'bar' : 'line';
   const pluginsArr = S.chartType==='candle' ? [candleWickPlugin] : [];
