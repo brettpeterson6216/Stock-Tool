@@ -78,16 +78,14 @@
           <div class="src-url">finnhub.io</div>
         </div>
       </div>
-      <p class="src-desc">Used for analyst price targets, earnings surprises, recommendation trends, news feeds, institutional ownership, dark pool data, insider transactions, and market-wide data (movers, sector performance, VIX). All calls are server-side — your API key is never exposed to the browser.</p>
+      <p class="src-desc">Used for analyst price targets, earnings surprises, recommendation trends, news feeds, institutional ownership, insider transactions, and selected market metrics. All calls are server-side — your API key is never exposed to the browser.</p>
       <div class="src-tags">
         <span class="tag gold">Analyst Targets</span>
         <span class="tag gold">Institutional</span>
-        <span class="tag gold">Dark Pool</span>
         <span class="tag gold">News</span>
         <span class="tag">Insider transactions</span>
         <span class="tag">Recommendations</span>
-        <span class="tag">Market movers</span>
-        <span class="tag">VIX / macro data</span>
+        <span class="tag">Market metrics</span>
       </div>
     </div>
 
@@ -120,10 +118,10 @@
     </div>
 
     <h2>Screener Data</h2>
-    <p>The stock screener uses Finnhub's market screener API, filtered and sorted server-side. Screener results include metrics available at the time of the API call and may not reflect intraday changes.</p>
+    <p>The stock screener evaluates a curated universe of widely followed companies using current quotes and company metrics, then filters and sorts the results server-side. Results reflect the latest data available from upstream providers and may not capture every intraday move.</p>
 
     <h2>Market Overview and Movers</h2>
-    <p>The homepage market overview (indices, movers, sector performance) pulls live data from Finnhub. VIX and macro indicators use Finnhub's symbol data for <code>^VIX</code> and related tickers. This data is marked as preview and does not count toward the daily analysis limit.</p>
+    <p>The homepage market overview requests current index and market-benchmark quotes through the same resilient quote pipeline used elsewhere in ImpliedLens. Preview market data does not count toward the daily analysis limit.</p>
 
     <div class="footer-links">
       <a href="/privacy">Privacy Policy</a>

@@ -166,6 +166,8 @@ app.use("/api",         financialsRouter);  // /api/financials/*, /api/earnings/
 // ============================================================
 //  Static HTML pages
 // ============================================================
+app.get("/", (_req, res) => res.sendFile(path.join(__dirname, "index.html")));
+
 app.get(["/login",  "/login.html"],  (req, res) => res.sendFile(path.join(__dirname, "public", "login.html")));
 app.get(["/signup", "/signup.html"], (req, res) => res.sendFile(path.join(__dirname, "public", "signup.html")));
 app.get(["/reset-password", "/reset-password.html"], (req, res) =>
