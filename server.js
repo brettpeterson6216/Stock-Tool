@@ -59,6 +59,8 @@ const billingRouter     = require("./routes/billing");
 const marketDataRouter  = require("./routes/market-data");
 const financialsRouter  = require("./routes/financials");
 const stockLandingRouter = require("./routes/stock-landing");
+const workspaceRouter     = require("./routes/workspace");
+const providerHealth      = require("./lib/provider-health");
 
 // ============================================================
 //  App setup
@@ -169,6 +171,7 @@ app.use("/api",         marketDataRouter);  // /api/quote/*, /api/screener, /api
 app.use("/api",         financialsRouter);  // /api/financials/*, /api/earnings/*, /api/metrics/*,
                                             // /api/sec/*, /api/estimates/*, /api/analyst/*,
                                             // /api/institutional/*, /api/darkpool/*, /api/me/limit
+app.use("/api",         workspaceRouter);    // /api/workspace/*
 
 // ============================================================
 //  Static HTML pages
@@ -258,10 +261,15 @@ app.use("/", stockLandingRouter);
 app.get("/healthz", async (_req, res) => {
   try {
     await db.execute("SELECT 1");
-    res.json({ ok: true, database: "ok", ...buildInfo });
+    res.json({ ok: true, database: "ok", providers: providerHealth.snapshot(), ...buildInfo });
   } catch (_) {
     res.status(503).json({ ok: false, database: "unavailable", ...buildInfo });
   }
+});
+
+app.get("/api/providers/health", (_req, res) => {
+  res.setHeader("Cache-Control", "no-store");
+  res.json(providerHealth.snapshot());
 });
 
 app.get("/api/version", (_req, res) => {

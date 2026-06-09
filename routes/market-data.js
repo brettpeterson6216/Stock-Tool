@@ -10,6 +10,7 @@ const express = require("express");
 
 const { FINNHUB_KEY }              = require("../lib/config");
 const { requirePro, checkAnalysisLimit } = require("../lib/plan");
+const { recordProvider } = require("../lib/provider-health");
 
 const router = express.Router();
 const _responseCache = new Map();
@@ -51,6 +52,7 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 5000) {
 // ============================================================
 router.get("/news/:ticker", async (req, res) => {
   const ticker = req.params.ticker.toUpperCase();
+  const started = Date.now();
   try {
     const cacheKey = `news:${ticker}`;
     const cached = getCached(cacheKey, 5 * 60 * 1000);
@@ -62,9 +64,11 @@ router.get("/news/:ticker", async (req, res) => {
     if (!r.ok) console.warn(`[news] Finnhub returned ${r.status} for ${ticker}`);
     const data   = await r.json();
     const items = Array.isArray(data) ? data.slice(0, 10) : [];
+    recordProvider("Finnhub", r.ok, Date.now() - started, r.ok ? "News available" : `HTTP ${r.status}`);
     setCached(cacheKey, items);
     res.json(items);
   } catch (e) {
+    recordProvider("Finnhub", false, Date.now() - started, e.message);
     console.error(`[news] error for ${ticker}:`, e.message);
     res.json([]);
   }
@@ -205,6 +209,7 @@ router.get("/screener", requirePro, async (req, res) => {
 async function getYahooSummary(_ticker, _modules) { return null; }
 
 router.get("/quote/:ticker", checkAnalysisLimit, async (req, res) => {
+  const started = Date.now();
   try {
     const ticker = req.params.ticker.toUpperCase().replace(/[^A-Z0-9.\-^]/g, "");
     if (!ticker) return res.status(400).json({ error: "No ticker" });
@@ -358,6 +363,7 @@ router.get("/quote/:ticker", checkAnalysisLimit, async (req, res) => {
 
     if (!data) {
       console.log(`[quote] All sources exhausted for ${ticker}`);
+      recordProvider("Market prices", false, Date.now() - started, `No price data for ${ticker}`);
       return res.status(404).json({ error: `No price data found for "${ticker}". Check the ticker symbol.` });
     }
 
@@ -405,8 +411,10 @@ router.get("/quote/:ticker", checkAnalysisLimit, async (req, res) => {
       delayed: interval !== "1m" && interval !== "2m" && interval !== "5m",
     };
     setCached(cacheKey, data);
+    recordProvider(source?.startsWith("Stooq") ? "Stooq" : "Yahoo Finance", true, Date.now() - started, source);
     res.json(data);
   } catch (e) {
+    recordProvider("Market prices", false, Date.now() - started, e.message);
     console.error("[quote] proxy error:", e.message);
     res.status(500).json({ error: "Failed to fetch quote data: " + e.message });
   }

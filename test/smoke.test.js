@@ -195,6 +195,63 @@ test("Free user can GET saved analyses", async () => {
   assert.ok(Array.isArray(body), "saves response should be an array");
 });
 
+test("Guest cannot read the synced investment workspace", async () => {
+  const res = await req("/api/workspace/theses");
+  assert.equal(res.status, 401);
+});
+
+test("Authenticated user can create, update, read, and delete a thesis", async () => {
+  const { cookie, csrfToken } = await makeSession("workspace_thesis", "workspace_thesis@test.com");
+  const headers = { cookie, "X-CSRF-Token": csrfToken };
+  const created = await req("/api/workspace/theses/AMD", {
+    method: "PUT", headers,
+    body: { status: "watching", thesis: "Data-center share expands.", catalysts: ["MI-series adoption"], risks: ["Execution"], sell_conditions: ["Share loss"], target_price: 220, bear_price: 110, conviction: 4 },
+  });
+  assert.equal(created.status, 200);
+  assert.equal((await created.json()).conviction, 4);
+
+  const list = await req("/api/workspace/theses", { headers: { cookie } });
+  const rows = await list.json();
+  assert.equal(rows.length, 1);
+  assert.deepEqual(rows[0].catalysts, ["MI-series adoption"]);
+
+  const removed = await req("/api/workspace/theses/AMD", { method: "DELETE", headers });
+  assert.equal(removed.status, 200);
+});
+
+test("Authenticated user can maintain portfolio positions and watchlist items", async () => {
+  const { cookie, csrfToken } = await makeSession("workspace_assets", "workspace_assets@test.com");
+  const headers = { cookie, "X-CSRF-Token": csrfToken };
+  const position = await req("/api/workspace/positions/MSFT", { method: "PUT", headers, body: { shares: 2.5, cost_basis: 400, sector: "Technology", notes: "Core" } });
+  assert.equal(position.status, 200);
+  assert.equal((await position.json()).shares, 2.5);
+  const watch = await req("/api/workspace/watchlist/NVDA", { method: "PUT", headers, body: { target_price: 190, note: "Wait for valuation" } });
+  assert.equal(watch.status, 200);
+
+  const summary = await req("/api/workspace/summary", { headers: { cookie } });
+  const body = await summary.json();
+  assert.equal(body.positions, 1);
+  assert.equal(body.watchlist, 1);
+  assert.equal(body.invested, 1000);
+
+  assert.equal((await req("/api/workspace/positions/MSFT", { method: "DELETE", headers })).status, 200);
+  assert.equal((await req("/api/workspace/watchlist/NVDA", { method: "DELETE", headers })).status, 200);
+});
+
+test("Workspace mutations require CSRF protection", async () => {
+  const { cookie } = await makeSession("workspace_csrf", "workspace_csrf@test.com");
+  const res = await req("/api/workspace/watchlist/AAPL", { method: "PUT", headers: { cookie }, body: { note: "No token" } });
+  assert.equal(res.status, 403);
+});
+
+test("Provider health endpoint exposes an observation snapshot", async () => {
+  const res = await req("/api/providers/health");
+  assert.equal(res.status, 200);
+  const body = await res.json();
+  assert.ok(Array.isArray(body.providers));
+  assert.ok(["observing", "operational", "degraded"].includes(body.status));
+});
+
 // ═══════════════════════════════════════════════════════════════
 //  3. Pro gate — free users get 403 on Pro endpoints
 // ═══════════════════════════════════════════════════════════════
