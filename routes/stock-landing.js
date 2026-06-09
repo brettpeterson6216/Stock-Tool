@@ -140,16 +140,16 @@ function renderPage(ticker, q) {
   <script type="application/ld+json">${schema}</script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'Inter',sans-serif;background:#08090D;color:rgba(220,225,232,.88);min-height:100vh}
+    body{font-family:'DM Sans',sans-serif;background:#08090D;color:rgba(220,225,232,.88);min-height:100vh}
     a{text-decoration:none;color:inherit}
 
     /* top bar */
     .top-bar{background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.06);
       padding:.8rem 2rem;display:flex;align-items:center;gap:1rem}
-    .logo{font-family:'Playfair Display',serif;font-size:1.2rem;color:#fff}
+    .logo{font-family:'DM Serif Display',serif;font-size:1.2rem;color:#fff}
     .logo em{color:#C8882A;font-style:italic}
     .top-bar .back{font-size:.78rem;color:rgba(220,225,232,.35);margin-left:auto}
     .top-bar .back:hover{color:#C8882A}
@@ -159,10 +159,10 @@ function renderPage(ticker, q) {
     .breadcrumb{font-size:.72rem;color:rgba(220,225,232,.35);margin-bottom:1.25rem}
     .breadcrumb a{color:rgba(220,225,232,.35)}
     .breadcrumb a:hover{color:#C8882A}
-    .ticker-badge{display:inline-block;font-family:monospace;font-size:.75rem;font-weight:700;
+    .ticker-badge{display:inline-block;font-family:'DM Mono',monospace;font-size:.75rem;font-weight:700;
       letter-spacing:.08em;background:rgba(200,136,42,.12);color:#C8882A;
       border:1px solid rgba(200,136,42,.25);border-radius:5px;padding:.2rem .6rem;margin-bottom:.75rem}
-    h1{font-family:'Playfair Display',serif;font-size:2rem;color:#fff;line-height:1.2;margin-bottom:.5rem}
+    h1{font-family:'DM Serif Display',serif;font-size:2rem;color:#fff;line-height:1.2;margin-bottom:.5rem}
     .exchange-tag{font-size:.75rem;color:rgba(220,225,232,.35);margin-bottom:2rem}
 
     /* quote card */
@@ -188,7 +188,7 @@ function renderPage(ticker, q) {
 
     /* what you get */
     .features{max-width:820px;margin:0 auto;padding:0 2rem 3rem}
-    h2{font-family:'Playfair Display',serif;font-size:1.3rem;color:#fff;margin-bottom:1rem}
+    h2{font-family:'DM Serif Display',serif;font-size:1.3rem;color:#fff;margin-bottom:1rem}
     .feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.75rem}
     .feat{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);
       border-radius:10px;padding:1rem 1.1rem}
@@ -201,7 +201,7 @@ function renderPage(ticker, q) {
     .pill-row{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.75rem}
     .ticker-pill{display:inline-block;padding:.35rem .85rem;border-radius:100px;
       background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);
-      font-size:.78rem;font-family:monospace;font-weight:600;color:rgba(220,225,232,.7);
+      font-size:.78rem;font-family:'DM Mono',monospace;font-weight:600;color:rgba(220,225,232,.7);
       transition:all .15s}
     .ticker-pill:hover{background:rgba(200,136,42,.1);border-color:rgba(200,136,42,.3);color:#C8882A}
 

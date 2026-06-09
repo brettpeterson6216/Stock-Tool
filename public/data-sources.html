@@ -7,32 +7,32 @@
   <title>Data Sources — ImpliedLens</title>
   <meta name="description" content="Where ImpliedLens gets its data — Finnhub, SEC EDGAR, Yahoo Finance, and how each source is used.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'Inter',sans-serif;background:#08090D;color:rgba(220,225,232,.85);min-height:100vh;padding:0}
+    body{font-family:'DM Sans',sans-serif;background:#08090D;color:rgba(220,225,232,.85);min-height:100vh;padding:0}
     a{color:#B98A3D;text-decoration:none}
     a:hover{text-decoration:underline}
     .top-bar{background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.06);padding:.85rem 2rem;display:flex;align-items:center;gap:1rem}
-    .logo{font-family:'Playfair Display',serif;font-size:1.3rem;color:#fff;text-decoration:none}
+    .logo{font-family:'DM Serif Display',serif;font-size:1.3rem;color:#fff;text-decoration:none}
     .logo em{color:#B98A3D;font-style:italic}
     .top-bar a.back{font-size:.8rem;color:rgba(220,225,232,.4);margin-left:auto}
     .top-bar a.back:hover{color:#B98A3D}
     .wrap{max-width:760px;margin:0 auto;padding:3rem 2rem 5rem}
     .eyebrow{font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#B98A3D;margin-bottom:.75rem}
-    h1{font-family:'Playfair Display',serif;font-size:2.1rem;color:#fff;margin-bottom:.5rem;line-height:1.25}
+    h1{font-family:'DM Serif Display',serif;font-size:2.1rem;color:#fff;margin-bottom:.5rem;line-height:1.25}
     .subtitle{font-size:1rem;color:rgba(220,225,232,.5);margin-bottom:2.5rem;line-height:1.6}
     .source-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:1.5rem 1.75rem;margin-bottom:1.25rem}
     .source-card:hover{border-color:rgba(185,138,61,.3)}
     .src-head{display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem}
     .src-icon{width:36px;height:36px;border-radius:8px;background:rgba(185,138,61,.12);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
-    .src-name{font-family:'Playfair Display',serif;font-size:1.05rem;color:#fff;font-weight:600}
+    .src-name{font-family:'DM Serif Display',serif;font-size:1.05rem;color:#fff;font-weight:600}
     .src-url{font-size:.75rem;color:rgba(220,225,232,.35);margin-top:.1rem}
     .src-desc{font-size:.88rem;line-height:1.75;color:rgba(220,225,232,.65);margin-bottom:.75rem}
     .src-tags{display:flex;flex-wrap:wrap;gap:.4rem}
     .tag{display:inline-block;padding:.2rem .65rem;border-radius:100px;background:rgba(255,255,255,.05);font-size:.7rem;color:rgba(220,225,232,.5);font-weight:500}
     .tag.gold{background:rgba(185,138,61,.1);color:#B98A3D}
-    h2{font-family:'Playfair Display',serif;font-size:1.1rem;color:#fff;margin:2.5rem 0 1rem;padding-bottom:.4rem;border-bottom:1px solid rgba(255,255,255,.07)}
+    h2{font-family:'DM Serif Display',serif;font-size:1.1rem;color:#fff;margin:2.5rem 0 1rem;padding-bottom:.4rem;border-bottom:1px solid rgba(255,255,255,.07)}
     p{font-size:.92rem;line-height:1.8;color:rgba(220,225,232,.65);margin-bottom:1rem}
     .caveat{background:rgba(185,138,61,.07);border:1px solid rgba(185,138,61,.2);border-radius:10px;padding:1rem 1.25rem;margin:1.5rem 0}
     .caveat p{margin-bottom:0;font-size:.85rem;color:rgba(220,225,232,.7)}

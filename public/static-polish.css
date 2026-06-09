@@ -75,7 +75,7 @@ p,li,.subtitle,.hero-sub,.feat-desc,.guide p,.guide li,.src-desc,.meta{color:var
 .feat:hover,.guide:hover,.source-card:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--sp-gold) 42%,var(--sp-border))!important;box-shadow:var(--sp-shadow)}
 .feat{counter-increment:feature}
 .feat-icon{font-size:0!important;width:34px;height:34px;border-radius:7px;background:var(--sp-panel-2);border:1px solid var(--sp-border);display:grid;place-items:center}
-.feat-icon::before{content:'0' counter(feature);font:700 10px/1 'Inter',sans-serif;letter-spacing:.08em;color:var(--sp-gold)}
+.feat-icon::before{content:'0' counter(feature);font:700 10px/1 'DM Sans',sans-serif;letter-spacing:.08em;color:var(--sp-gold)}
 .guide-num{color:var(--sp-gold)!important}
 .guide li::before{color:var(--sp-gold)!important}
 .source-card .src-icon{background:var(--sp-panel-2)!important;filter:saturate(.75)}
