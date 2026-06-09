@@ -8,7 +8,7 @@
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
     body{font-family:'Inter',system-ui,sans-serif;background:#08090D;color:rgba(220,225,232,.9);min-height:100vh}
-    a{color:#C8882A;text-decoration:none}
+    a{color:#B98A3D;text-decoration:none}
 
     /* ── Auth gate ── */
     #auth-gate{display:flex;align-items:center;justify-content:center;min-height:100vh}
@@ -16,8 +16,8 @@
     .auth-box h2{font-size:1.3rem;color:#fff;margin-bottom:.4rem}
     .auth-box p{font-size:.82rem;color:rgba(220,225,232,.4);margin-bottom:1.5rem}
     .auth-input{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:.7rem 1rem;color:#fff;font-size:.9rem;margin-bottom:.75rem;outline:none}
-    .auth-input:focus{border-color:#C8882A}
-    .auth-btn{width:100%;background:#C8882A;color:#08090D;border:none;border-radius:8px;padding:.75rem;font-size:.9rem;font-weight:700;cursor:pointer}
+    .auth-input:focus{border-color:#B98A3D}
+    .auth-btn{width:100%;background:#B98A3D;color:#08090D;border:none;border-radius:8px;padding:.75rem;font-size:.9rem;font-weight:700;cursor:pointer}
     .auth-btn:hover{opacity:.85}
     #auth-err{font-size:.78rem;color:#e05a5a;margin-top:.5rem;display:none}
 
@@ -25,10 +25,10 @@
     #dashboard{display:none;padding:0 0 4rem}
     .top-bar{background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.07);padding:.8rem 2rem;display:flex;align-items:center;justify-content:space-between}
     .logo{font-size:1.1rem;color:#fff;font-weight:600}
-    .logo em{color:#C8882A;font-style:italic}
+    .logo em{color:#B98A3D;font-style:italic}
     .top-actions{display:flex;gap:.75rem;align-items:center}
-    .refresh-btn{background:rgba(200,136,42,.1);border:1px solid rgba(200,136,42,.3);color:#C8882A;padding:.4rem .9rem;border-radius:7px;font-size:.78rem;cursor:pointer;transition:all .15s}
-    .refresh-btn:hover{background:rgba(200,136,42,.2)}
+    .refresh-btn{background:rgba(185,138,61,.1);border:1px solid rgba(185,138,61,.3);color:#B98A3D;padding:.4rem .9rem;border-radius:7px;font-size:.78rem;cursor:pointer;transition:all .15s}
+    .refresh-btn:hover{background:rgba(185,138,61,.2)}
     .last-updated{font-size:.72rem;color:rgba(220,225,232,.3)}
 
     .content{max-width:1100px;margin:0 auto;padding:2rem}
@@ -39,8 +39,8 @@
     .stat-label{font-size:.7rem;color:rgba(220,225,232,.4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.35rem}
     .stat-val{font-size:1.8rem;font-weight:700;color:#fff;line-height:1}
     .stat-sub{font-size:.72rem;color:rgba(220,225,232,.4);margin-top:.25rem}
-    .stat-card.gold .stat-val{color:#C8882A}
-    .stat-card.green .stat-val{color:#52d18a}
+    .stat-card.gold .stat-val{color:#B98A3D}
+    .stat-card.green .stat-val{color:#46b184}
 
     /* ── Section headers ── */
     h2{font-size:.88rem;font-weight:600;color:rgba(220,225,232,.5);text-transform:uppercase;letter-spacing:.08em;margin:2rem 0 .85rem;padding-bottom:.5rem;border-bottom:1px solid rgba(255,255,255,.06)}
@@ -52,8 +52,8 @@
     .funnel-name{font-size:.72rem;color:rgba(220,225,232,.45);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.4rem}
     .funnel-val{font-size:1.5rem;font-weight:700;color:#fff}
     .funnel-rate{font-size:.72rem;margin-top:.25rem}
-    .funnel-rate.good{color:#52d18a}
-    .funnel-rate.warn{color:#C8882A}
+    .funnel-rate.good{color:#46b184}
+    .funnel-rate.warn{color:#B98A3D}
     .funnel-rate.bad{color:#e05a5a}
 
     /* ── Chart ── */
@@ -67,9 +67,9 @@
     td{font-size:.82rem;padding:.6rem 1rem;border-bottom:1px solid rgba(255,255,255,.04);color:rgba(220,225,232,.75)}
     tr:last-child td{border-bottom:none}
     tr:hover td{background:rgba(255,255,255,.02)}
-    .badge{display:inline-block;padding:.15rem .55rem;border-radius:100px;font-size:.68rem;font-weight:600;background:rgba(200,136,42,.12);color:#C8882A}
+    .badge{display:inline-block;padding:.15rem .55rem;border-radius:100px;font-size:.68rem;font-weight:600;background:rgba(185,138,61,.12);color:#B98A3D}
     .badge.blue{background:rgba(80,130,255,.1);color:#6aa3ff}
-    .badge.green{background:rgba(82,209,138,.1);color:#52d18a}
+    .badge.green{background:rgba(82,209,138,.1);color:#46b184}
 
     /* ── Two-col layout ── */
     .two-col{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:2rem}
@@ -249,7 +249,7 @@ function render(data) {
   // ── Daily chart ─────────────────────────────────────────────────────────
   const days = [...new Set(daily.map(r => r.day))].sort();
   const keyColors = {
-    page_view:           'rgba(200,136,42,0.7)',
+    page_view:           'rgba(185,138,61,0.7)',
     analyze_started:     'rgba(82,209,138,0.7)',
     signup_completed:    'rgba(106,163,255,0.7)',
     pro_gate_viewed:     'rgba(220,100,100,0.7)',
