@@ -11,7 +11,7 @@
 <meta name="keywords" content="stock analysis, stock screener, DCF valuation, earnings history, SEC filings, analyst price targets, dark pool data, institutional holdings, stock comparison, financial statements, implied lens">
 <meta name="author" content="Implied Lens">
 <meta name="robots" content="index, follow">
-<meta name="theme-color" content="#C6A052">
+<meta name="theme-color" content="#A9782F">
 <!-- Open Graph -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://impliedlens.com/">
@@ -80,8 +80,8 @@
   --card:#FCFBF8;  --panel:#F2F1EC;
   --ink:#151719;  --ink2:#292D31; --ink3:#4A5057;
   --ink4:#707780; --ink5:#9AA1A8;
-  --gold:#B98A3D;   --gold-l:#E4D1A8;  --gold-l2:#F3ECE0;
-  --gold-d:#8B6527; --gold-d2:#5F461C;
+  --gold:#A9782F;   --gold-l:#D9BF8D;  --gold-l2:#F1E8D8;
+  --gold-d:#76521D; --gold-d2:#503812;
   --green:#247757; --green-l:#E4F1EB; --green-t:rgba(36,119,87,.10);
   --red:#A94F55;   --red-l:#F7E9E9;   --red-t:rgba(169,79,85,.10);
   --blue:#356D95;  --blue-l:#E8EFF4;
@@ -935,8 +935,8 @@ html[data-theme="dark"] #view-tool{
 html[data-theme="dark"] {
   --cream:#0B0D0F; --cream2:#111417; --cream3:#181C20;
   --card:#0E1114;  --panel:#12161A;
-  --gold:#C6A052; --gold-l:#DEC994; --gold-l2:#2A2419;
-  --gold-d:#A77D35; --gold-d2:#7B5A25;
+  --gold:#B88937; --gold-l:#CFB06B; --gold-l2:#272116;
+  --gold-d:#946823; --gold-d2:#694819;
   --green:#46B184; --red:#D96A70; --blue:#5C91B8;
   --border:rgba(255,255,255,.06); --border2:rgba(255,255,255,.10); --border3:rgba(255,255,255,.17);
   --shadow-sm:0 1px 3px rgba(0,0,0,.25); --shadow:0 2px 12px rgba(0,0,0,.4);
@@ -4096,20 +4096,20 @@ body.has-verif-banner #main-nav{top:42px}
 
 /* Lens Gold brand system */
 :root{
-  --brand-gold:#B98A3D;
-  --brand-gold-strong:#8B6527;
-  --brand-gold-soft:rgba(185,138,61,.09);
-  --brand-gold-line:rgba(185,138,61,.30);
+  --brand-gold:#A9782F;
+  --brand-gold-strong:#76521D;
+  --brand-gold-soft:rgba(169,120,47,.10);
+  --brand-gold-line:rgba(169,120,47,.34);
   --positive:#247757;
   --negative:#A94F55;
   --info:#356D95;
   --compare:#75649E;
 }
 html[data-theme="dark"]{
-  --brand-gold:#C6A052;
-  --brand-gold-strong:#D5B570;
-  --brand-gold-soft:rgba(198,160,82,.11);
-  --brand-gold-line:rgba(198,160,82,.32);
+  --brand-gold:#B88937;
+  --brand-gold-strong:#C5A153;
+  --brand-gold-soft:rgba(184,137,55,.12);
+  --brand-gold-line:rgba(184,137,55,.36);
   --positive:#46B184;
   --negative:#D96A70;
   --info:#5C91B8;
@@ -4159,6 +4159,18 @@ html[data-theme="dark"] .app-sidebar,html[data-theme="dark"] .hs-sidebar,html[da
 .mobile-bottom-nav{background:rgba(252,251,248,.96)!important;border-top-color:var(--border2)!important}
 html[data-theme="dark"] .mobile-bottom-nav{background:rgba(14,17,20,.97)!important;border-top-color:rgba(198,160,82,.13)!important}
 .mbn-item.mbn-active{color:var(--brand-gold)!important}
+
+/* Deeper Lens Gold: unify prominent home-page accents that predate the brand tokens. */
+.hh-badge,.hh-search-btn,.hh-chip:hover,.hsb-up-icon,.hsb-up-link,.wl-star.lit,.wl-star:hover,.report-badge,.report-btn,.ct-lim{
+  color:var(--brand-gold)!important;
+}
+.hh-badge{background:var(--brand-gold-soft);border-color:var(--brand-gold-line)}
+.hh-badge::before{background:var(--brand-gold);box-shadow:0 0 6px var(--brand-gold)}
+.hh-title em{background:linear-gradient(90deg,var(--brand-gold-strong),var(--brand-gold));-webkit-background-clip:text;background-clip:text}
+.hh-search-btn{background:var(--brand-gold)!important;color:#17130c!important}
+.hh-chip:hover,.report-badge,.report-btn{background:var(--brand-gold-soft);border-color:var(--brand-gold-line)}
+.mo-idx-dot[style*="#C6A052"]{background:var(--brand-gold)!important}
+.mo-bv2-icon[style*="#C6A052"]{background:var(--brand-gold-soft)!important;color:var(--brand-gold)!important}
 
 </style>
 <script>
