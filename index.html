@@ -1727,17 +1727,17 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
         <!-- Index prices -->
         <div class="mo-indices">
           <div class="mo-idx-item">
-            <div class="mo-idx-top"><div class="mo-idx-dot" style="background:#5c91b8"></div><div class="mo-idx-name">S&amp;P 500</div></div>
+            <div class="mo-idx-top"><div class="mo-idx-dot" style="background:var(--chart-ma50)"></div><div class="mo-idx-name">S&amp;P 500</div></div>
             <div class="mo-idx-price" id="ri-sp">—</div>
             <div class="mo-idx-chg" id="ri-sp-c">—</div>
           </div>
           <div class="mo-idx-item">
-            <div class="mo-idx-top"><div class="mo-idx-dot" style="background:#C6A052"></div><div class="mo-idx-name">Nasdaq 100</div></div>
+            <div class="mo-idx-top"><div class="mo-idx-dot" style="background:var(--chart-price)"></div><div class="mo-idx-name">Nasdaq 100</div></div>
             <div class="mo-idx-price" id="ri-nq">—</div>
             <div class="mo-idx-chg" id="ri-nq-c">—</div>
           </div>
           <div class="mo-idx-item">
-            <div class="mo-idx-top"><div class="mo-idx-dot" style="background:#9482bc"></div><div class="mo-idx-name">Dow Jones</div></div>
+            <div class="mo-idx-top"><div class="mo-idx-dot" style="background:var(--chart-ma200)"></div><div class="mo-idx-name">Dow Jones</div></div>
             <div class="mo-idx-price" id="ri-dj">—</div>
             <div class="mo-idx-chg" id="ri-dj-c">—</div>
           </div>
@@ -1747,20 +1747,20 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
         <!-- Breadth stats v2 -->
         <div class="mo-breadth-v2">
           <div class="mo-bv2-card">
-            <div class="mo-bv2-icon" style="background:rgba(74,222,128,.1);color:#46b184;"><i class="ti ti-trending-up"></i></div>
+            <div class="mo-bv2-icon" style="background:color-mix(in srgb,var(--chart-positive) 12%,transparent);color:var(--chart-positive);"><i class="ti ti-trending-up"></i></div>
             <div style="flex:1;min-width:0;">
               <div class="mo-bv2-label">Advancing</div>
               <div class="mo-bv2-val up" id="mo-advancing">—</div>
-              <div class="mo-bv2-bar-wrap"><div class="mo-bv2-bar" id="mo-adv-bar" style="background:#46b184;width:0%;"></div></div>
+              <div class="mo-bv2-bar-wrap"><div class="mo-bv2-bar" id="mo-adv-bar" style="background:var(--chart-positive);width:0%;"></div></div>
               <div class="mo-bv2-sub" id="mo-adv-pct">—</div>
             </div>
           </div>
           <div class="mo-bv2-card">
-            <div class="mo-bv2-icon" style="background:rgba(248,113,113,.1);color:#d96a70;"><i class="ti ti-trending-down"></i></div>
+            <div class="mo-bv2-icon" style="background:color-mix(in srgb,var(--chart-negative) 12%,transparent);color:var(--chart-negative);"><i class="ti ti-trending-down"></i></div>
             <div style="flex:1;min-width:0;">
               <div class="mo-bv2-label">Declining</div>
               <div class="mo-bv2-val dn" id="mo-declining">—</div>
-              <div class="mo-bv2-bar-wrap"><div class="mo-bv2-bar" id="mo-dec-bar" style="background:#d96a70;width:0%;"></div></div>
+              <div class="mo-bv2-bar-wrap"><div class="mo-bv2-bar" id="mo-dec-bar" style="background:var(--chart-negative);width:0%;"></div></div>
               <div class="mo-bv2-sub" id="mo-dec-pct">—</div>
             </div>
           </div>
@@ -1773,7 +1773,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
             </div>
           </div>
           <div class="mo-bv2-card">
-            <div class="mo-bv2-icon" style="background:rgba(167,139,250,.1);color:#9482bc;"><i class="ti ti-arrow-down-right"></i></div>
+            <div class="mo-bv2-icon" style="background:color-mix(in srgb,var(--chart-negative) 10%,transparent);color:var(--chart-negative);"><i class="ti ti-arrow-down-right"></i></div>
             <div style="flex:1;min-width:0;">
               <div class="mo-bv2-label">New Lows</div>
               <div class="mo-bv2-val neu" id="mo-lows">—</div>
@@ -1781,7 +1781,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
             </div>
           </div>
           <div class="mo-bv2-card">
-            <div class="mo-bv2-icon" style="background:rgba(74,144,212,.1);color:#5c91b8;"><i class="ti ti-chart-bar"></i></div>
+            <div class="mo-bv2-icon" style="background:color-mix(in srgb,var(--chart-ma50) 10%,transparent);color:var(--chart-ma50);"><i class="ti ti-chart-bar"></i></div>
             <div style="flex:1;min-width:0;">
               <div class="mo-bv2-label">Volume</div>
               <div class="mo-bv2-val neu" id="mo-vol">—</div>
@@ -2031,9 +2031,9 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
         <div class="act-btn" id="ct-line" onclick="setChartType('line',this)" title="Line"><i class="ti ti-chart-line"></i> Line</div>
         <div class="act-btn" id="ct-area" onclick="setChartType('area',this)" title="Area"><i class="ti ti-chart-area"></i> Area</div>
         <div class="act-sep"></div>
-        <div class="act-btn on" id="ind-ma50-btn" onclick="toggleInd(document.querySelector('[data-ind=ma50]'),'ma50')"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#5c91b8;margin-right:3px;"></span>MA50</div>
-        <div class="act-btn" id="ind-ma200-btn" onclick="toggleInd(document.querySelector('[data-ind=ma200]'),'ma200')"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#9b72c8;margin-right:3px;"></span>MA200</div>
-        <div class="act-btn" id="ind-bb-btn" onclick="toggleInd(document.querySelector('[data-ind=bb]'),'bb')"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#d4813a;margin-right:3px;"></span>Bollinger</div>
+        <div class="act-btn on indicator-control" id="ind-ma50-btn" data-mobile-label="50D" onclick="toggleInd(document.querySelector('[data-ind=ma50]'),'ma50')" title="50-day moving average" aria-label="Toggle 50-day moving average"><span class="chart-key key-ma50"></span>50D Avg</div>
+        <div class="act-btn indicator-control" id="ind-ma200-btn" data-mobile-label="200D" onclick="toggleInd(document.querySelector('[data-ind=ma200]'),'ma200')" title="200-day moving average" aria-label="Toggle 200-day moving average"><span class="chart-key key-ma200"></span>200D Avg</div>
+        <div class="act-btn indicator-control" id="ind-bb-btn" data-mobile-label="Bands" onclick="toggleInd(document.querySelector('[data-ind=bb]'),'bb')" title="Bollinger Bands" aria-label="Toggle Bollinger Bands"><span class="chart-key key-bands"></span>Bands</div>
         <div class="act-sep"></div>
         <div class="act-btn" id="epins-btn" onclick="this.classList.toggle('on')"><i class="ti ti-tag"></i> Earnings</div>
         <div class="act-btn" id="npins-btn" onclick="this.classList.toggle('on')"><i class="ti ti-news"></i> News</div>
@@ -2119,9 +2119,9 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
                   <div>
                     <div class="chart-title">Price Chart</div>
                     <div class="ind-row" style="margin-top:6px;" id="ind-row">
-                      <button class="ind-pill on" data-ind="ma50" onclick="toggleInd(this,'ma50')"><span class="ind-dot" style="background:#5c91b8"></span>MA50</button>
-                      <button class="ind-pill" data-ind="ma200" onclick="toggleInd(this,'ma200')"><span class="ind-dot" style="background:#9b72c8"></span>MA200</button>
-                      <button class="ind-pill" data-ind="bb" onclick="toggleInd(this,'bb')"><span class="ind-dot" style="background:#d4813a"></span>Bollinger</button>
+                      <button class="ind-pill on" data-ind="ma50" onclick="toggleInd(this,'ma50')"><span class="chart-key key-ma50"></span>50D Avg</button>
+                      <button class="ind-pill" data-ind="ma200" onclick="toggleInd(this,'ma200')"><span class="chart-key key-ma200"></span>200D Avg</button>
+                      <button class="ind-pill" data-ind="bb" onclick="toggleInd(this,'bb')"><span class="chart-key key-bands"></span>Bands</button>
                     </div>
                   </div>
                   <div class="range-pills">
@@ -2655,9 +2655,9 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
       <button class="cex-tool" data-markup-tool="freehand" onclick="setMarkupTool('freehand')" title="Freehand drawing"><i class="ti ti-pencil"></i></button>
       <button class="cex-tool" data-markup-tool="eraser" onclick="setMarkupTool('eraser')" title="Erase nearest mark"><i class="ti ti-eraser"></i></button>
       <span class="cex-tool-sep"></span>
-      <button class="cex-color active" data-markup-color="#c6a052" onclick="setMarkupColor('#c6a052')" style="background:#c6a052" title="Gold"></button>
-      <button class="cex-color" data-markup-color="#5c91b8" onclick="setMarkupColor('#5c91b8')" style="background:#5c91b8" title="Blue"></button>
-      <button class="cex-color" data-markup-color="#d96a70" onclick="setMarkupColor('#d96a70')" style="background:#d96a70" title="Red"></button>
+      <button class="cex-color active" data-markup-color="#B88937" onclick="setMarkupColor('#B88937')" style="background:#B88937" title="Lens Gold"></button>
+      <button class="cex-color" data-markup-color="#5F8193" onclick="setMarkupColor('#5F8193')" style="background:#5F8193" title="Steel blue"></button>
+      <button class="cex-color" data-markup-color="#9A7771" onclick="setMarkupColor('#9A7771')" style="background:#9A7771" title="Muted brick"></button>
       <span class="cex-tool-sep"></span>
       <button class="cex-tool" onclick="undoMarkup()" title="Undo markup"><i class="ti ti-arrow-back-up"></i></button>
       <button class="cex-tool" onclick="redoMarkup()" title="Redo markup"><i class="ti ti-arrow-forward-up"></i></button>
@@ -4071,7 +4071,10 @@ body.has-verif-banner #main-nav{top:42px}
   .app-section-hdr{height:44px;padding:0 .75rem}
   .app-chart-toolbar{height:auto;min-height:42px;overflow-x:auto!important;flex-wrap:nowrap!important;padding:5px 7px!important}
   .app-chart-toolbar .act-btn{min-width:38px;min-height:32px;padding:0 8px}
-  .app-chart-toolbar .act-btn:not([id^="ct-"]) {font-size:0}
+  .app-chart-toolbar .act-btn:not([id^="ct-"]):not(.indicator-control) {font-size:0}
+  .app-chart-toolbar .indicator-control{min-width:auto;font-size:0;gap:4px;padding-inline:8px}
+  .app-chart-toolbar .indicator-control::after{content:attr(data-mobile-label);font:600 9px/1 var(--mono);color:currentColor}
+  .app-chart-toolbar .indicator-control .chart-key{width:11px;height:3px;margin:0}
   .app-chart-toolbar .act-btn i,.app-chart-toolbar .act-btn span{font-size:13px;margin-right:0!important}
   .app-tf-strip{height:38px;overflow-x:auto!important;padding:4px 7px!important}
   .tf-pill,.tf-tog{min-width:38px;min-height:30px}
@@ -4110,10 +4113,10 @@ html[data-theme="dark"]{
   --brand-gold-strong:#C5A153;
   --brand-gold-soft:rgba(184,137,55,.12);
   --brand-gold-line:rgba(184,137,55,.36);
-  --positive:#46B184;
-  --negative:#D96A70;
-  --info:#5C91B8;
-  --compare:#9482BC;
+  --positive:#73A58C;
+  --negative:#C98285;
+  --info:#7896A6;
+  --compare:#9A9383;
 }
 nav{
   background:rgba(247,246,242,.96);
@@ -4159,6 +4162,33 @@ html[data-theme="dark"] .app-sidebar,html[data-theme="dark"] .hs-sidebar,html[da
 .mobile-bottom-nav{background:rgba(252,251,248,.96)!important;border-top-color:var(--border2)!important}
 html[data-theme="dark"] .mobile-bottom-nav{background:rgba(14,17,20,.97)!important;border-top-color:rgba(198,160,82,.13)!important}
 .mbn-item.mbn-active{color:var(--brand-gold)!important}
+
+/* Chart language: restrained, high-contrast, and consistent with Lens Gold. */
+:root{
+  --chart-price:#A9782F;
+  --chart-positive:#477A63;
+  --chart-negative:#9E5E62;
+  --chart-ma50:#52758A;
+  --chart-ma200:#747D70;
+  --chart-bands:#927744;
+  --chart-neutral:#817A6C;
+}
+html[data-theme="dark"]{
+  --chart-price:#B88937;
+  --chart-positive:#73A58C;
+  --chart-negative:#C98285;
+  --chart-ma50:#7896A6;
+  --chart-ma200:#9AA48F;
+  --chart-bands:#B09A69;
+  --chart-neutral:#A59D8C;
+}
+.chart-key{display:inline-block;width:13px;height:3px;border-radius:2px;margin-right:4px;flex:0 0 auto;background:var(--chart-neutral)}
+.key-ma50{background:var(--chart-ma50)}.key-ma200{background:var(--chart-ma200)}.key-bands{background:var(--chart-bands)}
+.indicator-control.on .chart-key,.ind-pill.on .chart-key{box-shadow:0 0 0 2px var(--brand-gold-soft)}
+.price-chg.up,.m-val.up,.td-best,.fin-positive,.earn-beat,.analyst-upside.up,.fstock-chg.up,.ct-yes,.ntb-pos{color:var(--chart-positive)!important}
+.price-chg.dn,.m-val.dn,.td-worst,.fin-negative,.earn-miss,.analyst-upside.dn,.fstock-chg.dn,.ntb-neg{color:var(--chart-negative)!important}
+.cb-buy,.analyst-gauge-seg.lit.sb{background:var(--chart-positive)!important}.cb-sell,.analyst-gauge-seg.lit.ss{background:var(--chart-negative)!important}
+.news-item.news-pos,.news-pos{border-left-color:var(--chart-positive)!important}.news-item.news-neg,.news-neg{border-left-color:var(--chart-negative)!important}
 
 /* Deeper Lens Gold: unify prominent home-page accents that predate the brand tokens. */
 .hh-badge,.hh-search-btn,.hh-chip:hover,.hsb-up-icon,.hsb-up-link,.wl-star.lit,.wl-star:hover,.report-badge,.report-btn,.ct-lim{
@@ -4212,7 +4242,7 @@ const S = {
   csrfToken: null,      // fetched from GET /api/csrf on page load
 };
 window.IL_STATE = S;
-const COLORS = ['#C6A052','#5c91b8','#46b184','#d96a70'];
+const COLORS = ['#B88937','#5F8193','#778673','#9A7771'];
 // Keep this list in sync with the requirePro-gated API routes in routes/financials.js
 // and routes/market-data.js (screener).
 const PRO_SECTIONS = ['financials','advmetrics','projection','dcf','screener','adveducation',
@@ -5235,7 +5265,7 @@ const baseOpts = (extraScales={}) => {
 
 /* ══ CHART EXPAND MODAL ══ */
 var _expandedChart = null;
-var _markup = {tool:'cursor',color:'#c6a052',items:[],draft:null,ready:false,observer:null};
+var _markup = {tool:'cursor',color:'#B88937',items:[],draft:null,ready:false,observer:null};
 
 function expandChart(chartId, title) {
   const src = S.charts[chartId];
@@ -5273,7 +5303,7 @@ function expandChart(chartId, title) {
       animation: false,
       plugins: {
         ...(srcCfg.options?.plugins||{}),
-        legend: { display: true, labels: { color:theme.text, font:{family:'DM Sans',size:11,weight:'500'}, boxWidth:16, padding:16, usePointStyle:true, pointStyleWidth:9 } },
+        legend: { display: true, labels: { color:theme.text, font:{family:'DM Sans',size:11,weight:'500'}, boxWidth:20, boxHeight:2, padding:16, usePointStyle:false } },
         tooltip: {
           mode:'index', intersect:false,
           backgroundColor:ttbg(), titleColor:'#888', bodyColor:ttbody(),
@@ -5302,6 +5332,16 @@ function expandChart(chartId, title) {
     }
   });
   initMarkupCanvas();
+}
+function cp() {
+  return isDark()
+    ? { price:'#B88937', positive:'#73A58C', negative:'#C98285', ma50:'#7896A6', ma200:'#9AA48F', bands:'#B09A69', neutral:'#A59D8C' }
+    : { price:'#A9782F', positive:'#477A63', negative:'#9E5E62', ma50:'#52758A', ma200:'#747D70', bands:'#927744', neutral:'#817A6C' };
+}
+function colorAlpha(hex, alpha) {
+  const raw=hex.replace('#','');
+  const n=parseInt(raw.length===3?raw.split('').map(x=>x+x).join(''):raw,16);
+  return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${alpha})`;
 }
 
 function resetExpandZoom(){
@@ -5903,7 +5943,7 @@ async function initModernGlobe(){
   draw();
 }
 
-function buildSparklineSVG(data,up){if(!data||data.length<2)return'';const w=100,h=22,min=Math.min(...data),max=Math.max(...data),rng=max-min||1;const pts=data.map((v,i)=>`${((i/(data.length-1))*w).toFixed(1)},${(h-((v-min)/rng)*h).toFixed(1)}`).join(' ');const col=up?'#46b184':'#d96a70';return`<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" style="width:100%;height:100%;display:block;"><polyline points="${pts}" fill="none" stroke="${col}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/></svg>`;}
+function buildSparklineSVG(data,up){if(!data||data.length<2)return'';const w=100,h=22,min=Math.min(...data),max=Math.max(...data),rng=max-min||1;const pts=data.map((v,i)=>`${((i/(data.length-1))*w).toFixed(1)},${(h-((v-min)/rng)*h).toFixed(1)}`).join(' ');const palette=cp();const col=up?palette.positive:palette.negative;return`<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" style="width:100%;height:100%;display:block;"><polyline points="${pts}" fill="none" stroke="${col}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/></svg>`;}
 
 async function loadHomeTickerStrip(){
   const el=document.getElementById('home-ticker-strip');if(!el)return;
@@ -5930,9 +5970,9 @@ async function loadHomeTickerStrip(){
 async function loadMarketOverview(range,btn){
   if(btn){document.querySelectorAll('.mo-tab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
   const IDXS=[
-    {t:'^GSPC', col:'#5c91b8', g0:'rgba(74,159,212,0.28)',  g1:'rgba(74,159,212,0)',   vi:'ri-sp', vc:'ri-sp-c',  label:'S&P 500'},
-    {t:'^IXIC', col:'#C6A052', g0:'rgba(198,160,82,0.28)',   g1:'rgba(198,160,82,0)',   vi:'ri-nq', vc:'ri-nq-c',  label:'Nasdaq 100'},
-    {t:'^DJI',  col:'#9482bc', g0:'rgba(167,139,250,0.22)',  g1:'rgba(167,139,250,0)',  vi:'ri-dj', vc:'ri-dj-c',  label:'Dow Jones'}
+    {t:'^GSPC', col:'#5F8193', g0:'rgba(95,129,147,0.22)', g1:'rgba(95,129,147,0)', vi:'ri-sp', vc:'ri-sp-c', label:'S&P 500'},
+    {t:'^IXIC', col:'#B88937', g0:'rgba(184,137,55,0.22)', g1:'rgba(184,137,55,0)', vi:'ri-nq', vc:'ri-nq-c', label:'Nasdaq 100'},
+    {t:'^DJI', col:'#778673', g0:'rgba(119,134,115,0.20)', g1:'rgba(119,134,115,0)', vi:'ri-dj', vc:'ri-dj-c', label:'Dow Jones'}
   ];
   // Map range to correct interval for intraday granularity
   const intervalMap={'1d':'5m','5d':'15m','1mo':'1d','3mo':'1d','ytd':'1d','1y':'1d','5y':'1wk'};
@@ -5988,7 +6028,7 @@ async function loadMarketOverview(range,btn){
     afterDraw(chart){
       const {ctx,chartArea}=chart;
       if(!chartArea)return;
-      const colors=['#5c91b8','#C6A052','#9482bc'];
+      const colors=['#5F8193','#B88937','#778673'];
       chart.data.datasets.forEach((ds,i)=>{
         const pts=ds.data.filter(x=>x!=null);
         if(!pts.length)return;
@@ -6119,7 +6159,7 @@ async function loadAnalystSignals(tickers){
   const total=buy+hold+sell||1,buyPct=Math.round(buy/total*100),holdPct=Math.round(hold/total*100),sellPct=100-buyPct-holdPct;
   ['analyst-bull-pct','abl-buy','abl-hold','abl-sell','analyst-note'].forEach((id,i)=>{const el=document.getElementById(id);if(el)el.textContent=[buyPct+'%',buy+' Buy',hold+' Hold',sell+' Sell',`Based on ${buy+hold+sell} analyst ratings`][i];});
   const c2=document.getElementById('analyst-donut-chart');if(!c2)return;
-  if(window._analystDonut){window._analystDonut.destroy();} window._analystDonut=new Chart(c2,{type:'doughnut',data:{datasets:[{data:[buyPct,holdPct,sellPct],backgroundColor:['#46b184','#9ca3af','#d96a70'],borderWidth:0}]},options:{responsive:false,cutout:'70%',animation:{duration:400},plugins:{legend:{display:false},tooltip:{enabled:false}}}});
+  if(window._analystDonut){window._analystDonut.destroy();} window._analystDonut=new Chart(c2,{type:'doughnut',data:{datasets:[{data:[buyPct,holdPct,sellPct],backgroundColor:[cp().positive,cp().neutral,cp().negative],borderWidth:0}]},options:{responsive:false,cutout:'70%',animation:{duration:400},plugins:{legend:{display:false},tooltip:{enabled:false}}}});
 }
 
 async function loadHomeInsights(){
@@ -6374,19 +6414,20 @@ async function loadAnalyst(ticker) {
 
       const bullPct = (counts.strongBuy + counts.buy) / totalRec * 100;
       const bearPct = (counts.sell + counts.strongSell) / totalRec * 100;
-      let consensus = 'Hold', consColor = '#C6A052';
-      if (bullPct >= 60) { consensus = 'Buy';       consColor = '#46b184'; }
-      if (bullPct >= 80) { consensus = 'Strong Buy'; consColor = '#22c55e'; }
-      if (bearPct >= 50) { consensus = 'Sell';       consColor = '#d96a70'; }
+      const palette=cp();
+      let consensus = 'Hold', consColor = palette.price;
+      if (bullPct >= 60) { consensus = 'Buy'; consColor = palette.positive; }
+      if (bullPct >= 80) { consensus = 'Strong Buy'; consColor = palette.positive; }
+      if (bearPct >= 50) { consensus = 'Sell'; consColor = palette.negative; }
 
       barHtml = `
         <div style="font-size:.7rem;color:var(--text4);margin-bottom:4px;">Analyst Consensus <span style="float:right;font-weight:700;color:${consColor};">${consensus}</span></div>
         <div class="consensus-bar-row">
-          ${pSB>0?`<div style="flex:${pSB};background:#22c55e;border-radius:3px;" title="Strong Buy ${pSB}%"></div>`:''}
-          ${pB>0?`<div style="flex:${pB};background:#46b184;border-radius:3px;" title="Buy ${pB}%"></div>`:''}
-          ${pH>0?`<div style="flex:${pH};background:#C6A052;border-radius:3px;" title="Hold ${pH}%"></div>`:''}
-          ${pS>0?`<div style="flex:${pS};background:#d96a70;border-radius:3px;" title="Sell ${pS}%"></div>`:''}
-          ${pSS>0?`<div style="flex:${pSS};background:#dc2626;border-radius:3px;" title="Strong Sell ${pSS}%"></div>`:''}
+          ${pSB>0?`<div style="flex:${pSB};background:${palette.positive};border-radius:3px;" title="Strong Buy ${pSB}%"></div>`:''}
+          ${pB>0?`<div style="flex:${pB};background:${colorAlpha(palette.positive,.72)};border-radius:3px;" title="Buy ${pB}%"></div>`:''}
+          ${pH>0?`<div style="flex:${pH};background:${palette.price};border-radius:3px;" title="Hold ${pH}%"></div>`:''}
+          ${pS>0?`<div style="flex:${pS};background:${colorAlpha(palette.negative,.72)};border-radius:3px;" title="Sell ${pS}%"></div>`:''}
+          ${pSS>0?`<div style="flex:${pSS};background:${palette.negative};border-radius:3px;" title="Strong Sell ${pSS}%"></div>`:''}
         </div>
         <div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--text5);margin-top:3px;">
           <span>🟢 ${counts.strongBuy+counts.buy} Buy</span>
@@ -6420,7 +6461,8 @@ const candleWickPlugin = {
       const yO = chart.scales.y.getPixelForValue(opens[i]||closes2[i]);
       const yC = chart.scales.y.getPixelForValue(closes2[i]);
       const isUp = (closes2[i]||0) >= (opens[i]||0);
-      ctx2.strokeStyle = isUp ? '#46b184' : '#d96a70';
+      const palette=cp();
+      ctx2.strokeStyle = isUp ? palette.positive : palette.negative;
       ctx2.lineWidth = 1;
       ctx2.beginPath(); ctx2.moveTo(x, yH); ctx2.lineTo(x, Math.min(yO,yC)); ctx2.stroke();
       ctx2.beginPath(); ctx2.moveTo(x, yL); ctx2.lineTo(x, Math.max(yO,yC)); ctx2.stroke();
@@ -6432,37 +6474,38 @@ const candleWickPlugin = {
 function buildPriceChart(result,closes,timestamps) {
   destroyChart('price-chart');
   const t=ct();
+  const p=cp();
   const labels=timestamps.map(ts=>new Date(ts*1000).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
   const valid=closes.map((c,i)=>({c,l:labels[i]})).filter(x=>x.c!=null);
   const vc=valid.map(x=>x.c), vl=valid.map(x=>x.l);
   const ma50v=sma(vc,50), ma200v=sma(vc,200), bbv=bollinger(vc,20);
   const hp={pointRadius:0,pointHoverRadius:6,pointHoverBorderWidth:2,pointHoverBorderColor:'#fff'};
-  const fillGrad=ctx=>{const g=ctx.chart.ctx.createLinearGradient(0,0,0,260);g.addColorStop(0,'rgba(185,138,61,.18)');g.addColorStop(1,'rgba(185,138,61,0)');return g;};
-  const strongGrad=ctx=>{const g=ctx.chart.ctx.createLinearGradient(0,0,0,260);g.addColorStop(0,'rgba(185,138,61,.35)');g.addColorStop(1,'rgba(185,138,61,.02)');return g;};
+  const fillGrad=ctx=>{const g=ctx.chart.ctx.createLinearGradient(0,0,0,260);g.addColorStop(0,colorAlpha(p.price,.16));g.addColorStop(1,colorAlpha(p.price,0));return g;};
+  const strongGrad=ctx=>{const g=ctx.chart.ctx.createLinearGradient(0,0,0,260);g.addColorStop(0,colorAlpha(p.price,.28));g.addColorStop(1,colorAlpha(p.price,.02));return g;};
   let ds;
   if(S.chartType==='candle') {
     const q2=result.indicators.quote[0];
     const opens2=q2.open||[], closes2=vc, highs2=q2.high||[], lows2=q2.low||[];
     const candleData=closes2.map((c2,i)=>opens2[i]!=null?[opens2[i],c2]:null).filter(x=>x!=null);
-    const candleColors=closes2.map((c2,i)=>(c2||0)>=(opens2[i]||0)?'rgba(74,222,128,.75)':'rgba(248,113,113,.75)');
+    const candleColors=closes2.map((c2,i)=>(c2||0)>=(opens2[i]||0)?colorAlpha(p.positive,.78):colorAlpha(p.negative,.78));
     ds=[{label:'Price',data:closes2.map((c2,i)=>opens2[i]!=null?[Math.min(opens2[i],c2),Math.max(opens2[i],c2)]:null),backgroundColor:candleColors,borderColor:candleColors,borderWidth:1,borderRadius:0,order:10}];
   } else if(S.chartType==='area') {
-    ds=[{label:'Price',data:vc,borderColor:'#C6A052',borderWidth:2,...hp,pointHoverBackgroundColor:'#C6A052',fill:true,backgroundColor:strongGrad,tension:.2,order:10}];
+    ds=[{label:'Price',data:vc,borderColor:p.price,borderWidth:2,...hp,pointHoverBackgroundColor:p.price,fill:true,backgroundColor:strongGrad,tension:.2,order:10}];
   } else {
-    ds=[{label:'Price',data:vc,borderColor:'#C6A052',borderWidth:2,...hp,pointHoverBackgroundColor:'#C6A052',fill:true,backgroundColor:fillGrad,tension:.2,order:10}];
+    ds=[{label:'Price',data:vc,borderColor:p.price,borderWidth:2,...hp,pointHoverBackgroundColor:p.price,fill:true,backgroundColor:fillGrad,tension:.2,order:10}];
   }
   const lineType = S.chartType==='candle' ? {type:'line'} : {};
-  if(S.inds.ma50)  ds.push({...lineType,label:'MA 50', data:ma50v, borderColor:'#5c91b8',borderWidth:1.5,...hp,pointHoverBackgroundColor:'#5c91b8',fill:false,tension:.2,order:9});
-  if(S.inds.ma200) ds.push({...lineType,label:'MA 200',data:ma200v,borderColor:'#9482bc',borderWidth:1.5,...hp,pointHoverBackgroundColor:'#9482bc',fill:false,tension:.2,order:8});
+  if(S.inds.ma50)  ds.push({...lineType,label:'50D average', data:ma50v, borderColor:p.ma50,borderWidth:1.5,...hp,pointHoverBackgroundColor:p.ma50,fill:false,tension:.2,order:9});
+  if(S.inds.ma200) ds.push({...lineType,label:'200D average',data:ma200v,borderColor:p.ma200,borderWidth:1.5,...hp,pointHoverBackgroundColor:p.ma200,fill:false,tension:.2,order:8});
   if(S.inds.bb) {
-    ds.push({...lineType,label:'BB Upper',data:bbv.map(x=>x.u),borderColor:'rgba(212,129,58,.55)',borderWidth:1,pointRadius:0,fill:false,tension:.2,order:7,borderDash:[4,3]});
-    ds.push({...lineType,label:'BB Lower',data:bbv.map(x=>x.l),borderColor:'rgba(212,129,58,.55)',borderWidth:1,pointRadius:0,fill:false,tension:.2,order:6,borderDash:[4,3]});
+    ds.push({...lineType,label:'Upper band',data:bbv.map(x=>x.u),borderColor:colorAlpha(p.bands,.62),borderWidth:1,pointRadius:0,fill:false,tension:.2,order:7,borderDash:[4,3]});
+    ds.push({...lineType,label:'Lower band',data:bbv.map(x=>x.l),borderColor:colorAlpha(p.bands,.62),borderWidth:1,pointRadius:0,fill:false,tension:.2,order:6,borderDash:[4,3]});
   }
   if(S.analystTarget){
     const n=vl.length;
-    if(S.analystTarget.mean) ds.push({...lineType,label:`Analyst Target $${S.analystTarget.mean.toFixed(0)}`,data:Array(n).fill(S.analystTarget.mean),borderColor:'rgba(139,195,74,.8)',borderWidth:1.5,borderDash:[6,4],pointRadius:0,fill:false,tension:0,order:5});
-    if(S.analystTarget.high) ds.push({...lineType,label:`High $${S.analystTarget.high.toFixed(0)}`,         data:Array(n).fill(S.analystTarget.high), borderColor:'rgba(74,222,128,.45)', borderWidth:1,borderDash:[3,4],pointRadius:0,fill:false,tension:0,order:4});
-    if(S.analystTarget.low)  ds.push({...lineType,label:`Low $${S.analystTarget.low.toFixed(0)}`,            data:Array(n).fill(S.analystTarget.low),  borderColor:'rgba(248,113,113,.45)',borderWidth:1,borderDash:[3,4],pointRadius:0,fill:false,tension:0,order:3});
+    if(S.analystTarget.mean) ds.push({...lineType,label:`Analyst target $${S.analystTarget.mean.toFixed(0)}`,data:Array(n).fill(S.analystTarget.mean),borderColor:colorAlpha(p.price,.82),borderWidth:1.5,borderDash:[6,4],pointRadius:0,fill:false,tension:0,order:5});
+    if(S.analystTarget.high) ds.push({...lineType,label:`Target high $${S.analystTarget.high.toFixed(0)}`,data:Array(n).fill(S.analystTarget.high),borderColor:colorAlpha(p.positive,.52),borderWidth:1,borderDash:[3,4],pointRadius:0,fill:false,tension:0,order:4});
+    if(S.analystTarget.low)  ds.push({...lineType,label:`Target low $${S.analystTarget.low.toFixed(0)}`,data:Array(n).fill(S.analystTarget.low),borderColor:colorAlpha(p.negative,.52),borderWidth:1,borderDash:[3,4],pointRadius:0,fill:false,tension:0,order:3});
   }
   const opts=baseOpts({
     y:{
@@ -6472,7 +6515,7 @@ function buildPriceChart(result,closes,timestamps) {
     },
     x:{ticks:{color:t.text,font:{size:10},maxTicksLimit:8},grid:{color:t.grid}}
   });
-  opts.plugins.legend={display:true,position:'top',align:'end',labels:{color:t.text,font:{size:10},boxWidth:12,padding:10,filter:i=>i.text&&i.text.length>0,usePointStyle:true,pointStyleWidth:8}};
+  opts.plugins.legend={display:true,position:'top',align:'end',labels:{color:t.text,font:{size:10},boxWidth:18,boxHeight:2,padding:12,filter:i=>i.text&&i.text.length>0,usePointStyle:false}};
   opts.plugins.tooltip={...opts.plugins.tooltip,callbacks:{
     title:items=>items[0]?.label||'',
     label:ctx=>{const raw=Array.isArray(ctx.raw)?ctx.raw[ctx.raw.length-1]:ctx.raw;return ` ${ctx.dataset.label||''}: $${Number(raw||0).toFixed(2)}`;}
@@ -6485,6 +6528,7 @@ function buildPriceChart(result,closes,timestamps) {
 function buildRSIChart(rsiVals,timestamps) {
   destroyChart('rsi-chart');
   const t=ct();
+  const p=cp();
   const labels=timestamps.map(ts=>new Date(ts*1000).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
   const last=rsiVals[rsiVals.length-1];
   document.getElementById('rsi-readout').textContent=last?`${last.toFixed(1)} — ${last<30?'Oversold':last>70?'Overbought':'Neutral'}`:'';
@@ -6492,10 +6536,10 @@ function buildRSIChart(rsiVals,timestamps) {
   S.charts['rsi-chart']=new Chart(document.getElementById('rsi-chart'),{
     type:'line',
     data:{labels,datasets:[
-      {label:'Overbought (70)',data:Array(n).fill(70),borderColor:'rgba(248,113,113,.45)',borderWidth:1,borderDash:[4,3],pointRadius:0,fill:false,tension:0,order:1},
-      {label:'Oversold (30)', data:Array(n).fill(30),borderColor:'rgba(74,222,128,.45)', borderWidth:1,borderDash:[4,3],pointRadius:0,fill:false,tension:0,order:2},
-      {label:'RSI (14)',data:rsiVals,borderWidth:1.5,pointRadius:0,pointHoverRadius:5,pointHoverBorderWidth:2,pointHoverBorderColor:'#fff',pointHoverBackgroundColor:'#C6A052',fill:false,tension:.2,order:3,
-       segment:{borderColor:ctx=>{const v=ctx.p0?.parsed?.y;return v<30?'#46b184':v>70?'#d96a70':'#C6A052';}}},
+      {label:'Overbought · 70',data:Array(n).fill(70),borderColor:colorAlpha(p.negative,.48),borderWidth:1,borderDash:[4,3],pointRadius:0,fill:false,tension:0,order:1},
+      {label:'Oversold · 30', data:Array(n).fill(30),borderColor:colorAlpha(p.positive,.48), borderWidth:1,borderDash:[4,3],pointRadius:0,fill:false,tension:0,order:2},
+      {label:'RSI · 14',data:rsiVals,borderWidth:1.5,pointRadius:0,pointHoverRadius:5,pointHoverBorderWidth:2,pointHoverBorderColor:'#fff',pointHoverBackgroundColor:p.price,fill:false,tension:.2,order:3,
+       segment:{borderColor:ctx=>{const v=ctx.p0?.parsed?.y;return v<30?p.positive:v>70?p.negative:p.price;}}},
     ]},
     options:{
       ...baseOpts(),
@@ -6508,9 +6552,9 @@ function buildRSIChart(rsiVals,timestamps) {
            title:{display:true,text:'RSI',color:t.muted,font:{size:9}}}
       },
       plugins:{
-        legend:{display:true,position:'top',align:'end',labels:{color:t.text,font:{size:9},boxWidth:10,usePointStyle:true,pointStyleWidth:8,padding:8}},
+        legend:{display:true,position:'top',align:'end',labels:{color:t.text,font:{size:9},boxWidth:16,boxHeight:2,usePointStyle:false,padding:10}},
         tooltip:{mode:'index',intersect:false,backgroundColor:t.ttBg,titleColor:t.ttTitle,bodyColor:t.ttBody,borderColor:t.ttBorder,borderWidth:1,callbacks:{
-          label:ctx=>ctx.dataset.label==='RSI (14)'?` RSI: ${Number(ctx.raw).toFixed(1)}`:null
+          label:ctx=>ctx.dataset.label==='RSI · 14'?` RSI: ${Number(ctx.raw).toFixed(1)}`:null
         }}
       }
     }
@@ -6520,6 +6564,7 @@ function buildRSIChart(rsiVals,timestamps) {
 function buildMACDChart(closes,timestamps) {
   destroyChart('macd-chart');
   const t=ct();
+  const p=cp();
   const labels=timestamps.map(ts=>new Date(ts*1000).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
   const {line,sig,hist}=macd(closes);
   const last=hist[hist.length-1];
@@ -6527,9 +6572,9 @@ function buildMACDChart(closes,timestamps) {
   S.charts['macd-chart']=new Chart(document.getElementById('macd-chart'),{
     type:'bar',
     data:{labels,datasets:[
-      {type:'bar', label:'Histogram',data:hist,backgroundColor:hist.map(v=>v>=0?'rgba(74,222,128,.45)':'rgba(248,113,113,.45)'),borderWidth:0,order:3},
-      {type:'line',label:'MACD',    data:line,borderColor:'#5c91b8',borderWidth:1.5,pointRadius:0,pointHoverRadius:5,pointHoverBorderColor:'#fff',pointHoverBackgroundColor:'#5c91b8',fill:false,tension:.2,order:1},
-      {type:'line',label:'Signal',  data:sig, borderColor:'#c98252',borderWidth:1.5,pointRadius:0,pointHoverRadius:5,pointHoverBorderColor:'#fff',pointHoverBackgroundColor:'#c98252',fill:false,tension:.2,order:2,borderDash:[4,3]},
+      {type:'bar', label:'Momentum',data:hist,backgroundColor:hist.map(v=>v>=0?colorAlpha(p.positive,.42):colorAlpha(p.negative,.42)),borderWidth:0,order:3},
+      {type:'line',label:'MACD',data:line,borderColor:p.ma50,borderWidth:1.5,pointRadius:0,pointHoverRadius:5,pointHoverBorderColor:'#fff',pointHoverBackgroundColor:p.ma50,fill:false,tension:.2,order:1},
+      {type:'line',label:'Signal',data:sig,borderColor:p.bands,borderWidth:1.5,pointRadius:0,pointHoverRadius:5,pointHoverBorderColor:'#fff',pointHoverBackgroundColor:p.bands,fill:false,tension:.2,order:2,borderDash:[4,3]},
     ]},
     options:{
       ...baseOpts(),
@@ -6540,7 +6585,7 @@ function buildMACDChart(closes,timestamps) {
            title:{display:true,text:'Value',color:t.muted,font:{size:9}}}
       },
       plugins:{
-        legend:{display:true,position:'top',align:'end',labels:{color:t.text,font:{size:9},boxWidth:10,usePointStyle:true,pointStyleWidth:8,padding:8}},
+        legend:{display:true,position:'top',align:'end',labels:{color:t.text,font:{size:9},boxWidth:16,boxHeight:2,usePointStyle:false,padding:10}},
         tooltip:{mode:'index',intersect:false,backgroundColor:t.ttBg,titleColor:t.ttTitle,bodyColor:t.ttBody,borderColor:t.ttBorder,borderWidth:1,callbacks:{
           label:ctx=>` ${ctx.dataset.label}: ${Number(ctx.raw).toFixed(4)}`
         }}
@@ -6552,8 +6597,9 @@ function buildMACDChart(closes,timestamps) {
 function buildVolChart(vols,timestamps,closes) {
   destroyChart('vol-chart');
   const t=ct();
+  const p=cp();
   const labels=timestamps.map(ts=>new Date(ts*1000).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
-  const bg=vols.map((_,i)=>closes[i]>=closes[i-1]?'rgba(74,222,128,.5)':'rgba(248,113,113,.5)');
+  const bg=vols.map((_,i)=>closes[i]>=closes[i-1]?colorAlpha(p.positive,.46):colorAlpha(p.negative,.46));
   S.charts['vol-chart']=new Chart(document.getElementById('vol-chart'),{
     type:'bar',
     data:{labels,datasets:[{label:'Volume',data:vols,backgroundColor:bg,borderWidth:0,borderRadius:1}]},
@@ -6579,9 +6625,10 @@ function buildVolChart(vols,timestamps,closes) {
 function buildDistChart(returns) {
   destroyChart('dist-chart');
   const t=ct();
+  const p=cp();
   const bins=[]; for(let i=-10;i<=10;i++) bins.push(i);
   const counts=bins.map(b=>returns.filter(r=>r>=b&&r<b+1).length);
-  const bg=bins.map(b=>b>=0?'rgba(74,222,128,.5)':'rgba(248,113,113,.5)');
+  const bg=bins.map(b=>b>=0?colorAlpha(p.positive,.46):colorAlpha(p.negative,.46));
   S.charts['dist-chart']=new Chart(document.getElementById('dist-chart'),{
     type:'bar',
     data:{labels:bins.map(b=>`${b>0?'+':''}${b}%`),datasets:[{label:'Days',data:counts,backgroundColor:bg,borderWidth:0,borderRadius:2}]},
@@ -6608,25 +6655,27 @@ function buildOBVChart(closes,vols,timestamps) {
   destroyChart('obv-chart');
   const el=document.getElementById('obv-chart'); if(!el) return;
   const t=ct();
+  const p=cp();
   const labels=timestamps.map(ts2=>new Date(ts2*1000).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
   const c2=closes.filter(x=>x!=null); const v2=vols.filter(x=>x!=null);
   const obvData=calcOBV(c2,v2);
   const last=obvData[obvData.length-1]||0;
   const el2=document.getElementById('obv-readout'); if(el2) el2.textContent=`${last>=0?'Accumulation':'Distribution'} (${(Math.abs(last)/1e6).toFixed(1)}M)`;
-  const fillG=ctx2=>{const g=ctx2.chart.ctx.createLinearGradient(0,0,0,145);g.addColorStop(0,'rgba(74,159,212,.22)');g.addColorStop(1,'rgba(74,159,212,0)');return g;};
-  S.charts['obv-chart']=new Chart(el,{type:'line',data:{labels,datasets:[{label:'OBV',data:obvData,borderColor:'#5c91b8',borderWidth:1.5,pointRadius:0,pointHoverRadius:5,fill:true,backgroundColor:fillG,tension:.2}]},options:{...baseOpts(),scales:{x:{ticks:{color:t.text,font:{size:9},maxTicksLimit:6},grid:{color:t.grid},title:{display:true,text:'Date',color:t.muted,font:{size:9}}},y:{ticks:{color:t.text,font:{size:9},callback:v=>`${v>=0?'':'-'}${(Math.abs(v)/1e6).toFixed(0)}M`},grid:{color:t.grid},title:{display:true,text:'OBV',color:t.muted,font:{size:9}}}},plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,backgroundColor:t.ttBg,titleColor:t.ttTitle,bodyColor:t.ttBody,borderColor:t.ttBorder,borderWidth:1,callbacks:{label:ctx3=>` OBV: ${(ctx3.raw/1e6).toFixed(2)}M`}}}}});
+  const fillG=ctx2=>{const g=ctx2.chart.ctx.createLinearGradient(0,0,0,145);g.addColorStop(0,colorAlpha(p.ma50,.18));g.addColorStop(1,colorAlpha(p.ma50,0));return g;};
+  S.charts['obv-chart']=new Chart(el,{type:'line',data:{labels,datasets:[{label:'On-balance volume',data:obvData,borderColor:p.ma50,borderWidth:1.5,pointRadius:0,pointHoverRadius:5,fill:true,backgroundColor:fillG,tension:.2}]},options:{...baseOpts(),scales:{x:{ticks:{color:t.text,font:{size:9},maxTicksLimit:6},grid:{color:t.grid},title:{display:true,text:'Date',color:t.muted,font:{size:9}}},y:{ticks:{color:t.text,font:{size:9},callback:v=>`${v>=0?'':'-'}${(Math.abs(v)/1e6).toFixed(0)}M`},grid:{color:t.grid},title:{display:true,text:'OBV',color:t.muted,font:{size:9}}}},plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,backgroundColor:t.ttBg,titleColor:t.ttTitle,bodyColor:t.ttBody,borderColor:t.ttBorder,borderWidth:1,callbacks:{label:ctx3=>` OBV: ${(ctx3.raw/1e6).toFixed(2)}M`}}}}});
 }
 function buildATRChart(highs,lows,closes,timestamps) {
   destroyChart('atr-chart');
   const el=document.getElementById('atr-chart'); if(!el) return;
   const t=ct();
+  const p=cp();
   const labels=timestamps.map(ts2=>new Date(ts2*1000).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
   const atrData=calcATR(highs.filter(x=>x!=null),lows.filter(x=>x!=null),closes.filter(x=>x!=null));
   const last=atrData.filter(x=>x!=null).pop()||0;
   const avg=atrData.filter(x=>x!=null).reduce((a,b)=>a+b,0)/atrData.filter(x=>x!=null).length;
   const el2=document.getElementById('atr-readout'); if(el2) el2.textContent=`$${last.toFixed(2)} — ${last>avg?'High Volatility':'Low Volatility'}`;
-  const fillG=ctx2=>{const g=ctx2.chart.ctx.createLinearGradient(0,0,0,145);g.addColorStop(0,'rgba(249,115,22,.22)');g.addColorStop(1,'rgba(249,115,22,0)');return g;};
-  S.charts['atr-chart']=new Chart(el,{type:'line',data:{labels,datasets:[{label:'ATR (14)',data:atrData,borderColor:'#c98252',borderWidth:1.5,pointRadius:0,pointHoverRadius:5,fill:true,backgroundColor:fillG,tension:.2,spanGaps:true}]},options:{...baseOpts(),scales:{x:{ticks:{color:t.text,font:{size:9},maxTicksLimit:6},grid:{color:t.grid},title:{display:true,text:'Date',color:t.muted,font:{size:9}}},y:{ticks:{color:t.text,font:{size:9},callback:v=>`$${v.toFixed(2)}`},grid:{color:t.grid},title:{display:true,text:'ATR',color:t.muted,font:{size:9}}}},plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,backgroundColor:t.ttBg,titleColor:t.ttTitle,bodyColor:t.ttBody,borderColor:t.ttBorder,borderWidth:1,callbacks:{label:ctx3=>` ATR: $${Number(ctx3.raw||0).toFixed(2)}`}}}}});
+  const fillG=ctx2=>{const g=ctx2.chart.ctx.createLinearGradient(0,0,0,145);g.addColorStop(0,colorAlpha(p.bands,.18));g.addColorStop(1,colorAlpha(p.bands,0));return g;};
+  S.charts['atr-chart']=new Chart(el,{type:'line',data:{labels,datasets:[{label:'Average true range · 14',data:atrData,borderColor:p.bands,borderWidth:1.5,pointRadius:0,pointHoverRadius:5,fill:true,backgroundColor:fillG,tension:.2,spanGaps:true}]},options:{...baseOpts(),scales:{x:{ticks:{color:t.text,font:{size:9},maxTicksLimit:6},grid:{color:t.grid},title:{display:true,text:'Date',color:t.muted,font:{size:9}}},y:{ticks:{color:t.text,font:{size:9},callback:v=>`$${v.toFixed(2)}`},grid:{color:t.grid},title:{display:true,text:'ATR',color:t.muted,font:{size:9}}}},plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,backgroundColor:t.ttBg,titleColor:t.ttTitle,bodyColor:t.ttBody,borderColor:t.ttBorder,borderWidth:1,callbacks:{label:ctx3=>` ATR: $${Number(ctx3.raw||0).toFixed(2)}`}}}}});
 }
 
 function toggleInd(btn,ind) {
@@ -6690,14 +6739,14 @@ function runProjection() {
   const ds=results.map((r,i)=>({
     label:r.l,
     data:Array.from({length:years+1},(_,yr)=>{ if(yr===0)return price; const fE=eps*Math.pow(1+r.g,yr)*r.mm; return Math.max(1,fE*pe*r.pem); }),
-    borderColor:['#d96a70','#C6A052','#46b184'][i],
-    borderWidth:2,pointRadius:4,pointBackgroundColor:['#d96a70','#C6A052','#46b184'][i],
+    borderColor:[cp().negative,cp().price,cp().positive][i],
+    borderWidth:2,pointRadius:4,pointBackgroundColor:[cp().negative,cp().price,cp().positive][i],
     fill:false,tension:.3,
   }));
   ds.unshift({label:'Current Price',data:Array(years+1).fill(price),borderColor:isDark()?'rgba(255,255,255,.2)':'rgba(0,0,0,.2)',borderWidth:1.5,borderDash:[5,4],pointRadius:0,fill:false});
   S.charts['proj-chart']=new Chart(document.getElementById('proj-chart'),{
     type:'line',data:{labels,datasets:ds},
-    options:(()=>{const _t=ct();return{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'top',align:'end',labels:{color:_t.text,font:{size:10},boxWidth:12,usePointStyle:true,pointStyleWidth:8,padding:8}},tooltip:{mode:'index',intersect:false,backgroundColor:_t.ttBg,titleColor:_t.ttTitle,bodyColor:_t.ttBody,borderColor:_t.ttBorder,borderWidth:1,callbacks:{label:ctx=>` ${ctx.dataset.label}: $${Number(ctx.raw).toFixed(2)}`}}},scales:{x:{ticks:{color:_t.text,font:{size:11}},grid:{color:_t.grid},title:{display:true,text:'Year',color:_t.muted,font:{size:9}}},y:{ticks:{color:_t.text,font:{size:10},callback:v=>`$${v.toFixed(0)}`},grid:{color:_t.grid},title:{display:true,text:'Price (USD)',color:_t.muted,font:{size:9}}}}}})()
+    options:(()=>{const _t=ct();return{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'top',align:'end',labels:{color:_t.text,font:{size:10},boxWidth:18,boxHeight:2,usePointStyle:false,padding:10}},tooltip:{mode:'index',intersect:false,backgroundColor:_t.ttBg,titleColor:_t.ttTitle,bodyColor:_t.ttBody,borderColor:_t.ttBorder,borderWidth:1,callbacks:{label:ctx=>` ${ctx.dataset.label}: $${Number(ctx.raw).toFixed(2)}`}}},scales:{x:{ticks:{color:_t.text,font:{size:11}},grid:{color:_t.grid},title:{display:true,text:'Year',color:_t.muted,font:{size:9}}},y:{ticks:{color:_t.text,font:{size:10},callback:v=>`$${v.toFixed(0)}`},grid:{color:_t.grid},title:{display:true,text:'Price (USD)',color:_t.muted,font:{size:9}}}}}})()
   });
   document.getElementById('proj-results').style.display='block';
 }
@@ -6786,7 +6835,7 @@ function buildPerfChart(tickers,results) {
     x:{ticks:{color:_pt.text,font:{size:10},maxTicksLimit:8},grid:{color:_pt.grid},title:{display:true,text:'Date',color:_pt.muted,font:{size:9}}},
     y:{ticks:{color:_pt.text,font:{size:10},callback:function(v){return (v>0?'+':'')+v.toFixed(0)+'%';}},grid:{color:_pt.grid},title:{display:true,text:'Return (%)',color:_pt.muted,font:{size:9}}}
   });
-  perfOpts.plugins={legend:{display:true,position:'top',align:'end',labels:{color:_pt.text,font:{size:10},boxWidth:12,usePointStyle:true,pointStyleWidth:8,padding:10}},tooltip:{mode:'index',intersect:false,backgroundColor:_pt.ttBg,titleColor:_pt.ttTitle,bodyColor:_pt.ttBody,borderColor:_pt.ttBorder,borderWidth:1,callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.raw>0?'+':''}${ctx.raw.toFixed(2)}%`}}};
+  perfOpts.plugins={legend:{display:true,position:'top',align:'end',labels:{color:_pt.text,font:{size:10},boxWidth:18,boxHeight:2,usePointStyle:false,padding:12}},tooltip:{mode:'index',intersect:false,backgroundColor:_pt.ttBg,titleColor:_pt.ttTitle,bodyColor:_pt.ttBody,borderColor:_pt.ttBorder,borderWidth:1,callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.raw>0?'+':''}${ctx.raw.toFixed(2)}%`}}};
   S.charts['cmp-perf-chart']=new Chart(el,{type:'line',data:{labels:labels,datasets:datasets},options:perfOpts});
 }
 
@@ -6807,13 +6856,13 @@ function buildRadarChart(tickers, results, analystArr=[]) {
   const datasets=tickers.map((t,i)=>({
     label:t,
     data:[nYr1[i],nRsi[i],nVol[i],nCap[i],nPe[i]].map(v=>Math.round(v)),
-    borderColor:COLORS[i],backgroundColor:COLORS[i].replace(')',',0.15)').replace('rgb','rgba'),
+    borderColor:COLORS[i],backgroundColor:colorAlpha(COLORS[i],.12),
     borderWidth:2,pointRadius:3,
   }));
   S.charts['cmp-radar-chart']=new Chart(el,{
     type:'radar',data:{labels:['1Y Return','RSI','Low Vol','Mkt Cap','Value (P/E)'],datasets},
     options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:true,position:'top',labels:{color:ct().text,font:{size:10},boxWidth:12,usePointStyle:true,pointStyleWidth:8,padding:10}}},
+      plugins:{legend:{display:true,position:'top',labels:{color:ct().text,font:{size:10},boxWidth:18,boxHeight:2,usePointStyle:false,padding:12}}},
       scales:{r:{min:0,max:100,ticks:{display:false},grid:{color:ct().grid},pointLabels:{color:ct().text,font:{size:10,weight:'500'}},angleLines:{color:ct().grid}}},
     }
   });
@@ -6887,9 +6936,9 @@ function runAdvancedProjection() {
   var peBull=parseFloat(document.getElementById('adv-pe-bull').value)||35;
   var eps0=price0/peNow;
   var scenarios=[
-    {l:'Bear',cls:'sc-bear',g:gBear,pe:peBear,color:'#d96a70'},
-    {l:'Base',cls:'sc-base',g:gBase,pe:peBase,color:'#C6A052'},
-    {l:'Bull',cls:'sc-bull',g:gBull,pe:peBull,color:'#46b184'},
+    {l:'Bear',cls:'sc-bear',g:gBear,pe:peBear,color:cp().negative},
+    {l:'Base',cls:'sc-base',g:gBase,pe:peBase,color:cp().price},
+    {l:'Bull',cls:'sc-bull',g:gBull,pe:peBull,color:cp().positive},
   ];
   var results=scenarios.map(function(s){
     var epsN=eps0*Math.pow(1+s.g,years);
@@ -7451,7 +7500,7 @@ async function loadInstitutional(ticker) {
       const vols   = dp.map(w=>w.totalWeeklyShareQuantity||0).reverse();
       S.charts['dp-chart'] = new Chart(dpCanvas, {
         type:'bar',
-        data:{ labels, datasets:[{ label:'OTC Weekly Volume', data:vols, backgroundColor:'rgba(185,138,61,.55)', borderColor:'#C6A052', borderWidth:1, borderRadius:3 }] },
+        data:{ labels, datasets:[{ label:'OTC weekly volume', data:vols, backgroundColor:colorAlpha(cp().price,.44), borderColor:cp().price, borderWidth:1, borderRadius:3 }] },
         options:{
           responsive:true, maintainAspectRatio:false,
           plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>' '+Number(ctx.raw).toLocaleString()+' shares'}} },
