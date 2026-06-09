@@ -66,6 +66,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.44.0/dist/tabler-icons.min.css" rel="stylesheet">
+<link href="/product-system.css?v=20260609-1" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-zoom/1.2.1/chartjs-plugin-zoom.min.js"></script>
@@ -2658,7 +2659,11 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
       <button class="cex-color" data-markup-color="#d96a70" onclick="setMarkupColor('#d96a70')" style="background:#d96a70" title="Red"></button>
       <span class="cex-tool-sep"></span>
       <button class="cex-tool" onclick="undoMarkup()" title="Undo markup"><i class="ti ti-arrow-back-up"></i></button>
+      <button class="cex-tool" onclick="redoMarkup()" title="Redo markup"><i class="ti ti-arrow-forward-up"></i></button>
       <button class="cex-tool" onclick="clearMarkup()" title="Clear all markup"><i class="ti ti-trash"></i></button>
+      <span class="cex-tool-sep"></span>
+      <button class="cex-tool" onclick="exportExpandedChart()" title="Export chart as PNG"><i class="ti ti-download"></i></button>
+      <span class="cex-save-state" id="cex-save-state">No saved marks</span>
     </div>
     <div class="cex-body">
       <div class="cex-workspace">
@@ -4190,6 +4195,7 @@ const S = {
   analystTarget: null,  // { mean, high, low } set by loadAnalyst()
   csrfToken: null,      // fetched from GET /api/csrf on page load
 };
+window.IL_STATE = S;
 const COLORS = ['#C6A052','#5c91b8','#46b184','#d96a70'];
 // Keep this list in sync with the requirePro-gated API routes in routes/financials.js
 // and routes/market-data.js (screener).
@@ -5085,6 +5091,7 @@ async function yahooFetch(ticker, range='1y') {
   if (!r.ok) throw new Error('fetch failed: ' + r.status);
   const d = await r.json();
   if (!d.chart?.result?.[0]) throw new Error('No data returned for ' + ticker);
+  d.chart.result[0].impliedLensProvenance = d.impliedLens || null;
 
   // Update limit counter from response headers
   const remaining = r.headers.get('X-Analyses-Remaining');
@@ -7965,5 +7972,6 @@ document.addEventListener('click', function(e) {
   </div>
 </div>
 </div>
+<script src="/product-system.js?v=20260609-2"></script>
 </body>
 </html>

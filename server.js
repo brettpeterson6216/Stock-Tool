@@ -51,6 +51,7 @@ const rateLimit = require("express-rate-limit");
 
 const { db, TursoStore, initDb } = require("./lib/db");
 const { guestIdMiddleware }  = require("./lib/plan");
+const buildInfo = require("./lib/build-info");
 
 // ---- Route modules ----
 const authRouter        = require("./routes/auth");
@@ -64,6 +65,10 @@ const stockLandingRouter = require("./routes/stock-landing");
 // ============================================================
 const app = express();
 app.set("trust proxy", 1);
+app.use((_req, res, next) => {
+  res.setHeader("X-ImpliedLens-Build", buildInfo.shortCommit);
+  next();
+});
 
 // Content-Security-Policy
 // unsafe-inline is required for both script-src AND script-src-attr because
@@ -253,10 +258,15 @@ app.use("/", stockLandingRouter);
 app.get("/healthz", async (_req, res) => {
   try {
     await db.execute("SELECT 1");
-    res.json({ ok: true });
+    res.json({ ok: true, database: "ok", ...buildInfo });
   } catch (_) {
-    res.status(503).json({ ok: false });
+    res.status(503).json({ ok: false, database: "unavailable", ...buildInfo });
   }
+});
+
+app.get("/api/version", (_req, res) => {
+  res.setHeader("Cache-Control", "no-store");
+  res.json(buildInfo);
 });
 
 app.use("/api", (_req, res) => res.status(404).json({ error: "API route not found." }));

@@ -225,6 +225,7 @@ router.get("/quote/:ticker", checkAnalysisLimit, async (req, res) => {
     };
 
     let data = null;
+    let source = null;
 
     // Attempt 1: Yahoo Finance v8 chart (query2)
     try {
@@ -235,6 +236,7 @@ router.get("/quote/:ticker", checkAnalysisLimit, async (req, res) => {
         if (j?.chart?.result?.[0]?.timestamp?.length) {
           console.log(`[quote] Yahoo query2 OK for ${ticker}`);
           data = j;
+          source = "Yahoo Finance chart";
         }
       }
     } catch (e) { console.log(`[quote] Yahoo query2 failed for ${ticker}: ${e.message}`); }
@@ -247,8 +249,9 @@ router.get("/quote/:ticker", checkAnalysisLimit, async (req, res) => {
         if (r.ok) {
           const j = await r.json();
           if (j?.chart?.result?.[0]?.timestamp?.length) {
-            console.log(`[quote] Yahoo query1 OK for ${ticker}`);
-            data = j;
+          console.log(`[quote] Yahoo query1 OK for ${ticker}`);
+          data = j;
+          source = "Yahoo Finance chart";
           }
         }
       } catch (e) { console.log(`[quote] Yahoo query1 failed for ${ticker}: ${e.message}`); }
@@ -287,6 +290,7 @@ router.get("/quote/:ticker", checkAnalysisLimit, async (req, res) => {
                 quote: [{ open: opens, high: highs, low: lows, close: closes, volume: vols }],
                 adjclose: [{ adjclose: closes }],
               }}], error: null }};
+              source = "Yahoo Finance historical CSV";
             }
           }
         }
@@ -343,6 +347,7 @@ router.get("/quote/:ticker", checkAnalysisLimit, async (req, res) => {
                 quote: [{ open: opens, high: highs, low: lows, close: closes, volume: vols }],
                 adjclose: [{ adjclose: closes }],
               }}], error: null }};
+              source = "Stooq historical prices + Finnhub snapshot";
             }
           } else {
             console.log(`[quote] Stooq returned no rows for ${ticker}: ${csv.slice(0,200)}`);
@@ -387,6 +392,18 @@ router.get("/quote/:ticker", checkAnalysisLimit, async (req, res) => {
       } catch (_) {}
     }
 
+    const timestamps = result.timestamp || [];
+    const latestTimestamp = timestamps.length ? timestamps[timestamps.length - 1] : null;
+    const ageSeconds = latestTimestamp ? Math.max(0, Math.round(Date.now() / 1000 - latestTimestamp)) : null;
+    data.impliedLens = {
+      source: source || "Aggregated market data",
+      retrievedAt: new Date().toISOString(),
+      latestTimestamp,
+      ageSeconds,
+      interval,
+      range,
+      delayed: interval !== "1m" && interval !== "2m" && interval !== "5m",
+    };
     setCached(cacheKey, data);
     res.json(data);
   } catch (e) {

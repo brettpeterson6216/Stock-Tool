@@ -114,6 +114,25 @@ test("GET / serves the homepage with a successful status", async () => {
   assert.match(await res.text(), /ImpliedLens/);
 });
 
+test("GET /healthz reports database and build health", async () => {
+  const res = await req("/healthz");
+  assert.equal(res.status, 200);
+  const body = await res.json();
+  assert.equal(body.ok, true);
+  assert.equal(body.database, "ok");
+  assert.ok(body.version);
+  assert.ok(body.commit);
+});
+
+test("GET /api/version exposes the running build", async () => {
+  const res = await req("/api/version");
+  assert.equal(res.status, 200);
+  const body = await res.json();
+  assert.ok(body.version);
+  assert.ok(body.startedAt);
+  assert.equal(res.headers.get("cache-control"), "no-store");
+});
+
 test("POST /api/auth/logout without CSRF token returns 403", async () => {
   const { cookie } = await makeSession("csrf_user1", "csrf1@test.com");
   const res = await req("/api/auth/logout", {
