@@ -12,10 +12,14 @@
 const { test, before, after } = require("node:test");
 const assert  = require("node:assert/strict");
 const http    = require("node:http");
+const os      = require("node:os");
+const path    = require("node:path");
+
+const testDbPath = path.join(os.tmpdir(), `il-smoke-test-${process.pid}.db`).replace(/\\/g, "/");
 
 // ── Configure test environment before requiring app modules ──
 process.env.NODE_ENV        = "test";
-process.env.TURSO_URL       = "file:/tmp/il-smoke-test.db";
+process.env.TURSO_URL       = `file:${testDbPath}`;
 process.env.TURSO_AUTH_TOKEN = "";
 process.env.SESSION_SECRET  = "smoke-test-secret-do-not-use-in-prod";
 process.env.FINNHUB_KEY     = "test-key";
@@ -23,6 +27,18 @@ process.env.ADMIN_SECRET    = "test-admin-secret-abc123";
 process.env.PORT            = "0"; // OS picks free port
 
 let server, baseUrl;
+const nativeFetch = global.fetch;
+
+// Keep smoke tests deterministic and fast: local app requests stay real,
+// while external market providers are represented as unavailable.
+global.fetch = (url, options) => {
+  const target = String(url);
+  if (target.startsWith("http://127.0.0.1:")) return nativeFetch(url, options);
+  return Promise.resolve(new Response(JSON.stringify({ error: "upstream unavailable in smoke test" }), {
+    status: 503,
+    headers: { "Content-Type": "application/json" },
+  }));
+};
 
 // ── Helpers ───────────────────────────────────────────────────
 async function req(path, opts = {}) {
@@ -81,15 +97,23 @@ before(async () => {
   });
 });
 
-after(() => {
-  server?.close();
+after(async () => {
+  if (server) await new Promise(resolve => server.close(resolve));
+  try { require("../lib/db").db.close(); } catch (_) {}
+  global.fetch = nativeFetch;
   // Clean up test DB
-  try { require("node:fs").unlinkSync("/tmp/il-smoke-test.db"); } catch (_) {}
+  try { require("node:fs").unlinkSync(testDbPath); } catch (_) {}
 });
 
 // ═══════════════════════════════════════════════════════════════
 //  1. CSRF protection
 // ═══════════════════════════════════════════════════════════════
+test("GET / serves the homepage with a successful status", async () => {
+  const res = await req("/");
+  assert.equal(res.status, 200);
+  assert.match(await res.text(), /ImpliedLens/);
+});
+
 test("POST /api/auth/logout without CSRF token returns 403", async () => {
   const { cookie } = await makeSession("csrf_user1", "csrf1@test.com");
   const res = await req("/api/auth/logout", {
@@ -303,6 +327,17 @@ test("Free user is locked out after exactly 5 distinct tickers", async () => {
   assert.equal(statuses[5], 429, "6th distinct ticker should return 429");
 });
 
+test("Free user can reopen an already-counted ticker after reaching the limit", async () => {
+  const { cookie } = await makeSession("quota_reopen", "quotareopen@test.com");
+  for (const ticker of ["AA", "BB", "CC", "DD", "EE"]) {
+    const res = await req(`/api/quote/${ticker}?range=1y`, { headers: { cookie } });
+    assert.notEqual(res.status, 429);
+  }
+  const reopened = await req("/api/quote/AA?range=1y", { headers: { cookie } });
+  assert.notEqual(reopened.status, 429, "Previously counted ticker should remain accessible");
+  assert.equal(Number(reopened.headers.get("X-Analyses-Used")), 5);
+});
+
 test("Guest gid cookie is set on first request", async () => {
   const res = await req("/api/csrf");
   const setCookie = res.headers.get("set-cookie") || "";
@@ -357,6 +392,16 @@ test("Checkout is blocked for unverified email", async () => {
   assert.equal(res.status, 403, "Checkout should be blocked for unverified email");
   const body = await res.json();
   assert.ok(body.requiresEmailVerification, "Response should set requiresEmailVerification flag");
+});
+
+test("Checkout rejects requests without a CSRF token", async () => {
+  const { cookie } = await makeSession("checkout_csrf1", "checkoutcsrf1@test.com");
+  const res = await req("/api/stripe/create-checkout", {
+    method: "POST",
+    headers: { cookie },
+    body: { annual: false },
+  });
+  assert.equal(res.status, 403);
 });
 
 test("Verification token flow: valid token marks user verified", async () => {

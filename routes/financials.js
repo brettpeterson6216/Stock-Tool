@@ -39,19 +39,31 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 5000) {
 router.get("/me/limit", async (req, res) => {
   const today = new Date().toISOString().slice(0, 10);
   if (!req.session.userId) {
-    const guestCount = req.session.guestDate === today ? (req.session.guestCount || 0) : 0;
-    return res.json({ plan: "guest", used: guestCount, limit: GUEST_DAILY_LIMIT, remaining: GUEST_DAILY_LIMIT - guestCount });
+    try {
+      const usage = await db.execute({
+        sql: "SELECT COUNT(*) AS cnt FROM analysis_usage WHERE subject_id = ? AND usage_date = ?",
+        args: [`g:${req.guestId || req.sessionID}`, today],
+      });
+      const used = Number(usage.rows[0]?.cnt || 0);
+      return res.json({ plan: "guest", used, limit: GUEST_DAILY_LIMIT, remaining: Math.max(0, GUEST_DAILY_LIMIT - used) });
+    } catch (e) {
+      return res.status(503).json({ error: "Analysis limit service unavailable." });
+    }
   }
   try {
-    const r   = await db.execute({ sql: "SELECT email, plan, trial_ends_at, analysis_date, analysis_count FROM users WHERE id = ?", args: [req.session.userId] });
+    const r   = await db.execute({ sql: "SELECT email, plan, trial_ends_at FROM users WHERE id = ?", args: [req.session.userId] });
     const row = r.rows[0];
     if (!row) return res.json({ plan: "free", used: 0, limit: FREE_DAILY_LIMIT, remaining: FREE_DAILY_LIMIT });
     const plan = getEffectivePlan(row);
     if (plan === "pro" || plan === "trial") return res.json({ plan, used: 0, limit: null, remaining: null });
-    const used = row.analysis_date === today ? (Number(row.analysis_count) || 0) : 0;
-    res.json({ plan, used, limit: FREE_DAILY_LIMIT, remaining: FREE_DAILY_LIMIT - used });
+    const usage = await db.execute({
+      sql: "SELECT COUNT(*) AS cnt FROM analysis_usage WHERE subject_id = ? AND usage_date = ?",
+      args: [`u:${req.session.userId}`, today],
+    });
+    const used = Number(usage.rows[0]?.cnt || 0);
+    res.json({ plan, used, limit: FREE_DAILY_LIMIT, remaining: Math.max(0, FREE_DAILY_LIMIT - used) });
   } catch (e) {
-    res.json({ plan: "free", used: 0, limit: FREE_DAILY_LIMIT, remaining: FREE_DAILY_LIMIT });
+    res.status(503).json({ error: "Analysis limit service unavailable." });
   }
 });
 
@@ -258,7 +270,7 @@ router.get("/earnings/:ticker", requirePro, async (req, res) => {
   try {
     const ticker = req.params.ticker.toUpperCase();
     const url    = `https://finnhub.io/api/v1/stock/earnings?symbol=${ticker}&limit=20&token=${FINNHUB_KEY}`;
-    const r      = await fetch(url);
+    const r      = await fetchWithTimeout(url);
     if (!r.ok) return res.status(r.status).json({ error: "Finnhub returned " + r.status });
     res.json(await r.json());
   } catch (e) {
@@ -274,7 +286,7 @@ router.get("/metrics/:ticker", requirePro, async (req, res) => {
   try {
     const ticker = req.params.ticker.toUpperCase();
     const url    = `https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FINNHUB_KEY}`;
-    const r      = await fetch(url);
+    const r      = await fetchWithTimeout(url);
     if (!r.ok) return res.status(r.status).json({ error: "Finnhub returned " + r.status });
     res.json(await r.json());
   } catch (e) {
@@ -295,7 +307,7 @@ router.get("/sec/:ticker", requirePro, async (req, res) => {
     // Strategy 1: EDGAR full-text search
     try {
       const cikUrl  = `https://efts.sec.gov/LATEST/search-index?q=%22${encodeURIComponent(ticker)}%22&forms=10-K,10-Q,8-K`;
-      const cikResp = await fetch(cikUrl, { headers: { "User-Agent": UA, "Accept": "application/json" } });
+      const cikResp = await fetchWithTimeout(cikUrl, { headers: { "User-Agent": UA, "Accept": "application/json" } });
       if (cikResp.ok) {
         const cikData = await cikResp.json();
         const hits    = cikData?.hits?.hits || [];
@@ -309,7 +321,7 @@ router.get("/sec/:ticker", requirePro, async (req, res) => {
     // Strategy 2: authoritative ticker→CIK map
     if (!entityId) {
       try {
-        const tcResp = await fetch("https://www.sec.gov/files/company_tickers.json", { headers: { "User-Agent": UA } });
+        const tcResp = await fetchWithTimeout("https://www.sec.gov/files/company_tickers.json", { headers: { "User-Agent": UA } });
         if (tcResp.ok) {
           const tcData = await tcResp.json();
           const entry  = Object.values(tcData).find(e => e.ticker?.toUpperCase() === ticker);
@@ -322,7 +334,7 @@ router.get("/sec/:ticker", requirePro, async (req, res) => {
 
     const paddedCik = String(entityId).padStart(10, "0");
     const subUrl    = `https://data.sec.gov/submissions/CIK${paddedCik}.json`;
-    const subResp   = await fetch(subUrl, { headers: { "User-Agent": UA } });
+    const subResp   = await fetchWithTimeout(subUrl, { headers: { "User-Agent": UA } });
     if (!subResp.ok) return res.json({ filings: [], entity: ticker });
     const sub = await subResp.json();
 
@@ -361,10 +373,10 @@ router.get("/estimates/:ticker", requirePro, async (req, res) => {
   try {
     const FH = FINNHUB_KEY;
     const [revResp, epsResp, metResp, ptResp] = await Promise.allSettled([
-      fetch(`https://finnhub.io/api/v1/stock/revenue-estimate?symbol=${ticker}&freq=annual&token=${FH}`),
-      fetch(`https://finnhub.io/api/v1/stock/eps-estimate?symbol=${ticker}&freq=annual&token=${FH}`),
-      fetch(`https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FH}`),
-      fetch(`https://finnhub.io/api/v1/stock/price-target?symbol=${ticker}&token=${FH}`),
+      fetchWithTimeout(`https://finnhub.io/api/v1/stock/revenue-estimate?symbol=${ticker}&freq=annual&token=${FH}`),
+      fetchWithTimeout(`https://finnhub.io/api/v1/stock/eps-estimate?symbol=${ticker}&freq=annual&token=${FH}`),
+      fetchWithTimeout(`https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FH}`),
+      fetchWithTimeout(`https://finnhub.io/api/v1/stock/price-target?symbol=${ticker}&token=${FH}`),
     ]);
 
     const safe = async (p) => {
@@ -416,7 +428,7 @@ router.get("/estimates/:ticker", requirePro, async (req, res) => {
 
     let fwdQuarterly = [];
     try {
-      const qEpsResp = await fetch(`https://finnhub.io/api/v1/stock/eps-estimate?symbol=${ticker}&freq=quarterly&token=${FH}`);
+      const qEpsResp = await fetchWithTimeout(`https://finnhub.io/api/v1/stock/eps-estimate?symbol=${ticker}&freq=quarterly&token=${FH}`);
       if (qEpsResp.ok) {
         const qEps = await qEpsResp.json();
         if (qEps?.data?.length) {
@@ -451,16 +463,16 @@ router.get("/analyst/:ticker", requirePro, async (req, res) => {
   const ticker = req.params.ticker.toUpperCase();
   try {
     const [ptResp, recResp] = await Promise.all([
-      fetch(`https://finnhub.io/api/v1/stock/price-target?symbol=${ticker}&token=${FINNHUB_KEY}`),
-      fetch(`https://finnhub.io/api/v1/stock/recommendation?symbol=${ticker}&token=${FINNHUB_KEY}`),
+      fetchWithTimeout(`https://finnhub.io/api/v1/stock/price-target?symbol=${ticker}&token=${FINNHUB_KEY}`),
+      fetchWithTimeout(`https://finnhub.io/api/v1/stock/recommendation?symbol=${ticker}&token=${FINNHUB_KEY}`),
     ]);
     const [pt, rec] = await Promise.all([ptResp.json(), recResp.json()]);
 
     let yahooFd = {};
     try {
       const [metricResp, quoteResp] = await Promise.all([
-        fetch(`https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FINNHUB_KEY}`),
-        fetch(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_KEY}`),
+        fetchWithTimeout(`https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FINNHUB_KEY}`),
+        fetchWithTimeout(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_KEY}`),
       ]);
       const [metricData, quoteData] = await Promise.all([metricResp.json(), quoteResp.json()]);
       const m = metricData.metric || {};
@@ -499,7 +511,7 @@ router.get("/analyst/:ticker", requirePro, async (req, res) => {
 router.get("/institutional/:ticker", requirePro, async (req, res) => {
   const ticker = req.params.ticker.toUpperCase();
   try {
-    const r    = await fetch(`https://finnhub.io/api/v1/stock/ownership?symbol=${ticker}&limit=10&token=${FINNHUB_KEY}`);
+    const r    = await fetchWithTimeout(`https://finnhub.io/api/v1/stock/ownership?symbol=${ticker}&limit=10&token=${FINNHUB_KEY}`);
     const data = await r.json();
     res.json(data);
   } catch (e) {
@@ -521,8 +533,8 @@ router.get("/darkpool/:ticker", requirePro, async (req, res) => {
     const finraUrl   = `https://api.finra.org/data/group/OTCMarket/name/weeklySummary?compareFilters=${compareFilters}&fields=weekStartDate,totalWeeklyShareQuantity,totalWeeklyTradeCount,lastSalePrice&limit=8&sortFields=${sortFields}`;
 
     const [finraResp, metricResp] = await Promise.all([
-      fetch(finraUrl, { headers: { "Accept": "application/json", "User-Agent": UA } }).catch(() => null),
-      fetch(`https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FINNHUB_KEY}`).catch(() => null),
+      fetchWithTimeout(finraUrl, { headers: { "Accept": "application/json", "User-Agent": UA } }).catch(() => null),
+      fetchWithTimeout(`https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FINNHUB_KEY}`).catch(() => null),
     ]);
 
     const finraData  = (finraResp?.ok)  ? await finraResp.json().catch(()=>[])    : [];

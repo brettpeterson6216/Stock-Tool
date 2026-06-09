@@ -76,7 +76,7 @@ async function fetchQuickQuote(ticker) {
 }
 
 function renderPage(ticker, q) {
-  const name      = q ? esc(q.name)      : ticker;
+  const name      = q ? String(q.name || ticker) : ticker;
   const price     = q ? fmtPrice(q.price)   : "—";
   const chgPct    = q ? fmtPct(q.changePct) : "";
   const isUp      = q ? q.changePct >= 0    : true;
@@ -96,6 +96,7 @@ function renderPage(ticker, q) {
 
   const canonicalUrl = `${APP_URL}/stock/${ticker}`;
   const analyzeUrl   = `${APP_URL}/?ticker=${ticker}`;
+  const analyzeUrlJson = JSON.stringify(analyzeUrl).replace(/</g, "\\u003c");
 
   // Schema.org FinancialProduct structured data
   const schema = JSON.stringify({
@@ -111,7 +112,7 @@ function renderPage(ticker, q) {
         { "@type": "ListItem", "position": 2, "name": ticker,   "item": canonicalUrl },
       ],
     },
-  });
+  }).replace(/</g, "\\u003c");
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -306,7 +307,7 @@ function renderPage(ticker, q) {
     // Auto-redirect to full analyzer after a short delay on CTA click
     // (also handle ?autoload=1 for programmatic deep links)
     if (new URLSearchParams(window.location.search).get('autoload') === '1') {
-      window.location.href = ${JSON.stringify(analyzeUrl)};
+      window.location.href = ${analyzeUrlJson};
     }
   </script>
 </body>

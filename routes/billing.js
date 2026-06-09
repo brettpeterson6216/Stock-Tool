@@ -16,11 +16,14 @@ const router = express.Router();
 // ============================================================
 //  POST /api/stripe/create-checkout
 // ============================================================
-router.post("/stripe/create-checkout", async (req, res) => {
+router.post("/stripe/create-checkout", validateCsrf, async (req, res) => {
   if (!req.session.userId)    return res.status(401).json({ error: "Login required." });
 
   try {
-    const userRow  = await db.execute({ sql: "SELECT id, email, stripe_customer_id, email_verified FROM users WHERE id = ?", args: [req.session.userId] });
+    const userRow  = await db.execute({
+      sql: "SELECT id, email, plan, trial_ends_at, stripe_customer_id, stripe_subscription_id, email_verified FROM users WHERE id = ?",
+      args: [req.session.userId],
+    });
     const user     = userRow.rows[0];
     if (!user)     return res.status(404).json({ error: "User not found." });
     if (!user.email_verified) {
@@ -31,6 +34,21 @@ router.post("/stripe/create-checkout", async (req, res) => {
     }
 
     if (!stripe) return res.status(503).json({ error: "Payments not configured yet." });
+
+    if (user.stripe_subscription_id) {
+      try {
+        const current = await stripe.subscriptions.retrieve(user.stripe_subscription_id);
+        if (["active", "trialing", "past_due"].includes(current.status)) {
+          return res.status(409).json({
+            error: "You already have a subscription. Manage it from your billing portal.",
+            hasSubscription: true,
+            portalUrl: "/api/stripe/portal",
+          });
+        }
+      } catch (e) {
+        if (e?.code !== "resource_missing") throw e;
+      }
+    }
 
     const priceId = req.body.annual ? STRIPE_PRICE_ANNUAL : STRIPE_PRICE_MONTHLY;
     if (!priceId) return res.status(503).json({ error: "Price not configured." });
@@ -50,7 +68,9 @@ router.post("/stripe/create-checkout", async (req, res) => {
       params.customer_email = user.email;
     }
 
-    const checkoutSession = await stripe.checkout.sessions.create(params);
+    const checkoutSession = await stripe.checkout.sessions.create(params, {
+      idempotencyKey: `checkout:${req.session.userId}:${req.body.annual ? "annual" : "monthly"}:${Math.floor(Date.now() / (5 * 60 * 1000))}`,
+    });
     track("checkout_started", { annual: !!req.body.annual, plan: req.body.annual ? "annual" : "monthly" },
           req.sessionID, req.session.userId).catch(() => {});
     res.json({ url: checkoutSession.url });
@@ -75,6 +95,12 @@ router.post("/stripe/webhook", async (req, res) => {
   }
 
   try {
+    const processed = await db.execute({
+      sql: "SELECT 1 FROM stripe_events WHERE event_id = ? LIMIT 1",
+      args: [event.id],
+    });
+    if (processed.rows.length) return res.json({ received: true, duplicate: true });
+
     switch (event.type) {
       case "checkout.session.completed": {
         const sess   = event.data.object;
@@ -109,17 +135,20 @@ router.post("/stripe/webhook", async (req, res) => {
         break;
       }
       case "invoice.payment_failed": {
-        const inv = event.data.object;
-        const r   = await db.execute({ sql: "SELECT id FROM users WHERE stripe_customer_id=?", args: [inv.customer] });
-        if (!r.rows.length) break;
-        await db.execute({ sql: "UPDATE users SET plan='free' WHERE id=?", args: [r.rows[0].id] });
+        // Stripe may retry a failed invoice while the subscription remains active
+        // or past_due. Access is updated from customer.subscription.updated.
         break;
       }
       default:
         console.log(`[stripe] unhandled webhook event: ${event.type}`);
     }
+    await db.execute({
+      sql: "INSERT OR IGNORE INTO stripe_events (event_id, event_type) VALUES (?, ?)",
+      args: [event.id, event.type],
+    });
   } catch (err) {
     console.error(`[stripe] webhook handler error on event ${event.type}:`, err);
+    return res.status(500).json({ error: "Webhook processing failed." });
   }
 
   res.json({ received: true });

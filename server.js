@@ -47,8 +47,9 @@ const path    = require("path");
 const express = require("express");
 const session = require("express-session");
 const helmet  = require("helmet");
+const rateLimit = require("express-rate-limit");
 
-const { TursoStore, initDb } = require("./lib/db");
+const { db, TursoStore, initDb } = require("./lib/db");
 const { guestIdMiddleware }  = require("./lib/plan");
 
 // ---- Route modules ----
@@ -133,6 +134,28 @@ app.use(session({
 // ============================================================
 //  Route mounting
 // ============================================================
+const marketDataLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 180,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many market-data requests. Please try again shortly." },
+});
+app.use([
+  "/api/quote",
+  "/api/news",
+  "/api/market",
+  "/api/screener",
+  "/api/financials",
+  "/api/earnings",
+  "/api/metrics",
+  "/api/sec",
+  "/api/estimates",
+  "/api/analyst",
+  "/api/institutional",
+  "/api/darkpool",
+], marketDataLimiter);
+
 app.use("/api",         authRouter);        // /api/auth/*, /api/saves, /api/admin/*
 app.use("/api",         billingRouter);     // /api/stripe/*
 app.use("/api",         marketDataRouter);  // /api/quote/*, /api/screener, /api/news/*, /api/market/*
@@ -143,6 +166,8 @@ app.use("/api",         financialsRouter);  // /api/financials/*, /api/earnings/
 // ============================================================
 //  Static HTML pages
 // ============================================================
+app.get("/", (_req, res) => res.sendFile(path.join(__dirname, "index.html")));
+
 app.get(["/login",  "/login.html"],  (req, res) => res.sendFile(path.join(__dirname, "public", "login.html")));
 app.get(["/signup", "/signup.html"], (req, res) => res.sendFile(path.join(__dirname, "public", "signup.html")));
 app.get(["/reset-password", "/reset-password.html"], (req, res) =>
@@ -158,7 +183,6 @@ app.get(["/blog",  "/blog.html"],  (_req, res) => res.sendFile(path.join(__dirna
 // ============================================================
 const { getOrCreateToken } = require("./lib/csrf");
 const { track }            = require("./lib/analytics");
-const rateLimit            = require("express-rate-limit");
 app.get("/api/csrf", (req, res) => {
   // Ensure a session exists before issuing a token
   if (!req.session) return res.status(500).json({ error: "Session unavailable." });
@@ -191,9 +215,14 @@ app.post("/api/track", trackLimiter, async (req, res) => {
   if (!CLIENT_EVENTS.has(event)) {
     return res.status(400).json({ error: "Unknown event." });
   }
-  const props = (properties && typeof properties === "object") ? properties : {};
-  // Strip any user-supplied ids — we derive them server-side
-  delete props.user_id;
+  const props = {};
+  if (properties && typeof properties === "object" && !Array.isArray(properties)) {
+    for (const [key, value] of Object.entries(properties).slice(0, 12)) {
+      if (key === "user_id" || key.length > 50) continue;
+      if (typeof value === "string") props[key] = value.slice(0, 250);
+      else if (typeof value === "number" || typeof value === "boolean" || value === null) props[key] = value;
+    }
+  }
   track(event, props, req.sessionID, req.session.userId || null).catch(() => {});
   res.json({ ok: true });
 });
@@ -219,8 +248,19 @@ app.get(["/data-sources", "/data-sources.html"],(_req, res) => res.sendFile(path
 // Ticker landing pages — server-rendered SEO pages for /stock/:ticker
 app.use("/", stockLandingRouter);
 
+app.get("/healthz", async (_req, res) => {
+  try {
+    await db.execute("SELECT 1");
+    res.json({ ok: true });
+  } catch (_) {
+    res.status(503).json({ ok: false });
+  }
+});
+
+app.use("/api", (_req, res) => res.status(404).json({ error: "API route not found." }));
+
 // SPA catch-all — must be last
-app.get("*", (_req, res) => res.sendFile(path.join(__dirname, "index.html")));
+app.get("*", (_req, res) => res.status(404).sendFile(path.join(__dirname, "index.html")));
 
 // ============================================================
 //  Start

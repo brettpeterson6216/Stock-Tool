@@ -23,6 +23,12 @@ if (process.env.NODE_ENV === "production" && !ADMIN_SECRET) {
 
 const router = express.Router();
 
+function regenerateSession(req) {
+  return new Promise((resolve, reject) => {
+    req.session.regenerate(err => err ? reject(err) : resolve());
+  });
+}
+
 // ── Email verification helpers ───────────────────────────────
 function _verifToken() {
   return crypto.randomBytes(32).toString("hex");
@@ -100,6 +106,7 @@ router.post("/auth/signup",           authLimiter, async (req, res) => {
     }
     const userId  = Number(ins.lastInsertRowid);
     const userRow = await db.execute({ sql: "SELECT id, username, email, created_at FROM users WHERE id = ?", args: [userId] });
+    await regenerateSession(req);
     req.session.userId = userId;
     // Fire-and-forget analytics
     track("signup_completed", { username, plan: "free" }, req.sessionID, userId).catch(() => {});
@@ -126,11 +133,12 @@ router.post("/auth/login",             authLimiter, async (req, res) => {
     const lookup = identifier.includes("@") ? identifier.toLowerCase() : identifier;
     const result = await db.execute({ sql: "SELECT id, username, email, password_hash FROM users WHERE username = ? OR email = ? LIMIT 1", args: [lookup, lookup] });
     const row = result.rows[0];
-    if (!row) return res.status(401).json({ error: "No account found with that username or email." });
+    if (!row) return res.status(401).json({ error: "Invalid username/email or password." });
 
     const ok = await bcrypt.compare(password, row.password_hash);
-    if (!ok) return res.status(401).json({ error: "Incorrect password." });
+    if (!ok) return res.status(401).json({ error: "Invalid username/email or password." });
 
+    await regenerateSession(req);
     req.session.userId = Number(row.id);
     track("login_completed", {}, req.sessionID, Number(row.id)).catch(() => {});
     return res.json({ user: { id: Number(row.id), username: row.username, email: row.email } });
@@ -274,7 +282,7 @@ router.post("/auth/forgot-password",   authLimiter, async (req, res) => {
 
 router.post("/auth/reset-password",    authLimiter, async (req, res) => {
   const { token, password } = req.body;
-  if (!token || !password || password.length < 8)
+  if (!token || !password || password.length < 8 || password.length > 200)
     return res.status(400).json({ error: "Invalid request." });
   try {
     const r   = await db.execute({ sql: "SELECT user_id, expires_at, used FROM reset_tokens WHERE token = ?", args: [token] });
@@ -284,8 +292,11 @@ router.post("/auth/reset-password",    authLimiter, async (req, res) => {
     if (Number(row.expires_at) < Date.now()) return res.status(400).json({ error: "This link has expired. Please request a new one." });
 
     const hash = await bcrypt.hash(password, BCRYPT_ROUNDS);
-    await db.execute({ sql: "UPDATE users SET password_hash = ? WHERE id = ?", args: [hash, row.user_id] });
-    await db.execute({ sql: "UPDATE reset_tokens SET used = 1 WHERE token = ?", args: [token] });
+    await db.batch([
+      { sql: "UPDATE users SET password_hash = ? WHERE id = ?", args: [hash, row.user_id] },
+      { sql: "UPDATE reset_tokens SET used = 1 WHERE user_id = ?", args: [row.user_id] },
+      { sql: "DELETE FROM sessions WHERE CAST(json_extract(data, '$.userId') AS INTEGER) = ?", args: [row.user_id] },
+    ], "write");
     return res.json({ ok: true });
   } catch (err) {
     console.error("reset-password error:", err);
@@ -476,7 +487,7 @@ const resendVerifLimiter = rateLimit({
   message: { error: "Too many resend requests. Try again in 15 minutes." },
 });
 
-router.post("/auth/resend-verification", resendVerifLimiter, async (req, res) => {
+router.post("/auth/resend-verification", resendVerifLimiter, validateCsrf, async (req, res) => {
   if (!req.session.userId) return res.status(401).json({ error: "Login required." });
   try {
     const r = await db.execute({

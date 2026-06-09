@@ -28,7 +28,6 @@
 <link rel="canonical" href="https://impliedlens.com/">
 <!-- Favicon -->
 <link rel="icon" type="image/svg+xml" href="/logo.svg">
-<link rel="alternate icon" href="/favicon.ico">
 <!-- Structured Data -->
 <script type="application/ld+json">
 {
@@ -745,6 +744,8 @@ footer { background:#080808; padding:3rem 2rem; }
   section { padding:4rem 1.25rem; }
 }
 @media(max-width:640px){
+  body.has-verif-banner { padding-top:58px; }
+  .mo-tab, .movers-tab, .tf-pill, .rpill, .tf-tog { min-height:44px; }
   .nav-links { display:none; }
   nav { padding:0 .9rem; }
 }
@@ -1320,7 +1321,12 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
   // On hard load: respect ?view=tool or ?view=home in URL
   // Must wait for DOM since #view-home / #view-tool are defined after this <nav>
   document.addEventListener('DOMContentLoaded', function() {
-    if (window.location.search.includes('view=tool')) showView('tool');
+    const params = new URLSearchParams(window.location.search);
+    const requestedSection = params.get('section');
+    if (params.get('view') === 'tool') {
+      showView('tool');
+      if (requestedSection) setTimeout(() => openSection(requestedSection), 0);
+    }
     else if (!window.location.search.includes('view=home')) {
       // nav data-view defaults to "home" — no action needed
     }
@@ -1379,7 +1385,10 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
         // Show verification banner if email unverified
         if (!user.email_verified) {
           const _vb = document.getElementById('verif-banner');
-          if (_vb) _vb.style.display = 'flex';
+          if (_vb) {
+            _vb.style.display = 'flex';
+            document.body.classList.add('has-verif-banner');
+          }
         }
 
         // Populate account dropdown
@@ -1466,6 +1475,7 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
           if (typeof S !== 'undefined') S.emailVerified = true;
           const _vb = document.getElementById('verif-banner');
           if (_vb) _vb.style.display = 'none';
+          document.body.classList.remove('has-verif-banner');
           history.replaceState(null, '', '/');
         } else if (_verifParam === 'expired') {
           toast('Verification link expired. Please request a new one.', 'err');
@@ -1552,10 +1562,10 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
 
     <div class="hsb-section">
       <div class="hsb-label">Market</div>
-      <a class="hsb-item" href="#"><i class="ti ti-chart-area"></i><span>Market Overview</span></a>
-      <a class="hsb-item" href="#"><i class="ti ti-calendar"></i><span>Earnings Calendar</span></a>
-      <a class="hsb-item" href="#"><i class="ti ti-rocket"></i><span>IPO Center</span></a>
-      <a class="hsb-item" href="#"><i class="ti ti-grid-dots"></i><span>Sector Heatmap</span></a>
+      <a class="hsb-item" href="#" onclick="navGoTo('home');document.querySelector('.hg-market')?.scrollIntoView({behavior:'smooth'});return false;"><i class="ti ti-chart-area"></i><span>Market Overview</span></a>
+      <a class="hsb-item" href="#" onclick="navGoTo('earnings');return false;"><i class="ti ti-calendar"></i><span>Earnings Calendar</span></a>
+      <a class="hsb-item" href="#" onclick="navGoTo('education');return false;"><i class="ti ti-rocket"></i><span>Market Playbooks</span></a>
+      <a class="hsb-item" href="#" onclick="navGoTo('screener');return false;"><i class="ti ti-grid-dots"></i><span>Sector Screener</span></a>
     </div>
 
     <div class="hsb-section">
@@ -1563,7 +1573,7 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
       <a class="hsb-item" href="#" onclick="navGoTo('compare');return false;"><i class="ti ti-arrows-split-2"></i><span>Compare</span></a>
       <a class="hsb-item" href="#" onclick="navGoTo('projection');return false;"><i class="ti ti-trending-up"></i><span>Projection Builder</span></a>
       <a class="hsb-item" href="#" onclick="navGoTo('dcf');return false;"><i class="ti ti-calculator"></i><span>DCF Calculator</span></a>
-      <a class="hsb-item" href="#"><i class="ti ti-rotate"></i><span>Backtester</span></a>
+      <a class="hsb-item" href="#" onclick="navGoTo('projection');return false;"><i class="ti ti-rotate"></i><span>Scenario Builder</span></a>
     </div>
 
     <div class="hsb-section">
@@ -1586,7 +1596,7 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
     <!-- Hero -->
     <section class="home-hero">
       <div class="hh-left">
-        <div class="hh-badge">Live Market Data &middot; Updated in Real-Time</div>
+        <div class="hh-badge">Live &amp; delayed market data</div>
         <h1 class="hh-title">Smarter Stock Analysis<br><em>for Confident Investors.</em></h1>
         <p class="hh-sub">Powerful tools. Proprietary data. Actionable insights.</p>
         <div class="hh-search">
@@ -1594,7 +1604,10 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
           <input type="text" id="hero-search" placeholder="Search any stock or ETF (e.g. AAPL, TSLA, NVDA)..." autocomplete="off" spellcheck="false">
           <button class="hh-search-btn" onclick="heroSearch()">Analyze &rarr;</button>
         </div></div>
-      <div class="hh-right"><canvas id="globe-canvas" style="display:block;"></canvas></div>
+      <div class="hh-right">
+        <canvas id="globe-canvas" style="display:block;"></canvas>
+        <div class="globe-caption"><span></span> Global market pulse</div>
+      </div>
     </section>
 
     <!-- Ticker strip -->
@@ -1727,32 +1740,32 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
         <!-- Footer -->
         <div class="mo-footer">
           <div class="mo-timestamp" id="mo-timestamp">Fetching market data&hellip;</div>
-          <div class="mo-realtime"><span class="mo-realtime-dot"></span>Real-time data</div>
+          <div class="mo-realtime"><span class="mo-realtime-dot"></span>Live &amp; delayed sources</div>
         </div>
 
         <!-- Model Portfolios divider -->
         <div class="mp-divider"></div>
         <div class="hc-hdr" style="margin-bottom:.5rem;">
-          <span class="hc-title">Model Portfolios</span>
+          <span class="hc-title">Illustrative Portfolios</span>
           <a class="hc-link" href="#" onclick="navGoTo('screener');return false;">View all &rarr;</a>
         </div>
         <div class="mp-row">
           <div class="mp-card">
             <div class="mp-name">Core Growth</div>
             <div class="mp-ret up">+12.48%</div>
-            <div class="mp-sub">1Y Return &middot; Moderate Risk</div>
+            <div class="mp-sub">Sample return &middot; Moderate Risk</div>
             <div class="mp-spark" id="mp-cg"></div>
           </div>
           <div class="mp-card">
             <div class="mp-name">Dividend Income</div>
             <div class="mp-ret up">+8.37%</div>
-            <div class="mp-sub">1Y Return &middot; Low Risk</div>
+            <div class="mp-sub">Sample return &middot; Low Risk</div>
             <div class="mp-spark" id="mp-di"></div>
           </div>
           <div class="mp-card">
             <div class="mp-name">Aggressive Tech</div>
             <div class="mp-ret up">+18.92%</div>
-            <div class="mp-sub">1Y Return &middot; High Risk</div>
+            <div class="mp-sub">Sample return &middot; High Risk</div>
             <div class="mp-spark" id="mp-at"></div>
           </div>
         </div>
@@ -1833,28 +1846,28 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
           <span class="hc-title">Continue Learning</span>
           <a class="hc-link" href="#" onclick="navGoTo('education');return false;">View all &rarr;</a>
         </div>
-        <div class="learn-item">
-          <div class="learn-icon">&#128202;</div>
+        <div class="learn-item" onclick="navGoTo('education');setTimeout(()=>openLesson(document.querySelector('[data-lesson=thesis]')),50)" style="cursor:pointer;">
+          <div class="learn-icon"><i class="ti ti-bulb"></i></div>
           <div class="learn-body">
-            <div class="learn-title">Valuation Masterclass</div>
-            <div class="learn-desc">Learn advanced valuation techniques from industry experts.</div>
-            <div class="learn-prog-wrap"><div class="learn-prog-bar"><div class="learn-prog-fill" style="width:65%"></div></div><span class="learn-prog-pct">65%</span></div>
+            <div class="learn-title">Write the investment thesis</div>
+            <div class="learn-desc">Turn a ticker into a clear, falsifiable investment case.</div>
+            <div class="learn-prog-pct">8 min · Foundation</div>
           </div>
         </div>
-        <div class="learn-item">
-          <div class="learn-icon">&#128200;</div>
+        <div class="learn-item" onclick="navGoTo('education');setTimeout(()=>openLesson(document.querySelector('[data-lesson=valuation]')),50)" style="cursor:pointer;">
+          <div class="learn-icon"><i class="ti ti-calculator"></i></div>
           <div class="learn-body">
-            <div class="learn-title">Options Strategies 101</div>
-            <div class="learn-desc">Build practical options strategies for any market condition.</div>
-            <div class="learn-prog-wrap"><div class="learn-prog-bar"><div class="learn-prog-fill" style="width:40%"></div></div><span class="learn-prog-pct">40%</span></div>
+            <div class="learn-title">Value the business</div>
+            <div class="learn-desc">Use multiples and DCF without falling for false precision.</div>
+            <div class="learn-prog-pct">14 min · Valuation</div>
           </div>
         </div>
-        <div class="learn-item">
-          <div class="learn-icon">&#9889;</div>
+        <div class="learn-item" onclick="navGoTo('education');setTimeout(()=>openLesson(document.querySelector('[data-lesson=risk]')),50)" style="cursor:pointer;">
+          <div class="learn-icon"><i class="ti ti-shield-check"></i></div>
           <div class="learn-body">
-            <div class="learn-title">Technical Analysis Fundamentals</div>
-            <div class="learn-desc">RSI, MACD, Bollinger Bands and how to use them.</div>
-            <div class="learn-prog-wrap"><div class="learn-prog-bar"><div class="learn-prog-fill" style="width:20%"></div></div><span class="learn-prog-pct">20%</span></div>
+            <div class="learn-title">Define the risk</div>
+            <div class="learn-desc">Size positions and write down what can break the thesis.</div>
+            <div class="learn-prog-pct">9 min · Risk</div>
           </div>
         </div>
       </div>
@@ -1868,9 +1881,9 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
             <svg viewBox="0 0 100 70" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"><defs><radialGradient id="rg1" cx="50%" cy="50%"><stop offset="0%" stop-color="#D4972E" stop-opacity=".3"/><stop offset="100%" stop-color="#D4972E" stop-opacity="0"/></radialGradient></defs><circle cx="50" cy="35" r="35" fill="url(#rg1)"/><rect x="15" y="45" width="8" height="15" rx="1" fill="#4ade80" opacity=".8"/><rect x="28" y="38" width="8" height="22" rx="1" fill="#4ade80" opacity=".8"/><rect x="41" y="30" width="8" height="30" rx="1" fill="#f87171" opacity=".8"/><rect x="54" y="22" width="8" height="38" rx="1" fill="#4ade80" opacity=".8"/><rect x="67" y="14" width="8" height="46" rx="1" fill="#4ade80" opacity=".9"/><path d="M15,52 Q32,40 45,34 Q58,25 80,18" stroke="#D4972E" stroke-width="1.5" fill="none" stroke-opacity=".7"/></svg>
           </div>
           <div class="report-body">
-            <div class="report-title">2025 Midyear Outlook</div>
-            <div class="report-desc">Key market themes, sector opportunities, and risks shaping the second half of 2025.</div>
-            <a class="report-btn" href="#" id="report-btn">Read Report &rarr;</a>
+            <div class="report-title">Research Library</div>
+            <div class="report-desc">Original market outlooks and sector research are in development.</div>
+            <span class="report-btn" aria-disabled="true">Coming soon</span>
           </div>
         </div>
         <div class="report-indices">
@@ -2448,50 +2461,78 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
           </div><!-- /sec-reports -->
 
           <div class="app-section" id="sec-education"><div class="acc-body" id="body-education" style="display:none;">
-<div style="font-size:.82rem;color:var(--text3);margin-bottom:1.5rem;">Core concepts every investor should know.</div>
-            <div style="display:grid;gap:.85rem;">
-              <div class="edu-card">
-                <div class="edu-title">📊 Price-to-Earnings (P/E) Ratio</div>
-                <div class="edu-body">The P/E ratio compares a company's stock price to its earnings per share. A high P/E can mean the market expects strong future growth; a low P/E may signal undervaluation or slow growth. Compare P/E to the sector average and the company's own history for context.</div>
-                <div class="edu-formula">P/E = Stock Price ÷ Earnings Per Share (EPS)</div>
+            <div class="edu-hero">
+              <div>
+                <div class="edu-kicker">ImpliedLens Academy</div>
+                <h2>Build an investment process, not a collection of opinions.</h2>
+                <p>Short, practical lessons connected directly to the tools inside ImpliedLens.</p>
               </div>
-              <div class="edu-card">
-                <div class="edu-title">💰 Earnings Per Share (EPS)</div>
-                <div class="edu-body">EPS measures how much profit a company generates for each share outstanding. Rising EPS over time is generally a positive sign. Watch for "diluted" EPS, which accounts for options and convertible securities — it gives a more conservative picture.</div>
-                <div class="edu-formula">EPS = Net Income ÷ Shares Outstanding</div>
-              </div>
-              <div class="edu-card">
-                <div class="edu-title">📈 Market Capitalization</div>
-                <div class="edu-body">Market cap is the total dollar value of a company's outstanding shares. It helps classify companies: Mega-cap (&gt;$200B), Large-cap ($10–200B), Mid-cap ($2–10B), Small-cap (&lt;$2B). Larger companies tend to be more stable; smaller ones can offer higher growth potential with more risk.</div>
-                <div class="edu-formula">Market Cap = Share Price × Shares Outstanding</div>
-              </div>
-              <div class="edu-card">
-                <div class="edu-title">🏦 Revenue vs. Profit</div>
-                <div class="edu-body">Revenue is the total money a company brings in from its business. Profit (net income) is what remains after all expenses, taxes, and interest. A company can grow revenue while still losing money — always look at the full picture. Gross margin and operating margin help you understand efficiency.</div>
-                <div class="edu-formula">Net Income = Revenue − Cost of Goods − Expenses − Taxes − Interest</div>
-              </div>
-              <div class="edu-card">
-                <div class="edu-title">📉 52-Week High / Low</div>
-                <div class="edu-body">The highest and lowest prices a stock has traded at over the past year. A stock trading near its 52-week high may indicate strength or overvaluation; near its low may signal weakness or opportunity. Always combine with fundamental analysis — price alone tells an incomplete story.</div>
-              </div>
-              <div class="edu-card">
-                <div class="edu-title">🔄 Free Cash Flow (FCF)</div>
-                <div class="edu-body">FCF is the cash a company generates after spending on capital expenditures (buildings, equipment). It represents money available for dividends, buybacks, debt paydown, or reinvestment. Many analysts consider FCF a better measure of financial health than reported earnings.</div>
-                <div class="edu-formula">FCF = Operating Cash Flow − Capital Expenditures</div>
-              </div>
-              <div class="edu-card">
-                <div class="edu-title">⚖️ Debt-to-Equity (D/E) Ratio</div>
-                <div class="edu-body">D/E measures how much a company relies on debt versus shareholder equity to finance its operations. A ratio above 2.0 is generally considered high-risk, though acceptable levels vary by industry. Capital-intensive industries like utilities or manufacturing typically carry more debt than software companies.</div>
-                <div class="edu-formula">D/E = Total Liabilities ÷ Shareholders' Equity</div>
-              </div>
-              <div class="edu-card">
-                <div class="edu-title">💵 Dividend Yield</div>
-                <div class="edu-body">Dividend yield shows the annual dividend payment as a percentage of the stock price. A higher yield provides income but may signal a slowing company or an unsustainable payout. Always check the payout ratio — dividends exceeding earnings are a red flag.</div>
-                <div class="edu-formula">Dividend Yield = Annual Dividend ÷ Stock Price × 100</div>
+              <div class="edu-progress-card">
+                <div class="edu-progress-top"><span>Your progress</span><strong id="edu-progress-label">0 / 6</strong></div>
+                <div class="edu-progress-track"><div id="edu-progress-fill"></div></div>
+                <small>Completed lessons are saved on this device.</small>
               </div>
             </div>
 
+            <div class="edu-path-grid">
+              <button class="edu-path" data-lesson="thesis" onclick="openLesson(this)">
+                <span class="edu-path-num">01</span><i class="ti ti-bulb"></i>
+                <strong>Write the thesis</strong><span>Turn a ticker into a falsifiable investment case.</span>
+                <em>8 min · Foundation</em>
+              </button>
+              <button class="edu-path" data-lesson="quality" onclick="openLesson(this)">
+                <span class="edu-path-num">02</span><i class="ti ti-building-bank"></i>
+                <strong>Judge business quality</strong><span>Read margins, returns, cash flow, and balance-sheet risk.</span>
+                <em>12 min · Fundamentals</em>
+              </button>
+              <button class="edu-path" data-lesson="valuation" onclick="openLesson(this)">
+                <span class="edu-path-num">03</span><i class="ti ti-calculator"></i>
+                <strong>Value the business</strong><span>Use multiples and DCF without false precision.</span>
+                <em>14 min · Valuation</em>
+              </button>
+              <button class="edu-path" data-lesson="chart" onclick="openLesson(this)">
+                <span class="edu-path-num">04</span><i class="ti ti-chart-candle"></i>
+                <strong>Read the chart</strong><span>Separate trend, momentum, volatility, and noise.</span>
+                <em>10 min · Technicals</em>
+              </button>
+              <button class="edu-path" data-lesson="risk" onclick="openLesson(this)">
+                <span class="edu-path-num">05</span><i class="ti ti-shield-check"></i>
+                <strong>Define the risk</strong><span>Size positions and write down what can break.</span>
+                <em>9 min · Risk</em>
+              </button>
+              <button class="edu-path" data-lesson="review" onclick="openLesson(this)">
+                <span class="edu-path-num">06</span><i class="ti ti-clipboard-check"></i>
+                <strong>Run the review</strong><span>Use a repeatable pre-buy and quarterly checklist.</span>
+                <em>7 min · Workflow</em>
+              </button>
+            </div>
 
+            <div class="edu-workbench">
+              <div class="edu-lesson-panel" id="edu-lesson-panel">
+                <div class="edu-panel-empty"><i class="ti ti-school"></i><strong>Select a lesson</strong><span>Each lesson includes a framework, warning signs, and a direct link to the relevant ImpliedLens tool.</span></div>
+              </div>
+              <aside class="edu-checklist">
+                <div class="edu-side-title">Pre-buy checklist</div>
+                <label><input type="checkbox"> I can explain how the company makes money.</label>
+                <label><input type="checkbox"> Revenue and cash flow support the thesis.</label>
+                <label><input type="checkbox"> Debt is manageable under a weaker scenario.</label>
+                <label><input type="checkbox"> Valuation leaves room for error.</label>
+                <label><input type="checkbox"> I wrote the conditions that make me sell.</label>
+                <button onclick="resetEduChecklist()"><i class="ti ti-refresh"></i> Reset checklist</button>
+              </aside>
+            </div>
+
+            <div class="edu-glossary">
+              <div class="edu-glossary-head"><div><div class="edu-kicker">Quick reference</div><h3>Investor glossary</h3></div><input id="edu-glossary-search" placeholder="Filter concepts..." oninput="filterGlossary(this.value)"></div>
+              <div class="edu-glossary-grid" id="edu-glossary-grid">
+                <div class="edu-term" data-term="price earnings pe valuation"><strong>P/E ratio</strong><span>Price paid for each dollar of earnings. Compare against growth, history, and peers.</span><code>Price ÷ EPS</code></div>
+                <div class="edu-term" data-term="free cash flow fcf cash"><strong>Free cash flow</strong><span>Cash remaining after operating needs and capital spending.</span><code>Operating cash flow − Capex</code></div>
+                <div class="edu-term" data-term="return invested capital roic quality"><strong>ROIC</strong><span>How efficiently a business turns invested capital into operating profit.</span><code>NOPAT ÷ Invested capital</code></div>
+                <div class="edu-term" data-term="enterprise value ebitda multiple"><strong>EV / EBITDA</strong><span>A capital-structure-neutral multiple useful for peer comparisons.</span><code>Enterprise value ÷ EBITDA</code></div>
+                <div class="edu-term" data-term="discounted cash flow dcf valuation"><strong>DCF</strong><span>A present-value model for future cash flows. Best used as a range, not a point estimate.</span><code>Σ FCFt ÷ (1 + WACC)t</code></div>
+                <div class="edu-term" data-term="margin safety valuation risk"><strong>Margin of safety</strong><span>The discount between your conservative value estimate and the market price.</span><code>(Value − Price) ÷ Value</code></div>
+              </div>
+            </div>
             </div><!-- /body-education -->
           </div><!-- /sec-education -->
 
@@ -2721,10 +2762,10 @@ html[data-theme="dark"] .mo-breadth,.mo-b-item{border-color:rgba(255,255,255,.07
 <div class="toast" id="toast"></div>
 
 <!-- Email verification banner -->
-<div id="verif-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:#2a1f00;border-bottom:1px solid rgba(200,136,42,.4);padding:.55rem 1rem;font-size:.8rem;color:rgba(220,225,232,.85);display:flex;align-items:center;justify-content:center;gap:.75rem;">
+<div id="verif-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:#2a1f00;border-bottom:1px solid rgba(200,136,42,.4);padding:.55rem 1rem;font-size:.8rem;color:rgba(220,225,232,.85);align-items:center;justify-content:center;gap:.75rem;">
   <span>📧 Please verify your email address to unlock all features.</span>
   <button onclick="resendVerification()" style="background:rgba(200,136,42,.2);border:1px solid rgba(200,136,42,.4);color:#C8882A;border-radius:5px;padding:.2rem .65rem;font-size:.75rem;cursor:pointer;font-weight:600;">Resend email</button>
-  <button onclick="document.getElementById('verif-banner').style.display='none'" style="background:none;border:none;color:rgba(220,225,232,.35);cursor:pointer;font-size:1rem;line-height:1;padding:0 .25rem;">✕</button>
+  <button onclick="document.getElementById('verif-banner').style.display='none';document.body.classList.remove('has-verif-banner')" style="background:none;border:none;color:rgba(220,225,232,.35);cursor:pointer;font-size:1rem;line-height:1;padding:0 .25rem;">✕</button>
 </div>
 
 <style>
@@ -3506,6 +3547,7 @@ html[data-theme="dark"] #am-username-msg { color: var(--text3) !important; }
 
 /* Mobile section tabs — hidden on desktop */
 .mobile-sec-tabs { display:none; }
+body.has-verif-banner { padding-top:42px; }
 
 @media(max-width:640px){
 
@@ -3608,7 +3650,7 @@ html[data-theme="dark"] #am-username-msg { color: var(--text3) !important; }
   .mobile-bottom-nav {
     display:flex !important;
     position:fixed;
-    bottom:0; left:0; right:0;
+    top:auto; bottom:0; left:0; right:0;
     height:58px;
     background:#0C0D12;
     border-top:1px solid rgba(255,255,255,.09);
@@ -3835,7 +3877,7 @@ html[data-theme="dark"] #am-username-msg { color: var(--text3) !important; }
   .mo-idx-item { min-width: calc(50% - 4px); }
 
   /* Bottom nav — ensure it's above content, clear iPhone home bar */
-  .mobile-bottom-nav { z-index: 200;
+  .mobile-bottom-nav { z-index: 3000;
     padding-bottom: max(8px, env(safe-area-inset-bottom));
     height: calc(56px + max(0px, env(safe-area-inset-bottom))); }
   /* Toast: clear bottom nav + safe area */
@@ -3850,6 +3892,117 @@ html[data-theme="dark"] #am-username-msg { color: var(--text3) !important; }
 @media (max-width: 400px) {
   .metrics-grid { grid-template-columns: 1fr !important; }
   .pgc-btn { width: 100%; }
+}
+
+/* Product polish pass */
+.globe-caption{position:absolute;right:34px;bottom:22px;display:flex;align-items:center;gap:7px;color:rgba(232,226,212,.45);font:600 .58rem/1 var(--sans);letter-spacing:.12em;text-transform:uppercase}
+.globe-caption span{width:6px;height:6px;border-radius:50%;background:#52d18a;box-shadow:0 0 10px #52d18a;animation:mo-pulse 2s infinite}
+.theme-toggle{width:38px;height:32px;justify-content:center;border-radius:6px!important;transition:background .15s}
+.theme-toggle:hover{background:var(--border)}
+.theme-toggle::before{content:'☀';font-size:12px;color:var(--text4)}
+html[data-theme="dark"] .theme-toggle::before{content:'☾';color:var(--gold)}
+.theme-toggle-track{display:none!important}
+body.has-verif-banner #main-nav{top:42px}
+.app-chart-toolbar,.app-tf-strip{scrollbar-width:none}
+.app-chart-toolbar::-webkit-scrollbar,.app-tf-strip::-webkit-scrollbar{display:none}
+.act-btn,.tf-pill,.tf-tog{min-height:26px;display:inline-flex;align-items:center;justify-content:center}
+.chart-wrap{transition:border-color .16s,box-shadow .16s}
+.chart-wrap:hover{border-color:rgba(200,136,42,.34)!important;box-shadow:0 8px 26px rgba(10,14,20,.08)}
+.chart-wrap:hover .chart-exp-btn,.chart-exp-btn:focus-visible{opacity:1}
+.chart-exp-btn{width:30px;height:30px}
+
+.edu-hero{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(230px,.7fr);gap:1.5rem;align-items:end;padding:1.5rem;border:1px solid var(--t-metric-border);background:linear-gradient(135deg,var(--t-metric-bg),rgba(200,136,42,.08));border-radius:8px;margin-bottom:1rem}
+.edu-kicker{font-size:.58rem;color:var(--gold);font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:.4rem}
+.edu-hero h2{font:600 1.4rem/1.2 var(--serif);color:var(--text);margin:0 0 .45rem}
+.edu-hero p{font-size:.76rem;line-height:1.55;color:var(--text4);margin:0}
+.edu-progress-card{border-left:1px solid var(--t-metric-border);padding-left:1.25rem}
+.edu-progress-top{display:flex;justify-content:space-between;gap:1rem;font-size:.67rem;color:var(--text4);margin-bottom:.55rem}
+.edu-progress-top strong{color:var(--gold);font-family:var(--mono)}
+.edu-progress-track{height:6px;background:var(--t-acc-border);border-radius:3px;overflow:hidden;margin-bottom:.45rem}
+#edu-progress-fill{height:100%;width:0;background:var(--gold);border-radius:3px;transition:width .3s}
+.edu-progress-card small{font-size:.57rem;color:var(--text5)}
+.edu-path-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.65rem;margin-bottom:1rem}
+.edu-path{position:relative;text-align:left;min-height:145px;padding:1rem;border:1px solid var(--t-metric-border);background:var(--t-metric-bg);border-radius:7px;color:var(--text);font-family:var(--sans);cursor:pointer;transition:transform .15s,border-color .15s,background .15s}
+.edu-path:hover,.edu-path.active{transform:translateY(-2px);border-color:var(--gold);background:rgba(200,136,42,.08)}
+.edu-path.done::after{content:'✓';position:absolute;right:10px;top:9px;width:19px;height:19px;display:grid;place-items:center;border-radius:50%;background:#52d18a;color:#07130c;font-size:.65rem;font-weight:800}
+.edu-path i{display:block;color:var(--gold);font-size:1.25rem;margin:.65rem 0 .5rem}
+.edu-path strong,.edu-path span,.edu-path em{display:block}
+.edu-path strong{font-size:.77rem;margin-bottom:.28rem}
+.edu-path span{font-size:.64rem;line-height:1.45;color:var(--text4)}
+.edu-path em{font-size:.55rem;color:var(--text5);font-style:normal;margin-top:.65rem;font-family:var(--mono)}
+.edu-path-num{position:absolute;right:10px;top:10px!important;color:var(--text5)!important;font-family:var(--mono);font-size:.55rem!important}
+.edu-workbench{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(220px,.65fr);gap:.75rem;margin-bottom:1rem}
+.edu-lesson-panel,.edu-checklist,.edu-glossary{border:1px solid var(--t-metric-border);background:var(--t-metric-bg);border-radius:7px}
+.edu-lesson-panel{min-height:245px;padding:1.15rem}
+.edu-panel-empty{min-height:210px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:var(--text5);gap:.45rem}
+.edu-panel-empty i{font-size:1.7rem;color:var(--gold)}
+.edu-panel-empty strong{font-size:.82rem;color:var(--text2)}
+.edu-panel-empty span{max-width:420px;font-size:.68rem;line-height:1.55}
+.edu-lesson-content h3{font:600 1.12rem/1.2 var(--serif);color:var(--text);margin:.2rem 0 .6rem}
+.edu-lesson-content p{font-size:.72rem;line-height:1.65;color:var(--text3);margin-bottom:.75rem}
+.edu-lesson-points{display:grid;grid-template-columns:1fr 1fr;gap:.45rem;margin-bottom:.8rem}
+.edu-lesson-points div{padding:.55rem .65rem;border:1px solid var(--t-metric-border);border-radius:5px;font-size:.64rem;line-height:1.45;color:var(--text3)}
+.edu-lesson-actions{display:flex;gap:.5rem;flex-wrap:wrap}
+.edu-lesson-actions button{border:1px solid var(--gold);background:var(--gold);color:#111820;border-radius:5px;padding:.5rem .75rem;font:700 .64rem var(--sans);cursor:pointer}
+.edu-lesson-actions button.secondary{background:transparent;color:var(--gold)}
+.edu-checklist{padding:1rem}
+.edu-side-title{font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:.7rem}
+.edu-checklist label{display:flex;gap:.5rem;align-items:flex-start;padding:.48rem 0;border-bottom:1px solid var(--t-acc-border);font-size:.64rem;line-height:1.4;color:var(--text4);cursor:pointer}
+.edu-checklist input{accent-color:var(--gold);margin-top:2px}
+.edu-checklist button{margin-top:.75rem;border:0;background:transparent;color:var(--gold);font:600 .62rem var(--sans);cursor:pointer;padding:0}
+.edu-glossary{padding:1rem}
+.edu-glossary-head{display:flex;align-items:end;justify-content:space-between;gap:1rem;margin-bottom:.75rem}
+.edu-glossary-head h3{font:600 1rem var(--serif);color:var(--text);margin:0}
+.edu-glossary-head input{width:210px;border:1px solid var(--t-metric-border);background:var(--t-acc-header-bg);color:var(--text);border-radius:5px;padding:.45rem .6rem;font:inherit;outline:none}
+.edu-glossary-head input:focus{border-color:var(--gold)}
+.edu-glossary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.5rem}
+.edu-term{padding:.7rem;border:1px solid var(--t-metric-border);border-radius:5px}
+.edu-term strong,.edu-term span,.edu-term code{display:block}
+.edu-term strong{font-size:.7rem;color:var(--text2);margin-bottom:.25rem}
+.edu-term span{font-size:.6rem;line-height:1.45;color:var(--text4);min-height:44px}
+.edu-term code{font-size:.56rem;color:var(--gold);margin-top:.4rem;white-space:normal}
+
+@media(max-width:900px){
+  .edu-path-grid,.edu-glossary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .edu-hero,.edu-workbench{grid-template-columns:1fr}
+  .edu-progress-card{border-left:0;border-top:1px solid var(--t-metric-border);padding:1rem 0 0}
+}
+@media(max-width:640px){
+  body.has-verif-banner #main-nav{top:58px}
+  nav .nav-right{gap:3px}
+  .nav-live,.btn-nav-outline,#nav-signup{display:none!important}
+  .home-hero{padding:1.35rem 1rem 1.15rem!important}
+  .hh-search{display:grid!important;grid-template-columns:auto minmax(0,1fr)!important;gap:0!important}
+  .hh-search-btn{grid-column:1/-1;border-radius:0;padding:.68rem!important}
+  .hh-search input{padding:.75rem 0!important}
+  .home-grid,.home-lower{padding:0!important;gap:0!important}
+  .hc{padding:.85rem}
+  .mo-indices,.mo-breadth-v2{grid-template-columns:1fr}
+  .mo-idx-item,.mo-bv2-card{border-right:0;border-bottom:1px solid var(--border2)}
+  .app-section-hdr{height:44px;padding:0 .75rem}
+  .app-chart-toolbar{height:auto;min-height:42px;overflow-x:auto!important;flex-wrap:nowrap!important;padding:5px 7px!important}
+  .app-chart-toolbar .act-btn{min-width:38px;min-height:32px;padding:0 8px}
+  .app-chart-toolbar .act-btn:not([id^="ct-"]) {font-size:0}
+  .app-chart-toolbar .act-btn i,.app-chart-toolbar .act-btn span{font-size:13px;margin-right:0!important}
+  .app-tf-strip{height:38px;overflow-x:auto!important;padding:4px 7px!important}
+  .tf-pill,.tf-tog{min-width:38px;min-height:30px}
+  .mobile-sec-tabs{position:sticky;top:0;z-index:10}
+  .mst-btn{min-height:44px;padding:.55rem .8rem!important}
+  .app-content-scroll{padding:0 0 76px!important}
+  .app-stats-footer{display:none!important}
+  .app-section .acc-body{padding:.7rem!important}
+  .chart-wrap{margin-bottom:.7rem!important;padding:.8rem .65rem .55rem!important;border-radius:6px!important}
+  .chart-exp-btn{opacity:1;top:5px;right:5px}
+  .h240{height:250px!important}.h200{height:220px!important}.h150{height:165px!important}
+  .cex-box{width:100vw;height:100dvh;max-height:none;border-radius:0;border:0}
+  .cex-header{padding:.65rem .75rem}.cex-hint{display:none}.cex-body{padding:.5rem}
+  .edu-hero{padding:1rem}.edu-hero h2{font-size:1.15rem}
+  .edu-path-grid,.edu-glossary-grid{grid-template-columns:1fr}
+  .edu-path{min-height:125px}
+  .edu-lesson-points{grid-template-columns:1fr}
+  .edu-glossary-head{align-items:stretch;flex-direction:column}
+  .edu-glossary-head input{width:100%;box-sizing:border-box}
+  .mobile-more-menu{max-height:70vh;overflow-y:auto}
 }
 
 </style>
@@ -4110,7 +4263,7 @@ function sectionLoadingHtml() {
 }
 
 function sectionErrorHtml(msg) {
-  return `<div class="sec-state-wrap sec-state-error"><span style="font-size:1.1rem;">⚠</span><span>${msg}</span></div>`;
+  return `<div class="sec-state-wrap sec-state-error"><span style="font-size:1.1rem;">⚠</span><span>${escapeHtml(msg)}</span></div>`;
 }
 
 async function proAwareFetch(url, sectionId, opts) {
@@ -4172,6 +4325,15 @@ function escapeHtml(s) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+
+function safeExternalUrl(value) {
+  try {
+    const url = new URL(String(value || ''), window.location.origin);
+    return url.protocol === 'https:' || url.protocol === 'http:' ? escapeHtml(url.href) : '';
+  } catch (_) {
+    return '';
+  }
 }
 
 // ── Accordion open/close ──
@@ -5410,6 +5572,46 @@ async function initGlobe(){
   frame();
 }
 
+async function initModernGlobe(){
+  const canvas=document.getElementById('globe-canvas');if(!canvas)return;
+  const W=520,H=360,dpr=Math.min(window.devicePixelRatio||1,2);
+  canvas.width=W*dpr;canvas.height=H*dpr;canvas.style.width=W+'px';canvas.style.height=H+'px';
+  const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);
+  const cx=260,cy=175,r=132;
+  let land,graticule;
+  try{
+    const world=await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(res=>res.json());
+    land=topojson.feature(world,world.objects.land);graticule=d3.geoGraticule().step([20,20])();
+  }catch(_){return}
+  const projection=d3.geoOrthographic().scale(r).translate([cx,cy]).clipAngle(90);
+  const geoPath=d3.geoPath(projection,ctx);
+  const hubs=[[-74,40.7],[0,51.5],[103.8,1.35],[139.7,35.7],[-122.4,37.8],[151.2,-33.8],[72.8,19.1]];
+  let yaw=20,frameNo=0;
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    const glow=ctx.createRadialGradient(cx,cy,r*.45,cx,cy,r*1.45);
+    glow.addColorStop(0,'rgba(200,136,42,.12)');glow.addColorStop(.55,'rgba(200,136,42,.04)');glow.addColorStop(1,'rgba(200,136,42,0)');
+    ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);projection.rotate([yaw,-18,0]);
+    ctx.save();ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.clip();
+    const ocean=ctx.createRadialGradient(cx-r*.35,cy-r*.35,4,cx,cy,r);
+    ocean.addColorStop(0,'#17212a');ocean.addColorStop(.65,'#0d141b');ocean.addColorStop(1,'#070b10');
+    ctx.fillStyle=ocean;ctx.fillRect(cx-r,cy-r,r*2,r*2);
+    ctx.beginPath();geoPath(graticule);ctx.strokeStyle='rgba(116,142,160,.16)';ctx.lineWidth=.55;ctx.stroke();
+    ctx.beginPath();geoPath(land);ctx.fillStyle='rgba(212,151,46,.2)';ctx.fill();ctx.strokeStyle='rgba(235,191,102,.48)';ctx.lineWidth=.55;ctx.stroke();ctx.restore();
+    ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.strokeStyle='rgba(212,151,46,.3)';ctx.lineWidth=1;ctx.stroke();
+    ctx.beginPath();ctx.ellipse(cx,cy,r*1.28,r*.34,-.18,0,Math.PI*2);ctx.strokeStyle='rgba(212,151,46,.18)';ctx.lineWidth=.75;ctx.stroke();
+    ctx.beginPath();ctx.ellipse(cx,cy,r*1.38,r*.45,.38,0,Math.PI*2);ctx.strokeStyle='rgba(82,209,138,.12)';ctx.stroke();
+    hubs.forEach((hub,i)=>{const p=projection(hub);if(!p||d3.geoDistance(hub,projection.invert([cx,cy]))>=Math.PI/2)return;const pulse=3+Math.sin(frameNo*.035+i)*1.4;ctx.beginPath();ctx.arc(p[0],p[1],pulse*2.4,0,Math.PI*2);ctx.fillStyle='rgba(82,209,138,.08)';ctx.fill();ctx.beginPath();ctx.arc(p[0],p[1],2.2,0,Math.PI*2);ctx.fillStyle=i%3===0?'#52d18a':'#d4972e';ctx.fill()});
+    const trend=[[40,278],[92,260],[138,266],[182,226],[225,238],[270,194],[316,207],[360,151],[407,163],[466,105]];
+    ctx.beginPath();trend.forEach((p,i)=>i?ctx.lineTo(...p):ctx.moveTo(...p));ctx.strokeStyle='rgba(82,209,138,.6)';ctx.lineWidth=1.4;ctx.stroke();
+    trend.forEach((p,i)=>{if(i%2===0){ctx.beginPath();ctx.arc(p[0],p[1],2,0,Math.PI*2);ctx.fillStyle='#52d18a';ctx.fill()}});
+    ctx.fillStyle='rgba(232,226,212,.35)';ctx.font='600 9px Inter';ctx.fillText('GLOBAL FLOW',40,300);
+    ctx.fillStyle='#52d18a';ctx.font='600 10px JetBrains Mono';ctx.fillText('+1.84%',432,94);
+    yaw+=.08;frameNo++;_globeRAF=requestAnimationFrame(draw);
+  }
+  draw();
+}
+
 function buildSparklineSVG(data,up){if(!data||data.length<2)return'';const w=100,h=22,min=Math.min(...data),max=Math.max(...data),rng=max-min||1;const pts=data.map((v,i)=>`${((i/(data.length-1))*w).toFixed(1)},${(h-((v-min)/rng)*h).toFixed(1)}`).join(' ');const col=up?'#4ade80':'#f87171';return`<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" style="width:100%;height:100%;display:block;"><polyline points="${pts}" fill="none" stroke="${col}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/></svg>`;}
 
 async function loadHomeTickerStrip(){
@@ -5576,22 +5778,15 @@ async function loadMarketOverview(range,btn){
 
 function fetchBreadth(results){
   try{
-    // Advancing / declining: directional estimate based on whether SPY is up or down.
-    // These are approximations — real breadth data requires a paid data feed.
-    const sp=results?.[0]?.value?.chart?.result?.[0]?.meta;
-    const up=sp?((sp.regularMarketPrice??0)>=(sp.chartPreviousClose??0)):true;
-    const adv=up?3214:2123, dec=up?2123:3214, total=adv+dec;
-    const advPct=Math.round(adv/total*100), decPct=100-advPct;
     const advEl=document.getElementById('mo-advancing'),decEl=document.getElementById('mo-declining');
     const advBar=document.getElementById('mo-adv-bar'),decBar=document.getElementById('mo-dec-bar');
     const advPctEl=document.getElementById('mo-adv-pct'),decPctEl=document.getElementById('mo-dec-pct');
-    if(advEl)advEl.textContent=adv.toLocaleString();
-    if(decEl)decEl.textContent=dec.toLocaleString();
-    if(advBar)advBar.style.width=advPct+'%';
-    if(decBar)decBar.style.width=decPct+'%';
-    // Label as estimate so users know these are not exact NYSE breadth counts
-    if(advPctEl)advPctEl.textContent=advPct+'% (est.)';
-    if(decPctEl)decPctEl.textContent=decPct+'% (est.)';
+    if(advEl)advEl.textContent='—';
+    if(decEl)decEl.textContent='—';
+    if(advBar)advBar.style.width='0%';
+    if(decBar)decBar.style.width='0%';
+    if(advPctEl)advPctEl.textContent='Dedicated feed required';
+    if(decPctEl)decPctEl.textContent='Dedicated feed required';
     // New highs/lows and volume require a dedicated data feed — show dashes
     const hiEl=document.getElementById('mo-highs'),loEl=document.getElementById('mo-lows');
     const hiSub=document.getElementById('mo-highs-sub'),loSub=document.getElementById('mo-lows-sub');
@@ -5642,7 +5837,7 @@ async function loadHomeInsights(){
   try{
     const r=await fetch('/api/news/SPY',{credentials:'same-origin'});if(!r.ok)throw new Error();
     const news=await r.json();const items=(Array.isArray(news)?news:news.data||[]).slice(0,4);if(!items.length)throw new Error();
-    el.innerHTML=items.map((n,i)=>{const title=(n.headline||n.title||'Market Update').substring(0,68);const ts=n.datetime?timeAgo(n.datetime*1000):'Recently';return`<div class="insight-item" ${n.url?`onclick="window.open('${n.url}','_blank')"`:''}><div class="insight-thumb">${icons[i%4]}</div><div class="insight-body"><div class="insight-cat">${cats[i%4]}</div><div class="insight-title">${title}</div><div class="insight-time">${ts}</div></div></div>`;}).join('');
+    el.innerHTML=items.map((n,i)=>{const title=escapeHtml((n.headline||n.title||'Market Update').substring(0,68));const ts=escapeHtml(n.datetime?timeAgo(n.datetime*1000):'Recently');const url=safeExternalUrl(n.url);const tag=url?'a':'div';const attrs=url?` href="${url}" target="_blank" rel="noopener noreferrer"`:'';return`<${tag} class="insight-item"${attrs}><div class="insight-thumb">${icons[i%4]}</div><div class="insight-body"><div class="insight-cat">${cats[i%4]}</div><div class="insight-title">${title}</div><div class="insight-time">${ts}</div></div></${tag}>`;}).join('');
   }catch(_){el.innerHTML=['AI Momentum Drives Markets Higher','Why NVDA Valuation Still Makes Sense','Semiconductors Rally on Strong Demand','What to Watch in Earnings Season'].map((t,i)=>`<div class="insight-item"><div class="insight-thumb">${icons[i]}</div><div class="insight-body"><div class="insight-cat">${cats[i]}</div><div class="insight-title">${t}</div><div class="insight-time">${['2h ago','5h ago','1d ago','1d ago'][i]}</div></div></div>`).join('');}
 }
 function timeAgo(ms){const d=(Date.now()-ms)/1000;if(d<3600)return`${Math.round(d/60)}m ago`;if(d<86400)return`${Math.round(d/3600)}h ago`;return`${Math.round(d/86400)}d ago`;}
@@ -5665,8 +5860,9 @@ function renderMovers(type) {
   el.innerHTML = items.map(m => {
     const up = m.chgPct >= 0;
     const price = m.price >= 1000 ? m.price.toLocaleString('en-US',{maximumFractionDigits:0}) : m.price.toFixed(2);
-    return `<div class="mover-row" onclick="loadTicker('${m.symbol}')" style="cursor:pointer;">
-      <div><div class="mover-sym">${m.symbol}</div><div class="mover-co">${(m.name||'').substring(0,26)}</div></div>
+    const symbol = escapeHtml(m.symbol);
+    return `<div class="mover-row" data-ticker="${symbol}" onclick="loadTicker(this.dataset.ticker)" style="cursor:pointer;">
+      <div><div class="mover-sym">${symbol}</div><div class="mover-co">${escapeHtml((m.name||'').substring(0,26))}</div></div>
       <div class="mover-price">$${price}</div>
       <div class="mover-pct ${up?'up':'dn'}">${up?'+':''}${m.chgPct.toFixed(2)}%</div>
     </div>`;
@@ -5753,7 +5949,60 @@ function toggleTheme() {
     document.documentElement.setAttribute('data-theme', 'dark');
     localStorage.setItem('il-theme', 'dark');
   }
+  requestAnimationFrame(() => {
+    Object.values(S.charts || {}).forEach(chart => {
+      if (!chart) return;
+      const t = ct();
+      if (chart.options?.scales?.x) {
+        chart.options.scales.x.ticks.color = t.text;
+        chart.options.scales.x.grid.color = t.grid;
+      }
+      if (chart.options?.scales?.y) {
+        chart.options.scales.y.ticks.color = t.text;
+        chart.options.scales.y.grid.color = t.grid;
+      }
+      if (chart.options?.plugins?.tooltip) {
+        chart.options.plugins.tooltip.backgroundColor = t.ttBg;
+        chart.options.plugins.tooltip.titleColor = t.ttTitle;
+        chart.options.plugins.tooltip.bodyColor = t.ttBody;
+        chart.options.plugins.tooltip.borderColor = t.ttBorder;
+      }
+      chart.update('none');
+    });
+  });
 }
+
+const EDU_LESSONS = {
+  thesis:{title:'Write a falsifiable investment thesis',body:'A useful thesis explains what the market may be missing, why the gap should close, and what evidence would prove you wrong. Keep it specific enough to review after every earnings report.',points:['Name the business driver, not just the ticker.','Write the catalyst and a realistic time horizon.','List two measurable reasons the thesis can fail.','Separate company quality from the price you pay.'],tool:'analyze',toolLabel:'Open chart & analysis'},
+  quality:{title:'Judge business quality from the statements',body:'Strong businesses tend to compound revenue, protect margins, turn profit into cash, and earn attractive returns without relying on excessive debt. One impressive metric is never enough.',points:['Compare revenue growth with free-cash-flow growth.','Check whether margins are stable through cycles.','Look for ROIC above the cost of capital.','Review debt maturities and interest coverage.'],tool:'financials',toolLabel:'Open financials'},
+  valuation:{title:'Value a range, not a precise number',body:'Valuation is a decision framework. Use peer multiples for market context and a DCF for scenario analysis, then demand a margin of safety before acting.',points:['Use normalized earnings or cash flow.','Run bear, base, and bull assumptions.','Stress discount rate and terminal growth.','Compare implied expectations with your thesis.'],tool:'dcf',toolLabel:'Open DCF model'},
+  chart:{title:'Read trend, momentum, and volatility separately',body:'Charts help with timing and risk management, but they do not replace a business thesis. Start with trend, then use momentum and volatility as supporting evidence.',points:['Use moving averages to frame the trend.','Treat RSI as context, not a buy/sell signal.','Use volume to assess conviction.','Let ATR inform position size and stops.'],tool:'analyze',toolLabel:'Open interactive chart'},
+  risk:{title:'Define risk before sizing the position',body:'Risk is not just daily volatility. It is permanent capital loss, thesis failure, and portfolio concentration. Define those risks before placing the trade.',points:['Set a maximum portfolio allocation.','Write the thesis-break conditions.','Model a weaker operating scenario.','Avoid stacking highly correlated positions.'],tool:'projection',toolLabel:'Open scenario builder'},
+  review:{title:'Build a repeatable review loop',body:'A repeatable process reduces emotional decisions. Review the thesis after results, compare actuals with expectations, and record what changed.',points:['Review revenue, margins, cash flow, and guidance.','Update valuation assumptions only with evidence.','Record whether the thesis strengthened or weakened.','Save the analysis for the next review.'],tool:'reports',toolLabel:'Open saved analyses'}
+};
+
+function eduCompleted(){try{return JSON.parse(localStorage.getItem('il-edu-complete')||'[]')}catch(_){return[]}}
+function updateEduProgress(){
+  const done=eduCompleted();
+  document.querySelectorAll('.edu-path').forEach(card=>card.classList.toggle('done',done.includes(card.dataset.lesson)));
+  const label=document.getElementById('edu-progress-label'),fill=document.getElementById('edu-progress-fill');
+  if(label)label.textContent=`${done.length} / ${Object.keys(EDU_LESSONS).length}`;
+  if(fill)fill.style.width=`${done.length/Object.keys(EDU_LESSONS).length*100}%`;
+}
+function openLesson(card){
+  const lesson=EDU_LESSONS[card.dataset.lesson],panel=document.getElementById('edu-lesson-panel');if(!lesson||!panel)return;
+  document.querySelectorAll('.edu-path').forEach(el=>el.classList.toggle('active',el===card));
+  panel.innerHTML=`<div class="edu-lesson-content"><div class="edu-kicker">Practical lesson</div><h3>${lesson.title}</h3><p>${lesson.body}</p><div class="edu-lesson-points">${lesson.points.map(p=>`<div>${p}</div>`).join('')}</div><div class="edu-lesson-actions"><button onclick="completeLesson('${card.dataset.lesson}')"><i class="ti ti-check"></i> Mark complete</button><button class="secondary" onclick="navGoTo('${lesson.tool}')">${lesson.toolLabel} <i class="ti ti-arrow-right"></i></button></div></div>`;
+}
+function completeLesson(id){
+  const done=new Set(eduCompleted());done.add(id);localStorage.setItem('il-edu-complete',JSON.stringify([...done]));updateEduProgress();toast('Lesson completed','ok');
+}
+function filterGlossary(value){
+  const q=String(value||'').trim().toLowerCase();
+  document.querySelectorAll('.edu-term').forEach(el=>el.style.display=!q||el.dataset.term.includes(q)||el.textContent.toLowerCase().includes(q)?'':'none');
+}
+function resetEduChecklist(){document.querySelectorAll('.edu-checklist input').forEach(el=>el.checked=false)}
+document.addEventListener('DOMContentLoaded',updateEduProgress);
 
 async function loadAnalyst(ticker) {
   try {
@@ -6434,11 +6683,12 @@ function renderScreenerTable(stocks) {
     var chg1Y=s.change1Y;
     var revGr=s.revenueGrowth;
     var cap=s.marketCap?fmtBig(s.marketCap):'--';
-    var sector=s.sector||'--';
+    var ticker=escapeHtml(s.ticker||'');
+    var sector=escapeHtml(s.sector||'--');
     var revGrStr=revGr==null?'--':(revGr>0?'<span style="color:#4ade80">+'+revGr.toFixed(1)+'%</span>':'<span style="color:#f87171">'+revGr.toFixed(1)+'%</span>');
     var signal=chg1Y==null?'--':chg1Y>20?'<span class="tag tag-up">Bullish</span>':chg1Y<-15?'<span class="tag tag-dn">Bearish</span>':'<span class="tag tag-neu">Neutral</span>';
-    return '<tr style="cursor:pointer" onclick="loadFromScreener(this)" data-ticker="'+s.ticker+'">'
-      +'<td><span class="scr-ticker">'+s.ticker+'</span></td>'
+    return '<tr style="cursor:pointer" onclick="loadFromScreener(this)" data-ticker="'+ticker+'">'
+      +'<td><span class="scr-ticker">'+ticker+'</span></td>'
       +'<td style="font-size:.72rem;color:var(--text4)">'+sector+'</td>'
       +'<td>$'+(s.price||0).toFixed(2)+'</td>'
       +'<td style="color:'+(chg1D>=0?'#4ade80':'#f87171')+'">'+(chg1D>=0?'+':'')+chg1D.toFixed(2)+'%</td>'
@@ -6583,7 +6833,9 @@ async function renderNews(ticker, name) {
       let cls = 'news-neu';
       if (item.sentiment === 'positive' || POS_WORDS.test(h)) cls = 'news-pos';
       else if (item.sentiment === 'negative' || NEG_WORDS.test(h)) cls = 'news-neg';
-      return `<a class="news-item ${cls}" href="${escapeHtml(item.url)}" target="_blank" rel="noopener">
+      const url = safeExternalUrl(item.url);
+      if (!url) return '';
+      return `<a class="news-item ${cls}" href="${url}" target="_blank" rel="noopener noreferrer">
         <div class="news-headline">${escapeHtml(h)}</div>
         <div class="news-meta">${escapeHtml(item.source || '')} · ${item.datetime ? new Date(item.datetime * 1000).toLocaleDateString() : ''}</div>
       </a>`;
@@ -6916,11 +7168,11 @@ async function loadInstitutional(ticker) {
           const chgColor  = change>0?'#4ade80':change<0?'#f87171':'var(--text4)';
           const chgStr    = change!=null ? `<span style="color:${chgColor}">${change>0?'+':''}${fmtBig(change).replace('$','')}</span>` : '—';
           return `<tr>
-            <td>${h.holderName||h.name||'—'}</td>
-            <td>${shares}</td>
-            <td>${pct}</td>
+            <td>${escapeHtml(h.holderName||h.name||'—')}</td>
+            <td>${escapeHtml(shares)}</td>
+            <td>${escapeHtml(pct)}</td>
             <td>${chgStr}</td>
-            <td style="font-size:.68rem;color:var(--text5);">${h.reportDate||h.date||'—'}</td>
+            <td style="font-size:.68rem;color:var(--text5);">${escapeHtml(h.reportDate||h.date||'—')}</td>
           </tr>`;
         }).join('');
       }
@@ -7115,11 +7367,12 @@ function renderSecFilings() {
   list.innerHTML = rows.map(f => {
     const badge = badgeClass(f.form);
     const desc  = f.description || f.form;
-    const url   = f.viewerUrl && f.primaryDoc ? f.viewerUrl : f.indexUrl;
+    const url   = safeExternalUrl(f.viewerUrl && f.primaryDoc ? f.viewerUrl : f.indexUrl);
+    if (!url) return '';
     return `<a href="${url}" target="_blank" rel="noopener" class="sec-filing-row">
-      <span class="sec-filing-badge ${badge}">${f.form}</span>
-      <span class="sec-filing-date">${f.date}</span>
-      <span class="sec-filing-desc">${desc}</span>
+      <span class="sec-filing-badge ${badge}">${escapeHtml(f.form)}</span>
+      <span class="sec-filing-date">${escapeHtml(f.date)}</span>
+      <span class="sec-filing-desc">${escapeHtml(desc)}</span>
       <span class="sec-filing-arrow">↗</span>
     </a>`;
   }).join('');
@@ -7171,7 +7424,7 @@ loadMarketOverview('1d');
 loadMarketMovers();
 loadHomeInsights();
 loadPortfolioSparklines();
-initGlobe();
+initModernGlobe();
 
 // Prime the analysis limit counter for free/guest users
 (async () => {

@@ -17,7 +17,7 @@
     .logo em{color:#C8882A;font-style:italic}
     .top-bar a.back{font-size:.8rem;color:rgba(220,225,232,.4);margin-left:auto}
     .top-bar a.back:hover{color:#C8882A}
-    .wrap{max-width:640px;margin:0 auto;padding:5rem 2rem;text-align:center}
+    .wrap{max-width:980px;margin:0 auto;padding:3.5rem 2rem 5rem}
     .pill{display:inline-block;padding:.25rem .85rem;border-radius:100px;background:rgba(200,136,42,.1);color:#C8882A;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:1.5rem}
     h1{font-family:'Playfair Display',serif;font-size:2.2rem;color:#fff;margin-bottom:1rem;line-height:1.25}
     p{font-size:.95rem;color:rgba(220,225,232,.55);line-height:1.8;margin-bottom:1.25rem}
@@ -27,6 +27,19 @@
     footer{margin-top:3rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,.07);display:flex;gap:1.25rem;flex-wrap:wrap;justify-content:center;font-size:.78rem}
     footer a{color:rgba(220,225,232,.3)}
     footer a:hover{color:#C8882A}
+    .intro{max-width:680px;margin:0 auto 2.5rem;text-align:center}
+    .guide-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+    .guide{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:1.35rem;transition:border-color .15s,transform .15s}
+    .guide:hover{border-color:rgba(200,136,42,.45);transform:translateY(-2px)}
+    .guide-num{font:600 .65rem monospace;color:#C8882A;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.7rem}
+    .guide h2{font-family:'Playfair Display',serif;font-size:1.15rem;color:#fff;margin-bottom:.55rem}
+    .guide p{font-size:.79rem;line-height:1.65;margin:0 0 .8rem}
+    .guide ul{list-style:none;display:grid;gap:.45rem}
+    .guide li{font-size:.73rem;color:rgba(220,225,232,.6);padding-left:1rem;position:relative}
+    .guide li::before{content:'·';position:absolute;left:.2rem;color:#C8882A}
+    .guide-cta{margin-top:1rem;display:inline-block;font-size:.75rem;font-weight:600}
+    .note{margin:2rem auto 0;max-width:760px;padding:1rem 1.2rem;border-left:2px solid #C8882A;background:rgba(200,136,42,.06);font-size:.78rem;color:rgba(220,225,232,.58);line-height:1.65}
+    @media(max-width:760px){.guide-grid{grid-template-columns:1fr}.wrap{padding:2.5rem 1rem 4rem}.top-bar{padding:.75rem 1rem}}
   </style>
 </head>
 <body>
@@ -35,14 +48,35 @@
     <a href="/" class="back">← Back to ImpliedLens</a>
   </div>
   <div class="wrap">
-    <span class="pill">Coming Soon</span>
-    <h1>Market insights &amp; platform updates.</h1>
-    <p>The ImpliedLens blog is where we'll share analysis walkthroughs, feature releases, investing frameworks, and how to get the most out of the platform.</p>
-    <p>In the meantime, follow us on social for updates and market commentary.</p>
-    <div class="socials">
-      <a href="https://x.com/ImpliedLens" target="_blank" rel="noopener" class="soc-btn">𝕏 @ImpliedLens</a>
-      <a href="https://instagram.com/ImpliedLens" target="_blank" rel="noopener" class="soc-btn">📸 @ImpliedLens</a>
+    <div class="intro">
+      <span class="pill">Research Playbooks</span>
+      <h1>A cleaner way to think about stocks.</h1>
+      <p>Practical frameworks for using data, valuation, and risk management without pretending the future is predictable.</p>
     </div>
+    <div class="guide-grid">
+      <article class="guide">
+        <div class="guide-num">Playbook 01 · 8 min</div>
+        <h2>From ticker to investment thesis</h2>
+        <p>Build a testable case before looking for evidence that agrees with you.</p>
+        <ul><li>Define the market disagreement</li><li>Name the catalyst and time horizon</li><li>Write the thesis-break conditions</li></ul>
+        <a class="guide-cta" href="/?view=tool&amp;section=education">Open the Academy →</a>
+      </article>
+      <article class="guide">
+        <div class="guide-num">Playbook 02 · 12 min</div>
+        <h2>How to read business quality</h2>
+        <p>Use the statements to separate durable economics from a good-looking quarter.</p>
+        <ul><li>Connect revenue, margins, and cash</li><li>Compare ROIC with capital needs</li><li>Stress-test debt and dilution</li></ul>
+        <a class="guide-cta" href="/?view=tool&amp;section=financials">Explore financials →</a>
+      </article>
+      <article class="guide">
+        <div class="guide-num">Playbook 03 · 14 min</div>
+        <h2>Valuation without false precision</h2>
+        <p>Treat valuation as a range of expectations rather than a magic target price.</p>
+        <ul><li>Normalize cash flow</li><li>Run bear, base, and bull cases</li><li>Demand a margin of safety</li></ul>
+        <a class="guide-cta" href="/?view=tool&amp;section=dcf">Open valuation tools →</a>
+      </article>
+    </div>
+    <div class="note">ImpliedLens education is informational only. The strongest process still includes independent verification, position sizing, and a clear understanding of what could go wrong.</div>
     <footer>
       <a href="/privacy">Privacy</a>
       <a href="/terms">Terms</a>
