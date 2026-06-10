@@ -260,6 +260,12 @@ test("Provider health endpoint exposes an observation snapshot", async () => {
   assert.ok(["observing", "operational", "degraded"].includes(body.status));
 });
 
+test("Honest feedback analytics events are accepted", async () => {
+  const res = await req("/api/track", { method: "POST", body: { event: "feedback_rated", properties: { rating: 1 } } });
+  assert.equal(res.status, 200);
+  assert.equal((await res.json()).ok, true);
+});
+
 // ═══════════════════════════════════════════════════════════════
 //  3. Pro gate — free users get 403 on Pro endpoints
 // ═══════════════════════════════════════════════════════════════

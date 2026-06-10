@@ -109,7 +109,7 @@
   }
 
   function provenanceLabel(p) {
-    if (!p) return { source: "Aggregated market data", freshness: "Source timing unavailable", warn: true };
+    if (!p) return { source: "Aggregated market data", freshness: "Provider timing varies", warn: true };
     const age = Number(p.ageSeconds);
     let freshness = "Latest observation";
     if (Number.isFinite(age)) {
@@ -117,13 +117,14 @@
       const days = Math.floor(age / 86400);
       freshness = days >= 1 ? `${days}d since latest observation` : mins >= 1 ? `${mins}m since latest observation` : "Latest observation under 1m old";
     }
+    if (p.delayed && !Number.isFinite(age)) freshness = "Provider timing varies";
     return { source: p.source || "Aggregated market data", freshness, warn: Boolean(p.delayed) };
   }
   function renderTrust(result) {
     const host = document.getElementById("r-time");
     if (!host) return;
     const p = provenanceLabel(result?.impliedLensProvenance);
-    host.textContent = p.warn ? "Delayed or end-of-day market context" : "Current market context";
+    host.textContent = "Latest available market context";
     let row = document.getElementById("il-trust-row");
     if (!row) {
       row = document.createElement("div");
@@ -235,6 +236,86 @@
     } catch (_) {}
   }
 
+  function installFeedbackPrompt() {
+    if (document.getElementById("il-feedback-modal")) return;
+    let rating = 0;
+    const labels = [
+      "",
+      "We want to understand what fell short.",
+      "Tell us what would make the experience more useful.",
+      "Thank you. What would move Implied Lens forward?",
+      "Great to hear. What should we refine next?",
+      "Thank you. Tell us what is working especially well.",
+    ];
+    const modal = document.createElement("div");
+    modal.id = "il-feedback-modal";
+    modal.className = "il-feedback-modal";
+    modal.setAttribute("role", "dialog");
+    modal.setAttribute("aria-modal", "true");
+    modal.setAttribute("aria-labelledby", "il-feedback-title");
+    modal.innerHTML = `<div class="il-feedback-card">
+      <div class="il-feedback-top"><div><div class="il-feedback-kicker">Member experience</div><h2 id="il-feedback-title">How is Implied Lens working for you?</h2><p>Your honest perspective helps us prioritize the right improvements.</p></div><button class="il-feedback-close" aria-label="Close feedback"><i class="ti ti-x"></i></button></div>
+      <div class="il-feedback-stars" role="group" aria-label="Rate your experience">${[1,2,3,4,5].map(value => `<button class="il-feedback-star" data-rating="${value}" aria-label="${value} out of 5 stars" aria-pressed="false"><i class="ti ti-star-filled"></i></button>`).join("")}</div>
+      <p class="il-feedback-label" id="il-feedback-label">Choose a rating to begin.</p>
+      <textarea class="il-feedback-note" id="il-feedback-note" aria-label="Feedback details" placeholder="What is working well, and what should we improve?"></textarea>
+      <div class="il-feedback-actions"><button class="il-feedback-action primary" id="il-feedback-email"><i class="ti ti-mail"></i> Email feedback</button><button class="il-feedback-action" id="il-feedback-share"><i class="ti ti-share-3"></i> Share your experience</button></div>
+      <p class="il-feedback-policy">Honest feedback is always welcome. Any member thank-you offer applies regardless of rating or sentiment; public posts should disclose the offer.</p>
+    </div>`;
+    document.body.appendChild(modal);
+    const label = modal.querySelector("#il-feedback-label");
+    const note = modal.querySelector("#il-feedback-note");
+    const close = () => modal.classList.remove("open");
+    const open = () => {
+      modal.classList.add("open");
+      if (typeof window.track === "function") window.track("feedback_opened");
+      setTimeout(() => modal.querySelector(".il-feedback-star")?.focus(), 0);
+    };
+    modal.querySelector(".il-feedback-close").onclick = close;
+    modal.onclick = event => { if (event.target === modal) close(); };
+    document.addEventListener("keydown", event => { if (event.key === "Escape" && modal.classList.contains("open")) close(); });
+    modal.querySelectorAll("[data-rating]").forEach(button => button.onclick = () => {
+      rating = Number(button.dataset.rating);
+      modal.querySelectorAll("[data-rating]").forEach(star => {
+        const active = Number(star.dataset.rating) <= rating;
+        star.classList.toggle("active", active);
+        star.setAttribute("aria-pressed", String(active));
+      });
+      label.textContent = labels[rating];
+      if (typeof window.track === "function") window.track("feedback_rated", { rating });
+    });
+    modal.querySelector("#il-feedback-email").onclick = () => {
+      const subject = `Implied Lens feedback${rating ? ` - ${rating}/5` : ""}`;
+      const body = `${rating ? `Experience rating: ${rating}/5\n\n` : ""}${note.value.trim()}`;
+      if (typeof window.track === "function") window.track("feedback_email_opened", { rating: rating || null });
+      window.location.href = `mailto:support@impliedlens.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    };
+    modal.querySelector("#il-feedback-share").onclick = async () => {
+      const text = "My honest experience with Implied Lens:";
+      if (typeof window.track === "function") window.track("feedback_shared", { rating: rating || null });
+      if (navigator.share) {
+        try { await navigator.share({ title: "Implied Lens", text, url: "https://impliedlens.com" }); return; } catch (_) {}
+      }
+      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent("https://impliedlens.com")}`, "_blank", "noopener,noreferrer");
+    };
+    const footerLinks = document.querySelector(".f-links");
+    if (footerLinks) {
+      const button = document.createElement("button");
+      button.className = "il-feedback-link";
+      button.textContent = "Give feedback";
+      button.onclick = open;
+      footerLinks.appendChild(button);
+    }
+    const moreMenu = document.querySelector(".mmenu-grid");
+    if (moreMenu) {
+      const button = document.createElement("button");
+      button.className = "mmenu-item il-feedback-link";
+      button.innerHTML = '<i class="ti ti-message-star"></i><span>Feedback</span>';
+      button.onclick = () => { window._toggleMobileMenu?.(); open(); };
+      moreMenu.appendChild(button);
+    }
+    window.openFeedbackPrompt = open;
+  }
+
   function improveUnavailableStates() {
     const indexChanges = ["ri-sp-c", "ri-nq-c", "ri-dj-c"]
       .map(id => document.getElementById(id)?.textContent || "")
@@ -259,9 +340,9 @@
       }
     });
     [
-      ["mo-highs-sub", "Consolidated feed unavailable"],
-      ["mo-lows-sub", "Consolidated feed unavailable"],
-      ["mo-vol-sub", "Consolidated feed unavailable"],
+      ["mo-highs-sub", "52-week breadth"],
+      ["mo-lows-sub", "52-week breadth"],
+      ["mo-vol-sub", "NYSE volume breadth"],
     ].forEach(([id, text]) => {
       const el = document.getElementById(id);
       if (el && !/unavailable/i.test(el.textContent)) el.textContent = text;
@@ -274,6 +355,7 @@
     installEducationContext();
     installOnboarding();
     installBuildBadge();
+    installFeedbackPrompt();
     improveUnavailableStates();
     setInterval(improveUnavailableStates, 1500);
   }

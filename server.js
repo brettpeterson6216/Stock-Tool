@@ -232,6 +232,7 @@ app.post("/api/track", trackLimiter, async (req, res) => {
     "page_view", "analyze_started", "analyze_completed",
     "pro_gate_viewed", "upgrade_modal_opened", "daily_limit_reached",
     "checkout_redirect", "plan_badge_clicked", "pricing_viewed",
+    "feedback_opened", "feedback_rated", "feedback_email_opened", "feedback_shared",
   ]);
   if (!CLIENT_EVENTS.has(event)) {
     return res.status(400).json({ error: "Unknown event." });

@@ -237,7 +237,7 @@ function renderPage(ticker, q) {
       <div class="q-main">
         <div class="q-price">${price}</div>
         <div class="q-chg" style="color:${chgColor}">${chgSign} ${chgPct}</div>
-        <div class="q-label">Live quote · 15 min delay</div>
+        <div class="q-label">Latest quote · typically 15 min delayed</div>
       </div>
       <div class="q-stats">
         <div class="q-stat">
@@ -263,7 +263,7 @@ function renderPage(ticker, q) {
       </div>
     </div>` : `
     <div class="quote-card" style="justify-content:center;padding:2rem">
-      <div style="color:rgba(220,225,232,.4);font-size:.9rem">Live quote unavailable — open the analyzer for full data.</div>
+      <div style="color:rgba(220,225,232,.4);font-size:.9rem">Open the analyzer for the latest available market context.</div>
     </div>`}
 
     <div class="cta-section">
