@@ -1668,7 +1668,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
         </div>
       </div>
       <div class="hh-right">
-        <canvas id="globe-canvas" style="display:block;"></canvas>
+        <canvas id="globe-canvas" style="display:block;" role="img" aria-label="Rotating global market map viewed through a magnifying glass"></canvas>
         <div class="globe-caption"><span></span> Global market pulse</div>
       </div>
     </section>
@@ -5905,40 +5905,53 @@ async function initModernGlobe(){
       halo:'rgba(198,160,82,.12)',haloFade:'rgba(198,160,82,0)',
       ocean0:'#19242d',ocean1:'#0c141b',ocean2:'#070b10',
       grid:'rgba(134,157,172,.17)',land:'rgba(198,160,82,.22)',coast:'rgba(239,197,112,.55)',
-      ring:'#d3a348',ringEdge:'rgba(246,214,145,.62)',ringShade:'rgba(56,38,9,.78)',
-      handle0:'#d5aa58',handle1:'#8d6826',handleEdge:'rgba(246,218,156,.6)',
-      shadow:'rgba(0,0,0,.55)',orbit:'rgba(198,160,82,.18)'
+      ring0:'#f0cf82',ring1:'#c8973e',ring2:'#76531c',ringEdge:'rgba(255,235,187,.82)',
+      grip0:'#34383d',grip1:'#111419',gripEdge:'rgba(241,205,132,.58)',
+      shadow:'rgba(0,0,0,.58)'
     }:{
       halo:'rgba(160,106,24,.13)',haloFade:'rgba(160,106,24,0)',
       ocean0:'#f9fbfa',ocean1:'#e8f0ef',ocean2:'#d8e4e2',
       grid:'rgba(43,84,88,.15)',land:'rgba(160,106,24,.24)',coast:'rgba(126,79,13,.62)',
-      ring:'#b98932',ringEdge:'rgba(255,246,219,.95)',ringShade:'rgba(92,62,16,.36)',
-      handle0:'#c69a48',handle1:'#76551d',handleEdge:'rgba(255,248,222,.8)',
-      shadow:'rgba(57,43,18,.24)',orbit:'rgba(126,79,13,.18)'
+      ring0:'#e1be73',ring1:'#b88732',ring2:'#6e4e1e',ringEdge:'rgba(255,250,229,.96)',
+      grip0:'#4b4d4d',grip1:'#202326',gripEdge:'rgba(139,98,32,.55)',
+      shadow:'rgba(57,43,18,.26)'
     };
   }
   function drawLensHardware(p){
-    const a=.70,ux=Math.cos(a),uy=Math.sin(a);
-    const ringX=cx+ux*(r+11),ringY=cy+uy*(r+11);
-    const handleX=cx+ux*(r+33),handleY=cy+uy*(r+33);
-    const ex=handleX+ux*91,ey=handleY+uy*91;
-    ctx.save();ctx.translate(ringX,ringY);ctx.rotate(a);
-    ctx.shadowColor=p.shadow;ctx.shadowBlur=13;ctx.shadowOffsetY=5;
-    const ferrule=ctx.createLinearGradient(0,-15,0,15);ferrule.addColorStop(0,p.ringEdge);ferrule.addColorStop(.35,p.ring);ferrule.addColorStop(1,p.ringShade);
-    ctx.fillStyle=ferrule;ctx.beginPath();ctx.roundRect(-5,-15,34,30,8);ctx.fill();
-    ctx.shadowColor='transparent';ctx.strokeStyle=p.handleEdge;ctx.lineWidth=1;ctx.stroke();
-    ctx.fillStyle=p.ringShade;ctx.beginPath();ctx.roundRect(21,-12,16,24,6);ctx.fill();
+    const a=.72;
+    ctx.save();
+    ctx.translate(cx,cy);
+    ctx.rotate(a);
+
+    // Draw the handle behind the lens so the joint reads as one continuous tool.
+    ctx.save();
+    ctx.shadowColor=p.shadow;ctx.shadowBlur=22;ctx.shadowOffsetY=8;
+    ctx.beginPath();ctx.moveTo(r+3,0);ctx.lineTo(r+137,0);
+    ctx.strokeStyle='rgba(22,18,12,.52)';ctx.lineWidth=34;ctx.lineCap='round';ctx.stroke();
     ctx.restore();
-    ctx.save();ctx.shadowColor=p.shadow;ctx.shadowBlur=20;ctx.shadowOffsetY=8;
-    ctx.beginPath();ctx.moveTo(handleX,handleY);ctx.lineTo(ex,ey);ctx.strokeStyle=p.ringShade;ctx.lineWidth=26;ctx.lineCap='round';ctx.stroke();ctx.restore();
-    const hg=ctx.createLinearGradient(handleX,handleY,ex,ey);hg.addColorStop(0,p.handle0);hg.addColorStop(.45,p.handle1);hg.addColorStop(1,p.handle0);
-    ctx.beginPath();ctx.moveTo(handleX,handleY);ctx.lineTo(ex,ey);ctx.strokeStyle=hg;ctx.lineWidth=18;ctx.lineCap='round';ctx.stroke();
-    ctx.beginPath();ctx.moveTo(handleX+3,handleY-3);ctx.lineTo(ex-5,ey-5);ctx.strokeStyle=p.handleEdge;ctx.lineWidth=2;ctx.lineCap='round';ctx.stroke();
-    ctx.save();ctx.shadowColor=p.shadow;ctx.shadowBlur=22;ctx.shadowOffsetY=7;ctx.beginPath();ctx.arc(cx,cy,r+13,0,Math.PI*2);ctx.strokeStyle=p.ringShade;ctx.lineWidth=18;ctx.stroke();ctx.restore();
-    const rg=ctx.createLinearGradient(cx-r,cy-r,cx+r,cy+r);rg.addColorStop(0,p.ringEdge);rg.addColorStop(.3,p.ring);rg.addColorStop(1,p.ringShade);
-    ctx.beginPath();ctx.arc(cx,cy,r+13,0,Math.PI*2);ctx.strokeStyle=rg;ctx.lineWidth=12;ctx.stroke();
-    ctx.beginPath();ctx.arc(cx,cy,r+5,0,Math.PI*2);ctx.strokeStyle=p.ringShade;ctx.lineWidth=2;ctx.stroke();
-    ctx.beginPath();ctx.arc(cx,cy,r+7,Math.PI*1.08,Math.PI*1.72);ctx.strokeStyle=p.ringEdge;ctx.lineWidth=2;ctx.lineCap='round';ctx.stroke();
+
+    const grip=ctx.createLinearGradient(0,-15,0,15);
+    grip.addColorStop(0,p.gripEdge);grip.addColorStop(.13,p.grip0);grip.addColorStop(.52,p.grip1);grip.addColorStop(.88,p.grip0);grip.addColorStop(1,p.gripEdge);
+    ctx.beginPath();ctx.moveTo(r+20,0);ctx.lineTo(r+137,0);
+    ctx.strokeStyle=grip;ctx.lineWidth=27;ctx.lineCap='round';ctx.stroke();
+    ctx.beginPath();ctx.moveTo(r+29,-7);ctx.lineTo(r+128,-7);
+    ctx.strokeStyle='rgba(255,255,255,.18)';ctx.lineWidth=1.5;ctx.lineCap='round';ctx.stroke();
+
+    const ferrule=ctx.createLinearGradient(0,-16,0,16);
+    ferrule.addColorStop(0,p.ringEdge);ferrule.addColorStop(.22,p.ring0);ferrule.addColorStop(.62,p.ring1);ferrule.addColorStop(1,p.ring2);
+    ctx.fillStyle=ferrule;ctx.beginPath();ctx.roundRect(r-1,-16,43,32,9);ctx.fill();
+    ctx.strokeStyle='rgba(44,31,12,.5)';ctx.lineWidth=1;ctx.stroke();
+    ctx.beginPath();ctx.moveTo(r+30,-12);ctx.lineTo(r+30,12);ctx.strokeStyle='rgba(255,245,214,.42)';ctx.stroke();
+    ctx.restore();
+
+    ctx.save();ctx.shadowColor=p.shadow;ctx.shadowBlur=24;ctx.shadowOffsetY=8;
+    ctx.beginPath();ctx.arc(cx,cy,r+9,0,Math.PI*2);ctx.strokeStyle='rgba(24,18,8,.48)';ctx.lineWidth=22;ctx.stroke();ctx.restore();
+    const rim=ctx.createLinearGradient(cx-r,cy-r,cx+r,cy+r);
+    rim.addColorStop(0,p.ringEdge);rim.addColorStop(.18,p.ring0);rim.addColorStop(.52,p.ring1);rim.addColorStop(1,p.ring2);
+    ctx.beginPath();ctx.arc(cx,cy,r+9,0,Math.PI*2);ctx.strokeStyle=rim;ctx.lineWidth=15;ctx.stroke();
+    ctx.beginPath();ctx.arc(cx,cy,r+1,0,Math.PI*2);ctx.strokeStyle='rgba(38,26,8,.48)';ctx.lineWidth=2;ctx.stroke();
+    ctx.beginPath();ctx.arc(cx,cy,r+17,0,Math.PI*2);ctx.strokeStyle='rgba(45,31,11,.35)';ctx.lineWidth=1;ctx.stroke();
+    ctx.beginPath();ctx.arc(cx,cy,r+9,Math.PI*1.08,Math.PI*1.72);ctx.strokeStyle=p.ringEdge;ctx.lineWidth=2.4;ctx.lineCap='round';ctx.stroke();
   }
   function draw(){
     const p=palette();
@@ -5946,7 +5959,6 @@ async function initModernGlobe(){
     const glow=ctx.createRadialGradient(cx,cy,r*.45,cx,cy,r*1.55);
     glow.addColorStop(0,p.halo);glow.addColorStop(.62,p.halo);glow.addColorStop(1,p.haloFade);
     ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);projection.rotate([yaw,-18,0]);
-    ctx.beginPath();ctx.ellipse(cx,cy,r*1.38,r*.35,-.18,0,Math.PI*2);ctx.strokeStyle=p.orbit;ctx.lineWidth=.8;ctx.stroke();
     ctx.save();ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.clip();
     const ocean=ctx.createRadialGradient(cx-r*.35,cy-r*.35,4,cx,cy,r);
     ocean.addColorStop(0,p.ocean0);ocean.addColorStop(.65,p.ocean1);ocean.addColorStop(1,p.ocean2);
