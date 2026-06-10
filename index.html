@@ -5908,13 +5908,13 @@ async function initModernGlobe(){
       grid:'rgba(151,183,192,.16)',land0:'#c19a54',land1:'#745728',coast:'rgba(246,210,137,.72)',border:'rgba(244,222,178,.24)',
       atmosphere:'rgba(113,189,205,.38)',shade:'rgba(2,8,12,.5)',
       ring0:'#f3d58d',ring1:'#c99b47',ring2:'#745420',ringEdge:'rgba(255,239,199,.86)',
-      wood0:'#9b5a30',wood1:'#65351d',wood2:'#351c12',woodEdge:'rgba(255,207,145,.28)',grain:'rgba(45,20,10,.34)'
+      wood0:'#303238',wood1:'#15171b',wood2:'#08090b',woodEdge:'rgba(255,255,255,.14)',grain:'rgba(142,126,101,.22)'
     }:{
       ocean0:'#f7fbfa',ocean1:'#dcebea',ocean2:'#b9d1d0',
       grid:'rgba(38,79,83,.14)',land0:'#d9c9a8',land1:'#a98c5c',coast:'rgba(111,72,20,.64)',border:'rgba(103,76,42,.26)',
       atmosphere:'rgba(89,150,157,.25)',shade:'rgba(38,58,59,.18)',
       ring0:'#e7c67f',ring1:'#b98c3c',ring2:'#72521e',ringEdge:'rgba(255,252,235,.96)',
-      wood0:'#a76136',wood1:'#6b391f',wood2:'#381e13',woodEdge:'rgba(255,216,159,.32)',grain:'rgba(50,22,10,.32)'
+      wood0:'#3b3d41',wood1:'#1c1e22',wood2:'#090a0c',woodEdge:'rgba(255,255,255,.17)',grain:'rgba(128,110,83,.2)'
     };
   }
   function drawLensHardware(p){
@@ -5923,39 +5923,47 @@ async function initModernGlobe(){
     ctx.translate(cx,cy);
     ctx.rotate(a);
 
-    // One slim silhouette keeps the hardware precise and visually quiet.
-    const handleStart=r+17,handleEnd=r+131;
+    // A full blackwood grip with rounded ends keeps the tool balanced.
+    const handleStart=r+18,handleEnd=r+126,handleHalf=13;
     ctx.save();
     ctx.beginPath();
-    ctx.moveTo(handleStart,-9);
-    ctx.bezierCurveTo(handleStart+30,-10,handleEnd-18,-8,handleEnd-4,-5);
-    ctx.quadraticCurveTo(handleEnd+4,0,handleEnd-4,5);
-    ctx.bezierCurveTo(handleEnd-18,8,handleStart+30,10,handleStart,9);
+    ctx.moveTo(handleStart,-handleHalf);
+    ctx.lineTo(handleEnd-handleHalf,-handleHalf);
+    ctx.arc(handleEnd-handleHalf,0,handleHalf,-Math.PI/2,Math.PI/2);
+    ctx.lineTo(handleStart,handleHalf);
+    ctx.quadraticCurveTo(handleStart-7,0,handleStart,-handleHalf);
     ctx.closePath();ctx.clip();
-    const wood=ctx.createLinearGradient(0,-10,0,10);
+    const wood=ctx.createLinearGradient(0,-handleHalf,0,handleHalf);
     wood.addColorStop(0,p.woodEdge);wood.addColorStop(.12,p.wood0);wood.addColorStop(.5,p.wood1);wood.addColorStop(.88,p.wood2);wood.addColorStop(1,p.wood0);
-    ctx.fillStyle=wood;ctx.fillRect(handleStart,-11,handleEnd-handleStart+8,22);
-    for(let i=0;i<3;i++){
-      const y=-5+i*5;
+    ctx.fillStyle=wood;ctx.fillRect(handleStart-8,-handleHalf-1,handleEnd-handleStart+9,handleHalf*2+2);
+    for(let i=0;i<4;i++){
+      const y=-7+i*4.5;
       ctx.beginPath();ctx.moveTo(handleStart+7,y);
-      ctx.bezierCurveTo(handleStart+35,y-2,handleStart+70,y+2,handleEnd-10,y+(i%2?1:-1));
-      ctx.strokeStyle=p.grain;ctx.lineWidth=.65;ctx.stroke();
+      ctx.bezierCurveTo(handleStart+33,y-1.5,handleStart+68,y+1.5,handleEnd-13,y+(i%2?.8:-.8));
+      ctx.strokeStyle=p.grain;ctx.lineWidth=.55;ctx.stroke();
     }
-    ctx.beginPath();ctx.moveTo(handleStart+12,-6);ctx.lineTo(handleEnd-15,-4);
-    ctx.strokeStyle='rgba(255,236,204,.2)';ctx.lineWidth=.9;ctx.lineCap='round';ctx.stroke();
+    ctx.beginPath();ctx.moveTo(handleStart+12,-7);ctx.lineTo(handleEnd-17,-7);
+    ctx.strokeStyle='rgba(255,255,255,.11)';ctx.lineWidth=.8;ctx.lineCap='round';ctx.stroke();
     ctx.restore();
     ctx.beginPath();
-    ctx.moveTo(handleStart,-9);
-    ctx.bezierCurveTo(handleStart+30,-10,handleEnd-18,-8,handleEnd-4,-5);
-    ctx.quadraticCurveTo(handleEnd+4,0,handleEnd-4,5);
-    ctx.bezierCurveTo(handleEnd-18,8,handleStart+30,10,handleStart,9);
-    ctx.closePath();ctx.strokeStyle='rgba(42,22,12,.52)';ctx.lineWidth=.8;ctx.stroke();
+    ctx.moveTo(handleStart,-handleHalf);
+    ctx.lineTo(handleEnd-handleHalf,-handleHalf);
+    ctx.arc(handleEnd-handleHalf,0,handleHalf,-Math.PI/2,Math.PI/2);
+    ctx.lineTo(handleStart,handleHalf);
+    ctx.quadraticCurveTo(handleStart-7,0,handleStart,-handleHalf);
+    ctx.closePath();ctx.strokeStyle='rgba(0,0,0,.62)';ctx.lineWidth=.9;ctx.stroke();
 
-    const ferrule=ctx.createLinearGradient(0,-11,0,11);
+    const ferrule=ctx.createLinearGradient(0,-13,0,13);
     ferrule.addColorStop(0,p.ringEdge);ferrule.addColorStop(.22,p.ring0);ferrule.addColorStop(.62,p.ring1);ferrule.addColorStop(1,p.ring2);
-    ctx.fillStyle=ferrule;ctx.beginPath();ctx.roundRect(r-1,-11,31,22,6);ctx.fill();
+    ctx.fillStyle=ferrule;ctx.beginPath();ctx.roundRect(r-1,-13,31,26,7);ctx.fill();
     ctx.strokeStyle='rgba(70,49,17,.42)';ctx.lineWidth=.8;ctx.stroke();
-    ctx.beginPath();ctx.moveTo(r+21,-8);ctx.lineTo(r+21,8);ctx.strokeStyle='rgba(255,246,218,.4)';ctx.lineWidth=.7;ctx.stroke();
+    ctx.beginPath();ctx.moveTo(r+21,-10);ctx.lineTo(r+21,10);ctx.strokeStyle='rgba(255,246,218,.4)';ctx.lineWidth=.7;ctx.stroke();
+
+    const pommel=ctx.createLinearGradient(0,-13,0,13);
+    pommel.addColorStop(0,p.ringEdge);pommel.addColorStop(.25,p.ring0);pommel.addColorStop(.68,p.ring1);pommel.addColorStop(1,p.ring2);
+    ctx.fillStyle=pommel;ctx.beginPath();ctx.roundRect(handleEnd-10,-13,20,26,8);ctx.fill();
+    ctx.strokeStyle='rgba(70,49,17,.46)';ctx.lineWidth=.8;ctx.stroke();
+    ctx.beginPath();ctx.moveTo(handleEnd-5,-10);ctx.lineTo(handleEnd-5,10);ctx.strokeStyle='rgba(255,246,218,.38)';ctx.lineWidth=.7;ctx.stroke();
     ctx.restore();
 
     const rim=ctx.createLinearGradient(cx-r,cy-r,cx+r,cy+r);
