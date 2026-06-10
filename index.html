@@ -1056,7 +1056,7 @@ html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; 
 /* --- Hero --- */
 .home-hero{position:relative;display:flex;align-items:center;height:310px;min-height:310px;padding:0!important;overflow:hidden;background:linear-gradient(135deg,#faf8f2 0%,#f3efe4 100%);border-bottom:1px solid var(--border2);transition:background .25s,border-color .25s;}
 .home-hero::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(125,96,45,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(125,96,45,.055) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;transition:opacity .25s;}
-.home-hero::after{content:'';position:absolute;width:430px;height:430px;border:1px solid rgba(160,106,24,.09);border-radius:50%;right:-68px;top:-185px;pointer-events:none;}
+.home-hero::after{display:none;}
 .hh-left{flex:1;min-width:0;padding:1.65rem 2rem 1.65rem 2.25rem;z-index:1;}
 .hh-right{flex-shrink:0;width:480px;height:310px;position:relative;z-index:1;overflow:visible;}
 @media(max-width:900px){.hh-right{display:none;}}
@@ -5904,21 +5904,17 @@ async function initModernGlobe(){
   let yaw=20,frameNo=0;
   function palette(){
     return isDark()?{
-      halo:'rgba(198,160,82,.12)',haloFade:'rgba(198,160,82,0)',
       ocean0:'#25404a',ocean1:'#122832',ocean2:'#08151d',
       grid:'rgba(151,183,192,.16)',land0:'#c19a54',land1:'#745728',coast:'rgba(246,210,137,.72)',border:'rgba(244,222,178,.24)',
       atmosphere:'rgba(113,189,205,.38)',shade:'rgba(2,8,12,.5)',
-      ring0:'#f0cf82',ring1:'#c8973e',ring2:'#76531c',ringEdge:'rgba(255,235,187,.82)',
-      wood0:'#8f4d24',wood1:'#512713',wood2:'#24120c',woodEdge:'rgba(255,196,116,.34)',grain:'rgba(41,16,8,.42)',
-      shadow:'rgba(0,0,0,.58)'
+      ring0:'#f3d58d',ring1:'#c99b47',ring2:'#745420',ringEdge:'rgba(255,239,199,.86)',
+      wood0:'#9b5a30',wood1:'#65351d',wood2:'#351c12',woodEdge:'rgba(255,207,145,.28)',grain:'rgba(45,20,10,.34)'
     }:{
-      halo:'rgba(160,106,24,.13)',haloFade:'rgba(160,106,24,0)',
       ocean0:'#f7fbfa',ocean1:'#dcebea',ocean2:'#b9d1d0',
       grid:'rgba(38,79,83,.14)',land0:'#d9c9a8',land1:'#a98c5c',coast:'rgba(111,72,20,.64)',border:'rgba(103,76,42,.26)',
       atmosphere:'rgba(89,150,157,.25)',shade:'rgba(38,58,59,.18)',
-      ring0:'#e1be73',ring1:'#b88732',ring2:'#6e4e1e',ringEdge:'rgba(255,250,229,.96)',
-      wood0:'#9c5528',wood1:'#5b2c17',wood2:'#29140c',woodEdge:'rgba(255,205,137,.38)',grain:'rgba(50,20,9,.38)',
-      shadow:'rgba(57,43,18,.26)'
+      ring0:'#e7c67f',ring1:'#b98c3c',ring2:'#72521e',ringEdge:'rgba(255,252,235,.96)',
+      wood0:'#a76136',wood1:'#6b391f',wood2:'#381e13',woodEdge:'rgba(255,216,159,.32)',grain:'rgba(50,22,10,.32)'
     };
   }
   function drawLensHardware(p){
@@ -5927,52 +5923,52 @@ async function initModernGlobe(){
     ctx.translate(cx,cy);
     ctx.rotate(a);
 
-    // Draw the handle behind the lens so the joint reads as one continuous tool.
+    // One slim silhouette keeps the hardware precise and visually quiet.
+    const handleStart=r+17,handleEnd=r+131;
     ctx.save();
-    ctx.shadowColor=p.shadow;ctx.shadowBlur=22;ctx.shadowOffsetY=8;
-    ctx.beginPath();ctx.moveTo(r+3,0);ctx.lineTo(r+137,0);
-    ctx.strokeStyle='rgba(22,18,12,.52)';ctx.lineWidth=34;ctx.lineCap='round';ctx.stroke();
-    ctx.restore();
-
-    const handleStart=r+27,handleLength=116;
-    ctx.save();
-    ctx.beginPath();ctx.roundRect(handleStart,-15,handleLength,30,15);ctx.clip();
-    const wood=ctx.createLinearGradient(0,-15,0,15);
-    wood.addColorStop(0,p.woodEdge);wood.addColorStop(.1,p.wood0);wood.addColorStop(.45,p.wood1);wood.addColorStop(.78,p.wood2);wood.addColorStop(1,p.wood0);
-    ctx.fillStyle=wood;ctx.fillRect(handleStart,-16,handleLength,32);
-    for(let i=0;i<5;i++){
-      const y=-10+i*5;
+    ctx.beginPath();
+    ctx.moveTo(handleStart,-9);
+    ctx.bezierCurveTo(handleStart+30,-10,handleEnd-18,-8,handleEnd-4,-5);
+    ctx.quadraticCurveTo(handleEnd+4,0,handleEnd-4,5);
+    ctx.bezierCurveTo(handleEnd-18,8,handleStart+30,10,handleStart,9);
+    ctx.closePath();ctx.clip();
+    const wood=ctx.createLinearGradient(0,-10,0,10);
+    wood.addColorStop(0,p.woodEdge);wood.addColorStop(.12,p.wood0);wood.addColorStop(.5,p.wood1);wood.addColorStop(.88,p.wood2);wood.addColorStop(1,p.wood0);
+    ctx.fillStyle=wood;ctx.fillRect(handleStart,-11,handleEnd-handleStart+8,22);
+    for(let i=0;i<3;i++){
+      const y=-5+i*5;
       ctx.beginPath();ctx.moveTo(handleStart+7,y);
-      ctx.bezierCurveTo(handleStart+35,y-3,handleStart+70,y+4,handleStart+108,y+(i%2?1:-2));
-      ctx.strokeStyle=p.grain;ctx.lineWidth=i===2?1.2:.7;ctx.stroke();
+      ctx.bezierCurveTo(handleStart+35,y-2,handleStart+70,y+2,handleEnd-10,y+(i%2?1:-1));
+      ctx.strokeStyle=p.grain;ctx.lineWidth=.65;ctx.stroke();
     }
-    ctx.beginPath();ctx.moveTo(handleStart+10,-9);ctx.lineTo(handleStart+104,-9);
-    ctx.strokeStyle='rgba(255,231,192,.2)';ctx.lineWidth=1.2;ctx.lineCap='round';ctx.stroke();
+    ctx.beginPath();ctx.moveTo(handleStart+12,-6);ctx.lineTo(handleEnd-15,-4);
+    ctx.strokeStyle='rgba(255,236,204,.2)';ctx.lineWidth=.9;ctx.lineCap='round';ctx.stroke();
     ctx.restore();
-    ctx.beginPath();ctx.roundRect(handleStart,-15,handleLength,30,15);ctx.strokeStyle='rgba(35,15,7,.55)';ctx.lineWidth=1.2;ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(handleStart,-9);
+    ctx.bezierCurveTo(handleStart+30,-10,handleEnd-18,-8,handleEnd-4,-5);
+    ctx.quadraticCurveTo(handleEnd+4,0,handleEnd-4,5);
+    ctx.bezierCurveTo(handleEnd-18,8,handleStart+30,10,handleStart,9);
+    ctx.closePath();ctx.strokeStyle='rgba(42,22,12,.52)';ctx.lineWidth=.8;ctx.stroke();
 
-    const ferrule=ctx.createLinearGradient(0,-16,0,16);
+    const ferrule=ctx.createLinearGradient(0,-11,0,11);
     ferrule.addColorStop(0,p.ringEdge);ferrule.addColorStop(.22,p.ring0);ferrule.addColorStop(.62,p.ring1);ferrule.addColorStop(1,p.ring2);
-    ctx.fillStyle=ferrule;ctx.beginPath();ctx.roundRect(r-2,-17,48,34,10);ctx.fill();
-    ctx.strokeStyle='rgba(44,31,12,.5)';ctx.lineWidth=1;ctx.stroke();
-    ctx.beginPath();ctx.moveTo(r+32,-13);ctx.lineTo(r+32,13);ctx.strokeStyle='rgba(255,245,214,.46)';ctx.stroke();
+    ctx.fillStyle=ferrule;ctx.beginPath();ctx.roundRect(r-1,-11,31,22,6);ctx.fill();
+    ctx.strokeStyle='rgba(70,49,17,.42)';ctx.lineWidth=.8;ctx.stroke();
+    ctx.beginPath();ctx.moveTo(r+21,-8);ctx.lineTo(r+21,8);ctx.strokeStyle='rgba(255,246,218,.4)';ctx.lineWidth=.7;ctx.stroke();
     ctx.restore();
 
-    ctx.save();ctx.shadowColor=p.shadow;ctx.shadowBlur=24;ctx.shadowOffsetY=8;
-    ctx.beginPath();ctx.arc(cx,cy,r+8,0,Math.PI*2);ctx.strokeStyle='rgba(24,18,8,.48)';ctx.lineWidth=21;ctx.stroke();ctx.restore();
     const rim=ctx.createLinearGradient(cx-r,cy-r,cx+r,cy+r);
     rim.addColorStop(0,p.ringEdge);rim.addColorStop(.18,p.ring0);rim.addColorStop(.52,p.ring1);rim.addColorStop(1,p.ring2);
-    ctx.beginPath();ctx.arc(cx,cy,r+8,0,Math.PI*2);ctx.strokeStyle=rim;ctx.lineWidth=14;ctx.stroke();
-    ctx.beginPath();ctx.arc(cx,cy,r+1,0,Math.PI*2);ctx.strokeStyle='rgba(38,26,8,.48)';ctx.lineWidth=2;ctx.stroke();
-    ctx.beginPath();ctx.arc(cx,cy,r+15,0,Math.PI*2);ctx.strokeStyle='rgba(45,31,11,.35)';ctx.lineWidth=1;ctx.stroke();
-    ctx.beginPath();ctx.arc(cx,cy,r+8,Math.PI*1.08,Math.PI*1.72);ctx.strokeStyle=p.ringEdge;ctx.lineWidth=2.2;ctx.lineCap='round';ctx.stroke();
+    ctx.beginPath();ctx.arc(cx,cy,r+4.5,0,Math.PI*2);ctx.strokeStyle=rim;ctx.lineWidth=8;ctx.stroke();
+    ctx.beginPath();ctx.arc(cx,cy,r+.5,0,Math.PI*2);ctx.strokeStyle='rgba(78,55,19,.42)';ctx.lineWidth=1.2;ctx.stroke();
+    ctx.beginPath();ctx.arc(cx,cy,r+8.7,0,Math.PI*2);ctx.strokeStyle='rgba(99,72,26,.24)';ctx.lineWidth=.8;ctx.stroke();
+    ctx.beginPath();ctx.arc(cx,cy,r+4.5,Math.PI*1.08,Math.PI*1.72);ctx.strokeStyle=p.ringEdge;ctx.lineWidth=1.4;ctx.lineCap='round';ctx.stroke();
   }
   function draw(){
     const p=palette();
     ctx.clearRect(0,0,W,H);
-    const glow=ctx.createRadialGradient(cx,cy,r*.45,cx,cy,r*1.55);
-    glow.addColorStop(0,p.halo);glow.addColorStop(.62,p.halo);glow.addColorStop(1,p.haloFade);
-    ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);projection.rotate([yaw,-18,0]);
+    projection.rotate([yaw,-18,0]);
     ctx.save();ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.clip();
     const ocean=ctx.createRadialGradient(cx-r*.35,cy-r*.35,4,cx,cy,r);
     ocean.addColorStop(0,p.ocean0);ocean.addColorStop(.65,p.ocean1);ocean.addColorStop(1,p.ocean2);
