@@ -6,8 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "check": "node --check server.js && node --check routes/auth.js && node --check routes/billing.js && node --check routes/market-data.js && node --check routes/financials.js && node --check routes/workspace.js && node --check lib/config.js && node --check lib/db.js && node --check lib/email.js && node --check lib/plan.js && node --check lib/build-info.js && node --check lib/provider-health.js && node --check public/product-system.js && node --check public/workspace-system.js && node --check scripts/verify-deploy.js && echo \"All files OK\"",
-    "test": "node --test test/smoke.test.js",
+    "check": "node --check server.js && node --check routes/auth.js && node --check routes/billing.js && node --check routes/market-data.js && node --check routes/financials.js && node --check routes/workspace.js && node --check lib/config.js && node --check lib/db.js && node --check lib/email.js && node --check lib/plan.js && node --check lib/build-info.js && node --check lib/provider-health.js && node --check public/model-math.js && node --check public/product-system.js && node --check public/workspace-system.js && node --check scripts/verify-deploy.js && echo \"All files OK\"",
+    "test": "node --test test/*.test.js",
     "verify:deploy": "node scripts/verify-deploy.js"
   },
   "dependencies": {

@@ -68,20 +68,19 @@
 <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.44.0/dist/tabler-icons.min.css" rel="stylesheet">
 <link href="/product-system.css?v=20260610-2" rel="stylesheet">
 <link href="/workspace-system.css?v=20260609-1" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-zoom/1.2.1/chartjs-plugin-zoom.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+<script src="/vendor/chart.umd.min.js?v=4.4.1"></script>
+<script defer src="/vendor/hammer.min.js?v=2.0.8"></script>
+<script defer src="/vendor/chartjs-plugin-zoom.min.js?v=1.2.1"></script>
+<script defer src="/model-math.js?v=20260610-1"></script>
 <style>
 /* ═══════════════════════════════ TOKENS ═══════════════════════════════ */
 :root {
   --cream:#F7F6F2; --cream2:#EFEEE9; --cream3:#E3E2DC;
   --card:#FCFBF8;  --panel:#F2F1EC;
   --ink:#151719;  --ink2:#292D31; --ink3:#4A5057;
-  --ink4:#707780; --ink5:#9AA1A8;
-  --gold:#A9782F;   --gold-l:#D9BF8D;  --gold-l2:#F1E8D8;
-  --gold-d:#76521D; --gold-d2:#503812;
+  --ink4:#66717B; --ink5:#626C76;
+  --gold:#76521D;   --gold-l:#D9BF8D;  --gold-l2:#F1E8D8;
+  --gold-d:#503812; --gold-d2:#38270D;
   --green:#247757; --green-l:#E4F1EB; --green-t:rgba(36,119,87,.10);
   --red:#A94F55;   --red-l:#F7E9E9;   --red-t:rgba(169,79,85,.10);
   --blue:#356D95;  --blue-l:#E8EFF4;
@@ -129,6 +128,7 @@
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 html { scroll-behavior:smooth; font-size:16px; }
 body { font-family:var(--sans); background:var(--cream); color:var(--ink); line-height:1.6; overflow-x:hidden; }
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
 ::-webkit-scrollbar { width:5px; height:5px; }
 ::-webkit-scrollbar-track { background:var(--cream2); }
 ::-webkit-scrollbar-thumb { background:var(--cream3); border-radius:3px; }
@@ -571,7 +571,7 @@ h2.sec-h2 {
 }
 .paywall-badge {
   display:inline-flex; align-items:center; gap:6px;
-  background:var(--gold); color:var(--ink);
+  background:var(--gold); color:#fff;
   font-size:.7rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
   padding:4px 14px; border-radius:100px; margin-bottom:1rem;
 }
@@ -631,12 +631,12 @@ h2.sec-h2 {
 .pricing-card.featured { background:var(--ink); color:var(--cream); border-color:var(--ink); }
 .pricing-pop {
   position:absolute; top:1.5rem; right:1.5rem;
-  background:var(--gold); color:var(--ink);
+  background:var(--gold); color:#fff;
   font-size:.62rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
   padding:3px 12px; border-radius:100px;
 }
 .pricing-tier { font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:var(--gold-d); margin-bottom:.75rem; }
-.pricing-card.featured .pricing-tier { color:var(--gold); }
+.pricing-card.featured .pricing-tier { color:var(--gold-l); }
 .pricing-num { display:flex; align-items:baseline; gap:4px; margin-bottom:.5rem; }
 .p-dollar { font-size:1.25rem; color:var(--ink4); }
 .pricing-card.featured .p-dollar { color:rgba(247,244,238,.4); }
@@ -656,8 +656,8 @@ h2.sec-h2 {
 }
 .btn-plan-dark { background:transparent; color:var(--ink); border-color:var(--border3); }
 .btn-plan-dark:hover { background:rgba(0,0,0,.04); }
-.btn-plan-gold { background:var(--gold); color:var(--ink); border-color:var(--gold); }
-.btn-plan-gold:hover { background:#d4a93e; border-color:#d4a93e; }
+.btn-plan-gold { background:var(--gold); color:#fff; border-color:var(--gold); }
+.btn-plan-gold:hover { background:var(--gold-d); border-color:var(--gold-d); }
 
 
 
@@ -822,13 +822,13 @@ html[data-theme="dark"] #view-tool{
   --text:rgba(220,225,232,.88);
   --text2:rgba(220,225,232,.72);
   --text3:rgba(220,225,232,.6);
-  --text4:rgba(220,225,232,.45);
-  --text5:rgba(220,225,232,.28);
+  --text4:rgba(220,225,232,.68);
+  --text5:rgba(220,225,232,.54);
   --ink:rgba(247,244,238,.9);
   --ink2:rgba(247,244,238,.72);
   --ink3:rgba(247,244,238,.6);
-  --ink4:rgba(247,244,238,.42);
-  --ink5:rgba(247,244,238,.28);
+  --ink4:rgba(247,244,238,.66);
+  --ink5:rgba(247,244,238,.52);
   --t-acc-border:rgba(255,255,255,.06);
   --t-acc-header-bg:rgba(255,255,255,.012);
   --t-acc-header-hover:rgba(255,255,255,.026);
@@ -838,11 +838,11 @@ html[data-theme="dark"] #view-tool{
   --t-metric-hover:rgba(255,255,255,.065);
   --t-chart-bg:rgba(255,255,255,.02);
   --t-chart-border:rgba(255,255,255,.05);
-  --t-chart-title:rgba(220,225,232,.42);
+  --t-chart-title:rgba(220,225,232,.60);
   --t-ticker-bg:rgba(255,255,255,.07);
   --t-ticker-border:rgba(255,255,255,.13);
   --t-ticker-color:rgba(220,225,232,.9);
-  --t-ticker-ph:rgba(247,244,238,.28);
+  --t-ticker-ph:rgba(247,244,238,.52);
   --t-panel-bg:rgba(255,255,255,.032);
   --t-panel-border:rgba(255,255,255,.065);
   --t-rpill-border:rgba(255,255,255,.1);
@@ -948,27 +948,27 @@ html[data-theme="dark"] {
   --t-metric-bg:rgba(255,255,255,.038);
   --t-metric-border:rgba(255,255,255,.065);
   --t-metric-hover:rgba(255,255,255,.065);
-  --t-mlbl:rgba(220,225,232,.33);
-  --t-msub:rgba(220,225,232,.25);
+  --t-mlbl:rgba(220,225,232,.60);
+  --t-msub:rgba(220,225,232,.54);
   --t-chart-bg:rgba(255,255,255,.02);
   --t-chart-border:rgba(255,255,255,.05);
-  --t-chart-title:rgba(220,225,232,.42);
+  --t-chart-title:rgba(220,225,232,.60);
   --t-ticker-bg:rgba(255,255,255,.07);
   --t-ticker-border:rgba(255,255,255,.13);
   --t-ticker-color:rgba(220,225,232,.9);
-  --t-ticker-ph:rgba(247,244,238,.28);
+  --t-ticker-ph:rgba(247,244,238,.52);
   --t-rpill-border:rgba(255,255,255,.09);
-  --t-rpill-color:rgba(220,225,232,.38);
+  --t-rpill-color:rgba(220,225,232,.64);
   --t-panel-bg:rgba(255,255,255,.032);
   --t-panel-border:rgba(255,255,255,.065);
-  --t-news-text:rgba(220,225,232,.5);
+  --t-news-text:rgba(220,225,232,.68);
   --t-news-border:rgba(255,255,255,.04);
-  --t-loading-color:rgba(220,225,232,.28);
+  --t-loading-color:rgba(220,225,232,.56);
   --t-quick-btn-border:rgba(255,255,255,.08);
   /* text tokens → light in dark mode */
   --text:rgba(235,232,224,.94);  --text2:rgba(235,232,224,.82);
-  --text3:rgba(222,221,216,.68); --text4:rgba(205,207,205,.50);
-  --text5:rgba(190,194,193,.32);
+  --text3:rgba(222,221,216,.76); --text4:rgba(205,207,205,.68);
+  --text5:rgba(190,194,193,.58);
 }
 /* dark mode: page text & body */
 html[data-theme="dark"] body { color:rgba(220,225,232,.88); }
@@ -1600,7 +1600,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
 </nav>
 
 <!-- ══════════ VIEW: HOME ══════════ -->
-<div id="view-home">
+<div id="view-home" role="main">
 <div class="home-shell">
 
   <!-- ── Left sidebar ── -->
@@ -1816,11 +1816,11 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
         </div>
         <table class="wl-table">
           <thead><tr>
-            <th>Symbol</th>
-            <th class="r">Price</th>
-            <th class="r">1D %</th>
-            <th class="r">Trend</th>
-            <th></th>
+            <th scope="col">Symbol</th>
+            <th scope="col" class="r">Price</th>
+            <th scope="col" class="r">1D %</th>
+            <th scope="col" class="r">Trend</th>
+            <th scope="col"><span class="sr-only">Watchlist action</span></th>
           </tr></thead>
           <tbody id="home-watchlist-body">
             <tr><td colspan="5" style="text-align:center;padding:.9rem 0;color:var(--text5);font-size:.67rem;">Loading&hellip;</td></tr>
@@ -1972,7 +1972,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
 </div><!-- /home-shell -->
 </div><!-- /view-home -->
 
-<div id="view-tool" style="display:none;">
+<div id="view-tool" role="main" style="display:none;">
   <div class="app-shell">
     <!-- ── Left sidebar ── -->
     <div class="app-sidebar">
@@ -2198,7 +2198,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
                   <div class="sidebar-card-title">Quick DCF — Intrinsic Value</div>
                   <div class="proj-controls" style="grid-template-columns:1fr 1fr;gap:6px 10px;">
                     <div><label class="fc-label">EPS ($)</label><input class="fc-input" type="number" id="qdcf-eps" value="" step="0.01" placeholder="e.g. 5.20"></div>
-                    <div><label class="fc-label">WACC (%)</label><input class="fc-input" type="number" id="qdcf-wacc" value="10" step="0.1"></div>
+                    <div><label class="fc-label">Discount Rate (%)</label><input class="fc-input" type="number" id="qdcf-wacc" value="10" step="0.1"></div>
                     <div><label class="fc-label">Growth Yr 1–5 (%)</label><input class="fc-input" type="number" id="qdcf-g1" value="15" step="0.5"></div>
                     <div><label class="fc-label">Growth Yr 6–10 (%)</label><input class="fc-input" type="number" id="qdcf-g2" value="8" step="0.5"></div>
                     <div style="grid-column:1/-1;"><label class="fc-label">Terminal Growth (%)</label><input class="fc-input" type="number" id="qdcf-tg" value="3" step="0.1"></div>
@@ -2410,7 +2410,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
               <div><label class="fc-label">Growth Yr 1–5 (%)</label><input class="fc-input" type="number" id="dcf-g1" value="15" step="0.5"></div>
               <div><label class="fc-label">Growth Yr 6–10 (%)</label><input class="fc-input" type="number" id="dcf-g2" value="8" step="0.5"></div>
               <div><label class="fc-label">Terminal Growth (%)</label><input class="fc-input" type="number" id="dcf-tg" value="3" step="0.1"></div>
-              <div><label class="fc-label">WACC (%)</label><input class="fc-input" type="number" id="dcf-wacc" value="10" step="0.1"></div>
+              <div><label class="fc-label">Discount Rate (%)</label><input class="fc-input" type="number" id="dcf-wacc" value="10" step="0.1"></div>
               <div><label class="fc-label">Current Price ($) <span style="color:var(--text5);font-size:.58rem;">optional</span></label><input class="fc-input" type="number" id="dcf-price" value="" step="0.01" placeholder="Auto-fills from Analyze"></div>
             </div>
             <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
@@ -2418,7 +2418,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
               <button class="btn-save-analysis" onclick="saveAnalysis('dcf')">⊕ Save to Analyses</button>
             </div>
             <div id="dcf-output" style="margin-top:1.25rem;"></div>
-            <div style="margin-top:1rem;font-size:.7rem;color:var(--text5);line-height:1.6;">This is an EPS-based simplified DCF, not a free-cash-flow model. Results are for educational purposes only — not investment advice.</div>
+            <div style="margin-top:1rem;font-size:.7rem;color:var(--text5);line-height:1.6;">This is an EPS-capitalization model that discounts projected earnings, not a free-cash-flow DCF. The auto-filled discount rate is a CAPM-based cost-of-equity proxy. Use a range of assumptions; results are educational, not investment advice.</div>
 
 
 
@@ -2507,7 +2507,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
                 <p>Short, practical lessons connected directly to the tools inside ImpliedLens.</p>
               </div>
               <div class="edu-progress-card">
-                <div class="edu-progress-top"><span>Your progress</span><strong id="edu-progress-label">0 / 6</strong></div>
+                <div class="edu-progress-top"><span>Your progress</span><strong id="edu-progress-label">0 / 8</strong></div>
                 <div class="edu-progress-track"><div id="edu-progress-fill"></div></div>
                 <small>Completed lessons are saved on this device.</small>
               </div>
@@ -2544,6 +2544,16 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
                 <strong>Run the review</strong><span>Use a repeatable pre-buy and quarterly checklist.</span>
                 <em>7 min · Workflow</em>
               </button>
+              <button class="edu-path" data-lesson="forecast" onclick="openLesson(this)">
+                <span class="edu-path-num">07</span><i class="ti ti-chart-arrows-vertical"></i>
+                <strong>Forecast the drivers</strong><span>Connect revenue, margins, earnings, and valuation.</span>
+                <em>13 min · Modeling</em>
+              </button>
+              <button class="edu-path" data-lesson="audit" onclick="openLesson(this)">
+                <span class="edu-path-num">08</span><i class="ti ti-list-check"></i>
+                <strong>Audit the model</strong><span>Find fragile assumptions before they become decisions.</span>
+                <em>11 min · Validation</em>
+              </button>
             </div>
 
             <div class="edu-workbench">
@@ -2570,6 +2580,12 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
                 <div class="edu-term" data-term="enterprise value ebitda multiple"><strong>EV / EBITDA</strong><span>A capital-structure-neutral multiple useful for peer comparisons.</span><code>Enterprise value ÷ EBITDA</code></div>
                 <div class="edu-term" data-term="discounted cash flow dcf valuation"><strong>DCF</strong><span>A present-value model for future cash flows. Best used as a range, not a point estimate.</span><code>Σ FCFt ÷ (1 + WACC)t</code></div>
                 <div class="edu-term" data-term="margin safety valuation risk"><strong>Margin of safety</strong><span>The discount between your conservative value estimate and the market price.</span><code>(Value − Price) ÷ Value</code></div>
+                <div class="edu-term" data-term="weighted average cost capital wacc discount rate"><strong>WACC</strong><span>A blended required return for debt and equity capital, used to discount enterprise cash flows.</span><code>WdKd(1 − tax) + WeKe</code></div>
+                <div class="edu-term" data-term="terminal growth rate valuation"><strong>Terminal growth</strong><span>The perpetual growth assumption after the explicit forecast period. It should remain conservative.</span><code>TV = FCFn+1 ÷ (WACC − g)</code></div>
+                <div class="edu-term" data-term="compound annual growth rate cagr return"><strong>CAGR</strong><span>The constant annual rate that connects a starting value to an ending value.</span><code>(End ÷ Start)^(1 ÷ years) − 1</code></div>
+                <div class="edu-term" data-term="beta risk volatility capm"><strong>Beta</strong><span>A historical estimate of sensitivity to broad-market returns, not a complete measure of risk.</span><code>Cov(stock, market) ÷ Var(market)</code></div>
+                <div class="edu-term" data-term="free cash flow yield valuation"><strong>FCF yield</strong><span>Free cash flow relative to market value. Useful for comparing cash generation with price.</span><code>Free cash flow ÷ Market cap</code></div>
+                <div class="edu-term" data-term="dilution shares stock compensation"><strong>Dilution</strong><span>Growth in share count that reduces each existing share's claim on earnings and cash flow.</span><code>(New shares ÷ Old shares) − 1</code></div>
               </div>
             </div>
             </div><!-- /body-education -->
@@ -2579,41 +2595,61 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
 <div style="font-size:.82rem;color:var(--text3);margin-bottom:1.5rem;">Advanced valuation and analysis methods used by professional investors.</div>
             <div style="display:grid;gap:.85rem;">
               <div class="edu-card">
-                <div class="edu-title">🧮 Discounted Cash Flow (DCF) Valuation</div>
+                <div class="edu-title"><i class="ti ti-calculator"></i> Discounted Cash Flow (DCF) Valuation</div>
                 <div class="edu-body">DCF estimates the intrinsic value of a company by projecting future cash flows and discounting them back to today using a required rate of return (WACC). If the intrinsic value exceeds the current price, the stock may be undervalued. Small changes in assumptions (growth rate, discount rate) dramatically affect the result — always run multiple scenarios.</div>
-                <div class="edu-formula">Intrinsic Value = Σ [FCF<sub>t</sub> ÷ (1 + WACC)<sup>t</sup>] + Terminal Value</div>
+                <div class="edu-formula">Intrinsic Value = Σ [FCF<sub>t</sub> ÷ (1 + WACC)<sup>t</sup>] + [Terminal Value ÷ (1 + WACC)<sup>n</sup>]</div>
               </div>
               <div class="edu-card">
-                <div class="edu-title">📐 EV/EBITDA Multiple</div>
+                <div class="edu-title"><i class="ti ti-ruler-measure"></i> EV/EBITDA Multiple</div>
                 <div class="edu-body">Enterprise Value to EBITDA is a capital-structure-neutral valuation multiple. It's preferred over P/E when comparing companies with different debt levels. A lower EV/EBITDA relative to peers may indicate undervaluation. Typical ranges vary widely: 8–12x for mature industrials, 20–40x+ for high-growth tech companies.</div>
                 <div class="edu-formula">EV = Market Cap + Debt − Cash &nbsp;|&nbsp; EV/EBITDA = EV ÷ EBITDA</div>
               </div>
               <div class="edu-card">
-                <div class="edu-title">📊 Return on Equity (ROE) &amp; ROIC</div>
-                <div class="edu-body">ROE measures how efficiently management uses shareholder equity to generate profit. ROIC (Return on Invested Capital) is broader — it measures returns on all invested capital (equity + debt). Warren Buffett favors companies with consistently high ROE (above 15%) with little to no debt. ROIC above WACC means value creation for shareholders.</div>
+                <div class="edu-title"><i class="ti ti-chart-histogram"></i> Return on Equity (ROE) &amp; ROIC</div>
+                <div class="edu-body">ROE measures profit relative to shareholder equity, while ROIC compares after-tax operating profit with the capital required to run the business. High ROE can be amplified by leverage or a reduced equity base. Sustained ROIC above the cost of capital is stronger evidence of value creation.</div>
                 <div class="edu-formula">ROE = Net Income ÷ Shareholders Equity &nbsp;|&nbsp; ROIC = NOPAT ÷ Invested Capital</div>
               </div>
               <div class="edu-card">
-                <div class="edu-title">📉 Technical Analysis: Moving Averages</div>
-                <div class="edu-body">The 50-day and 200-day simple moving averages (SMA) are the most watched technical indicators. When the 50-day crosses above the 200-day (Golden Cross), it signals bullish momentum. When it crosses below (Death Cross), it signals bearish momentum. Moving averages smooth out short-term volatility to reveal the underlying trend.</div>
+                <div class="edu-title"><i class="ti ti-chart-line"></i> Technical Analysis: Moving Averages</div>
+                <div class="edu-body">The 50-day and 200-day simple moving averages summarize intermediate and long-term trend direction. Crossovers describe a change in trend structure, but they are lagging observations rather than reliable forecasts. Use them with volume, volatility, and the business thesis.</div>
               </div>
               <div class="edu-card">
-                <div class="edu-title">⚡ RSI — Relative Strength Index</div>
-                <div class="edu-body">RSI measures the speed and magnitude of recent price changes on a 0–100 scale. Above 70 is typically overbought (potential sell signal); below 30 is oversold (potential buy signal). RSI works best in range-bound markets and can give false signals in strong trending markets. Always confirm with price action and fundamentals.</div>
+                <div class="edu-title"><i class="ti ti-wave-sine"></i> RSI - Relative Strength Index</div>
+                <div class="edu-body">RSI measures the speed and magnitude of recent price changes on a 0–100 scale. Readings above 70 or below 30 describe unusually strong or weak momentum; they are context, not automatic sell or buy signals. RSI can remain extreme in persistent trends, so confirm it with price structure, volume, and the investment thesis.</div>
                 <div class="edu-formula">RSI = 100 − [100 ÷ (1 + Average Gain ÷ Average Loss)]</div>
               </div>
               <div class="edu-card">
-                <div class="edu-title">📡 MACD — Moving Average Convergence Divergence</div>
-                <div class="edu-body">MACD is a trend-following momentum indicator that shows the relationship between two exponential moving averages (typically 12-day and 26-day EMA). The MACD line crossing above the signal line is bullish; crossing below is bearish. The histogram visualizes the gap between the two lines. Divergence between MACD and price can signal trend reversals.</div>
+                <div class="edu-title"><i class="ti ti-arrows-exchange"></i> MACD - Moving Average Convergence Divergence</div>
+                <div class="edu-body">MACD is a trend-following momentum indicator that compares two exponential moving averages, typically 12-day and 26-day periods. Signal-line crossovers and divergences describe changing momentum, but they can produce repeated false signals in sideways markets.</div>
                 <div class="edu-formula">MACD = 12-day EMA − 26-day EMA &nbsp;|&nbsp; Signal = 9-day EMA of MACD</div>
               </div>
               <div class="edu-card">
-                <div class="edu-title">🏗 Comparable Company Analysis (Comps)</div>
+                <div class="edu-title"><i class="ti ti-building-skyscraper"></i> Comparable Company Analysis (Comps)</div>
                 <div class="edu-body">Comps involves valuing a company by comparing it to publicly traded peers using multiples like P/E, EV/EBITDA, P/S, and P/FCF. Select peers with similar business models, growth rates, and margins. Apply the peer median multiple to your company's metrics to derive an implied share price range. Used alongside DCF for a range of value estimates.</div>
               </div>
               <div class="edu-card">
-                <div class="edu-title">🔮 Margin of Safety</div>
-                <div class="edu-body">Coined by Benjamin Graham, margin of safety means only buying a stock when its market price is significantly below your estimated intrinsic value — typically 20–50% below. This buffer protects against errors in your analysis, unforeseen risks, and market volatility. The wider the margin of safety, the lower the risk. "Price is what you pay. Value is what you get." — Warren Buffett</div>
+                <div class="edu-title"><i class="ti ti-shield-check"></i> Margin of Safety</div>
+                <div class="edu-body">Margin of safety is the discount between market price and a conservative value estimate. The required discount should reflect business quality, balance-sheet risk, forecast uncertainty, and the reliability of the valuation method. A wider discount can reduce model risk, but it cannot eliminate thesis risk.</div>
+              </div>
+              <div class="edu-card">
+                <div class="edu-title"><i class="ti ti-chart-arrows-vertical"></i> Driver-Based Forecasting</div>
+                <div class="edu-body">Build forecasts from operating drivers instead of extending a headline growth rate. Start with units, customers, price, or market share; then connect revenue to gross margin, operating expenses, taxes, reinvestment, and share count. Each assumption should have an observable source and a review date.</div>
+                <div class="edu-formula">Revenue = Volume x Price &nbsp;|&nbsp; EPS = Net income / Diluted shares</div>
+              </div>
+              <div class="edu-card">
+                <div class="edu-title"><i class="ti ti-list-check"></i> Model Audit and Sensitivity</div>
+                <div class="edu-body">A model is decision support, not a prediction. Check units and signs, reconcile starting values, inspect terminal-value dependence, and run a two-way sensitivity table for the assumptions that matter most. If a small input change reverses the conclusion, the position requires a wider margin of safety.</div>
+                <div class="edu-formula">Sensitivity = Change in output / Change in assumption</div>
+              </div>
+              <div class="edu-card">
+                <div class="edu-title"><i class="ti ti-coins"></i> Per-Share Economics</div>
+                <div class="edu-body">Company growth does not automatically become shareholder growth. Compare revenue, free cash flow, and earnings growth with diluted share-count growth. Buybacks create value only when shares are repurchased below conservative intrinsic value.</div>
+                <div class="edu-formula">Per-share growth = Business growth adjusted for dilution or buybacks</div>
+              </div>
+              <div class="edu-card">
+                <div class="edu-title"><i class="ti ti-alert-triangle"></i> Base Rates and Failure Modes</div>
+                <div class="edu-body">Before accepting a forecast, compare it with industry base rates and write the specific operating conditions that would invalidate it. Separate temporary volatility from permanent impairment, and update the thesis when evidence changes rather than when price moves.</div>
+                <div class="edu-formula">Expected value = Sum of scenario probability x scenario outcome</div>
               </div>
             </div>
 
@@ -2953,6 +2989,7 @@ a.nav-tab.active-tab { color:var(--gold-d) !important; font-weight:600; backgrou
 /* ── Education cards ── */
 .edu-card { background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); border-radius:10px; padding:1.1rem 1.3rem; }
 .edu-title { font-family:var(--serif); font-size:1rem; color:rgba(247,244,238,.9); margin-bottom:.6rem; }
+.edu-title i{color:var(--gold);font-size:1rem;margin-right:.35rem;vertical-align:-1px}
 .edu-body { font-size:.82rem; color:rgba(247,244,238,.6); line-height:1.65; margin-bottom:.6rem; }
 .edu-formula { font-family:var(--mono); font-size:.72rem; color:var(--gold-d); background:rgba(185,138,61,.07); border-left:2px solid rgba(185,138,61,.4); padding:.45rem .8rem; border-radius:0 5px 5px 0; }
 
@@ -3342,7 +3379,8 @@ html[data-theme="dark"] .input-light::placeholder{color:rgba(220,225,232,.28)!im
 .inst-table tr:hover td{background:var(--t-metric-bg);}
 
 /* ── Featured stocks grid ── */
-#featured-grid{display:flex;overflow-x:auto;scrollbar-width:none;border:1px solid var(--t-metric-border);border-radius:10px;overflow:hidden;margin-bottom:1.5rem;max-width:640px;margin-left:auto;margin-right:auto;}
+#featured-grid{display:flex;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;border:1px solid var(--t-metric-border);border-radius:10px;margin-bottom:1.5rem;max-width:640px;margin-left:auto;margin-right:auto;}
+#featured-grid::-webkit-scrollbar{display:none}
 .fstock-card{background:var(--t-metric-bg);border-right:1px solid var(--t-metric-border);border-bottom:none;padding:.65rem .9rem;cursor:pointer;transition:background .12s;min-width:110px;flex:1;}
 .fstock-card:hover{background:rgba(185,138,61,.09);}
 .fstock-top{display:flex;align-items:center;gap:6px;margin-bottom:2px;}
@@ -3410,7 +3448,7 @@ html[data-theme="dark"] .input-light::placeholder{color:rgba(220,225,232,.28)!im
 .aud-sep{color:var(--text5);font-size:.65rem;}
 
 /* ── Save badge ── */
-.save-badge{position:absolute;top:-12px;right:16px;background:var(--gold);color:var(--ink);font-size:.62rem;font-weight:800;letter-spacing:.1em;padding:.25rem .65rem;border-radius:20px;text-transform:uppercase;}
+.save-badge{position:absolute;top:-12px;right:16px;background:var(--gold);color:#fff;font-size:.62rem;font-weight:800;letter-spacing:.1em;padding:.25rem .65rem;border-radius:20px;text-transform:uppercase;}
 
 /* ── Compare table ── */
 .compare-table-wrap{max-width:680px;margin:0 auto;overflow-x:auto;}
@@ -3996,8 +4034,8 @@ body.has-verif-banner #main-nav{top:42px}
 .app-chart-toolbar,.app-tf-strip{scrollbar-width:none}
 .app-chart-toolbar::-webkit-scrollbar,.app-tf-strip::-webkit-scrollbar{display:none}
 .act-btn,.tf-pill,.tf-tog{min-height:26px;display:inline-flex;align-items:center;justify-content:center}
-.chart-wrap{transition:border-color .16s,box-shadow .16s}
-.chart-wrap:hover{border-color:rgba(185,138,61,.34)!important;box-shadow:0 8px 26px rgba(10,14,20,.08)}
+.chart-wrap{transition:border-color .16s}
+.chart-wrap:hover{border-color:rgba(185,138,61,.34)!important}
 .chart-wrap:hover .chart-exp-btn,.chart-exp-btn:focus-visible{opacity:1}
 .chart-exp-btn{width:30px;height:30px}
 
@@ -4032,6 +4070,9 @@ body.has-verif-banner #main-nav{top:42px}
 .edu-lesson-content p{font-size:.72rem;line-height:1.65;color:var(--text3);margin-bottom:.75rem}
 .edu-lesson-points{display:grid;grid-template-columns:1fr 1fr;gap:.45rem;margin-bottom:.8rem}
 .edu-lesson-points div{padding:.55rem .65rem;border:1px solid var(--t-metric-border);border-radius:5px;font-size:.64rem;line-height:1.45;color:var(--text3)}
+.edu-lesson-notes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.45rem;margin-bottom:.85rem}
+.edu-lesson-note{padding:.65rem;border-left:2px solid var(--gold);background:var(--t-acc-header-bg);font-size:.62rem;line-height:1.5;color:var(--text4)}
+.edu-lesson-note strong{display:block;margin-bottom:.2rem;color:var(--text2);font-size:.58rem;text-transform:uppercase;letter-spacing:.08em}
 .edu-lesson-actions{display:flex;gap:.5rem;flex-wrap:wrap}
 .edu-lesson-actions button{border:1px solid var(--gold);background:var(--gold);color:#111820;border-radius:5px;padding:.5rem .75rem;font:700 .64rem var(--sans);cursor:pointer}
 .edu-lesson-actions button.secondary{background:transparent;color:var(--gold)}
@@ -4072,6 +4113,11 @@ body.has-verif-banner #main-nav{top:42px}
   .mo-indices,.mo-breadth-v2{grid-template-columns:1fr}
   .mo-idx-item,.mo-bv2-card{border-right:0;border-bottom:1px solid var(--border2)}
   .app-section-hdr{height:44px;padding:0 .75rem}
+  .app-section-hdr .ash-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .app-section-hdr .ash-sub{display:none}
+  .ash-actions{flex-shrink:0}
+  .ash-btn{width:32px;height:30px;padding:0;justify-content:center;font-size:0}
+  .ash-btn i{font-size:14px}
   .app-chart-toolbar,.app-tf-strip{overflow-x:auto!important;overflow-y:hidden!important;touch-action:pan-x;overscroll-behavior-x:contain;overscroll-behavior-y:none;-webkit-overflow-scrolling:touch}
   .app-chart-toolbar{height:auto;min-height:42px;flex-wrap:nowrap!important;padding:5px 7px!important}
   .app-chart-toolbar>*{flex-shrink:0}
@@ -4097,9 +4143,11 @@ body.has-verif-banner #main-nav{top:42px}
   .cex-box{width:100vw;height:100dvh;max-height:none;border-radius:0;border:0}
   .cex-header{padding:.65rem .75rem}.cex-hint{display:none}.cex-body{padding:.5rem}.cex-btn span{display:none}.cex-toolbar{padding:.35rem}
   .edu-hero{padding:1rem}.edu-hero h2{font-size:1.15rem}
+  .edu-hero,.edu-workbench,.edu-lesson-panel,.edu-checklist,.edu-glossary,.edu-path,.il-guidance{min-width:0;max-width:100%;box-sizing:border-box}
+  .edu-hero h2,.edu-hero p,.edu-lesson-content,.edu-lesson-content h3,.edu-lesson-content p,.il-guidance-copy,.il-guidance-copy strong,.il-guidance-copy span{min-width:0;max-width:100%;overflow-wrap:anywhere}
   .edu-path-grid,.edu-glossary-grid{grid-template-columns:1fr}
   .edu-path{min-height:125px}
-  .edu-lesson-points{grid-template-columns:1fr}
+  .edu-lesson-points,.edu-lesson-notes{grid-template-columns:1fr}
   .edu-glossary-head{align-items:stretch;flex-direction:column}
   .edu-glossary-head input{width:100%;box-sizing:border-box}
   .mobile-more-menu{max-height:70vh;overflow-y:auto}
@@ -4107,10 +4155,10 @@ body.has-verif-banner #main-nav{top:42px}
 
 /* Lens Gold brand system */
 :root{
-  --brand-gold:#A9782F;
-  --brand-gold-strong:#76521D;
-  --brand-gold-soft:rgba(169,120,47,.10);
-  --brand-gold-line:rgba(169,120,47,.34);
+  --brand-gold:#76521D;
+  --brand-gold-strong:#503812;
+  --brand-gold-soft:rgba(118,82,29,.10);
+  --brand-gold-line:rgba(118,82,29,.34);
   --positive:#247757;
   --negative:#A94F55;
   --info:#356D95;
@@ -4142,6 +4190,7 @@ a.nav-tab.active-tab{color:var(--brand-gold-strong)!important;background:var(--b
 .btn-nav,.btn-primary,.btn-search,.btn-run{background:var(--brand-gold)!important;color:#17130C!important;border-color:var(--brand-gold)!important;box-shadow:none}
 .btn-nav:hover,.btn-primary:hover,.btn-search:hover,.btn-run:hover{background:var(--brand-gold-strong)!important;color:#fff!important;opacity:1}
 html[data-theme="dark"] .btn-nav:hover,html[data-theme="dark"] .btn-primary:hover,html[data-theme="dark"] .btn-search:hover,html[data-theme="dark"] .btn-run:hover{background:var(--brand-gold-strong)!important;color:#16120B!important}
+html:not([data-theme="dark"]) .btn-nav,html:not([data-theme="dark"]) .btn-primary,html:not([data-theme="dark"]) .btn-search,html:not([data-theme="dark"]) .btn-run,html:not([data-theme="dark"]) .hh-search-btn,html:not([data-theme="dark"]) .mo-tab.on,html:not([data-theme="dark"]) .movers-tab.active,html:not([data-theme="dark"]) .il-guidance button.primary,html:not([data-theme="dark"]) .il-feedback-action.primary{color:#fff!important}
 .btn-secondary,.btn-nav-outline{border-color:var(--border3);color:var(--text)}
 .btn-secondary:hover,.btn-nav-outline:hover{background:var(--brand-gold-soft);border-color:var(--brand-gold-line)}
 .theme-toggle-track{background:#E8E5DC;border-color:rgba(21,23,25,.16)}
@@ -4209,6 +4258,13 @@ html[data-theme="dark"]{
 .hh-chip:hover,.report-badge,.report-btn{background:var(--brand-gold-soft);border-color:var(--brand-gold-line)}
 .mo-idx-dot[style*="#C6A052"]{background:var(--brand-gold)!important}
 .mo-bv2-icon[style*="#C6A052"]{background:var(--brand-gold-soft)!important;color:var(--brand-gold)!important}
+#mo-vix-sub span{color:var(--red)!important}
+#pricing .pricing-card .p-desc{opacity:1!important;color:var(--ink3)!important}
+#pricing .pricing-card.featured .p-desc,#pricing .pricing-card.featured .p-per,#pricing .pricing-card.featured .p-dollar{color:rgba(247,244,238,.78)!important}
+footer .f-logo em{color:#D9BF8D!important}
+footer .f-links a,footer .f-links .il-feedback-link{color:rgba(247,244,238,.72)!important}
+footer .f-copy,footer .il-build{color:rgba(247,244,238,.62)!important}
+html:not([data-theme="dark"]) .hh-search-btn{color:#fff!important}
 
 </style>
 <script>
@@ -5619,7 +5675,7 @@ function renderStock(result, ticker) {
       if (est.suggestedWACC) {
         ['dcf-wacc','qdcf-wacc'].forEach(id => {
           const el = document.getElementById(id);
-          if (el) { el.value = est.suggestedWACC.toFixed(1); el.title = 'WACC = Risk-free (4.5%) + Beta × ERP (5.5%)'; }
+          if (el) { el.value = est.suggestedWACC.toFixed(1); el.title = 'CAPM-based discount-rate proxy = 4.5% risk-free rate + Beta x 5.5% equity risk premium'; }
         });
       }
       if (est.epsGrowth !== null) {
@@ -5887,16 +5943,24 @@ async function initGlobe(){
 
 async function initModernGlobe(){
   const canvas=document.getElementById('globe-canvas');if(!canvas)return;
+  if(_globeRAF){cancelAnimationFrame(_globeRAF);_globeRAF=null;}
   const W=480,H=310,dpr=Math.min(window.devicePixelRatio||1,2);
   canvas.width=W*dpr;canvas.height=H*dpr;canvas.style.width=W+'px';canvas.style.height=H+'px';
   const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);
   const cx=202,cy=143,r=108;
   let land,borders,graticule;
   const lensOverlay=new Image();
-  lensOverlay.src='/magnifying-glass-overlay.png?v=20260610-2';
+  lensOverlay.src='/magnifying-glass-overlay.png?v=20260610-3';
+  const ensureScript=(src,ready)=>ready()?Promise.resolve():new Promise((resolve,reject)=>{
+    const script=document.createElement('script');
+    script.src=src;script.async=true;script.onload=resolve;script.onerror=reject;
+    document.head.appendChild(script);
+  });
   try{
     const [world]=await Promise.all([
-      fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json').then(res=>res.json()),
+      fetch('/vendor/countries-110m.json?v=2').then(res=>res.json()),
+      ensureScript('/vendor/d3.min.js?v=7',()=>typeof window.d3!=='undefined'),
+      ensureScript('/vendor/topojson-client.min.js?v=3',()=>typeof window.topojson!=='undefined'),
       lensOverlay.decode().catch(()=>null)
     ]);
     land=topojson.feature(world,world.objects.land);
@@ -5906,7 +5970,8 @@ async function initModernGlobe(){
   const projection=d3.geoOrthographic().scale(r).translate([cx,cy]).clipAngle(90);
   const geoPath=d3.geoPath(projection,ctx);
   const hubs=[[-74,40.7],[0,51.5],[103.8,1.35],[139.7,35.7],[-122.4,37.8],[151.2,-33.8],[72.8,19.1]];
-  let yaw=20,frameNo=0,lastFrame=performance.now();
+  let yaw=20,frameNo=0,lastFrame=performance.now(),isVisible=true;
+  const reduceMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   function palette(){
     return isDark()?{
       ocean0:'#25404a',ocean1:'#122832',ocean2:'#08151d',
@@ -5919,6 +5984,9 @@ async function initModernGlobe(){
     };
   }
   function draw(now=performance.now()){
+    _globeRAF=null;
+    if(!isVisible||document.hidden||!canvas.isConnected)return;
+    if(!reduceMotion&&now-lastFrame<30){_globeRAF=requestAnimationFrame(draw);return;}
     const p=palette();
     ctx.clearRect(0,0,W,H);
     projection.rotate([yaw,-18,0]);
@@ -5940,8 +6008,20 @@ async function initModernGlobe(){
     ctx.beginPath();ctx.arc(cx,cy,r-.5,0,Math.PI*2);ctx.strokeStyle=p.atmosphere;ctx.lineWidth=2.2;ctx.stroke();
     if(lensOverlay.complete)ctx.drawImage(lensOverlay,0,0,W,H);
     const elapsed=Math.min(80,Math.max(0,now-lastFrame));
-    lastFrame=now;yaw+=elapsed*.0075;frameNo++;_globeRAF=requestAnimationFrame(draw);
+    lastFrame=now;
+    if(!reduceMotion)yaw+=elapsed*.0075;
+    frameNo++;
+    if(!reduceMotion)_globeRAF=requestAnimationFrame(draw);
   }
+  const start=()=>{if(!_globeRAF&&isVisible&&!document.hidden&&!reduceMotion){lastFrame=performance.now();_globeRAF=requestAnimationFrame(draw)}};
+  if('IntersectionObserver'in window){
+    new IntersectionObserver(entries=>{
+      isVisible=!!entries[0]?.isIntersecting;
+      if(isVisible)start();
+      else if(_globeRAF){cancelAnimationFrame(_globeRAF);_globeRAF=null;}
+    },{threshold:.05}).observe(canvas);
+  }
+  document.addEventListener('visibilitychange',start,{passive:true});
   draw();
 }
 
@@ -5972,9 +6052,9 @@ async function loadHomeTickerStrip(){
 async function loadMarketOverview(range,btn){
   if(btn){document.querySelectorAll('.mo-tab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
   const IDXS=[
-    {t:'^GSPC', col:'#5F8193', g0:'rgba(95,129,147,0.22)', g1:'rgba(95,129,147,0)', vi:'ri-sp', vc:'ri-sp-c', label:'S&P 500'},
-    {t:'^IXIC', col:'#B88937', g0:'rgba(184,137,55,0.22)', g1:'rgba(184,137,55,0)', vi:'ri-nq', vc:'ri-nq-c', label:'Nasdaq 100'},
-    {t:'^DJI', col:'#778673', g0:'rgba(119,134,115,0.20)', g1:'rgba(119,134,115,0)', vi:'ri-dj', vc:'ri-dj-c', label:'Dow Jones'}
+    {t:'^GSPC', col:'#5F8193', vi:'ri-sp', vc:'ri-sp-c', label:'S&P 500'},
+    {t:'^IXIC', col:'#B88937', vi:'ri-nq', vc:'ri-nq-c', label:'Nasdaq 100'},
+    {t:'^DJI', col:'#778673', vi:'ri-dj', vc:'ri-dj-c', label:'Dow Jones'}
   ];
   // Map range to correct interval for intraday granularity
   const intervalMap={'1d':'5m','5d':'15m','1mo':'1d','3mo':'1d','ytd':'1d','1y':'1d','5y':'1wk'};
@@ -5987,13 +6067,6 @@ async function loadMarketOverview(range,btn){
   const canvas=document.getElementById('market-overview-chart');
   if(!canvas)return;
   canvas.style.height='200px';
-  // Build gradients from real canvas context NOW (before Chart instantiation)
-  const ctx2d=canvas.getContext('2d');
-  canvas.style.height='200px'; const ch=200;
-  const gradients=IDXS.map(idx=>{
-    const g=ctx2d.createLinearGradient(0,0,0,ch);
-    g.addColorStop(0,idx.g0); g.addColorStop(1,idx.g1); return g;
-  });
   const datasets=results.map((res,i)=>{
     const idx=IDXS[i],result=res.value?.chart?.result?.[0],
           meta=result?.meta,
@@ -6019,7 +6092,7 @@ async function loadMarketOverview(range,btn){
       label:idx.label, data:norm,
       borderColor:idx.col, borderWidth:2.2,
       pointRadius:0, pointHoverRadius:5,
-      fill:'origin', backgroundColor:gradients[i],
+      fill:false,
       tension:.3, spanGaps:true
     };
   });
@@ -6325,12 +6398,14 @@ function toggleTheme() {
 }
 
 const EDU_LESSONS = {
-  thesis:{title:'Write a falsifiable investment thesis',body:'A useful thesis explains what the market may be missing, why the gap should close, and what evidence would prove you wrong. Keep it specific enough to review after every earnings report.',points:['Name the business driver, not just the ticker.','Write the catalyst and a realistic time horizon.','List two measurable reasons the thesis can fail.','Separate company quality from the price you pay.'],tool:'analyze',toolLabel:'Open chart & analysis'},
-  quality:{title:'Judge business quality from the statements',body:'Strong businesses tend to compound revenue, protect margins, turn profit into cash, and earn attractive returns without relying on excessive debt. One impressive metric is never enough.',points:['Compare revenue growth with free-cash-flow growth.','Check whether margins are stable through cycles.','Look for ROIC above the cost of capital.','Review debt maturities and interest coverage.'],tool:'financials',toolLabel:'Open financials'},
-  valuation:{title:'Value a range, not a precise number',body:'Valuation is a decision framework. Use peer multiples for market context and a DCF for scenario analysis, then demand a margin of safety before acting.',points:['Use normalized earnings or cash flow.','Run bear, base, and bull assumptions.','Stress discount rate and terminal growth.','Compare implied expectations with your thesis.'],tool:'dcf',toolLabel:'Open DCF model'},
-  chart:{title:'Read trend, momentum, and volatility separately',body:'Charts help with timing and risk management, but they do not replace a business thesis. Start with trend, then use momentum and volatility as supporting evidence.',points:['Use moving averages to frame the trend.','Treat RSI as context, not a buy/sell signal.','Use volume to assess conviction.','Let ATR inform position size and stops.'],tool:'analyze',toolLabel:'Open interactive chart'},
-  risk:{title:'Define risk before sizing the position',body:'Risk is not just daily volatility. It is permanent capital loss, thesis failure, and portfolio concentration. Define those risks before placing the trade.',points:['Set a maximum portfolio allocation.','Write the thesis-break conditions.','Model a weaker operating scenario.','Avoid stacking highly correlated positions.'],tool:'projection',toolLabel:'Open scenario builder'},
-  review:{title:'Build a repeatable review loop',body:'A repeatable process reduces emotional decisions. Review the thesis after results, compare actuals with expectations, and record what changed.',points:['Review revenue, margins, cash flow, and guidance.','Update valuation assumptions only with evidence.','Record whether the thesis strengthened or weakened.','Save the analysis for the next review.'],tool:'reports',toolLabel:'Open saved analyses'}
+  thesis:{title:'Write a falsifiable investment thesis',body:'A useful thesis explains what the market may be missing, why the gap should close, and what evidence would prove you wrong. Keep it specific enough to review after every earnings report.',points:['Name the business driver, not just the ticker.','Write the catalyst and a realistic time horizon.','List two measurable reasons the thesis can fail.','Separate company quality from the price you pay.'],formula:'Thesis = Variant view + Catalyst + Evidence + Failure condition',example:'Example: margin recovery exceeds consensus as mix shifts toward recurring revenue.',warning:'A price target without operating evidence is an opinion, not a thesis.',tool:'analyze',toolLabel:'Open chart & analysis'},
+  quality:{title:'Judge business quality from the statements',body:'Strong businesses tend to compound revenue, protect margins, turn profit into cash, and earn attractive returns without relying on excessive debt. One impressive metric is never enough.',points:['Compare revenue growth with free-cash-flow growth.','Check whether margins are stable through cycles.','Look for ROIC above the cost of capital.','Review debt maturities and interest coverage.'],formula:'ROIC = NOPAT / Invested capital',example:'Compare five-year median ROIC with the cost of capital and peer returns.',warning:'High ROE can be caused by leverage or a small equity base.',tool:'financials',toolLabel:'Open financials'},
+  valuation:{title:'Value a range, not a precise number',body:'Valuation is a decision framework. Use peer multiples for market context and a DCF for scenario analysis, then demand a margin of safety before acting.',points:['Use normalized earnings or cash flow.','Run bear, base, and bull assumptions.','Stress discount rate and terminal growth.','Compare implied expectations with your thesis.'],formula:'Present value = Future value / (1 + discount rate)^years',example:'Stress the discount rate and terminal growth together, not one at a time.',warning:'A terminal value above 75% of total value signals heavy assumption risk.',tool:'dcf',toolLabel:'Open DCF model'},
+  chart:{title:'Read trend, momentum, and volatility separately',body:'Charts help with timing and risk management, but they do not replace a business thesis. Start with trend, then use momentum and volatility as supporting evidence.',points:['Use moving averages to frame the trend.','Treat RSI as context, not a buy/sell signal.','Use volume to assess conviction.','Let ATR inform position size and stops.'],formula:'Annualized volatility = Daily return standard deviation x sqrt(252)',example:'Use ATR to compare the planned stop distance with ordinary price movement.',warning:'Indicator thresholds can remain extreme throughout strong trends.',tool:'analyze',toolLabel:'Open interactive chart'},
+  risk:{title:'Define risk before sizing the position',body:'Risk is not just daily volatility. It is permanent capital loss, thesis failure, and portfolio concentration. Define those risks before placing the trade.',points:['Set a maximum portfolio allocation.','Write the thesis-break conditions.','Model a weaker operating scenario.','Avoid stacking highly correlated positions.'],formula:'Position size = Maximum acceptable loss / Loss per share',example:'Model what happens if growth slows and the exit multiple contracts together.',warning:'Diversification by ticker is not diversification when drivers are correlated.',tool:'projection',toolLabel:'Open scenario builder'},
+  review:{title:'Build a repeatable review loop',body:'A repeatable process reduces emotional decisions. Review the thesis after results, compare actuals with expectations, and record what changed.',points:['Review revenue, margins, cash flow, and guidance.','Update valuation assumptions only with evidence.','Record whether the thesis strengthened or weakened.','Save the analysis for the next review.'],formula:'Decision update = New evidence compared with prior expectation',example:'Track estimate revisions and the reason for each change after earnings.',warning:'Do not move the failure condition simply because price declined.',tool:'reports',toolLabel:'Open saved analyses'},
+  forecast:{title:'Build a driver-based operating forecast',body:'A durable forecast connects observable business drivers to revenue, margins, earnings, cash flow, and per-share value. Start with the operating engine before choosing a valuation multiple.',points:['Forecast volume and price separately when possible.','Connect margin changes to specific operating causes.','Model taxes, reinvestment, and diluted share count.','Use scenario ranges instead of a single growth rate.'],formula:'Revenue = Volume x Price; EPS = Net income / Diluted shares',example:'For subscriptions, forecast customers x average revenue per customer.',warning:'Extrapolating a recent growth rate ignores saturation and competition.',tool:'projection',toolLabel:'Open scenario builder'},
+  audit:{title:'Audit assumptions before trusting the output',body:'Model errors often hide in units, timing, signs, and terminal assumptions. Reconcile the starting period, inspect every major dependency, and test whether modest input changes reverse the conclusion.',points:['Reconcile model inputs with reported source data.','Check percentages, decimals, signs, and time periods.','Inspect terminal-value share and scenario spread.','Compare outputs with peer and historical base rates.'],formula:'Sensitivity = Change in output / Change in assumption',example:'Run a two-way table for discount rate and terminal growth.',warning:'A precise output is not reliable when the assumptions are fragile.',tool:'dcf',toolLabel:'Audit the DCF model'}
 };
 
 function eduCompleted(){try{return JSON.parse(localStorage.getItem('il-edu-complete')||'[]')}catch(_){return[]}}
@@ -6344,7 +6419,7 @@ function updateEduProgress(){
 function openLesson(card){
   const lesson=EDU_LESSONS[card.dataset.lesson],panel=document.getElementById('edu-lesson-panel');if(!lesson||!panel)return;
   document.querySelectorAll('.edu-path').forEach(el=>el.classList.toggle('active',el===card));
-  panel.innerHTML=`<div class="edu-lesson-content"><div class="edu-kicker">Practical lesson</div><h3>${lesson.title}</h3><p>${lesson.body}</p><div class="edu-lesson-points">${lesson.points.map(p=>`<div>${p}</div>`).join('')}</div><div class="edu-lesson-actions"><button onclick="completeLesson('${card.dataset.lesson}')"><i class="ti ti-check"></i> Mark complete</button><button class="secondary" onclick="navGoTo('${lesson.tool}')">${lesson.toolLabel} <i class="ti ti-arrow-right"></i></button></div></div>`;
+  panel.innerHTML=`<div class="edu-lesson-content"><div class="edu-kicker">Practical lesson</div><h3>${lesson.title}</h3><p>${lesson.body}</p><div class="edu-lesson-points">${lesson.points.map(p=>`<div>${p}</div>`).join('')}</div><div class="edu-lesson-notes"><div class="edu-lesson-note"><strong>Formula</strong>${lesson.formula}</div><div class="edu-lesson-note"><strong>Worked use</strong>${lesson.example}</div><div class="edu-lesson-note"><strong>Failure mode</strong>${lesson.warning}</div></div><div class="edu-lesson-actions"><button onclick="completeLesson('${card.dataset.lesson}')"><i class="ti ti-check"></i> Mark complete</button><button class="secondary" onclick="navGoTo('${lesson.tool}')">${lesson.toolLabel} <i class="ti ti-arrow-right"></i></button></div></div>`;
 }
 function completeLesson(id){
   const done=new Set(eduCompleted());done.add(id);localStorage.setItem('il-edu-complete',JSON.stringify([...done]));updateEduProgress();toast('Lesson completed','ok');
@@ -6714,7 +6789,6 @@ function runProjection() {
   const margin=document.getElementById('proj-margin').value;
   const pe=parseFloat(document.getElementById('proj-pe').value);
   const mm={compress:.85,flat:1.0,expand:1.15}[margin];
-  const eps=price/pe;
   // All three scenarios shift with the selected margin — Bear/Bull offset around it
   const scenarios=[
     {l:'Bear',cls:'sc-bear',g:growthBase*.4, pem:.7, mm:mm*.88},
@@ -6722,12 +6796,11 @@ function runProjection() {
     {l:'Bull',cls:'sc-bull',g:growthBase*1.7,pem:1.3,mm:mm*1.12},
   ];
   const results=scenarios.map(s=>{
-    const fEps=eps*Math.pow(1+s.g,years)*s.mm;
-    const p=Math.max(1,fEps*pe*s.pem);
-    const tot=(p-price)/price*100;
-    const cagr=(Math.pow(p/price,1/years)-1)*100;
-    return{...s,price:p,tot,cagr};
+    const model=ImpliedLensMath.projectScenario({price,currentPE:pe,exitPE:pe*s.pem,growth:s.g,years,earningsMultiplier:s.mm});
+    return{...s,model,price:model.ok?model.terminalPrice:NaN,tot:model.ok?model.totalReturn*100:NaN,cagr:model.ok?model.cagr*100:NaN};
   });
+  const invalid=results.find(result=>!result.model.ok);
+  if(invalid){toast(invalid.model.error,'red');return;}
   document.getElementById('scenario-cards').innerHTML=results.map(r=>`
     <div class="sc-card ${r.cls}">
       <div class="sc-lbl">${r.l} Case</div>
@@ -6740,7 +6813,7 @@ function runProjection() {
   const labels=['Now',...Array.from({length:years},(_,i)=>`Year ${i+1}`)];
   const ds=results.map((r,i)=>({
     label:r.l,
-    data:Array.from({length:years+1},(_,yr)=>{ if(yr===0)return price; const fE=eps*Math.pow(1+r.g,yr)*r.mm; return Math.max(1,fE*pe*r.pem); }),
+    data:r.model.pricePath,
     borderColor:[cp().negative,cp().price,cp().positive][i],
     borderWidth:2,pointRadius:4,pointBackgroundColor:[cp().negative,cp().price,cp().positive][i],
     fill:false,tension:.3,
@@ -6784,7 +6857,7 @@ function buildCompareTable(tickers, results, analystArr=[]) {
   const dayChg=prices.map((p,i)=>((p-(prevs[i]||p))/(prevs[i]||p)*100));
   const yr1=closes.map(c=>c.length>1?((c[c.length-1]-c[0])/c[0]*100):0);
   const rsiVals=closes.map(c=>{const v=rsi(c);return v[v.length-1];});
-  const stdDevs=closes.map(c=>{const ret=c.map((v,i)=>i===0?0:(v-c[i-1])/c[i-1]);return Math.sqrt(ret.reduce((a,b)=>a+b*b,0)/ret.length)*Math.sqrt(252)*100;});
+  const stdDevs=closes.map(c=>ImpliedLensMath.annualizedVolatility(c,252)*100);
   // Merge analyst/Yahoo fundamental data per ticker
   const afds = analystArr.map(a => a.yahooFd || {});
   const getMarketCap = (m,afd) => (afd&&afd.marketCap) || m.marketCap || null;
@@ -6849,7 +6922,7 @@ function buildRadarChart(tickers, results, analystArr=[]) {
   // Normalize 0-100: 1Y return, RSI, inverse volatility, inverse P/E, market cap rank
   const yr1=closes.map(c=>c.length>1?((c[c.length-1]-c[0])/c[0]*100):0);
   const rsiVals=closes.map(c=>{const v=rsi(c);return v[v.length-1]||50;});
-  const vols=closes.map(c=>{const ret=c.map((v,i)=>i===0?0:(v-c[i-1])/c[i-1]);return Math.sqrt(ret.reduce((a,b)=>a+b*b,0)/ret.length)*Math.sqrt(252)*100;});
+  const vols=closes.map(c=>ImpliedLensMath.annualizedVolatility(c,252)*100);
   const afdsR=analystArr.map(a=>a.yahooFd||{});
   const caps=metas.map((m,i)=>afdsR[i].marketCap||m.marketCap||0);
   const pes=metas.map((m,i)=>afdsR[i].trailingPE||m.trailingPE||50);
@@ -6873,17 +6946,11 @@ function buildRadarChart(tickers, results, analystArr=[]) {
    DCF VALUATION
 ===================================================== */
 function calcDCF(eps,g1,g2,tg,wacc) {
-  if(wacc<=tg) return null;
-  var pv=0, epsVal=eps;
-  for(var i=1;i<=5;i++){epsVal*=(1+g1);pv+=epsVal/Math.pow(1+wacc,i);}
-  for(var i=6;i<=10;i++){epsVal*=(1+g2);pv+=epsVal/Math.pow(1+wacc,i);}
-  var tv=epsVal*(1+tg)/(wacc-tg);
-  var pvTv=tv/Math.pow(1+wacc,10);
-  return{pvCF:pv,pvTv:pvTv,intrinsic:pv+pvTv};
+  return ImpliedLensMath.epsDcf({eps:eps,growth1:g1,growth2:g2,terminalGrowth:tg,discountRate:wacc});
 }
 function renderDCFOutput(result,currentPrice,elId) {
   var el=document.getElementById(elId);
-  if(!result){el.innerHTML='<div style="color:#d96a70;font-size:.8rem;padding:.5rem;">WACC must be greater than terminal growth rate.</div>';return;}
+  if(!result||!result.ok){el.innerHTML='<div style="color:#d96a70;font-size:.8rem;padding:.5rem;">'+(result?.error||'Check the model assumptions.')+'</div>';return;}
   var pvCF=result.pvCF,pvTv=result.pvTv,intrinsic=result.intrinsic;
   var upside=currentPrice>0?((intrinsic-currentPrice)/currentPrice*100):null;
   var mos=upside===null?'N/A':upside>20?'Undervalued':upside>-10?'Fairly Valued':'Overvalued';
@@ -6891,6 +6958,7 @@ function renderDCFOutput(result,currentPrice,elId) {
   var html='<div class="dcf-out">';
   html+='<div class="dcf-row"><span class="dcf-lbl">PV of Cash Flows (10yr)</span><span class="dcf-val">$'+pvCF.toFixed(2)+'</span></div>';
   html+='<div class="dcf-row"><span class="dcf-lbl">PV of Terminal Value</span><span class="dcf-val">$'+pvTv.toFixed(2)+'</span></div>';
+  html+='<div class="dcf-row"><span class="dcf-lbl">Terminal Value Share</span><span class="dcf-val '+(result.terminalShare>.75?'dn':'')+'">'+(result.terminalShare*100).toFixed(1)+'%</span></div>';
   html+='<div class="dcf-row"><span class="dcf-lbl">Intrinsic Value (EPS-based)</span><span class="dcf-val gold">$'+intrinsic.toFixed(2)+'</span></div>';
   if(currentPrice>0){
     html+='<div class="dcf-row"><span class="dcf-lbl">Current Price</span><span class="dcf-val">$'+currentPrice.toFixed(2)+'</span></div>';
@@ -6926,31 +6994,27 @@ function runQuickDCF() {
    ADVANCED PROJECTION MODEL
 ===================================================== */
 function runAdvancedProjection() {
-  var years=parseInt(document.getElementById('adv-years').value)||5;
-  var price0=parseFloat(document.getElementById('adv-price').value)||100;
-  var divYield=parseFloat(document.getElementById('adv-div').value)/100||0;
-  var peNow=parseFloat(document.getElementById('adv-pe-now').value)||25;
-  var gBear=parseFloat(document.getElementById('adv-g-bear').value)/100||0;
-  var gBase=parseFloat(document.getElementById('adv-g-base').value)/100||0;
-  var gBull=parseFloat(document.getElementById('adv-g-bull').value)/100||0;
-  var peBear=parseFloat(document.getElementById('adv-pe-bear').value)||18;
-  var peBase=parseFloat(document.getElementById('adv-pe-base').value)||25;
-  var peBull=parseFloat(document.getElementById('adv-pe-bull').value)||35;
-  var eps0=price0/peNow;
+  var years=Number(document.getElementById('adv-years').value);
+  var price0=Number(document.getElementById('adv-price').value);
+  var divYield=Number(document.getElementById('adv-div').value)/100;
+  var peNow=Number(document.getElementById('adv-pe-now').value);
+  var gBear=Number(document.getElementById('adv-g-bear').value)/100;
+  var gBase=Number(document.getElementById('adv-g-base').value)/100;
+  var gBull=Number(document.getElementById('adv-g-bull').value)/100;
+  var peBear=Number(document.getElementById('adv-pe-bear').value);
+  var peBase=Number(document.getElementById('adv-pe-base').value);
+  var peBull=Number(document.getElementById('adv-pe-bull').value);
   var scenarios=[
     {l:'Bear',cls:'sc-bear',g:gBear,pe:peBear,color:cp().negative},
     {l:'Base',cls:'sc-base',g:gBase,pe:peBase,color:cp().price},
     {l:'Bull',cls:'sc-bull',g:gBull,pe:peBull,color:cp().positive},
   ];
   var results=scenarios.map(function(s){
-    var epsN=eps0*Math.pow(1+s.g,years);
-    var priceN=epsN*s.pe;
-    var divTotal=price0*divYield*years;
-    var totalReturn=priceN+divTotal;
-    var tot=(totalReturn-price0)/price0*100;
-    var cagr=(Math.pow(totalReturn/price0,1/years)-1)*100;
-    return Object.assign({},s,{priceN:priceN,divTotal:divTotal,totalReturn:totalReturn,tot:tot,cagr:cagr});
+    var model=ImpliedLensMath.projectScenario({price:price0,currentPE:peNow,exitPE:s.pe,growth:s.g,years:years,dividendYield:divYield});
+    return Object.assign({},s,{model:model,priceN:model.ok?model.terminalPrice:NaN,divTotal:model.ok?model.dividends:NaN,totalReturn:model.ok?model.totalValue:NaN,tot:model.ok?model.totalReturn*100:NaN,cagr:model.ok?model.cagr*100:NaN});
   });
+  var invalid=results.find(function(result){return !result.model.ok;});
+  if(invalid){toast(invalid.model.error,'red');return;}
   document.getElementById('adv-scenario-cards').innerHTML=results.map(function(r){
     return '<div class="sc-card '+r.cls+'">'
       +'<div class="sc-lbl">'+r.l+' Case</div>'
@@ -6963,15 +7027,7 @@ function runAdvancedProjection() {
   var labels=['Now'];
   for(var y=1;y<=years;y++) labels.push('Yr '+y);
   var datasets=results.map(function(r){
-    var pts=[];
-    for(var yr=0;yr<=years;yr++){
-      if(yr===0){pts.push(price0);continue;}
-      var eN=eps0*Math.pow(1+r.g,yr);
-      var pN=eN*r.pe;
-      var div=price0*divYield*yr;
-      pts.push(parseFloat((pN+div).toFixed(2)));
-    }
-    return{label:r.l,data:pts,borderColor:r.color,borderWidth:2,pointRadius:4,pointBackgroundColor:r.color,fill:false,tension:.3};
+    return{label:r.l,data:r.model.totalValuePath.map(function(value){return parseFloat(value.toFixed(2));}),borderColor:r.color,borderWidth:2,pointRadius:4,pointBackgroundColor:r.color,fill:false,tension:.3};
   });
   datasets.unshift({label:'Cost Basis',data:Array(years+1).fill(price0),borderColor:isDark()?'rgba(255,255,255,.2)':'rgba(0,0,0,.2)',borderWidth:1.5,borderDash:[5,4],pointRadius:0,fill:false});
   S.charts['adv-proj-chart']=new Chart(document.getElementById('adv-proj-chart'),{
@@ -7785,7 +7841,8 @@ loadMarketOverview('1d');
 loadMarketMovers();
 loadHomeInsights();
 loadPortfolioSparklines();
-initModernGlobe();
+if('requestIdleCallback'in window)requestIdleCallback(()=>initModernGlobe(),{timeout:1000});
+else setTimeout(initModernGlobe,120);
 
 // Prime the analysis limit counter for free/guest users
 (async () => {

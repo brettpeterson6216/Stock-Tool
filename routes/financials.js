@@ -385,19 +385,23 @@ router.get("/estimates/:ticker", requirePro, async (req, res) => {
     };
     const [rev, eps, met, pt] = await Promise.all([safe(revResp), safe(epsResp), safe(metResp), safe(ptResp)]);
 
+    const currentYear = String(new Date().getUTCFullYear());
+    const nextEstimatePair = (rows, field) => {
+      const future = [...(rows || [])]
+        .filter(row => row.period >= currentYear && Number(row[field]) > 0)
+        .sort((a, b) => a.period.localeCompare(b.period));
+      return [future[0] || null, future[1] || null];
+    };
+
     let revenueGrowth = null;
     if (rev?.data?.length >= 2) {
-      const sorted = [...rev.data].sort((a, b) => a.period.localeCompare(b.period));
-      const cur    = sorted.find(d => d.revenueAvg > 0);
-      const nxt    = sorted.find(d => d.period > (cur?.period||"") && d.revenueAvg > 0);
+      const [cur, nxt] = nextEstimatePair(rev.data, "revenueAvg");
       if (cur && nxt && cur.revenueAvg > 0) revenueGrowth = Math.round(((nxt.revenueAvg / cur.revenueAvg) - 1) * 1000) / 10;
     }
 
     let epsGrowth = null;
     if (eps?.data?.length >= 2) {
-      const sorted = [...eps.data].sort((a, b) => a.period.localeCompare(b.period));
-      const cur    = sorted.find(d => d.epsAvg > 0);
-      const nxt    = sorted.find(d => d.period > (cur?.period||"") && d.epsAvg > 0);
+      const [cur, nxt] = nextEstimatePair(eps.data, "epsAvg");
       if (cur && nxt && cur.epsAvg > 0) epsGrowth = Math.round(((nxt.epsAvg / cur.epsAvg) - 1) * 1000) / 10;
     }
 
@@ -421,8 +425,9 @@ router.get("/estimates/:ticker", requirePro, async (req, res) => {
 
     let nextYearEPS = null;
     if (eps?.data?.length) {
-      const sorted = [...eps.data].sort((a, b) => a.period.localeCompare(b.period));
-      const future = sorted.filter(d => d.epsAvg != null && d.epsAvg > 0);
+      const future = [...eps.data]
+        .filter(d => d.period >= currentYear && d.epsAvg != null && d.epsAvg > 0)
+        .sort((a, b) => a.period.localeCompare(b.period));
       if (future.length) nextYearEPS = future[0].epsAvg;
     }
 
