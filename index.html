@@ -5893,7 +5893,7 @@ async function initModernGlobe(){
   const cx=202,cy=143,r=108;
   let land,borders,graticule;
   const lensOverlay=new Image();
-  lensOverlay.src='/magnifying-glass-overlay.png?v=20260610-1';
+  lensOverlay.src='/magnifying-glass-overlay.png?v=20260610-2';
   try{
     const [world]=await Promise.all([
       fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json').then(res=>res.json()),
@@ -5906,7 +5906,7 @@ async function initModernGlobe(){
   const projection=d3.geoOrthographic().scale(r).translate([cx,cy]).clipAngle(90);
   const geoPath=d3.geoPath(projection,ctx);
   const hubs=[[-74,40.7],[0,51.5],[103.8,1.35],[139.7,35.7],[-122.4,37.8],[151.2,-33.8],[72.8,19.1]];
-  let yaw=20,frameNo=0;
+  let yaw=20,frameNo=0,lastFrame=performance.now();
   function palette(){
     return isDark()?{
       ocean0:'#25404a',ocean1:'#122832',ocean2:'#08151d',
@@ -5918,7 +5918,7 @@ async function initModernGlobe(){
       atmosphere:'rgba(89,150,157,.25)',shade:'rgba(38,58,59,.18)'
     };
   }
-  function draw(){
+  function draw(now=performance.now()){
     const p=palette();
     ctx.clearRect(0,0,W,H);
     projection.rotate([yaw,-18,0]);
@@ -5939,7 +5939,8 @@ async function initModernGlobe(){
     ctx.restore();
     ctx.beginPath();ctx.arc(cx,cy,r-.5,0,Math.PI*2);ctx.strokeStyle=p.atmosphere;ctx.lineWidth=2.2;ctx.stroke();
     if(lensOverlay.complete)ctx.drawImage(lensOverlay,0,0,W,H);
-    yaw+=.08;frameNo++;_globeRAF=requestAnimationFrame(draw);
+    const elapsed=Math.min(80,Math.max(0,now-lastFrame));
+    lastFrame=now;yaw+=elapsed*.0075;frameNo++;_globeRAF=requestAnimationFrame(draw);
   }
   draw();
 }
