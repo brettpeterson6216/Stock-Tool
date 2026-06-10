@@ -244,7 +244,13 @@
       window.IL_STATE.inds = { ...window.IL_STATE.inds, ...layout.inds };
       const typeButton = document.getElementById(`ct-${layout.chartType}`); window.setChartType(layout.chartType, typeButton);
       const rangeButton = [...document.querySelectorAll(".tf-pill")].find(el => (el.getAttribute("onclick") || "").includes(`'${layout.range}'`)); if (rangeButton) window.changeRange(layout.range, rangeButton);
-      ["ma50","ma200","bb"].forEach(ind => document.getElementById(`ind-${ind}-btn`)?.classList.toggle("on", Boolean(window.IL_STATE.inds[ind])));
+      ["ma50","ma200","bb"].forEach(ind => {
+        const button = document.getElementById(`ind-${ind}-btn`);
+        if (!button) return;
+        const selected = Boolean(window.IL_STATE.inds[ind]);
+        button.classList.toggle("on", selected);
+        button.setAttribute("aria-pressed", String(selected));
+      });
       toastMsg("Chart layout restored", "ok");
     };
   }

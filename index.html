@@ -2030,36 +2030,36 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
       </div>
       <!-- Chart toolbar (analyze section only) -->
       <div class="app-chart-toolbar" id="app-chart-toolbar">
-        <div class="act-btn on" id="ct-candle" onclick="setChartType('candle',this)" title="Candlestick"><i class="ti ti-chart-candle"></i> Candle</div>
-        <div class="act-btn" id="ct-line" onclick="setChartType('line',this)" title="Line"><i class="ti ti-chart-line"></i> Line</div>
-        <div class="act-btn" id="ct-area" onclick="setChartType('area',this)" title="Area"><i class="ti ti-chart-area"></i> Area</div>
+        <button type="button" class="act-btn on" id="ct-candle" onclick="setChartType('candle',this)" title="Candlestick" aria-pressed="true"><i class="ti ti-chart-candle"></i> Candle</button>
+        <button type="button" class="act-btn" id="ct-line" onclick="setChartType('line',this)" title="Line" aria-pressed="false"><i class="ti ti-chart-line"></i> Line</button>
+        <button type="button" class="act-btn" id="ct-area" onclick="setChartType('area',this)" title="Area" aria-pressed="false"><i class="ti ti-chart-area"></i> Area</button>
         <div class="act-sep"></div>
-        <div class="act-btn on indicator-control" id="ind-ma50-btn" data-mobile-label="50D" onclick="toggleInd(document.querySelector('[data-ind=ma50]'),'ma50')" title="50-day moving average" aria-label="Toggle 50-day moving average"><span class="chart-key key-ma50"></span>50D Avg</div>
-        <div class="act-btn indicator-control" id="ind-ma200-btn" data-mobile-label="200D" onclick="toggleInd(document.querySelector('[data-ind=ma200]'),'ma200')" title="200-day moving average" aria-label="Toggle 200-day moving average"><span class="chart-key key-ma200"></span>200D Avg</div>
-        <div class="act-btn indicator-control" id="ind-bb-btn" data-mobile-label="Bands" onclick="toggleInd(document.querySelector('[data-ind=bb]'),'bb')" title="Bollinger Bands" aria-label="Toggle Bollinger Bands"><span class="chart-key key-bands"></span>Bands</div>
+        <button type="button" class="act-btn on indicator-control" id="ind-ma50-btn" data-mobile-label="50D" onclick="toggleInd(document.querySelector('[data-ind=ma50]'),'ma50')" title="50-day moving average" aria-label="Toggle 50-day moving average" aria-pressed="true"><span class="chart-key key-ma50"></span>50D Avg</button>
+        <button type="button" class="act-btn indicator-control" id="ind-ma200-btn" data-mobile-label="200D" onclick="toggleInd(document.querySelector('[data-ind=ma200]'),'ma200')" title="200-day moving average" aria-label="Toggle 200-day moving average" aria-pressed="false"><span class="chart-key key-ma200"></span>200D Avg</button>
+        <button type="button" class="act-btn indicator-control" id="ind-bb-btn" data-mobile-label="Bands" onclick="toggleInd(document.querySelector('[data-ind=bb]'),'bb')" title="Bollinger Bands" aria-label="Toggle Bollinger Bands" aria-pressed="false"><span class="chart-key key-bands"></span>Bands</button>
         <div class="act-sep"></div>
-        <div class="act-btn" id="epins-btn" onclick="this.classList.toggle('on')"><i class="ti ti-tag"></i> Earnings</div>
-        <div class="act-btn" id="npins-btn" onclick="this.classList.toggle('on')"><i class="ti ti-news"></i> News</div>
+        <button type="button" class="act-btn" id="epins-btn" onclick="toggleToolbarOption(this)" aria-pressed="false"><i class="ti ti-tag"></i> Earnings</button>
+        <button type="button" class="act-btn" id="npins-btn" onclick="toggleToolbarOption(this)" aria-pressed="false"><i class="ti ti-news"></i> News</button>
         <div class="act-right">
-          <div class="act-btn" onclick="expandChart('price-chart','Price Chart')" title="Fullscreen"><i class="ti ti-maximize"></i></div>
+          <button type="button" class="act-btn" onclick="expandChart('price-chart','Price Chart')" title="Fullscreen" aria-label="Expand price chart"><i class="ti ti-maximize"></i></button>
         </div>
       </div>
       <!-- Timeframe strip (analyze section only) -->
       <div class="app-tf-strip" id="app-tf-strip">
-        <button class="tf-pill" onclick="changeRange('1d',this)">1D</button>
-        <button class="tf-pill" onclick="changeRange('5d',this)">5D</button>
-        <button class="tf-pill" onclick="changeRange('1mo',this)">1M</button>
-        <button class="tf-pill" onclick="changeRange('3mo',this)">3M</button>
-        <button class="tf-pill" onclick="changeRange('6mo',this)">6M</button>
-        <button class="tf-pill" onclick="changeRange('ytd',this)">YTD</button>
-        <button class="tf-pill on" onclick="changeRange('1y',this)">1Y</button>
-        <button class="tf-pill" onclick="changeRange('2y',this)">2Y</button>
-        <button class="tf-pill" onclick="changeRange('5y',this)">5Y</button>
-        <button class="tf-pill" onclick="changeRange('max',this)">Max</button>
+        <button class="tf-pill" onclick="changeRange('1d',this)" aria-pressed="false">1D</button>
+        <button class="tf-pill" onclick="changeRange('5d',this)" aria-pressed="false">5D</button>
+        <button class="tf-pill" onclick="changeRange('1mo',this)" aria-pressed="false">1M</button>
+        <button class="tf-pill" onclick="changeRange('3mo',this)" aria-pressed="false">3M</button>
+        <button class="tf-pill" onclick="changeRange('6mo',this)" aria-pressed="false">6M</button>
+        <button class="tf-pill" onclick="changeRange('ytd',this)" aria-pressed="false">YTD</button>
+        <button class="tf-pill on" onclick="changeRange('1y',this)" aria-pressed="true">1Y</button>
+        <button class="tf-pill" onclick="changeRange('2y',this)" aria-pressed="false">2Y</button>
+        <button class="tf-pill" onclick="changeRange('5y',this)" aria-pressed="false">5Y</button>
+        <button class="tf-pill" onclick="changeRange('max',this)" aria-pressed="false">Max</button>
         <div class="tf-right">
-          <button class="tf-tog" onclick="this.classList.toggle('on')">Log</button>
-          <button class="tf-tog" onclick="this.classList.toggle('on')">%</button>
-          <button class="tf-tog" onclick="this.classList.toggle('on')">Vol</button>
+          <button class="tf-tog" onclick="toggleToolbarOption(this)" aria-pressed="false">Log</button>
+          <button class="tf-tog" onclick="toggleToolbarOption(this)" aria-pressed="false">%</button>
+          <button class="tf-tog" onclick="toggleToolbarOption(this)" aria-pressed="false">Vol</button>
         </div>
       </div>
       <!-- Scrollable content area -->
@@ -3476,21 +3476,21 @@ html[data-theme="dark"] .input-light::placeholder{color:rgba(220,225,232,.28)!im
 /* Chart toolbar */
 .app-chart-toolbar{height:33px;background:var(--panel);border-bottom:1px solid var(--border2);display:flex;align-items:center;padding:0 .75rem;gap:1px;flex-shrink:0;overflow:hidden;}
 .act-sep { width:1px; height:14px; background:var(--t-acc-border); margin:0 5px; flex-shrink:0; }
-.act-btn{height:25px;padding:0 9px;border-radius:5px;font-size:.66rem;font-weight:500;color:var(--text4);cursor:pointer;display:flex;align-items:center;gap:4px;border:none;background:transparent;font-family:var(--sans);white-space:nowrap;transition:background .12s,color .12s;}
+.act-btn{height:25px;padding:0 9px;border-radius:5px;font-size:.66rem;font-weight:500;color:var(--text4);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;border:1px solid transparent;background:transparent;font-family:var(--sans);white-space:nowrap;box-sizing:border-box;transition:background .12s,color .12s,border-color .12s;}
 .act-btn:hover{background:rgba(185,138,61,.07);color:var(--text2);}
-.act-btn.on{background:rgba(185,138,61,.15);color:var(--gold);font-weight:600;}
+.act-btn.on{background:var(--brand-gold-soft);border-color:var(--brand-gold-line);color:var(--brand-gold-strong);font-weight:700;}
 .act-btn i{font-size:13px;}
 .act-right { margin-left:auto; display:flex; align-items:center; gap:1px; }
 
 /* Timeframe strip */
 .app-tf-strip{height:28px;background:var(--panel);border-bottom:1px solid var(--border2);display:flex;align-items:center;padding:0 .75rem;gap:1px;flex-shrink:0;}
-.tf-pill{font-size:.62rem;font-family:var(--mono);padding:0 7px;height:20px;border-radius:4px;color:var(--text5);cursor:pointer;display:flex;align-items:center;border:none;background:transparent;transition:all .12s;}
+.tf-pill{font-size:.62rem;font-family:var(--mono);padding:0 7px;height:20px;border-radius:4px;color:var(--text5);cursor:pointer;display:flex;align-items:center;justify-content:center;border:1px solid transparent;background:transparent;box-sizing:border-box;transition:background .12s,color .12s,border-color .12s;}
 .tf-pill:hover{color:var(--text2);background:rgba(185,138,61,.07);}
-.tf-pill.on{color:var(--gold);background:rgba(185,138,61,.14);font-weight:700;}
+.tf-pill.on{color:var(--brand-gold-strong);background:var(--brand-gold-soft);border-color:var(--brand-gold-line);font-weight:700;}
 .tf-right { margin-left:auto; display:flex; align-items:center; gap:3px; }
-.tf-tog { font-size:9px; font-family:var(--sans); color:var(--text5); padding:0 6px; cursor:pointer; border:none; background:transparent; }
-.tf-tog:hover { color:var(--text3); }
-.tf-tog.on { color:var(--gold); }
+.tf-tog { font-size:9px; font-family:var(--sans); color:var(--text5); padding:0 6px; cursor:pointer; border:1px solid transparent; background:transparent; border-radius:4px; box-sizing:border-box; }
+.tf-tog:hover { color:var(--text3); border-color:var(--border2); background:var(--surface2); }
+.tf-tog.on { color:var(--gold); border-color:var(--brand-gold-line); background:var(--brand-gold-soft); }
 
 /* Content scroll */
 .app-content-scroll { flex:1; overflow-y:auto; overflow-x:hidden; padding:1rem 1.5rem 2rem; }
@@ -4072,15 +4072,20 @@ body.has-verif-banner #main-nav{top:42px}
   .mo-indices,.mo-breadth-v2{grid-template-columns:1fr}
   .mo-idx-item,.mo-bv2-card{border-right:0;border-bottom:1px solid var(--border2)}
   .app-section-hdr{height:44px;padding:0 .75rem}
-  .app-chart-toolbar{height:auto;min-height:42px;overflow-x:auto!important;flex-wrap:nowrap!important;padding:5px 7px!important}
-  .app-chart-toolbar .act-btn{min-width:38px;min-height:32px;padding:0 8px}
+  .app-chart-toolbar,.app-tf-strip{overflow-x:auto!important;overflow-y:hidden!important;touch-action:pan-x;overscroll-behavior-x:contain;overscroll-behavior-y:none;-webkit-overflow-scrolling:touch}
+  .app-chart-toolbar{height:auto;min-height:42px;flex-wrap:nowrap!important;padding:5px 7px!important}
+  .app-chart-toolbar>*{flex-shrink:0}
+  .app-chart-toolbar .act-btn{min-width:38px;min-height:32px;padding:0 8px;flex:0 0 auto}
+  .app-chart-toolbar .act-btn[id^="ct-"]{min-width:68px}
   .app-chart-toolbar .act-btn:not([id^="ct-"]):not(.indicator-control) {font-size:0}
   .app-chart-toolbar .indicator-control{min-width:auto;font-size:0;gap:4px;padding-inline:8px}
   .app-chart-toolbar .indicator-control::after{content:attr(data-mobile-label);font:600 9px/1 var(--mono);color:currentColor}
   .app-chart-toolbar .indicator-control .chart-key{width:11px;height:3px;margin:0}
   .app-chart-toolbar .act-btn i,.app-chart-toolbar .act-btn span{font-size:13px;margin-right:0!important}
-  .app-tf-strip{height:38px;overflow-x:auto!important;padding:4px 7px!important}
-  .tf-pill,.tf-tog{min-width:38px;min-height:30px}
+  .app-tf-strip{height:38px;padding:4px 7px!important}
+  .app-tf-strip>*{flex-shrink:0}
+  .app-tf-strip .tf-right{margin-left:4px;flex:0 0 auto}
+  .tf-pill,.tf-tog{min-width:38px;min-height:30px;flex:0 0 auto}
   .mobile-sec-tabs{position:sticky;top:0;z-index:10}
   .mst-btn{min-height:44px;padding:.55rem .8rem!important}
   .app-content-scroll{padding:0 0 76px!important}
@@ -4154,7 +4159,7 @@ html[data-theme="dark"] .home-hero::before{opacity:.42}
 html[data-theme="dark"] .app-sidebar,html[data-theme="dark"] .hs-sidebar,html[data-theme="dark"] .app-section-hdr,html[data-theme="dark"] .home-ticker-strip,html[data-theme="dark"] .home-feat-strip{background:#111417!important}
 .sb-item.active,.hsb-home.active{background:var(--brand-gold-soft);border-left-color:var(--brand-gold)}
 .sb-item.active .sb-item-label,.sb-item.active .sb-item-icon,.hsb-home.active{color:var(--brand-gold)}
-.mo-tab.on,.rpill.active,.rpill:hover,.tf-pill.active,.tf-pill:hover{background:var(--brand-gold)!important;border-color:var(--brand-gold)!important;color:#17130C!important}
+.mo-tab.on,.rpill.active,.rpill:hover{background:var(--brand-gold)!important;border-color:var(--brand-gold)!important;color:#17130C!important}
 .search-row:focus-within,.input-light:focus,.ticker-input:focus,.fc-input:focus,.fc-select:focus{border-color:var(--brand-gold)!important;box-shadow:0 0 0 3px var(--brand-gold-soft)!important}
 .chart-wrap,.metric-card,.panel-box{background:var(--t-chart-bg);border-color:var(--t-chart-border)}
 .chart-title,.m-lbl,.panel-box-title{color:var(--text4)!important}
@@ -4680,8 +4685,11 @@ function updateNavToolLink(isHome) {
 }
 
 function setChartType(type, btn) {
-  document.querySelectorAll('#app-chart-toolbar .act-btn[id^="ct-"]').forEach(b => b.classList.remove('on'));
-  if(btn) btn.classList.add('on');
+  document.querySelectorAll('#app-chart-toolbar .act-btn[id^="ct-"]').forEach(b => {
+    const selected = b === btn;
+    b.classList.toggle('on', selected);
+    b.setAttribute('aria-pressed', String(selected));
+  });
   S.chartType = type;
   if(S.data) {
     const q = S.data.indicators.quote[0];
@@ -5107,6 +5115,12 @@ function toast(msg, type='') {
   const text=document.createElement('span');text.className='toast-msg';text.textContent=msg;
   t.append(iconWrap,text);
   setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+function toggleToolbarOption(btn) {
+  const selected = !btn.classList.contains('on');
+  btn.classList.toggle('on', selected);
+  btn.setAttribute('aria-pressed', String(selected));
 }
 
 async function resendVerification() {
@@ -6685,14 +6699,14 @@ function buildATRChart(highs,lows,closes,timestamps) {
 }
 
 function toggleInd(btn,ind) {
-  S.inds[ind]=!S.inds[ind]; btn.classList.toggle('on',S.inds[ind]);
+  S.inds[ind]=!S.inds[ind]; btn.classList.toggle('on',S.inds[ind]); btn.setAttribute('aria-pressed',String(S.inds[ind]));
   if(S.data) buildPriceChart(S.data,S.data.indicators.quote[0].close.filter(x=>x!=null),S.data.timestamp);
 }
 
 async function changeRange(range,btn) {
-  document.querySelectorAll('.tf-pill').forEach(p=>{const r=p.getAttribute('onclick')||'';p.classList.toggle('on',r.includes("'"+range+"'"));});
-  document.querySelectorAll('.rpill').forEach(p=>p.classList.remove('active'));
-  btn.classList.add('active'); S.range=range;
+  document.querySelectorAll('.tf-pill').forEach(p=>{const r=p.getAttribute('onclick')||'';const selected=r.includes("'"+range+"'");p.classList.toggle('on',selected);p.classList.remove('active');p.setAttribute('aria-pressed',String(selected));});
+  document.querySelectorAll('.rpill').forEach(p=>{const r=p.getAttribute('onclick')||'';const selected=r.includes("'"+range+"'");p.classList.toggle('active',selected);p.setAttribute('aria-pressed',String(selected));});
+  S.range=range;
   if(!S.ticker) return;
   try {
     const result=await yahooFetch(S.ticker,range);
@@ -8044,6 +8058,6 @@ document.addEventListener('click', function(e) {
 </div>
 </div>
 <script src="/product-system.js?v=20260610-3"></script>
-<script src="/workspace-system.js?v=20260610-1"></script>
+<script src="/workspace-system.js?v=20260610-2"></script>
 </body>
 </html>
