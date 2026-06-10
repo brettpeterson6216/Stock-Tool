@@ -5892,8 +5892,13 @@ async function initModernGlobe(){
   const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);
   const cx=202,cy=143,r=108;
   let land,borders,graticule;
+  const lensOverlay=new Image();
+  lensOverlay.src='/magnifying-glass-overlay.png?v=20260610-1';
   try{
-    const world=await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json').then(res=>res.json());
+    const [world]=await Promise.all([
+      fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json').then(res=>res.json()),
+      lensOverlay.decode().catch(()=>null)
+    ]);
     land=topojson.feature(world,world.objects.land);
     borders=topojson.mesh(world,world.objects.countries,(a,b)=>a!==b);
     graticule=d3.geoGraticule().step([15,15])();
@@ -5906,72 +5911,12 @@ async function initModernGlobe(){
     return isDark()?{
       ocean0:'#25404a',ocean1:'#122832',ocean2:'#08151d',
       grid:'rgba(151,183,192,.16)',land0:'#c19a54',land1:'#745728',coast:'rgba(246,210,137,.72)',border:'rgba(244,222,178,.24)',
-      atmosphere:'rgba(113,189,205,.38)',shade:'rgba(2,8,12,.5)',
-      ring0:'#f3d58d',ring1:'#c99b47',ring2:'#745420',ringEdge:'rgba(255,239,199,.86)',
-      wood0:'#303238',wood1:'#15171b',wood2:'#08090b',woodEdge:'rgba(255,255,255,.14)',grain:'rgba(142,126,101,.22)'
+      atmosphere:'rgba(113,189,205,.38)',shade:'rgba(2,8,12,.5)'
     }:{
       ocean0:'#f7fbfa',ocean1:'#dcebea',ocean2:'#b9d1d0',
       grid:'rgba(38,79,83,.14)',land0:'#d9c9a8',land1:'#a98c5c',coast:'rgba(111,72,20,.64)',border:'rgba(103,76,42,.26)',
-      atmosphere:'rgba(89,150,157,.25)',shade:'rgba(38,58,59,.18)',
-      ring0:'#e7c67f',ring1:'#b98c3c',ring2:'#72521e',ringEdge:'rgba(255,252,235,.96)',
-      wood0:'#3b3d41',wood1:'#1c1e22',wood2:'#090a0c',woodEdge:'rgba(255,255,255,.17)',grain:'rgba(128,110,83,.2)'
+      atmosphere:'rgba(89,150,157,.25)',shade:'rgba(38,58,59,.18)'
     };
-  }
-  function drawLensHardware(p){
-    const a=.67;
-    ctx.save();
-    ctx.translate(cx,cy);
-    ctx.rotate(a);
-
-    // A full blackwood grip with rounded ends keeps the tool balanced.
-    const handleStart=r+18,handleEnd=r+126,handleHalf=13;
-    ctx.save();
-    ctx.beginPath();
-    ctx.moveTo(handleStart,-handleHalf);
-    ctx.lineTo(handleEnd-handleHalf,-handleHalf);
-    ctx.arc(handleEnd-handleHalf,0,handleHalf,-Math.PI/2,Math.PI/2);
-    ctx.lineTo(handleStart,handleHalf);
-    ctx.quadraticCurveTo(handleStart-7,0,handleStart,-handleHalf);
-    ctx.closePath();ctx.clip();
-    const wood=ctx.createLinearGradient(0,-handleHalf,0,handleHalf);
-    wood.addColorStop(0,p.woodEdge);wood.addColorStop(.12,p.wood0);wood.addColorStop(.5,p.wood1);wood.addColorStop(.88,p.wood2);wood.addColorStop(1,p.wood0);
-    ctx.fillStyle=wood;ctx.fillRect(handleStart-8,-handleHalf-1,handleEnd-handleStart+9,handleHalf*2+2);
-    for(let i=0;i<4;i++){
-      const y=-7+i*4.5;
-      ctx.beginPath();ctx.moveTo(handleStart+7,y);
-      ctx.bezierCurveTo(handleStart+33,y-1.5,handleStart+68,y+1.5,handleEnd-13,y+(i%2?.8:-.8));
-      ctx.strokeStyle=p.grain;ctx.lineWidth=.55;ctx.stroke();
-    }
-    ctx.beginPath();ctx.moveTo(handleStart+12,-7);ctx.lineTo(handleEnd-17,-7);
-    ctx.strokeStyle='rgba(255,255,255,.11)';ctx.lineWidth=.8;ctx.lineCap='round';ctx.stroke();
-    ctx.restore();
-    ctx.beginPath();
-    ctx.moveTo(handleStart,-handleHalf);
-    ctx.lineTo(handleEnd-handleHalf,-handleHalf);
-    ctx.arc(handleEnd-handleHalf,0,handleHalf,-Math.PI/2,Math.PI/2);
-    ctx.lineTo(handleStart,handleHalf);
-    ctx.quadraticCurveTo(handleStart-7,0,handleStart,-handleHalf);
-    ctx.closePath();ctx.strokeStyle='rgba(0,0,0,.62)';ctx.lineWidth=.9;ctx.stroke();
-
-    const ferrule=ctx.createLinearGradient(0,-13,0,13);
-    ferrule.addColorStop(0,p.ringEdge);ferrule.addColorStop(.22,p.ring0);ferrule.addColorStop(.62,p.ring1);ferrule.addColorStop(1,p.ring2);
-    ctx.fillStyle=ferrule;ctx.beginPath();ctx.roundRect(r-1,-13,31,26,7);ctx.fill();
-    ctx.strokeStyle='rgba(70,49,17,.42)';ctx.lineWidth=.8;ctx.stroke();
-    ctx.beginPath();ctx.moveTo(r+21,-10);ctx.lineTo(r+21,10);ctx.strokeStyle='rgba(255,246,218,.4)';ctx.lineWidth=.7;ctx.stroke();
-
-    const pommel=ctx.createLinearGradient(0,-13,0,13);
-    pommel.addColorStop(0,p.ringEdge);pommel.addColorStop(.25,p.ring0);pommel.addColorStop(.68,p.ring1);pommel.addColorStop(1,p.ring2);
-    ctx.fillStyle=pommel;ctx.beginPath();ctx.roundRect(handleEnd-10,-13,20,26,8);ctx.fill();
-    ctx.strokeStyle='rgba(70,49,17,.46)';ctx.lineWidth=.8;ctx.stroke();
-    ctx.beginPath();ctx.moveTo(handleEnd-5,-10);ctx.lineTo(handleEnd-5,10);ctx.strokeStyle='rgba(255,246,218,.38)';ctx.lineWidth=.7;ctx.stroke();
-    ctx.restore();
-
-    const rim=ctx.createLinearGradient(cx-r,cy-r,cx+r,cy+r);
-    rim.addColorStop(0,p.ringEdge);rim.addColorStop(.18,p.ring0);rim.addColorStop(.52,p.ring1);rim.addColorStop(1,p.ring2);
-    ctx.beginPath();ctx.arc(cx,cy,r+4.5,0,Math.PI*2);ctx.strokeStyle=rim;ctx.lineWidth=8;ctx.stroke();
-    ctx.beginPath();ctx.arc(cx,cy,r+.5,0,Math.PI*2);ctx.strokeStyle='rgba(78,55,19,.42)';ctx.lineWidth=1.2;ctx.stroke();
-    ctx.beginPath();ctx.arc(cx,cy,r+8.7,0,Math.PI*2);ctx.strokeStyle='rgba(99,72,26,.24)';ctx.lineWidth=.8;ctx.stroke();
-    ctx.beginPath();ctx.arc(cx,cy,r+4.5,Math.PI*1.08,Math.PI*1.72);ctx.strokeStyle=p.ringEdge;ctx.lineWidth=1.4;ctx.lineCap='round';ctx.stroke();
   }
   function draw(){
     const p=palette();
@@ -5993,7 +5938,7 @@ async function initModernGlobe(){
     const reflection=ctx.createLinearGradient(cx-r*.72,cy-r*.78,cx+r*.15,cy+r*.2);reflection.addColorStop(0,'rgba(255,255,255,.3)');reflection.addColorStop(.28,'rgba(255,255,255,.08)');reflection.addColorStop(.58,'rgba(255,255,255,0)');ctx.fillStyle=reflection;ctx.beginPath();ctx.ellipse(cx-r*.3,cy-r*.35,r*.48,r*.17,-.64,0,Math.PI*2);ctx.fill();
     ctx.restore();
     ctx.beginPath();ctx.arc(cx,cy,r-.5,0,Math.PI*2);ctx.strokeStyle=p.atmosphere;ctx.lineWidth=2.2;ctx.stroke();
-    drawLensHardware(p);
+    if(lensOverlay.complete)ctx.drawImage(lensOverlay,0,0,W,H);
     yaw+=.08;frameNo++;_globeRAF=requestAnimationFrame(draw);
   }
   draw();
