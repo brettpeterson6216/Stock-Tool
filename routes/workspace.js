@@ -7,6 +7,11 @@ const { validateCsrf } = require("../lib/csrf");
 const router = express.Router();
 const TICKER_RE = /^[A-Z0-9.^-]{1,15}$/;
 
+function workspaceError(res, error) {
+  console.error("[workspace] request failed:", error.message || error);
+  return res.status(500).json({ error: "Workspace service unavailable. Please try again." });
+}
+
 function requireUser(req, res, next) {
   if (!req.session.userId) return res.status(401).json({ error: "Log in to sync your workspace." });
   next();
@@ -72,14 +77,14 @@ router.get("/workspace/summary", async (req, res) => {
       invested: Number(positions.rows[0]?.invested || 0),
       watchlist: Number(watchlist.rows[0]?.count || 0),
     });
-  } catch (error) { res.status(500).json({ error: error.message }); }
+  } catch (error) { workspaceError(res, error); }
 });
 
 router.get("/workspace/theses", async (req, res) => {
   try {
     const result = await db.execute({ sql: "SELECT * FROM investment_theses WHERE user_id=? ORDER BY updated_at DESC LIMIT 200", args: [req.session.userId] });
     res.json(result.rows.map(thesisRow));
-  } catch (error) { res.status(500).json({ error: error.message }); }
+  } catch (error) { workspaceError(res, error); }
 });
 
 router.get("/workspace/theses/:ticker", async (req, res) => {
@@ -88,7 +93,7 @@ router.get("/workspace/theses/:ticker", async (req, res) => {
   try {
     const result = await db.execute({ sql: "SELECT * FROM investment_theses WHERE user_id=? AND ticker=? LIMIT 1", args: [req.session.userId, symbol] });
     res.json(result.rows[0] ? thesisRow(result.rows[0]) : null);
-  } catch (error) { res.status(500).json({ error: error.message }); }
+  } catch (error) { workspaceError(res, error); }
 });
 
 router.put("/workspace/theses/:ticker", validateCsrf, async (req, res) => {
@@ -110,21 +115,23 @@ router.put("/workspace/theses/:ticker", validateCsrf, async (req, res) => {
     });
     const result = await db.execute({ sql: "SELECT * FROM investment_theses WHERE user_id=? AND ticker=?", args: [req.session.userId, symbol] });
     res.json(thesisRow(result.rows[0]));
-  } catch (error) { res.status(500).json({ error: error.message }); }
+  } catch (error) { workspaceError(res, error); }
 });
 
 router.delete("/workspace/theses/:ticker", validateCsrf, async (req, res) => {
   const symbol = ticker(req.params.ticker);
   if (!symbol) return res.status(400).json({ error: "Invalid ticker." });
-  await db.execute({ sql: "DELETE FROM investment_theses WHERE user_id=? AND ticker=?", args: [req.session.userId, symbol] });
-  res.json({ ok: true });
+  try {
+    await db.execute({ sql: "DELETE FROM investment_theses WHERE user_id=? AND ticker=?", args: [req.session.userId, symbol] });
+    res.json({ ok: true });
+  } catch (error) { workspaceError(res, error); }
 });
 
 router.get("/workspace/positions", async (req, res) => {
   try {
     const result = await db.execute({ sql: "SELECT * FROM portfolio_positions WHERE user_id=? ORDER BY updated_at DESC LIMIT 200", args: [req.session.userId] });
     res.json(result.rows.map(positionRow));
-  } catch (error) { res.status(500).json({ error: error.message }); }
+  } catch (error) { workspaceError(res, error); }
 });
 
 router.put("/workspace/positions/:ticker", validateCsrf, async (req, res) => {
@@ -142,21 +149,23 @@ router.put("/workspace/positions/:ticker", validateCsrf, async (req, res) => {
     });
     const result = await db.execute({ sql: "SELECT * FROM portfolio_positions WHERE user_id=? AND ticker=?", args: [req.session.userId, symbol] });
     res.json(positionRow(result.rows[0]));
-  } catch (error) { res.status(500).json({ error: error.message }); }
+  } catch (error) { workspaceError(res, error); }
 });
 
 router.delete("/workspace/positions/:ticker", validateCsrf, async (req, res) => {
   const symbol = ticker(req.params.ticker);
   if (!symbol) return res.status(400).json({ error: "Invalid ticker." });
-  await db.execute({ sql: "DELETE FROM portfolio_positions WHERE user_id=? AND ticker=?", args: [req.session.userId, symbol] });
-  res.json({ ok: true });
+  try {
+    await db.execute({ sql: "DELETE FROM portfolio_positions WHERE user_id=? AND ticker=?", args: [req.session.userId, symbol] });
+    res.json({ ok: true });
+  } catch (error) { workspaceError(res, error); }
 });
 
 router.get("/workspace/watchlist", async (req, res) => {
   try {
     const result = await db.execute({ sql: "SELECT * FROM watchlist_items WHERE user_id=? ORDER BY created_at DESC LIMIT 200", args: [req.session.userId] });
     res.json(result.rows.map(watchlistRow));
-  } catch (error) { res.status(500).json({ error: error.message }); }
+  } catch (error) { workspaceError(res, error); }
 });
 
 router.put("/workspace/watchlist/:ticker", validateCsrf, async (req, res) => {
@@ -170,14 +179,16 @@ router.put("/workspace/watchlist/:ticker", validateCsrf, async (req, res) => {
     });
     const result = await db.execute({ sql: "SELECT * FROM watchlist_items WHERE user_id=? AND ticker=?", args: [req.session.userId, symbol] });
     res.json(watchlistRow(result.rows[0]));
-  } catch (error) { res.status(500).json({ error: error.message }); }
+  } catch (error) { workspaceError(res, error); }
 });
 
 router.delete("/workspace/watchlist/:ticker", validateCsrf, async (req, res) => {
   const symbol = ticker(req.params.ticker);
   if (!symbol) return res.status(400).json({ error: "Invalid ticker." });
-  await db.execute({ sql: "DELETE FROM watchlist_items WHERE user_id=? AND ticker=?", args: [req.session.userId, symbol] });
-  res.json({ ok: true });
+  try {
+    await db.execute({ sql: "DELETE FROM watchlist_items WHERE user_id=? AND ticker=?", args: [req.session.userId, symbol] });
+    res.json({ ok: true });
+  } catch (error) { workspaceError(res, error); }
 });
 
 module.exports = router;

@@ -48,6 +48,7 @@ const express = require("express");
 const session = require("express-session");
 const helmet  = require("helmet");
 const rateLimit = require("express-rate-limit");
+const compression = require("compression");
 
 const { db, TursoStore, initDb } = require("./lib/db");
 const { guestIdMiddleware }  = require("./lib/plan");
@@ -107,6 +108,16 @@ app.use(helmet({
     },
   },
 }));
+app.use(compression());
+
+// HTML is deployment-sensitive and should always be revalidated. Fingerprinted
+// static assets keep their longer cache policy below.
+app.use((req, res, next) => {
+  if (req.method === "GET" && !req.path.startsWith("/api/") && (req.path === "/" || req.path.endsWith(".html") || !path.extname(req.path))) {
+    res.setHeader("Cache-Control", "no-cache, must-revalidate");
+  }
+  next();
+});
 
 // Static public assets (logo, robots.txt, sitemap.xml, …)
 app.use(express.static(path.join(__dirname, "public"), {
@@ -259,6 +270,7 @@ app.get(["/data-sources", "/data-sources.html"],(_req, res) => res.sendFile(path
 app.use("/", stockLandingRouter);
 
 app.get("/healthz", async (_req, res) => {
+  res.setHeader("Cache-Control", "no-store");
   try {
     await db.execute("SELECT 1");
     res.json({ ok: true, database: "ok", providers: providerHealth.snapshot(), ...buildInfo });

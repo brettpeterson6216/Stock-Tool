@@ -73,7 +73,7 @@
     const mobile = document.getElementById("mobile-sec-tabs");
     if (mobile) mobile.insertAdjacentHTML("beforeend", `<button class="mst-btn" data-sec="workspace">Workspace</button>`);
     const moreMenu = document.querySelector(".mmenu-grid");
-    if (moreMenu) moreMenu.insertAdjacentHTML("beforeend", `<a href="#" class="mmenu-item" onclick="navGoTo('workspace');_setMobileNav('workspace');_toggleMobileMenu();return false;"><i class="ti ti-briefcase"></i><span>Workspace</span></a>`);
+    if (moreMenu) moreMenu.insertAdjacentHTML("beforeend", `<a href="/?view=tool&amp;section=workspace" class="mmenu-item" onclick="navGoTo('workspace');_setMobileNav('workspace');_toggleMobileMenu();return false;"><i class="ti ti-briefcase"></i><span>Workspace</span></a>`);
     const scroll = document.querySelector(".app-content-scroll");
     if (!scroll) return;
     scroll.insertAdjacentHTML("beforeend", `<div class="app-section" id="sec-workspace"><div class="acc-body" id="body-workspace" style="display:none"><div class="il-ws-shell">
@@ -99,6 +99,12 @@
         loadWorkspace();
       }
       return out;
+    };
+    window.openWorkspaceWatchlist = function () {
+      state.tab = "watchlist";
+      if (typeof window.navGoTo === "function") window.navGoTo("workspace");
+      const tab = document.querySelector('.il-ws-tab[data-tab="watchlist"]');
+      if (tab) tab.click();
     };
   }
 

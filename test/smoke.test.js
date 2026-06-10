@@ -112,6 +112,7 @@ test("GET / serves the homepage with a successful status", async () => {
   const res = await req("/");
   assert.equal(res.status, 200);
   assert.match(await res.text(), /ImpliedLens/);
+  assert.match(res.headers.get("cache-control"), /no-cache/);
 });
 
 test("GET /healthz reports database and build health", async () => {
@@ -122,6 +123,13 @@ test("GET /healthz reports database and build health", async () => {
   assert.equal(body.database, "ok");
   assert.ok(body.version);
   assert.ok(body.commit);
+  assert.equal(res.headers.get("cache-control"), "no-store");
+});
+
+test("GET / compresses the homepage when the client accepts gzip", async () => {
+  const res = await req("/", { headers: { "Accept-Encoding": "gzip" } });
+  assert.equal(res.status, 200);
+  assert.equal(res.headers.get("content-encoding"), "gzip");
 });
 
 test("GET /api/version exposes the running build", async () => {

@@ -1277,6 +1277,8 @@ nav{box-shadow:0 1px 0 var(--border),0 8px 24px rgba(20,18,14,.025)}
 .hfs-item{min-height:76px}
 html[data-theme="dark"] nav{box-shadow:0 1px 0 rgba(255,255,255,.05),0 8px 24px rgba(0,0,0,.18)}
 html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
+:where(a,button,[role="button"],input,select,textarea):focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+@media(max-width:640px){.hc-link{min-height:36px;padding:9px 0}.learn-item{min-height:56px}}
 
 </style>
 </head>
@@ -1285,14 +1287,14 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
 
 <!-- ══════════ NAV ══════════ -->
 <nav id="main-nav" data-view="home">
-  <a class="nav-logo" href="#" onclick="navGoTo('home');return false;" style="display:flex;align-items:center;gap:9px;text-decoration:none;">
+  <a class="nav-logo" href="/?view=home" onclick="navGoTo('home');return false;" style="display:flex;align-items:center;gap:9px;text-decoration:none;">
     <img src="/logo.svg" alt="Implied Lens" style="width:28px;height:28px;border-radius:50%;flex-shrink:0;">
     <span>Implied<em style="font-style:italic;color:var(--gold-d);">Lens</em></span>
   </a>
   <div class="nav-links" id="nav-links">
-    <a href='#' id='nav-home' class="nav-tab active-tab" onclick="navGoTo('home');return false;">Market</a>
-    <a href='#' class="nav-tab" id="nav-education-link" onclick="navGoTo('education');return false;">Education</a>
-    <a href='#' class="nav-tab" id="nav-saved-link" onclick="navGoTo('reports');return false;">Saved</a>
+    <a href="/?view=home" id='nav-home' class="nav-tab active-tab" onclick="navGoTo('home');return false;">Market</a>
+    <a href="/?view=tool&amp;section=education" class="nav-tab" id="nav-education-link" onclick="navGoTo('education');return false;">Education</a>
+    <a href="/?view=tool&amp;section=reports" class="nav-tab" id="nav-saved-link" onclick="navGoTo('reports');return false;">Saved</a>
     <a href='/blog' class="nav-tab" id="nav-blog-link">Blog</a>
     <a href='/about' class="nav-tab" id="nav-about-link">About</a>
   </div>
@@ -1370,6 +1372,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
     showView('tool');
     window.scrollTo(0,0);
     openSection(id); // no skipProCheck — free users see the upgrade modal, not empty Pro panels
+    history.replaceState(null, '', '/?view=tool&section=' + encodeURIComponent(id));
   }
 
   // On hard load: respect ?view=tool or ?view=home in URL
@@ -1602,16 +1605,16 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
 
   <!-- ── Left sidebar ── -->
   <aside class="hs-sidebar">
-    <a class="hsb-home active" href="#" onclick="navGoTo('home');return false;"><i class="ti ti-globe"></i><span>Market</span></a>
+    <a class="hsb-home active" href="/?view=home" onclick="navGoTo('home');return false;"><i class="ti ti-globe"></i><span>Market</span></a>
 
     <div class="hsb-section">
       <div class="hsb-label">Analyze</div>
-      <a class="hsb-item" href="#" onclick="navGoTo('analyze');return false;"><i class="ti ti-chart-candle"></i><span>Analyze</span></a>
-      <a class="hsb-item" href="#" onclick="navGoTo('analyze');return false;"><i class="ti ti-chart-line"></i><span>Chart</span></a>
-      <a class="hsb-item" href="#" onclick="navGoTo('financials');return false;"><i class="ti ti-table"></i><span>Financials</span></a>
-      <a class="hsb-item" href="#" onclick="navGoTo('advmetrics');return false;"><i class="ti ti-report-analytics"></i><span>Metrics</span></a>
-      <a class="hsb-item" href="#" onclick="navGoTo('earnings');return false;"><i class="ti ti-calendar-event"></i><span>Earnings</span></a>
-      <a class="hsb-item" href="#" onclick="navGoTo('screener');return false;"><i class="ti ti-filter"></i><span>Screener</span></a>
+      <a class="hsb-item" href="/?view=tool&amp;section=analyze" onclick="navGoTo('analyze');return false;"><i class="ti ti-chart-candle"></i><span>Analyze</span></a>
+      <a class="hsb-item" href="/?view=tool&amp;section=analyze" onclick="navGoTo('analyze');return false;"><i class="ti ti-chart-line"></i><span>Chart</span></a>
+      <a class="hsb-item" href="/?view=tool&amp;section=financials" onclick="navGoTo('financials');return false;"><i class="ti ti-table"></i><span>Financials</span></a>
+      <a class="hsb-item" href="/?view=tool&amp;section=advmetrics" onclick="navGoTo('advmetrics');return false;"><i class="ti ti-report-analytics"></i><span>Metrics</span></a>
+      <a class="hsb-item" href="/?view=tool&amp;section=earnings" onclick="navGoTo('earnings');return false;"><i class="ti ti-calendar-event"></i><span>Earnings</span></a>
+      <a class="hsb-item" href="/?view=tool&amp;section=screener" onclick="navGoTo('screener');return false;"><i class="ti ti-filter"></i><span>Screener</span></a>
     </div>
 
     <div class="hsb-section">
@@ -1633,7 +1636,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
     <div class="hsb-section">
       <div class="hsb-label">Library</div>
       <a class="hsb-item" href="#" onclick="navGoTo('reports');return false;"><i class="ti ti-bookmark"></i><span>Saved</span></a>
-      <a class="hsb-item" href="#" onclick="navGoTo('education');return false;"><i class="ti ti-school"></i><span>Education</span></a>
+      <a class="hsb-item" href="/?view=tool&amp;section=education" onclick="navGoTo('education');return false;"><i class="ti ti-school"></i><span>Education</span></a>
     </div>
 
     <div class="hsb-upgrade" id="hsb-upgrade-box" style="display:none;">
@@ -1809,7 +1812,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
       <div class="hg-watch hc">
         <div class="hc-hdr">
           <span class="hc-title">Your Watchlist</span>
-          <a class="hc-link" href="#" onclick="navGoTo('analyze');return false;">View all &rarr;</a>
+          <a class="hc-link" href="/?view=tool&amp;section=workspace" onclick="navGoTo('workspace');return false;">Open watchlist &rarr;</a>
         </div>
         <table class="wl-table">
           <thead><tr>
@@ -1829,7 +1832,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
       <div class="hg-signals hc">
         <div class="hc-hdr">
           <span class="hc-title">Analyst Signals</span>
-          <a class="hc-link" href="#" onclick="navGoTo('analyze');return false;">View all &rarr;</a>
+          <a class="hc-link" href="/?view=tool&amp;section=analyze" onclick="navGoTo('analyze');return false;">View all &rarr;</a>
         </div>
         <div class="as-wrap">
           <div class="as-donut-wrap">
@@ -1852,7 +1855,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
       <div class="hg-insights hc">
         <div class="hc-hdr">
           <span class="hc-title">Latest Insights</span>
-          <a class="hc-link" href="#" onclick="navGoTo('analyze');return false;">View all &rarr;</a>
+          <a class="hc-link" href="/?view=tool&amp;section=analyze" onclick="navGoTo('analyze');return false;">View all &rarr;</a>
         </div>
         <div id="home-insights-list"><div style="color:var(--text5);font-size:.69rem;text-align:center;padding:1.5rem 0;">Loading&hellip;</div></div>
       </div>
@@ -1861,7 +1864,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
       <div class="hg-movers hc">
         <div class="hc-hdr">
           <span class="hc-title">Market Movers</span>
-          <a class="hc-link" href="#" onclick="navGoTo('screener');return false;">View all &rarr;</a>
+          <a class="hc-link" href="/?view=tool&amp;section=screener" onclick="navGoTo('screener');return false;">View all &rarr;</a>
         </div>
         <div class="movers-tabs">
           <button class="movers-tab on" onclick="switchMovers('gainers',this)">Top Gainers</button>
@@ -1880,7 +1883,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
           <span class="hc-title">Continue Learning</span>
           <a class="hc-link" href="#" onclick="navGoTo('education');return false;">View all &rarr;</a>
         </div>
-        <div class="learn-item" onclick="navGoTo('education');setTimeout(()=>openLesson(document.querySelector('[data-lesson=thesis]')),50)" style="cursor:pointer;">
+        <div class="learn-item" role="button" tabindex="0" onclick="navGoTo('education');setTimeout(()=>openLesson(document.querySelector('[data-lesson=thesis]')),50)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}" style="cursor:pointer;">
           <div class="learn-icon"><i class="ti ti-bulb"></i></div>
           <div class="learn-body">
             <div class="learn-title">Write the investment thesis</div>
@@ -1888,7 +1891,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
             <div class="learn-prog-pct">8 min · Foundation</div>
           </div>
         </div>
-        <div class="learn-item" onclick="navGoTo('education');setTimeout(()=>openLesson(document.querySelector('[data-lesson=valuation]')),50)" style="cursor:pointer;">
+        <div class="learn-item" role="button" tabindex="0" onclick="navGoTo('education');setTimeout(()=>openLesson(document.querySelector('[data-lesson=valuation]')),50)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}" style="cursor:pointer;">
           <div class="learn-icon"><i class="ti ti-calculator"></i></div>
           <div class="learn-body">
             <div class="learn-title">Value the business</div>
@@ -1896,7 +1899,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
             <div class="learn-prog-pct">14 min · Valuation</div>
           </div>
         </div>
-        <div class="learn-item" onclick="navGoTo('education');setTimeout(()=>openLesson(document.querySelector('[data-lesson=risk]')),50)" style="cursor:pointer;">
+        <div class="learn-item" role="button" tabindex="0" onclick="navGoTo('education');setTimeout(()=>openLesson(document.querySelector('[data-lesson=risk]')),50)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}" style="cursor:pointer;">
           <div class="learn-icon"><i class="ti ti-shield-check"></i></div>
           <div class="learn-body">
             <div class="learn-title">Define the risk</div>
@@ -1943,7 +1946,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
         <div style="font-family:var(--mono);font-size:.7rem;color:var(--gold-d);text-transform:uppercase;letter-spacing:.18em;margin-bottom:.75rem;">Your plan</div>
         <h2 id="pro-banner-title" style="font-family:var(--serif);font-size:2rem;margin-bottom:.5rem;">You&rsquo;re on <em style="color:var(--gold-d);">Pro Trial</em>.</h2>
         <p id="pro-banner-sub" style="color:var(--ink4);font-size:.95rem;margin-bottom:1.5rem;">All Pro features are unlocked. Your trial ends in <strong id="pro-banner-days">14</strong> days.</p>
-        <a href="/api/stripe/portal" target="_blank" style="display:inline-block;padding:.75rem 1.75rem;background:var(--ink);color:var(--cream);border-radius:var(--r2);font-weight:500;text-decoration:none;font-size:.9rem;">Manage subscription &rarr;</a>
+        <a href="/api/stripe/portal" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:.75rem 1.75rem;background:var(--ink);color:var(--cream);border-radius:var(--r2);font-weight:500;text-decoration:none;font-size:.9rem;">Manage subscription &rarr;</a>
       </div>
     </div>
 
@@ -2020,7 +2023,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
         <span class="ash-title" id="ash-title">Chart &amp; Analysis</span>
         <span class="ash-sub" id="ash-sub"></span>
         <div class="ash-actions">
-          <button class="ash-btn" onclick="if(S.ticker)toast('Alert set for '+S.ticker,'ok')"><i class="ti ti-bell-plus"></i>Alert</button>
+          <button class="ash-btn" onclick="if(S.ticker&amp;&amp;window.openWorkspaceWatchlist)openWorkspaceWatchlist()"><i class="ti ti-list-star"></i>Watch</button>
           <button class="ash-btn" onclick="if(S.ticker)saveAnalysis('price')"><i class="ti ti-bookmark"></i>Save</button>
           <button class="ash-btn" onclick="window.print()"><i class="ti ti-download"></i>Export</button>
         </div>
@@ -4580,6 +4583,9 @@ function openSection(id, skipProCheck) {
   else if (id === 'institutional')  { if(t) loadInstitutional(t); }
   else if (id === 'screener')    { loadScreener(); }
   else if (id === 'reports')     { setTimeout(renderSavedAnalyses, 100); }
+  if (document.getElementById('view-tool')?.style.display !== 'none') {
+    history.replaceState(null, '', '/?view=tool&section=' + encodeURIComponent(id));
+  }
 }
 
 function closeSection(id) {
@@ -6169,7 +6175,7 @@ async function loadHomeInsights(){
     const r=await fetch('/api/news/SPY',{credentials:'same-origin'});if(!r.ok)throw new Error();
     const news=await r.json();const items=(Array.isArray(news)?news:news.data||[]).slice(0,4);if(!items.length)throw new Error();
     el.innerHTML=items.map((n,i)=>{const title=escapeHtml((n.headline||n.title||'Market Update').substring(0,68));const ts=escapeHtml(n.datetime?timeAgo(n.datetime*1000):'Recently');const url=safeExternalUrl(n.url);const tag=url?'a':'div';const attrs=url?` href="${url}" target="_blank" rel="noopener noreferrer"`:'';return`<${tag} class="insight-item"${attrs}><div class="insight-thumb">${icons[i%4]}</div><div class="insight-body"><div class="insight-cat">${cats[i%4]}</div><div class="insight-title">${title}</div><div class="insight-time">${ts}</div></div></${tag}>`;}).join('');
-  }catch(_){el.innerHTML=['AI Momentum Drives Markets Higher','Why NVDA Valuation Still Makes Sense','Semiconductors Rally on Strong Demand','What to Watch in Earnings Season'].map((t,i)=>`<div class="insight-item"><div class="insight-thumb">${icons[i]}</div><div class="insight-body"><div class="insight-cat">${cats[i]}</div><div class="insight-title">${t}</div><div class="insight-time">${['2h ago','5h ago','1d ago','1d ago'][i]}</div></div></div>`).join('');}
+  }catch(_){el.innerHTML='<div class="insight-item" style="cursor:default"><div class="insight-thumb"><i class="ti ti-cloud-off"></i></div><div class="insight-body"><div class="insight-cat">LIVE NEWS</div><div class="insight-title">Headlines are temporarily unavailable.</div><div class="insight-time">Try again shortly or open a ticker for company-specific research.</div></div></div>';}
 }
 function timeAgo(ms){const d=(Date.now()-ms)/1000;if(d<3600)return`${Math.round(d/60)}m ago`;if(d<86400)return`${Math.round(d/3600)}h ago`;return`${Math.round(d/86400)}d ago`;}
 
@@ -8038,6 +8044,6 @@ document.addEventListener('click', function(e) {
 </div>
 </div>
 <script src="/product-system.js?v=20260609-2"></script>
-<script src="/workspace-system.js?v=20260609-3"></script>
+<script src="/workspace-system.js?v=20260610-1"></script>
 </body>
 </html>
