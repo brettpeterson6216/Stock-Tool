@@ -158,7 +158,24 @@
       guide.className = "il-guidance";
       host.insertBefore(guide, host.firstChild);
     }
-    guide.innerHTML = `<div class="il-guidance-copy"><strong>Build a complete ${ticker} decision, not just a price opinion.</strong><span>Start with the chart, then test business quality, valuation, and downside assumptions.</span></div><div class="il-guidance-actions"><button onclick="navGoTo('education');setTimeout(()=>openLesson(document.querySelector('[data-lesson=thesis]')),50)">Write thesis</button><button onclick="navGoTo('education');setTimeout(()=>openLesson(document.querySelector('[data-lesson=risk]')),50)">Define risk</button><button class="primary" onclick="saveAnalysis('price')">Save snapshot</button></div>`;
+    guide.innerHTML = `<div class="il-guidance-copy"><strong>Build a complete ${ticker} decision, not just a price opinion.</strong><span>Start with the chart, then test business quality, valuation, and downside assumptions.</span></div><div class="il-guidance-actions"><button onclick="navGoTo('education');setTimeout(()=>openLesson(document.querySelector('[data-lesson=thesis]')),50)">Write thesis</button><button onclick="navGoTo('education');setTimeout(()=>openLesson(document.querySelector('[data-lesson=risk]')),50)">Define risk</button><button onclick="shareTickerResearch('${ticker}')"><i class="ti ti-share-3"></i> Share research</button><button class="primary" onclick="saveAnalysis('price')">Save snapshot</button></div>`;
+  }
+
+  async function shareTickerResearch(ticker) {
+    const symbol = String(ticker || window.IL_STATE?.ticker || "").toUpperCase().replace(/[^A-Z0-9.^-]/g, "").slice(0, 15);
+    if (!symbol) return;
+    const url = `https://impliedlens.com/stock/${encodeURIComponent(symbol)}`;
+    const text = `Research ${symbol} with source-aware market context, valuation tools, and a reviewable decision process on Implied Lens.`;
+    if (typeof window.track === "function") window.track("research_shared", { ticker: symbol });
+    if (navigator.share) {
+      try { await navigator.share({ title: `${symbol} research | Implied Lens`, text, url }); return; } catch (_) {}
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      if (typeof window.toast === "function") window.toast(`${symbol} research link copied`, "ok");
+    } catch (_) {
+      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, "_blank", "noopener,noreferrer");
+    }
   }
 
   function decorateMetricLearning() {
@@ -357,6 +374,7 @@
     installBuildBadge();
     installFeedbackPrompt();
     improveUnavailableStates();
+    window.shareTickerResearch = shareTickerResearch;
     setInterval(improveUnavailableStates, 1500);
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

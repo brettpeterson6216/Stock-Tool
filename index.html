@@ -6,8 +6,8 @@
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Implied Lens — Institutional-Grade Stock Analysis Platform</title>
-<meta name="description" content="Implied Lens is a professional stock analysis platform with current market charts, DCF valuation, earnings history, SEC filings, analyst targets, dark pool data, financial statements, and stock screener — built for serious investors.">
+<title>Implied Lens — Stock Research and Valuation Workspace</title>
+<meta name="description" content="Implied Lens is a source-aware stock research workspace with market charts, valuation models, earnings-call research, SEC filings, financial statements, projections, and a reviewable investment process.">
 <meta name="keywords" content="stock analysis, stock screener, DCF valuation, earnings history, SEC filings, analyst price targets, dark pool data, institutional holdings, stock comparison, financial statements, implied lens">
 <meta name="author" content="Implied Lens">
 <meta name="robots" content="index, follow">
@@ -15,14 +15,14 @@
 <!-- Open Graph -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://impliedlens.com/">
-<meta property="og:title" content="Implied Lens — Institutional-Grade Stock Analysis">
-<meta property="og:description" content="Current market charts, DCF valuation, earnings history, SEC filings, analyst targets, dark pool data, and a full stock screener — all in one platform.">
+<meta property="og:title" content="Implied Lens — Research the Business, Test the Thesis">
+<meta property="og:description" content="Transparent source data, reviewable valuation models, earnings-call research, and a decision workspace for self-directed investors.">
 <meta property="og:image" content="https://impliedlens.com/logo.svg">
 <meta property="og:site_name" content="Implied Lens">
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Implied Lens — Stock Analysis Platform">
-<meta name="twitter:description" content="Professional stock analysis: current market charts, DCF valuation, SEC filings, analyst targets, dark pool data, and more.">
+<meta name="twitter:description" content="Transparent stock research, reviewable valuation models, and a decision process you can revisit.">
 <meta name="twitter:image" content="https://impliedlens.com/logo.svg">
 <!-- Canonical -->
 <link rel="canonical" href="https://impliedlens.com/">
@@ -35,7 +35,7 @@
   "@type": "WebApplication",
   "name": "Implied Lens",
   "url": "https://impliedlens.com",
-  "description": "Implied Lens is an institutional-grade stock analysis platform offering current market charts, DCF valuation models, earnings history, SEC filings, analyst price targets, dark pool volume data, institutional holdings, and a comprehensive stock screener.",
+  "description": "Implied Lens is a source-aware stock research and valuation workspace for self-directed investors.",
   "applicationCategory": "FinanceApplication",
   "offers": {
     "@type": "Offer",
@@ -49,7 +49,7 @@
     "SEC EDGAR filing browser",
     "Analyst price targets and recommendations",
     "Dark pool and institutional holdings data",
-    "Stock screener with 50,000+ stocks",
+    "Curated stock screener",
     "Compare up to 4 stocks side by side",
     "Risk metrics: Sharpe, Sortino, Alpha, Beta, VaR",
     "Financial statements: Income, Balance Sheet, Cash Flow"
@@ -68,10 +68,11 @@
 <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.44.0/dist/tabler-icons.min.css" rel="stylesheet">
 <link href="/product-system.css?v=20260610-2" rel="stylesheet">
 <link href="/workspace-system.css?v=20260609-1" rel="stylesheet">
+<link href="/research-system.css?v=20260611-1" rel="stylesheet">
 <script src="/vendor/chart.umd.min.js?v=4.4.1"></script>
 <script defer src="/vendor/hammer.min.js?v=2.0.8"></script>
 <script defer src="/vendor/chartjs-plugin-zoom.min.js?v=1.2.1"></script>
-<script defer src="/model-math.js?v=20260610-1"></script>
+<script defer src="/model-math.js?v=20260611-2"></script>
 <style>
 /* ═══════════════════════════════ TOKENS ═══════════════════════════════ */
 :root {
@@ -1108,6 +1109,9 @@ html[data-theme="dark"] .hh-proof{color:rgba(232,226,212,.35)}
 .home-grid{display:grid;grid-template-columns:1.65fr 1fr 1fr;grid-template-rows:auto auto;border-bottom:1px solid var(--border2);}
 @media(max-width:1200px){.home-grid{grid-template-columns:1fr 1fr;}}
 @media(max-width:768px){.home-grid{grid-template-columns:1fr;}}
+@media(max-width:768px){
+  .home-grid>.hc{grid-column:1!important;grid-row:auto!important;border-right:0!important}
+}
 .hg-market{grid-column:1;grid-row:1/3;border-right:1px solid var(--border2);}
 .hg-watch{grid-column:2;grid-row:1;border-right:1px solid var(--border2);border-bottom:1px solid var(--border2);}
 .hg-signals{grid-column:3;grid-row:1;border-bottom:1px solid var(--border2);}
@@ -1655,7 +1659,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
       <div class="hh-left">
         <div class="hh-badge" title="Coverage combines sources with different update schedules.">Resilient multi-source coverage</div>
         <h1 class="hh-title">Smarter Stock Analysis<br><em>for Confident Investors.</em></h1>
-        <p class="hh-sub">Powerful tools. Proprietary data. Actionable insights.</p>
+        <p class="hh-sub">Transparent data. Reviewable models. Decisions you can revisit.</p>
         <div class="hh-search">
           <span class="hh-search-icon"><i class="ti ti-search"></i></span>
           <input type="text" id="hero-search" placeholder="Search any stock or ETF (e.g. AAPL, TSLA, NVDA)..." autocomplete="off" spellcheck="false">
@@ -1935,9 +1939,9 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
 
     <!-- Feature strip -->
     <div class="home-feat-strip">
-      <div class="hfs-item"><div class="hfs-icon"><i class="ti ti-shield-check"></i></div><div><div class="hfs-title">Institutional-Grade Data</div><div class="hfs-desc">Resilient, transparent, and deeply sourced.</div></div></div>
-      <div class="hfs-item"><div class="hfs-icon"><i class="ti ti-bolt"></i></div><div><div class="hfs-title">Advanced Valuation Models</div><div class="hfs-desc">DCF, DDM, Multiples &amp; more.</div></div></div>
-      <div class="hfs-item"><div class="hfs-icon"><i class="ti ti-target"></i></div><div><div class="hfs-title">Actionable Insights</div><div class="hfs-desc">Clear signals. Smarter decisions.</div></div></div>
+      <div class="hfs-item"><div class="hfs-icon"><i class="ti ti-shield-check"></i></div><div><div class="hfs-title">Source-Aware Research</div><div class="hfs-desc">Transparent providers and visible methodology.</div></div></div>
+      <div class="hfs-item"><div class="hfs-icon"><i class="ti ti-bolt"></i></div><div><div class="hfs-title">Valuation &amp; Scenarios</div><div class="hfs-desc">DCF, multiples, projections, and sensitivities.</div></div></div>
+      <div class="hfs-item"><div class="hfs-icon"><i class="ti ti-target"></i></div><div><div class="hfs-title">Reviewable Decisions</div><div class="hfs-desc">Write the thesis, downside, and next check.</div></div></div>
       <div class="hfs-item"><div class="hfs-icon"><i class="ti ti-users"></i></div><div><div class="hfs-title">Built for Investors</div><div class="hfs-desc">Tools designed for retail investors who demand more.</div></div></div>
     </div>
 
@@ -1953,11 +1957,11 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
     <section id="pricing"><div class="container">
       <span class="sec-label">Simple, honest pricing</span>
       <h2 class="sec-h2">Start free. Upgrade when you're ready.</h2>
-      <p class="sec-sub">No Bloomberg fees. No hidden paywalls. Professional tools at a price that makes sense.</p>
+      <p class="sec-sub">Clear pricing. No hidden paywalls. A focused research workspace built for repeat use.</p>
       <div class="pricing-grid">
         <div class="pricing-card"><div class="pricing-tier">Starter</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">0</span><span class="p-per">/month</span></div><p class="p-desc">For curious investors exploring the platform.</p><ul class="p-features"><li>5 stock analyses per day</li><li>Latest price &amp; key metrics</li><li>Price chart with MA overlays</li><li>RSI &amp; MACD indicators</li><li>3-scenario projection model</li><li>Cloud-saved analyses (sync across devices)</li></ul><button class="btn-plan btn-plan-dark" id="pricing-free-btn">Get started free</button></div>
-        <div class="pricing-card featured"><div class="pricing-pop">Most Popular</div><div class="pricing-tier">Pro</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">7.99</span><span class="p-per">/month</span></div><p class="p-desc" style="font-size:.8rem;opacity:.7;">or $59.99/year &mdash; save 37%</p><p class="p-desc">For serious investors who research every day.</p><ul class="p-features"><li>Unlimited stock analyses</li><li>DCF intrinsic value model</li><li>Advanced projection (6 inputs)</li><li>4-stock side-by-side comparison</li><li>Full stock screener</li><li>PDF report export</li></ul><button class="btn-plan btn-plan-gold" id="pricing-pro-btn">Start 7-day free trial &rarr;</button></div>
-        <div class="pricing-card" style="position:relative;"><div class="save-badge">SAVE 37%</div><div class="pricing-tier">Pro Annual</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">59.99</span><span class="p-per">/year</span></div><p class="p-desc" style="font-size:.8rem;opacity:.7;">just $5/month</p><p class="p-desc">Everything in Pro, billed once a year.</p><ul class="p-features"><li>Unlimited stock analyses</li><li>DCF intrinsic value model</li><li>4-stock comparison</li><li>Full stock screener</li><li>PDF report export</li></ul><button class="btn-plan btn-plan-gold" id="pricing-annual-btn">Start 7-day free trial &rarr;</button></div>
+        <div class="pricing-card featured"><div class="pricing-pop">Most Popular</div><div class="pricing-tier">Pro</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">7.99</span><span class="p-per">/month</span></div><p class="p-desc" style="font-size:.8rem;opacity:.7;">or $59.99/year &mdash; save 37%</p><p class="p-desc">For serious investors who research every day.</p><ul class="p-features"><li>Unlimited stock analyses</li><li>DCF and advanced projections</li><li>Earnings-call research center</li><li>4-stock side-by-side comparison</li><li>Full stock screener</li><li>PDF report export</li></ul><button class="btn-plan btn-plan-gold" id="pricing-pro-btn">Start 7-day free trial &rarr;</button></div>
+        <div class="pricing-card" style="position:relative;"><div class="save-badge">SAVE 37%</div><div class="pricing-tier">Pro Annual</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">59.99</span><span class="p-per">/year</span></div><p class="p-desc" style="font-size:.8rem;opacity:.7;">just $5/month</p><p class="p-desc">Everything in Pro, billed once a year.</p><ul class="p-features"><li>Unlimited stock analyses</li><li>DCF and advanced projections</li><li>Earnings-call research center</li><li>4-stock comparison</li><li>Full stock screener</li><li>PDF report export</li></ul><button class="btn-plan btn-plan-gold" id="pricing-annual-btn">Start 7-day free trial &rarr;</button></div>
       </div>
     </div></section>
 
@@ -2080,7 +2084,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
           <div class="app-section open" id="sec-analyze"><div class="acc-body" id="body-analyze">
 <div class="tool-welcome" id="tool-welcome">
               <div class="tw-title">Market Intelligence</div>
-              <div class="tw-sub">Search any ticker for current charts, financials, metrics, and AI-powered analysis</div>
+              <div class="tw-sub">Search any ticker for current charts, financials, valuation models, and source-aware research</div>
             </div>
             <div class="search-row">
               <input class="ticker-input" id="main-ticker" type="text" placeholder="Try AAPL, TSLA, NVDA, SPY…" value="">
@@ -2722,6 +2726,8 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
         <a href="/privacy">Privacy Policy</a>
         <a href="/terms">Terms of Service</a>
         <a href="/data-sources">Data Sources</a>
+        <a href="/research-process">Research Process</a>
+        <a href="/compound-calculator">Compound Calculator</a>
         <a href="/about">About</a>
         <a href="/blog">Blog</a>
       </div>
@@ -4420,10 +4426,10 @@ const PRO_GATE_CONFIG = {
   darkpool: {
     title: 'Dark Pool &amp; Institutional Order Flow',
     bullets: [
-      'OTC dark pool volume as a % of total daily trading — updated daily',
-      'Large block trade alerts: institutions moving serious size',
-      'Dark pool ratio trend — a rising ratio signals institutional accumulation',
-      'Combine with holdings data for the fullest smart-money picture available',
+      'Aggregated weekly OTC volume and trade counts from FINRA',
+      'Review changes in off-exchange activity over time',
+      'Keep activity context separate from unsupported intent claims',
+      'Compare OTC activity with reported institutional ownership',
     ],
     preview: null,
   },
@@ -4463,7 +4469,7 @@ const PRO_GATE_CONFIG = {
       'Filter by sector, market cap, P/E, P/B, beta, momentum, and 15+ metrics',
       'Sort by revenue growth, dividend yield, or 1-year price performance',
       'Click any result to instantly load the full stock analysis',
-      'Updated daily — always fresh fundamentals, never stale snapshots',
+      'Uses the latest available provider observations at request time',
     ],
     preview: `<table class="pgc-tbl"><thead><tr><th>Stock</th><th>Sector</th><th>P/E</th><th>1Y Chg</th></tr></thead><tbody>
       <tr><td>AAPL</td><td>Technology</td><td>28.4×</td><td style="color:#46b184">+22%</td></tr>
@@ -4477,9 +4483,9 @@ const PRO_GATE_CONFIG = {
     title: 'Advanced Investor Education',
     bullets: [
       'Detailed DCF &amp; relative valuation modelling guides with worked examples',
-      'Options strategies: covered calls, protective puts, vertical spreads',
-      'Advanced technical analysis: volume profile, market structure, Fibonacci',
-      'Portfolio theory: correlation, position sizing, and risk-adjusted returns',
+      'Driver-based forecasting and model-audit frameworks',
+      'Per-share economics, dilution, and capital-allocation analysis',
+      'Base rates, position sizing, and repeatable review workflows',
     ],
     preview: null,
   },
@@ -8096,7 +8102,8 @@ document.addEventListener('click', function(e) {
   </div>
 </div>
 </div>
-<script src="/product-system.js?v=20260610-3"></script>
+<script src="/product-system.js?v=20260611-1"></script>
 <script src="/workspace-system.js?v=20260610-2"></script>
+<script src="/research-system.js?v=20260611-3"></script>
 </body>
 </html>

@@ -278,7 +278,7 @@ function renderPage(ticker, q) {
       <div class="feat"><div class="feat-icon">📊</div><div class="feat-title">Financial statements</div><div class="feat-desc">Income, balance sheet, cash flow from SEC filings with 30+ calculated ratios.</div></div>
       <div class="feat"><div class="feat-icon">🧮</div><div class="feat-title">DCF valuation</div><div class="feat-desc">Customizable discounted cash flow model with live inputs.</div></div>
       <div class="feat"><div class="feat-icon">🎯</div><div class="feat-title">Analyst targets</div><div class="feat-desc">Price targets, recommendation breakdowns, earnings surprises.</div></div>
-      <div class="feat"><div class="feat-icon">🏦</div><div class="feat-title">Institutional data</div><div class="feat-desc">13F ownership, dark pool prints, insider transactions.</div></div>
+      <div class="feat"><div class="feat-icon">🏦</div><div class="feat-title">Institutional context</div><div class="feat-desc">Ownership data and aggregated FINRA OTC activity.</div></div>
       <div class="feat"><div class="feat-icon">📋</div><div class="feat-title">SEC filings</div><div class="feat-desc">Direct links to 10-K, 10-Q, 8-K, and proxy statements.</div></div>
       <div class="feat"><div class="feat-icon">📈</div><div class="feat-title">Projection models</div><div class="feat-desc">Bull/base/bear scenario modeling with editable assumptions.</div></div>
     </div>

@@ -40,7 +40,7 @@
     .footer-links a{color:rgba(220,225,232,.4)}
     .footer-links a:hover{color:#B98A3D}
   </style>
-<link rel="stylesheet" href="/static-polish.css?v=20260609-3">
+<link rel="stylesheet" href="/static-polish.css?v=20260611-2">
 </head>
 <body>
   <div class="top-bar">
@@ -51,7 +51,7 @@
   <div class="wrap">
     <div class="eyebrow">Transparency</div>
     <h1>Data Sources</h1>
-    <p class="subtitle">Every number on ImpliedLens traces back to a primary source. Here's exactly where each piece of data comes from and how it's used.</p>
+    <p class="subtitle">ImpliedLens labels the providers and calculations behind its research surfaces. Here is where the data comes from and how it is used.</p>
 
     <div class="source-card">
       <div class="src-head">
@@ -61,7 +61,7 @@
           <div class="src-url">finance.yahoo.com</div>
         </div>
       </div>
-      <p class="src-desc">The primary source for price history, OHLCV candles, current quotes, key statistics, earnings summaries, and financial statements. Used for the main stock analysis, price charts, projection models, and DCF inputs. Data is requested from providers on each analysis request.</p>
+      <p class="src-desc">Used for price history, OHLCV candles, current quote context, and selected key statistics. Data is requested from providers on each analysis request.</p>
       <div class="src-tags">
         <span class="tag gold">Price Charts</span>
         <span class="tag gold">Financials</span>
@@ -81,7 +81,7 @@
           <div class="src-url">finnhub.io</div>
         </div>
       </div>
-      <p class="src-desc">Used for analyst price targets, earnings surprises, recommendation trends, news feeds, institutional ownership, insider transactions, and selected market metrics. All calls are server-side — your API key is never exposed to the browser.</p>
+      <p class="src-desc">Used for analyst price targets, earnings surprises, recommendation trends, news feeds, institutional ownership, earnings-call transcript availability, and selected market metrics. All calls are server-side — provider credentials are never exposed to the browser.</p>
       <div class="src-tags">
         <span class="tag gold">Analyst Targets</span>
         <span class="tag gold">Institutional</span>
@@ -100,7 +100,7 @@
           <div class="src-url">sec.gov/cgi-bin/browse-edgar</div>
         </div>
       </div>
-      <p class="src-desc">Direct access to official SEC filing data. Used for the SEC Filings section, which links to 10-K annual reports, 10-Q quarterly filings, 8-K current reports, DEF 14A proxy statements, and Form 4 insider transactions. All links point directly to SEC.gov — we do not store or proxy filing documents.</p>
+      <p class="src-desc">Direct access to official SEC filing data. Used for the SEC Filings section, which links to 10-K annual reports, 10-Q quarterly filings, 8-K current reports, and DEF 14A proxy statements. All links point directly to SEC.gov — we do not store or proxy filing documents.</p>
       <div class="src-tags">
         <span class="tag gold">SEC Filings</span>
         <span class="tag">10-K / 10-Q</span>
@@ -113,8 +113,8 @@
     <h2>Data Freshness and Delays</h2>
     <p>Quote data from Yahoo Finance is typically delayed 15 minutes for most exchanges during market hours. Pre-market and after-hours data is available where provided by Yahoo Finance. Historical OHLCV data is end-of-day. Analyst consensus figures are updated periodically and may lag by 24–48 hours. Institutional ownership data from Finnhub reflects the most recent 13F filings, which are filed quarterly.</p>
 
-    <h2>What We Do Not Fabricate</h2>
-    <p>All financial figures, ratios, analyst estimates, and price data shown on ImpliedLens are pulled directly from the above sources at request time. We do not generate, estimate, or fill in missing data points. If a data field is unavailable, it is shown as "—" or omitted rather than substituted. DCF models use inputs drawn from reported financials — the model itself is a calculation, not a prediction.</p>
+    <h2>Reported, Derived, and Modeled Data</h2>
+    <p>ImpliedLens separates provider-supplied observations from derived calculations and user-controlled models. Reported figures come from connected providers or SEC filings. Ratios, indicators, projections, DCF values, and wealth scenarios are calculations whose reliability depends on their inputs and assumptions. Missing provider fields are shown as unavailable rather than silently invented.</p>
 
     <div class="caveat">
       <p><strong>Important:</strong> Data accuracy depends on the upstream providers. ImpliedLens is not responsible for errors, delays, or omissions in data supplied by Finnhub, Yahoo Finance, or SEC EDGAR. Always verify critical figures against primary sources before making investment decisions.</p>
@@ -130,6 +130,7 @@
       <a href="/privacy">Privacy Policy</a>
       <a href="/terms">Terms of Service</a>
       <a href="/about">About</a>
+      <a href="/research-process">Research Process</a>
       <a href="/">← ImpliedLens</a>
     </div>
   </div>

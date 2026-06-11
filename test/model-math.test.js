@@ -35,3 +35,31 @@ test("annualized volatility uses sample standard deviation of returns", () => {
   assert.ok(Math.abs(volatility - 0.1154700538) < 0.000001);
   assert.equal(math.annualizedVolatility([100, 101], 252), 0);
 });
+
+test("future value compounds monthly and tracks contributions separately", () => {
+  const result = math.futureValue({ principal: 10000, monthlyContribution: 500, annualReturn: 0.10, years: 10 });
+  assert.equal(result.ok, true);
+  assert.equal(result.contributions, 70000);
+  assert.ok(result.value > result.contributions);
+  assert.equal(result.path.length, 11);
+});
+
+test("compound scenarios calculate low, base, high, and inflation-adjusted values", () => {
+  const result = math.compoundScenarios({
+    principal: 25000,
+    monthlyContribution: 750,
+    baseReturn: 0.10,
+    variance: 0.03,
+    inflation: 0.025,
+    years: 15,
+  });
+  assert.equal(result.ok, true);
+  assert.ok(result.low.value < result.base.value);
+  assert.ok(result.base.value < result.high.value);
+  assert.ok(result.realValue < result.base.value);
+});
+
+test("future value rejects impossible assumptions", () => {
+  assert.equal(math.futureValue({ principal: -1, monthlyContribution: 0, annualReturn: 0.1, years: 5 }).ok, false);
+  assert.equal(math.futureValue({ principal: 1, monthlyContribution: 0, annualReturn: -1, years: 5 }).ok, false);
+});

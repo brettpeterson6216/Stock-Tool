@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <script>(function(){if(localStorage.getItem('il-theme')==='dark')document.documentElement.setAttribute('data-theme','dark')})();</script>
+  <title>Compound Interest Scenario Calculator — ImpliedLens</title>
+  <meta name="description" content="Model low, base, and high compound-growth scenarios, monthly contributions, and inflation-adjusted purchasing power.">
+  <link rel="canonical" href="https://impliedlens.com/compound-calculator">
+  <meta property="og:title" content="Compound Interest Scenario Calculator — ImpliedLens">
+  <meta property="og:description" content="Model a realistic range, separate contributions from growth, and see purchasing power after inflation.">
+  <link rel="icon" type="image/svg+xml" href="/logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box}body{margin:0;font-family:'DM Sans',sans-serif;background:#f7f6f2;color:#151719}.top-bar{padding:.85rem 2rem;display:flex;gap:1rem;align-items:center;border-bottom:1px solid rgba(21,23,25,.1)}.logo{font-family:'DM Serif Display',serif;font-size:1.3rem;color:#151719;text-decoration:none}.logo em{color:#76521d}.back{margin-left:auto;font-size:.8rem}.wrap{max-width:1120px;margin:0 auto;padding:3.5rem 2rem 5rem}.eyebrow{font:700 .68rem 'DM Mono',monospace;color:#76521d;text-transform:uppercase}.intro h1{max-width:760px;margin:.7rem 0 .8rem;font:400 2.7rem/1.08 'DM Serif Display',serif}.intro p{max-width:680px;color:#4a5057;line-height:1.7}.tool{display:grid;grid-template-columns:330px minmax(0,1fr);gap:1rem;margin-top:2rem}.panel{padding:1.25rem;border:1px solid rgba(21,23,25,.12);border-radius:7px;background:#fcfbf8}.panel h2{margin:0 0 .25rem;font-size:1rem}.panel>p{margin:.2rem 0 1rem;color:#66717b;font-size:.76rem;line-height:1.5}.inputs{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}.field label{display:block;margin-bottom:.3rem;font:600 .62rem 'DM Mono',monospace;color:#66717b;text-transform:uppercase}.field input{width:100%;height:38px;padding:0 .6rem;border:1px solid rgba(21,23,25,.18);border-radius:5px;background:#f2f1ec;color:#151719;font:600 .76rem 'DM Mono',monospace}.btn{display:inline-flex;margin-top:1rem;padding:.7rem 1rem;border:0;border-radius:5px;background:#76521d;color:#fff;font-weight:700;cursor:pointer}.results{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(21,23,25,.12);border:1px solid rgba(21,23,25,.12)}.result{padding:1rem;background:#f2f1ec}.result span,.result strong{display:block}.result span{font:600 .6rem 'DM Mono',monospace;color:#66717b;text-transform:uppercase}.result strong{margin-top:.5rem;font:600 .95rem 'DM Mono',monospace}.chart{height:350px;margin-top:1rem}.note{margin-top:1rem;padding:.8rem;border-left:2px solid #76521d;background:rgba(118,82,29,.07);color:#66717b;font-size:.7rem;line-height:1.55}.cta{margin-top:2rem;padding:1.4rem 0;border-top:1px solid rgba(21,23,25,.1);display:flex;align-items:center;justify-content:space-between;gap:1rem}.cta p{margin:0;color:#4a5057;font-size:.82rem}.cta a{padding:.7rem 1rem;border-radius:5px;background:#76521d;color:#fff;text-decoration:none;font-size:.8rem;font-weight:700}@media(max-width:850px){.tool{grid-template-columns:1fr}.results{grid-template-columns:1fr 1fr}}@media(max-width:600px){.top-bar{padding:.75rem 1rem}.wrap{padding:2.5rem 1rem 4rem}.intro h1{font-size:2.15rem}.inputs{grid-template-columns:1fr 1fr}.results{grid-template-columns:1fr 1fr}.chart{height:280px}.cta{display:block}.cta a{display:inline-block;margin-top:1rem}}
+  </style>
+  <link rel="stylesheet" href="/static-polish.css?v=20260611-2">
+  <script src="/vendor/chart.umd.min.js?v=4.4.1"></script>
+  <script src="/model-math.js?v=20260611-2"></script>
+</head>
+<body>
+  <div class="top-bar"><a href="/" class="logo">Implied<em>Lens</em></a><a href="/" class="back">Back to the platform</a><button class="static-theme-toggle" type="button" aria-label="Switch theme"><span class="static-theme-thumb"></span></button></div>
+  <main class="wrap">
+    <section class="intro"><div class="eyebrow">Free scenario calculator</div><h1>See what contributions, returns, and time each actually do.</h1><p>Compare a range of compound-growth outcomes instead of relying on one optimistic number. The calculator separates your contributions from investment growth and shows the base scenario in today's purchasing power.</p></section>
+    <section class="tool">
+      <div class="panel"><h2>Assumptions</h2><p>Use a range that reflects uncertainty. Returns are hypothetical.</p><div class="inputs">
+        <div class="field"><label for="principal">Starting portfolio</label><input id="principal" type="number" value="30000" min="0"></div><div class="field"><label for="monthly">Monthly contribution</label><input id="monthly" type="number" value="1500" min="0"></div>
+        <div class="field"><label for="years">Years</label><input id="years" type="number" value="15" min="1" max="60"></div><div class="field"><label for="return">Base return %</label><input id="return" type="number" value="10" step=".1"></div>
+        <div class="field"><label for="variance">Range +/- %</label><input id="variance" type="number" value="3" min="0" step=".1"></div><div class="field"><label for="inflation">Inflation %</label><input id="inflation" type="number" value="2.5" step=".1"></div>
+      </div><button class="btn primary" id="run">Run scenarios</button><div class="note">Monthly compounding; contributions arrive at month-end. Taxes, fees, withdrawals, and return sequencing are not modeled.</div></div>
+      <div class="panel"><div class="results" id="results"></div><div class="chart"><canvas id="chart" role="img" aria-label="Low, base, high, and contribution compound-growth scenarios over time"></canvas></div></div>
+    </section>
+    <section class="cta"><p>Move from a wealth scenario to company research, valuation models, and a reviewable investment thesis.</p><a href="/?view=tool&amp;section=wealth">Open the full Wealth Planner</a></section>
+  </main>
+  <script src="/static-theme.js?v=20260609"></script>
+  <script>
+    let chart;
+    const money=value=>Number(value).toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0});
+    function run(){
+      const value=id=>Number(document.getElementById(id).value);
+      const input={principal:value('principal'),monthlyContribution:value('monthly'),years:value('years'),baseReturn:value('return')/100,variance:value('variance')/100,inflation:value('inflation')/100};
+      const results=document.getElementById('results');
+      const out=ImpliedLensMath.compoundScenarios(input);if(!out.ok){results.innerHTML='<div class="note">'+out.error+'</div>';return}
+      results.innerHTML=[['Low case',out.low.value],['Base case',out.base.value],['High case',out.high.value],["Today's dollars",out.realValue]].map(v=>'<div class="result"><span>'+v[0]+'</span><strong>'+money(v[1])+'</strong></div>').join('');
+      if(chart)chart.destroy();chart=new Chart(document.getElementById('chart'),{type:'line',data:{labels:out.base.path.map(p=>'Year '+Math.round(p.month/12)),datasets:[{label:'High',data:out.high.path.map(p=>p.value),borderColor:'#247757',pointRadius:0},{label:'Base',data:out.base.path.map(p=>p.value),borderColor:'#76521d',borderWidth:2.5,pointRadius:0},{label:'Low',data:out.low.path.map(p=>p.value),borderColor:'#a94f55',pointRadius:0},{label:'Contributions',data:out.base.path.map(p=>p.contributions),borderColor:'#66717b',borderDash:[4,4],pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{tooltip:{callbacks:{label:c=>c.dataset.label+': '+money(c.raw)}}},scales:{x:{grid:{display:false}},y:{ticks:{callback:money}}}}});
+    }
+    document.getElementById('run').addEventListener('click',run);run();
+  </script>
+</body>
+</html>

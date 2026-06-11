@@ -115,6 +115,14 @@ test("GET / serves the homepage with a successful status", async () => {
   assert.match(res.headers.get("cache-control"), /no-cache/);
 });
 
+test("Public brand and acquisition pages are available", async () => {
+  for (const [path, marker] of [["/research-process", "Research the business"], ["/compound-calculator", "Compound Interest Scenario Calculator"]]) {
+    const res = await req(path);
+    assert.equal(res.status, 200);
+    assert.match(await res.text(), new RegExp(marker));
+  }
+});
+
 test("GET /healthz reports database and build health", async () => {
   const res = await req("/healthz");
   assert.equal(res.status, 200);
@@ -275,6 +283,29 @@ test("Free user gets 403 on /api/financials/:ticker", async () => {
   assert.equal(res.status, 403, "free user should get 403 on Pro-gated financials");
   const body = await res.json();
   assert.ok(body.requiresPro, "response should indicate Pro required");
+});
+
+test("Earnings-call research is Pro-gated", async () => {
+  const { cookie } = await makeSession("calls_gate_user", "calls_gate@test.com");
+  const res = await req("/api/calls/AAPL", { headers: { cookie } });
+  assert.equal(res.status, 403);
+  assert.equal((await res.json()).requiresPro, true);
+});
+
+test("Pro earnings-call research degrades gracefully when transcripts are unavailable", async () => {
+  const email = "calls_pro@test.com";
+  const { cookie, csrfToken } = await makeSession("calls_pro_user", email);
+  const granted = await req("/api/admin/grant-pro", {
+    method: "POST",
+    headers: { cookie, "X-CSRF-Token": csrfToken, "X-Admin-Secret": process.env.ADMIN_SECRET },
+    body: { email },
+  });
+  assert.equal(granted.status, 200);
+  const res = await req("/api/calls/AAPL", { headers: { cookie } });
+  assert.equal(res.status, 200);
+  const body = await res.json();
+  assert.deepEqual(body.transcripts, []);
+  assert.match(body.links.sec, /sec\.gov/);
 });
 
 test("Guest gets 401 on /api/financials/:ticker", async () => {

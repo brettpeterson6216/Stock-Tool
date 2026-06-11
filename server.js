@@ -168,6 +168,7 @@ app.use([
   "/api/screener",
   "/api/financials",
   "/api/earnings",
+  "/api/calls",
   "/api/metrics",
   "/api/sec",
   "/api/estimates",
@@ -198,6 +199,8 @@ app.get(["/reset-password", "/reset-password.html"], (req, res) =>
 app.get(["/about", "/about.html"], (_req, res) => res.sendFile(path.join(__dirname, "public", "about.html")));
 
 app.get(["/blog",  "/blog.html"],  (_req, res) => res.sendFile(path.join(__dirname, "public", "blog.html")));
+app.get(["/research-process", "/research-process.html"], (_req, res) => res.sendFile(path.join(__dirname, "public", "research-process.html")));
+app.get(["/compound-calculator", "/compound-calculator.html"], (_req, res) => res.sendFile(path.join(__dirname, "public", "compound-calculator.html")));
 
 // ============================================================
 //  CSRF token endpoint — returns (or creates) per-session token
@@ -233,6 +236,8 @@ app.post("/api/track", trackLimiter, async (req, res) => {
     "pro_gate_viewed", "upgrade_modal_opened", "daily_limit_reached",
     "checkout_redirect", "plan_badge_clicked", "pricing_viewed",
     "feedback_opened", "feedback_rated", "feedback_email_opened", "feedback_shared",
+    "research_shared", "call_research_loaded", "call_transcript_opened", "call_scorecard_saved",
+    "wealth_plan_run", "wealth_plan_shared",
   ]);
   if (!CLIENT_EVENTS.has(event)) {
     return res.status(400).json({ error: "Unknown event." });

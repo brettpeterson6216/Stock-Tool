@@ -2,6 +2,8 @@
 //  Financials routes — all Pro-gated
 //    GET /api/financials/:ticker
 //    GET /api/earnings/:ticker
+//    GET /api/calls/:ticker
+//    GET /api/calls/:ticker/:id
 //    GET /api/metrics/:ticker
 //    GET /api/me/limit              (free — quota info)
 //    GET /api/sec/:ticker
@@ -276,6 +278,76 @@ router.get("/earnings/:ticker", requirePro, async (req, res) => {
   } catch (e) {
     console.error("earnings proxy error:", e.message);
     res.status(500).json({ error: "Failed to fetch earnings." });
+  }
+});
+
+// ============================================================
+//  GET /api/calls/:ticker and /api/calls/:ticker/:id  (Pro)
+// ============================================================
+router.get("/calls/:ticker", requirePro, async (req, res) => {
+  const ticker = req.params.ticker.toUpperCase().replace(/[^A-Z0-9.]/g, "");
+  if (!ticker) return res.status(400).json({ error: "Invalid ticker." });
+  try {
+    const [listResult, profileResult] = await Promise.allSettled([
+      fetchWithTimeout(`https://finnhub.io/api/v1/stock/transcripts/list?symbol=${ticker}&token=${FINNHUB_KEY}`, {}, 7000),
+      fetchWithTimeout(`https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${FINNHUB_KEY}`, {}, 5000),
+    ]);
+    const read = async result => {
+      if (result.status !== "fulfilled" || !result.value.ok) return null;
+      return result.value.json().catch(() => null);
+    };
+    const [listData, profile] = await Promise.all([read(listResult), read(profileResult)]);
+    const rows = Array.isArray(listData) ? listData : Array.isArray(listData?.transcripts) ? listData.transcripts : Array.isArray(listData?.data) ? listData.data : [];
+    const transcripts = rows.slice(0, 24).map(row => ({
+      id: String(row.id || ""),
+      symbol: String(row.symbol || ticker),
+      year: Number(row.year) || null,
+      quarter: Number(row.quarter) || null,
+      time: row.time || row.date || null,
+      title: String(row.title || `${ticker} earnings call`).slice(0, 200),
+    })).filter(row => row.id);
+    res.json({
+      ticker,
+      company: profile?.name || ticker,
+      companyWebsite: /^https?:\/\//.test(profile?.weburl || "") ? profile.weburl : null,
+      transcripts,
+      transcriptProvider: transcripts.length ? "Finnhub" : null,
+      links: {
+        sec: `https://www.sec.gov/edgar/browse/?CIK=${encodeURIComponent(ticker)}&owner=exclude&action=getcompany`,
+        investorRelationsSearch: `https://www.google.com/search?q=${encodeURIComponent(`${ticker} investor relations earnings call`)}`,
+        earnings: `https://finance.yahoo.com/quote/${encodeURIComponent(ticker)}/earnings/`,
+      },
+    });
+  } catch (error) {
+    console.error("[calls] list error:", error.message);
+    res.status(500).json({ error: "Could not load earnings-call research." });
+  }
+});
+
+router.get("/calls/:ticker/:id", requirePro, async (req, res) => {
+  const ticker = req.params.ticker.toUpperCase().replace(/[^A-Z0-9.]/g, "");
+  const id = String(req.params.id || "");
+  if (!ticker || !/^[A-Za-z0-9_.:-]{1,200}$/.test(id)) return res.status(400).json({ error: "Invalid transcript request." });
+  try {
+    const response = await fetchWithTimeout(`https://finnhub.io/api/v1/stock/transcripts?id=${encodeURIComponent(id)}&token=${FINNHUB_KEY}`, {}, 12000);
+    if (!response.ok) return res.status(response.status).json({ error: "Transcript is unavailable from the current data provider." });
+    const data = await response.json();
+    const transcript = Array.isArray(data?.transcript) ? data.transcript.slice(0, 800).map(item => ({
+      name: String(item.name || item.speaker || "Speaker").slice(0, 160),
+      speech: String(item.speech || item.text || "").slice(0, 30000),
+    })).filter(item => item.speech) : [];
+    res.json({
+      id,
+      ticker,
+      year: Number(data?.year) || null,
+      quarter: Number(data?.quarter) || null,
+      audio: /^https?:\/\//.test(data?.audio || "") ? data.audio : null,
+      participants: Array.isArray(data?.participant) ? data.participant.slice(0, 100) : [],
+      transcript,
+    });
+  } catch (error) {
+    console.error("[calls] transcript error:", error.message);
+    res.status(500).json({ error: "Could not load this transcript." });
   }
 });
 

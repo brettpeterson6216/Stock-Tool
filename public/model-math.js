@@ -106,5 +106,44 @@
     return Math.sqrt(variance) * Math.sqrt(periods);
   }
 
-  return { cagr, cumulativeDividends, projectScenario, epsDcf, annualizedVolatility };
+  function futureValue(input) {
+    const principal = Number(input.principal ?? 0);
+    const monthlyContribution = Number(input.monthlyContribution ?? 0);
+    const annualReturn = Number(input.annualReturn);
+    const years = Number(input.years);
+    if (![principal, monthlyContribution, annualReturn, years].every(finite)) return { ok: false, error: "Enter valid numeric assumptions." };
+    if (principal < 0 || monthlyContribution < 0 || years <= 0) return { ok: false, error: "Starting balance and contributions cannot be negative, and years must be above zero." };
+    if (annualReturn <= -1) return { ok: false, error: "Annual return must be greater than -100%." };
+
+    const months = Math.round(years * 12);
+    const monthlyRate = Math.pow(1 + annualReturn, 1 / 12) - 1;
+    const path = [{ month: 0, value: principal, contributions: principal }];
+    let value = principal;
+    let contributions = principal;
+    for (let month = 1; month <= months; month += 1) {
+      value *= 1 + monthlyRate;
+      value += monthlyContribution;
+      contributions += monthlyContribution;
+      if (month % 12 === 0 || month === months) path.push({ month, value, contributions });
+    }
+    return { ok: true, value, contributions, growth: value - contributions, path };
+  }
+
+  function compoundScenarios(input) {
+    const baseReturn = Number(input.baseReturn);
+    const variance = Number(input.variance ?? 0);
+    const inflation = Number(input.inflation ?? 0);
+    if (![baseReturn, variance, inflation].every(finite) || variance < 0 || inflation <= -1) {
+      return { ok: false, error: "Enter valid return, variance, and inflation assumptions." };
+    }
+    const build = annualReturn => futureValue({ ...input, annualReturn });
+    const low = build(baseReturn - variance);
+    const base = build(baseReturn);
+    const high = build(baseReturn + variance);
+    if (![low, base, high].every(result => result.ok)) return [low, base, high].find(result => !result.ok);
+    const realValue = base.value / Math.pow(1 + inflation, Number(input.years));
+    return { ok: true, low, base, high, realValue };
+  }
+
+  return { cagr, cumulativeDividends, projectScenario, epsDcf, annualizedVolatility, futureValue, compoundScenarios };
 });
