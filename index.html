@@ -490,6 +490,10 @@ h2.sec-h2 {
 .scenario-input-bull legend { color:#3f9271; }
 .probability-status { margin:0 0 12px; color:var(--text5); font-family:var(--mono); font-size:.66rem; }
 .probability-status.invalid { color:#b95d63; }
+.projection-error { display:none; margin:0 0 12px; padding:9px 11px; border:1px solid rgba(185,93,99,.35); border-radius:6px; background:rgba(185,93,99,.08); color:var(--text3); font-size:.72rem; line-height:1.45; }
+.projection-error.show { display:block; }
+.projection-invalid { border-color:#b95d63 !important; box-shadow:0 0 0 2px rgba(185,93,99,.12) !important; }
+.projection-actions { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
 .expected-value-panel { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:1px; margin-top:1.25rem; border:1px solid var(--t-panel-border); background:var(--t-panel-border); border-radius:var(--r2); overflow:hidden; }
 .expected-value-metric { min-width:0; padding:12px; background:var(--t-panel-bg); }
 .expected-value-metric span { display:block; color:var(--text5); font-size:.62rem; text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px; }
@@ -1479,6 +1483,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
           S.trialEndsAt   = user.trial_ends_at || null;
           S.loggedIn      = true;
           S.emailVerified = user.email_verified ? true : false;
+          if (typeof syncPlanUI === 'function') syncPlanUI();
         }
         // Show verification banner if email unverified
         if (!user.email_verified) {
@@ -1608,6 +1613,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
           _ub.style.display = ''; // show for free/guest
         }
       }
+      if (typeof syncPlanUI === 'function') syncPlanUI();
       _dismissVeil();
       // Auto-load analyzer from ?ticker= query param (landing page CTA flow)
       (function _handleTickerParam() {
@@ -2250,21 +2256,38 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
               </div><!-- /dash-sidebar -->
               </div><!-- /dash-layout -->
 
-              <!-- Free Projection -->
+              <!-- Custom Projection -->
               <div class="panel-box" style="margin-bottom:14px;">
-                <div class="panel-box-title">Quick Projection — Automatic Scenario Range</div>
-                <div style="font-size:.7rem;line-height:1.5;color:var(--text5);margin:-.35rem 0 .85rem;">Enter a central earnings-growth and valuation view. The quick model automatically spreads bear and bull cases around it; use Scenario Lab for fully independent assumptions.</div>
-                <div class="proj-controls">
+                <div class="panel-box-title">Custom Bear, Base &amp; Bull Projection</div>
+                <div style="font-size:.7rem;line-height:1.5;color:var(--text5);margin:-.35rem 0 .85rem;">Set each case independently. No scenario is generated from another case. Scenario Lab adds dividends, dilution, and probability-weighted outcomes.</div>
+                <div class="proj-controls projection-shared">
                   <div><label class="fc-label" for="proj-years">Time Horizon</label>
                     <select class="fc-select" id="proj-years"><option value="1">1 Year</option><option value="2">2 Years</option><option value="3" selected>3 Years</option><option value="5">5 Years</option><option value="10">10 Years</option></select>
                   </div>
-                  <div><label class="fc-label" for="proj-growth">EPS Growth Assumption (%)</label><input class="fc-input" type="number" id="proj-growth" value="12" step="0.5"></div>
-                  <div><label class="fc-label" for="proj-margin">Earnings Adjustment</label>
-                    <select class="fc-select" id="proj-margin"><option value="compress">Compression</option><option value="flat" selected>Flat</option><option value="expand">Expansion</option></select>
-                  </div>
-                  <div><label class="fc-label" for="proj-pe">Base Exit P/E Multiple</label><input class="fc-input" type="number" id="proj-pe" value="25" step="1"></div>
+                  <div><label class="fc-label" for="proj-pe-now">Current P/E <span style="text-transform:none;">(shared starting point)</span></label><input class="fc-input" type="number" id="proj-pe-now" value="25" min="0.1" step="0.5"></div>
                 </div>
-                <button class="btn-run" onclick="runProjection()">Run Projection →</button>
+                <div class="scenario-input-grid">
+                  <fieldset class="scenario-input-card scenario-input-bear">
+                    <legend>Bear Case</legend>
+                    <label for="proj-g-bear">Earnings growth <span>%/yr</span></label><input class="fc-input" type="number" id="proj-g-bear" value="3" step="0.5">
+                    <label for="proj-pe-bear">Exit P/E <span>terminal multiple</span></label><input class="fc-input" type="number" id="proj-pe-bear" value="18" min="0.1" step="0.5">
+                  </fieldset>
+                  <fieldset class="scenario-input-card scenario-input-base">
+                    <legend>Base Case</legend>
+                    <label for="proj-g-base">Earnings growth <span>%/yr</span></label><input class="fc-input" type="number" id="proj-g-base" value="12" step="0.5">
+                    <label for="proj-pe-base">Exit P/E <span>terminal multiple</span></label><input class="fc-input" type="number" id="proj-pe-base" value="25" min="0.1" step="0.5">
+                  </fieldset>
+                  <fieldset class="scenario-input-card scenario-input-bull">
+                    <legend>Bull Case</legend>
+                    <label for="proj-g-bull">Earnings growth <span>%/yr</span></label><input class="fc-input" type="number" id="proj-g-bull" value="25" step="0.5">
+                    <label for="proj-pe-bull">Exit P/E <span>terminal multiple</span></label><input class="fc-input" type="number" id="proj-pe-bull" value="35" min="0.1" step="0.5">
+                  </fieldset>
+                </div>
+                <div id="proj-error" class="projection-error" role="alert"></div>
+                <div class="projection-actions">
+                  <button class="btn-run" onclick="runProjection()"><i class="ti ti-calculator"></i> Calculate Custom Cases</button>
+                  <button class="btn-save-analysis" onclick="openSection('projection')"><i class="ti ti-adjustments-horizontal"></i> Open Scenario Lab</button>
+                </div>
                 <div id="proj-results" style="display:none;">
                   <div class="scenario-row" id="scenario-cards"></div>
                   <div class="h200" style="margin-top:14px;"><canvas id="proj-chart"></canvas></div>
@@ -2457,7 +2480,8 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
               </fieldset>
             </div>
             <div id="adv-prob-status" class="probability-status" role="status">Probabilities total 100%</div>
-            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <div id="adv-proj-error" class="projection-error" role="alert"></div>
+            <div class="projection-actions">
               <button class="btn-run" onclick="runAdvancedProjection()"><i class="ti ti-calculator"></i> Calculate Scenarios</button>
               <button class="btn-save-analysis" onclick="saveAnalysis('projection')"><i class="ti ti-bookmark-plus"></i> Save to Analyses</button>
             </div>
@@ -4388,6 +4412,29 @@ const PRO_SECTION_CONTENT = {};
 
 function isPro() { return S.userPlan === 'pro' || S.userPlan === 'trial'; }
 
+function syncPlanUI() {
+  const pro = isPro();
+  const sidebarUpgrade = document.getElementById('sb-pro-card');
+  const homeUpgrade = document.getElementById('hsb-upgrade-box');
+  const navUpgrade = document.getElementById('nav-upgrade');
+  if (sidebarUpgrade) {
+    sidebarUpgrade.style.display = pro ? 'none' : '';
+    sidebarUpgrade.setAttribute('aria-hidden', String(pro));
+  }
+  if (homeUpgrade) homeUpgrade.style.display = pro ? 'none' : homeUpgrade.style.display;
+  if (navUpgrade && pro) navUpgrade.style.display = 'none';
+  document.documentElement.dataset.plan = pro ? 'pro' : 'free';
+  if (pro && typeof PRO_SECTION_CONTENT !== 'undefined' && typeof PRO_SECTIONS !== 'undefined') {
+    const activeSection=document.querySelector('.app-section.open');
+    const activeId=activeSection?.id?.replace('sec-','');
+    const activeBody=activeId ? document.getElementById('body-'+activeId) : null;
+    if(activeId && PRO_SECTIONS.includes(activeId) && activeBody?.querySelector('.pro-gate-card') && PRO_SECTION_CONTENT[activeId]){
+      activeBody.innerHTML=PRO_SECTION_CONTENT[activeId];
+      if(typeof openSection==='function') openSection(activeId,true);
+    }
+  }
+}
+
 /* ══════════════════════════════════════════════════════
    CENTRALISED SECTION HELPERS
    sectionProGateHtml(id)   — contextual upgrade card
@@ -5309,6 +5356,10 @@ async function yahooFetch(ticker, range='1y') {
 
 // Update the analyses-remaining badge in the UI
 function updateLimitUI(remaining, limit, plan) {
+  if (plan === 'pro' || plan === 'trial' || plan === 'free') {
+    S.userPlan = plan;
+    syncPlanUI();
+  }
   const wrap = document.getElementById('limit-counter');
   if (!wrap) return;
   if (plan === 'pro' || plan === 'trial') { wrap.style.display = 'none'; return; }
@@ -5740,7 +5791,10 @@ function renderStock(result, ticker) {
   })();
 
   const peNow=Math.round(meta.trailingPE||25);
-  document.getElementById('proj-pe').value=peNow;
+  const quickCurrentPe=document.getElementById('proj-pe-now');
+  const quickBasePe=document.getElementById('proj-pe-base');
+  if(quickCurrentPe && !quickCurrentPe.dataset.userEdited) quickCurrentPe.value=peNow;
+  if(quickBasePe && !quickBasePe.dataset.userEdited) quickBasePe.value=peNow;
   // Auto-fill advanced projection + DCF fields
   if(document.getElementById('adv-price')) document.getElementById('adv-price').value=price.toFixed(2);
   if(document.getElementById('adv-pe-now')) document.getElementById('adv-pe-now').value=peNow;
@@ -5753,26 +5807,20 @@ function renderStock(result, ticker) {
       if (!er.ok) return;
       const est = await er.json();
 
-      // Quick projection growth -> prefer EPS consensus, then revenue consensus.
-      const growthEl = document.getElementById('proj-growth');
+      // Use consensus as a starting point for Base only. Bear and Bull remain user-controlled.
+      const growthEl = document.getElementById('proj-g-base');
       const projectionGrowth = est.epsGrowth !== null ? est.epsGrowth : est.revenueGrowth;
-      if (projectionGrowth !== null && growthEl) {
+      if (projectionGrowth !== null && growthEl && !growthEl.dataset.userEdited) {
         const g = Math.max(-50, Math.min(200, projectionGrowth));
         growthEl.value = g.toFixed(1);
-        growthEl.title = est.epsGrowth !== null ? 'Auto-filled from analyst consensus EPS growth' : 'EPS proxy auto-filled from analyst consensus revenue growth';
+        growthEl.title = est.epsGrowth !== null ? 'Base case starting point from analyst consensus EPS growth' : 'Base case EPS proxy from analyst consensus revenue growth';
       }
 
-      // Forward P/E → prefer analyst-implied over trailing
-      const peEl = document.getElementById('proj-pe');
-      if (est.forwardPE && est.forwardPE > 0 && est.forwardPE < 500 && peEl) {
+      // Forward P/E -> use as the Base starting point only.
+      const peEl = document.getElementById('proj-pe-base');
+      if (est.forwardPE && est.forwardPE > 0 && est.forwardPE < 500 && peEl && !peEl.dataset.userEdited) {
         peEl.value = Math.round(est.forwardPE);
-        peEl.title = 'Auto-filled from forward P/E estimate';
-      }
-
-      // Margin scenario → based on historical margin trend
-      const marginEl = document.getElementById('proj-margin');
-      if (est.marginTrend && marginEl) {
-        marginEl.value = est.marginTrend;
+        peEl.title = 'Base case starting point from forward P/E estimate';
       }
 
       S.estimates = est;
@@ -5797,27 +5845,16 @@ function renderStock(result, ticker) {
         ['dcf-g2','qdcf-g2'].forEach(id => { const el=document.getElementById(id); if(el) el.value=g2.toFixed(1); });
       }
 
-      // ── Advanced Projection: auto-fill Bear/Base/Bull ──
+      // Advanced Projection: use consensus for Base only; never derive Bear or Bull from it.
       if (est.epsGrowth !== null || est.revenueGrowth !== null) {
         const baseG = est.epsGrowth !== null ? est.epsGrowth : est.revenueGrowth;
-        const bear = (baseG * 0.35).toFixed(1);
-        const base = baseG.toFixed(1);
-        const bull = (baseG * 1.8).toFixed(1);
-        const advBear = document.getElementById('adv-g-bear');
         const advBase = document.getElementById('adv-g-base');
-        const advBull = document.getElementById('adv-g-bull');
-        if(advBear) advBear.value = bear;
-        if(advBase) advBase.value = base;
-        if(advBull) advBull.value = bull;
+        if(advBase && !advBase.dataset.userEdited) advBase.value = baseG.toFixed(1);
       }
       if (est.forwardPE) {
-        const peBear = document.getElementById('adv-pe-bear');
         const peBase = document.getElementById('adv-pe-base');
-        const peBull = document.getElementById('adv-pe-bull');
         const fpe = Math.round(est.forwardPE);
-        if(peBear) peBear.value = Math.round(fpe * 0.72);
-        if(peBase) peBase.value = fpe;
-        if(peBull) peBull.value = Math.round(fpe * 1.32);
+        if(peBase && !peBase.dataset.userEdited) peBase.value = fpe;
       }
 
       // ── Badge ──
@@ -5828,7 +5865,7 @@ function renderStock(result, ticker) {
           const b = document.createElement('div');
           b.id = 'proj-est-badge';
           b.style.cssText = 'font-size:.63rem;color:var(--gold);font-family:var(--mono);margin-bottom:.5rem;letter-spacing:.04em;';
-          b.textContent = '\u2736 Inputs auto-filled from analyst consensus estimates';
+          b.textContent = '\u2736 Base case seeded from analyst consensus; Bear and Bull stay custom';
           btn.parentNode.insertBefore(b, btn);
         }
       }
@@ -6894,32 +6931,56 @@ async function changeRange(range,btn) {
 /* ══════════════════════════════════════════════════════
    PROJECTION
 ══════════════════════════════════════════════════════ */
+function clearProjectionFeedback(errorId,resultId,chartId) {
+  const error=document.getElementById(errorId);
+  const results=document.getElementById(resultId);
+  if(error){error.textContent='';error.classList.remove('show');}
+  if(results) results.style.display='none';
+  document.querySelectorAll('.projection-invalid').forEach(function(field){field.classList.remove('projection-invalid');});
+  if(chartId) destroyChart(chartId);
+}
+function showProjectionError(errorId,message,fieldIds) {
+  const error=document.getElementById(errorId);
+  (fieldIds||[]).forEach(function(id){document.getElementById(id)?.classList.add('projection-invalid');});
+  if(error){error.textContent=message;error.classList.add('show');}
+  toast(message,'red');
+}
 function runProjection() {
-  if(!S.data){ toast('Load a stock first','red'); return; }
+  clearProjectionFeedback('proj-error','proj-results','proj-chart');
+  if(!S.data){ showProjectionError('proj-error','Load a stock before calculating custom cases.'); return; }
   const price=parseFloat(document.getElementById('r-price').textContent.replace('$',''));
   const years=parseInt(document.getElementById('proj-years').value);
-  const growthBase=parseFloat(document.getElementById('proj-growth').value)/100;
-  const margin=document.getElementById('proj-margin').value;
-  const pe=parseFloat(document.getElementById('proj-pe').value);
-  const mm={compress:.85,flat:1.0,expand:1.15}[margin];
-  // All three scenarios shift with the selected margin — Bear/Bull offset around it
+  const currentPE=Number(document.getElementById('proj-pe-now').value);
   const scenarios=[
-    {l:'Bear',cls:'sc-bear',g:growthBase*.4, pem:.7, mm:mm*.88},
-    {l:'Base',cls:'sc-base',g:growthBase,    pem:1.0,mm:mm},
-    {l:'Bull',cls:'sc-bull',g:growthBase*1.7,pem:1.3,mm:mm*1.12},
+    {key:'bear',l:'Bear',cls:'sc-bear'},
+    {key:'base',l:'Base',cls:'sc-base'},
+    {key:'bull',l:'Bull',cls:'sc-bull'},
   ];
+  const invalidFields=[];
+  if(!Number.isFinite(price)||price<=0) invalidFields.push('r-price');
+  if(!Number.isFinite(currentPE)||currentPE<=0) invalidFields.push('proj-pe-now');
+  scenarios.forEach(function(s){
+    s.growth=Number(document.getElementById('proj-g-'+s.key).value)/100;
+    s.exitPE=Number(document.getElementById('proj-pe-'+s.key).value);
+    if(!Number.isFinite(s.growth)||s.growth<=-1) invalidFields.push('proj-g-'+s.key);
+    if(!Number.isFinite(s.exitPE)||s.exitPE<=0) invalidFields.push('proj-pe-'+s.key);
+  });
+  if(invalidFields.length){
+    showProjectionError('proj-error','Each custom case needs earnings growth above -100% and an exit P/E above 0.',invalidFields);
+    return;
+  }
   const results=scenarios.map(s=>{
-    const model=ImpliedLensMath.projectScenario({price,currentPE:pe,exitPE:pe*s.pem,growth:s.g,years,earningsMultiplier:s.mm});
+    const model=ImpliedLensMath.projectScenario({price,currentPE,exitPE:s.exitPE,growth:s.growth,years});
     return{...s,model,price:model.ok?model.terminalPrice:NaN,tot:model.ok?model.totalReturn*100:NaN,cagr:model.ok?model.cagr*100:NaN};
   });
   const invalid=results.find(result=>!result.model.ok);
-  if(invalid){toast(invalid.model.error,'red');return;}
+  if(invalid){showProjectionError('proj-error',invalid.model.error);return;}
   document.getElementById('scenario-cards').innerHTML=results.map(r=>`
     <div class="sc-card ${r.cls}">
       <div class="sc-lbl">${r.l} Case</div>
       <div class="sc-price">$${r.price.toFixed(2)}</div>
       <div class="sc-pct">${r.tot>=0?'+':''}${r.tot.toFixed(1)}% total</div>
-      <div class="sc-irr">CAGR: ${r.cagr.toFixed(1)}% / yr</div>
+      <div class="sc-irr">CAGR: ${r.cagr.toFixed(1)}% / yr · Exit P/E: ${r.exitPE.toFixed(1)}x</div>
     </div>`).join('');
 
   destroyChart('proj-chart');
@@ -7131,6 +7192,7 @@ function runQuickDCF() {
    ADVANCED PROJECTION MODEL
 ===================================================== */
 function runAdvancedProjection() {
+  clearProjectionFeedback('adv-proj-error','adv-proj-results','adv-proj-chart');
   var years=Number(document.getElementById('adv-years').value);
   var price0=Number(document.getElementById('adv-price').value);
   var peNow=Number(document.getElementById('adv-pe-now').value);
@@ -7150,9 +7212,31 @@ function runAdvancedProjection() {
       probability:Number(document.getElementById('adv-prob-'+s.key).value)/100,
     });
   });
+  var invalidFields=[];
+  if(!Number.isFinite(price0)||price0<=0) invalidFields.push('adv-price');
+  if(!Number.isFinite(peNow)||peNow<=0) invalidFields.push('adv-pe-now');
+  scenarios.forEach(function(s){
+    if(!Number.isFinite(s.growth)||s.growth<=-1) invalidFields.push('adv-g-'+s.key);
+    if(!Number.isFinite(s.exitPE)||s.exitPE<=0) invalidFields.push('adv-pe-'+s.key);
+    if(!Number.isFinite(s.dividendYield)||s.dividendYield<0) invalidFields.push('adv-div-'+s.key);
+    if(!Number.isFinite(s.dividendGrowth)||s.dividendGrowth<=-1) invalidFields.push('adv-div-g-'+s.key);
+    if(!Number.isFinite(s.annualDilution)||s.annualDilution<=-1) invalidFields.push('adv-dil-'+s.key);
+    if(!Number.isFinite(s.probability)||s.probability<0||s.probability>1) invalidFields.push('adv-prob-'+s.key);
+  });
+  var probabilityTotal=scenarios.reduce(function(sum,s){return sum+s.probability;},0);
+  if(Math.abs(probabilityTotal-1)>0.0001){
+    scenarios.forEach(function(s){invalidFields.push('adv-prob-'+s.key);});
+  }
+  if(invalidFields.length){
+    showProjectionError('adv-proj-error',Math.abs(probabilityTotal-1)>0.0001
+      ? 'Probabilities must total 100%. Check the highlighted assumptions before calculating.'
+      : 'Check the highlighted assumptions. Exit P/E and shared values must be above 0; growth and buybacks must remain above -100%.',invalidFields);
+    updateScenarioProbabilityStatus();
+    return;
+  }
   var projection=ImpliedLensMath.projectCases({price:price0,currentPE:peNow,years:years,scenarios:scenarios});
   updateScenarioProbabilityStatus();
-  if(!projection.ok){toast(projection.error,'red');return;}
+  if(!projection.ok){showProjectionError('adv-proj-error',projection.error);return;}
   var results=projection.scenarios.map(function(result){
     return Object.assign({},result,{
       l:result.name,priceN:result.model.terminalPrice,divTotal:result.model.dividends,
@@ -7185,7 +7269,7 @@ function runAdvancedProjection() {
     type:'line',data:{labels:labels,datasets:datasets},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:(()=>{const _t=ct();return{legend:{display:true,position:'top',align:'end',labels:{color:_t.text,font:{size:10},boxWidth:12,usePointStyle:true,pointStyleWidth:8,padding:8}},tooltip:{mode:'index',intersect:false,backgroundColor:_t.ttBg,titleColor:_t.ttTitle,bodyColor:_t.ttBody,borderColor:_t.ttBorder,borderWidth:1,callbacks:{label:ctx=>` ${ctx.dataset.label}: $${Number(ctx.raw).toFixed(2)}`}}};})(),
-      scales:(()=>{const _t=ct();return{x:{ticks:{color:_t.text,font:{size:11}},grid:{color:_t.grid},title:{display:true,text:'Year',color:_t.muted,font:{size:9}}},y:{ticks:{color:_t.text,font:{size:10},callback:function(v){return '$'+v.toFixed(0);}},grid:{color:_t.grid},title:{display:true,text:'Price (USD)',color:_t.muted,font:{size:9}}}};})()}
+      scales:(()=>{const _t=ct();return{x:{ticks:{color:_t.text,font:{size:11}},grid:{color:_t.grid},title:{display:true,text:'Year',color:_t.muted,font:{size:9}}},y:{ticks:{color:_t.text,font:{size:10},callback:function(v){return '$'+v.toFixed(0);}},grid:{color:_t.grid},title:{display:true,text:'Total value (USD)',color:_t.muted,font:{size:9}}}};})()}
   });
   var irrHtml='<div class="dcf-out"><div class="dcf-row" style="background:var(--t-acc-header-bg);"><span class="dcf-lbl" style="font-weight:600;color:var(--text3);">Scenario</span><span class="dcf-val" style="font-weight:600;">Price</span><span class="dcf-val" style="font-weight:600;">Total Return</span><span class="dcf-val" style="font-weight:600;">CAGR</span></div>';
   results.forEach(function(r){
@@ -7203,7 +7287,24 @@ function updateScenarioProbabilityStatus() {
   status.classList.toggle('invalid',Math.abs(total-100)>=0.01);
 }
 document.addEventListener('input',function(event){
-  if(event.target && event.target.id && event.target.id.indexOf('adv-prob-')===0) updateScenarioProbabilityStatus();
+  if(!event.target || !event.target.id) return;
+  var id=event.target.id;
+  if(id.indexOf('proj-')===0 || id.indexOf('adv-')===0){
+    event.target.dataset.userEdited='true';
+    event.target.classList.remove('projection-invalid');
+    if(id.indexOf('adv-')===0){
+      const advancedResults=document.getElementById('adv-proj-results');
+      const advancedError=document.getElementById('adv-proj-error');
+      if(advancedResults) advancedResults.style.display='none';
+      if(advancedError) advancedError.classList.remove('show');
+    } else {
+      const quickResults=document.getElementById('proj-results');
+      const quickError=document.getElementById('proj-error');
+      if(quickResults) quickResults.style.display='none';
+      if(quickError) quickError.classList.remove('show');
+    }
+  }
+  if(id.indexOf('adv-prob-')===0) updateScenarioProbabilityStatus();
 });
 
 /* =====================================================

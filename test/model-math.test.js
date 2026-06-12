@@ -65,6 +65,29 @@ test("project cases validates probabilities and returns a weighted outcome", () 
   }).ok, false);
 });
 
+test("project cases keeps bear, base, and bull assumptions independent", () => {
+  const input = {
+    price: 100,
+    currentPE: 20,
+    years: 3,
+    scenarios: [
+      { name: "Bear", probability: 0.25, exitPE: 15, growth: 0.02 },
+      { name: "Base", probability: 0.5, exitPE: 20, growth: 0.1 },
+      { name: "Bull", probability: 0.25, exitPE: 30, growth: 0.2 },
+    ],
+  };
+  const first = math.projectCases(input);
+  const changedBear = math.projectCases({
+    ...input,
+    scenarios: input.scenarios.map(scenario => scenario.name === "Bear" ? { ...scenario, exitPE: 50 } : scenario),
+  });
+  assert.equal(first.ok, true);
+  assert.equal(changedBear.ok, true);
+  assert.notEqual(first.scenarios[0].model.terminalPrice, changedBear.scenarios[0].model.terminalPrice);
+  assert.equal(first.scenarios[1].model.terminalPrice, changedBear.scenarios[1].model.terminalPrice);
+  assert.equal(first.scenarios[2].model.terminalPrice, changedBear.scenarios[2].model.terminalPrice);
+});
+
 test("EPS DCF discounts both forecast earnings and terminal value", () => {
   const result = math.epsDcf({ eps: 5, growth1: 0.1, growth2: 0.05, terminalGrowth: 0.03, discountRate: 0.1 });
   assert.equal(result.ok, true);
