@@ -77,7 +77,9 @@
           <div class="il-wealth-field"><label for="il-w-return">Base annual return %</label><input id="il-w-return" type="number" min="-99" max="100" step=".1" value="10"></div>
           <div class="il-wealth-field"><label for="il-w-variance">Scenario range +/- %</label><input id="il-w-variance" type="number" min="0" max="50" step=".1" value="3"></div>
           <div class="il-wealth-field"><label for="il-w-inflation">Inflation %</label><input id="il-w-inflation" type="number" min="-10" max="30" step=".1" value="2.5"></div>
-        </div><div class="il-score-save"><button class="il-research-btn primary" id="il-run-wealth"><i class="ti ti-calculator"></i>Run scenarios</button></div><div class="il-wealth-note">The model compounds monthly and assumes contributions arrive at the end of each month. It does not include taxes, fees, withdrawals, or changing return sequences.</div></section>
+          <div class="il-wealth-field"><label for="il-w-fee">Annual fees %</label><input id="il-w-fee" type="number" min="0" max="20" step=".05" value=".25"></div>
+          <div class="il-wealth-field"><label for="il-w-tax">Annual tax drag %</label><input id="il-w-tax" type="number" min="0" max="50" step=".1" value="0"></div>
+        </div><div class="il-score-save"><button class="il-research-btn primary" id="il-run-wealth"><i class="ti ti-calculator"></i>Run scenarios</button></div><div class="il-wealth-note">The model compounds monthly, deducts optional annual fee and tax drag from each scenario return, and assumes contributions arrive at month end. It does not model withdrawals or changing return sequences.</div></section>
         <section class="il-research-panel"><div class="il-wealth-results" id="il-wealth-results"></div><div class="il-wealth-chart"><canvas id="il-wealth-chart" role="img" aria-label="Low, base, high, and contribution wealth scenarios over time"></canvas></div></section>
       </div>
     </div></div></div>`;
@@ -214,6 +216,8 @@
       baseReturn: Number(document.getElementById("il-w-return")?.value) / 100,
       variance: Number(document.getElementById("il-w-variance")?.value) / 100,
       inflation: Number(document.getElementById("il-w-inflation")?.value) / 100,
+      annualFee: Number(document.getElementById("il-w-fee")?.value) / 100,
+      taxDrag: Number(document.getElementById("il-w-tax")?.value) / 100,
     };
   }
 

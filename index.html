@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Implied Lens — Stock Research and Valuation Workspace</title>
 <meta name="description" content="Implied Lens is a source-aware stock research workspace with market charts, valuation models, earnings-call research, SEC filings, financial statements, projections, and a reviewable investment process.">
-<meta name="keywords" content="stock analysis, stock screener, DCF valuation, earnings history, SEC filings, analyst price targets, dark pool data, institutional holdings, stock comparison, financial statements, implied lens">
+<meta name="keywords" content="stock analysis, stock screener, intrinsic value, earnings history, SEC filings, analyst price targets, FINRA OTC data, institutional holdings, stock comparison, financial statements, implied lens">
 <meta name="author" content="Implied Lens">
 <meta name="robots" content="index, follow">
 <meta name="theme-color" content="#A9782F">
@@ -44,7 +44,7 @@
   },
   "featureList": [
     "Current market price charts",
-    "DCF intrinsic value calculator",
+    "EPS intrinsic value calculator",
     "Earnings history and EPS surprise tracker",
     "SEC EDGAR filing browser",
     "Analyst price targets and recommendations",
@@ -66,20 +66,20 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.44.0/dist/tabler-icons.min.css" rel="stylesheet">
-<link href="/product-system.css?v=20260610-2" rel="stylesheet">
+<link href="/product-system.css?v=20260612-1" rel="stylesheet">
 <link href="/workspace-system.css?v=20260609-1" rel="stylesheet">
 <link href="/research-system.css?v=20260611-1" rel="stylesheet">
 <script src="/vendor/chart.umd.min.js?v=4.4.1"></script>
 <script defer src="/vendor/hammer.min.js?v=2.0.8"></script>
 <script defer src="/vendor/chartjs-plugin-zoom.min.js?v=1.2.1"></script>
-<script defer src="/model-math.js?v=20260611-2"></script>
+<script defer src="/model-math.js?v=20260612-1"></script>
 <style>
 /* ═══════════════════════════════ TOKENS ═══════════════════════════════ */
 :root {
   --cream:#F7F6F2; --cream2:#EFEEE9; --cream3:#E3E2DC;
   --card:#FCFBF8;  --panel:#F2F1EC;
   --ink:#151719;  --ink2:#292D31; --ink3:#4A5057;
-  --ink4:#66717B; --ink5:#626C76;
+  --ink4:#59636C; --ink5:#56616B;
   --gold:#76521D;   --gold-l:#D9BF8D;  --gold-l2:#F1E8D8;
   --gold-d:#503812; --gold-d2:#38270D;
   --green:#247757; --green-l:#E4F1EB; --green-t:rgba(36,119,87,.10);
@@ -472,6 +472,41 @@ h2.sec-h2 {
   font-size:.9rem; font-weight:600; transition:all .18s;
 }
 .btn-run:hover { background:#d4a93e; transform:translateY(-1px); }
+.tool-intro { display:grid; gap:4px; padding:12px 14px; margin-bottom:1rem; border-left:3px solid var(--gold); background:rgba(185,138,61,.06); color:var(--text3); font-size:.78rem; line-height:1.5; }
+.tool-intro strong { color:var(--text); }
+.tool-intro-note { color:var(--text5); font-size:.7rem; }
+.projection-shared { grid-template-columns:repeat(3,minmax(140px,1fr)); }
+.scenario-input-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-bottom:8px; }
+.scenario-input-card { min-width:0; margin:0; padding:12px; border:1px solid var(--t-panel-border); border-radius:var(--r2); background:var(--t-panel-bg); display:grid; grid-template-columns:minmax(0,1fr) minmax(82px,.7fr); gap:8px 10px; align-items:center; }
+.scenario-input-card legend { padding:0 6px; font-family:var(--mono); font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; }
+.scenario-input-card label { min-width:0; color:var(--text3); font-size:.7rem; line-height:1.25; }
+.scenario-input-card label span { display:block; color:var(--text5); font-size:.58rem; margin-top:2px; }
+.scenario-input-card .fc-input { min-width:0; padding:.48rem .6rem; text-align:right; }
+.scenario-input-bear { border-top:2px solid #b95d63; }
+.scenario-input-bear legend { color:#b95d63; }
+.scenario-input-base { border-top:2px solid var(--gold); }
+.scenario-input-base legend { color:var(--gold); }
+.scenario-input-bull { border-top:2px solid #3f9271; }
+.scenario-input-bull legend { color:#3f9271; }
+.probability-status { margin:0 0 12px; color:var(--text5); font-family:var(--mono); font-size:.66rem; }
+.probability-status.invalid { color:#b95d63; }
+.expected-value-panel { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:1px; margin-top:1.25rem; border:1px solid var(--t-panel-border); background:var(--t-panel-border); border-radius:var(--r2); overflow:hidden; }
+.expected-value-metric { min-width:0; padding:12px; background:var(--t-panel-bg); }
+.expected-value-metric span { display:block; color:var(--text5); font-size:.62rem; text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px; }
+.expected-value-metric strong { color:var(--text); font-family:var(--mono); font-size:.95rem; }
+.sensitivity-wrap { overflow-x:auto; }
+.sensitivity-table { width:100%; min-width:520px; border-collapse:collapse; font-family:var(--mono); font-size:.72rem; }
+.sensitivity-table caption { text-align:left; color:var(--text3); font-family:var(--sans); font-weight:700; padding:0 0 8px; }
+.sensitivity-table th,.sensitivity-table td { padding:7px 9px; text-align:center; border:1px solid var(--t-panel-border); }
+.sensitivity-table th { color:var(--text5); background:var(--t-acc-header-bg); font-size:.62rem; }
+.sensitivity-table td { color:var(--text3); background:var(--t-panel-bg); }
+.sensitivity-table td.current { color:var(--gold); font-weight:700; outline:1px solid var(--gold); outline-offset:-2px; }
+.screener-summary { display:flex; justify-content:space-between; align-items:center; gap:10px; margin:-6px 0 10px; color:var(--text5); font-size:.7rem; }
+.btn-secondary-compact { display:inline-flex; align-items:center; gap:5px; border:1px solid var(--t-panel-border); background:var(--t-panel-bg); color:var(--text4); border-radius:var(--r); padding:6px 9px; font-size:.68rem; cursor:pointer; }
+.btn-secondary-compact:hover { border-color:var(--gold); color:var(--gold); }
+.scr-sort-btn { display:inline-flex; align-items:center; justify-content:flex-end; gap:3px; width:100%; padding:0; border:0; background:transparent; color:inherit; font:inherit; text-transform:inherit; letter-spacing:inherit; cursor:pointer; white-space:nowrap; }
+.scr-table th:first-child .scr-sort-btn { justify-content:flex-start; }
+.scr-sort-btn[aria-sort="ascending"],.scr-sort-btn[aria-sort="descending"] { color:var(--gold); }
 
 /* scenario cards */
 .scenario-row { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:1.25rem; }
@@ -750,6 +785,8 @@ footer { background:#080808; padding:3rem 2rem; }
   .features-bento { grid-template-columns:1fr; }
   .g2 { grid-template-columns:1fr; }
   .scenario-row { grid-template-columns:1fr; }
+  .projection-shared,.scenario-input-grid,.expected-value-panel { grid-template-columns:1fr; }
+  .scenario-input-card { grid-template-columns:minmax(0,1fr) minmax(92px,.65fr); }
   section { padding:4rem 1.25rem; }
 }
 @media(max-width:640px){
@@ -1372,7 +1409,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
   }
 
   function navGoTo(id) {
-    if (id === 'home') { showView('home'); updateNavToolLink(true); return; }
+    if (id === 'home') { showView('home'); updateNavToolLink(true); initializeHomeDashboard(); return; }
     showView('tool');
     window.scrollTo(0,0);
     openSection(id); // no skipProCheck — free users see the upgrade modal, not empty Pro panels
@@ -1633,7 +1670,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
       <div class="hsb-label">Tools</div>
       <a class="hsb-item" href="#" onclick="navGoTo('compare');return false;"><i class="ti ti-arrows-split-2"></i><span>Compare</span></a>
       <a class="hsb-item" href="#" onclick="navGoTo('projection');return false;"><i class="ti ti-trending-up"></i><span>Projection Builder</span></a>
-      <a class="hsb-item" href="#" onclick="navGoTo('dcf');return false;"><i class="ti ti-calculator"></i><span>DCF Calculator</span></a>
+      <a class="hsb-item" href="#" onclick="navGoTo('dcf');return false;"><i class="ti ti-calculator"></i><span>Intrinsic Value</span></a>
       <a class="hsb-item" href="#" onclick="navGoTo('projection');return false;"><i class="ti ti-rotate"></i><span>Scenario Builder</span></a>
     </div>
 
@@ -1940,7 +1977,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
     <!-- Feature strip -->
     <div class="home-feat-strip">
       <div class="hfs-item"><div class="hfs-icon"><i class="ti ti-shield-check"></i></div><div><div class="hfs-title">Source-Aware Research</div><div class="hfs-desc">Transparent providers and visible methodology.</div></div></div>
-      <div class="hfs-item"><div class="hfs-icon"><i class="ti ti-bolt"></i></div><div><div class="hfs-title">Valuation &amp; Scenarios</div><div class="hfs-desc">DCF, multiples, projections, and sensitivities.</div></div></div>
+      <div class="hfs-item"><div class="hfs-icon"><i class="ti ti-bolt"></i></div><div><div class="hfs-title">Valuation &amp; Scenarios</div><div class="hfs-desc">Intrinsic value, multiples, projections, and sensitivities.</div></div></div>
       <div class="hfs-item"><div class="hfs-icon"><i class="ti ti-target"></i></div><div><div class="hfs-title">Reviewable Decisions</div><div class="hfs-desc">Write the thesis, downside, and next check.</div></div></div>
       <div class="hfs-item"><div class="hfs-icon"><i class="ti ti-users"></i></div><div><div class="hfs-title">Built for Investors</div><div class="hfs-desc">Tools designed for retail investors who demand more.</div></div></div>
     </div>
@@ -1960,8 +1997,8 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
       <p class="sec-sub">Clear pricing. No hidden paywalls. A focused research workspace built for repeat use.</p>
       <div class="pricing-grid">
         <div class="pricing-card"><div class="pricing-tier">Starter</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">0</span><span class="p-per">/month</span></div><p class="p-desc">For curious investors exploring the platform.</p><ul class="p-features"><li>5 stock analyses per day</li><li>Latest price &amp; key metrics</li><li>Price chart with MA overlays</li><li>RSI &amp; MACD indicators</li><li>3-scenario projection model</li><li>Cloud-saved analyses (sync across devices)</li></ul><button class="btn-plan btn-plan-dark" id="pricing-free-btn">Get started free</button></div>
-        <div class="pricing-card featured"><div class="pricing-pop">Most Popular</div><div class="pricing-tier">Pro</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">7.99</span><span class="p-per">/month</span></div><p class="p-desc" style="font-size:.8rem;opacity:.7;">or $59.99/year &mdash; save 37%</p><p class="p-desc">For serious investors who research every day.</p><ul class="p-features"><li>Unlimited stock analyses</li><li>DCF and advanced projections</li><li>Earnings-call research center</li><li>4-stock side-by-side comparison</li><li>Full stock screener</li><li>PDF report export</li></ul><button class="btn-plan btn-plan-gold" id="pricing-pro-btn">Start 7-day free trial &rarr;</button></div>
-        <div class="pricing-card" style="position:relative;"><div class="save-badge">SAVE 37%</div><div class="pricing-tier">Pro Annual</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">59.99</span><span class="p-per">/year</span></div><p class="p-desc" style="font-size:.8rem;opacity:.7;">just $5/month</p><p class="p-desc">Everything in Pro, billed once a year.</p><ul class="p-features"><li>Unlimited stock analyses</li><li>DCF and advanced projections</li><li>Earnings-call research center</li><li>4-stock comparison</li><li>Full stock screener</li><li>PDF report export</li></ul><button class="btn-plan btn-plan-gold" id="pricing-annual-btn">Start 7-day free trial &rarr;</button></div>
+        <div class="pricing-card featured"><div class="pricing-pop">Most Popular</div><div class="pricing-tier">Pro</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">7.99</span><span class="p-per">/month</span></div><p class="p-desc" style="font-size:.8rem;opacity:.7;">or $59.99/year &mdash; save 37%</p><p class="p-desc">For serious investors who research every day.</p><ul class="p-features"><li>Unlimited stock analyses</li><li>Intrinsic value and advanced projections</li><li>Earnings-call research center</li><li>4-stock side-by-side comparison</li><li>Full stock screener</li><li>PDF report export</li></ul><button class="btn-plan btn-plan-gold" id="pricing-pro-btn">Start 7-day free trial &rarr;</button></div>
+        <div class="pricing-card" style="position:relative;"><div class="save-badge">SAVE 37%</div><div class="pricing-tier">Pro Annual</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">59.99</span><span class="p-per">/year</span></div><p class="p-desc" style="font-size:.8rem;opacity:.7;">just $5/month</p><p class="p-desc">Everything in Pro, billed once a year.</p><ul class="p-features"><li>Unlimited stock analyses</li><li>Intrinsic value and advanced projections</li><li>Earnings-call research center</li><li>4-stock comparison</li><li>Full stock screener</li><li>PDF report export</li></ul><button class="btn-plan btn-plan-gold" id="pricing-annual-btn">Start 7-day free trial &rarr;</button></div>
       </div>
     </div></section>
 
@@ -1998,7 +2035,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
         <div class="sb-group-label">Tools</div>
         <div class="sb-item" data-sec="compare"><i class="ti ti-adjustments-horizontal sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Compare</span></div>
         <div class="sb-item" data-sec="projection"><i class="ti ti-timeline sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Projection</span></div>
-        <div class="sb-item" data-sec="dcf"><i class="ti ti-calculator sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">DCF</span></div>
+        <div class="sb-item" data-sec="dcf"><i class="ti ti-calculator sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">EPS Value</span></div>
         <div class="sb-item" data-sec="screener"><i class="ti ti-filter sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Screener</span></div>
       </div>
 
@@ -2027,9 +2064,9 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
         <span class="ash-title" id="ash-title">Chart &amp; Analysis</span>
         <span class="ash-sub" id="ash-sub"></span>
         <div class="ash-actions">
-          <button class="ash-btn" onclick="if(S.ticker&amp;&amp;window.openWorkspaceWatchlist)openWorkspaceWatchlist()"><i class="ti ti-list-star"></i>Watch</button>
-          <button class="ash-btn" onclick="if(S.ticker)saveAnalysis('price')"><i class="ti ti-bookmark"></i>Save</button>
-          <button class="ash-btn" onclick="window.print()"><i class="ti ti-download"></i>Export</button>
+          <button class="ash-btn" title="Add to watchlist" aria-label="Add to watchlist" onclick="if(S.ticker&amp;&amp;window.openWorkspaceWatchlist)openWorkspaceWatchlist()"><i class="ti ti-star"></i>Watch</button>
+          <button class="ash-btn" title="Save analysis" aria-label="Save analysis" onclick="if(S.ticker)saveAnalysis('price')"><i class="ti ti-bookmark"></i>Save</button>
+          <button class="ash-btn" title="Export analysis" aria-label="Export analysis" onclick="window.print()"><i class="ti ti-download"></i>Export</button>
         </div>
       </div>
       <!-- Chart toolbar (analyze section only) -->
@@ -2038,8 +2075,8 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
         <button type="button" class="act-btn" id="ct-line" onclick="setChartType('line',this)" title="Line" aria-pressed="false"><i class="ti ti-chart-line"></i> Line</button>
         <button type="button" class="act-btn" id="ct-area" onclick="setChartType('area',this)" title="Area" aria-pressed="false"><i class="ti ti-chart-area"></i> Area</button>
         <div class="act-sep"></div>
-        <button type="button" class="act-btn on indicator-control" id="ind-ma50-btn" data-mobile-label="50D" onclick="toggleInd(document.querySelector('[data-ind=ma50]'),'ma50')" title="50-day moving average" aria-label="Toggle 50-day moving average" aria-pressed="true"><span class="chart-key key-ma50"></span>50D Avg</button>
-        <button type="button" class="act-btn indicator-control" id="ind-ma200-btn" data-mobile-label="200D" onclick="toggleInd(document.querySelector('[data-ind=ma200]'),'ma200')" title="200-day moving average" aria-label="Toggle 200-day moving average" aria-pressed="false"><span class="chart-key key-ma200"></span>200D Avg</button>
+        <button type="button" class="act-btn on indicator-control" id="ind-ma50-btn" data-mobile-label="50D" onclick="toggleInd(document.querySelector('[data-ind=ma50]'),'ma50')" title="50-day moving average" aria-label="Toggle 50D Avg" aria-pressed="true"><span class="chart-key key-ma50"></span>50D Avg</button>
+        <button type="button" class="act-btn indicator-control" id="ind-ma200-btn" data-mobile-label="200D" onclick="toggleInd(document.querySelector('[data-ind=ma200]'),'ma200')" title="200-day moving average" aria-label="Toggle 200D Avg" aria-pressed="false"><span class="chart-key key-ma200"></span>200D Avg</button>
         <button type="button" class="act-btn indicator-control" id="ind-bb-btn" data-mobile-label="Bands" onclick="toggleInd(document.querySelector('[data-ind=bb]'),'bb')" title="Bollinger Bands" aria-label="Toggle Bollinger Bands" aria-pressed="false"><span class="chart-key key-bands"></span>Bands</button>
         <div class="act-sep"></div>
         <button type="button" class="act-btn" id="epins-btn" onclick="toggleToolbarOption(this)" aria-pressed="false"><i class="ti ti-tag"></i> Earnings</button>
@@ -2076,7 +2113,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
         <button class="mst-btn" data-sec="secfilings">SEC</button>
         <button class="mst-btn" data-sec="institutional">Inst.</button>
         <button class="mst-btn" data-sec="compare">Compare</button>
-        <button class="mst-btn" data-sec="dcf">DCF</button>
+        <button class="mst-btn" data-sec="dcf">Value</button>
         <button class="mst-btn" data-sec="screener">Screener</button>
       </div>
       <div class="app-content-scroll">
@@ -2199,9 +2236,9 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
                 </div>
                 <!-- Quick DCF in sidebar -->
                 <div class="sidebar-card">
-                  <div class="sidebar-card-title">Quick DCF — Intrinsic Value</div>
+                  <div class="sidebar-card-title">Quick EPS Value Estimate</div>
                   <div class="proj-controls" style="grid-template-columns:1fr 1fr;gap:6px 10px;">
-                    <div><label class="fc-label">EPS ($)</label><input class="fc-input" type="number" id="qdcf-eps" value="" step="0.01" placeholder="e.g. 5.20"></div>
+                    <div><label class="fc-label">Starting EPS ($)</label><input class="fc-input" type="number" id="qdcf-eps" value="" step="0.01" placeholder="e.g. 5.20"></div>
                     <div><label class="fc-label">Discount Rate (%)</label><input class="fc-input" type="number" id="qdcf-wacc" value="10" step="0.1"></div>
                     <div><label class="fc-label">Growth Yr 1–5 (%)</label><input class="fc-input" type="number" id="qdcf-g1" value="15" step="0.5"></div>
                     <div><label class="fc-label">Growth Yr 6–10 (%)</label><input class="fc-input" type="number" id="qdcf-g2" value="8" step="0.5"></div>
@@ -2215,16 +2252,17 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
 
               <!-- Free Projection -->
               <div class="panel-box" style="margin-bottom:14px;">
-                <div class="panel-box-title">Forward Projection — 3 Scenarios</div>
+                <div class="panel-box-title">Quick Projection — Automatic Scenario Range</div>
+                <div style="font-size:.7rem;line-height:1.5;color:var(--text5);margin:-.35rem 0 .85rem;">Enter a central earnings-growth and valuation view. The quick model automatically spreads bear and bull cases around it; use Scenario Lab for fully independent assumptions.</div>
                 <div class="proj-controls">
-                  <div><label class="fc-label">Time Horizon</label>
+                  <div><label class="fc-label" for="proj-years">Time Horizon</label>
                     <select class="fc-select" id="proj-years"><option value="1">1 Year</option><option value="2">2 Years</option><option value="3" selected>3 Years</option><option value="5">5 Years</option><option value="10">10 Years</option></select>
                   </div>
-                  <div><label class="fc-label">Revenue Growth (%)</label><input class="fc-input" type="number" id="proj-growth" value="12" step="0.5"></div>
-                  <div><label class="fc-label">Margin Scenario</label>
+                  <div><label class="fc-label" for="proj-growth">EPS Growth Assumption (%)</label><input class="fc-input" type="number" id="proj-growth" value="12" step="0.5"></div>
+                  <div><label class="fc-label" for="proj-margin">Earnings Adjustment</label>
                     <select class="fc-select" id="proj-margin"><option value="compress">Compression</option><option value="flat" selected>Flat</option><option value="expand">Expansion</option></select>
                   </div>
-                  <div><label class="fc-label">Exit P/E Multiple</label><input class="fc-input" type="number" id="proj-pe" value="25" step="1"></div>
+                  <div><label class="fc-label" for="proj-pe">Base Exit P/E Multiple</label><input class="fc-input" type="number" id="proj-pe" value="25" step="1"></div>
                 </div>
                 <button class="btn-run" onclick="runProjection()">Run Projection →</button>
                 <div id="proj-results" style="display:none;">
@@ -2306,11 +2344,11 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.75rem;">
                   <div style="font-family:var(--mono);font-size:.7rem;color:rgba(220,225,232,.35);letter-spacing:.05em;" id="sec-entity-label"></div>
                   <div style="display:flex;gap:.4rem;flex-wrap:wrap;" id="sec-filter-row">
-                    <button class="sec-filter-btn active" data-form="ALL">All</button>
-                    <button class="sec-filter-btn" data-form="10-K">10-K</button>
-                    <button class="sec-filter-btn" data-form="10-Q">10-Q</button>
-                    <button class="sec-filter-btn" data-form="8-K">8-K</button>
-                    <button class="sec-filter-btn" data-form="DEF 14A">Proxy</button>
+                    <button class="sec-filter-btn active" data-form="ALL" onclick="filterSecFilings('ALL')">All</button>
+                    <button class="sec-filter-btn" data-form="10-K" onclick="filterSecFilings('10-K')">10-K</button>
+                    <button class="sec-filter-btn" data-form="10-Q" onclick="filterSecFilings('10-Q')">10-Q</button>
+                    <button class="sec-filter-btn" data-form="8-K" onclick="filterSecFilings('8-K')">8-K</button>
+                    <button class="sec-filter-btn" data-form="DEF 14A" onclick="filterSecFilings('DEF 14A')">Proxy</button>
                   </div>
                 </div>
                 <div id="sec-filings-list" style="display:flex;flex-direction:column;gap:.5rem;"></div>
@@ -2319,14 +2357,14 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
             </div><!-- /body-secfilings -->
           </div><!-- /sec-secfilings -->
 
-          <!-- INSTITUTIONAL & DARK POOL -->
+          <!-- INSTITUTIONAL & FINRA OTC ACTIVITY -->
           <div class="app-section" id="sec-institutional"><div class="acc-body" id="body-institutional" style="display:none;">
               <div style="font-size:.82rem;color:var(--text4);margin-bottom:1.25rem;">Top institutional holders, OTC trading volume, and short interest data from FINRA &amp; Finnhub.</div>
               <div id="inst-loading" class="loading-bar" style="display:none;"><div class="spinner"></div> Loading institutional data…</div>
               <div id="inst-nostock" style="color:var(--text5);font-size:.85rem;">Search for a stock in the Analyze tab first.</div>
               <div id="inst-content" style="display:none;">
-                <!-- OTC Flow & Short Interest Cards -->
-                <div class="analyst-box-title" style="margin-bottom:.65rem;">OTC Flow &amp; Short Interest</div>
+                <!-- OTC Activity & Short Interest Cards -->
+                <div class="analyst-box-title" style="margin-bottom:.65rem;">FINRA OTC Activity &amp; Short Interest</div>
                 <div id="dp-cards" class="dp-grid"></div>
                 <div style="margin-bottom:1.25rem;">
                   <div class="analyst-box-title" style="margin-bottom:.5rem;">Weekly OTC Weekly Volume (FINRA)</div>
@@ -2378,27 +2416,53 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
           </div><!-- /sec-compare -->
 
           <div class="app-section" id="sec-projection"><div class="acc-body" id="body-projection" style="display:none;">
-<div style="font-size:.82rem;color:var(--text3);margin-bottom:1.25rem;">Advanced model with separate inputs per scenario. Load a stock first to auto-fill current price.</div>
-            <div class="proj-controls" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr));">
-              <div><label class="fc-label">Time Horizon</label>
+            <div class="tool-intro">
+              <div><strong>Scenario Lab</strong> builds each bear, base, and bull case from its own assumptions, then calculates a probability-weighted expected value.</div>
+              <div class="tool-intro-note">Start with base, change one assumption at a time, and use positive dilution for more shares or a negative value for buybacks.</div>
+            </div>
+            <div class="proj-controls projection-shared">
+              <div><label class="fc-label" for="adv-years">Time Horizon</label>
                 <select class="fc-select" id="adv-years"><option value="1">1 Year</option><option value="2">2 Years</option><option value="3">3 Years</option><option value="5" selected>5 Years</option><option value="10">10 Years</option></select>
               </div>
-              <div><label class="fc-label">Current Price ($)</label><input class="fc-input" type="number" id="adv-price" value="100" step="0.01"></div>
-              <div><label class="fc-label">Dividend Yield (%)</label><input class="fc-input" type="number" id="adv-div" value="0.5" step="0.1"></div>
-              <div style="grid-column:1/-1;border-top:1px solid var(--t-acc-border);padding-top:.75rem;margin-top:.25rem;font-family:var(--mono);font-size:.65rem;color:var(--text5);text-transform:uppercase;letter-spacing:.07em;">Bear / Base / Bull Inputs</div>
-              <div><label class="fc-label">Bear Growth (%/yr)</label><input class="fc-input" type="number" id="adv-g-bear" value="3" step="0.5"></div>
-              <div><label class="fc-label">Base Growth (%/yr)</label><input class="fc-input" type="number" id="adv-g-base" value="12" step="0.5"></div>
-              <div><label class="fc-label">Bull Growth (%/yr)</label><input class="fc-input" type="number" id="adv-g-bull" value="25" step="0.5"></div>
-              <div><label class="fc-label">Bear Exit P/E</label><input class="fc-input" type="number" id="adv-pe-bear" value="18" step="1"></div>
-              <div><label class="fc-label">Base Exit P/E</label><input class="fc-input" type="number" id="adv-pe-base" value="25" step="1"></div>
-              <div><label class="fc-label">Bull Exit P/E</label><input class="fc-input" type="number" id="adv-pe-bull" value="35" step="1"></div>
-              <div><label class="fc-label">Current P/E</label><input class="fc-input" type="number" id="adv-pe-now" value="25" step="1"></div>
+              <div><label class="fc-label" for="adv-price">Current Price ($)</label><input class="fc-input" type="number" id="adv-price" value="100" min="0.01" step="0.01"></div>
+              <div><label class="fc-label" for="adv-pe-now">Current P/E</label><input class="fc-input" type="number" id="adv-pe-now" value="25" min="0.1" step="0.5"></div>
             </div>
+            <div class="scenario-input-grid">
+              <fieldset class="scenario-input-card scenario-input-bear">
+                <legend>Bear Case</legend>
+                <label for="adv-g-bear">Earnings growth <span>%/yr</span></label><input class="fc-input" type="number" id="adv-g-bear" value="3" step="0.5">
+                <label for="adv-pe-bear">Exit P/E <span>terminal multiple</span></label><input class="fc-input" type="number" id="adv-pe-bear" value="18" min="0.1" step="0.5">
+                <label for="adv-div-bear">Dividend yield <span>% of current price</span></label><input class="fc-input" type="number" id="adv-div-bear" value="0.5" min="0" step="0.1">
+                <label for="adv-div-g-bear">Dividend growth <span>%/yr</span></label><input class="fc-input" type="number" id="adv-div-g-bear" value="0" step="0.5">
+                <label for="adv-dil-bear">Dilution / buyback <span>%/yr</span></label><input class="fc-input" type="number" id="adv-dil-bear" value="2" step="0.25">
+                <label for="adv-prob-bear">Probability <span>%</span></label><input class="fc-input" type="number" id="adv-prob-bear" value="25" min="0" max="100" step="1">
+              </fieldset>
+              <fieldset class="scenario-input-card scenario-input-base">
+                <legend>Base Case</legend>
+                <label for="adv-g-base">Earnings growth <span>%/yr</span></label><input class="fc-input" type="number" id="adv-g-base" value="12" step="0.5">
+                <label for="adv-pe-base">Exit P/E <span>terminal multiple</span></label><input class="fc-input" type="number" id="adv-pe-base" value="25" min="0.1" step="0.5">
+                <label for="adv-div-base">Dividend yield <span>% of current price</span></label><input class="fc-input" type="number" id="adv-div-base" value="0.5" min="0" step="0.1">
+                <label for="adv-div-g-base">Dividend growth <span>%/yr</span></label><input class="fc-input" type="number" id="adv-div-g-base" value="6" step="0.5">
+                <label for="adv-dil-base">Dilution / buyback <span>%/yr</span></label><input class="fc-input" type="number" id="adv-dil-base" value="0" step="0.25">
+                <label for="adv-prob-base">Probability <span>%</span></label><input class="fc-input" type="number" id="adv-prob-base" value="50" min="0" max="100" step="1">
+              </fieldset>
+              <fieldset class="scenario-input-card scenario-input-bull">
+                <legend>Bull Case</legend>
+                <label for="adv-g-bull">Earnings growth <span>%/yr</span></label><input class="fc-input" type="number" id="adv-g-bull" value="25" step="0.5">
+                <label for="adv-pe-bull">Exit P/E <span>terminal multiple</span></label><input class="fc-input" type="number" id="adv-pe-bull" value="35" min="0.1" step="0.5">
+                <label for="adv-div-bull">Dividend yield <span>% of current price</span></label><input class="fc-input" type="number" id="adv-div-bull" value="0.5" min="0" step="0.1">
+                <label for="adv-div-g-bull">Dividend growth <span>%/yr</span></label><input class="fc-input" type="number" id="adv-div-g-bull" value="12" step="0.5">
+                <label for="adv-dil-bull">Dilution / buyback <span>%/yr</span></label><input class="fc-input" type="number" id="adv-dil-bull" value="-1" step="0.25">
+                <label for="adv-prob-bull">Probability <span>%</span></label><input class="fc-input" type="number" id="adv-prob-bull" value="25" min="0" max="100" step="1">
+              </fieldset>
+            </div>
+            <div id="adv-prob-status" class="probability-status" role="status">Probabilities total 100%</div>
             <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-              <button class="btn-run" onclick="runAdvancedProjection()">Run Advanced Projection →</button>
-              <button class="btn-save-analysis" onclick="saveAnalysis('projection')">⊕ Save to Analyses</button>
+              <button class="btn-run" onclick="runAdvancedProjection()"><i class="ti ti-calculator"></i> Calculate Scenarios</button>
+              <button class="btn-save-analysis" onclick="saveAnalysis('projection')"><i class="ti ti-bookmark-plus"></i> Save to Analyses</button>
             </div>
             <div id="adv-proj-results" style="display:none;">
+              <div id="adv-expected-value" class="expected-value-panel"></div>
               <div class="scenario-row" id="adv-scenario-cards" style="margin-top:1.25rem;"></div>
               <div class="h200" style="margin-top:14px;"><canvas id="adv-proj-chart"></canvas></div>
               <div id="adv-irr-table" style="margin-top:14px;"></div>
@@ -2408,9 +2472,9 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
           </div><!-- /sec-projection -->
 
           <div class="app-section" id="sec-dcf"><div class="acc-body" id="body-dcf" style="display:none;">
-<div style="font-size:.82rem;color:var(--text3);margin-bottom:1.25rem;">10-year two-stage discounted cash flow model. Enter the stock's EPS and your assumptions below.</div>
+<div class="tool-intro"><div><strong>EPS Intrinsic Value Model</strong> discounts ten years of projected earnings and a terminal earnings value.</div><div class="tool-intro-note">This is not a free-cash-flow DCF. Use the sensitivity table to test how dependent the estimate is on discount and terminal-growth assumptions.</div></div>
             <div class="proj-controls">
-              <div><label class="fc-label">Current EPS ($)</label><input class="fc-input" type="number" id="dcf-eps" value="5.20" step="0.01"></div>
+              <div><label class="fc-label">Starting EPS ($)</label><input class="fc-input" type="number" id="dcf-eps" value="5.20" step="0.01"></div>
               <div><label class="fc-label">Growth Yr 1–5 (%)</label><input class="fc-input" type="number" id="dcf-g1" value="15" step="0.5"></div>
               <div><label class="fc-label">Growth Yr 6–10 (%)</label><input class="fc-input" type="number" id="dcf-g2" value="8" step="0.5"></div>
               <div><label class="fc-label">Terminal Growth (%)</label><input class="fc-input" type="number" id="dcf-tg" value="3" step="0.1"></div>
@@ -2422,6 +2486,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
               <button class="btn-save-analysis" onclick="saveAnalysis('dcf')">⊕ Save to Analyses</button>
             </div>
             <div id="dcf-output" style="margin-top:1.25rem;"></div>
+            <div id="dcf-sensitivity" style="margin-top:1rem;"></div>
             <div style="margin-top:1rem;font-size:.7rem;color:var(--text5);line-height:1.6;">This is an EPS-capitalization model that discounts projected earnings, not a free-cash-flow DCF. The auto-filled discount rate is a CAPM-based cost-of-equity proxy. Use a range of assumptions; results are educational, not investment advice.</div>
 
 
@@ -2430,6 +2495,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
           </div><!-- /sec-dcf -->
 
           <div class="app-section" id="sec-screener"><div class="acc-body" id="body-screener" style="display:none;">
+<div class="tool-intro"><div><strong>Market Screener</strong> narrows the current universe using valuation, size, income, momentum, and sector filters.</div><div class="tool-intro-note">A missing metric is not treated as a failure unless that metric is required by the active filter.</div></div>
 <div class="scr-filters">
               <div class="scr-filter-group"><label>Sector</label><select id="scr-sector" onchange="applyScreener()" style="width:100%;background:var(--card);color:var(--text);border:1px solid var(--border2);border-radius:var(--r);padding:4px 6px;font-size:.72rem;margin-top:6px;"><option value="ALL">All Sectors</option><option value="Tech">Technology</option><option value="Health">Healthcare</option><option value="Finance">Financials</option><option value="Cons.Disc">Consumer Disc.</option><option value="Staples">Consumer Staples</option><option value="Energy">Energy</option><option value="Industrials">Industrials</option><option value="Materials">Materials</option><option value="Real Est.">Real Estate</option><option value="Utilities">Utilities</option><option value="ETF">ETFs</option></select></div>
               <div class="scr-filter-group"><label>Max P/E <span id="scr-pe-val">50x</span></label><input type="range" class="scr-slider" id="scr-pe" min="5" max="200" value="50" oninput="document.getElementById('scr-pe-val').textContent=this.value+'x';applyScreener()"></div>
@@ -2438,23 +2504,24 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
               <div class="scr-filter-group"><label>Min Mkt Cap <span id="scr-cap-val">$0B</span></label><input type="range" class="scr-slider" id="scr-cap" min="0" max="500" value="0" step="10" oninput="document.getElementById('scr-cap-val').textContent='$'+this.value+'B';applyScreener()"></div>
               <div class="scr-filter-group"><label>Min 1Y Return <span id="scr-ret-val">−50%</span></label><input type="range" class="scr-slider" id="scr-ret" min="-50" max="200" value="-50" oninput="document.getElementById('scr-ret-val').textContent=this.value+'%';applyScreener()"></div>
             </div>
+            <div class="screener-summary"><span id="scr-result-count" role="status">Load the screener to view results.</span><button class="btn-secondary-compact" type="button" onclick="resetScreener()"><i class="ti ti-refresh"></i> Reset filters</button></div>
             <div class="loading-bar" id="scr-loading" style="display:none;"><div class="spinner"></div> Loading market data…</div>
             <div class="scr-table-wrap">
               <table class="scr-table" id="scr-table">
                 <thead><tr>
-                  <th style="text-align:left;" onclick="sortScreener('ticker')">Stock ↕</th>
-                  <th onclick="sortScreener('price')">Price ↕</th>
-                  <th onclick="sortScreener('change1D')">Day ↕</th>
-                  <th onclick="sortScreener('change1Y')">1Y Chg ↕</th>
-                  <th onclick="sortScreener('revenueGrowth')">Rev Gr ↕</th>
-                  <th onclick="sortScreener('sector')">Sector ↕</th>
-                  <th onclick="sortScreener('marketCap')">Mkt Cap ↕</th>
-                  <th onclick="sortScreener('pe')">P/E ↕</th>
-                  <th onclick="sortScreener('pb')">P/B ↕</th>
-                  <th onclick="sortScreener('dividendYield')">Div Yield ↕</th>
-                  <th onclick="sortScreener('beta')">Beta ↕</th>
+                  <th style="text-align:left;"><button class="scr-sort-btn" type="button" data-sort="ticker" onclick="sortScreener('ticker')">Stock <i class="ti ti-selector"></i></button></th>
+                  <th><button class="scr-sort-btn" type="button" data-sort="price" onclick="sortScreener('price')">Price <i class="ti ti-selector"></i></button></th>
+                  <th><button class="scr-sort-btn" type="button" data-sort="change1D" onclick="sortScreener('change1D')">Day <i class="ti ti-selector"></i></button></th>
+                  <th><button class="scr-sort-btn" type="button" data-sort="change1Y" onclick="sortScreener('change1Y')">1Y Chg <i class="ti ti-selector"></i></button></th>
+                  <th><button class="scr-sort-btn" type="button" data-sort="revenueGrowth" onclick="sortScreener('revenueGrowth')">Rev Gr <i class="ti ti-selector"></i></button></th>
+                  <th><button class="scr-sort-btn" type="button" data-sort="sector" onclick="sortScreener('sector')">Sector <i class="ti ti-selector"></i></button></th>
+                  <th><button class="scr-sort-btn" type="button" data-sort="marketCap" onclick="sortScreener('marketCap')">Mkt Cap <i class="ti ti-selector"></i></button></th>
+                  <th><button class="scr-sort-btn" type="button" data-sort="pe" onclick="sortScreener('pe')">P/E <i class="ti ti-selector"></i></button></th>
+                  <th><button class="scr-sort-btn" type="button" data-sort="pb" onclick="sortScreener('pb')">P/B <i class="ti ti-selector"></i></button></th>
+                  <th><button class="scr-sort-btn" type="button" data-sort="dividendYield" onclick="sortScreener('dividendYield')">Div Yield <i class="ti ti-selector"></i></button></th>
+                  <th><button class="scr-sort-btn" type="button" data-sort="beta" onclick="sortScreener('beta')">Beta <i class="ti ti-selector"></i></button></th>
                 </tr></thead>
-                <tbody id="scr-body"><tr><td colspan="9" style="text-align:center;color:var(--text5);padding:2rem;">Click the Screener tab to load data</td></tr></tbody>
+                <tbody id="scr-body"><tr><td colspan="11" style="text-align:center;color:var(--text5);padding:2rem;">Click the Screener tab to load data</td></tr></tbody>
               </table>
             </div>
 
@@ -2479,7 +2546,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
               <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;" id="sa-type-filters">
                 <button class="sa-pill active" data-type="ALL">All</button>
                 <button class="sa-pill" data-type="price">Price Snapshot</button>
-                <button class="sa-pill" data-type="dcf">DCF</button>
+                <button class="sa-pill" data-type="dcf">Intrinsic Value</button>
                 <button class="sa-pill" data-type="projection">Projection</button>
                 <button class="sa-pill" data-type="compare">Compare</button>
                 <button class="sa-pill" data-type="note">Notes</button>
@@ -2832,7 +2899,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
     </div>
 
     <ul class="modal-2col" style="list-style:none;margin-bottom:1.25rem;display:grid;grid-template-columns:1fr 1fr;gap:.3rem .75rem;">
-      <li style="font-size:.82rem;color:var(--ink3);">✓ DCF Valuation model</li>
+      <li style="font-size:.82rem;color:var(--ink3);">✓ EPS intrinsic-value model</li>
       <li style="font-size:.82rem;color:var(--ink3);">✓ Advanced Projection</li>
       <li style="font-size:.82rem;color:var(--ink3);">✓ Stock Screener</li>
       <li style="font-size:.82rem;color:var(--ink3);">✓ PDF Report export</li>
@@ -4316,7 +4383,8 @@ const COLORS = ['#B88937','#5F8193','#778673','#9A7771'];
 // Keep this list in sync with the requirePro-gated API routes in routes/financials.js
 // and routes/market-data.js (screener).
 const PRO_SECTIONS = ['financials','advmetrics','projection','dcf','screener','adveducation',
-                      'earnings','secfilings','institutional','analyst','darkpool'];
+  'earnings','secfilings','institutional','analyst','darkpool'];
+const PRO_SECTION_CONTENT = {};
 
 function isPro() { return S.userPlan === 'pro' || S.userPlan === 'trial'; }
 
@@ -4403,7 +4471,7 @@ const PRO_GATE_CONFIG = {
       'Top institutional holders with exact share counts and % of float owned',
       'Recent additions, reductions, and newly opened positions each quarter',
       'Total institutional ownership % and concentration risk at a glance',
-      'Dark pool OTC volume paired for a complete smart-money picture',
+      'FINRA OTC activity paired with reported institutional ownership',
     ],
     preview: `<table class="pgc-tbl"><thead><tr><th>Institution</th><th>Shares</th><th>% Float</th></tr></thead><tbody>
       <tr><td>Vanguard Group</td><td>1.29B</td><td>8.2%</td></tr>
@@ -4424,7 +4492,7 @@ const PRO_GATE_CONFIG = {
     preview: null,
   },
   darkpool: {
-    title: 'Dark Pool &amp; Institutional Order Flow',
+    title: 'FINRA OTC &amp; Institutional Activity',
     bullets: [
       'Aggregated weekly OTC volume and trade counts from FINRA',
       'Review changes in off-exchange activity over time',
@@ -4434,20 +4502,20 @@ const PRO_GATE_CONFIG = {
     preview: null,
   },
   projection: {
-    title: '6-Input Advanced Projection Builder',
+    title: 'Independent Bull, Base &amp; Bear Scenario Lab',
     bullets: [
       'Model bull, base, and bear price scenarios simultaneously',
-      'Six inputs: revenue growth, operating margin, P/E target, share count, and more',
-      '5-year forward price projection with annualised return estimates',
+      'Set earnings growth, exit P/E, dividends, dilution, and probability independently',
+      'Probability-weighted expected value with total-return and CAGR estimates',
       'Save projections and revisit them as the story changes quarter to quarter',
     ],
     preview: null,
   },
   dcf: {
-    title: 'DCF Intrinsic Value Model',
+    title: 'EPS Intrinsic Value Model',
     bullets: [
-      'Set your own revenue growth rate, margin, and discount rate (WACC)',
-      'Calculates fair value per share using discounted free cash flows',
+      'Set your own earnings growth, terminal growth, and discount rate',
+      'Calculates an EPS-based intrinsic-value range',
       'Shows whether the stock is over or undervalued at today\'s price',
       'Sensitivity table: see exactly how fair value shifts with each assumption',
     ],
@@ -4461,7 +4529,7 @@ const PRO_GATE_CONFIG = {
         <div style="background:var(--bg2);border-radius:5px;padding:4px 3px"><div style="color:var(--ink5)">WACC</div><div style="color:var(--ink)">9.0%</div></div>
       </div>
     </div>`,
-    previewLabel: 'AAPL · illustrative DCF sample',
+    previewLabel: 'AAPL · illustrative EPS value sample',
   },
   screener: {
     title: 'Full Market Screener — 200+ Stocks',
@@ -4568,7 +4636,7 @@ function handleSectionError(e, sectionId, container) {
       <div class="pgc-title">You've used your 5 free analyses today</div>
       <ul class="pgc-bullets">
         <li>Unlimited stock analyses — no daily cap, ever</li>
-        <li>All Pro sections: Financials, DCF, Screener, SEC filings &amp; more</li>
+        <li>All Pro sections: Financials, intrinsic value, Screener, SEC filings &amp; more</li>
         <li>Advanced projections, institutional data, and analyst targets</li>
         <li>Comes back tomorrow free, or unlock everything now</li>
       </ul>
@@ -4625,8 +4693,15 @@ function openSection(id, skipProCheck) {
   const sec = document.getElementById('sec-' + id);
   const bod = document.getElementById('body-' + id);
   if (!sec || !bod) return;
+  if (PRO_SECTIONS.includes(id) && !PRO_SECTION_CONTENT[id] && !bod.querySelector('.pro-gate-card')) {
+    PRO_SECTION_CONTENT[id] = bod.innerHTML;
+  }
+  if (PRO_SECTIONS.includes(id) && isPro() && PRO_SECTION_CONTENT[id] && bod.querySelector('.pro-gate-card')) {
+    bod.innerHTML = PRO_SECTION_CONTENT[id];
+  }
   sec.classList.add('open');
   bod.style.display = 'block';
+  setTimeout(function(){ if(window.refreshToolEnhancements) window.refreshToolEnhancements(); },0);
   // Show/hide chart toolbars (only for analyze)
   const ct = document.getElementById('app-chart-toolbar');
   const tf = document.getElementById('app-tf-strip');
@@ -4688,7 +4763,7 @@ const SECTION_META = {
   institutional:{ icon:'ti-building-bank', title:'Institutional' },
   compare:     { icon:'ti-adjustments-horizontal', title:'Compare Stocks' },
   projection:  { icon:'ti-timeline',      title:'Projection' },
-  dcf:         { icon:'ti-calculator',    title:'DCF Valuation' },
+  dcf:         { icon:'ti-calculator',    title:'EPS Intrinsic Value' },
   screener:    { icon:'ti-filter',        title:'Screener' },
   reports:     { icon:'ti-bookmark',      title:'Saved Analyses' },
   education:   { icon:'ti-school',        title:'Education' },
@@ -4806,12 +4881,14 @@ function saveAnalysis(type) {
     data = { price, marketCap: meta.marketCap, range: S.range };
   } else if (type === 'dcf') {
     const dcfEl = document.getElementById('dcf-output');
-    title = `${S.ticker} — DCF Analysis`;
+    title = `${S.ticker} — EPS Intrinsic Value`;
     data = { intrinsicText: dcfEl ? dcfEl.innerText.slice(0,200) : '', price };
   } else if (type === 'projection') {
     const projEl = document.getElementById('adv-scenario-cards') || document.getElementById('adv-proj-results');
-    title = `${S.ticker} — Advanced Projection`;
-    data = { summaryText: projEl ? projEl.innerText.slice(0,200) : '', price };
+    const assumptions = {};
+    ['adv-years','adv-price','adv-pe-now','adv-g-bear','adv-pe-bear','adv-div-bear','adv-div-g-bear','adv-dil-bear','adv-prob-bear','adv-g-base','adv-pe-base','adv-div-base','adv-div-g-base','adv-dil-base','adv-prob-base','adv-g-bull','adv-pe-bull','adv-div-bull','adv-div-g-bull','adv-dil-bull','adv-prob-bull'].forEach(id => { assumptions[id] = document.getElementById(id)?.value; });
+    title = `${S.ticker} — Scenario Lab`;
+    data = { summaryText: projEl ? projEl.innerText.slice(0,400) : '', assumptions, price };
   } else if (type === 'compare') {
     const tickers = ['cmp1','cmp2','cmp3','cmp4'].map(id=>document.getElementById(id)?.value.trim().toUpperCase()).filter(Boolean);
     title = `Compare: ${tickers.join(' vs ')}`;
@@ -4909,7 +4986,7 @@ function renderSavedAnalyses() {
   }
   if (empty) empty.style.display = 'none';
 
-  const typeLabels = { price:'Price Snapshot', dcf:'DCF', projection:'Projection', compare:'Compare', note:'Note' };
+  const typeLabels = { price:'Price Snapshot', dcf:'Intrinsic Value', projection:'Projection', compare:'Compare', note:'Note' };
   const typeClass  = { price:'sa-type-price', dcf:'sa-type-dcf', projection:'sa-type-projection', compare:'sa-type-compare', note:'sa-type-note' };
 
   _saListEntries = all;
@@ -5251,6 +5328,33 @@ function updateLimitUI(remaining, limit, plan) {
 
 function fmtBig(n) { if(!n) return '—'; if(n>=1e12) return `$${(n/1e12).toFixed(2)}T`; if(n>=1e9) return `$${(n/1e9).toFixed(2)}B`; if(n>=1e6) return `$${(n/1e6).toFixed(2)}M`; return `$${n.toLocaleString()}`; }
 function fmtPct(n) { return n==null?'—':`${n>=0?'+':''}${n.toFixed(2)}%`; }
+function alignQuoteSeries(result) {
+  const q=result?.indicators?.quote?.[0]||{};
+  const timestamps=result?.timestamp||[];
+  const rows=timestamps.map((timestamp,index)=>({
+    timestamp,
+    close:q.close?.[index],
+    open:q.open?.[index],
+    high:q.high?.[index],
+    low:q.low?.[index],
+    volume:q.volume?.[index],
+  })).filter(row=>Number.isFinite(Number(row.close)));
+  const closes=rows.map(row=>Number(row.close));
+  const alignedQuote={
+    ...q,
+    close:closes,
+    open:rows.map(row=>Number.isFinite(Number(row.open))?Number(row.open):Number(row.close)),
+    high:rows.map(row=>Number.isFinite(Number(row.high))?Number(row.high):Number(row.close)),
+    low:rows.map(row=>Number.isFinite(Number(row.low))?Number(row.low):Number(row.close)),
+    volume:rows.map(row=>Number.isFinite(Number(row.volume))?Number(row.volume):0),
+  };
+  return {
+    result:{...result,timestamp:rows.map(row=>row.timestamp),indicators:{...result.indicators,quote:[alignedQuote]}},
+    timestamps:rows.map(row=>row.timestamp),
+    quote:alignedQuote,
+    closes,
+  };
+}
 
 /* ══════════════════════════════════════════════════════
    INDICATORS
@@ -5543,9 +5647,10 @@ async function fetchAndRender() {
 
 function renderStock(result, ticker) {
   const meta=result.meta;
-  const ts=result.timestamp||[];
-  const q=result.indicators.quote[0];
-  const closes=q.close||[]; const opens=q.open||[]; const highs=q.high||[]; const lows=q.low||[]; const vols=q.volume||[];
+  const aligned=alignQuoteSeries(result);
+  const ts=aligned.timestamps;
+  const q=aligned.quote;
+  const closes=aligned.closes; const opens=q.open||[]; const highs=q.high||[]; const lows=q.low||[]; const vols=q.volume||[];
 
   const price=meta.regularMarketPrice||closes[closes.length-1]||0;
   const prev=meta.previousClose||meta.chartPreviousClose||price;
@@ -5561,7 +5666,7 @@ function renderStock(result, ticker) {
   document.getElementById('r-time').textContent='Latest update · '+new Date().toLocaleTimeString();
 
   // metrics
-  const c=closes.filter(x=>x!=null);
+  const c=closes;
   const rsiVals=rsi(c); const rsiNow=rsiVals[rsiVals.length-1];
   const ma50v=sma(c,50); const ma50Now=ma50v[ma50v.length-1];
   const ma200v=sma(c,200); const ma200Now=ma200v[ma200v.length-1];
@@ -5648,12 +5753,13 @@ function renderStock(result, ticker) {
       if (!er.ok) return;
       const est = await er.json();
 
-      // Revenue growth → use analyst consensus if available, otherwise keep current
+      // Quick projection growth -> prefer EPS consensus, then revenue consensus.
       const growthEl = document.getElementById('proj-growth');
-      if (est.revenueGrowth !== null && growthEl) {
-        const g = Math.max(-50, Math.min(200, est.revenueGrowth));
+      const projectionGrowth = est.epsGrowth !== null ? est.epsGrowth : est.revenueGrowth;
+      if (projectionGrowth !== null && growthEl) {
+        const g = Math.max(-50, Math.min(200, projectionGrowth));
         growthEl.value = g.toFixed(1);
-        growthEl.title = 'Auto-filled from analyst consensus revenue estimate';
+        growthEl.title = est.epsGrowth !== null ? 'Auto-filled from analyst consensus EPS growth' : 'EPS proxy auto-filled from analyst consensus revenue growth';
       }
 
       // Forward P/E → prefer analyst-implied over trailing
@@ -5731,7 +5837,7 @@ function renderStock(result, ticker) {
 
   // Chart.js must measure a visible container; reveal results before creating canvases.
   document.getElementById('stock-result').style.display='block';
-  buildPriceChart(result,c,ts);
+  buildPriceChart(aligned.result,c,ts);
   buildRSIChart(rsiVals,ts);
   buildMACDChart(c,ts);
   buildVolChart(vols,ts,c);
@@ -6774,13 +6880,14 @@ async function changeRange(range,btn) {
   try {
     const result=await yahooFetch(S.ticker,range);
     S.data=result;
-    const q=result.indicators.quote[0];
-    buildPriceChart(result,q.close.filter(x=>x!=null),result.timestamp);
-    buildRSIChart(rsi(q.close.filter(x=>x!=null)),result.timestamp);
-    buildMACDChart(q.close.filter(x=>x!=null),result.timestamp);
-    buildVolChart(q.volume,result.timestamp,q.close);
-    buildOBVChart(q.close.filter(x=>x!=null),q.volume,result.timestamp);
-    buildATRChart(q.high||[],q.low||[],q.close.filter(x=>x!=null),result.timestamp);
+    const aligned=alignQuoteSeries(result);
+    const q=aligned.quote;
+    buildPriceChart(aligned.result,aligned.closes,aligned.timestamps);
+    buildRSIChart(rsi(aligned.closes),aligned.timestamps);
+    buildMACDChart(aligned.closes,aligned.timestamps);
+    buildVolChart(q.volume,aligned.timestamps,aligned.closes);
+    buildOBVChart(aligned.closes,q.volume,aligned.timestamps);
+    buildATRChart(q.high||[],q.low||[],aligned.closes,aligned.timestamps);
   } catch(e){ toast('Range unavailable','red'); }
 }
 
@@ -6836,9 +6943,11 @@ function runProjection() {
    COMPARE TAB
 ══════════════════════════════════════════════════════ */
 async function runCompare() {
-  const tickers=['cmp1','cmp2','cmp3','cmp4']
+  const enteredTickers=['cmp1','cmp2','cmp3','cmp4']
     .map(id=>document.getElementById(id).value.trim().toUpperCase())
     .filter(Boolean);
+  const tickers=[...new Set(enteredTickers)];
+  if(tickers.length!==enteredTickers.length){ toast('Remove duplicate tickers before comparing','red'); return; }
   if(tickers.length<2){ toast('Enter at least 2 tickers','red'); return; }
   document.getElementById('cmp-loading').style.display='flex';
   document.getElementById('cmp-results').style.display='none';
@@ -6847,9 +6956,10 @@ async function runCompare() {
       Promise.all(tickers.map(t=>yahooFetch(t,'1y'))),
       Promise.all(tickers.map(t=>proAwareFetch('/api/analyst/'+encodeURIComponent(t),'compare').then(r=>r.json()).catch(()=>({}))))
     ]);
-    buildCompareTable(tickers, results, analystArr);
-    buildPerfChart(tickers, results);
-    buildRadarChart(tickers, results, analystArr);
+    const alignedResults=results.map(result=>alignQuoteSeries(result).result);
+    buildCompareTable(tickers, alignedResults, analystArr);
+    buildPerfChart(tickers, alignedResults);
+    buildRadarChart(tickers, alignedResults, analystArr);
     document.getElementById('cmp-results').style.display='block';
   } catch(e){ toast('Failed to load one or more tickers','red'); }
   finally { document.getElementById('cmp-loading').style.display='none'; }
@@ -6962,7 +7072,7 @@ function renderDCFOutput(result,currentPrice,elId) {
   var mos=upside===null?'N/A':upside>20?'Undervalued':upside>-10?'Fairly Valued':'Overvalued';
   var mosClass=upside===null?'':upside>20?'up':upside>-10?'gold':'dn';
   var html='<div class="dcf-out">';
-  html+='<div class="dcf-row"><span class="dcf-lbl">PV of Cash Flows (10yr)</span><span class="dcf-val">$'+pvCF.toFixed(2)+'</span></div>';
+  html+='<div class="dcf-row"><span class="dcf-lbl">PV of Projected EPS (10yr)</span><span class="dcf-val">$'+pvCF.toFixed(2)+'</span></div>';
   html+='<div class="dcf-row"><span class="dcf-lbl">PV of Terminal Value</span><span class="dcf-val">$'+pvTv.toFixed(2)+'</span></div>';
   html+='<div class="dcf-row"><span class="dcf-lbl">Terminal Value Share</span><span class="dcf-val '+(result.terminalShare>.75?'dn':'')+'">'+(result.terminalShare*100).toFixed(1)+'%</span></div>';
   html+='<div class="dcf-row"><span class="dcf-lbl">Intrinsic Value (EPS-based)</span><span class="dcf-val gold">$'+intrinsic.toFixed(2)+'</span></div>';
@@ -6974,6 +7084,26 @@ function renderDCFOutput(result,currentPrice,elId) {
   html+='</div>';
   el.innerHTML=html;
 }
+function renderDCFSensitivity(eps,g1,g2,tg,wacc) {
+  var el=document.getElementById('dcf-sensitivity');
+  if(!el) return;
+  var discountRates=[wacc-.02,wacc-.01,wacc,wacc+.01,wacc+.02];
+  var terminalRates=[tg-.01,tg-.005,tg,tg+.005,tg+.01];
+  var html='<div class="sensitivity-wrap"><table class="sensitivity-table"><caption>Sensitivity: intrinsic value by discount rate and terminal growth</caption><thead><tr><th>Discount \\ Terminal</th>';
+  terminalRates.forEach(function(rate){html+='<th>'+((rate)*100).toFixed(1)+'%</th>';});
+  html+='</tr></thead><tbody>';
+  discountRates.forEach(function(discount){
+    html+='<tr><th>'+((discount)*100).toFixed(1)+'%</th>';
+    terminalRates.forEach(function(terminal){
+      var result=calcDCF(eps,g1,g2,terminal,discount);
+      var current=Math.abs(discount-wacc)<0.00001&&Math.abs(terminal-tg)<0.00001;
+      html+='<td class="'+(current?'current':'')+'">'+(result.ok?'$'+result.intrinsic.toFixed(2):'--')+'</td>';
+    });
+    html+='</tr>';
+  });
+  html+='</tbody></table></div>';
+  el.innerHTML=html;
+}
 function runDCF() {
   var eps=parseFloat(document.getElementById('dcf-eps').value)||0;
   var g1=parseFloat(document.getElementById('dcf-g1').value)/100||0;
@@ -6982,8 +7112,9 @@ function runDCF() {
   var wacc=parseFloat(document.getElementById('dcf-wacc').value)/100||0;
   var priceEl=document.getElementById('dcf-price').value;
   var cp=priceEl?parseFloat(priceEl):(S.data?parseFloat((document.getElementById('r-price')||{}).textContent||'0'):0);
-  if(!eps){document.getElementById('dcf-output').innerHTML='<div style="color:#d96a70;font-size:.8rem;padding:.5rem;">Enter a current EPS value.</div>';return;}
+  if(!eps){document.getElementById('dcf-output').innerHTML='<div style="color:#d96a70;font-size:.8rem;padding:.5rem;">Enter a positive starting EPS value.</div>';return;}
   renderDCFOutput(calcDCF(eps,g1,g2,tg,wacc),cp,'dcf-output');
+  renderDCFSensitivity(eps,g1,g2,tg,wacc);
 }
 function runQuickDCF() {
   var eps=parseFloat(document.getElementById('qdcf-eps').value)||0;
@@ -6992,7 +7123,7 @@ function runQuickDCF() {
   var tg=parseFloat(document.getElementById('qdcf-tg').value)/100||0;
   var wacc=parseFloat(document.getElementById('qdcf-wacc').value)/100||0;
   var cp=S.data?parseFloat((document.getElementById('r-price')||{}).textContent||'0'):0;
-  if(!eps){document.getElementById('qdcf-output').innerHTML='<div style="color:#d96a70;font-size:.8rem;padding:.5rem;">Enter the stock current EPS value.</div>';return;}
+  if(!eps){document.getElementById('qdcf-output').innerHTML='<div style="color:#d96a70;font-size:.8rem;padding:.5rem;">Enter a positive starting EPS value.</div>';return;}
   renderDCFOutput(calcDCF(eps,g1,g2,tg,wacc),cp,'qdcf-output');
 }
 
@@ -7002,31 +7133,44 @@ function runQuickDCF() {
 function runAdvancedProjection() {
   var years=Number(document.getElementById('adv-years').value);
   var price0=Number(document.getElementById('adv-price').value);
-  var divYield=Number(document.getElementById('adv-div').value)/100;
   var peNow=Number(document.getElementById('adv-pe-now').value);
-  var gBear=Number(document.getElementById('adv-g-bear').value)/100;
-  var gBase=Number(document.getElementById('adv-g-base').value)/100;
-  var gBull=Number(document.getElementById('adv-g-bull').value)/100;
-  var peBear=Number(document.getElementById('adv-pe-bear').value);
-  var peBase=Number(document.getElementById('adv-pe-base').value);
-  var peBull=Number(document.getElementById('adv-pe-bull').value);
-  var scenarios=[
-    {l:'Bear',cls:'sc-bear',g:gBear,pe:peBear,color:cp().negative},
-    {l:'Base',cls:'sc-base',g:gBase,pe:peBase,color:cp().price},
-    {l:'Bull',cls:'sc-bull',g:gBull,pe:peBull,color:cp().positive},
+  var cases=[
+    {key:'bear',l:'Bear',cls:'sc-bear',color:cp().negative},
+    {key:'base',l:'Base',cls:'sc-base',color:cp().price},
+    {key:'bull',l:'Bull',cls:'sc-bull',color:cp().positive},
   ];
-  var results=scenarios.map(function(s){
-    var model=ImpliedLensMath.projectScenario({price:price0,currentPE:peNow,exitPE:s.pe,growth:s.g,years:years,dividendYield:divYield});
-    return Object.assign({},s,{model:model,priceN:model.ok?model.terminalPrice:NaN,divTotal:model.ok?model.dividends:NaN,totalReturn:model.ok?model.totalValue:NaN,tot:model.ok?model.totalReturn*100:NaN,cagr:model.ok?model.cagr*100:NaN});
+  var scenarios=cases.map(function(s){
+    return Object.assign({},s,{
+      name:s.l,
+      growth:Number(document.getElementById('adv-g-'+s.key).value)/100,
+      exitPE:Number(document.getElementById('adv-pe-'+s.key).value),
+      dividendYield:Number(document.getElementById('adv-div-'+s.key).value)/100,
+      dividendGrowth:Number(document.getElementById('adv-div-g-'+s.key).value)/100,
+      annualDilution:Number(document.getElementById('adv-dil-'+s.key).value)/100,
+      probability:Number(document.getElementById('adv-prob-'+s.key).value)/100,
+    });
   });
-  var invalid=results.find(function(result){return !result.model.ok;});
-  if(invalid){toast(invalid.model.error,'red');return;}
+  var projection=ImpliedLensMath.projectCases({price:price0,currentPE:peNow,years:years,scenarios:scenarios});
+  updateScenarioProbabilityStatus();
+  if(!projection.ok){toast(projection.error,'red');return;}
+  var results=projection.scenarios.map(function(result){
+    return Object.assign({},result,{
+      l:result.name,priceN:result.model.terminalPrice,divTotal:result.model.dividends,
+      totalReturn:result.model.totalValue,tot:result.model.totalReturn*100,cagr:result.model.cagr*100,
+    });
+  });
+  document.getElementById('adv-expected-value').innerHTML=[
+    ['Expected total value','$'+projection.expectedTotalValue.toFixed(2)],
+    ['Expected terminal price','$'+projection.expectedTerminalPrice.toFixed(2)],
+    ['Expected total return',(projection.expectedTotalReturn>=0?'+':'')+(projection.expectedTotalReturn*100).toFixed(1)+'%'],
+    ['Expected CAGR',(projection.expectedCagr*100).toFixed(1)+'% / yr'],
+  ].map(function(item){return '<div class="expected-value-metric"><span>'+item[0]+'</span><strong>'+item[1]+'</strong></div>';}).join('');
   document.getElementById('adv-scenario-cards').innerHTML=results.map(function(r){
     return '<div class="sc-card '+r.cls+'">'
-      +'<div class="sc-lbl">'+r.l+' Case</div>'
+      +'<div class="sc-lbl">'+r.l+' Case &middot; '+(r.probability*100).toFixed(0)+'%</div>'
       +'<div class="sc-price">$'+r.priceN.toFixed(2)+'</div>'
       +'<div class="sc-pct">'+(r.tot>=0?'+':'')+r.tot.toFixed(1)+'% total</div>'
-      +'<div class="sc-irr">CAGR: '+r.cagr.toFixed(1)+'%/yr &middot; Div: $'+r.divTotal.toFixed(2)+'</div>'
+      +'<div class="sc-irr">CAGR: '+r.cagr.toFixed(1)+'%/yr &middot; Dividends: $'+r.divTotal.toFixed(2)+'</div>'
       +'</div>';
   }).join('');
   destroyChart('adv-proj-chart');
@@ -7035,6 +7179,7 @@ function runAdvancedProjection() {
   var datasets=results.map(function(r){
     return{label:r.l,data:r.model.totalValuePath.map(function(value){return parseFloat(value.toFixed(2));}),borderColor:r.color,borderWidth:2,pointRadius:4,pointBackgroundColor:r.color,fill:false,tension:.3};
   });
+  datasets.push({label:'Expected value',data:projection.expectedTotalValuePath.map(function(value){return parseFloat(value.toFixed(2));}),borderColor:cp().price,borderWidth:2.5,borderDash:[5,4],pointRadius:0,fill:false,tension:.3});
   datasets.unshift({label:'Cost Basis',data:Array(years+1).fill(price0),borderColor:isDark()?'rgba(255,255,255,.2)':'rgba(0,0,0,.2)',borderWidth:1.5,borderDash:[5,4],pointRadius:0,fill:false});
   S.charts['adv-proj-chart']=new Chart(document.getElementById('adv-proj-chart'),{
     type:'line',data:{labels:labels,datasets:datasets},
@@ -7050,6 +7195,16 @@ function runAdvancedProjection() {
   document.getElementById('adv-irr-table').innerHTML=irrHtml;
   document.getElementById('adv-proj-results').style.display='block';
 }
+function updateScenarioProbabilityStatus() {
+  var status=document.getElementById('adv-prob-status');
+  if(!status) return;
+  var total=['bear','base','bull'].reduce(function(sum,key){return sum+(Number(document.getElementById('adv-prob-'+key)?.value)||0);},0);
+  status.textContent='Probabilities total '+total.toFixed(0)+'%'+(Math.abs(total-100)<0.01?'':' - adjust to 100% before calculating');
+  status.classList.toggle('invalid',Math.abs(total-100)>=0.01);
+}
+document.addEventListener('input',function(event){
+  if(event.target && event.target.id && event.target.id.indexOf('adv-prob-')===0) updateScenarioProbabilityStatus();
+});
 
 /* =====================================================
    STOCK SCREENER
@@ -7060,6 +7215,7 @@ async function loadScreener() {
   document.getElementById('scr-loading').style.display='flex';
   try {
     var r=await fetch('/api/screener');
+    if(!r.ok) throw new Error('Screener request failed ('+r.status+')');
     S.screenerData=await r.json();
     screenerLoaded=true;
     applyScreener();
@@ -7090,12 +7246,29 @@ function applyScreener() {
     if(typeof av==='string') return dir*av.localeCompare(bv);
     return dir*(av-bv);
   });
+  var count=document.getElementById('scr-result-count');
+  if(count) count.textContent=filtered.length+' of '+S.screenerData.length+' stocks match the current filters';
   renderScreenerTable(filtered);
+}
+function resetScreener() {
+  var defaults={ 'scr-sector':'ALL','scr-pe':'50','scr-pb':'20','scr-div':'0','scr-cap':'0','scr-ret':'-50' };
+  Object.keys(defaults).forEach(function(id){var el=document.getElementById(id);if(el) el.value=defaults[id];});
+  document.getElementById('scr-pe-val').textContent='50x';
+  document.getElementById('scr-pb-val').textContent='20x';
+  document.getElementById('scr-div-val').textContent='0%';
+  document.getElementById('scr-cap-val').textContent='$0B';
+  document.getElementById('scr-ret-val').textContent='-50%';
+  S.screenerSort={col:'marketCap',dir:-1};
+  applyScreener();
 }
 function loadFromScreener(el){var t=el.getAttribute('data-ticker');if(t){quickLoad(t);navGoTo('analyze');}}
 function sortScreener(col) {
   if(S.screenerSort.col===col) S.screenerSort.dir*=-1;
   else { S.screenerSort.col=col; S.screenerSort.dir=-1; }
+  document.querySelectorAll('.scr-sort-btn').forEach(function(btn){
+    if(btn.dataset.sort===col) btn.setAttribute('aria-sort',S.screenerSort.dir===1?'ascending':'descending');
+    else btn.removeAttribute('aria-sort');
+  });
   applyScreener();
 }
 function renderScreenerTable(stocks) {
@@ -7110,13 +7283,13 @@ function renderScreenerTable(stocks) {
     var sector=escapeHtml(s.sector||'--');
     var revGrStr=revGr==null?'--':(revGr>0?'<span style="color:#46b184">+'+revGr.toFixed(1)+'%</span>':'<span style="color:#d96a70">'+revGr.toFixed(1)+'%</span>');
     var signal=chg1Y==null?'--':chg1Y>20?'<span class="tag tag-up">Bullish</span>':chg1Y<-15?'<span class="tag tag-dn">Bearish</span>':'<span class="tag tag-neu">Neutral</span>';
-    return '<tr style="cursor:pointer" onclick="loadFromScreener(this)" data-ticker="'+ticker+'">'
+    return '<tr role="button" tabindex="0" aria-label="Analyze '+ticker+'" style="cursor:pointer" onclick="loadFromScreener(this)" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();loadFromScreener(this)}" data-ticker="'+ticker+'">'
       +'<td><span class="scr-ticker">'+ticker+'</span></td>'
-      +'<td style="font-size:.72rem;color:var(--text4)">'+sector+'</td>'
       +'<td>$'+(s.price||0).toFixed(2)+'</td>'
       +'<td style="color:'+(chg1D>=0?'#46b184':'#d96a70')+'">'+(chg1D>=0?'+':'')+chg1D.toFixed(2)+'%</td>'
       +'<td style="color:'+(chg1Y==null?'inherit':chg1Y>=0?'#46b184':'#d96a70')+'">'+(chg1Y!=null?(chg1Y>=0?'+':'')+chg1Y.toFixed(1)+'%':'--')+'</td>'
       +'<td>'+revGrStr+'</td>'
+      +'<td style="font-size:.72rem;color:var(--text4)">'+sector+'</td>'
       +'<td>'+cap+'</td>'
       +'<td>'+(s.pe!=null&&s.pe>0?s.pe.toFixed(1)+'x':'--')+'</td>'
       +'<td>'+(s.pb!=null&&s.pb>0?s.pb.toFixed(1)+'x':'--')+'</td>'
@@ -7143,10 +7316,10 @@ function renderRiskPanel(closes, meta) {
 
   const n = returns.length;
   const mean   = returns.reduce((a,b) => a+b, 0) / n;
-  const variance = returns.reduce((a,b) => a + Math.pow(b - mean, 2), 0) / n;
+  const variance = returns.reduce((a,b) => a + Math.pow(b - mean, 2), 0) / Math.max(1,n-1);
   const stdDev = Math.sqrt(variance);
   const annualVol = (stdDev * Math.sqrt(252)).toFixed(1);
-  const annualReturn = (mean * 252).toFixed(1);
+  const annualReturn = ((Math.pow(closes[closes.length-1]/closes[0],252/n)-1)*100).toFixed(1);
 
   // Risk-free rate ~4.5% annual → 0.01746 daily
   const rfDaily = 0.01746;
@@ -7220,7 +7393,7 @@ function renderRiskPanel(closes, meta) {
 
   el.innerHTML = `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
-      ${stat('Annual Volatility', annualVol+'%', col(-parseFloat(annualVol)))}
+      ${stat('Annual Volatility', annualVol+'%', parseFloat(annualVol)<25?'#46b184':parseFloat(annualVol)<45?'#C6A052':'#d96a70')}
       ${stat('Annual Return', annualReturn+'%', posCol(annualReturn), 'est.')}
       ${stat('Beta', beta, betaRaw!=null?(betaRaw<0.8?'#46b184':betaRaw>1.4?'#d96a70':'var(--gold)'):'var(--text4)')}
       ${stat('Alpha', alpha!=='--'?alpha+'%':'--', posCol(alpha), 'vs S&P 500')}
@@ -7549,7 +7722,7 @@ async function loadInstitutional(ticker) {
       ] : [];
       const allCards = [...dpKpi, ...siCards];
       if(!allCards.length) {
-        dpCards.innerHTML = '<div style="color:var(--text5);font-size:.8rem;">No dark pool data available for this ticker. FINRA OTC data covers stocks traded off-exchange; some NYSE/NASDAQ stocks may not appear.</div>';
+        dpCards.innerHTML = '<div style="color:var(--text5);font-size:.8rem;">No FINRA OTC activity data is available for this ticker. Coverage varies by security and reporting period.</div>';
       } else {
         dpCards.innerHTML = allCards.map(c =>
           `<div class="dp-card"><div class="dp-card-lbl">${c.lbl}</div><div class="dp-card-val" style="color:${c.color}">${c.val}</div></div>`
@@ -7560,6 +7733,8 @@ async function loadInstitutional(ticker) {
     // ── OTC Weekly Volume bar chart ──
     if(dpCanvas && dp.length) {
       destroyChart('dp-chart');
+      dpCanvas.style.display='block';
+      document.getElementById('dp-chart-empty')?.remove();
       const labels = dp.map(w=>w.weekStartDate||'').reverse();
       const vols   = dp.map(w=>w.totalWeeklyShareQuantity||0).reverse();
       S.charts['dp-chart'] = new Chart(dpCanvas, {
@@ -7569,13 +7744,14 @@ async function loadInstitutional(ticker) {
           responsive:true, maintainAspectRatio:false,
           plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>' '+Number(ctx.raw).toLocaleString()+' shares'}} },
           scales:{
-            x:{ticks:{color:'var(--text5)',font:{size:9}}, grid:{display:false}},
-            y:{ticks:{color:'var(--text5)',font:{size:9},callback:v=>fmtBig(v).replace('$','')}, grid:{color:gcol()}}
+            x:{ticks:{color:ct().muted,font:{size:9}}, grid:{display:false}},
+            y:{ticks:{color:ct().muted,font:{size:9},callback:v=>fmtBig(v).replace('$','')}, grid:{color:gcol()}}
           }
         }
       });
     } else if(dpCanvas) {
-      dpCanvas.parentElement.innerHTML = '<div style="color:var(--text5);font-size:.78rem;padding:.5rem 0;">No weekly OTC volume data found for this ticker from FINRA.</div>';
+      dpCanvas.style.display='none';
+      if(!document.getElementById('dp-chart-empty')) dpCanvas.insertAdjacentHTML('afterend','<div id="dp-chart-empty" style="color:var(--text5);font-size:.78rem;padding:.5rem 0;">No weekly OTC volume data found for this ticker from FINRA.</div>');
     }
 
     // ── Institutional table ──
@@ -7631,9 +7807,10 @@ async function loadEarnings(ticker) {
     const estData = estRes.status==='fulfilled' ? await estRes.value.json().catch(()=>({})) : {};
     const fwdQ = estData.fwdQuarterly || [];
 
-    // Render forward estimates banner if available
-    if (fwdQ.length && cont) {
-      const fwdHtml = `<div style="background:rgba(185,138,61,.08);border:1px solid rgba(185,138,61,.25);border-radius:8px;padding:10px 14px;margin-bottom:12px;">
+    // Build forward estimates banner if available
+    let fwdHtml = '';
+    if (fwdQ.length) {
+      fwdHtml = `<div style="background:rgba(185,138,61,.08);border:1px solid rgba(185,138,61,.25);border-radius:8px;padding:10px 14px;margin-bottom:12px;">
         <div style="font-size:.65rem;color:var(--gold);font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">\u2736 Analyst Forward EPS Estimates</div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;">
           ${fwdQ.map(q => `<div style="background:var(--t-metric-bg);border:1px solid var(--t-metric-border);border-radius:6px;padding:6px 10px;min-width:90px;">
@@ -7644,14 +7821,11 @@ async function loadEarnings(ticker) {
           </div>`).join('')}
         </div>
       </div>`;
-      const fwdBanner = document.createElement('div');
-      fwdBanner.innerHTML = fwdHtml;
-      cont.prepend(fwdBanner);
     }
 
     if (!Array.isArray(data) || !data.length) {
       if(loading) loading.style.display='none';
-      if(cont) cont.innerHTML='<div style="color:var(--text5);font-size:.82rem;">No earnings data found for this ticker.</div>';
+      if(cont) cont.innerHTML=fwdHtml+'<div style="color:var(--text5);font-size:.82rem;">No historical earnings data found for this ticker.</div>';
       return;
     }
     // sort newest first
@@ -7703,7 +7877,7 @@ async function loadEarnings(ticker) {
         else                               { badge='<span class="earn-badge meet">IN-LINE</span>'; cls='earn-meet'; barWidth=50; }
       }
       const detailId = 'earn-det-'+idx;
-      tableHtml += `<tr class="earn-expand-row" onclick="toggleEarnDetail('${detailId}')" style="cursor:pointer;">
+      tableHtml += `<tr class="earn-expand-row" role="button" tabindex="0" aria-label="Toggle ${row.period||'earnings'} details" onclick="toggleEarnDetail('${detailId}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleEarnDetail('${detailId}')}" style="cursor:pointer;">
         <td>${row.period||'—'}</td>
         <td>${est}</td>
         <td class="${cls}">${act}</td>
@@ -7741,7 +7915,7 @@ async function loadEarnings(ticker) {
     });
     tableHtml += '</tbody></table></div>';
     if(loading) loading.style.display='none';
-    if(cont) cont.innerHTML = summaryHtml + tableHtml;
+    if(cont) cont.innerHTML = fwdHtml + summaryHtml + tableHtml;
   } catch(e) {
     if(loading) loading.style.display='none';
     if(error) { error.style.display='block'; error.textContent='Could not load earnings: '+e.message; }
@@ -7784,7 +7958,7 @@ function renderSecFilings() {
   if (!list) return;
   const rows = _secFilter === 'ALL' ? _secFilings : _secFilings.filter(f => f.form === _secFilter || (f.form === _secFilter + '/A'));
   if (!rows.length) {
-    list.innerHTML = '<div style="font-size:.8rem;color:rgba(220,225,232,.3);padding:.5rem 0;">No filings found for this filter.</div>';
+    list.innerHTML = '<div style="font-size:.8rem;color:var(--text5);padding:.5rem 0;">No filings found for this filter.</div>';
     return;
   }
   list.innerHTML = rows.map(f => {
@@ -7840,15 +8014,20 @@ async function loadSecFilings(ticker) {
 
 
 
-// Auto-load featured grid on page open
-loadFeaturedGrid();
-loadHomeTickerStrip();
-loadMarketOverview('1d');
-loadMarketMovers();
-loadHomeInsights();
-loadPortfolioSparklines();
-if('requestIdleCallback'in window)requestIdleCallback(()=>initModernGlobe(),{timeout:1000});
-else setTimeout(initModernGlobe,120);
+let homeDashboardLoaded=false;
+function initializeHomeDashboard(){
+  if(homeDashboardLoaded) return;
+  homeDashboardLoaded=true;
+  loadFeaturedGrid();
+  loadHomeTickerStrip();
+  loadMarketOverview('1d');
+  loadMarketMovers();
+  loadHomeInsights();
+  loadPortfolioSparklines();
+  if('requestIdleCallback'in window) requestIdleCallback(()=>initModernGlobe(),{timeout:1000});
+  else setTimeout(initModernGlobe,120);
+}
+if(new URLSearchParams(window.location.search).get('view')!=='tool') initializeHomeDashboard();
 
 // Prime the analysis limit counter for free/guest users
 (async () => {
@@ -8094,7 +8273,7 @@ document.addEventListener('click', function(e) {
     <a href="#" class="mmenu-item" onclick="navGoTo('advmetrics');_setMobileNav('advmetrics');_toggleMobileMenu();return false;"><i class="ti ti-report-analytics"></i><span>Metrics</span></a>
     <a href="#" class="mmenu-item" onclick="navGoTo('earnings');_setMobileNav('earnings');_toggleMobileMenu();return false;"><i class="ti ti-trending-up"></i><span>Earnings</span></a>
     <a href="#" class="mmenu-item" onclick="navGoTo('compare');_setMobileNav('compare');_toggleMobileMenu();return false;"><i class="ti ti-arrows-split-2"></i><span>Compare</span></a>
-    <a href="#" class="mmenu-item" onclick="navGoTo('dcf');_setMobileNav('dcf');_toggleMobileMenu();return false;"><i class="ti ti-calculator"></i><span>DCF</span></a>
+    <a href="#" class="mmenu-item" onclick="navGoTo('dcf');_setMobileNav('dcf');_toggleMobileMenu();return false;"><i class="ti ti-calculator"></i><span>Intrinsic Value</span></a>
     <a href="#" class="mmenu-item" onclick="navGoTo('education');_setMobileNav('education');_toggleMobileMenu();return false;"><i class="ti ti-school"></i><span>Education</span></a>
     <a href="#" class="mmenu-item" onclick="navGoTo('projection');_setMobileNav('projection');_toggleMobileMenu();return false;"><i class="ti ti-timeline"></i><span>Projection</span></a>
     <a href="#" class="mmenu-item" onclick="navGoTo('secfilings');_setMobileNav('secfilings');_toggleMobileMenu();return false;"><i class="ti ti-file-text"></i><span>SEC</span></a>
@@ -8102,8 +8281,8 @@ document.addEventListener('click', function(e) {
   </div>
 </div>
 </div>
-<script src="/product-system.js?v=20260611-1"></script>
-<script src="/workspace-system.js?v=20260610-2"></script>
-<script src="/research-system.js?v=20260611-3"></script>
+<script src="/product-system.js?v=20260612-1"></script>
+<script src="/workspace-system.js?v=20260612-1"></script>
+<script src="/research-system.js?v=20260612-1"></script>
 </body>
 </html>

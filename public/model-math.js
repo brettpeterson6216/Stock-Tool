@@ -37,17 +37,22 @@
     const years = Number(input.years);
     const earningsMultiplier = Number(input.earningsMultiplier ?? 1);
     const dividendYield = Number(input.dividendYield ?? 0);
-    if (![price, currentPE, exitPE, growth, years, earningsMultiplier, dividendYield].every(finite)) return { ok: false, error: "Enter valid numeric assumptions." };
+    const dividendGrowth = Number(input.dividendGrowth ?? growth);
+    const annualDilution = Number(input.annualDilution ?? 0);
+    if (![price, currentPE, exitPE, growth, years, earningsMultiplier, dividendYield, dividendGrowth, annualDilution].every(finite)) return { ok: false, error: "Enter valid numeric assumptions." };
     if (price <= 0 || currentPE <= 0 || exitPE <= 0 || years <= 0 || earningsMultiplier <= 0) return { ok: false, error: "Price, P/E ratios, horizon, and earnings multiplier must be above zero." };
     if (growth <= -1) return { ok: false, error: "Annual growth must be greater than -100%." };
+    if (dividendGrowth <= -1) return { ok: false, error: "Dividend growth must be greater than -100%." };
     if (dividendYield < 0) return { ok: false, error: "Dividend yield cannot be negative." };
+    if (annualDilution <= -1) return { ok: false, error: "Annual dilution must be greater than -100%. Use a negative value for buybacks." };
     const eps0 = price / currentPE;
     const pricePath = [price];
     const dividendPath = [0];
     const totalValuePath = [price];
     for (let year = 1; year <= years; year += 1) {
-      const projectedPrice = eps0 * Math.pow(1 + growth, year) * earningsMultiplier * exitPE;
-      const dividends = cumulativeDividends(price, dividendYield, growth, year);
+      const perShareFactor = Math.pow(1 + annualDilution, -year);
+      const projectedPrice = eps0 * Math.pow(1 + growth, year) * perShareFactor * earningsMultiplier * exitPE;
+      const dividends = cumulativeDividends(price, dividendYield, dividendGrowth, year);
       pricePath.push(projectedPrice);
       dividendPath.push(dividends);
       totalValuePath.push(projectedPrice + dividends);
@@ -66,6 +71,51 @@
       pricePath,
       dividendPath,
       totalValuePath,
+    };
+  }
+
+  function projectCases(input) {
+    const price = Number(input.price);
+    const currentPE = Number(input.currentPE);
+    const years = Number(input.years);
+    const scenarios = Array.isArray(input.scenarios) ? input.scenarios : [];
+    if (![price, currentPE, years].every(finite) || price <= 0 || currentPE <= 0 || years <= 0) {
+      return { ok: false, error: "Price, current P/E, and horizon must be above zero." };
+    }
+    if (scenarios.length < 2) return { ok: false, error: "Enter at least two scenarios." };
+    const probabilities = scenarios.map(scenario => Number(scenario.probability));
+    if (!probabilities.every(probability => finite(probability) && probability >= 0 && probability <= 1)) {
+      return { ok: false, error: "Each scenario probability must be between 0% and 100%." };
+    }
+    const probabilityTotal = probabilities.reduce((sum, probability) => sum + probability, 0);
+    if (Math.abs(probabilityTotal - 1) > 0.0001) return { ok: false, error: "Scenario probabilities must total 100%." };
+
+    const results = scenarios.map((scenario, index) => {
+      const model = projectScenario({ ...scenario, price, currentPE, years });
+      return { ...scenario, probability: probabilities[index], model };
+    });
+    const invalid = results.find(result => !result.model.ok);
+    if (invalid) return invalid.model;
+
+    const weighted = key => results.reduce((sum, result) => sum + result.model[key] * result.probability, 0);
+    const expectedTotalValue = weighted("totalValue");
+    const expectedPricePath = Array.from({ length: years + 1 }, (_, index) =>
+      results.reduce((sum, result) => sum + result.model.pricePath[index] * result.probability, 0)
+    );
+    const expectedTotalValuePath = Array.from({ length: years + 1 }, (_, index) =>
+      results.reduce((sum, result) => sum + result.model.totalValuePath[index] * result.probability, 0)
+    );
+    return {
+      ok: true,
+      probabilityTotal,
+      scenarios: results,
+      expectedTerminalPrice: weighted("terminalPrice"),
+      expectedDividends: weighted("dividends"),
+      expectedTotalValue,
+      expectedTotalReturn: expectedTotalValue / price - 1,
+      expectedCagr: cagr(price, expectedTotalValue, years),
+      expectedPricePath,
+      expectedTotalValuePath,
     };
   }
 
@@ -110,13 +160,17 @@
     const principal = Number(input.principal ?? 0);
     const monthlyContribution = Number(input.monthlyContribution ?? 0);
     const annualReturn = Number(input.annualReturn);
+    const annualFee = Number(input.annualFee ?? 0);
+    const taxDrag = Number(input.taxDrag ?? 0);
     const years = Number(input.years);
-    if (![principal, monthlyContribution, annualReturn, years].every(finite)) return { ok: false, error: "Enter valid numeric assumptions." };
+    if (![principal, monthlyContribution, annualReturn, annualFee, taxDrag, years].every(finite)) return { ok: false, error: "Enter valid numeric assumptions." };
     if (principal < 0 || monthlyContribution < 0 || years <= 0) return { ok: false, error: "Starting balance and contributions cannot be negative, and years must be above zero." };
-    if (annualReturn <= -1) return { ok: false, error: "Annual return must be greater than -100%." };
+    if (annualFee < 0 || taxDrag < 0) return { ok: false, error: "Annual fees and tax drag cannot be negative." };
+    const effectiveAnnualReturn = annualReturn - annualFee - taxDrag;
+    if (effectiveAnnualReturn <= -1) return { ok: false, error: "Return after fees and tax drag must be greater than -100%." };
 
     const months = Math.round(years * 12);
-    const monthlyRate = Math.pow(1 + annualReturn, 1 / 12) - 1;
+    const monthlyRate = Math.pow(1 + effectiveAnnualReturn, 1 / 12) - 1;
     const path = [{ month: 0, value: principal, contributions: principal }];
     let value = principal;
     let contributions = principal;
@@ -126,7 +180,7 @@
       contributions += monthlyContribution;
       if (month % 12 === 0 || month === months) path.push({ month, value, contributions });
     }
-    return { ok: true, value, contributions, growth: value - contributions, path };
+    return { ok: true, value, contributions, growth: value - contributions, effectiveAnnualReturn, path };
   }
 
   function compoundScenarios(input) {
@@ -145,5 +199,5 @@
     return { ok: true, low, base, high, realValue };
   }
 
-  return { cagr, cumulativeDividends, projectScenario, epsDcf, annualizedVolatility, futureValue, compoundScenarios };
+  return { cagr, cumulativeDividends, projectScenario, projectCases, epsDcf, annualizedVolatility, futureValue, compoundScenarios };
 });

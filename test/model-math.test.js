@@ -22,6 +22,49 @@ test("scenario projection rejects impossible assumptions", () => {
   assert.equal(math.projectScenario({ price: 100, currentPE: 20, exitPE: 20, growth: -1, years: 5 }).ok, false);
 });
 
+test("scenario projection independently models dividend growth and dilution", () => {
+  const result = math.projectScenario({
+    price: 100,
+    currentPE: 20,
+    exitPE: 20,
+    growth: 0.1,
+    dividendYield: 0.02,
+    dividendGrowth: 0,
+    annualDilution: 0.05,
+    years: 2,
+  });
+  assert.equal(result.ok, true);
+  assert.ok(Math.abs(result.terminalPrice - (121 / Math.pow(1.05, 2))) < 0.000001);
+  assert.ok(Math.abs(result.dividends - 4) < 0.000001);
+});
+
+test("project cases validates probabilities and returns a weighted outcome", () => {
+  const result = math.projectCases({
+    price: 100,
+    currentPE: 20,
+    years: 2,
+    scenarios: [
+      { name: "Bear", probability: 0.25, exitPE: 15, growth: 0 },
+      { name: "Base", probability: 0.5, exitPE: 20, growth: 0.1 },
+      { name: "Bull", probability: 0.25, exitPE: 25, growth: 0.2 },
+    ],
+  });
+  assert.equal(result.ok, true);
+  assert.equal(result.scenarios.length, 3);
+  assert.ok(result.expectedTerminalPrice > result.scenarios[0].model.terminalPrice);
+  assert.ok(result.expectedTerminalPrice < result.scenarios[2].model.terminalPrice);
+  assert.ok(result.expectedCagr > 0);
+  assert.equal(math.projectCases({
+    price: 100,
+    currentPE: 20,
+    years: 2,
+    scenarios: [
+      { probability: 0.4, exitPE: 15, growth: 0 },
+      { probability: 0.4, exitPE: 20, growth: 0.1 },
+    ],
+  }).ok, false);
+});
+
 test("EPS DCF discounts both forecast earnings and terminal value", () => {
   const result = math.epsDcf({ eps: 5, growth1: 0.1, growth2: 0.05, terminalGrowth: 0.03, discountRate: 0.1 });
   assert.equal(result.ok, true);
@@ -62,4 +105,12 @@ test("compound scenarios calculate low, base, high, and inflation-adjusted value
 test("future value rejects impossible assumptions", () => {
   assert.equal(math.futureValue({ principal: -1, monthlyContribution: 0, annualReturn: 0.1, years: 5 }).ok, false);
   assert.equal(math.futureValue({ principal: 1, monthlyContribution: 0, annualReturn: -1, years: 5 }).ok, false);
+});
+
+test("future value deducts optional annual fees and tax drag", () => {
+  const gross = math.futureValue({ principal: 10000, monthlyContribution: 0, annualReturn: 0.1, years: 10 });
+  const net = math.futureValue({ principal: 10000, monthlyContribution: 0, annualReturn: 0.1, annualFee: 0.01, taxDrag: 0.02, years: 10 });
+  assert.equal(net.ok, true);
+  assert.ok(net.value < gross.value);
+  assert.ok(Math.abs(net.effectiveAnnualReturn - 0.07) < 0.000001);
 });

@@ -366,6 +366,34 @@
     });
   }
 
+  function installToolGuidance() {
+    const guides = {
+      financials: ["Read the trend before the latest number.", "Advanced check: reconcile earnings with cash flow, debt, and diluted shares."],
+      advmetrics: ["Start with margins, returns on capital, and leverage.", "Advanced check: compare the company with its own history and a relevant peer group."],
+      earnings: ["Look for the direction and consistency of estimate surprises.", "Advanced check: separate one-time beats from durable estimate revisions."],
+      secfilings: ["10-K is annual, 10-Q is quarterly, and 8-K reports material events.", "Advanced check: inspect risk factors, share count, segment results, and footnotes."],
+      institutional: ["Use ownership and FINRA OTC activity as context, not a trading signal.", "Advanced check: compare changes across reporting periods and verify the filing date."],
+      compare: ["Choose companies with similar business models before comparing ratios.", "Advanced check: treat the radar as relative ranking, then verify the underlying figures."],
+      reports: ["Save a snapshot when your thesis or assumptions change.", "Advanced check: compare each new review with the prior decision record."],
+    };
+    Object.entries(guides).forEach(([id, copy]) => {
+      const body = document.getElementById(`body-${id}`);
+      if (!body || body.querySelector(".il-tool-guide")) return;
+      const guide = document.createElement("div");
+      guide.className = "il-tool-guide";
+      guide.innerHTML = `<div><span>Start here</span><strong>${copy[0]}</strong></div><div><span>Research check</span><strong>${copy[1]}</strong></div>`;
+      body.insertBefore(guide, body.firstChild);
+    });
+  }
+
+  function improveControlSemantics() {
+    document.querySelectorAll("#view-tool button:not([type])").forEach(button => button.type = "button");
+    document.querySelectorAll("#view-tool label:not([for])").forEach(label => {
+      const control = label.querySelector("input,select,textarea") || label.parentElement?.querySelector("input[id],select[id],textarea[id]");
+      if (control?.id) label.htmlFor = control.id;
+    });
+  }
+
   function init() {
     installChartPersistence();
     installQuoteTrust();
@@ -373,6 +401,14 @@
     installOnboarding();
     installBuildBadge();
     installFeedbackPrompt();
+    installToolGuidance();
+    improveControlSemantics();
+    window.refreshToolEnhancements = () => {
+      installToolGuidance();
+      improveControlSemantics();
+    };
+    const toolView = document.getElementById("view-tool");
+    if (toolView) new MutationObserver(improveControlSemantics).observe(toolView, { childList: true, subtree: true });
     improveUnavailableStates();
     window.shareTickerResearch = shareTickerResearch;
     setInterval(improveUnavailableStates, 1500);

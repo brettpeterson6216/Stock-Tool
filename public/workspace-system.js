@@ -166,7 +166,12 @@
 
   async function savePosition() {
     const ticker = symbol(document.getElementById("il-position-ticker").value);
-    const body = { shares: document.getElementById("il-position-shares").value, cost_basis: document.getElementById("il-position-cost").value, sector: document.getElementById("il-position-sector").value, notes: document.getElementById("il-position-notes").value };
+    const shares = Number(document.getElementById("il-position-shares").value);
+    const costBasis = Number(document.getElementById("il-position-cost").value);
+    if (!ticker) return toastMsg("Enter a ticker first", "red");
+    if (!Number.isFinite(shares) || shares <= 0) return toastMsg("Shares must be above zero", "red");
+    if (!Number.isFinite(costBasis) || costBasis < 0) return toastMsg("Cost basis cannot be negative", "red");
+    const body = { shares, cost_basis: costBasis, sector: document.getElementById("il-position-sector").value, notes: document.getElementById("il-position-notes").value };
     try { const saved = await persist("position", ticker, body); state.positions = [saved, ...state.positions.filter(v => v.ticker !== ticker)]; saveLocal(); renderAll(); toastMsg(`${ticker} position saved`, "ok"); } catch (e) { toastMsg(e.message, "red"); }
   }
 
@@ -174,14 +179,18 @@
     const panel = document.querySelector('[data-panel="watchlist"]');
     panel.innerHTML = `<div class="il-ws-grid">${formBlock("watchlist")}<div class="il-ws-block"><h3>Watchlist intelligence</h3><p>See how far the latest price sits from your level.</p><div class="il-ws-list">${state.watchlist.length ? state.watchlist.map(row => {
       const price = state.prices[row.ticker]; const gap = price && row.target_price ? (row.target_price - price) / price * 100 : null;
-      return `<div class="il-ws-item"><button class="il-ws-btn" data-open-ticker="${esc(row.ticker)}"><strong>${esc(row.ticker)}</strong></button><div class="il-ws-num">${money(price)}<span>latest price</span></div><div class="il-ws-num ${gap >= 0 ? "pos" : "neg"}">${gap == null ? "—" : `${gap >= 0 ? "+" : ""}${gap.toFixed(1)}%`}<span>to ${money(row.target_price)}</span></div><div><span>${esc(row.note || "No note")}</span></div><button class="il-ws-btn danger" data-remove="watchlist" data-ticker="${esc(row.ticker)}"><i class="ti ti-trash"></i></button></div>`;
+      return `<div class="il-ws-item"><button class="il-ws-btn" data-open-ticker="${esc(row.ticker)}"><strong>${esc(row.ticker)}</strong></button><div class="il-ws-num">${money(price)}<span>latest price</span></div><div class="il-ws-num ${gap == null ? "" : gap >= 0 ? "pos" : "neg"}">${gap == null ? "—" : `${gap >= 0 ? "+" : ""}${gap.toFixed(1)}%`}<span>to ${money(row.target_price)}</span></div><div><span>${esc(row.note || "No note")}</span></div><button class="il-ws-btn danger" data-remove="watchlist" data-ticker="${esc(row.ticker)}"><i class="ti ti-trash"></i></button></div>`;
     }).join("") : `<div class="il-ws-empty">Add companies you want to follow with a reason and target.</div>`}</div></div></div>`;
     panel.querySelector("#il-save-watchlist").onclick = saveWatchlist; panel.querySelectorAll("[data-open-ticker]").forEach(button => button.onclick = () => openTicker(button.dataset.openTicker)); wireRemoves(panel); refreshPrices(state.watchlist.map(v => v.ticker));
   }
 
   async function saveWatchlist() {
     const ticker = symbol(document.getElementById("il-watchlist-ticker").value);
-    const body = { target_price: document.getElementById("il-watchlist-target").value, note: document.getElementById("il-watchlist-note").value };
+    const rawTarget = document.getElementById("il-watchlist-target").value;
+    const targetPrice = rawTarget === "" ? null : Number(rawTarget);
+    if (!ticker) return toastMsg("Enter a ticker first", "red");
+    if (targetPrice !== null && (!Number.isFinite(targetPrice) || targetPrice <= 0)) return toastMsg("Target price must be above zero", "red");
+    const body = { target_price: targetPrice, note: document.getElementById("il-watchlist-note").value };
     try { const saved = await persist("watchlist", ticker, body); state.watchlist = [saved, ...state.watchlist.filter(v => v.ticker !== ticker)]; saveLocal(); renderAll(); toastMsg(`${ticker} added to watchlist`, "ok"); } catch (e) { toastMsg(e.message, "red"); }
   }
 
