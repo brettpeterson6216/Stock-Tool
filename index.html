@@ -1412,8 +1412,13 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
     }
   }
 
-  function navGoTo(id) {
+  function navGoTo(id, attempt) {
     if (id === 'home') { showView('home'); updateNavToolLink(true); initializeHomeDashboard(); return; }
+    if (typeof openSection !== 'function') {
+      const nextAttempt = (attempt || 0) + 1;
+      if (nextAttempt <= 100) setTimeout(() => navGoTo(id, nextAttempt), 50);
+      return;
+    }
     showView('tool');
     window.scrollTo(0,0);
     openSection(id); // no skipProCheck — free users see the upgrade modal, not empty Pro panels
@@ -1427,7 +1432,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
     const requestedSection = params.get('section');
     if (params.get('view') === 'tool') {
       showView('tool');
-      if (requestedSection) setTimeout(() => openSection(requestedSection), 0);
+      if (requestedSection) setTimeout(() => navGoTo(requestedSection), 0);
     }
     else if (!window.location.search.includes('view=home')) {
       // nav data-view defaults to "home" — no action needed
@@ -1624,10 +1629,14 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
         const _mi = document.getElementById('main-ticker');
         if (_mi) _mi.value = _clean;
         history.replaceState(null, '', '/');
-        navGoTo('analyze');
-        if (typeof fetchAndRender === 'function') {
-          setTimeout(() => fetchAndRender(), 200);
-        }
+        (function _openTicker(attempt) {
+          if (typeof openSection !== 'function' || typeof fetchAndRender !== 'function') {
+            if (attempt < 100) setTimeout(() => _openTicker(attempt + 1), 50);
+            return;
+          }
+          navGoTo('analyze');
+          fetchAndRender();
+        })(0);
       })();
     }
 
@@ -5752,7 +5761,7 @@ function renderStock(result, ticker) {
   }).join('');
 
   // Sector benchmark comparison panel
-  (async () => {
+  if (isPro()) (async () => {
     try {
       const profResp = await fetch('/api/analyst/'+encodeURIComponent(ticker), {credentials:'same-origin'});
       const profData = profResp.ok ? await profResp.json() : {};
@@ -5801,7 +5810,7 @@ function renderStock(result, ticker) {
   if(document.getElementById('dcf-price')) document.getElementById('dcf-price').value=price.toFixed(2);
 
   // Async: fetch analyst consensus estimates and auto-fill projection defaults
-  (async () => {
+  if (isPro()) (async () => {
     try {
       const er = await fetch('/api/estimates/' + encodeURIComponent(ticker), { credentials:'same-origin' });
       if (!er.ok) return;
@@ -5887,7 +5896,7 @@ function renderStock(result, ticker) {
   updateSectionHeader('analyze');
   renderRiskPanel(c,meta);
   renderNews(ticker,meta.longName||ticker);
-  loadAnalyst(ticker);
+  if (isPro()) loadAnalyst(ticker);
 
   document.getElementById('proj-results').style.display='none';
   renderSavedAnalyses();
@@ -6655,6 +6664,7 @@ function resetEduChecklist(){document.querySelectorAll('.edu-checklist input').f
 document.addEventListener('DOMContentLoaded',updateEduProgress);
 
 async function loadAnalyst(ticker) {
+  if (!isPro()) return;
   try {
     const r = await fetch(`/api/analyst/${encodeURIComponent(ticker)}`, { credentials: 'same-origin' });
     if (!r.ok) return;

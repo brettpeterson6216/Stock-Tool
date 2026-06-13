@@ -120,6 +120,11 @@ app.use((req, res, next) => {
 });
 
 // Static public assets (logo, robots.txt, sitemap.xml, …)
+app.get("/favicon.ico", (_req, res) => {
+  res.type("image/svg+xml");
+  res.sendFile(path.join(__dirname, "public", "logo.svg"));
+});
+
 app.use(express.static(path.join(__dirname, "public"), {
   maxAge: "7d",
   etag: true,

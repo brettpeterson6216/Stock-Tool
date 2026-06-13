@@ -123,6 +123,26 @@ test("Public brand and acquisition pages are available", async () => {
   }
 });
 
+test("Public pages expose canonical, favicon, and social metadata", async () => {
+  for (const pagePath of ["/about", "/blog", "/data-sources", "/privacy", "/terms", "/research-process", "/compound-calculator"]) {
+    const res = await req(pagePath);
+    assert.equal(res.status, 200);
+    const html = await res.text();
+    assert.match(html, new RegExp(`<link rel="canonical" href="https://impliedlens\\.com${pagePath}">`));
+    assert.match(html, /<link rel="icon" type="image\/svg\+xml" href="\/logo\.svg">/);
+    assert.match(html, /<meta property="og:title"/);
+    assert.match(html, /<meta property="og:description"/);
+    assert.match(html, /<meta name="twitter:card"/);
+  }
+});
+
+test("GET /favicon.ico serves the brand mark", async () => {
+  const res = await req("/favicon.ico");
+  assert.equal(res.status, 200);
+  assert.match(res.headers.get("content-type"), /image\/svg\+xml/);
+  assert.match(await res.text(), /<svg/);
+});
+
 test("GET /healthz reports database and build health", async () => {
   const res = await req("/healthz");
   assert.equal(res.status, 200);
