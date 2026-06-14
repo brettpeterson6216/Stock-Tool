@@ -16,10 +16,16 @@ const express = require("express");
 
 const { FINNHUB_KEY }  = require("../lib/config");
 const { db }           = require("../lib/db");
-const { requirePro, getEffectivePlan, FREE_DAILY_LIMIT, GUEST_DAILY_LIMIT } = require("../lib/plan");
+const { requirePro, getEffectivePlan, normalizeTicker, FREE_DAILY_LIMIT, GUEST_DAILY_LIMIT } = require("../lib/plan");
 
 const router = express.Router();
 const UA     = "ImpliedLens/1.0 brettpeterson6216@gmail.com";
+
+function requestTicker(req, res) {
+  const ticker = normalizeTicker(req.params.ticker);
+  if (!ticker) res.status(400).json({ error: "Invalid ticker." });
+  return ticker;
+}
 
 // ---- Fetch with timeout helper ----
 async function fetchWithTimeout(url, options = {}, timeoutMs = 5000) {
@@ -73,7 +79,8 @@ router.get("/me/limit", async (req, res) => {
 //  GET /api/financials/:ticker  (Pro)
 // ============================================================
 router.get("/financials/:ticker", requirePro, async (req, res) => {
-  const ticker = req.params.ticker.toUpperCase().replace(/[^A-Z0-9.]/g, "");
+  const ticker = requestTicker(req, res);
+  if (!ticker) return;
 
   try {
     // Step 1: Resolve CIK from SEC authoritative ticker map
@@ -269,8 +276,9 @@ router.get("/financials/:ticker", requirePro, async (req, res) => {
 //  GET /api/earnings/:ticker  (Pro)
 // ============================================================
 router.get("/earnings/:ticker", requirePro, async (req, res) => {
+  const ticker = requestTicker(req, res);
+  if (!ticker) return;
   try {
-    const ticker = req.params.ticker.toUpperCase();
     const url    = `https://finnhub.io/api/v1/stock/earnings?symbol=${ticker}&limit=20&token=${FINNHUB_KEY}`;
     const r      = await fetchWithTimeout(url);
     if (!r.ok) return res.status(r.status).json({ error: "Finnhub returned " + r.status });
@@ -285,8 +293,8 @@ router.get("/earnings/:ticker", requirePro, async (req, res) => {
 //  GET /api/calls/:ticker and /api/calls/:ticker/:id  (Pro)
 // ============================================================
 router.get("/calls/:ticker", requirePro, async (req, res) => {
-  const ticker = req.params.ticker.toUpperCase().replace(/[^A-Z0-9.]/g, "");
-  if (!ticker) return res.status(400).json({ error: "Invalid ticker." });
+  const ticker = requestTicker(req, res);
+  if (!ticker) return;
   try {
     const [listResult, profileResult] = await Promise.allSettled([
       fetchWithTimeout(`https://finnhub.io/api/v1/stock/transcripts/list?symbol=${ticker}&token=${FINNHUB_KEY}`, {}, 7000),
@@ -325,9 +333,10 @@ router.get("/calls/:ticker", requirePro, async (req, res) => {
 });
 
 router.get("/calls/:ticker/:id", requirePro, async (req, res) => {
-  const ticker = req.params.ticker.toUpperCase().replace(/[^A-Z0-9.]/g, "");
+  const ticker = requestTicker(req, res);
   const id = String(req.params.id || "");
-  if (!ticker || !/^[A-Za-z0-9_.:-]{1,200}$/.test(id)) return res.status(400).json({ error: "Invalid transcript request." });
+  if (!ticker) return;
+  if (!/^[A-Za-z0-9_.:-]{1,200}$/.test(id)) return res.status(400).json({ error: "Invalid transcript request." });
   try {
     const response = await fetchWithTimeout(`https://finnhub.io/api/v1/stock/transcripts?id=${encodeURIComponent(id)}&token=${FINNHUB_KEY}`, {}, 12000);
     if (!response.ok) return res.status(response.status).json({ error: "Transcript is unavailable from the current data provider." });
@@ -355,8 +364,9 @@ router.get("/calls/:ticker/:id", requirePro, async (req, res) => {
 //  GET /api/metrics/:ticker  (Pro)
 // ============================================================
 router.get("/metrics/:ticker", requirePro, async (req, res) => {
+  const ticker = requestTicker(req, res);
+  if (!ticker) return;
   try {
-    const ticker = req.params.ticker.toUpperCase();
     const url    = `https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FINNHUB_KEY}`;
     const r      = await fetchWithTimeout(url);
     if (!r.ok) return res.status(r.status).json({ error: "Finnhub returned " + r.status });
@@ -371,8 +381,8 @@ router.get("/metrics/:ticker", requirePro, async (req, res) => {
 //  GET /api/sec/:ticker  (Pro)
 // ============================================================
 router.get("/sec/:ticker", requirePro, async (req, res) => {
-  const ticker = req.params.ticker.toUpperCase().replace(/[^A-Z0-9.]/g, "");
-  if (!ticker) return res.status(400).json({ error: "No ticker" });
+  const ticker = requestTicker(req, res);
+  if (!ticker) return;
   try {
     let entityId = null, entityName = ticker;
 
@@ -440,8 +450,8 @@ router.get("/sec/:ticker", requirePro, async (req, res) => {
 //  GET /api/estimates/:ticker  (Pro)
 // ============================================================
 router.get("/estimates/:ticker", requirePro, async (req, res) => {
-  const ticker = req.params.ticker.toUpperCase().replace(/[^A-Z0-9.]/g, "");
-  if (!ticker) return res.status(400).json({ error: "No ticker" });
+  const ticker = requestTicker(req, res);
+  if (!ticker) return;
   try {
     const FH = FINNHUB_KEY;
     const [revResp, epsResp, metResp, ptResp] = await Promise.allSettled([
@@ -537,7 +547,8 @@ router.get("/estimates/:ticker", requirePro, async (req, res) => {
 //  GET /api/analyst/:ticker  (Pro)
 // ============================================================
 router.get("/analyst/:ticker", requirePro, async (req, res) => {
-  const ticker = req.params.ticker.toUpperCase();
+  const ticker = requestTicker(req, res);
+  if (!ticker) return;
   try {
     const [ptResp, recResp] = await Promise.all([
       fetchWithTimeout(`https://finnhub.io/api/v1/stock/price-target?symbol=${ticker}&token=${FINNHUB_KEY}`),
@@ -586,7 +597,8 @@ router.get("/analyst/:ticker", requirePro, async (req, res) => {
 //  GET /api/institutional/:ticker  (Pro)
 // ============================================================
 router.get("/institutional/:ticker", requirePro, async (req, res) => {
-  const ticker = req.params.ticker.toUpperCase();
+  const ticker = requestTicker(req, res);
+  if (!ticker) return;
   try {
     const r    = await fetchWithTimeout(`https://finnhub.io/api/v1/stock/ownership?symbol=${ticker}&limit=10&token=${FINNHUB_KEY}`);
     const data = await r.json();
@@ -601,7 +613,8 @@ router.get("/institutional/:ticker", requirePro, async (req, res) => {
 //  GET /api/darkpool/:ticker  (Pro)
 // ============================================================
 router.get("/darkpool/:ticker", requirePro, async (req, res) => {
-  const ticker = req.params.ticker.toUpperCase();
+  const ticker = requestTicker(req, res);
+  if (!ticker) return;
   try {
     const compareFilters = encodeURIComponent(JSON.stringify([
       { fieldName: "issueSymbolIdentifier", compareType: "equal", fieldValue: ticker },

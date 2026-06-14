@@ -28,12 +28,14 @@ process.env.PORT            = "0"; // OS picks free port
 
 let server, baseUrl;
 const nativeFetch = global.fetch;
+const externalFetches = [];
 
 // Keep smoke tests deterministic and fast: local app requests stay real,
 // while external market providers are represented as unavailable.
 global.fetch = (url, options) => {
   const target = String(url);
   if (target.startsWith("http://127.0.0.1:")) return nativeFetch(url, options);
+  externalFetches.push(target);
   return Promise.resolve(new Response(JSON.stringify({ error: "upstream unavailable in smoke test" }), {
     status: 503,
     headers: { "Content-Type": "application/json" },
@@ -50,23 +52,14 @@ async function req(path, opts = {}) {
   });
 }
 
-// Sign up, log in and return { cookie, csrfToken }
-async function makeSession(username, email, password = "Password123") {
-  await req("/api/auth/signup", {
-    method: "POST",
-    body: { username, email, password },
-  });
-  const loginRes = await req("/api/auth/login", {
-    method: "POST",
-    body: { identifier: email, password },
-  });
+function cookieFromResponse(response) {
   // Extract individual Set-Cookie headers safely.
   // Node 18+ fetch (undici) supports getSetCookie(); fall back to comma-join split.
   let rawCookies;
-  if (typeof loginRes.headers.getSetCookie === "function") {
-    rawCookies = loginRes.headers.getSetCookie();
+  if (typeof response.headers.getSetCookie === "function") {
+    rawCookies = response.headers.getSetCookie();
   } else {
-    const joined = loginRes.headers.get("set-cookie") || "";
+    const joined = response.headers.get("set-cookie") || "";
     // rudimentary split that avoids splitting on commas inside cookie values
     rawCookies = joined ? [joined] : [];
   }
@@ -75,10 +68,28 @@ async function makeSession(username, email, password = "Password123") {
     .map(c => c.split(";")[0].trim())
     .filter(Boolean)
     .join("; ");
+  return cookie;
+}
+
+async function loginSession(identifier, password = "Password123") {
+  const loginRes = await req("/api/auth/login", {
+    method: "POST",
+    body: { identifier, password },
+  });
+  const cookie = cookieFromResponse(loginRes);
   // Fetch CSRF token for this session
   const csrfRes = await req("/api/csrf", { headers: { cookie } });
   const { token } = await csrfRes.json();
   return { cookie, csrfToken: token };
+}
+
+// Sign up, log in and return { cookie, csrfToken }
+async function makeSession(username, email, password = "Password123") {
+  await req("/api/auth/signup", {
+    method: "POST",
+    body: { username, email, password },
+  });
+  return loginSession(email, password);
 }
 
 // ── Lifecycle ─────────────────────────────────────────────────
@@ -116,6 +127,9 @@ test("GET / serves the homepage with a successful status", async () => {
   assert.match(html, /Create free account for 5\/day/);
   assert.match(html, /function startGuestSignup/);
   assert.match(html, /analysis_resumed_after_auth/);
+  assert.match(html, /function openBillingPortal/);
+  assert.match(html, /ImpliedLensMath\.annualizedVolatility\(c,252\)\*100/);
+  assert.match(html, /const _initialParams = new URLSearchParams\(window\.location\.search\)/);
   assert.match(res.headers.get("cache-control"), /no-cache/);
 });
 
@@ -238,6 +252,72 @@ test("POST /api/auth/logout with correct CSRF token succeeds", async () => {
   assert.equal(res.status, 200, "should accept logout with correct CSRF token");
 });
 
+test("Usernames are normalized and enforced case-insensitively", async () => {
+  const first = await req("/api/auth/signup", {
+    method: "POST",
+    body: { username: "CaseUser", email: "case_user1@test.com", password: "Password123" },
+  });
+  assert.equal(first.status, 201);
+  assert.equal((await first.json()).user.username, "caseuser");
+
+  const duplicate = await req("/api/auth/signup", {
+    method: "POST",
+    body: { username: "CASEUSER", email: "case_user2@test.com", password: "Password123" },
+  });
+  assert.equal(duplicate.status, 409);
+
+  const login = await req("/api/auth/login", {
+    method: "POST",
+    body: { identifier: "CaSeUsEr", password: "Password123" },
+  });
+  assert.equal(login.status, 200);
+});
+
+test("Changing a password rotates the current session and invalidates other sessions", async () => {
+  await req("/api/auth/signup", {
+    method: "POST",
+    body: { username: "password_sessions", email: "password_sessions@test.com", password: "Password123" },
+  });
+  const first = await loginSession("password_sessions@test.com");
+  const second = await loginSession("password_sessions@test.com");
+
+  const changed = await req("/api/auth/change-password", {
+    method: "POST",
+    headers: { cookie: first.cookie, "X-CSRF-Token": first.csrfToken },
+    body: { currentPassword: "Password123", newPassword: "NewPassword456" },
+  });
+  assert.equal(changed.status, 200);
+  const changedBody = await changed.json();
+  assert.equal(changedBody.ok, true);
+  assert.equal(changedBody.csrfToken.length, 64);
+
+  const rotatedCookie = cookieFromResponse(changed);
+  const current = await req("/api/auth/me", { headers: { cookie: rotatedCookie } });
+  assert.equal((await current.json()).user.email, "password_sessions@test.com");
+
+  const other = await req("/api/auth/me", { headers: { cookie: second.cookie } });
+  assert.equal((await other.json()).user, null);
+  assert.equal((await req("/api/auth/login", { method: "POST", body: { identifier: "password_sessions@test.com", password: "Password123" } })).status, 401);
+  assert.equal((await req("/api/auth/login", { method: "POST", body: { identifier: "password_sessions@test.com", password: "NewPassword456" } })).status, 200);
+});
+
+test("Account changes enforce username and password length limits", async () => {
+  const { cookie, csrfToken } = await makeSession("account_limits", "account_limits@test.com");
+  const username = await req("/api/auth/change-username", {
+    method: "POST",
+    headers: { cookie, "X-CSRF-Token": csrfToken },
+    body: { username: "a".repeat(33) },
+  });
+  assert.equal(username.status, 400);
+
+  const password = await req("/api/auth/change-password", {
+    method: "POST",
+    headers: { cookie, "X-CSRF-Token": csrfToken },
+    body: { currentPassword: "Password123", newPassword: "a".repeat(201) },
+  });
+  assert.equal(password.status, 400);
+});
+
 // ═══════════════════════════════════════════════════════════════
 //  2. Cloud saves — free registered users
 // ═══════════════════════════════════════════════════════════════
@@ -252,6 +332,13 @@ test("Free user can POST to /api/saves (cloud saves are free)", async () => {
   const body = await res.json();
   assert.ok(body.ok, "response should have ok:true");
   assert.ok(typeof body.id === "number", "response should return numeric id");
+});
+
+test("Saved analyses reject invalid tickers and malformed payloads", async () => {
+  const { cookie, csrfToken } = await makeSession("save_validation", "save_validation@test.com");
+  const headers = { cookie, "X-CSRF-Token": csrfToken };
+  assert.equal((await req("/api/saves", { method: "POST", headers, body: { ticker: "?bad", type: "price", data: {} } })).status, 400);
+  assert.equal((await req("/api/saves", { method: "POST", headers, body: { ticker: "AAPL", type: "price", data: [] } })).status, 400);
 });
 
 test("Guest (no session) cannot POST to /api/saves", async () => {
@@ -419,6 +506,20 @@ test("Pro earnings-call research degrades gracefully when transcripts are unavai
   assert.match(body.links.sec, /sec\.gov/);
 });
 
+test("Pro data routes reject malformed tickers before contacting providers", async () => {
+  const email = "pro_ticker_validation@test.com";
+  const { cookie, csrfToken } = await makeSession("pro_ticker_validation", email);
+  assert.equal((await req("/api/admin/grant-pro", {
+    method: "POST",
+    headers: { cookie, "X-CSRF-Token": csrfToken, "X-Admin-Secret": process.env.ADMIN_SECRET },
+    body: { email },
+  })).status, 200);
+  externalFetches.length = 0;
+  const res = await req("/api/analyst/%3Ftoken%3Devil", { headers: { cookie } });
+  assert.equal(res.status, 400);
+  assert.equal(externalFetches.length, 0);
+});
+
 test("Guest gets 401 on /api/financials/:ticker", async () => {
   const res = await req("/api/financials/AAPL");
   assert.equal(res.status, 401, "guest should get 401 on Pro-gated route");
@@ -500,6 +601,23 @@ test("Preview quota bypass works for AAPL with preview=1", async () => {
   const res = await req("/api/quote/AAPL?range=1d&preview=1");
   // Will fail with upstream error (no real Finnhub key) but not with 429
   assert.notEqual(res.status, 429, "preview=1 should not trigger quota 429");
+});
+
+test("Market routes reject malformed tickers before contacting providers", async () => {
+  externalFetches.length = 0;
+  const res = await req("/api/news/%3Ftoken%3Devil");
+  assert.equal(res.status, 400);
+  assert.equal(externalFetches.length, 0);
+});
+
+test("Quote requests default unsupported ranges and intervals to allowlisted values", async () => {
+  const { cookie } = await makeSession("quote_allowlist", "quote_allowlist@test.com");
+  externalFetches.length = 0;
+  const res = await req("/api/quote/RANGE?range=forever&interval=evil", { headers: { cookie } });
+  assert.notEqual(res.status, 429);
+  const yahooRequest = externalFetches.find(url => url.includes("/v8/finance/chart/RANGE"));
+  assert.ok(yahooRequest);
+  assert.match(yahooRequest, /interval=1d&range=1y/);
 });
 
 // ═══════════════════════════════════════════════════════════════
@@ -663,6 +781,12 @@ test("Checkout rejects requests without a CSRF token", async () => {
     body: { annual: false },
   });
   assert.equal(res.status, 403);
+});
+
+test("Billing portal creation is POST-only and CSRF-protected", async () => {
+  const { cookie } = await makeSession("portal_csrf1", "portalcsrf1@test.com");
+  assert.equal((await req("/api/stripe/portal", { headers: { cookie } })).status, 404);
+  assert.equal((await req("/api/stripe/portal", { method: "POST", headers: { cookie } })).status, 403);
 });
 
 test("Verification token flow: valid token marks user verified", async () => {

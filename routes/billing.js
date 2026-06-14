@@ -18,6 +18,7 @@ const router = express.Router();
 // ============================================================
 router.post("/stripe/create-checkout", validateCsrf, async (req, res) => {
   if (!req.session.userId)    return res.status(401).json({ error: "Login required." });
+  const annual = req.body?.annual === true;
 
   try {
     const userRow  = await db.execute({
@@ -42,7 +43,6 @@ router.post("/stripe/create-checkout", validateCsrf, async (req, res) => {
           return res.status(409).json({
             error: "You already have a subscription. Manage it from your billing portal.",
             hasSubscription: true,
-            portalUrl: "/api/stripe/portal",
           });
         }
       } catch (e) {
@@ -50,7 +50,7 @@ router.post("/stripe/create-checkout", validateCsrf, async (req, res) => {
       }
     }
 
-    const priceId = req.body.annual ? STRIPE_PRICE_ANNUAL : STRIPE_PRICE_MONTHLY;
+    const priceId = annual ? STRIPE_PRICE_ANNUAL : STRIPE_PRICE_MONTHLY;
     if (!priceId) return res.status(503).json({ error: "Price not configured." });
 
     const params = {
@@ -59,7 +59,7 @@ router.post("/stripe/create-checkout", validateCsrf, async (req, res) => {
       line_items: [{ price: priceId, quantity: 1 }],
       subscription_data: { trial_period_days: 7 },
       success_url: `${APP_URL}/?upgraded=1`,
-      cancel_url:  `${APP_URL}/`,
+      cancel_url:  `${APP_URL}/?checkout=cancelled`,
       metadata: { userId: String(req.session.userId) },
     };
     if (user.stripe_customer_id) {
@@ -69,9 +69,9 @@ router.post("/stripe/create-checkout", validateCsrf, async (req, res) => {
     }
 
     const checkoutSession = await stripe.checkout.sessions.create(params, {
-      idempotencyKey: `checkout:${req.session.userId}:${req.body.annual ? "annual" : "monthly"}:${Math.floor(Date.now() / (5 * 60 * 1000))}`,
+      idempotencyKey: `checkout:${req.session.userId}:${annual ? "annual" : "monthly"}:${Math.floor(Date.now() / (5 * 60 * 1000))}`,
     });
-    track("checkout_started", { annual: !!req.body.annual, plan: req.body.annual ? "annual" : "monthly" },
+    track("checkout_started", { annual, plan: annual ? "annual" : "monthly" },
           req.sessionID, req.session.userId).catch(() => {});
     res.json({ url: checkoutSession.url });
   } catch (err) {
@@ -155,23 +155,23 @@ router.post("/stripe/webhook", async (req, res) => {
 });
 
 // ============================================================
-//  GET /api/stripe/portal
+//  POST /api/stripe/portal
 // ============================================================
-router.get("/stripe/portal", async (req, res) => {
+router.post("/stripe/portal", validateCsrf, async (req, res) => {
+  if (!req.session.userId) return res.status(401).json({ error: "Login required." });
   if (!stripe)             return res.status(503).json({ error: "Payments not configured." });
-  if (!req.session.userId) return res.redirect("/login");
   try {
     const r          = await db.execute({ sql: "SELECT stripe_customer_id FROM users WHERE id = ?", args: [req.session.userId] });
     const customerId = r.rows[0]?.stripe_customer_id;
-    if (!customerId) return res.redirect("/#pricing");
+    if (!customerId) return res.status(404).json({ error: "No subscription found." });
     const portalSession = await stripe.billingPortal.sessions.create({
       customer:   customerId,
       return_url: `${APP_URL}/`,
     });
-    res.redirect(portalSession.url);
+    res.json({ url: portalSession.url });
   } catch (err) {
     console.error("portal error:", err);
-    res.redirect("/#pricing");
+    res.status(500).json({ error: "Could not open the billing portal." });
   }
 });
 

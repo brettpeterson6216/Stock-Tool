@@ -9,10 +9,10 @@ const crypto    = require("crypto");
 const rateLimit = require("express-rate-limit");
 
 const { db }               = require("../lib/db");
-const { getEffectivePlan, FREE_DAILY_LIMIT, GUEST_DAILY_LIMIT } = require("../lib/plan");
+const { getEffectivePlan, normalizeTicker, FREE_DAILY_LIMIT, GUEST_DAILY_LIMIT } = require("../lib/plan");
 const { sendEmail }        = require("../lib/email");
 const { BCRYPT_ROUNDS, APP_URL, ADMIN_SECRET } = require("../lib/config");
-const { validateCsrf } = require("../lib/csrf");
+const { validateCsrf, getOrCreateToken } = require("../lib/csrf");
 const { track }        = require("../lib/analytics");
 
 // Fail fast if ADMIN_SECRET is missing in production
@@ -66,7 +66,7 @@ async function _sendVerificationEmail(email, token) {
 // and would lock users out after a few refreshes.
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 60,
+  max: process.env.NODE_ENV === "test" ? 1000 : 60,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: "Too many attempts. Try again in 15 minutes." },
@@ -80,7 +80,7 @@ function validateSignup({ username, email, password }) {
   const errors = [];
   if (!username || !USERNAME_RE.test(username))
     errors.push("Username must be 3-32 chars (letters, numbers, _ . -).");
-  if (!email || !EMAIL_RE.test(email))
+  if (!email || email.length > 254 || !EMAIL_RE.test(email))
     errors.push("Please enter a valid email address.");
   if (!password || password.length < 8)
     errors.push("Password must be at least 8 characters.");
@@ -94,15 +94,16 @@ function validateSignup({ username, email, password }) {
 // ============================================================
 router.post("/auth/signup",           authLimiter, async (req, res) => {
   try {
-    const username = String(req.body.username || "").trim();
-    const email    = String(req.body.email    || "").trim().toLowerCase();
-    const password = String(req.body.password || "");
-    const acquisition = analyticsContext(req.body);
+    const body = req.body || {};
+    const username = String(body.username || "").trim().toLowerCase();
+    const email    = String(body.email    || "").trim().toLowerCase();
+    const password = String(body.password || "");
+    const acquisition = analyticsContext(body);
 
     const errors = validateSignup({ username, email, password });
     if (errors.length) return res.status(400).json({ error: errors.join(" ") });
 
-    const byUser  = await db.execute({ sql: "SELECT id FROM users WHERE username = ? LIMIT 1", args: [username] });
+    const byUser  = await db.execute({ sql: "SELECT id FROM users WHERE LOWER(username) = LOWER(?) LIMIT 1", args: [username] });
     if (byUser.rows.length) return res.status(409).json({ error: "That username is already taken." });
 
     const byEmail = await db.execute({ sql: "SELECT id FROM users WHERE email = ? LIMIT 1", args: [email] });
@@ -141,13 +142,15 @@ router.post("/auth/signup",           authLimiter, async (req, res) => {
 
 router.post("/auth/login",             authLimiter, async (req, res) => {
   try {
-    const identifier = String(req.body.identifier || req.body.username || req.body.email || "").trim();
-    const password   = String(req.body.password || "");
-    const acquisition = analyticsContext(req.body);
+    const body = req.body || {};
+    const identifier = String(body.identifier || body.username || body.email || "").trim();
+    const password   = String(body.password || "");
+    const acquisition = analyticsContext(body);
     if (!identifier || !password) return res.status(400).json({ error: "Please enter your username/email and password." });
+    if (identifier.length > 254 || password.length > 200) return res.status(400).json({ error: "Invalid login request." });
 
     const lookup = identifier.includes("@") ? identifier.toLowerCase() : identifier;
-    const result = await db.execute({ sql: "SELECT id, username, email, password_hash FROM users WHERE username = ? OR email = ? LIMIT 1", args: [lookup, lookup] });
+    const result = await db.execute({ sql: "SELECT id, username, email, password_hash FROM users WHERE LOWER(username) = LOWER(?) OR email = ? LIMIT 1", args: [lookup, lookup] });
     const row = result.rows[0];
     if (!row) return res.status(401).json({ error: "Invalid username/email or password." });
 
@@ -234,11 +237,17 @@ router.get("/saves", async (req, res) => {
 router.post("/saves", validateCsrf, async (req, res) => {
   if (!req.session.userId) return res.status(401).json({ error: "Not logged in" });
   const { ticker, type, label, data } = req.body || {};
-  if (!ticker || !data) return res.status(400).json({ error: "ticker and data required" });
+  const symbol = normalizeTicker(ticker);
+  const allowedTypes = new Set(["price", "dcf", "projection", "compare", "note"]);
+  const safeType = allowedTypes.has(type) ? type : "price";
+  const safeLabel = String(label || "").trim().slice(0, 160);
+  if (!symbol || !data || typeof data !== "object" || Array.isArray(data)) {
+    return res.status(400).json({ error: "Valid ticker and analysis data required." });
+  }
   try {
     const r = await db.execute({
       sql:  "INSERT INTO saved_analyses (user_id, ticker, type, label, data) VALUES (?,?,?,?,?)",
-      args: [req.session.userId, ticker.toUpperCase(), type || "price", label || "", JSON.stringify(data)],
+      args: [req.session.userId, symbol, safeType, safeLabel, JSON.stringify(data)],
     });
     res.json({ ok: true, id: Number(r.lastInsertRowid) });
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -264,15 +273,18 @@ router.delete("/saves", validateCsrf, async (req, res) => {
 //  Password reset
 // ============================================================
 router.post("/auth/forgot-password",   authLimiter, async (req, res) => {
-  const email = String(req.body.email || "").trim().toLowerCase();
-  if (!email) return res.status(400).json({ error: "Email is required." });
+  const email = String(req.body?.email || "").trim().toLowerCase();
+  if (!email || email.length > 254 || !EMAIL_RE.test(email)) return res.status(400).json({ error: "Please enter a valid email address." });
   try {
     const result = await db.execute({ sql: "SELECT id FROM users WHERE email = ?", args: [email] });
     if (!result.rows.length) return res.json({ ok: true }); // prevent enumeration
 
     const token   = crypto.randomBytes(32).toString("hex");
     const expires = Date.now() + 60 * 60 * 1000;
-    await db.execute({ sql: "INSERT INTO reset_tokens (token, user_id, expires_at) VALUES (?, ?, ?)", args: [token, result.rows[0].id, expires] });
+    await db.batch([
+      { sql: "UPDATE reset_tokens SET used = 1 WHERE user_id = ? AND used = 0", args: [result.rows[0].id] },
+      { sql: "INSERT INTO reset_tokens (token, user_id, expires_at) VALUES (?, ?, ?)", args: [token, result.rows[0].id, expires] },
+    ], "write");
 
     const resetUrl = `${APP_URL}/reset-password?token=${token}`;
     await sendEmail({
@@ -297,8 +309,8 @@ router.post("/auth/forgot-password",   authLimiter, async (req, res) => {
 });
 
 router.post("/auth/reset-password",    authLimiter, async (req, res) => {
-  const { token, password } = req.body;
-  if (!token || !password || password.length < 8 || password.length > 200)
+  const { token, password } = req.body || {};
+  if (!/^[0-9a-f]{64}$/i.test(String(token || "")) || typeof password !== "string" || password.length < 8 || password.length > 200)
     return res.status(400).json({ error: "Invalid request." });
   try {
     const r   = await db.execute({ sql: "SELECT user_id, expires_at, used FROM reset_tokens WHERE token = ?", args: [token] });
@@ -325,9 +337,8 @@ router.post("/auth/reset-password",    authLimiter, async (req, res) => {
 // ============================================================
 router.post("/auth/change-username",   authLimiter, validateCsrf, async (req, res) => {
   if (!req.session.userId) return res.status(401).json({ error: "Not logged in." });
-  const { username } = req.body;
-  if (!username || username.length < 3) return res.status(400).json({ error: "Username must be at least 3 characters." });
-  if (!/^[a-z0-9_.-]+$/i.test(username)) return res.status(400).json({ error: "Only letters, numbers, _ . and - are allowed." });
+  const username = String(req.body?.username || "").trim().toLowerCase();
+  if (!USERNAME_RE.test(username)) return res.status(400).json({ error: "Username must be 3-32 chars (letters, numbers, _ . -)." });
   try {
     const existing = await db.execute({
       sql:  "SELECT id FROM users WHERE LOWER(username) = LOWER(?) AND id != ?",
@@ -344,18 +355,25 @@ router.post("/auth/change-username",   authLimiter, validateCsrf, async (req, re
 
 router.post("/auth/change-password",   authLimiter, validateCsrf, async (req, res) => {
   if (!req.session.userId) return res.status(401).json({ error: "Not logged in." });
-  const { currentPassword, newPassword } = req.body;
-  if (!currentPassword || !newPassword || newPassword.length < 8)
-    return res.status(400).json({ error: "New password must be at least 8 characters." });
+  const { currentPassword, newPassword } = req.body || {};
+  if (typeof currentPassword !== "string" || currentPassword.length > 200 || typeof newPassword !== "string" || newPassword.length < 8 || newPassword.length > 200)
+    return res.status(400).json({ error: "New password must be 8-200 characters." });
   try {
-    const r    = await db.execute({ sql: "SELECT password_hash FROM users WHERE id = ?", args: [req.session.userId] });
+    const userId = Number(req.session.userId);
+    const r    = await db.execute({ sql: "SELECT password_hash FROM users WHERE id = ?", args: [userId] });
     const user = r.rows[0];
     if (!user) return res.status(404).json({ error: "User not found." });
     const match = await bcrypt.compare(currentPassword, user.password_hash);
     if (!match) return res.status(400).json({ error: "Current password is incorrect." });
     const hash = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
-    await db.execute({ sql: "UPDATE users SET password_hash = ? WHERE id = ?", args: [hash, req.session.userId] });
-    return res.json({ ok: true });
+    await db.batch([
+      { sql: "UPDATE users SET password_hash = ? WHERE id = ?", args: [hash, userId] },
+      { sql: "DELETE FROM sessions WHERE CAST(json_extract(data, '$.userId') AS INTEGER) = ?", args: [userId] },
+    ], "write");
+    await regenerateSession(req);
+    req.session.userId = userId;
+    const csrfToken = getOrCreateToken(req);
+    return res.json({ ok: true, csrfToken });
   } catch (err) {
     console.error("change-password error:", err);
     return res.status(500).json({ error: "Something went wrong." });
@@ -529,7 +547,7 @@ router.get("/admin/analytics", async (req, res) => {
 // ============================================================
 router.get("/verify-email", async (req, res) => {
   const token = String(req.query.token || "").trim();
-  if (!token) return res.redirect("/?verif=invalid");
+  if (!/^[0-9a-f]{64}$/i.test(token)) return res.redirect("/?verif=invalid");
   try {
     const r = await db.execute({
       sql:  "SELECT user_id, expires_at, used FROM email_verif_tokens WHERE token = ?",

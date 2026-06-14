@@ -99,8 +99,9 @@ router.get("/workspace/theses/:ticker", async (req, res) => {
 router.put("/workspace/theses/:ticker", validateCsrf, async (req, res) => {
   const symbol = ticker(req.params.ticker);
   if (!symbol) return res.status(400).json({ error: "Invalid ticker." });
-  const status = ["watching", "owned", "passed", "review"].includes(req.body.status) ? req.body.status : "watching";
-  const conviction = Math.max(1, Math.min(5, Number(req.body.conviction) || 3));
+  const body = req.body || {};
+  const status = ["watching", "owned", "passed", "review"].includes(body.status) ? body.status : "watching";
+  const conviction = Math.max(1, Math.min(5, Number(body.conviction) || 3));
   try {
     await db.execute({
       sql: `INSERT INTO investment_theses
@@ -109,9 +110,9 @@ router.put("/workspace/theses/:ticker", validateCsrf, async (req, res) => {
         ON CONFLICT(user_id,ticker) DO UPDATE SET status=excluded.status,thesis=excluded.thesis,catalysts=excluded.catalysts,
         risks=excluded.risks,sell_conditions=excluded.sell_conditions,target_price=excluded.target_price,bear_price=excluded.bear_price,
         review_date=excluded.review_date,conviction=excluded.conviction,updated_at=CURRENT_TIMESTAMP`,
-      args: [req.session.userId, symbol, status, text(req.body.thesis), JSON.stringify(list(req.body.catalysts)),
-        JSON.stringify(list(req.body.risks)), JSON.stringify(list(req.body.sell_conditions)), numberOrNull(req.body.target_price),
-        numberOrNull(req.body.bear_price), text(req.body.review_date, 20) || null, conviction],
+      args: [req.session.userId, symbol, status, text(body.thesis), JSON.stringify(list(body.catalysts)),
+        JSON.stringify(list(body.risks)), JSON.stringify(list(body.sell_conditions)), numberOrNull(body.target_price),
+        numberOrNull(body.bear_price), text(body.review_date, 20) || null, conviction],
     });
     const result = await db.execute({ sql: "SELECT * FROM investment_theses WHERE user_id=? AND ticker=?", args: [req.session.userId, symbol] });
     res.json(thesisRow(result.rows[0]));
@@ -136,8 +137,9 @@ router.get("/workspace/positions", async (req, res) => {
 
 router.put("/workspace/positions/:ticker", validateCsrf, async (req, res) => {
   const symbol = ticker(req.params.ticker);
-  const shares = Number(req.body.shares);
-  const costBasis = Number(req.body.cost_basis);
+  const body = req.body || {};
+  const shares = Number(body.shares);
+  const costBasis = Number(body.cost_basis);
   if (!symbol || !Number.isFinite(shares) || shares <= 0 || !Number.isFinite(costBasis) || costBasis < 0) {
     return res.status(400).json({ error: "Ticker, positive shares, and a valid cost basis are required." });
   }
@@ -145,7 +147,7 @@ router.put("/workspace/positions/:ticker", validateCsrf, async (req, res) => {
     await db.execute({
       sql: `INSERT INTO portfolio_positions (user_id,ticker,shares,cost_basis,sector,notes,updated_at) VALUES (?,?,?,?,?,?,CURRENT_TIMESTAMP)
         ON CONFLICT(user_id,ticker) DO UPDATE SET shares=excluded.shares,cost_basis=excluded.cost_basis,sector=excluded.sector,notes=excluded.notes,updated_at=CURRENT_TIMESTAMP`,
-      args: [req.session.userId, symbol, shares, costBasis, text(req.body.sector, 80), text(req.body.notes, 1000)],
+      args: [req.session.userId, symbol, shares, costBasis, text(body.sector, 80), text(body.notes, 1000)],
     });
     const result = await db.execute({ sql: "SELECT * FROM portfolio_positions WHERE user_id=? AND ticker=?", args: [req.session.userId, symbol] });
     res.json(positionRow(result.rows[0]));
@@ -171,11 +173,12 @@ router.get("/workspace/watchlist", async (req, res) => {
 router.put("/workspace/watchlist/:ticker", validateCsrf, async (req, res) => {
   const symbol = ticker(req.params.ticker);
   if (!symbol) return res.status(400).json({ error: "Invalid ticker." });
+  const body = req.body || {};
   try {
     await db.execute({
       sql: `INSERT INTO watchlist_items (user_id,ticker,note,target_price) VALUES (?,?,?,?)
         ON CONFLICT(user_id,ticker) DO UPDATE SET note=excluded.note,target_price=excluded.target_price`,
-      args: [req.session.userId, symbol, text(req.body.note, 500), numberOrNull(req.body.target_price)],
+      args: [req.session.userId, symbol, text(body.note, 500), numberOrNull(body.target_price)],
     });
     const result = await db.execute({ sql: "SELECT * FROM watchlist_items WHERE user_id=? AND ticker=?", args: [req.session.userId, symbol] });
     res.json(watchlistRow(result.rows[0]));

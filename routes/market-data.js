@@ -9,12 +9,14 @@
 const express = require("express");
 
 const { FINNHUB_KEY }              = require("../lib/config");
-const { requirePro, checkAnalysisLimit } = require("../lib/plan");
+const { requirePro, checkAnalysisLimit, normalizeTicker } = require("../lib/plan");
 const { recordProvider } = require("../lib/provider-health");
 
 const router = express.Router();
 const _responseCache = new Map();
 const MAX_CACHE_ENTRIES = 500;
+const VALID_RANGES = new Set(["1d", "5d", "1mo", "3mo", "6mo", "1y", "2y", "5y", "10y", "ytd", "max"]);
+const VALID_INTERVALS = new Set(["1m", "2m", "5m", "15m", "30m", "60m", "90m", "1h", "1d", "5d", "1wk", "1mo", "3mo"]);
 
 function getCached(key, ttlMs) {
   const entry = _responseCache.get(key);
@@ -51,7 +53,8 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 5000) {
 //  News
 // ============================================================
 router.get("/news/:ticker", async (req, res) => {
-  const ticker = req.params.ticker.toUpperCase();
+  const ticker = normalizeTicker(req.params.ticker);
+  if (!ticker) return res.status(400).json({ error: "Invalid ticker." });
   const started = Date.now();
   try {
     const cacheKey = `news:${ticker}`;
@@ -211,12 +214,11 @@ async function getYahooSummary(_ticker, _modules) { return null; }
 router.get("/quote/:ticker", checkAnalysisLimit, async (req, res) => {
   const started = Date.now();
   try {
-    const ticker = req.params.ticker.toUpperCase().replace(/[^A-Z0-9.\-^]/g, "");
-    if (!ticker) return res.status(400).json({ error: "No ticker" });
-    const range = (req.query.range || "1y").replace(/[^a-z0-9]/gi, "");
-    const VALID_INTERVALS = ["1m","2m","5m","15m","30m","60m","90m","1h","1d","5d","1wk","1mo","3mo"];
-    const rawInterval = (req.query.interval || "1d").replace(/[^a-z0-9]/gi, "");
-    const interval = VALID_INTERVALS.includes(rawInterval) ? rawInterval : "1d";
+    const ticker = req.params.ticker;
+    const rawRange = String(req.query.range || "1y").toLowerCase();
+    const range = VALID_RANGES.has(rawRange) ? rawRange : "1y";
+    const rawInterval = String(req.query.interval || "1d").toLowerCase();
+    const interval = VALID_INTERVALS.has(rawInterval) ? rawInterval : "1d";
     const cacheKey = `quote:${ticker}:${range}:${interval}`;
     const cached = getCached(cacheKey, 60 * 1000);
     if (cached) return res.json(cached);
@@ -266,7 +268,7 @@ router.get("/quote/:ticker", checkAnalysisLimit, async (req, res) => {
     if (!data) {
       try {
         const now2      = Math.floor(Date.now() / 1000);
-        const rangeSecs = { "1d":86400,"5d":5*86400,"1mo":30*86400,"3mo":90*86400,"6mo":180*86400,"1y":365*86400,"2y":730*86400,"5y":1825*86400 };
+        const rangeSecs = { "1d":86400,"5d":5*86400,"1mo":30*86400,"3mo":90*86400,"6mo":180*86400,"1y":365*86400,"2y":730*86400,"5y":1825*86400,"10y":3650*86400,"max":10950*86400 };
         const period1   = now2 - (rangeSecs[range] || 365*86400);
         const csvUrl    = `https://query1.finance.yahoo.com/v7/finance/download/${encodeURIComponent(ticker)}?period1=${period1}&period2=${now2}&interval=1d&events=history&includeAdjustedClose=true`;
         const r         = await fetchWithTimeout(csvUrl, { headers: YH }, 4000);
@@ -306,7 +308,7 @@ router.get("/quote/:ticker", checkAnalysisLimit, async (req, res) => {
     if (!data) {
       try {
         const now3     = new Date();
-        const rangeDays = { "1d":5,"5d":10,"1mo":35,"3mo":95,"6mo":185,"1y":370,"2y":740,"5y":1830 };
+        const rangeDays = { "1d":5,"5d":10,"1mo":35,"3mo":95,"6mo":185,"1y":370,"2y":740,"5y":1830,"10y":3660,"max":10960 };
         const days     = rangeDays[range] || 370;
         const from     = new Date(now3 - days * 86400000);
         const fmt      = d => d.toISOString().slice(0,10).replace(/-/g,"");
@@ -425,7 +427,7 @@ router.get("/quote/:ticker", checkAnalysisLimit, async (req, res) => {
 // ============================================================
 router.get("/market/analyst-signals", async (req, res) => {
   const raw     = String(req.query.tickers || "");
-  const tickers = raw.split(",").map(t => t.toUpperCase().replace(/[^A-Z0-9.]/g, "")).filter(Boolean).slice(0, 10);
+  const tickers = raw.split(",").map(normalizeTicker).filter(Boolean).slice(0, 10);
   if (!tickers.length) return res.json({ buy: 0, hold: 0, sell: 0 });
   const cacheKey = `signals:${tickers.sort().join(",")}`;
   const cached = getCached(cacheKey, 10 * 60 * 1000);
@@ -458,7 +460,8 @@ router.get("/market/analyst-signals", async (req, res) => {
 //  Market movers (gainers / losers / most active)
 // ============================================================
 router.get("/market/movers", async (req, res) => {
-  const type   = req.query.type || "gainers";
+  const requestedType = String(req.query.type || "gainers");
+  const type = ["gainers", "losers", "active"].includes(requestedType) ? requestedType : "gainers";
   const cacheKey = `movers:${type}`;
   const cached = getCached(cacheKey, 2 * 60 * 1000);
   if (cached) return res.json(cached);

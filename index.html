@@ -1373,7 +1373,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
           <div class="nav-acct-header-plan" id="nav-acct-header-plan"></div>
         </div>
         <a href="#" class="nav-acct-item" id="nav-acct-settings">⚙️ Account Settings</a>
-        <a href="/api/stripe/portal" class="nav-acct-item">💳 Subscription</a>
+        <a href="#" class="nav-acct-item" onclick="openBillingPortal();return false;">💳 Subscription</a>
         <div class="nav-acct-divider"></div>
         <a href="#" class="nav-acct-item danger" id="nav-acct-logout">↩ Log out</a>
       </div>
@@ -1476,6 +1476,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
     const $acctHdrName = document.getElementById('nav-acct-header-name');
     const $acctHdrPlan = document.getElementById('nav-acct-header-plan');
     const $acctLogout  = document.getElementById('nav-acct-logout');
+    const _initialParams = new URLSearchParams(window.location.search);
 
     try {
       const [meRes, csrfRes] = await Promise.all([
@@ -1539,7 +1540,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
         if (typeof syncSavesFromDB === 'function') syncSavesFromDB();
 
         // Logged-in users go straight to tool view unless they explicitly came home
-        if (!window.location.search.includes('view=home')) {
+        if (_initialParams.get('view') !== 'home') {
           showView('tool');
         }
 
@@ -1579,13 +1580,17 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
         }
 
         // Auto-show upgrade success toast
-        if (window.location.search.includes('upgraded=1')) {
+        if (_initialParams.get('upgraded') === '1') {
           if (typeof toast !== 'undefined') toast('Welcome to Pro! All features unlocked.', 'ok');
           history.replaceState(null, '', '/');
           trackWhenReady('checkout_redirect', { source: 'stripe_success' });
         }
+        if (_initialParams.get('checkout') === 'cancelled') {
+          if (typeof toast !== 'undefined') toast('Checkout cancelled. Your plan was not changed.');
+          history.replaceState(null, '', '/');
+        }
         // Email verification result toasts
-        const _verifParam = new URLSearchParams(window.location.search).get('verif');
+        const _verifParam = _initialParams.get('verif');
         if (_verifParam === 'ok') {
           toast('Email verified! You can now start your trial.', 'ok');
           if (typeof S !== 'undefined') S.emailVerified = true;
@@ -1605,11 +1610,16 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
         }
         // Resume checkout after auth (from upgrade modal → signup/login)
         const _resumePlan = sessionStorage.getItem('pendingUpgradePlan');
-        if (_resumePlan && window.location.search.includes('resume_checkout=1')) {
-          sessionStorage.removeItem('pendingUpgradePlan');
+        if (_resumePlan && _initialParams.get('resume_checkout') === '1') {
           history.replaceState(null, '', '/');
           trackWhenReady('checkout_resumed_after_auth', { plan: _resumePlan });
-          if (typeof startTrial === 'function') {
+          if (typeof S !== 'undefined' && !S.emailVerified) {
+            _upgradePlan = _resumePlan;
+            showUpgradeModal(_resumePlan === 'annual', 'checkout_resume_unverified');
+            document.getElementById('upgrade-modal-unverified').style.display = 'block';
+            trackWhenReady('checkout_blocked_unverified', { plan: _resumePlan, source: 'checkout_resume' });
+          } else if (typeof startTrial === 'function') {
+            sessionStorage.removeItem('pendingUpgradePlan');
             setTimeout(() => startTrial(_resumePlan === 'annual'), 800);
           }
         }
@@ -1633,7 +1643,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
       _dismissVeil();
       // Auto-load analyzer from ?ticker= query param (landing page CTA flow)
       (function _handleTickerParam() {
-        const _params = new URLSearchParams(window.location.search);
+        const _params = _initialParams;
         const _t = _params.get('ticker');
         if (!_t) return;
         const _clean = _t.toUpperCase().replace(/[^A-Z0-9.\-^]/g, '').slice(0, 10);
@@ -2021,7 +2031,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
         <div style="font-family:var(--mono);font-size:.7rem;color:var(--gold-d);text-transform:uppercase;letter-spacing:.18em;margin-bottom:.75rem;">Your plan</div>
         <h2 id="pro-banner-title" style="font-family:var(--serif);font-size:2rem;margin-bottom:.5rem;">You&rsquo;re on <em style="color:var(--gold-d);">Pro Trial</em>.</h2>
         <p id="pro-banner-sub" style="color:var(--ink4);font-size:.95rem;margin-bottom:1.5rem;">All Pro features are unlocked. Your trial ends in <strong id="pro-banner-days">14</strong> days.</p>
-        <a href="/api/stripe/portal" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:.75rem 1.75rem;background:var(--ink);color:var(--cream);border-radius:var(--r2);font-weight:500;text-decoration:none;font-size:.9rem;">Manage subscription &rarr;</a>
+        <a href="#" onclick="openBillingPortal();return false;" style="display:inline-block;padding:.75rem 1.75rem;background:var(--ink);color:var(--cream);border-radius:var(--r2);font-weight:500;text-decoration:none;font-size:.9rem;">Manage subscription &rarr;</a>
       </div>
     </div>
 
@@ -2901,7 +2911,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
     </div>
 
     <!-- Subscription button -->
-    <a href="/api/stripe/portal" style="display:block;text-align:center;background:var(--ink);color:var(--cream);padding:.6rem 1rem;border-radius:var(--r);font-size:.85rem;font-weight:500;text-decoration:none;margin-bottom:1.5rem;transition:background .15s;" id="am-sub-btn">💳 Manage Subscription</a>
+    <a href="#" onclick="openBillingPortal();return false;" style="display:block;text-align:center;background:var(--ink);color:var(--cream);padding:.6rem 1rem;border-radius:var(--r);font-size:.85rem;font-weight:500;text-decoration:none;margin-bottom:1.5rem;transition:background .15s;" id="am-sub-btn">💳 Manage Subscription</a>
 
     <!-- Divider -->
     <div style="border-top:1px solid var(--border2);margin-bottom:1.25rem;"></div>
@@ -5251,6 +5261,7 @@ async function submitPasswordChange() {
 
   if (!cur || !nw || !conf) { msg.style.color='#c0392b'; msg.textContent='Please fill in all fields.'; return; }
   if (nw.length < 8)         { msg.style.color='#c0392b'; msg.textContent='New password must be at least 8 characters.'; return; }
+  if (nw.length > 200)       { msg.style.color='#c0392b'; msg.textContent='New password must be 200 characters or fewer.'; return; }
   if (nw !== conf)           { msg.style.color='#c0392b'; msg.textContent='New passwords do not match.'; return; }
 
   msg.style.color='var(--ink3)'; msg.textContent='Updating…';
@@ -5262,12 +5273,40 @@ async function submitPasswordChange() {
     });
     const data = await r.json();
     if (data.ok) {
+      if (data.csrfToken) S.csrfToken = data.csrfToken;
       msg.style.color='#27ae60'; msg.textContent='Password updated successfully.';
       ['am-cur-pw','am-new-pw','am-confirm-pw'].forEach(id => { document.getElementById(id).value=''; });
     } else {
       msg.style.color='#c0392b'; msg.textContent = data.error || 'Update failed.';
     }
   } catch(_) { msg.style.color='#c0392b'; msg.textContent='Network error. Please try again.'; }
+}
+
+async function openBillingPortal() {
+  try {
+    const r = await fetch('/api/stripe/portal', {
+      method: 'POST',
+      headers: { 'X-CSRF-Token': S.csrfToken||'' },
+      credentials: 'same-origin',
+    });
+    const data = await r.json().catch(() => ({}));
+    if (r.status === 401) {
+      window.location.href = '/login?next=' + encodeURIComponent('/');
+      return;
+    }
+    if (r.status === 404) {
+      if (typeof closeAccountModal === 'function') closeAccountModal();
+      showUpgradeModal(false, 'billing_portal_no_subscription');
+      return;
+    }
+    if (!r.ok || !data.url) {
+      toast(data.error || 'Could not open the billing portal.', 'err');
+      return;
+    }
+    window.location.href = data.url;
+  } catch (_) {
+    toast('Could not open the billing portal. Please try again.', 'err');
+  }
 }
 
 async function startTrial(annual) {
@@ -5279,7 +5318,20 @@ async function startTrial(annual) {
       body: JSON.stringify({ annual: !!annual }),
     });
     const data = await r.json();
-    if (!r.ok) { toast(data.error || 'Could not start checkout.', 'err'); return; }
+    if (!r.ok) {
+      if (data.hasSubscription) {
+        await openBillingPortal();
+        return;
+      }
+      if (data.requiresEmailVerification) {
+        S.emailVerified = false;
+        showUpgradeModal(!!annual, 'checkout_requires_verification');
+        document.getElementById('upgrade-modal-unverified').style.display = 'block';
+      }
+      toast(data.error || 'Could not start checkout.', 'err');
+      return;
+    }
+    sessionStorage.removeItem('pendingUpgradePlan');
     window.location.href = data.url;
   } catch (e) {
     toast('Something went wrong. Please try again.', 'err');
@@ -5828,7 +5880,7 @@ function renderStock(result, ticker) {
   const ma50v=sma(c,50); const ma50Now=ma50v[ma50v.length-1];
   const ma200v=sma(c,200); const ma200Now=ma200v[ma200v.length-1];
   const returns=c.map((v,i)=>i===0?0:(v-c[i-1])/c[i-1]*100);
-  const stdDev=Math.sqrt(returns.reduce((a,b)=>a+b*b,0)/returns.length)*Math.sqrt(252)*100;
+  const stdDev=ImpliedLensMath.annualizedVolatility(c,252)*100;
   const h52=meta.fiftyTwoWeekHigh; const l52=meta.fiftyTwoWeekLow;
 
   const metrics=[
