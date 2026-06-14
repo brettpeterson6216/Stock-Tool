@@ -140,6 +140,27 @@
       </div>
     </div>
 
+    <div class="two-col">
+      <div>
+        <h2 style="margin-top:0">Ticker Landing Acquisition â€” 30 Days</h2>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Ticker</th><th>Unique Views</th><th>CTA Clicks</th><th>CTR</th></tr></thead>
+            <tbody id="acquisition-body"></tbody>
+          </table>
+        </div>
+      </div>
+      <div>
+        <h2 style="margin-top:0">Signup Sources â€” 30 Days</h2>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Source</th><th>Signups</th></tr></thead>
+            <tbody id="signup-sources-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <!-- Recent events -->
     <h2>Recent Events (last 100)</h2>
     <div class="tbl-wrap">
@@ -196,8 +217,16 @@ function getDaily30(daily, event) {
   return daily.filter(r => r.event === event).reduce((s,r) => s + Number(r.cnt), 0);
 }
 
+function getUnique(uniqueFunnel, event) {
+  const row = uniqueFunnel.find(r => r.event === event);
+  return row ? Number(row.actor_count) : 0;
+}
+
 function render(data) {
-  const { daily, gatesBySection, modalSources, totals, users, recent } = data;
+  const {
+    daily, uniqueFunnel = [], acquisitionByTicker = [], signupSources = [],
+    gatesBySection, modalSources, totals, users, recent,
+  } = data;
 
   // ── KPI cards ──────────────────────────────────────────────────────────
   const pv30    = getDaily30(daily, 'page_view');
@@ -215,7 +244,7 @@ function render(data) {
     { label:'Pro / Trial',  val: fmt((users.pro_count||0)+(users.trial_count||0)),
       sub:`${users.pro_count||0} pro · ${users.trial_count||0} trial`, cls:'gold' },
     { label:'New Signups 30d', val: fmt(sig30), sub:`${fmt(sigAll)} all time`, cls:'' },
-    { label:'Page Views 30d',  val: fmt(pv30),  sub:`${fmt(pvAll)} all time`, cls:'' },
+    { label:'Unique App Visitors 30d', val: fmt(getUnique(uniqueFunnel, 'page_view')), sub:`${fmt(pv30)} app page-view events`, cls:'' },
     { label:'Analyses 30d',   val: fmt(an30),  sub:'analyze_started', cls:'' },
     { label:'Gates Shown 30d',val: fmt(gate30),sub:'pro_gate_viewed', cls:'' },
     { label:'Checkout Starts 30d', val: fmt(co30),   sub:'checkout_started', cls:'gold' },
@@ -228,14 +257,16 @@ function render(data) {
 
   // ── Funnel ──────────────────────────────────────────────────────────────
   const steps = [
-    { name:'Page Views', key:'page_view' },
+    { name:'App Visitors', key:'page_view' },
     { name:'Analyses',   key:'analyze_started' },
     { name:'Gates Seen', key:'pro_gate_viewed' },
     { name:'Modal Open', key:'upgrade_modal_opened' },
+    { name:'Signup Intent', key:'guest_signup_started' },
+    { name:'Signups',    key:'signup_completed' },
     { name:'Checkout',   key:'checkout_started' },
     { name:'Converted',  key:'checkout_completed' },
   ];
-  const funnelVals = steps.map(s => getDaily30(daily, s.key));
+  const funnelVals = steps.map(s => getUnique(uniqueFunnel, s.key));
   document.getElementById('funnel').innerHTML = steps.map((s, i) => {
     const val  = funnelVals[i];
     const prev = i === 0 ? val : funnelVals[i-1];
@@ -245,6 +276,7 @@ function render(data) {
     return `<div class="funnel-step">
       <div class="funnel-name">${s.name}</div>
       <div class="funnel-val">${fmt(val)}</div>
+      <div class="stat-sub">unique people</div>
       ${rate}
     </div>`;
   }).join('');
@@ -304,6 +336,27 @@ function render(data) {
         <td>${fmt(r.cnt)}</td>
       </tr>`).join('')
     : '<tr><td colspan="2" style="color:rgba(220,225,232,.3);text-align:center;padding:1.5rem">No modal opens yet</td></tr>';
+
+  document.getElementById('acquisition-body').innerHTML = acquisitionByTicker.length
+    ? acquisitionByTicker.map(r => {
+        const views = Number(r.unique_views || 0);
+        const clicks = Number(r.unique_ctas || 0);
+        const ctr = views ? Math.round(clicks / views * 100) : 0;
+        return `<tr>
+          <td><span class="badge blue">${esc(r.ticker || 'unknown')}</span></td>
+          <td>${fmt(views)}</td>
+          <td>${fmt(clicks)}</td>
+          <td>${ctr}%</td>
+        </tr>`;
+      }).join('')
+    : '<tr><td colspan="4" style="color:rgba(220,225,232,.3);text-align:center;padding:1.5rem">No ticker landing traffic yet</td></tr>';
+
+  document.getElementById('signup-sources-body').innerHTML = signupSources.length
+    ? signupSources.map(r => `<tr>
+        <td><span class="badge">${esc(r.source || 'direct / unknown')}</span></td>
+        <td>${fmt(r.cnt)}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="2" style="color:rgba(220,225,232,.3);text-align:center;padding:1.5rem">No attributed signups yet</td></tr>';
 
   // ── Recent events ────────────────────────────────────────────────────────
   const badgeCls = { signup_completed:'green', checkout_completed:'green',

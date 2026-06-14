@@ -11,6 +11,10 @@
 // ============================================================
 const express  = require("express");
 const { FINNHUB_KEY, APP_URL } = require("../lib/config");
+const {
+  ACQUISITION_TICKER_SET,
+  relatedTickers,
+} = require("../lib/acquisition-tickers");
 
 const router = express.Router();
 
@@ -40,6 +44,30 @@ function fmtBig(n) {
   if (n >= 1e9)  return "$" + (n / 1e9).toFixed(2) + "B";
   if (n >= 1e6)  return "$" + (n / 1e6).toFixed(2) + "M";
   return "$" + Number(n).toLocaleString();
+}
+
+function researchQuestions(name, ticker, industry) {
+  const label = name && name !== ticker ? name : ticker;
+  const category = String(industry || "").toLowerCase();
+  let tailored = `What assumptions does the current ${ticker} price require to deliver an attractive return?`;
+  if (/software|technology|semiconductor|computer|electronic/.test(category)) {
+    tailored = `Can ${label} sustain growth and margins as its technology market matures?`;
+  } else if (/bank|financial|insurance|capital markets/.test(category)) {
+    tailored = `How sensitive are ${label}'s earnings and balance sheet to rates, credit losses, and liquidity?`;
+  } else if (/drug|biotech|health|medical|pharma/.test(category)) {
+    tailored = `Which products and pipeline milestones drive ${label}'s next five years of cash flow?`;
+  } else if (/retail|consumer|restaurant|beverage|food/.test(category)) {
+    tailored = `Does ${label} have enough pricing power and unit growth to protect margins?`;
+  } else if (/energy|oil|gas/.test(category)) {
+    tailored = `How resilient is ${label}'s free cash flow across a full commodity-price cycle?`;
+  } else if (/aerospace|defense|industrial|machinery/.test(category)) {
+    tailored = `How durable are ${label}'s backlog, margins, and capital-return plans?`;
+  }
+  return [
+    tailored,
+    `Which risks would invalidate the investment thesis for ${ticker}?`,
+    `How does ${ticker}'s valuation compare with its growth, quality, and closest alternatives?`,
+  ];
 }
 
 async function fetchQuickQuote(ticker) {
@@ -85,6 +113,9 @@ function renderPage(ticker, q) {
   const mktCap    = q ? fmtBig(q.marketCap) : "—";
   const industry  = q ? esc(q.industry) : "";
   const exchange  = q ? esc(q.exchange) : "";
+  const indexable = ACQUISITION_TICKER_SET.has(ticker);
+  const questions = researchQuestions(name, ticker, q?.industry);
+  const related   = relatedTickers(ticker);
 
   const metaTitle = q
     ? `${ticker} Stock Analysis — ${name} ${price} (${chgPct}) | ImpliedLens`
@@ -95,8 +126,15 @@ function renderPage(ticker, q) {
     : `Analyze ${ticker} with ImpliedLens — DCF valuation, financials, analyst targets, earnings history, and institutional data.`;
 
   const canonicalUrl = `${APP_URL}/stock/${ticker}`;
-  const analyzeUrl   = `${APP_URL}/?ticker=${ticker}`;
+  const analyzeUrl   = `${APP_URL}/?ticker=${ticker}&source=stock_landing`;
+  const signupNext   = `/?view=tool&section=analyze&ticker=${ticker}&resume_analysis=1&source=stock_landing_signup`;
+  const signupUrl    = `/signup?next=${encodeURIComponent(signupNext)}&source=stock_landing&ticker=${encodeURIComponent(ticker)}`;
   const analyzeUrlJson = JSON.stringify(analyzeUrl).replace(/</g, "\\u003c");
+  const landingContextJson = JSON.stringify({
+    ticker,
+    quote_available: !!q,
+    industry: q?.industry || null,
+  }).replace(/</g, "\\u003c");
 
   // Schema.org FinancialProduct structured data
   const schema = JSON.stringify({
@@ -121,6 +159,7 @@ function renderPage(ticker, q) {
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>${esc(metaTitle)}</title>
   <meta name="description" content="${esc(metaDesc)}">
+  <meta name="robots" content="${indexable ? "index,follow" : "noindex,follow"}">
   <link rel="canonical" href="${esc(canonicalUrl)}">
 
   <!-- Open Graph -->
@@ -185,6 +224,7 @@ function renderPage(ticker, q) {
       transition:opacity .15s;cursor:pointer}
     .cta-btn:hover{opacity:.85}
     .cta-note{font-size:.78rem;color:rgba(220,225,232,.35);margin-top:.65rem}
+    .cta-note a{color:#C8882A;font-weight:600}
 
     /* what you get */
     .features{max-width:820px;margin:0 auto;padding:0 2rem 3rem}
@@ -195,6 +235,12 @@ function renderPage(ticker, q) {
     .feat-icon{font-size:1.1rem;margin-bottom:.4rem}
     .feat-title{font-size:.85rem;font-weight:600;color:#fff;margin-bottom:.2rem}
     .feat-desc{font-size:.75rem;color:rgba(220,225,232,.45);line-height:1.5}
+
+    .research{max-width:820px;margin:0 auto;padding:0 2rem 3rem}
+    .research-list{display:grid;gap:.65rem}
+    .research-item{background:rgba(200,136,42,.06);border:1px solid rgba(200,136,42,.16);
+      border-radius:10px;padding:.9rem 1rem;font-size:.82rem;line-height:1.5;color:rgba(220,225,232,.72)}
+    .research-item strong{color:#C8882A;margin-right:.4rem}
 
     /* related tickers */
     .related{max-width:820px;margin:0 auto;padding:0 2rem 4rem}
@@ -214,7 +260,7 @@ function renderPage(ticker, q) {
     @media(max-width:600px){
       h1{font-size:1.5rem}
       .q-price{font-size:1.8rem}
-      .hero,.features,.related{padding-left:1rem;padding-right:1rem}
+      .hero,.features,.research,.related{padding-left:1rem;padding-right:1rem}
     }
   </style>
 </head>
@@ -267,8 +313,8 @@ function renderPage(ticker, q) {
     </div>`}
 
     <div class="cta-section">
-      <a href="${esc(analyzeUrl)}" class="cta-btn">Analyze ${esc(ticker)} in depth →</a>
-      <div class="cta-note">Free · No account required for your first analyses</div>
+      <a id="analyze-cta" href="${esc(analyzeUrl)}" class="cta-btn">Analyze ${esc(ticker)} in depth →</a>
+      <div class="cta-note">Guests get 2 analyses/day. <a id="landing-signup-cta" href="${esc(signupUrl)}">Create a free account for 5/day</a>.</div>
     </div>
   </div>
 
@@ -284,12 +330,17 @@ function renderPage(ticker, q) {
     </div>
   </div>
 
+  <div class="research">
+    <h2>Questions to answer before investing in ${esc(ticker)}</h2>
+    <div class="research-list">
+      ${questions.map((question, index) => `<div class="research-item"><strong>0${index + 1}</strong>${esc(question)}</div>`).join("")}
+    </div>
+  </div>
+
   <div class="related">
     <h2>Analyze another ticker</h2>
     <div class="pill-row">
-      ${["AAPL","MSFT","NVDA","TSLA","AMZN","META","GOOGL","JPM","BRK.B","SPY","QQQ","NFLX"]
-        .filter(t => t !== ticker)
-        .slice(0, 10)
+      ${related
         .map(t => `<a href="/stock/${t}" class="ticker-pill">${t}</a>`)
         .join("")}
     </div>
@@ -304,6 +355,57 @@ function renderPage(ticker, q) {
   </footer>
 
   <script>
+    const landingContext = ${landingContextJson};
+    function trackLanding(event, properties) {
+      let referrerHost = '';
+      try { referrerHost = document.referrer ? new URL(document.referrer).hostname : ''; } catch (_) {}
+      const params = new URLSearchParams(window.location.search);
+      fetch('/api/track', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          event,
+          properties: {
+            ...landingContext,
+            ...properties,
+            referrer_host: referrerHost || null,
+            utm_source: params.get('utm_source'),
+            utm_medium: params.get('utm_medium'),
+            utm_campaign: params.get('utm_campaign'),
+          },
+        }),
+        keepalive: true,
+      }).catch(() => {});
+    }
+    const acquisitionParams = new URLSearchParams(window.location.search);
+    const acquisition = {
+      source: 'stock_landing',
+      utm_source: acquisitionParams.get('utm_source'),
+      utm_medium: acquisitionParams.get('utm_medium'),
+      utm_campaign: acquisitionParams.get('utm_campaign'),
+    };
+    try {
+      sessionStorage.setItem('ilAcquisitionContext', JSON.stringify(
+        Object.fromEntries(Object.entries(acquisition).filter(([, value]) => value))
+      ));
+    } catch (_) {}
+    ['analyze-cta','landing-signup-cta'].forEach(id => {
+      const link = document.getElementById(id);
+      if (!link) return;
+      const url = new URL(link.href, window.location.origin);
+      ['utm_source','utm_medium','utm_campaign'].forEach(key => {
+        if (acquisition[key]) url.searchParams.set(key, acquisition[key]);
+      });
+      link.href = url.toString();
+    });
+    trackLanding('landing_page_view', {});
+    document.getElementById('analyze-cta').addEventListener('click', () => {
+      trackLanding('landing_cta_clicked', { destination: 'analyzer' });
+    });
+    document.getElementById('landing-signup-cta').addEventListener('click', () => {
+      trackLanding('guest_signup_started', { source: 'stock_landing' });
+    });
+
     // Auto-redirect to full analyzer after a short delay on CTA click
     // (also handle ?autoload=1 for programmatic deep links)
     if (new URLSearchParams(window.location.search).get('autoload') === '1') {

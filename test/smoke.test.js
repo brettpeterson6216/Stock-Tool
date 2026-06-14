@@ -111,7 +111,11 @@ after(async () => {
 test("GET / serves the homepage with a successful status", async () => {
   const res = await req("/");
   assert.equal(res.status, 200);
-  assert.match(await res.text(), /ImpliedLens/);
+  const html = await res.text();
+  assert.match(html, /ImpliedLens/);
+  assert.match(html, /Create free account for 5\/day/);
+  assert.match(html, /function startGuestSignup/);
+  assert.match(html, /analysis_resumed_after_auth/);
   assert.match(res.headers.get("cache-control"), /no-cache/);
 });
 
@@ -120,6 +124,43 @@ test("Public brand and acquisition pages are available", async () => {
     const res = await req(path);
     assert.equal(res.status, 200);
     assert.match(await res.text(), new RegExp(marker));
+  }
+});
+
+test("Sitemap exposes the expanded curated ticker acquisition set", async () => {
+  const res = await req("/sitemap.xml");
+  assert.equal(res.status, 200);
+  assert.match(res.headers.get("content-type"), /application\/xml/);
+  const xml = await res.text();
+  const stockUrls = xml.match(/<loc>[^<]+\/stock\//g) || [];
+  assert.ok(stockUrls.length >= 100, "sitemap should include at least 100 curated ticker pages");
+  assert.match(xml, /\/stock\/AAPL<\/loc>/);
+  assert.match(xml, /\/stock\/XLU<\/loc>/);
+});
+
+test("Ticker landing pages explain free allowances and protect uncurated pages from indexing", async () => {
+  const curated = await req("/stock/AAPL");
+  assert.equal(curated.status, 200);
+  const curatedHtml = await curated.text();
+  assert.match(curatedHtml, /<meta name="robots" content="index,follow">/);
+  assert.match(curatedHtml, /Guests get 2 analyses\/day/);
+  assert.match(curatedHtml, /Create a free account for 5\/day/);
+  assert.match(curatedHtml, /landing_page_view/);
+  assert.match(curatedHtml, /Questions to answer before investing in AAPL/);
+
+  const uncurated = await req("/stock/NOTREAL");
+  assert.equal(uncurated.status, 200);
+  assert.match(await uncurated.text(), /<meta name="robots" content="noindex,follow">/);
+});
+
+test("Auth pages preserve a local return path and expose attribution hooks", async () => {
+  for (const [pagePath, marker] of [["/signup", "signup_page_viewed"], ["/login", "login_page_viewed"]]) {
+    const res = await req(`${pagePath}?next=https%3A%2F%2Fevil.example%2Fsteal&source=smoke&ticker=AAPL`);
+    assert.equal(res.status, 200);
+    const html = await res.text();
+    assert.match(html, /function safeNext/);
+    assert.match(html, new RegExp(marker));
+    assert.match(html, /body: JSON\.stringify\(\{ [^}]*analytics/);
   }
 });
 
@@ -292,6 +333,56 @@ test("Honest feedback analytics events are accepted", async () => {
   const res = await req("/api/track", { method: "POST", body: { event: "feedback_rated", properties: { rating: 1 } } });
   assert.equal(res.status, 200);
   assert.equal((await res.json()).ok, true);
+});
+
+test("Growth funnel events are accepted and unknown client events are rejected", async () => {
+  for (const event of [
+    "landing_page_view", "landing_cta_clicked", "guest_signup_prompt_viewed",
+    "guest_signup_started", "signup_page_viewed", "analysis_resumed_after_auth",
+    "checkout_requires_login", "signup_started_from_upgrade",
+    "checkout_resumed_after_auth", "checkout_blocked_unverified",
+  ]) {
+    const res = await req("/api/track", { method: "POST", body: { event, properties: { ticker: "AAPL" } } });
+    assert.equal(res.status, 200, `${event} should be accepted`);
+  }
+  const unknown = await req("/api/track", { method: "POST", body: { event: "made_up_growth_event" } });
+  assert.equal(unknown.status, 400);
+});
+
+test("Anonymous funnel analytics use a stable hashed guest actor", async () => {
+  const cookieRes = await req("/api/csrf");
+  const setCookie = cookieRes.headers.get("set-cookie") || "";
+  const gid = (setCookie.match(/il_gid=([^;]+)/) || [])[1];
+  assert.ok(gid);
+  const cookie = `il_gid=${gid}`;
+
+  for (const event of ["landing_page_view", "landing_cta_clicked"]) {
+    const res = await req("/api/track", {
+      method: "POST",
+      headers: { cookie },
+      body: { event, properties: { ticker: "SMOKE" } },
+    });
+    assert.equal(res.status, 200);
+  }
+
+  const { db } = require("../lib/db");
+  const tracked = await db.execute({
+    sql: "SELECT properties FROM analytics_events WHERE event IN ('landing_page_view','landing_cta_clicked') AND json_extract(properties, '$.ticker') = 'SMOKE' ORDER BY id",
+  });
+  const actors = tracked.rows.map(row => JSON.parse(row.properties).guest_actor);
+  assert.equal(actors.length, 2);
+  assert.equal(actors[0], actors[1]);
+  assert.equal(actors[0].length, 24);
+  assert.notEqual(actors[0], gid);
+
+  const admin = await req("/api/admin/analytics", { headers: { "X-Admin-Secret": process.env.ADMIN_SECRET } });
+  assert.equal(admin.status, 200);
+  const body = await admin.json();
+  assert.ok(Array.isArray(body.uniqueFunnel));
+  assert.ok(Array.isArray(body.acquisitionByTicker));
+  const smoke = body.acquisitionByTicker.find(row => row.ticker === "SMOKE");
+  assert.equal(Number(smoke.unique_views), 1);
+  assert.equal(Number(smoke.unique_ctas), 1);
 });
 
 // ═══════════════════════════════════════════════════════════════
@@ -513,6 +604,35 @@ test("New signup has email_verified=0 in response", async () => {
   assert.equal(res.status, 201, "Signup should succeed");
   const body = await res.json();
   assert.equal(Number(body.user.email_verified), 0, "New user should have email_verified=0");
+});
+
+test("Signup completion records sanitized acquisition attribution", async () => {
+  const res = await req("/api/auth/signup", {
+    method: "POST",
+    body: {
+      username: "attributed_signup",
+      email: "attributed@test.com",
+      password: "Password123",
+      analytics: {
+        source: "guest_limit_counter",
+        ticker: "NVDA",
+        entry_path: "/signup",
+        return_path: "/",
+        ignored_secret: "do-not-store",
+      },
+    },
+  });
+  assert.equal(res.status, 201);
+  const { db } = require("../lib/db");
+  const tracked = await db.execute({
+    sql: "SELECT properties FROM analytics_events WHERE event = 'signup_completed' AND user_id = (SELECT id FROM users WHERE email = ?) ORDER BY id DESC LIMIT 1",
+    args: ["attributed@test.com"],
+  });
+  const props = JSON.parse(tracked.rows[0].properties);
+  assert.equal(props.source, "guest_limit_counter");
+  assert.equal(props.ticker, "NVDA");
+  assert.ok(!("ignored_secret" in props));
+  assert.ok(!("username" in props));
 });
 
 test("/api/auth/me returns email_verified field", async () => {

@@ -29,6 +29,20 @@ function regenerateSession(req) {
   });
 }
 
+function analyticsContext(body) {
+  const source = body && typeof body.analytics === "object" && !Array.isArray(body.analytics)
+    ? body.analytics
+    : {};
+  const allowed = ["source", "ticker", "entry_path", "utm_source", "utm_medium", "utm_campaign", "return_path"];
+  const context = {};
+  for (const key of allowed) {
+    if (typeof source[key] === "string" && source[key].trim()) {
+      context[key] = source[key].trim().slice(0, 250);
+    }
+  }
+  return context;
+}
+
 // ── Email verification helpers ───────────────────────────────
 function _verifToken() {
   return crypto.randomBytes(32).toString("hex");
@@ -83,6 +97,7 @@ router.post("/auth/signup",           authLimiter, async (req, res) => {
     const username = String(req.body.username || "").trim();
     const email    = String(req.body.email    || "").trim().toLowerCase();
     const password = String(req.body.password || "");
+    const acquisition = analyticsContext(req.body);
 
     const errors = validateSignup({ username, email, password });
     if (errors.length) return res.status(400).json({ error: errors.join(" ") });
@@ -109,7 +124,7 @@ router.post("/auth/signup",           authLimiter, async (req, res) => {
     await regenerateSession(req);
     req.session.userId = userId;
     // Fire-and-forget analytics
-    track("signup_completed", { username, plan: "free" }, req.sessionID, userId).catch(() => {});
+    track("signup_completed", { plan: "free", ...acquisition }, req.sessionID, userId).catch(() => {});
     // Send verification email (fire-and-forget — don't fail signup if email fails)
     const verifToken = _verifToken();
     const verifExpiry = Date.now() + 24 * 60 * 60 * 1000; // 24h
@@ -128,6 +143,7 @@ router.post("/auth/login",             authLimiter, async (req, res) => {
   try {
     const identifier = String(req.body.identifier || req.body.username || req.body.email || "").trim();
     const password   = String(req.body.password || "");
+    const acquisition = analyticsContext(req.body);
     if (!identifier || !password) return res.status(400).json({ error: "Please enter your username/email and password." });
 
     const lookup = identifier.includes("@") ? identifier.toLowerCase() : identifier;
@@ -140,7 +156,7 @@ router.post("/auth/login",             authLimiter, async (req, res) => {
 
     await regenerateSession(req);
     req.session.userId = Number(row.id);
-    track("login_completed", {}, req.sessionID, Number(row.id)).catch(() => {});
+    track("login_completed", acquisition, req.sessionID, Number(row.id)).catch(() => {});
     return res.json({ user: { id: Number(row.id), username: row.username, email: row.email } });
   } catch (err) {
     console.error("login error:", err);
@@ -372,6 +388,72 @@ router.get("/admin/analytics", async (req, res) => {
       ORDER BY day ASC
     `);
 
+    // Unique actors make funnel rates meaningful even when one visitor fires
+    // the same event repeatedly. Prefer a user id after auth, otherwise session.
+    const uniqueFunnel = await db.execute(`
+      SELECT
+        event,
+        COUNT(*) AS event_count,
+        COUNT(DISTINCT CASE
+          WHEN user_id IS NOT NULL THEN 'u:' || user_id
+          WHEN json_extract(properties, '$.guest_actor') IS NOT NULL THEN 'g:' || json_extract(properties, '$.guest_actor')
+          WHEN session_id IS NOT NULL THEN 's:' || session_id
+          ELSE 'e:' || id
+        END) AS actor_count
+      FROM analytics_events
+      WHERE created_at >= datetime('now', '-30 days')
+        AND event IN (
+          'landing_page_view', 'landing_cta_clicked', 'page_view',
+          'analyze_started', 'guest_signup_started', 'signup_page_viewed',
+          'signup_completed', 'pro_gate_viewed', 'upgrade_modal_opened',
+          'checkout_started', 'checkout_completed'
+        )
+      GROUP BY event
+      ORDER BY event
+    `);
+
+    const acquisitionByTicker = await db.execute(`
+      SELECT
+        json_extract(properties, '$.ticker') AS ticker,
+        SUM(CASE WHEN event = 'landing_page_view' THEN 1 ELSE 0 END) AS view_events,
+        COUNT(DISTINCT CASE WHEN event = 'landing_page_view' THEN
+          CASE
+            WHEN user_id IS NOT NULL THEN 'u:' || user_id
+            WHEN json_extract(properties, '$.guest_actor') IS NOT NULL THEN 'g:' || json_extract(properties, '$.guest_actor')
+            WHEN session_id IS NOT NULL THEN 's:' || session_id
+            ELSE 'e:' || id
+          END
+        END) AS unique_views,
+        SUM(CASE WHEN event = 'landing_cta_clicked' THEN 1 ELSE 0 END) AS cta_events,
+        COUNT(DISTINCT CASE WHEN event = 'landing_cta_clicked' THEN
+          CASE
+            WHEN user_id IS NOT NULL THEN 'u:' || user_id
+            WHEN json_extract(properties, '$.guest_actor') IS NOT NULL THEN 'g:' || json_extract(properties, '$.guest_actor')
+            WHEN session_id IS NOT NULL THEN 's:' || session_id
+            ELSE 'e:' || id
+          END
+        END) AS unique_ctas
+      FROM analytics_events
+      WHERE created_at >= datetime('now', '-30 days')
+        AND event IN ('landing_page_view', 'landing_cta_clicked')
+        AND json_extract(properties, '$.ticker') IS NOT NULL
+      GROUP BY ticker
+      ORDER BY unique_views DESC, ticker ASC
+      LIMIT 50
+    `);
+
+    const signupSources = await db.execute(`
+      SELECT
+        COALESCE(NULLIF(json_extract(properties, '$.source'), ''), 'direct / unknown') AS source,
+        COUNT(*) AS cnt
+      FROM analytics_events
+      WHERE event = 'signup_completed'
+        AND created_at >= datetime('now', '-30 days')
+      GROUP BY source
+      ORDER BY cnt DESC
+      LIMIT 20
+    `);
+
     // ── Pro gate views by section (all time + last 30d) ──────
     const gatesBySection = await db.execute(`
       SELECT
@@ -425,6 +507,9 @@ router.get("/admin/analytics", async (req, res) => {
 
     res.json({
       daily:          daily.rows,
+      uniqueFunnel:   uniqueFunnel.rows,
+      acquisitionByTicker: acquisitionByTicker.rows,
+      signupSources:  signupSources.rows,
       gatesBySection: gatesBySection.rows,
       modalSources:   modalSources.rows,
       totals:         totals.rows,

@@ -1457,6 +1457,14 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
     v.classList.add('done');
     setTimeout(function(){ if(v && v.parentNode) v.parentNode.removeChild(v); }, 220);
   }
+  function trackWhenReady(event, props, attempt) {
+    if (typeof track === 'function') {
+      track(event, props);
+      return;
+    }
+    const nextAttempt = (attempt || 0) + 1;
+    if (nextAttempt <= 100) setTimeout(() => trackWhenReady(event, props, nextAttempt), 50);
+  }
   setTimeout(_dismissVeil, 4000);
   (async () => {
     const $login     = document.getElementById('nav-login');
@@ -1574,7 +1582,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
         if (window.location.search.includes('upgraded=1')) {
           if (typeof toast !== 'undefined') toast('Welcome to Pro! All features unlocked.', 'ok');
           history.replaceState(null, '', '/');
-          track('checkout_redirect', { source: 'stripe_success' });
+          trackWhenReady('checkout_redirect', { source: 'stripe_success' });
         }
         // Email verification result toasts
         const _verifParam = new URLSearchParams(window.location.search).get('verif');
@@ -1600,12 +1608,11 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
         if (_resumePlan && window.location.search.includes('resume_checkout=1')) {
           sessionStorage.removeItem('pendingUpgradePlan');
           history.replaceState(null, '', '/');
-          track('checkout_resumed_after_auth', { plan: _resumePlan });
+          trackWhenReady('checkout_resumed_after_auth', { plan: _resumePlan });
           if (typeof startTrial === 'function') {
             setTimeout(() => startTrial(_resumePlan === 'annual'), 800);
           }
         }
-        track('page_view', { path: window.location.pathname });
       }
     } catch (_) { /* server not running */ } finally {
       // Show Go Pro banner only for free/guest users
@@ -1619,16 +1626,28 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
         }
       }
       if (typeof syncPlanUI === 'function') syncPlanUI();
+      trackWhenReady('page_view', {
+        plan: (typeof S !== 'undefined' && S.loggedIn) ? _plan : 'guest',
+        logged_in: !!(typeof S !== 'undefined' && S.loggedIn),
+      });
       _dismissVeil();
       // Auto-load analyzer from ?ticker= query param (landing page CTA flow)
       (function _handleTickerParam() {
-        const _t = new URLSearchParams(window.location.search).get('ticker');
+        const _params = new URLSearchParams(window.location.search);
+        const _t = _params.get('ticker');
         if (!_t) return;
         const _clean = _t.toUpperCase().replace(/[^A-Z0-9.\-^]/g, '').slice(0, 10);
         if (!_clean) return;
+        const _range = _params.get('range');
+        if (typeof S !== 'undefined' && ['1d','5d','1mo','3mo','6mo','1y','2y','5y','10y','max'].includes(_range)) {
+          S.range = _range;
+        }
+        if (_params.get('resume_analysis') === '1') {
+          trackWhenReady('analysis_resumed_after_auth', { ticker: _clean, source: _params.get('source') || 'auth_return' });
+        }
         const _mi = document.getElementById('main-ticker');
         if (_mi) _mi.value = _clean;
-        history.replaceState(null, '', '/');
+        history.replaceState(null, '', '/?view=tool&section=analyze');
         (function _openTicker(attempt) {
           if (typeof openSection !== 'function' || typeof fetchAndRender !== 'function') {
             if (attempt < 100) setTimeout(() => _openTicker(attempt + 1), 50);
@@ -4379,23 +4398,78 @@ html:not([data-theme="dark"]) .hh-search-btn{color:#fff!important}
 ══════════════════════════════════════════════════════ */
 
 /* ── Client analytics ─────────────────────────────────────────────────── */
-const _trackQueue = [];
-let _csrfForTrack = null;
+function acquisitionContext() {
+  const params = new URLSearchParams(window.location.search);
+  let persisted = {};
+  try { persisted = JSON.parse(sessionStorage.getItem('ilAcquisitionContext') || '{}'); } catch (_) {}
+  let referrerHost = '';
+  try { referrerHost = document.referrer ? new URL(document.referrer).hostname : ''; } catch (_) {}
+  const context = {
+    path: window.location.pathname,
+    ticker: (params.get('ticker') || '').toUpperCase().replace(/[^A-Z0-9.\-^]/g, '').slice(0, 10) || null,
+    source: params.get('source') || persisted.source || null,
+    utm_source: params.get('utm_source') || persisted.utm_source || null,
+    utm_medium: params.get('utm_medium') || persisted.utm_medium || null,
+    utm_campaign: params.get('utm_campaign') || persisted.utm_campaign || null,
+    referrer_host: referrerHost || persisted.referrer_host || null,
+  };
+  const filtered = Object.fromEntries(Object.entries(context).filter(([, value]) => value !== null && value !== ''));
+  try {
+    const attribution = Object.fromEntries(
+      ['source','utm_source','utm_medium','utm_campaign','referrer_host']
+        .filter(key => filtered[key])
+        .map(key => [key, filtered[key]])
+    );
+    if (Object.keys(attribution).length) sessionStorage.setItem('ilAcquisitionContext', JSON.stringify(attribution));
+  } catch (_) {}
+  return filtered;
+}
 
 async function track(event, props = {}) {
   try {
-    // Reuse the CSRF token already stored in session (fetched at page load)
-    if (!_csrfForTrack) {
-      const r = await fetch('/api/csrf');
-      if (r.ok) { const d = await r.json(); _csrfForTrack = d.token || null; }
-    }
     await fetch('/api/track', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': _csrfForTrack || '' },
-      body: JSON.stringify({ event, properties: props }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event, properties: { ...acquisitionContext(), ...props } }),
       keepalive: true,
     });
   } catch (_) { /* never crash the caller */ }
+}
+
+function analysisReturnUrl(extra = {}) {
+  const params = new URLSearchParams({ view: 'tool', section: 'analyze', resume_analysis: '1' });
+  const ticker = (document.getElementById('main-ticker')?.value || S.ticker || '').trim().toUpperCase()
+    .replace(/[^A-Z0-9.\-^]/g, '').slice(0, 10);
+  if (ticker) params.set('ticker', ticker);
+  if (S.range) params.set('range', S.range);
+  Object.entries(extra).forEach(([key, value]) => {
+    if (value !== null && value !== undefined && value !== '') params.set(key, String(value));
+  });
+  return '/?' + params.toString();
+}
+
+function startGuestSignup(source = 'guest_prompt') {
+  const ticker = (document.getElementById('main-ticker')?.value || S.ticker || '').trim().toUpperCase()
+    .replace(/[^A-Z0-9.\-^]/g, '').slice(0, 10);
+  const next = analysisReturnUrl({ source });
+  try { sessionStorage.setItem('pendingAnalysisContext', JSON.stringify({ ticker, range: S.range, source })); } catch (_) {}
+  track('guest_signup_started', { source, ticker: ticker || null });
+  const params = new URLSearchParams({ next, source });
+  if (ticker) params.set('ticker', ticker);
+  const context = acquisitionContext();
+  ['utm_source','utm_medium','utm_campaign'].forEach(key => { if (context[key]) params.set(key, context[key]); });
+  window.location.href = '/signup?' + params.toString();
+}
+
+function startGuestLogin(source = 'guest_prompt') {
+  const ticker = (document.getElementById('main-ticker')?.value || S.ticker || '').trim().toUpperCase()
+    .replace(/[^A-Z0-9.\-^]/g, '').slice(0, 10);
+  const next = analysisReturnUrl({ source });
+  const params = new URLSearchParams({ next, source });
+  if (ticker) params.set('ticker', ticker);
+  const context = acquisitionContext();
+  ['utm_source','utm_medium','utm_campaign'].forEach(key => { if (context[key]) params.set(key, context[key]); });
+  window.location.href = '/login?' + params.toString();
 }
 
 const S = {
@@ -4682,8 +4756,8 @@ function handleSectionError(e, sectionId, container) {
         <li>Cloud-saved analyses that sync across all your devices</li>
         <li>Upgrade to Pro anytime for full access — no pressure</li>
       </ul>
-      <a href="/signup" style="display:block;background:var(--ink);color:var(--cream);border-radius:9px;padding:.8rem 1.6rem;font-size:.9rem;font-weight:700;text-decoration:none;text-align:center;margin-bottom:.5rem;">Create free account →</a>
-      <div style="font-size:.75rem;color:var(--ink4);text-align:center">Already have an account? <a href="/login" style="color:var(--gold);font-weight:600;">Sign in</a></div>
+      <a href="/signup" onclick="startGuestSignup('pro_gate_login_required');return false;" style="display:block;background:var(--ink);color:var(--cream);border-radius:9px;padding:.8rem 1.6rem;font-size:.9rem;font-weight:700;text-decoration:none;text-align:center;margin-bottom:.5rem;">Create free account →</a>
+      <div style="font-size:.75rem;color:var(--ink4);text-align:center">Already have an account? <a href="/login" onclick="startGuestLogin('pro_gate_login_required');return false;" style="color:var(--gold);font-weight:600;">Sign in</a></div>
     </div></div>`;
     container.style.display = 'block';
   } else if (e.code === 'LIMIT_REACHED') {
@@ -5256,12 +5330,24 @@ async function handleUpgradeClick() {
     // Attach plan to signup/login links so they redirect back
     const signupBtn = document.getElementById('upgrade-signup-btn');
     const loginBtn  = document.getElementById('upgrade-login-btn');
+    const ticker = (document.getElementById('main-ticker')?.value || S.ticker || '').trim().toUpperCase()
+      .replace(/[^A-Z0-9.\-^]/g, '').slice(0, 10);
+    const context = acquisitionContext();
+    const upgradeAuthUrl = path => {
+      const params = new URLSearchParams({ next: '/?resume_checkout=1', source: 'upgrade_modal' });
+      if (ticker) params.set('ticker', ticker);
+      ['utm_source','utm_medium','utm_campaign'].forEach(key => { if (context[key]) params.set(key, context[key]); });
+      return `${path}?${params.toString()}`;
+    };
     if (signupBtn) {
-      signupBtn.href = `/signup?next=${encodeURIComponent('/?resume_checkout=1')}`;
-      signupBtn.onclick = () => track('signup_started_from_upgrade', { plan: _upgradePlan });
+      signupBtn.href = upgradeAuthUrl('/signup');
+      signupBtn.onclick = () => {
+        track('signup_started_from_upgrade', { plan: _upgradePlan });
+        track('guest_signup_started', { source: 'upgrade_modal', plan: _upgradePlan, ticker: ticker || null });
+      };
     }
     if (loginBtn) {
-      loginBtn.href = `/login?next=${encodeURIComponent('/?resume_checkout=1')}`;
+      loginBtn.href = upgradeAuthUrl('/login');
       loginBtn.onclick = () => track('login_started_from_upgrade', { plan: _upgradePlan });
     }
     document.getElementById('upgrade-cta-btn').style.display = 'none';
@@ -5376,13 +5462,24 @@ function updateLimitUI(remaining, limit, plan) {
   const used = limit - remaining;
   const pct  = Math.min(100, (used / limit) * 100);
   const color = remaining <= 1 ? '#d96a70' : remaining <= 2 ? '#C6A052' : '#46b184';
+  const isGuest = plan === 'guest';
+  if (isGuest && used >= 1) {
+    try {
+      if (!sessionStorage.getItem('guestSignupPromptSeen')) {
+        sessionStorage.setItem('guestSignupPromptSeen', '1');
+        track('guest_signup_prompt_viewed', { source: 'analysis_limit_counter', used, limit });
+      }
+    } catch (_) {}
+  }
   wrap.innerHTML = `
-    <span style="font-size:.68rem;color:var(--text5);">Free analyses today:</span>
+    <span style="font-size:.68rem;color:var(--text5);">${isGuest ? 'Guest analyses today:' : 'Free analyses today:'}</span>
     <span style="font-size:.68rem;font-weight:700;color:${color};">${used}/${limit}</span>
     <div style="height:4px;width:60px;background:var(--t-chart-border);border-radius:2px;overflow:hidden;">
       <div style="height:100%;width:${pct}%;background:${color};border-radius:2px;transition:width .3s;"></div>
     </div>
-    ${remaining === 0 ? `<button onclick="showUpgradeModal()" style="font-size:.63rem;padding:.15rem .45rem;background:var(--gold);color:var(--ink);border:none;border-radius:4px;cursor:pointer;font-weight:700;">Upgrade</button>` : ''}
+    ${isGuest
+      ? `<button onclick="startGuestSignup('analysis_limit_counter')" style="font-size:.63rem;padding:.22rem .55rem;background:var(--gold);color:var(--ink);border:none;border-radius:4px;cursor:pointer;font-weight:700;">Create free account for 5/day</button>`
+      : remaining === 0 ? `<button onclick="showUpgradeModal()" style="font-size:.63rem;padding:.15rem .45rem;background:var(--gold);color:var(--ink);border:none;border-radius:4px;cursor:pointer;font-weight:700;">Upgrade</button>` : ''}
   `;
 }
 
@@ -5693,7 +5790,7 @@ async function fetchAndRender() {
       err.innerHTML=`<span>You've used all <strong>${e.limitData?.limit||5} free analyses</strong> for today. <a href="#" onclick="showUpgradeModal();return false;" style="color:var(--gold);font-weight:600;">Upgrade to Pro</a> for unlimited access.</span>`;
       err.style.display='block';
     } else if (e.message === 'SIGNUP_REQUIRED') {
-      window.location.href = '/signup';
+      startGuestSignup('guest_limit_reached');
     } else {
       const err=document.getElementById('analyze-error');
       err.textContent=`Could not load "${ticker}": ${e.message}`;

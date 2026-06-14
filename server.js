@@ -44,6 +44,7 @@ const { PORT, SESSION_SECRET } = cfg;
 }());
 
 const path    = require("path");
+const crypto  = require("crypto");
 const express = require("express");
 const session = require("express-session");
 const helmet  = require("helmet");
@@ -62,6 +63,7 @@ const financialsRouter  = require("./routes/financials");
 const stockLandingRouter = require("./routes/stock-landing");
 const workspaceRouter     = require("./routes/workspace");
 const providerHealth      = require("./lib/provider-health");
+const { buildSitemapXml } = require("./lib/acquisition-tickers");
 
 // ============================================================
 //  App setup
@@ -123,6 +125,12 @@ app.use((req, res, next) => {
 app.get("/favicon.ico", (_req, res) => {
   res.type("image/svg+xml");
   res.sendFile(path.join(__dirname, "public", "logo.svg"));
+});
+
+app.get("/sitemap.xml", (_req, res) => {
+  res.type("application/xml");
+  res.setHeader("Cache-Control", "public, max-age=3600");
+  res.send(buildSitemapXml(cfg.APP_URL));
 });
 
 app.use(express.static(path.join(__dirname, "public"), {
@@ -240,6 +248,12 @@ app.post("/api/track", trackLimiter, async (req, res) => {
     "page_view", "analyze_started", "analyze_completed",
     "pro_gate_viewed", "upgrade_modal_opened", "daily_limit_reached",
     "checkout_redirect", "plan_badge_clicked", "pricing_viewed",
+    "landing_page_view", "landing_cta_clicked",
+    "guest_signup_prompt_viewed", "guest_signup_started",
+    "signup_page_viewed", "login_page_viewed", "analysis_resumed_after_auth",
+    "checkout_requires_login", "signup_started_from_upgrade",
+    "login_started_from_upgrade", "checkout_resumed_after_auth",
+    "checkout_blocked_unverified",
     "feedback_opened", "feedback_rated", "feedback_email_opened", "feedback_shared",
     "research_shared", "call_research_loaded", "call_transcript_opened", "call_scorecard_saved",
     "wealth_plan_run", "wealth_plan_shared",
@@ -254,6 +268,9 @@ app.post("/api/track", trackLimiter, async (req, res) => {
       if (typeof value === "string") props[key] = value.slice(0, 250);
       else if (typeof value === "number" || typeof value === "boolean" || value === null) props[key] = value;
     }
+  }
+  if (!req.session.userId && req.guestId) {
+    props.guest_actor = crypto.createHash("sha256").update(req.guestId).digest("hex").slice(0, 24);
   }
   track(event, props, req.sessionID, req.session.userId || null).catch(() => {});
   res.json({ ok: true });
