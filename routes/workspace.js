@@ -34,6 +34,18 @@ function numberOrNull(value) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+function dateOrNull(value) {
+  const clean = String(value || "").trim();
+  if (!clean) return null;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(clean)) return undefined;
+  const [year, month, day] = clean.split("-").map(Number);
+  const parsed = new Date(Date.UTC(year, month - 1, day));
+  if (parsed.getUTCFullYear() !== year || parsed.getUTCMonth() !== month - 1 || parsed.getUTCDate() !== day) {
+    return undefined;
+  }
+  return clean;
+}
+
 function list(value) {
   const source = Array.isArray(value) ? value : String(value || "").split(/\r?\n/);
   return source.map(item => text(item, 280)).filter(Boolean).slice(0, 20);
@@ -218,27 +230,41 @@ router.put("/workspace/portfolio-profile", validateCsrf, async (req, res) => {
 
 router.post("/workspace/review-reminder", validateCsrf, async (req, res) => {
   const referenceKey = new Date().toISOString().slice(0, 10);
+  let claimed = false;
   try {
-    const [userResult, reviewResult, sentResult] = await Promise.all([
+    const [userResult, reviewResult] = await Promise.all([
       db.execute({ sql: "SELECT email FROM users WHERE id=? LIMIT 1", args: [req.session.userId] }),
       db.execute({ sql: "SELECT ticker,status,review_date FROM investment_theses WHERE user_id=? AND review_date IS NOT NULL AND review_date <= date('now', '+7 days') ORDER BY review_date ASC LIMIT 30", args: [req.session.userId] }),
-      db.execute({ sql: "SELECT 1 FROM lifecycle_email_log WHERE user_id=? AND email_type='review_digest' AND reference_key=? LIMIT 1", args: [req.session.userId, referenceKey] }),
     ]);
-    if (sentResult.rows.length) return res.json({ ok: true, alreadySent: true, count: reviewResult.rows.length });
-    if (!reviewResult.rows.length) return res.status(400).json({ error: "Schedule a thesis review within the next 7 days first." });
+    if (!reviewResult.rows.length) return res.status(400).json({ error: "Schedule a thesis review due within the next 7 days first." });
     const email = userResult.rows[0]?.email;
     if (!email) return res.status(404).json({ error: "Member email not found." });
+    const claim = await db.execute({
+      sql: "INSERT OR IGNORE INTO lifecycle_email_log (user_id,email_type,reference_key) VALUES (?,'review_digest',?)",
+      args: [req.session.userId, referenceKey],
+    });
+    claimed = Number(claim.rowsAffected || 0) > 0;
+    if (!claimed) return res.json({ ok: true, alreadySent: true, count: reviewResult.rows.length });
     const rows = reviewResult.rows.map(row => `<li><strong>${html(row.ticker)}</strong> - ${html(row.status)} - review ${html(row.review_date)}</li>`).join("");
     const result = await sendEmail({
       to: email,
       subject: `ImpliedLens review list: ${reviewResult.rows.length} decision${reviewResult.rows.length === 1 ? "" : "s"} due`,
       html: `<h2>Your upcoming investment reviews</h2><p>Review the evidence, thesis, and sell conditions before changing a position.</p><ul>${rows}</ul><p><a href="${html(process.env.APP_URL || "https://www.impliedlens.com")}/?view=tool&section=workspace">Open your workspace</a></p>`,
     });
-    if (!result?.sent && !result?.simulated) return res.status(502).json({ error: "Could not send the review email. Please try again." });
-    await db.execute({ sql: "INSERT OR IGNORE INTO lifecycle_email_log (user_id,email_type,reference_key) VALUES (?,'review_digest',?)", args: [req.session.userId, referenceKey] });
+    if (!result?.sent && !result?.simulated) {
+      await db.execute({ sql: "DELETE FROM lifecycle_email_log WHERE user_id=? AND email_type='review_digest' AND reference_key=?", args: [req.session.userId, referenceKey] });
+      claimed = false;
+      return res.status(502).json({ error: "Could not send the review email. Please try again." });
+    }
+    claimed = false;
     track("review_reminder_requested", { count: reviewResult.rows.length }, req.sessionID, req.session.userId).catch(() => {});
     res.json({ ok: true, alreadySent: false, simulated: Boolean(result.simulated), count: reviewResult.rows.length });
-  } catch (error) { workspaceError(res, error); }
+  } catch (error) {
+    if (claimed) {
+      await db.execute({ sql: "DELETE FROM lifecycle_email_log WHERE user_id=? AND email_type='review_digest' AND reference_key=?", args: [req.session.userId, referenceKey] }).catch(() => {});
+    }
+    workspaceError(res, error);
+  }
 });
 
 router.get("/workspace/theses", async (req, res) => {
@@ -263,6 +289,8 @@ router.put("/workspace/theses/:ticker", validateCsrf, async (req, res) => {
   const body = req.body || {};
   const status = ["watching", "owned", "passed", "review"].includes(body.status) ? body.status : "watching";
   const conviction = Math.max(1, Math.min(5, Number(body.conviction) || 3));
+  const reviewDate = dateOrNull(body.review_date);
+  if (reviewDate === undefined) return res.status(400).json({ error: "Review date must be a valid YYYY-MM-DD date." });
   try {
     await db.execute({
       sql: `INSERT INTO investment_theses
@@ -273,7 +301,7 @@ router.put("/workspace/theses/:ticker", validateCsrf, async (req, res) => {
         review_date=excluded.review_date,conviction=excluded.conviction,updated_at=CURRENT_TIMESTAMP`,
       args: [req.session.userId, symbol, status, text(body.thesis), JSON.stringify(list(body.catalysts)),
         JSON.stringify(list(body.risks)), JSON.stringify(list(body.sell_conditions)), numberOrNull(body.target_price),
-        numberOrNull(body.bear_price), text(body.review_date, 20) || null, conviction],
+        numberOrNull(body.bear_price), reviewDate, conviction],
     });
     const result = await db.execute({ sql: "SELECT * FROM investment_theses WHERE user_id=? AND ticker=?", args: [req.session.userId, symbol] });
     res.json(thesisRow(result.rows[0]));

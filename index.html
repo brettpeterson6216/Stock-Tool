@@ -1387,7 +1387,8 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
     if (view === 'tool') {
       if (home) home.style.display = 'none';
       if (tool) { tool.style.display = 'flex'; tool.style.flexDirection = 'column'; }
-      history.replaceState(null, '', '/?view=tool');
+      const activeSection = new URLSearchParams(window.location.search).get('section');
+      history.replaceState(null, '', '/?view=tool' + (activeSection ? '&section=' + encodeURIComponent(activeSection) : ''));
       const nav = document.getElementById('main-nav'); if(nav) nav.setAttribute('data-view','tool');
       document.querySelectorAll('.nav-tab').forEach(a => a.classList.remove('active-tab'));
       const tt = document.getElementById('nav-tool-link'); if(tt) tt.classList.add('active-tab');
@@ -1414,7 +1415,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
 
   function navGoTo(id, attempt) {
     if (id === 'home') { showView('home'); updateNavToolLink(true); initializeHomeDashboard(); return; }
-    if (typeof openSection !== 'function') {
+    if (typeof openSection !== 'function' || !document.getElementById('sec-' + id)) {
       const nextAttempt = (attempt || 0) + 1;
       if (nextAttempt <= 100) setTimeout(() => navGoTo(id, nextAttempt), 50);
       return;
@@ -8616,7 +8617,7 @@ document.addEventListener('click', function(e) {
 </div>
 </div>
 <script src="/product-system.js?v=20260612-1"></script>
-<script src="/workspace-system.js?v=20260614-1"></script>
+<script src="/workspace-system.js?v=20260614-2"></script>
 <script src="/research-system.js?v=20260612-1"></script>
 </body>
 </html>

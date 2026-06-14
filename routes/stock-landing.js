@@ -17,6 +17,7 @@ const {
 } = require("../lib/acquisition-tickers");
 
 const router = express.Router();
+const TICKER_RE = /^[A-Z0-9.^-]{1,15}$/;
 
 // ── Helpers ───────────────────────────────────────────────────
 function esc(s) {
@@ -418,8 +419,8 @@ function renderPage(ticker, q) {
 
 // ── Route ─────────────────────────────────────────────────────
 router.get("/stock/:ticker", async (req, res) => {
-  const raw    = (req.params.ticker || "").toUpperCase().replace(/[^A-Z0-9.\-^]/g, "").slice(0, 10);
-  if (!raw) return res.redirect("/");
+  const raw = String(req.params.ticker || "").trim().toUpperCase();
+  if (!TICKER_RE.test(raw)) return res.status(404).type("text/plain").send("Ticker page not found.");
 
   // Fetch live quote data (best-effort — page renders without it)
   const q = await fetchQuickQuote(raw);

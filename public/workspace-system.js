@@ -244,7 +244,7 @@
         <div class="il-ws-field"><label>Income stability</label><select id="il-guide-income">${guideOptions([["variable","Variable"],["stable","Stable"],["very_stable","Very stable"]], profile.income_stability || "stable")}</select></div>
         <div class="il-ws-field wide"><label>Management preference</label><select id="il-guide-preference">${guideOptions([["passive","Mostly passive"],["blended","Blended"],["active","Active research sleeve"]], profile.preference || "passive")}</select></div>
       </div><div class="il-ws-actions"><button class="il-ws-btn primary" id="il-save-guide"><i class="ti ti-sparkles"></i>${model ? "Update guide" : "Build my guide"}</button><span class="il-ws-sync">Optional and private to your account</span></div></div>
-      <div class="il-ws-block"><h3>Review rhythm</h3><p>${due ? `${due} thesis review${due === 1 ? "" : "s"} due within 7 days.` : "Schedule thesis review dates to build a repeatable decision habit."}</p><button class="il-ws-btn ${due ? "primary" : ""}" id="il-email-reviews" ${due ? "" : "disabled"}><i class="ti ti-mail"></i>Email my review list</button><span class="il-ws-sync">At most one digest per day</span></div></div>
+      <div class="il-ws-block"><h3>Review rhythm</h3><p>${due ? `${due} thesis review${due === 1 ? "" : "s"} overdue or coming up within 7 days.` : "Schedule thesis review dates to build a repeatable decision habit."}</p><button class="il-ws-btn ${due ? "primary" : ""}" id="il-email-reviews" ${due ? "" : "disabled"}><i class="ti ti-mail"></i>Email my review list</button><span class="il-ws-sync">At most one digest per day</span></div></div>
       ${model ? renderGuideModel(model) : `<div class="il-ws-block il-ws-guide-empty"><h3>Your model will appear here</h3><p>It will use broad asset classes, explain the reasoning, and show the guardrails that matter more than a precise percentage.</p></div>`}`;
     panel.querySelector("#il-save-guide").onclick = saveGuide;
     panel.querySelector("#il-email-reviews").onclick = emailReviews;
@@ -343,7 +343,12 @@
     const panel = document.querySelector('[data-panel="trust"]');
     if (!panel) return;
     const providers = state.providers?.providers || [];
-    panel.innerHTML = `<div class="il-ws-grid"><div class="il-ws-block"><h3>Provider observations</h3><p>Live status reflects providers observed by this running service.</p><div class="il-ws-health">${providers.length ? providers.map(p => `<div class="il-ws-health-row"><span><i class="il-ws-dot ${p.status === "operational" ? "" : "degraded"}"></i>${esc(p.name)}</span><span>${esc(p.status)} · ${p.latencyMs ?? "—"}ms</span></div>`).join("") : `<div class="il-ws-empty">Provider status will appear as market requests are observed.</div>`}</div></div><div class="il-ws-block"><h3>How to read the signal</h3><p>Operational means a recent request completed. Degraded means the latest observed request failed or returned no usable data.</p><a class="il-ws-btn" href="/data-sources"><i class="ti ti-external-link"></i>Data methodology</a></div></div>`;
+    const providerStale = Boolean(state.providers?.stale);
+    const message = state.providers?.message || "Live status reflects providers observed by this running service.";
+    panel.innerHTML = `<div class="il-ws-grid"><div class="il-ws-block"><h3>Provider observations</h3><p>${esc(message)}</p><div class="il-ws-health">${providers.length ? providers.map(p => {
+      const status = providerStale && p.status === "operational" ? "stale" : p.status;
+      return `<div class="il-ws-health-row"><span><i class="il-ws-dot ${status === "degraded" ? "degraded" : ""}" ${status === "stale" ? 'style="background:var(--brand-gold)"' : ""}></i>${esc(p.name)}</span><span>${esc(status)} · ${p.latencyMs ?? "—"}ms</span></div>`;
+    }).join("") : `<div class="il-ws-empty">Provider status will appear as market requests are observed.</div>`}</div></div><div class="il-ws-block"><h3>How to read the signal</h3><p>Operational means a recent request completed. Stale means the last observation is older than 15 minutes. Degraded means the latest observed request failed or returned no usable data.</p><a class="il-ws-btn" href="/data-sources"><i class="ti ti-external-link"></i>Data methodology</a></div></div>`;
   }
   async function loadProviders() { try { const r = await fetch("/api/providers/health", { cache: "no-store" }); state.providers = await r.json(); renderTrust(); } catch (_) {} }
 

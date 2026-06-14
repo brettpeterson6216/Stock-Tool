@@ -137,6 +137,7 @@ app.use(express.static(path.join(__dirname, "public"), {
   maxAge: "7d",
   etag: true,
   setHeaders(res, filePath) {
+    if (filePath.endsWith(".html"))       res.setHeader("Cache-Control", "no-cache, must-revalidate");
     if (filePath.endsWith(".svg"))        res.setHeader("Content-Type", "image/svg+xml");
     if (filePath.endsWith("robots.txt"))  res.setHeader("Content-Type", "text/plain");
     if (filePath.endsWith("sitemap.xml")) res.setHeader("Content-Type", "application/xml");

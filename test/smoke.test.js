@@ -130,6 +130,8 @@ test("GET / serves the homepage with a successful status", async () => {
   assert.match(html, /function openBillingPortal/);
   assert.match(html, /ImpliedLensMath\.annualizedVolatility\(c,252\)\*100/);
   assert.match(html, /const _initialParams = new URLSearchParams\(window\.location\.search\)/);
+  assert.match(html, /!document\.getElementById\('sec-' \+ id\)/);
+  assert.match(html, /const activeSection = new URLSearchParams\(window\.location\.search\)\.get\('section'\)/);
   assert.match(res.headers.get("cache-control"), /no-cache/);
 });
 
@@ -138,6 +140,14 @@ test("Public brand and acquisition pages are available", async () => {
     const res = await req(path);
     assert.equal(res.status, 200);
     assert.match(await res.text(), new RegExp(marker));
+  }
+});
+
+test("Direct HTML pages are never served with long-lived browser caching", async () => {
+  for (const pagePath of ["/login.html", "/signup.html", "/admin-analytics.html"]) {
+    const res = await req(pagePath);
+    assert.equal(res.status, 200);
+    assert.match(res.headers.get("cache-control"), /no-cache/);
   }
 });
 
@@ -165,6 +175,13 @@ test("Ticker landing pages explain free allowances and protect uncurated pages f
   const uncurated = await req("/stock/NOTREAL");
   assert.equal(uncurated.status, 200);
   assert.match(await uncurated.text(), /<meta name="robots" content="noindex,follow">/);
+});
+
+test("Ticker landing pages reject malformed symbols instead of creating junk pages", async () => {
+  for (const pagePath of ["/stock/AAPL!", "/stock/%3Ftoken%3Devil", "/stock/THIS-TICKER-IS-FAR-TOO-LONG"]) {
+    const res = await req(pagePath);
+    assert.equal(res.status, 404);
+  }
 });
 
 test("Auth pages preserve a local return path and expose attribution hooks", async () => {
@@ -383,6 +400,19 @@ test("Authenticated user can create, update, read, and delete a thesis", async (
   assert.equal(removed.status, 200);
 });
 
+test("Thesis review dates must be real calendar dates", async () => {
+  const { cookie, csrfToken } = await makeSession("workspace_dates", "workspace_dates@test.com");
+  const headers = { cookie, "X-CSRF-Token": csrfToken };
+  for (const reviewDate of ["not-a-date", "2026-02-30"]) {
+    const res = await req("/api/workspace/theses/AAPL", {
+      method: "PUT",
+      headers,
+      body: { thesis: "Validate the date", review_date: reviewDate, conviction: 3 },
+    });
+    assert.equal(res.status, 400);
+  }
+});
+
 test("Authenticated user can maintain portfolio positions and watchlist items", async () => {
   const { cookie, csrfToken } = await makeSession("workspace_assets", "workspace_assets@test.com");
   const headers = { cookie, "X-CSRF-Token": csrfToken };
@@ -442,7 +472,7 @@ test("Portfolio guide is member-only, validated, saved, and totals 100 percent",
   assert.equal((await summary.json()).activation.portfolioProfile, true);
 });
 
-test("Review digest requires a scheduled review and is idempotent per day", async () => {
+test("Review digest requires a scheduled review and is concurrency-safe per day", async () => {
   const { cookie, csrfToken } = await makeSession("review_digest", "review_digest@test.com");
   const headers = { cookie, "X-CSRF-Token": csrfToken };
   const empty = await req("/api/workspace/review-reminder", { method: "POST", headers, body: {} });
@@ -454,12 +484,27 @@ test("Review digest requires a scheduled review and is idempotent per day", asyn
     headers,
     body: { thesis: "Review the evidence", review_date: today, conviction: 3 },
   })).status, 200);
-  const sent = await req("/api/workspace/review-reminder", { method: "POST", headers, body: {} });
-  assert.equal(sent.status, 200);
-  assert.equal((await sent.json()).alreadySent, false);
+  const attempts = await Promise.all([
+    req("/api/workspace/review-reminder", { method: "POST", headers, body: {} }),
+    req("/api/workspace/review-reminder", { method: "POST", headers, body: {} }),
+  ]);
+  assert.ok(attempts.every(response => response.status === 200));
+  const results = await Promise.all(attempts.map(response => response.json()));
+  assert.deepEqual(results.map(result => result.alreadySent).sort(), [false, true]);
   const duplicate = await req("/api/workspace/review-reminder", { method: "POST", headers, body: {} });
   assert.equal(duplicate.status, 200);
   assert.equal((await duplicate.json()).alreadySent, true);
+});
+
+test("Resend responses are only successful when a delivery id is returned", () => {
+  const { interpretResendResponse } = require("../lib/email");
+  assert.equal(interpretResendResponse({ data: null, error: { message: "Rejected" } }).sent, false);
+  assert.equal(interpretResendResponse({ data: null, error: null }).sent, false);
+  assert.deepEqual(interpretResendResponse({ data: { id: "email_1" }, error: null }), {
+    sent: true,
+    simulated: false,
+    id: "email_1",
+  });
 });
 
 test("Provider health endpoint exposes an observation snapshot", async () => {
@@ -467,9 +512,23 @@ test("Provider health endpoint exposes an observation snapshot", async () => {
   assert.equal(res.status, 200);
   const body = await res.json();
   assert.ok(Array.isArray(body.providers));
-  assert.ok(["observing", "operational", "degraded"].includes(body.status));
+  assert.ok(["observing", "operational", "stale", "degraded"].includes(body.status));
   assert.equal(typeof body.stale, "boolean");
   assert.equal(typeof body.message, "string");
+});
+
+test("Provider health marks old successful observations as stale", () => {
+  const { recordProvider, snapshot } = require("../lib/provider-health");
+  const realNow = Date.now;
+  recordProvider("Stale provider test", true, 12);
+  try {
+    Date.now = () => realNow() + 16 * 60 * 1000;
+    const body = snapshot();
+    assert.equal(body.status, "stale");
+    assert.equal(body.stale, true);
+  } finally {
+    Date.now = realNow;
+  }
 });
 
 test("Honest feedback analytics events are accepted", async () => {
