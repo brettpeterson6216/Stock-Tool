@@ -16,6 +16,7 @@ const os      = require("node:os");
 const path    = require("node:path");
 
 const testDbPath = path.join(os.tmpdir(), `il-smoke-test-${process.pid}.db`).replace(/\\/g, "/");
+try { require("node:fs").unlinkSync(testDbPath); } catch (_) {}
 
 // ── Configure test environment before requiring app modules ──
 process.env.NODE_ENV        = "test";
@@ -132,6 +133,13 @@ test("GET / serves the homepage with a successful status", async () => {
   assert.match(html, /const _initialParams = new URLSearchParams\(window\.location\.search\)/);
   assert.match(html, /!document\.getElementById\('sec-' \+ id\)/);
   assert.match(html, /const activeSection = new URLSearchParams\(window\.location\.search\)\.get\('section'\)/);
+  assert.match(html, /Build an AI Portfolio Guide you can actually understand/);
+  assert.match(html, /Illustrative AAPL workspace/);
+  assert.match(html, /function setPricingPeriod\(period\)/);
+  assert.match(html, /id="mbn-workspace"/);
+  assert.match(html, /workspace-system\.js\?v=20260614-4/);
+  assert.match(html, /workspace-system\.css\?v=20260614-4/);
+  assert.match(html, /__initialWorkspaceTab/);
   assert.match(res.headers.get("cache-control"), /no-cache/);
 });
 

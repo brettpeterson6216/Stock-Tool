@@ -10,6 +10,15 @@
   function symbol(value) { return String(value || "").trim().toUpperCase().replace(/[^A-Z0-9.^-]/g, "").slice(0, 15); }
   function esc(value) { return String(value ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
   function money(value) { return value !== null && value !== "" && Number.isFinite(Number(value)) ? Number(value).toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 2 }) : "—"; }
+  function relativeAge(value) {
+    if (!value) return "Not observed yet";
+    const seconds = Math.max(0, Math.round((Date.now() - new Date(value).getTime()) / 1000));
+    if (!Number.isFinite(seconds)) return "Observation time unavailable";
+    if (seconds < 60) return "Checked under 1m ago";
+    if (seconds < 3600) return `Checked ${Math.round(seconds / 60)}m ago`;
+    if (seconds < 86400) return `Checked ${Math.round(seconds / 3600)}h ago`;
+    return `Checked ${Math.round(seconds / 86400)}d ago`;
+  }
   function lines(value) { return String(value || "").split(/\r?\n/).map(v => v.trim()).filter(Boolean); }
   function currentTicker() { return symbol(window.IL_STATE?.ticker || document.getElementById("main-ticker")?.value || ""); }
   function localData() { return read(STORE, { theses: [], positions: [], watchlist: [] }); }
@@ -86,14 +95,12 @@
     if (reports) reports.insertAdjacentHTML("beforebegin", `<div class="sb-item" data-sec="workspace"><i class="ti ti-briefcase sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Workspace</span></div>`);
     const mobile = document.getElementById("mobile-sec-tabs");
     if (mobile) mobile.insertAdjacentHTML("beforeend", `<button class="mst-btn" data-sec="workspace">Workspace</button>`);
-    const moreMenu = document.querySelector(".mmenu-grid");
-    if (moreMenu) moreMenu.insertAdjacentHTML("beforeend", `<a href="/?view=tool&amp;section=workspace" class="mmenu-item" onclick="navGoTo('workspace');_setMobileNav('workspace');_toggleMobileMenu();return false;"><i class="ti ti-briefcase"></i><span>Workspace</span></a>`);
     const scroll = document.querySelector(".app-content-scroll");
     if (!scroll) return;
     scroll.insertAdjacentHTML("beforeend", `<div class="app-section" id="sec-workspace"><div class="acc-body" id="body-workspace" style="display:none"><div class="il-ws-shell">
-      <div class="il-ws-hero"><div class="il-ws-intro"><div class="il-ws-kicker">Decision workspace</div><h2>Turn research into a reviewable decision.</h2><p>Keep the thesis, position, watchlist, and data trust context together.</p></div><div class="il-ws-stat"><span>Theses</span><strong id="il-ws-thesis-count">0</strong></div><div class="il-ws-stat"><span>Positions</span><strong id="il-ws-position-count">0</strong></div><div class="il-ws-stat"><span>Cost basis</span><strong id="il-ws-invested">$0</strong></div></div>
+      <div class="il-ws-hero"><div class="il-ws-intro"><div class="il-ws-kicker">Decision dashboard</div><h2>Turn research into a reviewable decision.</h2><p>Continue the work that matters: test a thesis, understand exposure, and revisit decisions on schedule.</p></div><div class="il-ws-stat accent-blue"><span>Theses</span><strong id="il-ws-thesis-count">0</strong></div><div class="il-ws-stat accent-green"><span>Positions</span><strong id="il-ws-position-count">0</strong></div><div class="il-ws-stat accent-gold"><span>Cost basis</span><strong id="il-ws-invested">$0</strong></div><div class="il-ws-stat accent-red"><span>Reviews due</span><strong id="il-ws-review-count">0</strong></div></div>
       <div id="il-ws-activation"></div>
-      <div class="il-ws-tabs"><button class="il-ws-tab active" data-tab="thesis">Thesis</button><button class="il-ws-tab" data-tab="portfolio">Portfolio</button><button class="il-ws-tab" data-tab="guide">AI Portfolio Guide</button><button class="il-ws-tab" data-tab="watchlist">Watchlist</button><button class="il-ws-tab" data-tab="trust">Data trust</button></div>
+      <div class="il-ws-tabs"><button class="il-ws-tab active" data-tab="thesis"><i class="ti ti-notes"></i>Thesis</button><button class="il-ws-tab" data-tab="portfolio"><i class="ti ti-chart-donut-3"></i>Portfolio</button><button class="il-ws-tab" data-tab="guide"><i class="ti ti-sparkles"></i>AI Portfolio Guide</button><button class="il-ws-tab" data-tab="watchlist"><i class="ti ti-star"></i>Watchlist</button><button class="il-ws-tab" data-tab="trust"><i class="ti ti-shield-check"></i>Data trust</button></div>
       <div class="il-ws-panel active" data-panel="thesis"></div><div class="il-ws-panel" data-panel="portfolio"></div><div class="il-ws-panel" data-panel="guide"></div><div class="il-ws-panel" data-panel="watchlist"></div><div class="il-ws-panel" data-panel="trust"></div>
     </div></div></div>`);
     document.querySelector(".il-ws-tabs").addEventListener("click", event => {
@@ -122,6 +129,11 @@
       const tab = document.querySelector('.il-ws-tab[data-tab="watchlist"]');
       if (tab) tab.click();
     };
+    window.openPortfolioGuide = function () {
+      state.tab = "guide";
+      if (typeof window.navGoTo === "function") window.navGoTo("workspace");
+      setTimeout(() => document.querySelector('.il-ws-tab[data-tab="guide"]')?.click(), 0);
+    };
   }
 
   function renderAll() {
@@ -129,6 +141,7 @@
     document.getElementById("il-ws-thesis-count").textContent = state.theses.length;
     document.getElementById("il-ws-position-count").textContent = state.positions.length;
     document.getElementById("il-ws-invested").textContent = money(invested);
+    document.getElementById("il-ws-review-count").textContent = Number(state.summary?.dueReviews || 0);
     renderActivation(); renderThesis(); renderPortfolio(); renderGuide(); renderWatchlist(); renderTrust(); renderHomeWatchlist();
   }
 
@@ -173,10 +186,11 @@
       <div class="il-ws-field"><label>Bear price</label><input id="il-thesis-bear" type="number" step=".01" value="${esc(item.bear_price)}"></div><div class="il-ws-field"><label>Target price</label><input id="il-thesis-target" type="number" step=".01" value="${esc(item.target_price)}"></div>
       <div class="il-ws-field"><label>Review date</label><input id="il-thesis-review" type="date" value="${esc(item.review_date)}"></div><div class="il-ws-field"><label>Conviction</label><div class="il-ws-conviction">${[1,2,3,4,5].map(v => `<button class="${state.conviction === v ? "active" : ""}" data-conviction="${v}">${v}</button>`).join("")}</div></div>
       </div><div class="il-ws-actions"><button class="il-ws-btn primary" id="il-save-thesis"><i class="ti ti-device-floppy"></i>Save thesis</button>${item.ticker ? `<button class="il-ws-btn danger" data-remove="thesis" data-ticker="${esc(item.ticker)}"><i class="ti ti-trash"></i>Remove</button>` : ""}<span class="il-ws-sync">${syncLabel()}</span></div></div>
-      <div class="il-ws-block"><h3>Thesis library</h3><p>Open a prior decision to review it against new evidence.</p><div class="il-ws-list">${state.theses.length ? state.theses.map(row => `<button class="il-ws-btn" data-open-thesis="${esc(row.ticker)}"><strong>${esc(row.ticker)}</strong>&nbsp;${esc(row.status || "watching")}</button>`).join("") : `<div class="il-ws-empty">Load a ticker and save your first thesis.</div>`}</div></div></div>`;
+      <div class="il-ws-block"><h3>Thesis library</h3><p>Open a prior decision to review it against new evidence.</p><div class="il-ws-list">${state.theses.length ? state.theses.map(row => `<button class="il-ws-btn" data-open-thesis="${esc(row.ticker)}"><strong>${esc(row.ticker)}</strong>&nbsp;${esc(row.status || "watching")}</button>`).join("") : `<div class="il-ws-empty il-ws-empty-rich"><i class="ti ti-notes"></i><strong>Start with a decision you may need to defend.</strong><span>Load a company, write what the market may misunderstand, and schedule the next evidence review.</span><button class="il-ws-btn" data-empty-action="analyze">Analyze a company</button></div>`}</div></div></div>`;
     panel.querySelectorAll("[data-conviction]").forEach(button => button.onclick = () => { state.conviction = Number(button.dataset.conviction); renderThesis(); });
     panel.querySelector("#il-save-thesis").onclick = saveThesis;
     panel.querySelectorAll("[data-open-thesis]").forEach(button => button.onclick = () => openTicker(button.dataset.openThesis, "thesis"));
+    panel.querySelector("[data-empty-action='analyze']")?.addEventListener("click", () => window.openSection?.("analyze"));
     wireRemoves(panel);
   }
 
@@ -201,10 +215,16 @@
   function renderPortfolio() {
     const panel = document.querySelector('[data-panel="portfolio"]');
     const totalValue = state.positions.reduce((sum, row) => sum + (state.prices[row.ticker] || row.cost_basis) * row.shares, 0);
-    panel.innerHTML = `<div class="il-ws-grid">${formBlock("position")}<div class="il-ws-block"><h3>Portfolio intelligence</h3><p>Weights and returns refresh from the latest available price.</p><div class="il-ws-list">${state.positions.length ? state.positions.map(row => {
+    const weights = state.positions.map(row => {
+      const value = row.shares * (state.prices[row.ticker] || row.cost_basis);
+      return { ticker: row.ticker, value, weight: totalValue ? value / totalValue * 100 : 0 };
+    }).sort((a, b) => b.weight - a.weight);
+    const largest = weights[0]?.weight || 0;
+    const overview = state.positions.length ? `<div class="il-ws-portfolio-overview"><div><div class="il-ws-kicker">Concentration view</div><strong>${largest.toFixed(1)}%</strong><span>largest position${largest > 35 ? " · review concentration risk" : " · within a diversified range"}</span></div><div class="il-ws-weight-bars">${weights.slice(0, 5).map(row => `<div><span>${esc(row.ticker)}</span><i><b style="width:${Math.min(100, row.weight)}%"></b></i><strong>${row.weight.toFixed(1)}%</strong></div>`).join("")}</div></div>` : `<div class="il-ws-sample"><div class="il-ws-kicker">Example concentration view</div><div class="il-ws-weight-bars"><div><span>CORE</span><i><b style="width:48%"></b></i><strong>48%</strong></div><div><span>GROWTH</span><i><b style="width:32%;background:#7d91b6"></b></i><strong>32%</strong></div><div><span>RESERVE</span><i><b style="width:20%;background:#8aa381"></b></i><strong>20%</strong></div></div><p>Add positions to replace this preview with your actual concentration and return view.</p></div>`;
+    panel.innerHTML = `<div class="il-ws-grid">${formBlock("position")}<div class="il-ws-block"><h3>Portfolio intelligence</h3><p>Weights and returns refresh from the latest available price.</p>${overview}<div class="il-ws-list">${state.positions.length ? state.positions.map(row => {
       const price = state.prices[row.ticker]; const cost = row.shares * row.cost_basis; const value = row.shares * (price || row.cost_basis); const gain = value - cost; const pct = cost ? gain / cost * 100 : 0; const weight = totalValue ? value / totalValue * 100 : 0;
       return `<div class="il-ws-item"><div><strong>${esc(row.ticker)}</strong><span>${esc(row.sector || "Unclassified")}</span></div><div class="il-ws-num">${money(value)}<span>${weight.toFixed(1)}% weight</span></div><div class="il-ws-num ${gain >= 0 ? "pos" : "neg"}">${gain >= 0 ? "+" : ""}${money(gain)}<span>${pct.toFixed(1)}% return</span></div><div class="il-ws-num">${row.shares} shares<span>${money(row.cost_basis)} basis</span></div><button class="il-ws-btn danger" data-remove="position" data-ticker="${esc(row.ticker)}"><i class="ti ti-trash"></i></button></div>`;
-    }).join("") : `<div class="il-ws-empty">Add positions to see weights and unrealized returns.</div>`}</div></div></div>`;
+    }).join("") : ""}</div></div></div>`;
     panel.querySelector("#il-save-position").onclick = savePosition; wireRemoves(panel); refreshPrices(state.positions.map(v => v.ticker));
   }
 
@@ -245,15 +265,15 @@
         <div class="il-ws-field wide"><label>Management preference</label><select id="il-guide-preference">${guideOptions([["passive","Mostly passive"],["blended","Blended"],["active","Active research sleeve"]], profile.preference || "passive")}</select></div>
       </div><div class="il-ws-actions"><button class="il-ws-btn primary" id="il-save-guide"><i class="ti ti-sparkles"></i>${model ? "Update guide" : "Build my guide"}</button><span class="il-ws-sync">Optional and private to your account</span></div></div>
       <div class="il-ws-block"><h3>Review rhythm</h3><p>${due ? `${due} thesis review${due === 1 ? "" : "s"} overdue or coming up within 7 days.` : "Schedule thesis review dates to build a repeatable decision habit."}</p><button class="il-ws-btn ${due ? "primary" : ""}" id="il-email-reviews" ${due ? "" : "disabled"}><i class="ti ti-mail"></i>Email my review list</button><span class="il-ws-sync">At most one digest per day</span></div></div>
-      ${model ? renderGuideModel(model) : `<div class="il-ws-block il-ws-guide-empty"><h3>Your model will appear here</h3><p>It will use broad asset classes, explain the reasoning, and show the guardrails that matter more than a precise percentage.</p></div>`}`;
+      ${model ? renderGuideModel(model) : renderGuideModel({ archetype: "Balanced preview", allocations: [{ asset: "US equity", percent: 45 }, { asset: "International equity", percent: 20 }, { asset: "Investment-grade bonds", percent: 25 }, { asset: "Short-term reserves", percent: 10 }], rationale: ["Your questionnaire answers will explain why the model changes."], guardrails: ["Revisit after major income, family, debt, or time-horizon changes."], disclosure: "Preview only. Complete the questionnaire to build your educational model." }, true)}`;
     panel.querySelector("#il-save-guide").onclick = saveGuide;
     panel.querySelector("#il-email-reviews").onclick = emailReviews;
     if (!model) panel.querySelector(".il-ws-fields").addEventListener("change", () => track("portfolio_questionnaire_started", {}), { once: true });
   }
 
-  function renderGuideModel(model) {
+  function renderGuideModel(model, preview = false) {
     const allocations = Array.isArray(model.allocations) ? model.allocations : [];
-    return `<div class="il-ws-block il-ws-guide-model"><div class="il-ws-model-title"><div><div class="il-ws-kicker">Illustrative allocation</div><h3>${esc(model.archetype || "Portfolio")} model</h3></div><strong>${allocations.reduce((sum, row) => sum + Number(row.percent || 0), 0)}%</strong></div>
+    return `<div class="il-ws-block il-ws-guide-model ${preview ? "preview" : ""}"><div class="il-ws-model-title"><div><div class="il-ws-kicker">${preview ? "Example output" : "Illustrative allocation"}</div><h3>${esc(model.archetype || "Portfolio")} model</h3></div><strong>${allocations.reduce((sum, row) => sum + Number(row.percent || 0), 0)}%</strong></div>
       <div class="il-ws-allocations">${allocations.map(row => `<div class="il-ws-allocation"><div><span>${esc(row.asset)}</span><strong>${Number(row.percent || 0)}%</strong></div><div class="il-ws-allocation-bar"><i style="width:${Math.max(0, Math.min(100, Number(row.percent || 0)))}%"></i></div></div>`).join("")}</div>
       <div class="il-ws-guide-notes"><div><h4>Why this model</h4><ul>${(model.rationale || []).map(item => `<li>${esc(item)}</li>`).join("")}</ul></div><div><h4>Guardrails</h4><ul>${(model.guardrails || []).map(item => `<li>${esc(item)}</li>`).join("")}</ul></div></div>
       <p class="il-ws-disclosure">${esc(model.disclosure || "")}</p></div>`;
@@ -294,8 +314,9 @@
     panel.innerHTML = `<div class="il-ws-grid">${formBlock("watchlist")}<div class="il-ws-block"><h3>Watchlist intelligence</h3><p>See how far the latest price sits from your level.</p><div class="il-ws-list">${state.watchlist.length ? state.watchlist.map(row => {
       const price = state.prices[row.ticker]; const gap = price && row.target_price ? (row.target_price - price) / price * 100 : null;
       return `<div class="il-ws-item"><button class="il-ws-btn" data-open-ticker="${esc(row.ticker)}"><strong>${esc(row.ticker)}</strong></button><div class="il-ws-num">${money(price)}<span>latest price</span></div><div class="il-ws-num ${gap == null ? "" : gap >= 0 ? "pos" : "neg"}">${gap == null ? "—" : `${gap >= 0 ? "+" : ""}${gap.toFixed(1)}%`}<span>to ${money(row.target_price)}</span></div><div><span>${esc(row.note || "No note")}</span></div><button class="il-ws-btn danger" data-remove="watchlist" data-ticker="${esc(row.ticker)}"><i class="ti ti-trash"></i></button></div>`;
-    }).join("") : `<div class="il-ws-empty">Add companies you want to follow with a reason and target.</div>`}</div></div></div>`;
+    }).join("") : `<div class="il-ws-empty il-ws-empty-rich"><i class="ti ti-star"></i><strong>Track the reason, not only the ticker.</strong><span>Add a company with the price level or evidence that would make it worth revisiting.</span><button class="il-ws-btn" data-empty-focus="watchlist">Add the first watch item</button></div>`}</div></div></div>`;
     panel.querySelector("#il-save-watchlist").onclick = saveWatchlist; panel.querySelectorAll("[data-open-ticker]").forEach(button => button.onclick = () => openTicker(button.dataset.openTicker)); wireRemoves(panel); refreshPrices(state.watchlist.map(v => v.ticker));
+    panel.querySelector("[data-empty-focus='watchlist']")?.addEventListener("click", () => document.getElementById("il-watchlist-ticker")?.focus());
   }
 
   async function saveWatchlist() {
@@ -333,7 +354,11 @@
   }
   function renderHomeWatchlist() {
     const host = document.getElementById("home-watchlist-body");
-    if (!host || !state.watchlist.length) return;
+    if (!host) return;
+    if (!state.watchlist.length) {
+      host.innerHTML = `<tr><td colspan="5"><div class="il-home-watch-empty"><strong>Build a decision watchlist</strong><span>Keep the reason and level attached to each company.</span><button onclick="openWorkspaceWatchlist()">Add watch item</button></div></td></tr>`;
+      return;
+    }
     host.innerHTML = state.watchlist.slice(0, 5).map(row => {
       const price = state.prices[row.ticker]; const gap = price && row.target_price ? (row.target_price - price) / price * 100 : null;
       return `<tr><td><div class="wl-sym">${esc(row.ticker)}</div><div class="wl-co">${esc(row.note || "Your watchlist")}</div></td><td class="wl-price">${money(price)}</td><td class="wl-pct ${gap == null ? "" : gap >= 0 ? "up" : "dn"}">${gap == null ? "—" : `${gap >= 0 ? "+" : ""}${gap.toFixed(1)}%`}</td><td class="wl-spark"><span style="color:var(--text5);font-size:.6rem;">to ${money(row.target_price)}</span></td><td><span class="wl-star lit" title="Tracked">★</span></td></tr>`;
@@ -347,8 +372,9 @@
     const message = state.providers?.message || "Live status reflects providers observed by this running service.";
     panel.innerHTML = `<div class="il-ws-grid"><div class="il-ws-block"><h3>Provider observations</h3><p>${esc(message)}</p><div class="il-ws-health">${providers.length ? providers.map(p => {
       const status = providerStale && p.status === "operational" ? "stale" : p.status;
-      return `<div class="il-ws-health-row"><span><i class="il-ws-dot ${status === "degraded" ? "degraded" : ""}" ${status === "stale" ? 'style="background:var(--brand-gold)"' : ""}></i>${esc(p.name)}</span><span>${esc(status)} · ${p.latencyMs ?? "—"}ms</span></div>`;
-    }).join("") : `<div class="il-ws-empty">Provider status will appear as market requests are observed.</div>`}</div></div><div class="il-ws-block"><h3>How to read the signal</h3><p>Operational means a recent request completed. Stale means the last observation is older than 15 minutes. Degraded means the latest observed request failed or returned no usable data.</p><a class="il-ws-btn" href="/data-sources"><i class="ti ti-external-link"></i>Data methodology</a></div></div>`;
+      return `<div class="il-ws-health-row"><span><i class="il-ws-dot ${status === "degraded" ? "degraded" : ""}" ${status === "stale" ? 'style="background:var(--brand-gold)"' : ""}></i>${esc(p.name)}</span><span><b class="il-ws-status ${esc(status)}">${esc(status)}</b>${esc(relativeAge(p.checkedAt))} · ${p.latencyMs ?? "—"}ms</span></div>`;
+    }).join("") : `<div class="il-ws-empty il-ws-empty-rich"><i class="ti ti-radar"></i><strong>No provider request observed yet.</strong><span>Load a ticker and this panel will show the providers, freshness, latency, and latest outcome observed by this running service.</span><button class="il-ws-btn" data-empty-action="analyze">Analyze a company</button></div>`}</div></div><div class="il-ws-block"><h3>How to read the signal</h3><p>Operational means a recent request completed. Stale means the last observation is older than 15 minutes. Degraded means the latest observed request failed or returned no usable data.</p><div class="il-ws-freshness"><i class="ti ti-clock"></i>${esc(relativeAge(state.providers?.latestObservation))}</div><a class="il-ws-btn" href="/data-sources"><i class="ti ti-external-link"></i>Data methodology</a></div></div>`;
+    panel.querySelector("[data-empty-action='analyze']")?.addEventListener("click", () => window.openSection?.("analyze"));
   }
   async function loadProviders() { try { const r = await fetch("/api/providers/health", { cache: "no-store" }); state.providers = await r.json(); renderTrust(); } catch (_) {} }
 
@@ -395,6 +421,9 @@
     injectShell(); installChartWorkspace(); installGuidanceShortcut(); loadWorkspace(); loadProviders();
     setInterval(loadProviders, 30000);
     setTimeout(loadWorkspace, 1200);
+    if (window.__initialWorkspaceTab === "guide" || new URLSearchParams(window.location.search).get("workspace_tab") === "guide") {
+      setTimeout(() => window.openPortfolioGuide?.(), 0);
+    }
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 }());
