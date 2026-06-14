@@ -472,6 +472,44 @@ router.get("/admin/analytics", async (req, res) => {
       LIMIT 20
     `);
 
+    const activation = await db.execute(`
+      SELECT event, COUNT(DISTINCT user_id) AS users
+      FROM analytics_events
+      WHERE user_id IS NOT NULL
+        AND created_at >= datetime('now', '-30 days')
+        AND event IN (
+          'analyze_completed', 'thesis_saved', 'watchlist_saved', 'position_saved',
+          'portfolio_profile_saved', 'review_reminder_requested'
+        )
+      GROUP BY event
+      ORDER BY event
+    `);
+
+    const retention = await db.execute(`
+      SELECT
+        COUNT(*) AS cohort,
+        SUM(CASE WHEN u.created_at <= datetime('now', '-1 day') THEN 1 ELSE 0 END) AS d1_eligible,
+        SUM(CASE WHEN u.created_at <= datetime('now', '-1 day') AND EXISTS (
+          SELECT 1 FROM analytics_events a WHERE a.user_id=u.id
+          AND a.created_at >= datetime(u.created_at, '+1 day')
+          AND a.created_at < datetime(u.created_at, '+2 days')
+        ) THEN 1 ELSE 0 END) AS d1_returned,
+        SUM(CASE WHEN u.created_at <= datetime('now', '-7 days') THEN 1 ELSE 0 END) AS d7_eligible,
+        SUM(CASE WHEN u.created_at <= datetime('now', '-7 days') AND EXISTS (
+          SELECT 1 FROM analytics_events a WHERE a.user_id=u.id
+          AND a.created_at >= datetime(u.created_at, '+7 days')
+          AND a.created_at < datetime(u.created_at, '+8 days')
+        ) THEN 1 ELSE 0 END) AS d7_returned,
+        SUM(CASE WHEN u.created_at <= datetime('now', '-30 days') THEN 1 ELSE 0 END) AS d30_eligible,
+        SUM(CASE WHEN u.created_at <= datetime('now', '-30 days') AND EXISTS (
+          SELECT 1 FROM analytics_events a WHERE a.user_id=u.id
+          AND a.created_at >= datetime(u.created_at, '+30 days')
+          AND a.created_at < datetime(u.created_at, '+31 days')
+        ) THEN 1 ELSE 0 END) AS d30_returned
+      FROM users u
+      WHERE u.created_at >= datetime('now', '-90 days')
+    `);
+
     // ── Pro gate views by section (all time + last 30d) ──────
     const gatesBySection = await db.execute(`
       SELECT
@@ -528,6 +566,8 @@ router.get("/admin/analytics", async (req, res) => {
       uniqueFunnel:   uniqueFunnel.rows,
       acquisitionByTicker: acquisitionByTicker.rows,
       signupSources:  signupSources.rows,
+      activation:     activation.rows,
+      retention:      retention.rows[0] || {},
       gatesBySection: gatesBySection.rows,
       modalSources:   modalSources.rows,
       totals:         totals.rows,

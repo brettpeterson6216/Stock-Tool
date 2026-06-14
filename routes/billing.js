@@ -125,6 +125,7 @@ router.post("/stripe/webhook", async (req, res) => {
         if (sub.status === "trialing") plan = "trial";
         const trialEnd = sub.trial_end ? new Date(sub.trial_end * 1000).toISOString() : null;
         await db.execute({ sql: "UPDATE users SET plan=?, trial_ends_at=? WHERE id=?", args: [plan, trialEnd, r.rows[0].id] });
+        track("subscription_updated", { status: sub.status, plan }, null, Number(r.rows[0].id)).catch(() => {});
         break;
       }
       case "customer.subscription.deleted": {
@@ -132,11 +133,15 @@ router.post("/stripe/webhook", async (req, res) => {
         const r   = await db.execute({ sql: "SELECT id FROM users WHERE stripe_customer_id=?", args: [sub.customer] });
         if (!r.rows.length) break;
         await db.execute({ sql: "UPDATE users SET plan='free', trial_ends_at=NULL WHERE id=?", args: [r.rows[0].id] });
+        track("subscription_cancelled", {}, null, Number(r.rows[0].id)).catch(() => {});
         break;
       }
       case "invoice.payment_failed": {
         // Stripe may retry a failed invoice while the subscription remains active
         // or past_due. Access is updated from customer.subscription.updated.
+        const invoice = event.data.object;
+        const r = await db.execute({ sql: "SELECT id FROM users WHERE stripe_customer_id=?", args: [invoice.customer] });
+        if (r.rows.length) track("payment_failed", {}, null, Number(r.rows[0].id)).catch(() => {});
         break;
       }
       default:
@@ -168,6 +173,7 @@ router.post("/stripe/portal", validateCsrf, async (req, res) => {
       customer:   customerId,
       return_url: `${APP_URL}/`,
     });
+    track("billing_portal_opened", {}, req.sessionID, req.session.userId).catch(() => {});
     res.json({ url: portalSession.url });
   } catch (err) {
     console.error("portal error:", err);

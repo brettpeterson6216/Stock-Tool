@@ -408,12 +408,68 @@ test("Workspace mutations require CSRF protection", async () => {
   assert.equal(res.status, 403);
 });
 
+test("Portfolio guide is member-only, validated, saved, and totals 100 percent", async () => {
+  assert.equal((await req("/api/workspace/portfolio-profile")).status, 401);
+  const { cookie, csrfToken } = await makeSession("portfolio_guide", "portfolio_guide@test.com");
+  const headers = { cookie, "X-CSRF-Token": csrfToken };
+  const invalid = await req("/api/workspace/portfolio-profile", { method: "PUT", headers, body: { goal: "growth" } });
+  assert.equal(invalid.status, 400);
+
+  const saved = await req("/api/workspace/portfolio-profile", {
+    method: "PUT",
+    headers,
+    body: {
+      goal: "growth",
+      horizon_years: 18,
+      risk_tolerance: "aggressive",
+      liquidity_need: "low",
+      experience: "experienced",
+      income_stability: "very_stable",
+      preference: "active",
+    },
+  });
+  assert.equal(saved.status, 200);
+  const profile = await saved.json();
+  assert.equal(profile.model.archetype, "Growth");
+  assert.equal(profile.model.educationalOnly, true);
+  assert.equal(profile.model.allocations.reduce((sum, row) => sum + row.percent, 0), 100);
+  assert.ok(profile.model.allocations.some(row => row.asset === "Research sleeve"));
+
+  const fetched = await req("/api/workspace/portfolio-profile", { headers: { cookie } });
+  assert.equal(fetched.status, 200);
+  assert.equal((await fetched.json()).goal, "growth");
+  const summary = await req("/api/workspace/summary", { headers: { cookie } });
+  assert.equal((await summary.json()).activation.portfolioProfile, true);
+});
+
+test("Review digest requires a scheduled review and is idempotent per day", async () => {
+  const { cookie, csrfToken } = await makeSession("review_digest", "review_digest@test.com");
+  const headers = { cookie, "X-CSRF-Token": csrfToken };
+  const empty = await req("/api/workspace/review-reminder", { method: "POST", headers, body: {} });
+  assert.equal(empty.status, 400);
+
+  const today = new Date().toISOString().slice(0, 10);
+  assert.equal((await req("/api/workspace/theses/AAPL", {
+    method: "PUT",
+    headers,
+    body: { thesis: "Review the evidence", review_date: today, conviction: 3 },
+  })).status, 200);
+  const sent = await req("/api/workspace/review-reminder", { method: "POST", headers, body: {} });
+  assert.equal(sent.status, 200);
+  assert.equal((await sent.json()).alreadySent, false);
+  const duplicate = await req("/api/workspace/review-reminder", { method: "POST", headers, body: {} });
+  assert.equal(duplicate.status, 200);
+  assert.equal((await duplicate.json()).alreadySent, true);
+});
+
 test("Provider health endpoint exposes an observation snapshot", async () => {
   const res = await req("/api/providers/health");
   assert.equal(res.status, 200);
   const body = await res.json();
   assert.ok(Array.isArray(body.providers));
   assert.ok(["observing", "operational", "degraded"].includes(body.status));
+  assert.equal(typeof body.stale, "boolean");
+  assert.equal(typeof body.message, "string");
 });
 
 test("Honest feedback analytics events are accepted", async () => {
@@ -428,6 +484,9 @@ test("Growth funnel events are accepted and unknown client events are rejected",
     "guest_signup_started", "signup_page_viewed", "analysis_resumed_after_auth",
     "checkout_requires_login", "signup_started_from_upgrade",
     "checkout_resumed_after_auth", "checkout_blocked_unverified",
+    "activation_checklist_viewed", "thesis_saved", "watchlist_saved", "position_saved",
+    "portfolio_questionnaire_started", "portfolio_profile_saved", "portfolio_guide_viewed",
+    "review_reminder_requested", "billing_portal_opened", "checkout_cancelled",
   ]) {
     const res = await req("/api/track", { method: "POST", body: { event, properties: { ticker: "AAPL" } } });
     assert.equal(res.status, 200, `${event} should be accepted`);
@@ -467,6 +526,8 @@ test("Anonymous funnel analytics use a stable hashed guest actor", async () => {
   const body = await admin.json();
   assert.ok(Array.isArray(body.uniqueFunnel));
   assert.ok(Array.isArray(body.acquisitionByTicker));
+  assert.ok(Array.isArray(body.activation));
+  assert.ok(body.retention && typeof body.retention === "object");
   const smoke = body.acquisitionByTicker.find(row => row.ticker === "SMOKE");
   assert.equal(Number(smoke.unique_views), 1);
   assert.equal(Number(smoke.unique_ctas), 1);

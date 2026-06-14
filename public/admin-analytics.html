@@ -111,6 +111,17 @@
     <h2>Conversion Funnel — Last 30 Days</h2>
     <div class="funnel" id="funnel"></div>
 
+    <div class="two-col">
+      <div>
+        <h2 style="margin-top:0">Member Activation - 30 Days</h2>
+        <div class="tbl-wrap"><table><thead><tr><th>Habit</th><th>Members</th></tr></thead><tbody id="activation-body"></tbody></table></div>
+      </div>
+      <div>
+        <h2 style="margin-top:0">Signup Retention - 90 Day Cohort</h2>
+        <div class="tbl-wrap"><table><thead><tr><th>Window</th><th>Returned</th><th>Eligible</th><th>Rate</th></tr></thead><tbody id="retention-body"></tbody></table></div>
+      </div>
+    </div>
+
     <!-- Daily activity chart -->
     <h2>Daily Activity — Last 30 Days</h2>
     <div class="chart-wrap">
@@ -224,7 +235,7 @@ function getUnique(uniqueFunnel, event) {
 
 function render(data) {
   const {
-    daily, uniqueFunnel = [], acquisitionByTicker = [], signupSources = [],
+    daily, uniqueFunnel = [], acquisitionByTicker = [], signupSources = [], activation = [], retention = {},
     gatesBySection, modalSources, totals, users, recent,
   } = data;
 
@@ -282,6 +293,28 @@ function render(data) {
   }).join('');
 
   // ── Daily chart ─────────────────────────────────────────────────────────
+  const activationLabels = {
+    analyze_completed: 'Completed an analysis',
+    thesis_saved: 'Saved a thesis',
+    watchlist_saved: 'Added a watch item',
+    position_saved: 'Saved a position',
+    portfolio_profile_saved: 'Built portfolio guide',
+    review_reminder_requested: 'Requested review digest',
+  };
+  document.getElementById('activation-body').innerHTML = activation.length
+    ? activation.map(row => `<tr><td>${esc(activationLabels[row.event] || row.event)}</td><td>${fmt(row.users)}</td></tr>`).join('')
+    : '<tr><td colspan="2" style="color:rgba(220,225,232,.3);text-align:center;padding:1.5rem">No activation events yet</td></tr>';
+
+  const retentionRows = [
+    ['Day 1', retention.d1_returned, retention.d1_eligible],
+    ['Day 7', retention.d7_returned, retention.d7_eligible],
+    ['Day 30', retention.d30_returned, retention.d30_eligible],
+  ];
+  document.getElementById('retention-body').innerHTML = retentionRows.map(([label, returned, eligible]) => {
+    const r = Number(returned || 0), e = Number(eligible || 0);
+    return `<tr><td>${label}</td><td>${fmt(r)}</td><td>${fmt(e)}</td><td>${e ? Math.round(r / e * 100) : 0}%</td></tr>`;
+  }).join('');
+
   const days = [...new Set(daily.map(r => r.day))].sort();
   const keyColors = {
     page_view:           'rgba(185,138,61,0.7)',

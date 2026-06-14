@@ -67,7 +67,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.44.0/dist/tabler-icons.min.css" rel="stylesheet">
 <link href="/product-system.css?v=20260612-1" rel="stylesheet">
-<link href="/workspace-system.css?v=20260609-1" rel="stylesheet">
+<link href="/workspace-system.css?v=20260614-1" rel="stylesheet">
 <link href="/research-system.css?v=20260611-1" rel="stylesheet">
 <script src="/vendor/chart.umd.min.js?v=4.4.1"></script>
 <script defer src="/vendor/hammer.min.js?v=2.0.8"></script>
@@ -1587,6 +1587,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
         }
         if (_initialParams.get('checkout') === 'cancelled') {
           if (typeof toast !== 'undefined') toast('Checkout cancelled. Your plan was not changed.');
+          trackWhenReady('checkout_cancelled', { source: 'stripe_checkout' });
           history.replaceState(null, '', '/');
         }
         // Email verification result toasts
@@ -2956,7 +2957,7 @@ html[data-theme="dark"] .home-feat-strip{background:#0d0f14}
       <div id="plan-annual" class="plan-opt" onclick="selectUpgradePlan('annual')" style="cursor:pointer;">
         <div class="plan-opt-name">Annual <span style="font-size:.65rem;background:var(--gold);color:#fff;border-radius:3px;padding:1px 5px;">SAVE 37%</span></div>
         <div class="plan-opt-price">$5.00<span class="plan-opt-per">/mo</span></div>
-        <div class="plan-opt-sub">$60 billed yearly</div>
+        <div class="plan-opt-sub">$59.99 billed yearly</div>
       </div>
     </div>
 
@@ -8615,7 +8616,7 @@ document.addEventListener('click', function(e) {
 </div>
 </div>
 <script src="/product-system.js?v=20260612-1"></script>
-<script src="/workspace-system.js?v=20260612-1"></script>
+<script src="/workspace-system.js?v=20260614-1"></script>
 <script src="/research-system.js?v=20260612-1"></script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 
   const STORE = "il-workspace-v1";
   const LAYOUTS = "il-chart-layouts-v1";
-  const state = { tab: "thesis", theses: [], positions: [], watchlist: [], prices: {}, priceRequested: new Set(), providers: null, conviction: 3 };
+  const state = { tab: "thesis", theses: [], positions: [], watchlist: [], prices: {}, priceRequested: new Set(), providers: null, summary: null, portfolioProfile: null, conviction: 3, activationTracked: false };
 
   function read(key, fallback) { try { return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback)); } catch (_) { return fallback; } }
   function write(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch (_) {} }
@@ -15,6 +15,7 @@
   function localData() { return read(STORE, { theses: [], positions: [], watchlist: [] }); }
   function saveLocal() { write(STORE, { theses: state.theses, positions: state.positions, watchlist: state.watchlist }); }
   function toastMsg(message, kind) { if (typeof window.toast === "function") window.toast(message, kind); }
+  function track(event, properties = {}) { if (typeof window.track === "function") window.track(event, properties); }
 
   async function api(path, options = {}) {
     const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
@@ -30,14 +31,27 @@
       return;
     }
     try {
-      const [t, p, w] = await Promise.all(["theses", "positions", "watchlist"].map(type => api(`/api/workspace/${type}`)));
-      if ([t, p, w].some(r => !r.ok)) throw new Error("sync unavailable");
-      [state.theses, state.positions, state.watchlist] = await Promise.all([t.json(), p.json(), w.json()]);
+      const [t, p, w, s, profile] = await Promise.all([
+        ...["theses", "positions", "watchlist"].map(type => api(`/api/workspace/${type}`)),
+        api("/api/workspace/summary"),
+        api("/api/workspace/portfolio-profile"),
+      ]);
+      if ([t, p, w, s, profile].some(r => !r.ok)) throw new Error("sync unavailable");
+      [state.theses, state.positions, state.watchlist, state.summary, state.portfolioProfile] = await Promise.all([t.json(), p.json(), w.json(), s.json(), profile.json()]);
       renderAll();
     } catch (_) {
       Object.assign(state, local);
       renderAll();
     }
+  }
+
+  async function refreshMemberSummary() {
+    if (!window.IL_STATE?.loggedIn) return;
+    try {
+      const response = await api("/api/workspace/summary");
+      if (response.ok) state.summary = await response.json();
+      renderActivation();
+    } catch (_) {}
   }
 
   function syncLabel() { return window.IL_STATE?.loggedIn ? "Cloud synced" : "Saved on this device"; }
@@ -78,8 +92,9 @@
     if (!scroll) return;
     scroll.insertAdjacentHTML("beforeend", `<div class="app-section" id="sec-workspace"><div class="acc-body" id="body-workspace" style="display:none"><div class="il-ws-shell">
       <div class="il-ws-hero"><div class="il-ws-intro"><div class="il-ws-kicker">Decision workspace</div><h2>Turn research into a reviewable decision.</h2><p>Keep the thesis, position, watchlist, and data trust context together.</p></div><div class="il-ws-stat"><span>Theses</span><strong id="il-ws-thesis-count">0</strong></div><div class="il-ws-stat"><span>Positions</span><strong id="il-ws-position-count">0</strong></div><div class="il-ws-stat"><span>Cost basis</span><strong id="il-ws-invested">$0</strong></div></div>
-      <div class="il-ws-tabs"><button class="il-ws-tab active" data-tab="thesis">Thesis</button><button class="il-ws-tab" data-tab="portfolio">Portfolio</button><button class="il-ws-tab" data-tab="watchlist">Watchlist</button><button class="il-ws-tab" data-tab="trust">Data trust</button></div>
-      <div class="il-ws-panel active" data-panel="thesis"></div><div class="il-ws-panel" data-panel="portfolio"></div><div class="il-ws-panel" data-panel="watchlist"></div><div class="il-ws-panel" data-panel="trust"></div>
+      <div id="il-ws-activation"></div>
+      <div class="il-ws-tabs"><button class="il-ws-tab active" data-tab="thesis">Thesis</button><button class="il-ws-tab" data-tab="portfolio">Portfolio</button><button class="il-ws-tab" data-tab="guide">AI Portfolio Guide</button><button class="il-ws-tab" data-tab="watchlist">Watchlist</button><button class="il-ws-tab" data-tab="trust">Data trust</button></div>
+      <div class="il-ws-panel active" data-panel="thesis"></div><div class="il-ws-panel" data-panel="portfolio"></div><div class="il-ws-panel" data-panel="guide"></div><div class="il-ws-panel" data-panel="watchlist"></div><div class="il-ws-panel" data-panel="trust"></div>
     </div></div></div>`);
     document.querySelector(".il-ws-tabs").addEventListener("click", event => {
       const tab = event.target.closest("[data-tab]")?.dataset.tab;
@@ -87,6 +102,7 @@
       state.tab = tab;
       document.querySelectorAll(".il-ws-tab").forEach(el => el.classList.toggle("active", el.dataset.tab === tab));
       document.querySelectorAll(".il-ws-panel").forEach(el => el.classList.toggle("active", el.dataset.panel === tab));
+      if (tab === "guide") track("portfolio_guide_viewed", { has_profile: Boolean(state.portfolioProfile) });
     });
     if (window.SECTION_META) window.SECTION_META.workspace = { icon: "ti-briefcase", title: "Investment Workspace" };
     const originalOpen = window.openSection;
@@ -113,7 +129,35 @@
     document.getElementById("il-ws-thesis-count").textContent = state.theses.length;
     document.getElementById("il-ws-position-count").textContent = state.positions.length;
     document.getElementById("il-ws-invested").textContent = money(invested);
-    renderThesis(); renderPortfolio(); renderWatchlist(); renderTrust(); renderHomeWatchlist();
+    renderActivation(); renderThesis(); renderPortfolio(); renderGuide(); renderWatchlist(); renderTrust(); renderHomeWatchlist();
+  }
+
+  function renderActivation() {
+    const host = document.getElementById("il-ws-activation");
+    if (!host) return;
+    if (!window.IL_STATE?.loggedIn) {
+      host.innerHTML = `<div class="il-ws-activation"><div><div class="il-ws-kicker">Member workflow</div><h3>Sync your decisions and build your portfolio guide.</h3><p>Create a free account to keep this workspace across devices.</p></div><button class="il-ws-btn primary" id="il-ws-join">Create free account</button></div>`;
+      host.querySelector("#il-ws-join").onclick = () => typeof window.startGuestSignup === "function" ? window.startGuestSignup("workspace_activation") : window.location.assign("/signup");
+      return;
+    }
+    const activation = state.summary?.activation || {};
+    const items = [
+      ["analyzed", "Run an analysis", "analyze"],
+      ["thesis", "Save a thesis", "thesis"],
+      ["watchlist", "Add a watch item", "watchlist"],
+      ["portfolioProfile", "Build portfolio guide", "guide"],
+      ["reviewScheduled", "Schedule a review", "thesis"],
+    ];
+    host.innerHTML = `<div class="il-ws-activation"><div><div class="il-ws-kicker">Activation path</div><h3>${state.summary?.activationCompleted || 0} of ${state.summary?.activationTotal || items.length} decision habits set up</h3><p>Finish the loop once, then use it whenever your evidence changes.</p></div><div class="il-ws-checks">${items.map(([key, label, target]) => `<button class="${activation[key] ? "done" : ""}" data-activation-target="${target}"><i class="ti ${activation[key] ? "ti-check" : "ti-arrow-right"}"></i>${esc(label)}</button>`).join("")}</div></div>`;
+    host.querySelectorAll("[data-activation-target]").forEach(button => button.onclick = () => {
+      const target = button.dataset.activationTarget;
+      if (target === "analyze") return typeof window.openSection === "function" && window.openSection("analyze");
+      document.querySelector(`.il-ws-tab[data-tab="${target}"]`)?.click();
+    });
+    if (!state.activationTracked) {
+      state.activationTracked = true;
+      track("activation_checklist_viewed", { completed: Number(state.summary?.activationCompleted || 0) });
+    }
   }
 
   function renderThesis() {
@@ -143,7 +187,7 @@
       catalysts: lines(document.getElementById("il-thesis-catalysts").value), risks: lines(document.getElementById("il-thesis-risks").value),
       sell_conditions: lines(document.getElementById("il-thesis-sell").value), bear_price: document.getElementById("il-thesis-bear").value,
       target_price: document.getElementById("il-thesis-target").value, review_date: document.getElementById("il-thesis-review").value, conviction: state.conviction };
-    try { const saved = await persist("thesis", ticker, body); state.theses = [saved, ...state.theses.filter(v => v.ticker !== ticker)]; saveLocal(); renderAll(); toastMsg(`${ticker} thesis saved`, "ok"); } catch (e) { toastMsg(e.message, "red"); }
+    try { const saved = await persist("thesis", ticker, body); state.theses = [saved, ...state.theses.filter(v => v.ticker !== ticker)]; saveLocal(); track("thesis_saved", { ticker, has_review_date: Boolean(body.review_date) }); await refreshMemberSummary(); renderAll(); toastMsg(`${ticker} thesis saved`, "ok"); } catch (e) { toastMsg(e.message, "red"); }
   }
 
   function formBlock(kind) {
@@ -172,7 +216,77 @@
     if (!Number.isFinite(shares) || shares <= 0) return toastMsg("Shares must be above zero", "red");
     if (!Number.isFinite(costBasis) || costBasis < 0) return toastMsg("Cost basis cannot be negative", "red");
     const body = { shares, cost_basis: costBasis, sector: document.getElementById("il-position-sector").value, notes: document.getElementById("il-position-notes").value };
-    try { const saved = await persist("position", ticker, body); state.positions = [saved, ...state.positions.filter(v => v.ticker !== ticker)]; saveLocal(); renderAll(); toastMsg(`${ticker} position saved`, "ok"); } catch (e) { toastMsg(e.message, "red"); }
+    try { const saved = await persist("position", ticker, body); state.positions = [saved, ...state.positions.filter(v => v.ticker !== ticker)]; saveLocal(); track("position_saved", { ticker }); await refreshMemberSummary(); renderAll(); toastMsg(`${ticker} position saved`, "ok"); } catch (e) { toastMsg(e.message, "red"); }
+  }
+
+  function guideOptions(values, selected) {
+    return values.map(([value, label]) => `<option value="${value}" ${selected === value ? "selected" : ""}>${label}</option>`).join("");
+  }
+
+  function renderGuide() {
+    const panel = document.querySelector('[data-panel="guide"]');
+    if (!panel) return;
+    if (!window.IL_STATE?.loggedIn) {
+      panel.innerHTML = `<div class="il-ws-block il-ws-guide-intro"><div class="il-ws-kicker">Optional member tool</div><h3>Build a transparent AI Portfolio Guide.</h3><p>Answer seven short questions to create an educational model allocation. No individual stock picks, no black box, and no changes to your holdings.</p><button class="il-ws-btn primary" id="il-guide-join">Create free account</button></div>`;
+      panel.querySelector("#il-guide-join").onclick = () => typeof window.startGuestSignup === "function" ? window.startGuestSignup("portfolio_guide") : window.location.assign("/signup");
+      return;
+    }
+    const profile = state.portfolioProfile || {};
+    const model = profile.model || null;
+    const due = Number(state.summary?.dueReviews || 0);
+    panel.innerHTML = `<div class="il-ws-guide-head"><div><div class="il-ws-kicker">Transparent questionnaire model</div><h3>AI Portfolio Guide</h3><p>Use a short questionnaire to create a broad, educational allocation model you can revisit as life changes.</p></div><span class="il-ws-disclosure">Educational only, not investment advice</span></div>
+      <div class="il-ws-grid il-ws-guide-grid"><div class="il-ws-block"><h3>${model ? "Update your answers" : "Build your model"}</h3><p>Your answers stay in your member workspace.</p><div class="il-ws-fields">
+        <div class="il-ws-field"><label>Primary goal</label><select id="il-guide-goal">${guideOptions([["retirement","Retirement"],["growth","Long-term growth"],["income","Income"],["capital_preservation","Capital preservation"]], profile.goal || "retirement")}</select></div>
+        <div class="il-ws-field"><label>Time horizon (years)</label><input id="il-guide-horizon" type="number" min="1" max="50" value="${esc(profile.horizon_years || 10)}"></div>
+        <div class="il-ws-field"><label>Risk reaction</label><select id="il-guide-risk">${guideOptions([["conservative","Protect against large declines"],["balanced","Accept moderate declines"],["aggressive","Accept large declines for growth"]], profile.risk_tolerance || "balanced")}</select></div>
+        <div class="il-ws-field"><label>Near-term liquidity need</label><select id="il-guide-liquidity">${guideOptions([["low","Low"],["medium","Medium"],["high","High"]], profile.liquidity_need || "medium")}</select></div>
+        <div class="il-ws-field"><label>Investing experience</label><select id="il-guide-experience">${guideOptions([["new","New"],["intermediate","Intermediate"],["experienced","Experienced"]], profile.experience || "intermediate")}</select></div>
+        <div class="il-ws-field"><label>Income stability</label><select id="il-guide-income">${guideOptions([["variable","Variable"],["stable","Stable"],["very_stable","Very stable"]], profile.income_stability || "stable")}</select></div>
+        <div class="il-ws-field wide"><label>Management preference</label><select id="il-guide-preference">${guideOptions([["passive","Mostly passive"],["blended","Blended"],["active","Active research sleeve"]], profile.preference || "passive")}</select></div>
+      </div><div class="il-ws-actions"><button class="il-ws-btn primary" id="il-save-guide"><i class="ti ti-sparkles"></i>${model ? "Update guide" : "Build my guide"}</button><span class="il-ws-sync">Optional and private to your account</span></div></div>
+      <div class="il-ws-block"><h3>Review rhythm</h3><p>${due ? `${due} thesis review${due === 1 ? "" : "s"} due within 7 days.` : "Schedule thesis review dates to build a repeatable decision habit."}</p><button class="il-ws-btn ${due ? "primary" : ""}" id="il-email-reviews" ${due ? "" : "disabled"}><i class="ti ti-mail"></i>Email my review list</button><span class="il-ws-sync">At most one digest per day</span></div></div>
+      ${model ? renderGuideModel(model) : `<div class="il-ws-block il-ws-guide-empty"><h3>Your model will appear here</h3><p>It will use broad asset classes, explain the reasoning, and show the guardrails that matter more than a precise percentage.</p></div>`}`;
+    panel.querySelector("#il-save-guide").onclick = saveGuide;
+    panel.querySelector("#il-email-reviews").onclick = emailReviews;
+    if (!model) panel.querySelector(".il-ws-fields").addEventListener("change", () => track("portfolio_questionnaire_started", {}), { once: true });
+  }
+
+  function renderGuideModel(model) {
+    const allocations = Array.isArray(model.allocations) ? model.allocations : [];
+    return `<div class="il-ws-block il-ws-guide-model"><div class="il-ws-model-title"><div><div class="il-ws-kicker">Illustrative allocation</div><h3>${esc(model.archetype || "Portfolio")} model</h3></div><strong>${allocations.reduce((sum, row) => sum + Number(row.percent || 0), 0)}%</strong></div>
+      <div class="il-ws-allocations">${allocations.map(row => `<div class="il-ws-allocation"><div><span>${esc(row.asset)}</span><strong>${Number(row.percent || 0)}%</strong></div><div class="il-ws-allocation-bar"><i style="width:${Math.max(0, Math.min(100, Number(row.percent || 0)))}%"></i></div></div>`).join("")}</div>
+      <div class="il-ws-guide-notes"><div><h4>Why this model</h4><ul>${(model.rationale || []).map(item => `<li>${esc(item)}</li>`).join("")}</ul></div><div><h4>Guardrails</h4><ul>${(model.guardrails || []).map(item => `<li>${esc(item)}</li>`).join("")}</ul></div></div>
+      <p class="il-ws-disclosure">${esc(model.disclosure || "")}</p></div>`;
+  }
+
+  async function saveGuide() {
+    const body = {
+      goal: document.getElementById("il-guide-goal").value,
+      horizon_years: Number(document.getElementById("il-guide-horizon").value),
+      risk_tolerance: document.getElementById("il-guide-risk").value,
+      liquidity_need: document.getElementById("il-guide-liquidity").value,
+      experience: document.getElementById("il-guide-experience").value,
+      income_stability: document.getElementById("il-guide-income").value,
+      preference: document.getElementById("il-guide-preference").value,
+    };
+    try {
+      const response = await api("/api/workspace/portfolio-profile", { method: "PUT", body });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Could not build guide");
+      state.portfolioProfile = data;
+      await refreshMemberSummary();
+      renderGuide();
+      toastMsg("Portfolio guide saved", "ok");
+    } catch (error) { toastMsg(error.message, "red"); }
+  }
+
+  async function emailReviews() {
+    try {
+      const response = await api("/api/workspace/review-reminder", { method: "POST", body: {} });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Could not send review list");
+      toastMsg(data.alreadySent ? "Today's review list was already sent" : `Review list sent for ${data.count} decision${data.count === 1 ? "" : "s"}`, "ok");
+    } catch (error) { toastMsg(error.message, "red"); }
   }
 
   function renderWatchlist() {
@@ -191,7 +305,7 @@
     if (!ticker) return toastMsg("Enter a ticker first", "red");
     if (targetPrice !== null && (!Number.isFinite(targetPrice) || targetPrice <= 0)) return toastMsg("Target price must be above zero", "red");
     const body = { target_price: targetPrice, note: document.getElementById("il-watchlist-note").value };
-    try { const saved = await persist("watchlist", ticker, body); state.watchlist = [saved, ...state.watchlist.filter(v => v.ticker !== ticker)]; saveLocal(); renderAll(); toastMsg(`${ticker} added to watchlist`, "ok"); } catch (e) { toastMsg(e.message, "red"); }
+    try { const saved = await persist("watchlist", ticker, body); state.watchlist = [saved, ...state.watchlist.filter(v => v.ticker !== ticker)]; saveLocal(); track("watchlist_saved", { ticker }); await refreshMemberSummary(); renderAll(); toastMsg(`${ticker} added to watchlist`, "ok"); } catch (e) { toastMsg(e.message, "red"); }
   }
 
   function wireRemoves(host) {
