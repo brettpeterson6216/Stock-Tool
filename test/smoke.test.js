@@ -137,6 +137,9 @@ test("GET / serves the homepage with a successful status", async () => {
   assert.match(html, /Illustrative AAPL workspace/);
   assert.match(html, /function setPricingPeriod\(period\)/);
   assert.match(html, /id="mbn-workspace"/);
+  assert.match(html, /aria-label="Home"/);
+  assert.match(html, /viewport-fit=cover/);
+  assert.match(html, /input,select,textarea\{font-size:16px!important\}/);
   assert.match(html, /workspace-system\.js\?v=20260614-4/);
   assert.match(html, /workspace-system\.css\?v=20260614-4/);
   assert.match(html, /__initialWorkspaceTab/);
