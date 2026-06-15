@@ -915,10 +915,14 @@ html[data-theme="dark"] #view-tool{
 .m-sub{font-size:.58rem;color:var(--t-msub);margin-top:2px;}
 /* Charts */
 .chart-wrap{background:var(--t-chart-bg);border:1px solid var(--t-chart-border);border-radius:var(--r2);padding:1rem 1rem .75rem;margin-bottom:.875rem;overflow:hidden;}
-.chart-wrap .chart-header{border-bottom:1px solid var(--t-chart-border);margin:-1rem -1rem .75rem;padding:.58rem 3.25rem .58rem 1rem;min-height:34px;}
+.chart-wrap .chart-header{border-bottom:1px solid var(--t-chart-border);margin:-1rem -1rem .75rem;padding:.62rem 1rem;min-height:36px;flex-wrap:nowrap;}
+.chart-wrap .chart-header>*{min-width:0}
 .chart-title{font-size:.72rem;font-weight:700;letter-spacing:.045em;text-transform:uppercase;color:var(--t-chart-title);line-height:1.25;}
 .chart-data-note{margin-top:3px;color:var(--text5);font:500 .59rem/1.35 var(--sans);letter-spacing:0;}
 .chart-data-note.warn{color:var(--brand-gold-strong);}
+.chart-header .range-pills,.chart-header [id$="-readout"]{margin-left:auto}
+.chart-header [id$="-readout"]{padding:3px 7px;border:1px solid var(--t-chart-border);border-radius:5px;background:var(--t-acc-header-bg);line-height:1.2}
+.chart-header .range-pills+.chart-exp-btn,.chart-header [id$="-readout"]+.chart-exp-btn{margin-left:.45rem}
 .h240{height:230px;}.h200{height:195px;}.h180{height:170px;}.h150{height:145px;}
 .rpill{font-size:.66rem;padding:2px 9px;border-radius:3px;border-color:var(--t-rpill-border);color:var(--t-rpill-color);}
 .rpill.active,.rpill:hover{background:var(--gold);color:#0A0C0E;border-color:var(--gold);}
@@ -1492,6 +1496,8 @@ html[data-theme="dark"] .hh-product-preview{background:rgba(14,17,20,.9);box-sha
     if (nextAttempt <= 100) setTimeout(() => trackWhenReady(event, props, nextAttempt), 50);
   }
   setTimeout(_dismissVeil, 4000);
+  let _resolveAuthReady;
+  window.IL_AUTH_READY = new Promise(resolve => { _resolveAuthReady = resolve; });
   (async () => {
     const $login     = document.getElementById('nav-login');
     const $signup    = document.getElementById('nav-signup');
@@ -1665,6 +1671,8 @@ html[data-theme="dark"] .hh-product-preview{background:rgba(14,17,20,.9);box-sha
         }
       }
       if (typeof syncPlanUI === 'function') syncPlanUI();
+      if (typeof S !== 'undefined') S.authReady = true;
+      if (_resolveAuthReady) _resolveAuthReady();
       trackWhenReady('page_view', {
         plan: (typeof S !== 'undefined' && S.loggedIn) ? _plan : 'guest',
         logged_in: !!(typeof S !== 'undefined' && S.loggedIn),
@@ -2175,7 +2183,7 @@ html[data-theme="dark"] .hh-product-preview{background:rgba(14,17,20,.9);box-sha
         <button type="button" class="act-btn" id="epins-btn" onclick="toggleToolbarOption(this)" aria-pressed="false"><i class="ti ti-tag"></i> Earnings</button>
         <button type="button" class="act-btn" id="npins-btn" onclick="toggleToolbarOption(this)" aria-pressed="false"><i class="ti ti-news"></i> News</button>
         <div class="act-right">
-          <button type="button" class="act-btn chart-zoom-btn" onclick="zoomPriceChart(.8)" title="Zoom out" aria-label="Zoom price chart out"><i class="ti ti-zoom-out"></i></button>
+          <button type="button" class="act-btn chart-zoom-btn" onclick="zoomPriceChart(.8)" title="Zoom out or load older history" aria-label="Zoom price chart out or load older history"><i class="ti ti-zoom-out"></i></button>
           <button type="button" class="act-btn chart-zoom-btn" onclick="resetPriceZoom()" title="Reset chart zoom" aria-label="Reset price chart zoom"><i class="ti ti-focus-2"></i></button>
           <button type="button" class="act-btn chart-zoom-btn" onclick="zoomPriceChart(1.25)" title="Zoom in" aria-label="Zoom price chart in"><i class="ti ti-zoom-in"></i></button>
           <button type="button" class="act-btn" onclick="expandChart('price-chart','Price Chart')" title="Fullscreen" aria-label="Expand price chart"><i class="ti ti-maximize"></i></button>
@@ -2254,11 +2262,10 @@ html[data-theme="dark"] .hh-product-preview{background:rgba(14,17,20,.9);box-sha
 
               <!-- Main price chart -->
               <div class="chart-wrap">
-                <button class="chart-exp-btn" onclick="expandChart('price-chart','Price Chart')" title="Expand and mark up chart" aria-label="Expand and mark up price chart"><i class="ti ti-maximize"></i></button>
                 <div class="chart-header">
                   <div>
                     <div class="chart-title">Price Chart</div>
-                    <div class="chart-data-note" id="chart-data-note">Pinch or use the zoom controls to inspect the chart</div>
+                    <div class="chart-data-note" id="chart-data-note">Zoom out at full view to load more price history</div>
                     <div class="ind-row" style="margin-top:6px;" id="ind-row">
                       <button class="ind-pill on" data-ind="ma50" onclick="toggleInd(this,'ma50')"><span class="chart-key key-ma50"></span>50D Avg</button>
                       <button class="ind-pill" data-ind="ma200" onclick="toggleInd(this,'ma200')"><span class="chart-key key-ma200"></span>200D Avg</button>
@@ -2272,6 +2279,7 @@ html[data-theme="dark"] .hh-product-preview{background:rgba(14,17,20,.9);box-sha
                     <button class="rpill" onclick="changeRange('2y',this)">2Y</button>
                     <button class="rpill" onclick="changeRange('5y',this)">5Y</button>
                   </div>
+                  <button class="chart-exp-btn" onclick="expandChart('price-chart','Price Chart')" title="Expand and mark up chart" aria-label="Expand and mark up price chart"><i class="ti ti-maximize"></i></button>
                 </div>
                 <div class="h240"><canvas id="price-chart"></canvas></div>
               </div>
@@ -2281,13 +2289,11 @@ html[data-theme="dark"] .hh-product-preview{background:rgba(14,17,20,.9);box-sha
               <!-- RSI + MACD -->
               <div class="g2">
                 <div class="chart-wrap">
-                  <button class="chart-exp-btn" onclick="expandChart('rsi-chart','RSI (14)')" title="Expand and mark up chart" aria-label="Expand and mark up RSI chart"><i class="ti ti-maximize"></i></button>
-                  <div class="chart-header"><div class="chart-title">RSI (14)</div><div id="rsi-readout" style="font-family:var(--mono);font-size:.68rem;color:var(--text4);"></div></div>
+                  <div class="chart-header"><div class="chart-title">RSI (14)</div><div id="rsi-readout" style="font-family:var(--mono);font-size:.68rem;color:var(--text4);"></div><button class="chart-exp-btn" onclick="expandChart('rsi-chart','RSI (14)')" title="Expand and mark up chart" aria-label="Expand and mark up RSI chart"><i class="ti ti-maximize"></i></button></div>
                   <div class="h150"><canvas id="rsi-chart"></canvas></div>
                 </div>
                 <div class="chart-wrap">
-                  <button class="chart-exp-btn" onclick="expandChart('macd-chart','MACD (12,26,9)')" title="Expand and mark up chart" aria-label="Expand and mark up MACD chart"><i class="ti ti-maximize"></i></button>
-                  <div class="chart-header"><div class="chart-title">MACD (12,26,9)</div><div id="macd-readout" style="font-family:var(--mono);font-size:.68rem;color:var(--text4);"></div></div>
+                  <div class="chart-header"><div class="chart-title">MACD (12,26,9)</div><div id="macd-readout" style="font-family:var(--mono);font-size:.68rem;color:var(--text4);"></div><button class="chart-exp-btn" onclick="expandChart('macd-chart','MACD (12,26,9)')" title="Expand and mark up chart" aria-label="Expand and mark up MACD chart"><i class="ti ti-maximize"></i></button></div>
                   <div class="h150"><canvas id="macd-chart"></canvas></div>
                 </div>
               </div>
@@ -2295,13 +2301,11 @@ html[data-theme="dark"] .hh-product-preview{background:rgba(14,17,20,.9);box-sha
               <!-- Volume + Returns Distribution -->
               <div class="g2">
                 <div class="chart-wrap">
-                  <button class="chart-exp-btn" onclick="expandChart('vol-chart','Volume')" title="Expand and mark up chart" aria-label="Expand and mark up volume chart"><i class="ti ti-maximize"></i></button>
-                  <div class="chart-header"><div class="chart-title">Volume</div></div>
+                  <div class="chart-header"><div class="chart-title">Volume</div><button class="chart-exp-btn" onclick="expandChart('vol-chart','Volume')" title="Expand and mark up chart" aria-label="Expand and mark up volume chart"><i class="ti ti-maximize"></i></button></div>
                   <div class="h150"><canvas id="vol-chart"></canvas></div>
                 </div>
                 <div class="chart-wrap">
-                  <button class="chart-exp-btn" onclick="expandChart('dist-chart','Daily Returns Distribution')" title="Expand and mark up chart" aria-label="Expand and mark up returns distribution"><i class="ti ti-maximize"></i></button>
-                  <div class="chart-header"><div class="chart-title">Daily Returns Distribution</div></div>
+                  <div class="chart-header"><div class="chart-title">Daily Returns Distribution</div><button class="chart-exp-btn" onclick="expandChart('dist-chart','Daily Returns Distribution')" title="Expand and mark up chart" aria-label="Expand and mark up returns distribution"><i class="ti ti-maximize"></i></button></div>
                   <div class="h150"><canvas id="dist-chart"></canvas></div>
                 </div>
               </div>
@@ -2309,13 +2313,11 @@ html[data-theme="dark"] .hh-product-preview{background:rgba(14,17,20,.9);box-sha
               <!-- OBV + ATR -->
               <div class="g2">
                 <div class="chart-wrap">
-                  <button class="chart-exp-btn" onclick="expandChart('obv-chart','On Balance Volume')" title="Expand and mark up chart" aria-label="Expand and mark up OBV chart"><i class="ti ti-maximize"></i></button>
-                  <div class="chart-header"><div class="chart-title">On Balance Volume</div><div id="obv-readout" style="font-family:var(--mono);font-size:.68rem;color:var(--text4);"></div></div>
+                  <div class="chart-header"><div class="chart-title">On Balance Volume</div><div id="obv-readout" style="font-family:var(--mono);font-size:.68rem;color:var(--text4);"></div><button class="chart-exp-btn" onclick="expandChart('obv-chart','On Balance Volume')" title="Expand and mark up chart" aria-label="Expand and mark up OBV chart"><i class="ti ti-maximize"></i></button></div>
                   <div class="h150"><canvas id="obv-chart"></canvas></div>
                 </div>
                 <div class="chart-wrap">
-                  <button class="chart-exp-btn" onclick="expandChart('atr-chart','ATR (14)')" title="Expand and mark up chart" aria-label="Expand and mark up ATR chart"><i class="ti ti-maximize"></i></button>
-                  <div class="chart-header"><div class="chart-title">ATR (14) — Volatility</div><div id="atr-readout" style="font-family:var(--mono);font-size:.68rem;color:var(--text4);"></div></div>
+                  <div class="chart-header"><div class="chart-title">ATR (14) — Volatility</div><div id="atr-readout" style="font-family:var(--mono);font-size:.68rem;color:var(--text4);"></div><button class="chart-exp-btn" onclick="expandChart('atr-chart','ATR (14)')" title="Expand and mark up chart" aria-label="Expand and mark up ATR chart"><i class="ti ti-maximize"></i></button></div>
                   <div class="h150"><canvas id="atr-chart"></canvas></div>
                 </div>
               </div>
@@ -2868,7 +2870,7 @@ html[data-theme="dark"] .hh-product-preview{background:rgba(14,17,20,.9);box-sha
       <span class="cex-title" id="cex-title">Chart</span>
       <div class="cex-controls">
         <span class="cex-hint">Pinch or scroll to zoom &middot; Drag to pan</span>
-        <button class="cex-btn cex-icon-btn" onclick="zoomExpandedChart(.8)" title="Zoom out" aria-label="Zoom expanded chart out"><i class="ti ti-zoom-out"></i></button>
+        <button class="cex-btn cex-icon-btn" onclick="zoomExpandedChart(.8)" title="Zoom out or load older history" aria-label="Zoom expanded chart out or load older history"><i class="ti ti-zoom-out"></i></button>
         <button class="cex-btn cex-icon-btn" onclick="zoomExpandedChart(1.25)" title="Zoom in" aria-label="Zoom expanded chart in"><i class="ti ti-zoom-in"></i></button>
         <button class="cex-btn" onclick="resetExpandZoom()" title="Reset zoom"><i class="ti ti-focus-2"></i> <span>Reset zoom</span></button>
         <button class="cex-btn gold" onclick="closeExpandModal()" title="Close expanded chart"><i class="ti ti-x"></i> <span>Close</span></button>
@@ -3464,14 +3466,13 @@ html[data-theme="dark"] .input-light::placeholder{color:rgba(220,225,232,.28)!im
 /* ══ CHART EXPAND BUTTON ══ */
 .chart-wrap{position:relative;}
 .chart-exp-btn{
-  position:absolute;top:8px;right:8px;z-index:2;
+  position:static;z-index:2;flex:0 0 auto;margin-left:auto;
   width:30px;height:30px;border-radius:6px;border:1px solid var(--brand-gold-line);
   background:var(--t-acc-header-bg);color:var(--text4);cursor:pointer;
   font-size:.82rem;display:flex;align-items:center;justify-content:center;
-  opacity:0;transition:opacity .15s,background .15s,color .15s,transform .15s;
+  opacity:1;transition:background .15s,color .15s,transform .15s;
   line-height:1;
 }
-.chart-wrap:hover .chart-exp-btn{opacity:1;}
 .chart-exp-btn:hover{background:var(--brand-gold)!important;color:#0A0800!important;border-color:var(--brand-gold)!important;transform:translateY(-1px);}
 .chart-exp-btn i,.cex-btn i,.cex-tool i,.ash-btn i,.act-btn i{color:currentColor!important;font-size:1em;line-height:1}
 
@@ -4232,7 +4233,7 @@ body.has-verif-banner #main-nav{top:42px}
 .act-btn,.tf-pill,.tf-tog{min-height:26px;display:inline-flex;align-items:center;justify-content:center}
 .chart-wrap{transition:border-color .16s}
 .chart-wrap:hover{border-color:rgba(185,138,61,.34)!important}
-.chart-wrap:hover .chart-exp-btn,.chart-exp-btn:focus-visible{opacity:1}
+.chart-exp-btn:focus-visible{opacity:1}
 .chart-exp-btn{width:30px;height:30px}
 
 .edu-hero{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(230px,.7fr);gap:1.5rem;align-items:end;padding:1.5rem;border:1px solid var(--t-metric-border);background:linear-gradient(135deg,var(--t-metric-bg),rgba(185,138,61,.08));border-radius:8px;margin-bottom:1rem}
@@ -4351,12 +4352,12 @@ body.has-verif-banner #main-nav{top:42px}
   .app-section .acc-body{padding:.7rem!important}
   .g2{grid-template-columns:1fr!important}
   .chart-wrap{margin-bottom:.7rem!important;padding:.8rem .65rem .55rem!important;border-radius:8px!important}
-  .chart-wrap .chart-header{margin:-.8rem -.65rem .65rem!important;padding:.62rem 3.2rem .62rem .7rem!important;min-height:38px;align-items:flex-start;gap:.25rem}
+  .chart-wrap .chart-header{margin:-.8rem -.65rem .65rem!important;padding:.62rem .7rem!important;min-height:42px;align-items:center;gap:.5rem}
   .chart-wrap .chart-header>div{min-width:0;max-width:100%}
-  .chart-wrap .chart-header [id$="-readout"]{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.61rem!important}
+  .chart-wrap .chart-header [id$="-readout"]{max-width:45%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.61rem!important}
   .chart-wrap .chart-header .ind-row,.chart-wrap .chart-header .range-pills{display:none!important}
   .chart-data-note{font-size:.58rem;max-width:230px}
-  .chart-exp-btn{opacity:1;top:7px;right:7px;width:34px;height:34px}
+  .chart-exp-btn{width:36px;height:36px;border-radius:7px}
   #price-chart{touch-action:none}
   .h240{height:285px!important}.h200{height:220px!important}.h150{height:180px!important}
   .cex-box{width:100vw;height:100dvh;max-height:none;border-radius:0;border:0}
@@ -4458,8 +4459,8 @@ html[data-theme="dark"]{
   --chart-bands:#D0A457;
   --chart-neutral:#AAB2C0;
 }
-.chart-wrap{background:linear-gradient(180deg,var(--t-chart-bg),color-mix(in srgb,var(--t-chart-bg) 96%,var(--brand-gold) 4%));box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 8px 24px rgba(17,20,24,.035)}
-.chart-wrap .chart-header{background:color-mix(in srgb,var(--t-chart-bg) 96%,var(--brand-gold) 4%)}
+.chart-wrap{background:var(--t-chart-bg);border-color:color-mix(in srgb,var(--t-chart-border) 82%,var(--brand-gold) 18%);box-shadow:0 8px 28px rgba(17,20,24,.045)}
+.chart-wrap .chart-header{background:color-mix(in srgb,var(--t-chart-bg) 97%,var(--brand-gold) 3%);box-shadow:inset 3px 0 0 var(--brand-gold)}
 .chart-title{color:var(--text3)!important}
 .chart-key{display:inline-block;width:13px;height:3px;border-radius:2px;margin-right:4px;flex:0 0 auto;background:var(--chart-neutral)}
 .key-ma50{background:var(--chart-ma50)}.key-ma200{background:var(--chart-ma200)}.key-bands{background:var(--chart-bands)}
@@ -4578,6 +4579,7 @@ const S = {
   screenerSort: { col: 'marketCap', dir: -1 },
   userPlan: 'free',   // 'free' | 'trial' | 'pro'
   loggedIn: false,
+  authReady: false,
   trialEndsAt: null,
   analystTarget: null,  // { mean, high, low } set by loadAnalyst()
   csrfToken: null,      // fetched from GET /api/csrf on page load
@@ -4608,7 +4610,7 @@ function syncPlanUI() {
     const activeSection=document.querySelector('.app-section.open');
     const activeId=activeSection?.id?.replace('sec-','');
     const activeBody=activeId ? document.getElementById('body-'+activeId) : null;
-    if(activeId && PRO_SECTIONS.includes(activeId) && activeBody?.querySelector('.pro-gate-card') && PRO_SECTION_CONTENT[activeId]){
+    if(activeId && PRO_SECTIONS.includes(activeId) && activeBody?.querySelector('.pro-gate-card,.sec-state-wrap') && PRO_SECTION_CONTENT[activeId]){
       activeBody.innerHTML=PRO_SECTION_CONTENT[activeId];
       if(typeof openSection==='function') openSection(activeId,true);
     }
@@ -4941,6 +4943,14 @@ function openSection(id, skipProCheck) {
   if (scroll) scroll.scrollTop = 0;
   // Auto-load data tabs
   const t = S.ticker;
+  if (PRO_SECTIONS.includes(id) && !S.authReady) {
+    bod.innerHTML = sectionLoadingHtml();
+    history.replaceState(null, '', '/?view=tool&section=' + encodeURIComponent(id));
+    window.IL_AUTH_READY?.then(() => {
+      if (sec.classList.contains('open')) openSection(id, true);
+    });
+    return;
+  }
   if (!isPro() && PRO_SECTIONS.includes(id) && id !== 'reports') {
     // Show contextual gate card inline — user can dismiss and see upgrade options
     const gateBody = document.getElementById('body-' + id);
@@ -5678,7 +5688,7 @@ function syncIndicatorAvailability(barCount) {
   note.classList.toggle('warn',unavailableActive.length>0);
   note.textContent=unavailableActive.length
     ? `${unavailableActive.join(' and ')} ${unavailableActive.length===1?'needs':'need'} more trading days. Choose a longer range.`
-    : 'Pinch or use the zoom controls to inspect the chart';
+    : 'Zoom out at full view to load more price history';
 }
 
 function rebuildPriceChart() {
@@ -5773,6 +5783,8 @@ Chart.defaults.color = ct().text;
 const baseOpts = (extraScales={}) => {
   const t = ct();
   const compact=window.matchMedia('(max-width: 640px)').matches;
+  const xExtra=extraScales.x||{};
+  const yExtra=extraScales.y||{};
   return {
     responsive:true, maintainAspectRatio:false, normalized:true, resizeDelay:60,
     interaction:{mode:'index',intersect:false},
@@ -5788,8 +5800,8 @@ const baseOpts = (extraScales={}) => {
       }
     },
     scales:{
-      x:{ border:{color:t.grid}, ticks:{color:t.text,font:{family:'DM Mono',size:compact?9:10,weight:'500'},maxTicksLimit:compact?5:8,padding:6}, grid:{color:t.grid,tickLength:4}, ...(extraScales.x||{}) },
-      y:{ border:{color:t.grid}, ticks:{color:t.text,font:{family:'DM Mono',size:compact?9:10,weight:'500'},padding:6,maxTicksLimit:compact?6:8}, grid:{color:t.grid,tickLength:4}, ...(extraScales.y||{}) }
+      x:{ ...xExtra, border:{display:false,...(xExtra.border||{})}, title:{...(xExtra.title||{}),display:false}, ticks:{color:t.text,font:{family:'DM Mono',size:compact?9:10,weight:'500'},maxTicksLimit:compact?5:8,padding:7,...(xExtra.ticks||{})}, grid:{display:false,color:t.grid,...(xExtra.grid||{})} },
+      y:{ ...yExtra, border:{display:false,...(yExtra.border||{})}, title:{...(yExtra.title||{}),display:false}, ticks:{color:t.text,font:{family:'DM Mono',size:compact?9:10,weight:'500'},padding:7,maxTicksLimit:compact?6:8,...(yExtra.ticks||{})}, grid:{color:t.grid,lineWidth:1,...(yExtra.grid||{})} }
     }
   };
 };
@@ -5803,12 +5815,40 @@ function chartZoomOptions() {
       mode:'x',
     },
     pan:{enabled:true,mode:'x',threshold:8},
-    limits:{x:{min:'original',max:'original',minRange:12}},
+    limits:{x:{min:'original',max:'original',minRange:4}},
   };
 }
 
-function zoomPriceChart(factor){
+const CHART_RANGE_ORDER=['1d','5d','1mo','3mo','6mo','1y','2y','5y','max'];
+let _rangeExpansionBusy=false;
+
+function chartAtFullHistory(chart){
+  return !chart?.getZoomLevel || chart.getZoomLevel()<=1.01;
+}
+async function loadMorePriceHistory(){
+  if(_rangeExpansionBusy) return false;
+  const current=S.range==='ytd'?'1y':S.range;
+  const index=CHART_RANGE_ORDER.indexOf(current);
+  const next=CHART_RANGE_ORDER[Math.min(index+1,CHART_RANGE_ORDER.length-1)];
+  if(!next||next===current){
+    toast('Maximum available price history is already loaded');
+    return false;
+  }
+  _rangeExpansionBusy=true;
+  try {
+    const loaded=await changeRange(next);
+    if(loaded) toast(`Loaded ${next==='max'?'maximum':next.toUpperCase()} price history`,'ok');
+    return loaded;
+  } finally {
+    _rangeExpansionBusy=false;
+  }
+}
+async function zoomPriceChart(factor){
   const chart=S.charts['price-chart'];
+  if(factor<1&&chartAtFullHistory(chart)){
+    await loadMorePriceHistory();
+    return;
+  }
   if(chart?.zoom) chart.zoom(factor);
 }
 function resetPriceZoom(){
@@ -5818,13 +5858,18 @@ function resetPriceZoom(){
 
 /* ══ CHART EXPAND MODAL ══ */
 var _expandedChart = null;
+var _expandedSource = null;
+var _expandedHasUserZoom = false;
 var _markup = {tool:'cursor',color:'#B88937',items:[],draft:null,ready:false,observer:null};
 
 function expandChart(chartId, title) {
   const src = S.charts[chartId];
   if (!src) { toast('Load a stock first', 'red'); return; }
   document.getElementById('cex-title').textContent = title;
+  _expandedSource={chartId,title};
   const modal = document.getElementById('chart-expand-modal');
+  modal.dataset.chartId=chartId;
+  modal.dataset.chartTitle=title;
   modal.classList.add('open');
   document.body.style.overflow = 'hidden';
   setMarkupTool('cursor');
@@ -5864,9 +5909,9 @@ function expandChart(chartId, title) {
           titleFont:{family:'DM Mono',size:11,weight:'500'},bodyFont:{family:'DM Sans',size:12,weight:'500'}
         },
         zoom: {
-          zoom: { wheel:{enabled:true,speed:0.07}, pinch:{enabled:true}, mode:'x' },
+          zoom: { wheel:{enabled:true,speed:0.07}, pinch:{enabled:true}, mode:'x', onZoomComplete({chart}){_expandedHasUserZoom=!chartAtFullHistory(chart);} },
           pan:  { enabled:true, mode:'x', threshold:8 },
-          limits: { x:{min:'original',max:'original',minRange:12} }
+          limits: { x:{min:'original',max:'original',minRange:4} }
         }
       },
       scales: {
@@ -5884,6 +5929,7 @@ function expandChart(chartId, title) {
       }
     }
   });
+  _expandedHasUserZoom=false;
   initMarkupCanvas();
 }
 function cp() {
@@ -5908,8 +5954,19 @@ function colorAlpha(hex, alpha) {
 function resetExpandZoom(){
   if(_expandedChart) _expandedChart.resetZoom();
 }
-function zoomExpandedChart(factor){
-  if(_expandedChart?.zoom) _expandedChart.zoom(factor);
+async function zoomExpandedChart(factor){
+  const modal=document.getElementById('chart-expand-modal');
+  const sourceId=modal?.dataset?.chartId||_expandedSource?.chartId;
+  const sourceTitle=modal?.dataset?.chartTitle||_expandedSource?.title;
+  if(factor<1&&sourceId==='price-chart'){
+    const loaded=await loadMorePriceHistory();
+    if(loaded) expandChart(sourceId,sourceTitle||'Price Chart');
+    return;
+  }
+  if(_expandedChart?.zoom) {
+    _expandedChart.zoom(factor);
+    _expandedHasUserZoom=!chartAtFullHistory(_expandedChart);
+  }
 }
 
 function closeExpandModal(){
@@ -7152,8 +7209,8 @@ function buildPriceChart(result,closes,timestamps) {
     },
     x:{ticks:{color:t.text,font:{size:10},maxTicksLimit:8},grid:{color:t.grid}}
   });
-  opts.plugins.legend={display:true,position:'top',align:'end',labels:{color:t.text,font:{size:10},boxWidth:18,boxHeight:2,padding:12,filter:i=>i.text&&i.text.length>0,usePointStyle:false}};
-  opts.plugins.legend.display=!window.matchMedia('(max-width: 640px)').matches;
+  opts.plugins.legend={display:false};
+  opts.datasets={bar:{barPercentage:.82,categoryPercentage:.9,maxBarThickness:14}};
   opts.plugins.zoom=chartZoomOptions();
   opts.plugins.tooltip={...opts.plugins.tooltip,callbacks:{
     title:items=>items[0]?.label||'',
@@ -7191,7 +7248,7 @@ function buildRSIChart(rsiVals,timestamps) {
            title:{display:true,text:'RSI',color:t.muted,font:{size:9}}}
       },
       plugins:{
-        legend:{display:true,position:'top',align:'end',labels:{color:t.text,font:{size:9},boxWidth:16,boxHeight:2,usePointStyle:false,padding:10}},
+        legend:{display:false},
         tooltip:{mode:'index',intersect:false,backgroundColor:t.ttBg,titleColor:t.ttTitle,bodyColor:t.ttBody,borderColor:t.ttBorder,borderWidth:1,callbacks:{
           label:ctx=>ctx.dataset.label==='RSI · 14'?` RSI: ${Number(ctx.raw).toFixed(1)}`:null
         }}
@@ -7224,7 +7281,7 @@ function buildMACDChart(closes,timestamps) {
            title:{display:true,text:'Value',color:t.muted,font:{size:9}}}
       },
       plugins:{
-        legend:{display:true,position:'top',align:'end',labels:{color:t.text,font:{size:9},boxWidth:16,boxHeight:2,usePointStyle:false,padding:10}},
+        legend:{display:false},
         tooltip:{mode:'index',intersect:false,backgroundColor:t.ttBg,titleColor:t.ttTitle,bodyColor:t.ttBody,borderColor:t.ttBorder,borderWidth:1,callbacks:{
           label:ctx=>` ${ctx.dataset.label}: ${Number(ctx.raw).toFixed(4)}`
         }}
@@ -7336,7 +7393,7 @@ async function changeRange(range,btn) {
   document.querySelectorAll('.tf-pill').forEach(p=>{const r=p.getAttribute('onclick')||'';const selected=r.includes("'"+range+"'");p.classList.toggle('on',selected);p.classList.remove('active');p.setAttribute('aria-pressed',String(selected));});
   document.querySelectorAll('.rpill').forEach(p=>{const r=p.getAttribute('onclick')||'';const selected=r.includes("'"+range+"'");p.classList.toggle('active',selected);p.setAttribute('aria-pressed',String(selected));});
   S.range=range;
-  if(!S.ticker) return;
+  if(!S.ticker) return false;
   try {
     const result=await yahooFetch(S.ticker,range);
     const aligned=alignQuoteSeries(result);
@@ -7348,7 +7405,8 @@ async function changeRange(range,btn) {
     buildVolChart(q.volume,aligned.timestamps,aligned.closes);
     buildOBVChart(aligned.closes,q.volume,aligned.timestamps);
     buildATRChart(q.high||[],q.low||[],aligned.closes,aligned.timestamps);
-  } catch(e){ toast('Range unavailable','red'); }
+    return true;
+  } catch(e){ toast('Range unavailable','red'); return false; }
 }
 
 /* ══════════════════════════════════════════════════════

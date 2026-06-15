@@ -16,7 +16,7 @@ const express = require("express");
 
 const { FINNHUB_KEY }  = require("../lib/config");
 const { db }           = require("../lib/db");
-const { requirePro, getEffectivePlan, normalizeTicker, FREE_DAILY_LIMIT, GUEST_DAILY_LIMIT } = require("../lib/plan");
+const { requirePro, reconcileEffectivePlan, normalizeTicker, FREE_DAILY_LIMIT, GUEST_DAILY_LIMIT } = require("../lib/plan");
 
 const router = express.Router();
 const UA     = "ImpliedLens/1.0 brettpeterson6216@gmail.com";
@@ -59,10 +59,10 @@ router.get("/me/limit", async (req, res) => {
     }
   }
   try {
-    const r   = await db.execute({ sql: "SELECT email, plan, trial_ends_at FROM users WHERE id = ?", args: [req.session.userId] });
+    const r   = await db.execute({ sql: "SELECT id, email, plan, trial_ends_at, stripe_customer_id, stripe_subscription_id FROM users WHERE id = ?", args: [req.session.userId] });
     const row = r.rows[0];
     if (!row) return res.json({ plan: "free", used: 0, limit: FREE_DAILY_LIMIT, remaining: FREE_DAILY_LIMIT });
-    const plan = getEffectivePlan(row);
+    const plan = await reconcileEffectivePlan(row);
     if (plan === "pro" || plan === "trial") return res.json({ plan, used: 0, limit: null, remaining: null });
     const usage = await db.execute({
       sql: "SELECT COUNT(*) AS cnt FROM analysis_usage WHERE subject_id = ? AND usage_date = ?",

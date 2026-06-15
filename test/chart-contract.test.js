@@ -20,8 +20,12 @@ test("price charts expose dependable zoom controls and mobile gestures", () => {
   assert.match(html, /pinch:\{enabled:true\}/);
   assert.match(html, /pan:\{enabled:true,mode:'x',threshold:8\}/);
   assert.match(html, /onclick="zoomPriceChart\(1\.25\)"/);
+  assert.match(html, /Zoom price chart out or load older history/);
   assert.match(html, /onclick="resetPriceZoom\(\)"/);
   assert.match(html, /onclick="zoomExpandedChart\(1\.25\)"/);
+  assert.match(html, /async function loadMorePriceHistory\(\)/);
+  assert.match(html, /CHART_RANGE_ORDER=\['1d','5d','1mo','3mo','6mo','1y','2y','5y','max'\]/);
+  assert.match(html, /minRange:4/);
   assert.match(html, /#price-chart\{touch-action:none\}/);
 });
 
@@ -32,5 +36,6 @@ test("mobile chart headers reserve room for controls and explain unavailable ind
   assert.match(html, /S\.inds\.ma50&&vc\.length>=INDICATOR_REQUIREMENTS\.ma50\.bars/);
   assert.match(html, /\.g2\{grid-template-columns:1fr!important\}/);
   assert.match(html, /\.chart-wrap \.chart-header \.ind-row,\.chart-wrap \.chart-header \.range-pills\{display:none!important\}/);
-  assert.match(html, /\.chart-exp-btn\{opacity:1;top:7px;right:7px;width:34px;height:34px\}/);
+  assert.match(html, /\.chart-exp-btn\{\s*position:static/);
+  assert.doesNotMatch(html, /<div class="chart-wrap">\s*<button class="chart-exp-btn"/);
 });

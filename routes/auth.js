@@ -9,7 +9,7 @@ const crypto    = require("crypto");
 const rateLimit = require("express-rate-limit");
 
 const { db }               = require("../lib/db");
-const { getEffectivePlan, normalizeTicker, FREE_DAILY_LIMIT, GUEST_DAILY_LIMIT } = require("../lib/plan");
+const { reconcileEffectivePlan, normalizeTicker, FREE_DAILY_LIMIT, GUEST_DAILY_LIMIT } = require("../lib/plan");
 const { sendEmail }        = require("../lib/email");
 const { BCRYPT_ROUNDS, APP_URL, ADMIN_SECRET } = require("../lib/config");
 const { validateCsrf, getOrCreateToken } = require("../lib/csrf");
@@ -178,11 +178,15 @@ router.get("/auth/me", async (req, res) => {
   if (!req.session.userId) return res.json({ user: null });
   try {
     const result = await db.execute({
-      sql:  "SELECT id, username, email, created_at, plan, trial_ends_at, email_verified FROM users WHERE id = ?",
+      sql:  "SELECT id, username, email, created_at, plan, trial_ends_at, email_verified, stripe_customer_id, stripe_subscription_id FROM users WHERE id = ?",
       args: [req.session.userId],
     });
     const user = result.rows[0] || null;
-    if (user) user.effectivePlan = getEffectivePlan(user);
+    if (user) {
+      user.effectivePlan = await reconcileEffectivePlan(user);
+      delete user.stripe_customer_id;
+      delete user.stripe_subscription_id;
+    }
     return res.json({ user });
   } catch (err) {
     return res.json({ user: null });

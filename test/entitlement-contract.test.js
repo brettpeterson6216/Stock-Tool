@@ -1,0 +1,33 @@
+"use strict";
+
+const { test } = require("node:test");
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
+const { subscriptionStatusToPlan } = require("../lib/plan");
+
+const html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
+const authSource = fs.readFileSync(path.join(__dirname, "..", "routes", "auth.js"), "utf8");
+const planSource = fs.readFileSync(path.join(__dirname, "..", "lib", "plan.js"), "utf8");
+
+test("Stripe subscription statuses preserve legitimate paid access", () => {
+  assert.equal(subscriptionStatusToPlan("trialing"), "trial");
+  assert.equal(subscriptionStatusToPlan("active"), "pro");
+  assert.equal(subscriptionStatusToPlan("past_due"), "pro");
+  assert.equal(subscriptionStatusToPlan("canceled"), "free");
+});
+
+test("locked paid accounts reconcile against Stripe before Pro rejection", () => {
+  assert.match(planSource, /async function reconcileEffectivePlan\(user\)/);
+  assert.match(planSource, /stripe\.subscriptions\.retrieve\(user\.stripe_subscription_id\)/);
+  assert.match(planSource, /stripe\.subscriptions\.list\(\{ customer: user\.stripe_customer_id/);
+  assert.match(planSource, /const plan = await reconcileEffectivePlan\(user\)/);
+  assert.match(authSource, /user\.effectivePlan = await reconcileEffectivePlan\(user\)/);
+});
+
+test("protected sections wait for authoritative auth state before gating", () => {
+  assert.match(html, /window\.IL_AUTH_READY = new Promise/);
+  assert.match(html, /authReady: false/);
+  assert.match(html, /PRO_SECTIONS\.includes\(id\) && !S\.authReady/);
+  assert.match(html, /window\.IL_AUTH_READY\?\.then/);
+});

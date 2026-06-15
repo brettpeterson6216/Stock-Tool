@@ -5,6 +5,7 @@ const express = require("express");
 const Stripe  = require("stripe");
 
 const { db }                                                    = require("../lib/db");
+const { subscriptionStatusToPlan } = require("../lib/plan");
 const { validateCsrf } = require("../lib/csrf");
 const { track }        = require("../lib/analytics");
 const { STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET,
@@ -107,7 +108,7 @@ router.post("/stripe/webhook", async (req, res) => {
         const userId = sess.metadata && sess.metadata.userId;
         if (!userId || !sess.subscription) break;
         const sub    = await stripe.subscriptions.retrieve(sess.subscription);
-        const plan   = sub.status === "trialing" ? "trial" : "pro";
+        const plan   = subscriptionStatusToPlan(sub.status);
         const trialEnd = sub.trial_end ? new Date(sub.trial_end * 1000).toISOString() : null;
         await db.execute({
           sql:  "UPDATE users SET plan=?, trial_ends_at=?, stripe_customer_id=?, stripe_subscription_id=? WHERE id=?",
@@ -120,9 +121,7 @@ router.post("/stripe/webhook", async (req, res) => {
         const sub = event.data.object;
         const r   = await db.execute({ sql: "SELECT id FROM users WHERE stripe_customer_id=?", args: [sub.customer] });
         if (!r.rows.length) break;
-        let plan = "free";
-        if (sub.status === "active")   plan = "pro";
-        if (sub.status === "trialing") plan = "trial";
+        const plan = subscriptionStatusToPlan(sub.status);
         const trialEnd = sub.trial_end ? new Date(sub.trial_end * 1000).toISOString() : null;
         await db.execute({ sql: "UPDATE users SET plan=?, trial_ends_at=? WHERE id=?", args: [plan, trialEnd, r.rows[0].id] });
         track("subscription_updated", { status: sub.status, plan }, null, Number(r.rows[0].id)).catch(() => {});
