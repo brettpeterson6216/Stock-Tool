@@ -4292,8 +4292,18 @@ body.has-verif-banner #main-nav{top:42px}
   input,select,textarea{font-size:16px!important}
   img,svg,canvas{max-width:100%}
   body.has-verif-banner #main-nav{top:58px}
-  nav .nav-right{gap:3px}
+  nav{min-width:0;max-width:100%}
+  nav .nav-right{gap:3px;min-width:0;max-width:calc(100% - 48px);padding-left:.25rem}
   .nav-live,.btn-nav-outline,#nav-signup{display:none!important}
+  #main-nav[data-view="tool"] .nav-logo{padding-right:0;margin-right:0;border-right:0}
+  #main-nav[data-view="tool"] .nav-logo>span,
+  #main-nav[data-view="tool"] #nav-ticker-bar,
+  #main-nav[data-view="tool"] .theme-toggle{display:none!important}
+  .nav-acct-wrap,.nav-acct-btn{min-width:0;max-width:100%}
+  #nav-acct-name{min-width:0;overflow:hidden;text-overflow:ellipsis}
+  .nav-acct-badge,.nav-acct-chevron{flex-shrink:0}
+  .nav-acct-menu{right:0;min-width:min(220px,calc(100vw - 1.5rem));max-width:calc(100vw - 1.5rem)}
+  .nav-acct-header-name{overflow-wrap:anywhere}
   .home-hero{padding:1.35rem 1rem 1.15rem!important}
   .hh-proof{display:none}
   .hh-search{display:grid!important;grid-template-columns:auto minmax(0,1fr)!important;gap:0!important}

@@ -140,6 +140,9 @@ test("GET / serves the homepage with a successful status", async () => {
   assert.match(html, /aria-label="Home"/);
   assert.match(html, /viewport-fit=cover/);
   assert.match(html, /input,select,textarea\{font-size:16px!important\}/);
+  assert.match(html, /#main-nav\[data-view="tool"\] #nav-ticker-bar,/);
+  assert.match(html, /\.nav-acct-wrap,\.nav-acct-btn\{min-width:0;max-width:100%\}/);
+  assert.match(html, /\.nav-acct-menu\{right:0;min-width:min\(220px,calc\(100vw - 1\.5rem\)\)/);
   assert.match(html, /workspace-system\.js\?v=20260614-4/);
   assert.match(html, /workspace-system\.css\?v=20260614-4/);
   assert.match(html, /__initialWorkspaceTab/);
