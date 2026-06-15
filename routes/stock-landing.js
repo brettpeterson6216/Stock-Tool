@@ -168,13 +168,20 @@ function renderPage(ticker, q) {
   <meta property="og:url"         content="${esc(canonicalUrl)}">
   <meta property="og:title"       content="${esc(metaTitle)}">
   <meta property="og:description" content="${esc(metaDesc)}">
+  <meta property="og:image"       content="${APP_URL}/social-card.png">
+  <meta property="og:image:type"  content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt"   content="ImpliedLens stock research workspace preview">
   <meta property="og:site_name"   content="ImpliedLens">
 
   <!-- Twitter Card -->
-  <meta name="twitter:card"        content="summary">
+  <meta name="twitter:card"        content="summary_large_image">
   <meta name="twitter:site"        content="@ImpliedLens">
   <meta name="twitter:title"       content="${esc(metaTitle)}">
   <meta name="twitter:description" content="${esc(metaDesc)}">
+  <meta name="twitter:image"       content="${APP_URL}/social-card.png">
+  <meta name="twitter:image:alt"   content="ImpliedLens stock research workspace preview">
 
   <!-- Structured data -->
   <script type="application/ld+json">${schema}</script>

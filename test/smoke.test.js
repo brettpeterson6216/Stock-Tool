@@ -182,6 +182,9 @@ test("Ticker landing pages explain free allowances and protect uncurated pages f
   assert.match(curatedHtml, /Create a free account for 5\/day/);
   assert.match(curatedHtml, /landing_page_view/);
   assert.match(curatedHtml, /Questions to answer before investing in AAPL/);
+  assert.match(curatedHtml, /<meta property="og:image"\s+content="[^"]+\/social-card\.png">/);
+  assert.match(curatedHtml, /<meta name="twitter:card"\s+content="summary_large_image">/);
+  assert.match(curatedHtml, /<meta name="twitter:image"\s+content="[^"]+\/social-card\.png">/);
 
   const uncurated = await req("/stock/NOTREAL");
   assert.equal(uncurated.status, 200);
@@ -215,8 +218,18 @@ test("Public pages expose canonical, favicon, and social metadata", async () => 
     assert.match(html, /<link rel="icon" type="image\/svg\+xml" href="\/logo\.svg">/);
     assert.match(html, /<meta property="og:title"/);
     assert.match(html, /<meta property="og:description"/);
-    assert.match(html, /<meta name="twitter:card"/);
+    assert.match(html, /<meta property="og:image" content="https:\/\/impliedlens\.com\/social-card\.png">/);
+    assert.match(html, /<meta property="og:image:width" content="1200">/);
+    assert.match(html, /<meta name="twitter:card" content="summary_large_image">/);
+    assert.match(html, /<meta name="twitter:image" content="https:\/\/impliedlens\.com\/social-card\.png">/);
   }
+});
+
+test("GET /social-card.png serves a large PNG social preview", async () => {
+  const res = await req("/social-card.png");
+  assert.equal(res.status, 200);
+  assert.match(res.headers.get("content-type"), /image\/png/);
+  assert.ok(Number(res.headers.get("content-length")) > 100000);
 });
 
 test("GET /favicon.ico serves the brand mark", async () => {
