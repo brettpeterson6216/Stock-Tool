@@ -77,7 +77,7 @@
 <link href="/research-system.css?v=20260611-1" rel="stylesheet">
 <script src="/vendor/chart.umd.min.js?v=4.4.1"></script>
 <script defer src="/vendor/hammer.min.js?v=2.0.8"></script>
-<script defer src="/vendor/chartjs-plugin-zoom.min.js?v=1.2.1"></script>
+<script defer src="/vendor/chartjs-plugin-zoom.min.js?v=2.2.0"></script>
 <script defer src="/model-math.js?v=20260612-1"></script>
 <style>
 /* ═══════════════════════════════ TOKENS ═══════════════════════════════ */
@@ -915,8 +915,10 @@ html[data-theme="dark"] #view-tool{
 .m-sub{font-size:.58rem;color:var(--t-msub);margin-top:2px;}
 /* Charts */
 .chart-wrap{background:var(--t-chart-bg);border:1px solid var(--t-chart-border);border-radius:var(--r2);padding:1rem 1rem .75rem;margin-bottom:.875rem;overflow:hidden;}
-.chart-wrap .chart-header{border-bottom:1px solid var(--t-chart-border);margin:-1rem -1rem .75rem;padding:.5rem 1rem;}
-.chart-title{font-size:.67rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--t-chart-title);}
+.chart-wrap .chart-header{border-bottom:1px solid var(--t-chart-border);margin:-1rem -1rem .75rem;padding:.58rem 3.25rem .58rem 1rem;min-height:34px;}
+.chart-title{font-size:.72rem;font-weight:700;letter-spacing:.045em;text-transform:uppercase;color:var(--t-chart-title);line-height:1.25;}
+.chart-data-note{margin-top:3px;color:var(--text5);font:500 .59rem/1.35 var(--sans);letter-spacing:0;}
+.chart-data-note.warn{color:var(--brand-gold-strong);}
 .h240{height:230px;}.h200{height:195px;}.h180{height:170px;}.h150{height:145px;}
 .rpill{font-size:.66rem;padding:2px 9px;border-radius:3px;border-color:var(--t-rpill-border);color:var(--t-rpill-color);}
 .rpill.active,.rpill:hover{background:var(--gold);color:#0A0C0E;border-color:var(--gold);}
@@ -2173,6 +2175,9 @@ html[data-theme="dark"] .hh-product-preview{background:rgba(14,17,20,.9);box-sha
         <button type="button" class="act-btn" id="epins-btn" onclick="toggleToolbarOption(this)" aria-pressed="false"><i class="ti ti-tag"></i> Earnings</button>
         <button type="button" class="act-btn" id="npins-btn" onclick="toggleToolbarOption(this)" aria-pressed="false"><i class="ti ti-news"></i> News</button>
         <div class="act-right">
+          <button type="button" class="act-btn chart-zoom-btn" onclick="zoomPriceChart(.8)" title="Zoom out" aria-label="Zoom price chart out"><i class="ti ti-zoom-out"></i></button>
+          <button type="button" class="act-btn chart-zoom-btn" onclick="resetPriceZoom()" title="Reset chart zoom" aria-label="Reset price chart zoom"><i class="ti ti-focus-2"></i></button>
+          <button type="button" class="act-btn chart-zoom-btn" onclick="zoomPriceChart(1.25)" title="Zoom in" aria-label="Zoom price chart in"><i class="ti ti-zoom-in"></i></button>
           <button type="button" class="act-btn" onclick="expandChart('price-chart','Price Chart')" title="Fullscreen" aria-label="Expand price chart"><i class="ti ti-maximize"></i></button>
         </div>
       </div>
@@ -2253,6 +2258,7 @@ html[data-theme="dark"] .hh-product-preview{background:rgba(14,17,20,.9);box-sha
                 <div class="chart-header">
                   <div>
                     <div class="chart-title">Price Chart</div>
+                    <div class="chart-data-note" id="chart-data-note">Pinch or use the zoom controls to inspect the chart</div>
                     <div class="ind-row" style="margin-top:6px;" id="ind-row">
                       <button class="ind-pill on" data-ind="ma50" onclick="toggleInd(this,'ma50')"><span class="chart-key key-ma50"></span>50D Avg</button>
                       <button class="ind-pill" data-ind="ma200" onclick="toggleInd(this,'ma200')"><span class="chart-key key-ma200"></span>200D Avg</button>
@@ -2861,7 +2867,9 @@ html[data-theme="dark"] .hh-product-preview{background:rgba(14,17,20,.9);box-sha
     <div class="cex-header">
       <span class="cex-title" id="cex-title">Chart</span>
       <div class="cex-controls">
-        <span class="cex-hint">Scroll to zoom &middot; Drag to pan</span>
+        <span class="cex-hint">Pinch or scroll to zoom &middot; Drag to pan</span>
+        <button class="cex-btn cex-icon-btn" onclick="zoomExpandedChart(.8)" title="Zoom out" aria-label="Zoom expanded chart out"><i class="ti ti-zoom-out"></i></button>
+        <button class="cex-btn cex-icon-btn" onclick="zoomExpandedChart(1.25)" title="Zoom in" aria-label="Zoom expanded chart in"><i class="ti ti-zoom-in"></i></button>
         <button class="cex-btn" onclick="resetExpandZoom()" title="Reset zoom"><i class="ti ti-focus-2"></i> <span>Reset zoom</span></button>
         <button class="cex-btn gold" onclick="closeExpandModal()" title="Close expanded chart"><i class="ti ti-x"></i> <span>Close</span></button>
       </div>
@@ -3457,14 +3465,14 @@ html[data-theme="dark"] .input-light::placeholder{color:rgba(220,225,232,.28)!im
 .chart-wrap{position:relative;}
 .chart-exp-btn{
   position:absolute;top:8px;right:8px;z-index:2;
-  width:26px;height:26px;border-radius:5px;border:1px solid var(--t-acc-border);
+  width:30px;height:30px;border-radius:6px;border:1px solid var(--brand-gold-line);
   background:var(--t-acc-header-bg);color:var(--text4);cursor:pointer;
   font-size:.82rem;display:flex;align-items:center;justify-content:center;
-  opacity:0;transition:opacity .15s,background .15s,color .15s;
+  opacity:0;transition:opacity .15s,background .15s,color .15s,transform .15s;
   line-height:1;
 }
 .chart-wrap:hover .chart-exp-btn{opacity:1;}
-.chart-exp-btn:hover{background:var(--gold)!important;color:#0A0800!important;border-color:var(--gold)!important;}
+.chart-exp-btn:hover{background:var(--brand-gold)!important;color:#0A0800!important;border-color:var(--brand-gold)!important;transform:translateY(-1px);}
 .chart-exp-btn i,.cex-btn i,.cex-tool i,.ash-btn i,.act-btn i{color:currentColor!important;font-size:1em;line-height:1}
 
 /* ══ CHART EXPAND MODAL ══ */
@@ -3486,18 +3494,19 @@ html[data-theme="dark"] .input-light::placeholder{color:rgba(220,225,232,.28)!im
   background:var(--t-acc-header-bg);flex-shrink:0;
 }
 .cex-title{font-size:.95rem;font-weight:600;color:var(--text);font-family:var(--serif);}
-.cex-controls{display:flex;gap:.5rem;align-items:center;}
+.cex-controls{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap;justify-content:flex-end;}
 .cex-btn{
-  font-size:.72rem;padding:.3rem .75rem;border-radius:var(--r);
+  min-height:34px;font-size:.72rem;padding:.3rem .75rem;border-radius:var(--r);
   border:1px solid var(--t-acc-border);background:var(--t-acc-header-bg);
-  color:var(--text4);cursor:pointer;font-family:var(--sans);transition:all .15s;
+  color:var(--text4);cursor:pointer;font-family:var(--sans);transition:all .15s;display:inline-flex;align-items:center;justify-content:center;gap:4px;
 }
+.cex-icon-btn{width:36px;padding:.3rem;}
 .cex-btn:hover{background:var(--t-acc-header-hover);color:var(--text);}
 .cex-btn.gold{background:var(--gold);color:#111820;border-color:var(--gold);font-weight:600;}
 .cex-hint{font-size:.68rem;color:var(--text5);font-family:var(--mono);}
 .cex-body{flex:1;position:relative;padding:1rem 1.25rem;min-height:0;}
 .cex-body canvas{width:100%!important;height:100%!important;}
-.cex-workspace{position:relative;width:100%;height:100%;min-height:0}
+.cex-workspace{position:relative;width:100%;height:100%;min-height:0;touch-action:none}
 #chart-markup{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none;touch-action:none}
 #chart-markup.drawing{pointer-events:auto;cursor:crosshair}
 .cex-toolbar{display:flex;align-items:center;gap:4px;padding:.38rem .55rem;border-bottom:1px solid var(--border);background:var(--panel);overflow-x:auto;flex-shrink:0}
@@ -3699,8 +3708,10 @@ html[data-theme="dark"] .input-light::placeholder{color:rgba(220,225,232,.28)!im
 .act-btn{height:25px;padding:0 9px;border-radius:5px;font-size:.66rem;font-weight:500;color:var(--text4);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;border:1px solid transparent;background:transparent;font-family:var(--sans);white-space:nowrap;box-sizing:border-box;transition:background .12s,color .12s,border-color .12s;}
 .act-btn:hover{background:rgba(185,138,61,.07);color:var(--text2);}
 .act-btn.on{background:var(--brand-gold-soft);border-color:var(--brand-gold-line);color:var(--brand-gold-strong);font-weight:700;}
+.act-btn:disabled,.ind-pill:disabled{opacity:.42;cursor:not-allowed;filter:saturate(.35);}
 .act-btn i{font-size:13px;}
 .act-right { margin-left:auto; display:flex; align-items:center; gap:1px; }
+.chart-zoom-btn{border-color:var(--border2);}
 
 /* Timeframe strip */
 .app-tf-strip{height:28px;background:var(--panel);border-bottom:1px solid var(--border2);display:flex;align-items:center;padding:0 .75rem;gap:1px;flex-shrink:0;}
@@ -4338,11 +4349,18 @@ body.has-verif-banner #main-nav{top:42px}
   .app-content-scroll{padding:0 0 76px!important}
   .app-stats-footer{display:none!important}
   .app-section .acc-body{padding:.7rem!important}
-  .chart-wrap{margin-bottom:.7rem!important;padding:.8rem .65rem .55rem!important;border-radius:6px!important}
-  .chart-exp-btn{opacity:1;top:5px;right:5px}
-  .h240{height:250px!important}.h200{height:220px!important}.h150{height:165px!important}
+  .g2{grid-template-columns:1fr!important}
+  .chart-wrap{margin-bottom:.7rem!important;padding:.8rem .65rem .55rem!important;border-radius:8px!important}
+  .chart-wrap .chart-header{margin:-.8rem -.65rem .65rem!important;padding:.62rem 3.2rem .62rem .7rem!important;min-height:38px;align-items:flex-start;gap:.25rem}
+  .chart-wrap .chart-header>div{min-width:0;max-width:100%}
+  .chart-wrap .chart-header [id$="-readout"]{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.61rem!important}
+  .chart-wrap .chart-header .ind-row,.chart-wrap .chart-header .range-pills{display:none!important}
+  .chart-data-note{font-size:.58rem;max-width:230px}
+  .chart-exp-btn{opacity:1;top:7px;right:7px;width:34px;height:34px}
+  #price-chart{touch-action:none}
+  .h240{height:285px!important}.h200{height:220px!important}.h150{height:180px!important}
   .cex-box{width:100vw;height:100dvh;max-height:none;border-radius:0;border:0}
-  .cex-header{padding:.65rem .75rem}.cex-hint{display:none}.cex-body{padding:.5rem}.cex-btn span{display:none}.cex-toolbar{padding:.35rem}
+  .cex-header{padding:.55rem .65rem;gap:.5rem;align-items:flex-start}.cex-title{font-family:var(--sans);font-size:.78rem;padding-top:.45rem}.cex-hint{display:none}.cex-body{padding:.35rem}.cex-btn{min-width:38px;min-height:38px;padding:.35rem}.cex-btn span{display:none}.cex-toolbar{padding:.35rem}
   .edu-hero{padding:1rem}.edu-hero h2{font-size:1.15rem}
   .edu-hero,.edu-workbench,.edu-lesson-panel,.edu-checklist,.edu-glossary,.edu-path,.il-guidance{min-width:0;max-width:100%;box-sizing:border-box}
   .edu-hero h2,.edu-hero p,.edu-lesson-content,.edu-lesson-content h3,.edu-lesson-content p,.il-guidance-copy,.il-guidance-copy strong,.il-guidance-copy span{min-width:0;max-width:100%;overflow-wrap:anywhere}
@@ -4423,23 +4441,26 @@ html[data-theme="dark"] .mobile-bottom-nav{background:rgba(14,17,20,.97)!importa
 
 /* Chart language: restrained, high-contrast, and consistent with Lens Gold. */
 :root{
-  --chart-price:#A9782F;
-  --chart-positive:#477A63;
-  --chart-negative:#9E5E62;
-  --chart-ma50:#52758A;
-  --chart-ma200:#747D70;
-  --chart-bands:#927744;
-  --chart-neutral:#817A6C;
+  --chart-price:#98651E;
+  --chart-positive:#197A5A;
+  --chart-negative:#B14F59;
+  --chart-ma50:#2778A6;
+  --chart-ma200:#7558A6;
+  --chart-bands:#B17D28;
+  --chart-neutral:#667085;
 }
 html[data-theme="dark"]{
-  --chart-price:#B88937;
-  --chart-positive:#73A58C;
-  --chart-negative:#C98285;
-  --chart-ma50:#7896A6;
-  --chart-ma200:#9AA48F;
-  --chart-bands:#B09A69;
-  --chart-neutral:#A59D8C;
+  --chart-price:#D0A348;
+  --chart-positive:#58B88F;
+  --chart-negative:#E07C84;
+  --chart-ma50:#68B5E2;
+  --chart-ma200:#B29ADC;
+  --chart-bands:#D0A457;
+  --chart-neutral:#AAB2C0;
 }
+.chart-wrap{background:linear-gradient(180deg,var(--t-chart-bg),color-mix(in srgb,var(--t-chart-bg) 96%,var(--brand-gold) 4%));box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 8px 24px rgba(17,20,24,.035)}
+.chart-wrap .chart-header{background:color-mix(in srgb,var(--t-chart-bg) 96%,var(--brand-gold) 4%)}
+.chart-title{color:var(--text3)!important}
 .chart-key{display:inline-block;width:13px;height:3px;border-radius:2px;margin-right:4px;flex:0 0 auto;background:var(--chart-neutral)}
 .key-ma50{background:var(--chart-ma50)}.key-ma200{background:var(--chart-ma200)}.key-bands{background:var(--chart-bands)}
 .indicator-control.on .chart-key,.ind-pill.on .chart-key{box-shadow:0 0 0 2px var(--brand-gold-soft)}
@@ -5034,10 +5055,7 @@ function setChartType(type, btn) {
     b.setAttribute('aria-pressed', String(selected));
   });
   S.chartType = type;
-  if(S.data) {
-    const q = S.data.indicators.quote[0];
-    buildPriceChart(S.data, q.close.filter(x=>x!=null), S.data.timestamp);
-  }
+  rebuildPriceChart();
 }
 
 
@@ -5634,11 +5652,61 @@ function alignQuoteSeries(result) {
 /* ══════════════════════════════════════════════════════
    INDICATORS
 ══════════════════════════════════════════════════════ */
-function sma(data,p) { return data.map((_,i)=>{ if(i<p-1)return null; return data.slice(i-p+1,i+1).reduce((a,b)=>a+(b||0),0)/p; }); }
+const INDICATOR_REQUIREMENTS = {
+  ma50: { bars:50, label:'50D Avg' },
+  ma200:{ bars:200,label:'200D Avg' },
+  bb:   { bars:20, label:'Bands' },
+};
+
+function syncIndicatorAvailability(barCount) {
+  Object.entries(INDICATOR_REQUIREMENTS).forEach(([ind,config])=>{
+    const unavailable=barCount<config.bars;
+    const title=unavailable
+      ? `${config.label} requires ${config.bars} trading days; choose a longer range`
+      : `Toggle ${config.label}`;
+    document.querySelectorAll(`[data-ind="${ind}"], #ind-${ind}-btn`).forEach(btn=>{
+      btn.disabled=unavailable;
+      btn.setAttribute('aria-disabled',String(unavailable));
+      btn.title=title;
+    });
+  });
+  const note=document.getElementById('chart-data-note');
+  if(!note) return;
+  const unavailableActive=Object.entries(INDICATOR_REQUIREMENTS)
+    .filter(([ind,config])=>S.inds[ind]&&barCount<config.bars)
+    .map(([,config])=>config.label);
+  note.classList.toggle('warn',unavailableActive.length>0);
+  note.textContent=unavailableActive.length
+    ? `${unavailableActive.join(' and ')} ${unavailableActive.length===1?'needs':'need'} more trading days. Choose a longer range.`
+    : 'Pinch or use the zoom controls to inspect the chart';
+}
+
+function rebuildPriceChart() {
+  if(!S.data) return;
+  const aligned=alignQuoteSeries(S.data);
+  S.data=aligned.result;
+  buildPriceChart(S.data,aligned.closes,aligned.timestamps);
+}
+
+function sma(data,p) {
+  return data.map((_,i)=>{
+    if(i<p-1) return null;
+    const window=data.slice(i-p+1,i+1);
+    return window.every(Number.isFinite) ? window.reduce((a,b)=>a+b,0)/p : null;
+  });
+}
 function rsi(c,p=14) {
   return c.map((_,i)=>{ if(i<p)return null; let g=0,l=0; for(let j=i-p+1;j<=i;j++){const d=c[j]-c[j-1]; if(d>0)g+=d; else l-=d;} const rs=g/(l||.0001); return 100-100/(1+rs); });
 }
-function ema(d,p) { const k=2/(p+1); let arr=Array(p-1).fill(null); let v=d.slice(0,p).filter(x=>x!=null).reduce((a,b)=>a+b,0)/p; arr.push(v); for(let i=p;i<d.length;i++){v=d[i]*k+v*(1-k);arr.push(v);} return arr; }
+function ema(d,p) {
+  const arr=Array(d.length).fill(null);
+  if(d.length<p || !d.slice(0,p).every(Number.isFinite)) return arr;
+  const k=2/(p+1);
+  let v=d.slice(0,p).reduce((a,b)=>a+b,0)/p;
+  arr[p-1]=v;
+  for(let i=p;i<d.length;i++){ if(Number.isFinite(d[i])){v=d[i]*k+v*(1-k);arr[i]=v;} }
+  return arr;
+}
 function macd(c) { const e12=ema(c,12),e26=ema(c,26); const line=e12.map((v,i)=>v==null||e26[i]==null?null:v-e26[i]); const clean=line.filter(x=>x!=null); const sig=ema(clean,9); const fs=Array(line.length-sig.length).fill(null).concat(sig); const hist=line.map((v,i)=>v==null||fs[i]==null?null:v-fs[i]); return{line,sig:fs,hist}; }
 function bollinger(c,p=20,m=2) { return c.map((_,i)=>{ if(i<p-1)return{u:null,l:null,mid:null}; const sl=c.slice(i-p+1,i+1); const mid=sl.reduce((a,b)=>a+b,0)/p; const std=Math.sqrt(sl.reduce((a,b)=>a+(b-mid)**2,0)/p); return{u:mid+m*std,l:mid-m*std,mid}; }); }
 function calcOBV(closes,vols) { return closes.map((c2,i)=>{ if(i===0)return vols[0]||0; const prev=closes[i-1]; return 0; }).reduce((acc,_,i)=>{ if(i===0){acc.push(vols[0]||0);return acc;} const prev=closes[i-1]; const v=vols[i]||0; acc.push(acc[i-1]+(closes[i]>prev?v:closes[i]<prev?-v:0)); return acc; },[]); }
@@ -5697,16 +5765,18 @@ const crosshairPlugin = {
   }
 };
 Chart.register(crosshairPlugin);
-Chart.defaults.font.family = 'DM Sans';
+Chart.defaults.font.family = "'DM Sans', system-ui, sans-serif";
 Chart.defaults.font.size = 11;
+Chart.defaults.font.weight = '500';
 Chart.defaults.color = ct().text;
 
 const baseOpts = (extraScales={}) => {
   const t = ct();
+  const compact=window.matchMedia('(max-width: 640px)').matches;
   return {
-    responsive:true, maintainAspectRatio:false,
+    responsive:true, maintainAspectRatio:false, normalized:true, resizeDelay:60,
     interaction:{mode:'index',intersect:false},
-    layout:{padding:{top:3,right:4,bottom:2,left:2}},
+    layout:{padding:{top:3,right:compact?2:5,bottom:2,left:2}},
     plugins:{
       legend:{display:false},
       tooltip:{
@@ -5718,11 +5788,33 @@ const baseOpts = (extraScales={}) => {
       }
     },
     scales:{
-      x:{ border:{color:t.grid}, ticks:{color:t.text,font:{family:'DM Mono',size:10,weight:'400'},maxTicksLimit:8,padding:6}, grid:{color:t.grid,tickLength:4}, ...(extraScales.x||{}) },
-      y:{ border:{color:t.grid}, ticks:{color:t.text,font:{family:'DM Mono',size:10,weight:'400'},padding:6}, grid:{color:t.grid,tickLength:4}, ...(extraScales.y||{}) }
+      x:{ border:{color:t.grid}, ticks:{color:t.text,font:{family:'DM Mono',size:compact?9:10,weight:'500'},maxTicksLimit:compact?5:8,padding:6}, grid:{color:t.grid,tickLength:4}, ...(extraScales.x||{}) },
+      y:{ border:{color:t.grid}, ticks:{color:t.text,font:{family:'DM Mono',size:compact?9:10,weight:'500'},padding:6,maxTicksLimit:compact?6:8}, grid:{color:t.grid,tickLength:4}, ...(extraScales.y||{}) }
     }
   };
 };
+
+function chartZoomOptions() {
+  const compact=window.matchMedia('(max-width: 640px)').matches;
+  return {
+    zoom:{
+      wheel:{enabled:!compact,speed:.07},
+      pinch:{enabled:true},
+      mode:'x',
+    },
+    pan:{enabled:true,mode:'x',threshold:8},
+    limits:{x:{min:'original',max:'original',minRange:12}},
+  };
+}
+
+function zoomPriceChart(factor){
+  const chart=S.charts['price-chart'];
+  if(chart?.zoom) chart.zoom(factor);
+}
+function resetPriceZoom(){
+  const chart=S.charts['price-chart'];
+  if(chart?.resetZoom) chart.resetZoom();
+}
 
 /* ══ CHART EXPAND MODAL ══ */
 var _expandedChart = null;
@@ -5772,9 +5864,9 @@ function expandChart(chartId, title) {
           titleFont:{family:'DM Mono',size:11,weight:'500'},bodyFont:{family:'DM Sans',size:12,weight:'500'}
         },
         zoom: {
-          zoom: { wheel:{enabled:true,speed:0.08}, pinch:{enabled:true}, mode:'x', onZoom(){_expandedChart?.update('none');} },
-          pan:  { enabled:true, mode:'x', onPan(){_expandedChart?.update('none');} },
-          limits: { x:{min:'original',max:'original'} }
+          zoom: { wheel:{enabled:true,speed:0.07}, pinch:{enabled:true}, mode:'x' },
+          pan:  { enabled:true, mode:'x', threshold:8 },
+          limits: { x:{min:'original',max:'original',minRange:12} }
         }
       },
       scales: {
@@ -5795,9 +5887,17 @@ function expandChart(chartId, title) {
   initMarkupCanvas();
 }
 function cp() {
-  return isDark()
-    ? { price:'#B88937', positive:'#73A58C', negative:'#C98285', ma50:'#7896A6', ma200:'#9AA48F', bands:'#B09A69', neutral:'#A59D8C' }
-    : { price:'#A9782F', positive:'#477A63', negative:'#9E5E62', ma50:'#52758A', ma200:'#747D70', bands:'#927744', neutral:'#817A6C' };
+  const styles=getComputedStyle(document.documentElement);
+  const get=(name,fallback)=>styles.getPropertyValue(name).trim()||fallback;
+  return {
+    price:get('--chart-price','#B88937'),
+    positive:get('--chart-positive','#73A58C'),
+    negative:get('--chart-negative','#C98285'),
+    ma50:get('--chart-ma50','#68B5E2'),
+    ma200:get('--chart-ma200','#B29ADC'),
+    bands:get('--chart-bands','#D0A457'),
+    neutral:get('--chart-neutral','#AAB2C0'),
+  };
 }
 function colorAlpha(hex, alpha) {
   const raw=hex.replace('#','');
@@ -5807,6 +5907,9 @@ function colorAlpha(hex, alpha) {
 
 function resetExpandZoom(){
   if(_expandedChart) _expandedChart.resetZoom();
+}
+function zoomExpandedChart(factor){
+  if(_expandedChart?.zoom) _expandedChart.zoom(factor);
 }
 
 function closeExpandModal(){
@@ -5923,6 +6026,8 @@ async function fetchAndRender() {
 function renderStock(result, ticker) {
   const meta=result.meta;
   const aligned=alignQuoteSeries(result);
+  result=aligned.result;
+  S.data=result;
   const ts=aligned.timestamps;
   const q=aligned.quote;
   const closes=aligned.closes; const opens=q.open||[]; const highs=q.high||[]; const lows=q.low||[]; const vols=q.volume||[];
@@ -6902,10 +7007,7 @@ async function loadAnalyst(ticker) {
     const low  = pt.targetLow  || null;
     if (mean || high || low) {
       S.analystTarget = { mean, high, low };
-      if (S.data) {
-        const c = S.data.indicators.quote[0].close.filter(x => x != null);
-        buildPriceChart(S.data, c, S.data.timestamp);
-      }
+      rebuildPriceChart();
     }
 
     // ── Consensus bar → sidebar ──
@@ -6983,8 +7085,8 @@ const candleWickPlugin = {
   afterDatasetsDraw(chart) {
     if(S.chartType !== 'candle') return;
     const ds0 = chart.getDatasetMeta(0);
-    if(!ds0 || !S.data) return;
-    const q = S.data.indicators.quote[0];
+    const q = chart.data.datasets[0]?._quote || S.data?.indicators?.quote?.[0];
+    if(!ds0 || !q) return;
     const highs = q.high||[], lows = q.low||[], opens = q.open||[], closes2 = q.close||[];
     const ctx2 = chart.ctx;
     ctx2.save();
@@ -7010,9 +7112,10 @@ function buildPriceChart(result,closes,timestamps) {
   destroyChart('price-chart');
   const t=ct();
   const p=cp();
-  const labels=timestamps.map(ts=>new Date(ts*1000).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
-  const valid=closes.map((c,i)=>({c,l:labels[i]})).filter(x=>x.c!=null);
-  const vc=valid.map(x=>x.c), vl=valid.map(x=>x.l);
+  const count=Math.min(closes.length,timestamps.length);
+  const vc=closes.slice(0,count).map(Number);
+  const vl=timestamps.slice(0,count).map(ts=>new Date(ts*1000).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+  syncIndicatorAvailability(vc.length);
   const ma50v=sma(vc,50), ma200v=sma(vc,200), bbv=bollinger(vc,20);
   const hp={pointRadius:0,pointHoverRadius:6,pointHoverBorderWidth:2,pointHoverBorderColor:'#fff'};
   const fillGrad=ctx=>{const g=ctx.chart.ctx.createLinearGradient(0,0,0,260);g.addColorStop(0,colorAlpha(p.price,.16));g.addColorStop(1,colorAlpha(p.price,0));return g;};
@@ -7020,19 +7123,18 @@ function buildPriceChart(result,closes,timestamps) {
   let ds;
   if(S.chartType==='candle') {
     const q2=result.indicators.quote[0];
-    const opens2=q2.open||[], closes2=vc, highs2=q2.high||[], lows2=q2.low||[];
-    const candleData=closes2.map((c2,i)=>opens2[i]!=null?[opens2[i],c2]:null).filter(x=>x!=null);
+    const opens2=(q2.open||[]).slice(0,count), closes2=vc;
     const candleColors=closes2.map((c2,i)=>(c2||0)>=(opens2[i]||0)?colorAlpha(p.positive,.78):colorAlpha(p.negative,.78));
-    ds=[{label:'Price',data:closes2.map((c2,i)=>opens2[i]!=null?[Math.min(opens2[i],c2),Math.max(opens2[i],c2)]:null),backgroundColor:candleColors,borderColor:candleColors,borderWidth:1,borderRadius:0,order:10}];
+    ds=[{label:'Price',data:closes2.map((c2,i)=>[Math.min(opens2[i],c2),Math.max(opens2[i],c2)]),backgroundColor:candleColors,borderColor:candleColors,borderWidth:1,borderRadius:1,order:10,_quote:q2}];
   } else if(S.chartType==='area') {
     ds=[{label:'Price',data:vc,borderColor:p.price,borderWidth:2,...hp,pointHoverBackgroundColor:p.price,fill:true,backgroundColor:strongGrad,tension:.2,order:10}];
   } else {
     ds=[{label:'Price',data:vc,borderColor:p.price,borderWidth:2,...hp,pointHoverBackgroundColor:p.price,fill:true,backgroundColor:fillGrad,tension:.2,order:10}];
   }
   const lineType = S.chartType==='candle' ? {type:'line'} : {};
-  if(S.inds.ma50)  ds.push({...lineType,label:'50D average', data:ma50v, borderColor:p.ma50,borderWidth:1.5,...hp,pointHoverBackgroundColor:p.ma50,fill:false,tension:.2,order:9});
-  if(S.inds.ma200) ds.push({...lineType,label:'200D average',data:ma200v,borderColor:p.ma200,borderWidth:1.5,...hp,pointHoverBackgroundColor:p.ma200,fill:false,tension:.2,order:8});
-  if(S.inds.bb) {
+  if(S.inds.ma50&&vc.length>=INDICATOR_REQUIREMENTS.ma50.bars)  ds.push({...lineType,label:'50D average', data:ma50v, borderColor:p.ma50,borderWidth:1.5,...hp,pointHoverBackgroundColor:p.ma50,fill:false,tension:.2,order:9});
+  if(S.inds.ma200&&vc.length>=INDICATOR_REQUIREMENTS.ma200.bars) ds.push({...lineType,label:'200D average',data:ma200v,borderColor:p.ma200,borderWidth:1.5,...hp,pointHoverBackgroundColor:p.ma200,fill:false,tension:.2,order:8});
+  if(S.inds.bb&&vc.length>=INDICATOR_REQUIREMENTS.bb.bars) {
     ds.push({...lineType,label:'Upper band',data:bbv.map(x=>x.u),borderColor:colorAlpha(p.bands,.62),borderWidth:1,pointRadius:0,fill:false,tension:.2,order:7,borderDash:[4,3]});
     ds.push({...lineType,label:'Lower band',data:bbv.map(x=>x.l),borderColor:colorAlpha(p.bands,.62),borderWidth:1,pointRadius:0,fill:false,tension:.2,order:6,borderDash:[4,3]});
   }
@@ -7051,6 +7153,8 @@ function buildPriceChart(result,closes,timestamps) {
     x:{ticks:{color:t.text,font:{size:10},maxTicksLimit:8},grid:{color:t.grid}}
   });
   opts.plugins.legend={display:true,position:'top',align:'end',labels:{color:t.text,font:{size:10},boxWidth:18,boxHeight:2,padding:12,filter:i=>i.text&&i.text.length>0,usePointStyle:false}};
+  opts.plugins.legend.display=!window.matchMedia('(max-width: 640px)').matches;
+  opts.plugins.zoom=chartZoomOptions();
   opts.plugins.tooltip={...opts.plugins.tooltip,callbacks:{
     title:items=>items[0]?.label||'',
     label:ctx=>{const raw=Array.isArray(ctx.raw)?ctx.raw[ctx.raw.length-1]:ctx.raw;return ` ${ctx.dataset.label||''}: $${Number(raw||0).toFixed(2)}`;}
@@ -7214,8 +7318,18 @@ function buildATRChart(highs,lows,closes,timestamps) {
 }
 
 function toggleInd(btn,ind) {
+  const requirement=INDICATOR_REQUIREMENTS[ind];
+  const bars=S.data?.timestamp?.length||0;
+  if(requirement&&bars<requirement.bars){
+    toast(`${requirement.label} needs ${requirement.bars} trading days. Choose a longer range.`,'red');
+    return;
+  }
   S.inds[ind]=!S.inds[ind]; btn.classList.toggle('on',S.inds[ind]); btn.setAttribute('aria-pressed',String(S.inds[ind]));
-  if(S.data) buildPriceChart(S.data,S.data.indicators.quote[0].close.filter(x=>x!=null),S.data.timestamp);
+  document.querySelectorAll(`[data-ind="${ind}"], #ind-${ind}-btn`).forEach(control=>{
+    control.classList.toggle('on',S.inds[ind]);
+    control.setAttribute('aria-pressed',String(S.inds[ind]));
+  });
+  rebuildPriceChart();
 }
 
 async function changeRange(range,btn) {
@@ -7225,8 +7339,8 @@ async function changeRange(range,btn) {
   if(!S.ticker) return;
   try {
     const result=await yahooFetch(S.ticker,range);
-    S.data=result;
     const aligned=alignQuoteSeries(result);
+    S.data=aligned.result;
     const q=aligned.quote;
     buildPriceChart(aligned.result,aligned.closes,aligned.timestamps);
     buildRSIChart(rsi(aligned.closes),aligned.timestamps);
