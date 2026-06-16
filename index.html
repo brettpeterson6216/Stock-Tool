@@ -4605,6 +4605,8 @@ function syncPlanUI() {
   }
   if (homeUpgrade) homeUpgrade.style.display = pro ? 'none' : homeUpgrade.style.display;
   if (navUpgrade && pro) navUpgrade.style.display = 'none';
+  const limitCounter = document.getElementById('limit-counter');
+  if (limitCounter && pro) limitCounter.style.display = 'none';
   document.documentElement.dataset.plan = pro ? 'pro' : 'free';
   if (pro && typeof PRO_SECTION_CONTENT !== 'undefined' && typeof PRO_SECTIONS !== 'undefined') {
     const activeSection=document.querySelector('.app-section.open');
@@ -4831,10 +4833,40 @@ function sectionErrorHtml(msg) {
   return `<div class="sec-state-wrap sec-state-error"><span style="font-size:1.1rem;">⚠</span><span>${escapeHtml(msg)}</span></div>`;
 }
 
+async function refreshAuthStateForAccess() {
+  try {
+    const res = await fetch('/api/auth/me', { credentials: 'same-origin' });
+    if (!res.ok) return false;
+    const { user } = await res.json();
+    if (user) {
+      S.userPlan = user.effectivePlan || 'free';
+      S.trialEndsAt = user.trial_ends_at || null;
+      S.loggedIn = true;
+      S.emailVerified = !!user.email_verified;
+    } else {
+      S.userPlan = 'free';
+      S.loggedIn = false;
+      S.emailVerified = false;
+    }
+    syncPlanUI();
+    return isPro();
+  } catch (_) {
+    return false;
+  }
+}
+
 async function proAwareFetch(url, sectionId, opts) {
-  const res = await fetch(url, { credentials: 'same-origin', ...(opts||{}) });
+  const retryingAuth = !!(opts && opts._retriedAuth);
+  const fetchOpts = { ...(opts || {}) };
+  delete fetchOpts._retriedAuth;
+  const res = await fetch(url, { credentials: 'same-origin', ...fetchOpts });
   if (res.status === 401) { const e = new Error('LOGIN_REQUIRED');  e.code = 'LOGIN_REQUIRED';  throw e; }
-  if (res.status === 403) { const e = new Error('PRO_REQUIRED');    e.code = 'PRO_REQUIRED';    e.sectionId = sectionId; throw e; }
+  if (res.status === 403) {
+    if (!retryingAuth && await refreshAuthStateForAccess()) {
+      return proAwareFetch(url, sectionId, { ...fetchOpts, _retriedAuth: true });
+    }
+    const e = new Error('PRO_REQUIRED');    e.code = 'PRO_REQUIRED';    e.sectionId = sectionId; throw e;
+  }
   if (res.status === 429) { const e = new Error('LIMIT_REACHED');   e.code = 'LIMIT_REACHED';   throw e; }
   if (!res.ok)            { throw new Error(`Request failed (${res.status})`); }
   return res;
@@ -8613,10 +8645,13 @@ if(new URLSearchParams(window.location.search).get('view')!=='tool') initializeH
 // Prime the analysis limit counter for free/guest users
 (async () => {
   try {
+    if (window.IL_AUTH_READY) await window.IL_AUTH_READY;
+    if (isPro()) { syncPlanUI(); return; }
     const r = await fetch('/api/me/limit', { credentials: 'same-origin' });
     if (!r.ok) return;
     const d = await r.json();
-    if (d.limit !== null) updateLimitUI(d.remaining, d.limit, d.plan);
+    if (d.limit !== null && d.plan !== 'pro' && d.plan !== 'trial') updateLimitUI(d.remaining, d.limit, d.plan);
+    else syncPlanUI();
   } catch(_) {}
 })();
 

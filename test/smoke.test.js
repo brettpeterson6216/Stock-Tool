@@ -653,6 +653,22 @@ test("Pro earnings-call research degrades gracefully when transcripts are unavai
   assert.match(body.links.sec, /sec\.gov/);
 });
 
+test("Pro users do not receive free analysis quota state", async () => {
+  const email = "limit_pro@test.com";
+  const { cookie, csrfToken } = await makeSession("limit_pro_user", email);
+  assert.equal((await req("/api/admin/grant-pro", {
+    method: "POST",
+    headers: { cookie, "X-CSRF-Token": csrfToken, "X-Admin-Secret": process.env.ADMIN_SECRET },
+    body: { email },
+  })).status, 200);
+  const res = await req("/api/me/limit", { headers: { cookie } });
+  assert.equal(res.status, 200);
+  const body = await res.json();
+  assert.equal(body.plan, "pro");
+  assert.equal(body.limit, null);
+  assert.equal(body.remaining, null);
+});
+
 test("Pro data routes reject malformed tickers before contacting providers", async () => {
   const email = "pro_ticker_validation@test.com";
   const { cookie, csrfToken } = await makeSession("pro_ticker_validation", email);

@@ -14,6 +14,46 @@ const { STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET,
 const stripe = STRIPE_SECRET_KEY ? Stripe(STRIPE_SECRET_KEY) : null;
 const router = express.Router();
 
+function stripeId(value) {
+  if (!value) return null;
+  return typeof value === "string" ? value : value.id || null;
+}
+
+async function stripeCustomerEmail(customerId) {
+  if (!stripe || !customerId) return null;
+  try {
+    const customer = await stripe.customers.retrieve(customerId);
+    return customer && !customer.deleted ? customer.email || null : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+async function findUserIdForStripeEvent({ userId, customerId, subscriptionId, email }) {
+  if (userId) {
+    const byId = await db.execute({ sql: "SELECT id FROM users WHERE id = ? LIMIT 1", args: [userId] });
+    if (byId.rows.length) return Number(byId.rows[0].id);
+  }
+
+  if (customerId || subscriptionId) {
+    const byStripe = await db.execute({
+      sql: "SELECT id FROM users WHERE stripe_customer_id = ? OR stripe_subscription_id = ? LIMIT 1",
+      args: [customerId || "", subscriptionId || ""],
+    });
+    if (byStripe.rows.length) return Number(byStripe.rows[0].id);
+  }
+
+  if (email) {
+    const byEmail = await db.execute({
+      sql: "SELECT id FROM users WHERE email = ? LIMIT 1",
+      args: [String(email).toLowerCase()],
+    });
+    if (byEmail.rows.length) return Number(byEmail.rows[0].id);
+  }
+
+  return null;
+}
+
 // ============================================================
 //  POST /api/stripe/create-checkout
 // ============================================================
@@ -54,14 +94,16 @@ router.post("/stripe/create-checkout", validateCsrf, async (req, res) => {
     const priceId = annual ? STRIPE_PRICE_ANNUAL : STRIPE_PRICE_MONTHLY;
     if (!priceId) return res.status(503).json({ error: "Price not configured." });
 
+    const metadata = { userId: String(req.session.userId) };
     const params = {
       mode: "subscription",
       payment_method_types: ["card"],
       line_items: [{ price: priceId, quantity: 1 }],
-      subscription_data: { trial_period_days: 7 },
+      subscription_data: { trial_period_days: 7, metadata },
       success_url: `${APP_URL}/?upgraded=1`,
       cancel_url:  `${APP_URL}/?checkout=cancelled`,
-      metadata: { userId: String(req.session.userId) },
+      client_reference_id: String(req.session.userId),
+      metadata,
     };
     if (user.stripe_customer_id) {
       params.customer = user.stripe_customer_id;
@@ -105,42 +147,81 @@ router.post("/stripe/webhook", async (req, res) => {
     switch (event.type) {
       case "checkout.session.completed": {
         const sess   = event.data.object;
-        const userId = sess.metadata && sess.metadata.userId;
-        if (!userId || !sess.subscription) break;
-        const sub    = await stripe.subscriptions.retrieve(sess.subscription);
+        const subscriptionId = stripeId(sess.subscription);
+        const customerId = stripeId(sess.customer);
+        if (!subscriptionId) break;
+        const sub    = await stripe.subscriptions.retrieve(subscriptionId);
+        const email  = sess.customer_details?.email || sess.customer_email || await stripeCustomerEmail(customerId);
+        const userId = await findUserIdForStripeEvent({
+          userId: sess.metadata?.userId || sess.client_reference_id,
+          customerId,
+          subscriptionId,
+          email,
+        });
+        if (!userId) {
+          console.warn("[stripe] checkout completed could not be linked to a user", { customerId, subscriptionId, email });
+          break;
+        }
         const plan   = subscriptionStatusToPlan(sub.status);
         const trialEnd = sub.trial_end ? new Date(sub.trial_end * 1000).toISOString() : null;
         await db.execute({
           sql:  "UPDATE users SET plan=?, trial_ends_at=?, stripe_customer_id=?, stripe_subscription_id=? WHERE id=?",
-          args: [plan, trialEnd, sess.customer, sess.subscription, userId],
+          args: [plan, trialEnd, customerId || stripeId(sub.customer), subscriptionId, userId],
         });
         track("checkout_completed", { plan, trial: plan === "trial" }, null, Number(userId)).catch(() => {});
         break;
       }
       case "customer.subscription.updated": {
         const sub = event.data.object;
-        const r   = await db.execute({ sql: "SELECT id FROM users WHERE stripe_customer_id=?", args: [sub.customer] });
-        if (!r.rows.length) break;
+        const customerId = stripeId(sub.customer);
+        const userId = await findUserIdForStripeEvent({
+          userId: sub.metadata?.userId,
+          customerId,
+          subscriptionId: sub.id,
+          email: await stripeCustomerEmail(customerId),
+        });
+        if (!userId) {
+          console.warn("[stripe] subscription update could not be linked to a user", { customerId, subscriptionId: sub.id });
+          break;
+        }
         const plan = subscriptionStatusToPlan(sub.status);
         const trialEnd = sub.trial_end ? new Date(sub.trial_end * 1000).toISOString() : null;
-        await db.execute({ sql: "UPDATE users SET plan=?, trial_ends_at=? WHERE id=?", args: [plan, trialEnd, r.rows[0].id] });
-        track("subscription_updated", { status: sub.status, plan }, null, Number(r.rows[0].id)).catch(() => {});
+        await db.execute({
+          sql: "UPDATE users SET plan=?, trial_ends_at=?, stripe_customer_id=?, stripe_subscription_id=? WHERE id=?",
+          args: [plan, trialEnd, customerId, sub.id, userId],
+        });
+        track("subscription_updated", { status: sub.status, plan }, null, Number(userId)).catch(() => {});
         break;
       }
       case "customer.subscription.deleted": {
         const sub = event.data.object;
-        const r   = await db.execute({ sql: "SELECT id FROM users WHERE stripe_customer_id=?", args: [sub.customer] });
-        if (!r.rows.length) break;
-        await db.execute({ sql: "UPDATE users SET plan='free', trial_ends_at=NULL WHERE id=?", args: [r.rows[0].id] });
-        track("subscription_cancelled", {}, null, Number(r.rows[0].id)).catch(() => {});
+        const customerId = stripeId(sub.customer);
+        const userId = await findUserIdForStripeEvent({
+          userId: sub.metadata?.userId,
+          customerId,
+          subscriptionId: sub.id,
+          email: await stripeCustomerEmail(customerId),
+        });
+        if (!userId) break;
+        await db.execute({
+          sql: "UPDATE users SET plan='free', trial_ends_at=NULL, stripe_customer_id=?, stripe_subscription_id=? WHERE id=?",
+          args: [customerId, sub.id, userId],
+        });
+        track("subscription_cancelled", {}, null, Number(userId)).catch(() => {});
         break;
       }
       case "invoice.payment_failed": {
         // Stripe may retry a failed invoice while the subscription remains active
         // or past_due. Access is updated from customer.subscription.updated.
         const invoice = event.data.object;
-        const r = await db.execute({ sql: "SELECT id FROM users WHERE stripe_customer_id=?", args: [invoice.customer] });
-        if (r.rows.length) track("payment_failed", {}, null, Number(r.rows[0].id)).catch(() => {});
+        const customerId = stripeId(invoice.customer);
+        const subscriptionId = stripeId(invoice.subscription);
+        const userId = await findUserIdForStripeEvent({
+          customerId,
+          subscriptionId,
+          email: await stripeCustomerEmail(customerId),
+        });
+        if (userId) track("payment_failed", {}, null, Number(userId)).catch(() => {});
         break;
       }
       default:
