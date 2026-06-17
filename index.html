@@ -716,21 +716,40 @@ h2.sec-h2 {
 
 
 /* ═══════════════════════════════ CTA BANNER ═══════════════════════════════ */
-.cta-strip { background:var(--ink); color:var(--cream); text-align:center; padding:6rem 2rem; }
-.cta-strip h2.sec-h2 { color:var(--cream); max-width:580px; margin:0 auto 1.25rem; }
-.cta-strip p { color:rgba(247,244,238,.55); font-size:1.05rem; margin-bottom:2.5rem; }
+.cta-strip {
+  background:linear-gradient(180deg,#fbfaf6 0%,#f1eee6 100%);
+  color:var(--ink);
+  text-align:center;
+  padding:5.25rem 2rem;
+  border-top:1px solid var(--border2);
+  border-bottom:1px solid var(--border2);
+}
+.cta-strip .container {
+  max-width:760px;
+  padding:3rem 2rem;
+  border:1px solid rgba(118,82,29,.16);
+  border-radius:18px;
+  background:rgba(252,251,248,.72);
+  box-shadow:0 22px 70px rgba(118,82,29,.12), inset 0 1px 0 rgba(255,255,255,.85);
+}
+.cta-strip h2.sec-h2 { color:var(--ink); max-width:580px; margin:0 auto 1.25rem; }
+.cta-strip p { color:var(--ink4); font-size:1.05rem; margin-bottom:2.5rem; }
 
 /* ═══════════════════════════════ FOOTER ═══════════════════════════════ */
-footer { background:#080808; padding:3rem 2rem; }
+footer {
+  background:linear-gradient(180deg,#f1eee6 0%,#e9e5dc 100%);
+  padding:3rem 2rem;
+  border-top:1px solid rgba(118,82,29,.14);
+}
 .footer-inner {
   max-width:1100px; margin:0 auto;
   display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem;
 }
-.f-logo { font-family:var(--serif); font-size:1.1rem; color:var(--cream); }
+.f-logo { font-family:var(--serif); font-size:1.1rem; color:var(--ink); }
 .f-links { display:flex; gap:1.5rem; flex-wrap:wrap; }
-.f-links a { font-size:.78rem; color:rgba(247,244,238,.35); text-decoration:none; transition:color .18s; }
-.f-links a:hover { color:rgba(247,244,238,.7); }
-.f-copy { font-size:.72rem; color:rgba(247,244,238,.25); }
+.f-links a { font-size:.78rem; color:var(--ink4); text-decoration:none; transition:color .18s; }
+.f-links a:hover { color:var(--gold-d); }
+.f-copy { font-size:.72rem; color:var(--ink5); }
 
 /* ═══════════════════════════════ TOAST & MODAL ═══════════════════════════════ */
 .toast {
@@ -1056,7 +1075,8 @@ html[data-theme="dark"] .pricing-card.featured .p-dollar,html[data-theme="dark"]
 html[data-theme="dark"] .pricing-card.featured .p-features li { color:rgba(220,225,232,.75)!important; }
 html[data-theme="dark"] .btn-plan-dark { background:rgba(255,255,255,.035); color:var(--text); border-color:rgba(255,255,255,.18); }
 html[data-theme="dark"] .btn-plan-dark:hover { background:rgba(255,255,255,.075); border-color:rgba(185,138,61,.35); }
-html[data-theme="dark"] .cta-strip { background:#0A0C11; color:var(--text); border-top:1px solid rgba(255,255,255,.07); }
+html[data-theme="dark"] .cta-strip { background:#0A0C11; color:var(--text); border-top:1px solid rgba(255,255,255,.07); border-bottom:0; }
+html[data-theme="dark"] .cta-strip .container { background:transparent; border-color:transparent; box-shadow:none; }
 html[data-theme="dark"] .cta-strip h2.sec-h2 { color:var(--text)!important; }
 html[data-theme="dark"] .cta-strip p { color:var(--text3)!important; opacity:1!important; }
 /* feat cards */
@@ -1075,6 +1095,11 @@ html[data-theme="dark"] .modal-box { background:var(--card)!important; border-co
 html[data-theme="dark"] .modal-box h2,html[data-theme="dark"] .modal-box label { color:rgba(220,225,232,.85)!important; }
 html[data-theme="dark"] .modal-note { color:rgba(220,225,232,.35)!important; }
 html[data-theme="dark"] #cta-btn-plans { color:rgba(220,225,232,.65)!important; border-color:rgba(255,255,255,.18)!important; }
+html[data-theme="dark"] footer { background:#050506!important; border-top-color:rgba(255,255,255,.07)!important; }
+html[data-theme="dark"] footer .f-logo { color:var(--cream)!important; }
+html[data-theme="dark"] footer .f-logo em{color:#D9BF8D!important}
+html[data-theme="dark"] footer .f-links a,html[data-theme="dark"] footer .f-links .il-feedback-link{color:rgba(247,244,238,.72)!important}
+html[data-theme="dark"] footer .f-copy,html[data-theme="dark"] footer .il-build{color:rgba(247,244,238,.62)!important}
 
 /* ══════════════════════════════════════════
    HOME DASHBOARD — v4 PREMIUM
@@ -4484,9 +4509,10 @@ html[data-theme="dark"]{
 #mo-vix-sub span{color:var(--red)!important}
 #pricing .pricing-card .p-desc{opacity:1!important;color:var(--ink3)!important}
 #pricing .pricing-card.featured .p-desc,#pricing .pricing-card.featured .p-per,#pricing .pricing-card.featured .p-dollar{color:rgba(247,244,238,.78)!important}
-footer .f-logo em{color:#D9BF8D!important}
-footer .f-links a,footer .f-links .il-feedback-link{color:rgba(247,244,238,.72)!important}
-footer .f-copy,footer .il-build{color:rgba(247,244,238,.62)!important}
+footer .f-logo em{color:var(--gold-d)!important}
+footer .f-links .il-feedback-link{color:var(--ink4)!important}
+footer .f-links .il-feedback-link:hover{color:var(--gold-d)!important}
+footer .il-build{color:var(--ink5)!important}
 html:not([data-theme="dark"]) .hh-search-btn{color:#fff!important}
 
 </style>
