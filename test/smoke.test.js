@@ -260,7 +260,7 @@ test("Apple Home Screen icon and web app manifest are available", async () => {
   assert.match(manifest.headers.get("content-type"), /manifest\+json|application\/json/);
   const data = await manifest.json();
   assert.equal(data.short_name, "ImpliedLens");
-  assert.equal(data.theme_color, "#050505");
+  assert.equal(data.theme_color, "#f9f8f5");
 });
 
 test("GET /healthz reports database and build health", async () => {

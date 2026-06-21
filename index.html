@@ -2,7 +2,17 @@
 <html lang="en">
 <head>
 <script>
-(function(){var t=localStorage.getItem('il-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})();
+(function(){
+  var t=localStorage.getItem('il-theme');
+  if(t==='dark')document.documentElement.setAttribute('data-theme','dark');
+  window.syncBrowserChrome=function(){
+    var dark=document.documentElement.getAttribute('data-theme')==='dark';
+    var color=document.querySelector('meta[name="theme-color"]');
+    var status=document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+    if(color)color.setAttribute('content',dark?'#0e1114':'#f9f8f5');
+    if(status)status.setAttribute('content',dark?'black-translucent':'default');
+  };
+})();
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -11,7 +21,7 @@
 <meta name="keywords" content="stock analysis, stock screener, intrinsic value, earnings history, SEC filings, analyst price targets, FINRA OTC data, institutional holdings, stock comparison, financial statements, implied lens">
 <meta name="author" content="Implied Lens">
 <meta name="robots" content="index, follow">
-<meta name="theme-color" content="#A9782F">
+<meta name="theme-color" content="#f9f8f5">
 <!-- Open Graph -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://impliedlens.com/">
@@ -39,7 +49,8 @@
 <link rel="manifest" href="/site.webmanifest">
 <meta name="apple-mobile-web-app-title" content="ImpliedLens">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<script>window.syncBrowserChrome();</script>
 <!-- Structured Data -->
 <script type="application/ld+json">
 {
@@ -6988,6 +6999,7 @@ function loadTicker(ticker) {
 }
 
 function updateThemeControl() {
+  window.syncBrowserChrome?.();
   const btn = document.getElementById('theme-toggle-btn');
   if (!btn) return;
   const dark = isDark();

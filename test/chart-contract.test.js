@@ -58,3 +58,10 @@ test("the fixed header covers the top device safe area", () => {
   assert.match(html, /#view-home\{padding-top:calc\(56px \+ env\(safe-area-inset-top, 0px\)\)\}/);
   assert.match(html, /#view-tool \{[^}]*padding-top:calc\(56px \+ env\(safe-area-inset-top, 0px\)\)/);
 });
+
+test("mobile browser chrome follows the selected site theme", () => {
+  assert.match(html, /dark\?'#0e1114':'#f9f8f5'/);
+  assert.match(html, /dark\?'black-translucent':'default'/);
+  assert.match(html, /<meta name="apple-mobile-web-app-status-bar-style" content="default">/);
+  assert.match(html, /function updateThemeControl\(\) \{\s*window\.syncBrowserChrome\?\.\(\);/);
+});
