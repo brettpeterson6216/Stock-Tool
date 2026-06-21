@@ -133,8 +133,9 @@
 
 /* ═══════════════════════════════ RESET ═══════════════════════════════ */
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-html { scroll-behavior:smooth; font-size:16px; }
+html { scroll-behavior:smooth; font-size:16px; background:var(--cream); }
 body { font-family:var(--sans); background:var(--cream); color:var(--ink); line-height:1.6; overflow-x:hidden; }
+html[data-theme="dark"] { background:#0e1114; }
 .sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
 ::-webkit-scrollbar { width:5px; height:5px; }
 ::-webkit-scrollbar-track { background:var(--cream2); }
@@ -150,6 +151,7 @@ nav {
   border-bottom:1px solid var(--border2);
   gap:0;
 }
+#main-nav{height:calc(56px + env(safe-area-inset-top, 0px));padding-top:env(safe-area-inset-top, 0px)}
 .nav-logo {
   font-family:var(--serif); font-size:1.2rem; letter-spacing:-0.01em;
   color:var(--ink); text-decoration:none;
@@ -1106,7 +1108,7 @@ html[data-theme="dark"] footer .f-copy,html[data-theme="dark"] footer .il-build{
 ══════════════════════════════════════════ */
 
 /* --- Home Shell --- */
-#view-home{padding-top:56px}
+#view-home{padding-top:calc(56px + env(safe-area-inset-top, 0px))}
 .home-shell{display:flex;min-height:calc(100vh - 56px);}
 .hs-sidebar{width:196px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--border2);display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;position:sticky;top:56px;height:calc(100vh - 56px);}
 @media(max-width:960px){.hs-sidebar{width:50px;}}
@@ -3636,7 +3638,7 @@ html[data-theme="dark"] .input-light::placeholder{color:rgba(220,225,232,.28)!im
 .tcard-role{font-size:.7rem;color:var(--text5);}
 
 /* ════════════════════ APP SHELL ════════════════════ */
-#view-tool { display:flex; flex-direction:column; height:100vh; padding-top:56px; box-sizing:border-box; overflow:hidden; }
+#view-tool { display:flex; flex-direction:column; height:100vh; padding-top:calc(56px + env(safe-area-inset-top, 0px)); box-sizing:border-box; overflow:hidden; }
 #view-tool.shown { display:flex!important; }
 .app-shell { display:flex; flex:1; overflow:hidden; min-height:0; }
 
@@ -3824,7 +3826,8 @@ html[data-theme="dark"] #am-username-msg { color: var(--text3) !important; }
 
 /* Mobile section tabs — hidden on desktop */
 .mobile-sec-tabs { display:none; }
-body.has-verif-banner { padding-top:42px; }
+body.has-verif-banner { padding-top:calc(42px + env(safe-area-inset-top, 0px)); }
+#verif-banner{padding-top:calc(.55rem + env(safe-area-inset-top, 0px))!important}
 
 @media(max-width:640px){
 
@@ -4199,7 +4202,7 @@ html:not([data-theme="dark"]) .theme-toggle-thumb{left:3px;transform:none;backgr
 #view-tool .tw-title{color:var(--text)!important}
 #view-tool .tw-sub{color:var(--text4)!important}
 #view-tool .fg-label{color:var(--text5)!important}
-body.has-verif-banner #main-nav{top:42px}
+body.has-verif-banner #main-nav{top:calc(42px + env(safe-area-inset-top, 0px))}
 .app-chart-toolbar,.app-tf-strip{scrollbar-width:none}
 .app-chart-toolbar::-webkit-scrollbar,.app-tf-strip::-webkit-scrollbar{display:none}
 .act-btn,.tf-pill,.tf-tog{min-height:26px;display:inline-flex;align-items:center;justify-content:center}
@@ -4275,14 +4278,12 @@ body.has-verif-banner #main-nav{top:42px}
   #view-tool{height:100dvh}
   input,select,textarea{font-size:16px!important}
   img,svg,canvas{max-width:100%}
-  body.has-verif-banner #main-nav{top:58px}
+  body.has-verif-banner #main-nav{top:calc(58px + env(safe-area-inset-top, 0px))}
   nav{min-width:0;max-width:100%}
   nav .nav-right{gap:4px;min-width:0;max-width:calc(100% - 132px);padding-left:.25rem}
   .nav-live,.btn-nav-outline,#nav-signup{display:none!important}
-  #main-nav[data-view="tool"] .nav-logo{padding-right:.45rem;margin-right:0;border-right:0;font-size:1rem;gap:6px}
-  #main-nav[data-view="tool"] .nav-logo img{width:26px!important;height:26px!important}
   #main-nav[data-view="tool"] #nav-ticker-bar{display:none!important}
-  #main-nav[data-view="tool"] .theme-toggle{display:flex!important;transform:scale(.86);transform-origin:center right;margin-right:-4px}
+  #main-nav[data-view="tool"] .theme-toggle{display:flex!important}
   #main-nav[data-view="tool"] #nav-upgrade{display:none!important}
   .nav-acct-wrap,.nav-acct-btn{min-width:0;max-width:100%}
   #nav-acct-name{min-width:0;overflow:hidden;text-overflow:ellipsis}

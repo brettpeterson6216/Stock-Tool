@@ -47,7 +47,14 @@ test("invalid ticker errors are understandable and hide provider details", () =>
 });
 
 test("mobile tool pages keep the brand and theme control visible", () => {
-  assert.match(html, /#main-nav\[data-view="tool"\] \.nav-logo\{[^}]*font-size:1rem/);
   assert.match(html, /#main-nav\[data-view="tool"\] \.theme-toggle\{display:flex!important/);
+  assert.doesNotMatch(html, /#main-nav\[data-view="tool"\] \.nav-logo\{[^}]*(font-size|gap|padding-right)/);
+  assert.doesNotMatch(html, /#main-nav\[data-view="tool"\] \.theme-toggle\{[^}]*(scale|margin-right)/);
   assert.doesNotMatch(html, /#main-nav\[data-view="tool"\] \.nav-logo>span,\s*#main-nav\[data-view="tool"\] #nav-ticker-bar,\s*#main-nav\[data-view="tool"\] \.theme-toggle\{display:none!important\}/);
+});
+
+test("the fixed header covers the top device safe area", () => {
+  assert.match(html, /height:calc\(56px \+ env\(safe-area-inset-top, 0px\)\)/);
+  assert.match(html, /#view-home\{padding-top:calc\(56px \+ env\(safe-area-inset-top, 0px\)\)\}/);
+  assert.match(html, /#view-tool \{[^}]*padding-top:calc\(56px \+ env\(safe-area-inset-top, 0px\)\)/);
 });
