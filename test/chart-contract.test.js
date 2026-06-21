@@ -39,3 +39,9 @@ test("mobile chart headers reserve room for controls and explain unavailable ind
   assert.match(html, /\.chart-exp-btn\{\s*position:static/);
   assert.doesNotMatch(html, /<div class="chart-wrap">\s*<button class="chart-exp-btn"/);
 });
+
+test("invalid ticker errors are understandable and hide provider details", () => {
+  assert.match(html, /Could not find "\$\{ticker\}"\. Check the ticker symbol and try again/);
+  assert.match(html, /r\.status === 404 \? 'TICKER_NOT_FOUND'/);
+  assert.doesNotMatch(html, /Could not load "\$\{ticker\}": \$\{e\.message\}/);
+});

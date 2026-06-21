@@ -5585,9 +5585,15 @@ async function yahooFetch(ticker, range='1y') {
     e.limitData = d; throw e;
   }
 
-  if (!r.ok) throw new Error('fetch failed: ' + r.status);
+  if (!r.ok) {
+    const d = await r.json().catch(()=>({}));
+    const e = new Error(r.status === 404 ? 'TICKER_NOT_FOUND' : 'QUOTE_LOAD_FAILED');
+    e.status = r.status;
+    e.detail = d.error || '';
+    throw e;
+  }
   const d = await r.json();
-  if (!d.chart?.result?.[0]) throw new Error('No data returned for ' + ticker);
+  if (!d.chart?.result?.[0]) throw new Error('TICKER_NOT_FOUND');
   d.chart.result[0].impliedLensProvenance = d.impliedLens || null;
 
   // Update limit counter from response headers
@@ -6073,9 +6079,13 @@ async function fetchAndRender() {
       err.style.display='block';
     } else if (e.message === 'SIGNUP_REQUIRED') {
       startGuestSignup('guest_limit_reached');
+    } else if (e.message === 'TICKER_NOT_FOUND') {
+      const err=document.getElementById('analyze-error');
+      err.textContent=`Could not find "${ticker}". Check the ticker symbol and try again—it may not exist or may not be supported.`;
+      err.style.display='block';
     } else {
       const err=document.getElementById('analyze-error');
-      err.textContent=`Could not load "${ticker}": ${e.message}`;
+      err.textContent=`We could not load "${ticker}" right now. Please try again in a moment.`;
       err.style.display='block';
     }
   } finally {
