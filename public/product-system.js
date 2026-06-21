@@ -158,7 +158,7 @@
       guide.className = "il-guidance";
       host.insertBefore(guide, host.firstChild);
     }
-    guide.innerHTML = `<div class="il-guidance-copy"><strong>Build a complete ${ticker} decision, not just a price opinion.</strong><span>Start with the chart, then test business quality, valuation, and downside assumptions.</span></div><div class="il-guidance-actions"><button onclick="navGoTo('education');setTimeout(()=>openLesson(document.querySelector('[data-lesson=thesis]')),50)">Write thesis</button><button onclick="navGoTo('education');setTimeout(()=>openLesson(document.querySelector('[data-lesson=risk]')),50)">Define risk</button><button onclick="shareTickerResearch('${ticker}')"><i class="ti ti-share-3"></i> Share research</button><button class="primary" onclick="saveAnalysis('price')">Save snapshot</button></div>`;
+    guide.innerHTML = `<div class="il-guidance-copy"><strong>Build a complete ${ticker} decision, not just a price opinion.</strong><span>Start with the chart, then write down the operating evidence and failure conditions behind your view.</span></div><div class="il-guidance-actions"><button onclick="navGoTo('education');setTimeout(()=>openLesson(document.querySelector('[data-lesson=thesis]')),50)">Learn to write a thesis</button><button onclick="shareTickerResearch('${ticker}')"><i class="ti ti-share-3"></i> Share research</button><button class="primary" onclick="saveAnalysis('price')">Save snapshot</button></div>`;
   }
 
   async function shareTickerResearch(ticker) {
@@ -181,14 +181,13 @@
   function decorateMetricLearning() {
     document.querySelectorAll("#metrics-grid .m-lbl").forEach((label) => {
       if (label.querySelector(".il-metric-learn")) return;
-      const lesson = /RSI|MA 50|MA 200|Volatility/i.test(label.textContent) ? "chart" : /Market Cap|52W|Volume/i.test(label.textContent) ? "thesis" : "quality";
       const button = document.createElement("button");
       button.className = "il-metric-learn";
       button.title = "Learn how to use this metric";
       button.textContent = "?";
       button.onclick = () => {
         navGoTo("education");
-        setTimeout(() => openLesson(document.querySelector(`[data-lesson=${lesson}]`)), 50);
+        setTimeout(() => openLesson(document.querySelector("[data-lesson=thesis]")), 50);
       };
       label.appendChild(button);
     });
@@ -207,8 +206,8 @@
       if (!context) return;
       const ticker = window.IL_STATE?.ticker;
       context.innerHTML = ticker
-        ? `<div class="il-guidance-copy"><strong>Apply the Academy to ${ticker}</strong><span>Use each lesson against the live analysis you already loaded. Your ticker stays available as you move between tools.</span></div><div class="il-guidance-actions"><button onclick="openLesson(document.querySelector('[data-lesson=quality]'))">Quality</button><button onclick="openLesson(document.querySelector('[data-lesson=valuation]'))">Valuation</button><button class="primary" onclick="openLesson(document.querySelector('[data-lesson=review]'))">Review workflow</button></div>`
-        : `<div class="il-guidance-copy"><strong>Learn with a real company.</strong><span>Load a ticker first, then return here to apply each framework to live market data.</span></div><div class="il-guidance-actions"><button class="primary" onclick="navGoTo('analyze')">Load a ticker</button></div>`;
+        ? `<div class="il-guidance-copy"><strong>Apply this module to ${ticker}</strong><span>Use the live company context to write a variant view, operating driver, supporting evidence, and failure condition.</span></div><div class="il-guidance-actions"><button class="primary" onclick="openLesson(document.querySelector('[data-lesson=thesis]'))">Start module</button></div>`
+        : `<div class="il-guidance-copy"><strong>Learn with a real company.</strong><span>Load a ticker first, then return here to build a testable stock thesis.</span></div><div class="il-guidance-actions"><button class="primary" onclick="navGoTo('analyze')">Load a ticker</button></div>`;
     };
     update();
     document.querySelectorAll(".edu-checklist input").forEach((input, index) => {

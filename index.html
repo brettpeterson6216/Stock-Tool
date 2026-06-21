@@ -1390,7 +1390,7 @@ html[data-theme="dark"] .hh-product-preview{background:rgba(14,17,20,.9);box-sha
   </a>
   <div class="nav-links" id="nav-links">
     <a href="/?view=home" id='nav-home' class="nav-tab active-tab" onclick="navGoTo('home');return false;">Market</a>
-    <a href="/?view=tool&amp;section=education" class="nav-tab" id="nav-education-link" onclick="navGoTo('education');return false;">Education</a>
+    <a href="/?view=tool&amp;section=education" class="nav-tab" id="nav-education-link" onclick="navGoTo('education');return false;">Learn</a>
     <a href="/?view=tool&amp;section=reports" class="nav-tab" id="nav-saved-link" onclick="navGoTo('reports');return false;">Saved</a>
     <a href="/?view=tool&amp;section=workspace&amp;workspace_tab=guide" class="nav-tab" id="nav-guide-link" style="display:none;" onclick="openPortfolioGuide();return false;">Portfolio Guide</a>
     <a href='/blog' class="nav-tab" id="nav-blog-link">Blog</a>
@@ -1467,6 +1467,7 @@ html[data-theme="dark"] .hh-product-preview{background:rgba(14,17,20,.9);box-sha
   }
 
   function navGoTo(id, attempt) {
+    if (id === 'adveducation') id = 'education';
     if (id === 'home') { showView('home'); updateNavToolLink(true); initializeHomeDashboard(); return; }
     if (typeof openSection !== 'function' || !document.getElementById('sec-' + id)) {
       const nextAttempt = (attempt || 0) + 1;
@@ -1768,7 +1769,6 @@ html[data-theme="dark"] .hh-product-preview{background:rgba(14,17,20,.9);box-sha
       <div class="hsb-label">Market</div>
       <a class="hsb-item" href="#" onclick="navGoTo('home');document.querySelector('.hg-market')?.scrollIntoView({behavior:'smooth'});return false;"><i class="ti ti-chart-area"></i><span>Market Overview</span></a>
       <a class="hsb-item" href="#" onclick="navGoTo('earnings');return false;"><i class="ti ti-calendar"></i><span>Earnings Calendar</span></a>
-      <a class="hsb-item" href="#" onclick="navGoTo('education');return false;"><i class="ti ti-rocket"></i><span>Market Playbooks</span></a>
       <a class="hsb-item" href="#" onclick="navGoTo('screener');return false;"><i class="ti ti-grid-dots"></i><span>Sector Screener</span></a>
     </div>
 
@@ -1785,7 +1785,7 @@ html[data-theme="dark"] .hh-product-preview{background:rgba(14,17,20,.9);box-sha
       <a class="hsb-item" href="/?view=tool&amp;section=workspace" onclick="navGoTo('workspace');return false;"><i class="ti ti-briefcase"></i><span>Workspace</span></a>
       <a class="hsb-item" href="/?view=tool&amp;section=workspace&amp;workspace_tab=guide" onclick="openPortfolioGuide();return false;"><i class="ti ti-sparkles"></i><span>Portfolio Guide</span></a>
       <a class="hsb-item" href="#" onclick="navGoTo('reports');return false;"><i class="ti ti-bookmark"></i><span>Saved</span></a>
-      <a class="hsb-item" href="/?view=tool&amp;section=education" onclick="navGoTo('education');return false;"><i class="ti ti-school"></i><span>Education</span></a>
+      <a class="hsb-item" href="/?view=tool&amp;section=education" onclick="navGoTo('education');return false;"><i class="ti ti-school"></i><span>Learn</span></a>
     </div>
 
     <div class="hsb-upgrade" id="hsb-upgrade-box" style="display:none;">
@@ -2036,37 +2036,21 @@ html[data-theme="dark"] .hh-product-preview{background:rgba(14,17,20,.9);box-sha
       <div class="hl-learning hc">
         <div class="hc-hdr">
           <span class="hc-title">Continue Learning</span>
-          <a class="hc-link" href="#" onclick="navGoTo('education');return false;">View all &rarr;</a>
+          <a class="hc-link" href="#" onclick="navGoTo('education');return false;">Open module &rarr;</a>
         </div>
         <div class="learn-item" role="button" tabindex="0" onclick="navGoTo('education');setTimeout(()=>openLesson(document.querySelector('[data-lesson=thesis]')),50)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}" style="cursor:pointer;">
           <div class="learn-icon"><i class="ti ti-bulb"></i></div>
           <div class="learn-body">
-            <div class="learn-title">Write the investment thesis</div>
-            <div class="learn-desc">Turn a ticker into a clear, falsifiable investment case.</div>
-            <div class="learn-prog-pct">8 min · Foundation</div>
-          </div>
-        </div>
-        <div class="learn-item" role="button" tabindex="0" onclick="navGoTo('education');setTimeout(()=>openLesson(document.querySelector('[data-lesson=valuation]')),50)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}" style="cursor:pointer;">
-          <div class="learn-icon"><i class="ti ti-calculator"></i></div>
-          <div class="learn-body">
-            <div class="learn-title">Value the business</div>
-            <div class="learn-desc">Use multiples and DCF without falling for false precision.</div>
-            <div class="learn-prog-pct">14 min · Valuation</div>
-          </div>
-        </div>
-        <div class="learn-item" role="button" tabindex="0" onclick="navGoTo('education');setTimeout(()=>openLesson(document.querySelector('[data-lesson=risk]')),50)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}" style="cursor:pointer;">
-          <div class="learn-icon"><i class="ti ti-shield-check"></i></div>
-          <div class="learn-body">
-            <div class="learn-title">Define the risk</div>
-            <div class="learn-desc">Size positions and write down what can break the thesis.</div>
-            <div class="learn-prog-pct">9 min · Risk</div>
+            <div class="learn-title">Build your first stock thesis</div>
+            <div class="learn-desc">Learn the four parts of a testable investment case, then apply them to a company.</div>
+            <div class="learn-prog-pct">12 min · Test module</div>
           </div>
         </div>
       </div>
       <div class="hl-report hc">
         <div class="hc-hdr">
           <span class="hc-title">A repeatable research loop</span>
-          <a class="hc-link" href="#" onclick="navGoTo('education');return false;">Open Academy &rarr;</a>
+          <a class="hc-link" href="#" onclick="navGoTo('education');return false;">Open Learn &rarr;</a>
         </div>
         <div class="workflow-list">
           <div class="workflow-step">
@@ -2170,8 +2154,7 @@ html[data-theme="dark"] .hh-product-preview{background:rgba(14,17,20,.9);box-sha
       <div class="sb-group-pad">
         <div class="sb-group-label">Library</div>
         <div class="sb-item" data-sec="reports"><i class="ti ti-bookmark sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Saved</span></div>
-        <div class="sb-item" data-sec="education"><i class="ti ti-school sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Education</span></div>
-        <div class="sb-item" data-sec="adveducation"><i class="ti ti-certificate sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Adv. Learn</span></div>
+        <div class="sb-item" data-sec="education"><i class="ti ti-school sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Learn</span></div>
       </div>
 
       <div class="sb-bottom">
@@ -2715,12 +2698,12 @@ html[data-theme="dark"] .hh-product-preview{background:rgba(14,17,20,.9);box-sha
           <div class="app-section" id="sec-education"><div class="acc-body" id="body-education" style="display:none;">
             <div class="edu-hero">
               <div>
-                <div class="edu-kicker">ImpliedLens Academy</div>
-                <h2>Build an investment process, not a collection of opinions.</h2>
-                <p>Short, practical lessons connected directly to the tools inside ImpliedLens.</p>
+                <div class="edu-kicker">ImpliedLens Learn</div>
+                <h2>Build your first stock thesis.</h2>
+                <p>One practical test module connected directly to the research tools inside ImpliedLens.</p>
               </div>
               <div class="edu-progress-card">
-                <div class="edu-progress-top"><span>Your progress</span><strong id="edu-progress-label">0 / 8</strong></div>
+                <div class="edu-progress-top"><span>Module progress</span><strong id="edu-progress-label">0 / 1</strong></div>
                 <div class="edu-progress-track"><div id="edu-progress-fill"></div></div>
                 <small>Completed lessons are saved on this device.</small>
               </div>
@@ -2729,57 +2712,21 @@ html[data-theme="dark"] .hh-product-preview{background:rgba(14,17,20,.9);box-sha
             <div class="edu-path-grid">
               <button class="edu-path" data-lesson="thesis" onclick="openLesson(this)">
                 <span class="edu-path-num">01</span><i class="ti ti-bulb"></i>
-                <strong>Write the thesis</strong><span>Turn a ticker into a falsifiable investment case.</span>
-                <em>8 min · Foundation</em>
-              </button>
-              <button class="edu-path" data-lesson="quality" onclick="openLesson(this)">
-                <span class="edu-path-num">02</span><i class="ti ti-building-bank"></i>
-                <strong>Judge business quality</strong><span>Read margins, returns, cash flow, and balance-sheet risk.</span>
-                <em>12 min · Fundamentals</em>
-              </button>
-              <button class="edu-path" data-lesson="valuation" onclick="openLesson(this)">
-                <span class="edu-path-num">03</span><i class="ti ti-calculator"></i>
-                <strong>Value the business</strong><span>Use multiples and DCF without false precision.</span>
-                <em>14 min · Valuation</em>
-              </button>
-              <button class="edu-path" data-lesson="chart" onclick="openLesson(this)">
-                <span class="edu-path-num">04</span><i class="ti ti-chart-candle"></i>
-                <strong>Read the chart</strong><span>Separate trend, momentum, volatility, and noise.</span>
-                <em>10 min · Technicals</em>
-              </button>
-              <button class="edu-path" data-lesson="risk" onclick="openLesson(this)">
-                <span class="edu-path-num">05</span><i class="ti ti-shield-check"></i>
-                <strong>Define the risk</strong><span>Size positions and write down what can break.</span>
-                <em>9 min · Risk</em>
-              </button>
-              <button class="edu-path" data-lesson="review" onclick="openLesson(this)">
-                <span class="edu-path-num">06</span><i class="ti ti-clipboard-check"></i>
-                <strong>Run the review</strong><span>Use a repeatable pre-buy and quarterly checklist.</span>
-                <em>7 min · Workflow</em>
-              </button>
-              <button class="edu-path" data-lesson="forecast" onclick="openLesson(this)">
-                <span class="edu-path-num">07</span><i class="ti ti-chart-arrows-vertical"></i>
-                <strong>Forecast the drivers</strong><span>Connect revenue, margins, earnings, and valuation.</span>
-                <em>13 min · Modeling</em>
-              </button>
-              <button class="edu-path" data-lesson="audit" onclick="openLesson(this)">
-                <span class="edu-path-num">08</span><i class="ti ti-list-check"></i>
-                <strong>Audit the model</strong><span>Find fragile assumptions before they become decisions.</span>
-                <em>11 min · Validation</em>
+                <strong>Build a stock thesis</strong><span>Turn a ticker into a clear, falsifiable investment case.</span>
+                <em>12 min · Foundation</em>
               </button>
             </div>
 
             <div class="edu-workbench">
               <div class="edu-lesson-panel" id="edu-lesson-panel">
-                <div class="edu-panel-empty"><i class="ti ti-school"></i><strong>Select a lesson</strong><span>Each lesson includes a framework, warning signs, and a direct link to the relevant ImpliedLens tool.</span></div>
+                <div class="edu-panel-empty"><i class="ti ti-school"></i><strong>Start the module</strong><span>Learn the framework, complete the applied checklist, and mark the module complete.</span></div>
               </div>
               <aside class="edu-checklist">
-                <div class="edu-side-title">Pre-buy checklist</div>
-                <label><input type="checkbox"> I can explain how the company makes money.</label>
-                <label><input type="checkbox"> Revenue and cash flow support the thesis.</label>
-                <label><input type="checkbox"> Debt is manageable under a weaker scenario.</label>
-                <label><input type="checkbox"> Valuation leaves room for error.</label>
-                <label><input type="checkbox"> I wrote the conditions that make me sell.</label>
+                <div class="edu-side-title">Module exercise</div>
+                <label><input type="checkbox"> I named the operating driver behind my thesis.</label>
+                <label><input type="checkbox"> I wrote what the market may be missing.</label>
+                <label><input type="checkbox"> I identified evidence that would prove me wrong.</label>
+                <label><input type="checkbox"> I set a date or event for reviewing the thesis.</label>
                 <button onclick="resetEduChecklist()"><i class="ti ti-refresh"></i> Reset checklist</button>
               </aside>
             </div>
@@ -4614,7 +4561,7 @@ window.IL_STATE = S;
 const COLORS = ['#B88937','#5F8193','#778673','#9A7771'];
 // Keep this list in sync with the requirePro-gated API routes in routes/financials.js
 // and routes/market-data.js (screener).
-const PRO_SECTIONS = ['financials','advmetrics','projection','dcf','screener','adveducation',
+const PRO_SECTIONS = ['financials','advmetrics','projection','dcf','screener',
   'earnings','secfilings','institutional','analyst','darkpool'];
 const PRO_SECTION_CONTENT = {};
 
@@ -5061,8 +5008,7 @@ const SECTION_META = {
   dcf:         { icon:'ti-calculator',    title:'EPS Intrinsic Value' },
   screener:    { icon:'ti-filter',        title:'Screener' },
   reports:     { icon:'ti-bookmark',      title:'Saved Analyses' },
-  education:   { icon:'ti-school',        title:'Education' },
-  adveducation:{ icon:'ti-certificate',   title:'Adv. Education' },
+  education:   { icon:'ti-school',        title:'Learn' },
 };
 
 function updateSectionHeader(id) {
@@ -7075,31 +7021,28 @@ function toggleTheme() {
 }
 
 const EDU_LESSONS = {
-  thesis:{title:'Write a falsifiable investment thesis',body:'A useful thesis explains what the market may be missing, why the gap should close, and what evidence would prove you wrong. Keep it specific enough to review after every earnings report.',points:['Name the business driver, not just the ticker.','Write the catalyst and a realistic time horizon.','List two measurable reasons the thesis can fail.','Separate company quality from the price you pay.'],formula:'Thesis = Variant view + Catalyst + Evidence + Failure condition',example:'Example: margin recovery exceeds consensus as mix shifts toward recurring revenue.',warning:'A price target without operating evidence is an opinion, not a thesis.',tool:'analyze',toolLabel:'Open chart & analysis'},
-  quality:{title:'Judge business quality from the statements',body:'Strong businesses tend to compound revenue, protect margins, turn profit into cash, and earn attractive returns without relying on excessive debt. One impressive metric is never enough.',points:['Compare revenue growth with free-cash-flow growth.','Check whether margins are stable through cycles.','Look for ROIC above the cost of capital.','Review debt maturities and interest coverage.'],formula:'ROIC = NOPAT / Invested capital',example:'Compare five-year median ROIC with the cost of capital and peer returns.',warning:'High ROE can be caused by leverage or a small equity base.',tool:'financials',toolLabel:'Open financials'},
-  valuation:{title:'Value a range, not a precise number',body:'Valuation is a decision framework. Use peer multiples for market context and a DCF for scenario analysis, then demand a margin of safety before acting.',points:['Use normalized earnings or cash flow.','Run bear, base, and bull assumptions.','Stress discount rate and terminal growth.','Compare implied expectations with your thesis.'],formula:'Present value = Future value / (1 + discount rate)^years',example:'Stress the discount rate and terminal growth together, not one at a time.',warning:'A terminal value above 75% of total value signals heavy assumption risk.',tool:'dcf',toolLabel:'Open DCF model'},
-  chart:{title:'Read trend, momentum, and volatility separately',body:'Charts help with timing and risk management, but they do not replace a business thesis. Start with trend, then use momentum and volatility as supporting evidence.',points:['Use moving averages to frame the trend.','Treat RSI as context, not a buy/sell signal.','Use volume to assess conviction.','Let ATR inform position size and stops.'],formula:'Annualized volatility = Daily return standard deviation x sqrt(252)',example:'Use ATR to compare the planned stop distance with ordinary price movement.',warning:'Indicator thresholds can remain extreme throughout strong trends.',tool:'analyze',toolLabel:'Open interactive chart'},
-  risk:{title:'Define risk before sizing the position',body:'Risk is not just daily volatility. It is permanent capital loss, thesis failure, and portfolio concentration. Define those risks before placing the trade.',points:['Set a maximum portfolio allocation.','Write the thesis-break conditions.','Model a weaker operating scenario.','Avoid stacking highly correlated positions.'],formula:'Position size = Maximum acceptable loss / Loss per share',example:'Model what happens if growth slows and the exit multiple contracts together.',warning:'Diversification by ticker is not diversification when drivers are correlated.',tool:'projection',toolLabel:'Open scenario builder'},
-  review:{title:'Build a repeatable review loop',body:'A repeatable process reduces emotional decisions. Review the thesis after results, compare actuals with expectations, and record what changed.',points:['Review revenue, margins, cash flow, and guidance.','Update valuation assumptions only with evidence.','Record whether the thesis strengthened or weakened.','Save the analysis for the next review.'],formula:'Decision update = New evidence compared with prior expectation',example:'Track estimate revisions and the reason for each change after earnings.',warning:'Do not move the failure condition simply because price declined.',tool:'reports',toolLabel:'Open saved analyses'},
-  forecast:{title:'Build a driver-based operating forecast',body:'A durable forecast connects observable business drivers to revenue, margins, earnings, cash flow, and per-share value. Start with the operating engine before choosing a valuation multiple.',points:['Forecast volume and price separately when possible.','Connect margin changes to specific operating causes.','Model taxes, reinvestment, and diluted share count.','Use scenario ranges instead of a single growth rate.'],formula:'Revenue = Volume x Price; EPS = Net income / Diluted shares',example:'For subscriptions, forecast customers x average revenue per customer.',warning:'Extrapolating a recent growth rate ignores saturation and competition.',tool:'projection',toolLabel:'Open scenario builder'},
-  audit:{title:'Audit assumptions before trusting the output',body:'Model errors often hide in units, timing, signs, and terminal assumptions. Reconcile the starting period, inspect every major dependency, and test whether modest input changes reverse the conclusion.',points:['Reconcile model inputs with reported source data.','Check percentages, decimals, signs, and time periods.','Inspect terminal-value share and scenario spread.','Compare outputs with peer and historical base rates.'],formula:'Sensitivity = Change in output / Change in assumption',example:'Run a two-way table for discount rate and terminal growth.',warning:'A precise output is not reliable when the assumptions are fragile.',tool:'dcf',toolLabel:'Audit the DCF model'}
+  thesis:{title:'Build a falsifiable stock thesis',body:'A useful stock thesis states what the market may be missing, identifies the operating evidence that should close the gap, and defines what would prove the idea wrong. It is a testable decision record, not a prediction that the price will rise.',points:['Variant view: state what you believe differently from the market.','Business driver: connect the view to revenue, margins, cash flow, or per-share value.','Evidence: name the result or catalyst that would support the view.','Failure condition: write the measurable fact that would invalidate it.'],formula:'Thesis = Variant view + Business driver + Evidence + Failure condition',example:'Example: recurring-revenue mix lifts operating margin faster than expected over the next four quarters.',warning:'“The stock looks cheap” is not a thesis unless you explain why earnings or cash-flow expectations are wrong.',tool:'analyze',toolLabel:'Choose a stock to research'}
 };
 
 function eduCompleted(){try{return JSON.parse(localStorage.getItem('il-edu-complete')||'[]')}catch(_){return[]}}
 function updateEduProgress(){
-  const done=eduCompleted();
+  const lessonIds=[...document.querySelectorAll('.edu-path[data-lesson]')].map(card=>card.dataset.lesson);
+  const done=eduCompleted().filter(id=>lessonIds.includes(id));
   document.querySelectorAll('.edu-path').forEach(card=>card.classList.toggle('done',done.includes(card.dataset.lesson)));
   const label=document.getElementById('edu-progress-label'),fill=document.getElementById('edu-progress-fill');
-  if(label)label.textContent=`${done.length} / ${Object.keys(EDU_LESSONS).length}`;
-  if(fill)fill.style.width=`${done.length/Object.keys(EDU_LESSONS).length*100}%`;
+  if(label)label.textContent=`${done.length} / ${lessonIds.length}`;
+  if(fill)fill.style.width=`${lessonIds.length ? done.length/lessonIds.length*100 : 0}%`;
 }
 function openLesson(card){
+  if(!card)return;
   const lesson=EDU_LESSONS[card.dataset.lesson],panel=document.getElementById('edu-lesson-panel');if(!lesson||!panel)return;
   document.querySelectorAll('.edu-path').forEach(el=>el.classList.toggle('active',el===card));
   panel.innerHTML=`<div class="edu-lesson-content"><div class="edu-kicker">Practical lesson</div><h3>${lesson.title}</h3><p>${lesson.body}</p><div class="edu-lesson-points">${lesson.points.map(p=>`<div>${p}</div>`).join('')}</div><div class="edu-lesson-notes"><div class="edu-lesson-note"><strong>Formula</strong>${lesson.formula}</div><div class="edu-lesson-note"><strong>Worked use</strong>${lesson.example}</div><div class="edu-lesson-note"><strong>Failure mode</strong>${lesson.warning}</div></div><div class="edu-lesson-actions"><button onclick="completeLesson('${card.dataset.lesson}')"><i class="ti ti-check"></i> Mark complete</button><button class="secondary" onclick="navGoTo('${lesson.tool}')">${lesson.toolLabel} <i class="ti ti-arrow-right"></i></button></div></div>`;
 }
 function completeLesson(id){
-  const done=new Set(eduCompleted());done.add(id);localStorage.setItem('il-edu-complete',JSON.stringify([...done]));updateEduProgress();toast('Lesson completed','ok');
+  const checks=[...document.querySelectorAll('.edu-checklist input')];
+  if(checks.length&&checks.some(el=>!el.checked)){toast('Complete the module exercise first','err');return;}
+  const done=new Set(eduCompleted());done.add(id);localStorage.setItem('il-edu-complete',JSON.stringify([...done]));updateEduProgress();toast('Module completed','ok');
 }
 function filterGlossary(value){
   const q=String(value||'').trim().toLowerCase();
@@ -8914,7 +8857,7 @@ document.addEventListener('click', function(e) {
     <a href="#" class="mmenu-item" onclick="navGoTo('earnings');_setMobileNav('earnings');_toggleMobileMenu();return false;"><i class="ti ti-trending-up"></i><span>Earnings</span></a>
     <a href="#" class="mmenu-item" onclick="navGoTo('compare');_setMobileNav('compare');_toggleMobileMenu();return false;"><i class="ti ti-arrows-split-2"></i><span>Compare</span></a>
     <a href="#" class="mmenu-item" onclick="navGoTo('dcf');_setMobileNav('dcf');_toggleMobileMenu();return false;"><i class="ti ti-calculator"></i><span>Intrinsic Value</span></a>
-    <a href="#" class="mmenu-item" onclick="navGoTo('education');_setMobileNav('education');_toggleMobileMenu();return false;"><i class="ti ti-school"></i><span>Education</span></a>
+    <a href="#" class="mmenu-item" onclick="navGoTo('education');_setMobileNav('education');_toggleMobileMenu();return false;"><i class="ti ti-school"></i><span>Learn</span></a>
     <a href="#" class="mmenu-item" onclick="navGoTo('projection');_setMobileNav('projection');_toggleMobileMenu();return false;"><i class="ti ti-timeline"></i><span>Projection</span></a>
     <a href="#" class="mmenu-item" onclick="navGoTo('secfilings');_setMobileNav('secfilings');_toggleMobileMenu();return false;"><i class="ti ti-file-text"></i><span>SEC</span></a>
     <a href="#" class="mmenu-item" onclick="navGoTo('institutional');_setMobileNav('institutional');_toggleMobileMenu();return false;"><i class="ti ti-building-bank"></i><span>Inst.</span></a>
