@@ -45,3 +45,9 @@ test("invalid ticker errors are understandable and hide provider details", () =>
   assert.match(html, /r\.status === 404 \? 'TICKER_NOT_FOUND'/);
   assert.doesNotMatch(html, /Could not load "\$\{ticker\}": \$\{e\.message\}/);
 });
+
+test("mobile tool pages keep the brand and theme control visible", () => {
+  assert.match(html, /#main-nav\[data-view="tool"\] \.nav-logo\{[^}]*font-size:1rem/);
+  assert.match(html, /#main-nav\[data-view="tool"\] \.theme-toggle\{display:flex!important/);
+  assert.doesNotMatch(html, /#main-nav\[data-view="tool"\] \.nav-logo>span,\s*#main-nav\[data-view="tool"\] #nav-ticker-bar,\s*#main-nav\[data-view="tool"\] \.theme-toggle\{display:none!important\}/);
+});
