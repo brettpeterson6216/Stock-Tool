@@ -242,6 +242,27 @@ test("GET /favicon.ico serves the brand mark", async () => {
   assert.match(await res.text(), /<svg/);
 });
 
+test("Apple Home Screen icon and web app manifest are available", async () => {
+  const home = await req("/");
+  const html = await home.text();
+  assert.match(html, /<link rel="apple-touch-icon" sizes="180x180" href="\/apple-touch-icon\.png">/);
+  assert.match(html, /<link rel="manifest" href="\/site\.webmanifest">/);
+
+  for (const asset of ["/apple-touch-icon.png", "/app-icon-192.png", "/app-icon-512.png"]) {
+    const res = await req(asset);
+    assert.equal(res.status, 200);
+    assert.match(res.headers.get("content-type"), /image\/png/);
+    assert.ok(Number(res.headers.get("content-length")) > 10000);
+  }
+
+  const manifest = await req("/site.webmanifest");
+  assert.equal(manifest.status, 200);
+  assert.match(manifest.headers.get("content-type"), /manifest\+json|application\/json/);
+  const data = await manifest.json();
+  assert.equal(data.short_name, "ImpliedLens");
+  assert.equal(data.theme_color, "#050505");
+});
+
 test("GET /healthz reports database and build health", async () => {
   const res = await req("/healthz");
   assert.equal(res.status, 200);
