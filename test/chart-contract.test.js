@@ -6,6 +6,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
+const productJs = fs.readFileSync(path.join(__dirname, "..", "public", "product-system.js"), "utf8");
 
 test("chart rebuilds keep prices and timestamps on one aligned series", () => {
   assert.match(html, /function rebuildPriceChart\(\)/);
@@ -64,4 +65,13 @@ test("mobile browser chrome follows the selected site theme", () => {
   assert.match(html, /dark\?'black-translucent':'default'/);
   assert.match(html, /<meta name="apple-mobile-web-app-status-bar-style" content="default">/);
   assert.match(html, /function updateThemeControl\(\) \{\s*window\.syncBrowserChrome\?\.\(\);/);
+});
+
+test("learning module stays in Learn and produces a saved thesis", () => {
+  assert.match(html, /id="edu-workshop"/);
+  assert.match(productJs, /The company loads here\. You stay inside the module\./);
+  assert.match(productJs, /Use Apple example/);
+  assert.match(productJs, /Save thesis and complete/);
+  assert.match(productJs, /\/api\/workspace\/theses\/\$\{encodeURIComponent\(learnState\.ticker\)\}/);
+  assert.doesNotMatch(html, /<div class="edu-side-title">Module exercise<\/div>/);
 });

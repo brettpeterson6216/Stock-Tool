@@ -89,7 +89,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.44.0/dist/tabler-icons.min.css" rel="stylesheet">
-<link href="/product-system.css?v=20260612-1" rel="stylesheet">
+<link href="/product-system.css?v=20260621-2" rel="stylesheet">
 <link href="/workspace-system.css?v=20260614-4" rel="stylesheet">
 <link href="/research-system.css?v=20260611-1" rel="stylesheet">
 <script src="/vendor/chart.umd.min.js?v=4.4.1"></script>
@@ -2722,7 +2722,7 @@ html[data-theme="dark"] .hh-product-preview{background:rgba(14,17,20,.9);box-sha
                 <p>One practical test module connected directly to the research tools inside ImpliedLens.</p>
               </div>
               <div class="edu-progress-card">
-                <div class="edu-progress-top"><span>Module progress</span><strong id="edu-progress-label">0 / 1</strong></div>
+                <div class="edu-progress-top"><span>Workshop progress</span><strong id="edu-progress-label">Step 1 / 6</strong></div>
                 <div class="edu-progress-track"><div id="edu-progress-fill"></div></div>
                 <small>Completed lessons are saved on this device.</small>
               </div>
@@ -2736,18 +2736,8 @@ html[data-theme="dark"] .hh-product-preview{background:rgba(14,17,20,.9);box-sha
               </button>
             </div>
 
-            <div class="edu-workbench">
-              <div class="edu-lesson-panel" id="edu-lesson-panel">
-                <div class="edu-panel-empty"><i class="ti ti-school"></i><strong>Start the module</strong><span>Learn the framework, complete the applied checklist, and mark the module complete.</span></div>
-              </div>
-              <aside class="edu-checklist">
-                <div class="edu-side-title">Module exercise</div>
-                <label><input type="checkbox"> I named the operating driver behind my thesis.</label>
-                <label><input type="checkbox"> I wrote what the market may be missing.</label>
-                <label><input type="checkbox"> I identified evidence that would prove me wrong.</label>
-                <label><input type="checkbox"> I set a date or event for reviewing the thesis.</label>
-                <button onclick="resetEduChecklist()"><i class="ti ti-refresh"></i> Reset checklist</button>
-              </aside>
+            <div id="edu-workshop" class="il-learn-workshop">
+              <div class="edu-panel-empty"><i class="ti ti-school"></i><strong>Loading workshop…</strong></div>
             </div>
 
             <div class="edu-glossary">
@@ -8894,7 +8884,7 @@ document.addEventListener('click', function(e) {
   </div>
 </div>
 </div>
-<script src="/product-system.js?v=20260612-1"></script>
+<script src="/product-system.js?v=20260621-2"></script>
 <script src="/workspace-system.js?v=20260614-4"></script>
 <script src="/research-system.js?v=20260612-1"></script>
 </body>
