@@ -11,12 +11,14 @@
 
 const { test, before, after } = require("node:test");
 const assert  = require("node:assert/strict");
+const fs      = require("node:fs");
 const http    = require("node:http");
 const os      = require("node:os");
 const path    = require("node:path");
 
 const testDbPath = path.join(os.tmpdir(), `il-smoke-test-${process.pid}.db`).replace(/\\/g, "/");
-try { require("node:fs").unlinkSync(testDbPath); } catch (_) {}
+try { fs.unlinkSync(testDbPath); } catch (_) {}
+const legacyCss = fs.readFileSync(path.join(__dirname, "..", "public", "legacy-app.css"), "utf8");
 
 // ── Configure test environment before requiring app modules ──
 process.env.NODE_ENV        = "test";
@@ -139,10 +141,11 @@ test("GET / serves the homepage with a successful status", async () => {
   assert.match(html, /id="mbn-workspace"/);
   assert.match(html, /aria-label="Home"/);
   assert.match(html, /viewport-fit=cover/);
-  assert.match(html, /input,select,textarea\{font-size:16px!important\}/);
-  assert.match(html, /#main-nav\[data-view="tool"\] #nav-ticker-bar\{display:none!important\}/);
-  assert.match(html, /\.nav-acct-wrap,\.nav-acct-btn\{min-width:0;max-width:100%\}/);
-  assert.match(html, /\.nav-acct-menu\{right:0;min-width:min\(220px,calc\(100vw - 1\.5rem\)\)/);
+  assert.match(html, /legacy-app\.css\?v=20260624-1/);
+  assert.match(legacyCss, /input,select,textarea\{font-size:16px!important\}/);
+  assert.match(legacyCss, /#main-nav\[data-view="tool"\] #nav-ticker-bar\{display:none!important\}/);
+  assert.match(legacyCss, /\.nav-acct-wrap,\.nav-acct-btn\{min-width:0;max-width:100%\}/);
+  assert.match(legacyCss, /\.nav-acct-menu\{right:0;min-width:min\(220px,calc\(100vw - 1\.5rem\)\)/);
   assert.match(html, /workspace-system\.js\?v=20260614-4/);
   assert.match(html, /workspace-system\.css\?v=20260614-4/);
   assert.match(html, /__initialWorkspaceTab/);

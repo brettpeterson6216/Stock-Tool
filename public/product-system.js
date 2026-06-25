@@ -120,11 +120,28 @@
     if (p.delayed && !Number.isFinite(age)) freshness = "Provider timing varies";
     return { source: p.source || "Aggregated market data", freshness, warn: Boolean(p.delayed) };
   }
+  function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
+  }
+  function trustDateLabel(value, fallback) {
+    if (!value) return fallback;
+    const date = typeof value === "number" ? new Date(value * 1000) : new Date(value);
+    if (Number.isNaN(date.getTime())) return fallback;
+    return date.toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+  }
+  function trustField(label, value) {
+    return `<div class="il-trust-field"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`;
+  }
   function renderTrust(result) {
     const host = document.getElementById("r-time");
     if (!host) return;
-    const p = provenanceLabel(result?.impliedLensProvenance);
-    host.textContent = "Latest available market context";
+    const provenance = result?.impliedLensProvenance || null;
+    const p = provenanceLabel(provenance);
+    const range = provenance?.range ? String(provenance.range).toUpperCase() : "Current range";
+    const interval = provenance?.interval || "Provider default";
+    const latest = trustDateLabel(provenance?.latestTimestamp, "Latest observation unavailable");
+    const retrieved = trustDateLabel(provenance?.retrievedAt, "Retrieved in this session");
+    host.textContent = "Latest available context";
     let row = document.getElementById("il-trust-row");
     if (!row) {
       row = document.createElement("div");
@@ -132,7 +149,18 @@
       row.className = "il-trust-row";
       host.parentElement.appendChild(row);
     }
-    row.innerHTML = `<span class="il-trust-chip"><i class="ti ti-database"></i>${p.source}</span><span class="il-trust-chip ${p.warn ? "warn" : ""}"><i class="ti ti-clock"></i>${p.freshness}</span><a class="il-trust-chip" href="/data-sources"><i class="ti ti-external-link"></i>Methodology</a>`;
+    row.innerHTML = `<span class="il-trust-chip"><i class="ti ti-database"></i>${escapeHtml(p.source)}</span><span class="il-trust-chip ${p.warn ? "warn" : ""}"><i class="ti ti-clock"></i>${escapeHtml(p.freshness)}</span><a class="il-trust-chip" href="/data-sources"><i class="ti ti-external-link"></i>Methodology</a>`;
+    let panel = document.getElementById("il-trust-panel");
+    if (!panel) {
+      panel = document.createElement("div");
+      panel.id = "il-trust-panel";
+      panel.className = "il-trust-panel";
+      const header = document.querySelector("#stock-result .result-header");
+      header?.insertAdjacentElement("afterend", panel);
+    }
+    if (panel) {
+      panel.innerHTML = `<div class="il-trust-panel-head"><span><i class="ti ti-shield-check"></i>Evidence quality</span><a href="/data-sources">Data methodology</a></div><div class="il-trust-grid">${trustField("Source", p.source)}${trustField("Freshness", p.freshness)}${trustField("Latest bar", latest)}${trustField("Retrieved", retrieved)}${trustField("Range", range)}${trustField("Interval", interval)}</div><div class="il-trust-note">Use this as latest available context, not a real-time trading signal. Review the source, range, and interval before saving a thesis.</div>`;
+    }
   }
 
   function installQuoteTrust() {
@@ -191,6 +219,55 @@
       };
       label.appendChild(button);
     });
+  }
+
+  const DECISION_PATH = [
+    { key: "search", icon: "ti-search", label: "Search", detail: "Load the company context.", section: "analyze" },
+    { key: "evidence", icon: "ti-file-search", label: "Evidence", detail: "Read filings, calls, and metrics.", section: "financials" },
+    { key: "model", icon: "ti-calculator", label: "Model", detail: "Test assumptions and valuation ranges.", section: "projection" },
+    { key: "thesis", icon: "ti-pencil", label: "Thesis", detail: "Write what would prove you wrong.", section: "education" },
+    { key: "review", icon: "ti-calendar-check", label: "Review", detail: "Save the decision and revisit it.", section: "workspace" },
+  ];
+
+  function decisionPathHtml(compact = false) {
+    return `<div class="il-decision-path ${compact ? "compact" : ""}" aria-label="Implied Lens decision workflow">
+      ${DECISION_PATH.map((step, index) => `<button type="button" class="il-decision-step" data-il-spine="${step.section}">
+        <span class="il-decision-num">${String(index + 1).padStart(2, "0")}</span>
+        <i class="ti ${step.icon}" aria-hidden="true"></i>
+        <strong>${step.label}</strong>
+        <em>${step.detail}</em>
+      </button>`).join("")}
+    </div>`;
+  }
+
+  function bindDecisionPath(host) {
+    host.querySelectorAll("[data-il-spine]").forEach(button => {
+      button.onclick = () => {
+        const section = button.dataset.ilSpine;
+        if (typeof window.track === "function") window.track("decision_spine_clicked", { section });
+        if (typeof window.navGoTo === "function") window.navGoTo(section);
+      };
+    });
+  }
+
+  function installDecisionSpine() {
+    const heroSearch = document.querySelector(".home-hero .hh-search");
+    if (heroSearch && !document.getElementById("il-home-decision-path")) {
+      const wrap = document.createElement("div");
+      wrap.id = "il-home-decision-path";
+      wrap.innerHTML = decisionPathHtml(true);
+      heroSearch.insertAdjacentElement("afterend", wrap);
+      bindDecisionPath(wrap);
+    }
+    const welcome = document.getElementById("tool-welcome");
+    if (welcome && !document.getElementById("il-tool-decision-path")) {
+      const wrap = document.createElement("div");
+      wrap.id = "il-tool-decision-path";
+      wrap.className = "il-tool-decision-wrap";
+      wrap.innerHTML = `<div class="il-tool-decision-head"><span>Decision path</span><strong>Turn a ticker into a reviewable investment record.</strong></div>${decisionPathHtml(false)}`;
+      welcome.insertBefore(wrap, welcome.firstChild);
+      bindDecisionPath(wrap);
+    }
   }
 
   const learnDefaults = { step: 0, ticker: "", company: "", price: null, quiz: "", quizCorrect: false, driver: "", variant: "", evidence: "", failure: "", reviewDate: "", completed: false };
@@ -511,6 +588,7 @@
   function init() {
     installChartPersistence();
     installQuoteTrust();
+    installDecisionSpine();
     installEducationContext();
     installOnboarding();
     installBuildBadge();

@@ -6,7 +6,10 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
+const legacyCss = fs.readFileSync(path.join(__dirname, "..", "public", "legacy-app.css"), "utf8");
 const productJs = fs.readFileSync(path.join(__dirname, "..", "public", "product-system.js"), "utf8");
+const productCss = fs.readFileSync(path.join(__dirname, "..", "public", "product-system.css"), "utf8");
+const htmlAndLegacyCss = `${html}\n${legacyCss}`;
 
 test("chart rebuilds keep prices and timestamps on one aligned series", () => {
   assert.match(html, /function rebuildPriceChart\(\)/);
@@ -27,7 +30,7 @@ test("price charts expose dependable zoom controls and mobile gestures", () => {
   assert.match(html, /async function loadMorePriceHistory\(\)/);
   assert.match(html, /CHART_RANGE_ORDER=\['1d','5d','1mo','3mo','6mo','1y','2y','5y','max'\]/);
   assert.match(html, /minRange:4/);
-  assert.match(html, /#price-chart\{touch-action:none\}/);
+  assert.match(htmlAndLegacyCss, /#price-chart\{touch-action:none\}/);
 });
 
 test("mobile chart headers reserve room for controls and explain unavailable indicators", () => {
@@ -35,9 +38,9 @@ test("mobile chart headers reserve room for controls and explain unavailable ind
   assert.match(html, /50D Avg.*bars:50|ma50:\s*\{\s*bars:50/);
   assert.match(html, /ma200:\{\s*bars:200/);
   assert.match(html, /S\.inds\.ma50&&vc\.length>=INDICATOR_REQUIREMENTS\.ma50\.bars/);
-  assert.match(html, /\.g2\{grid-template-columns:1fr!important\}/);
-  assert.match(html, /\.chart-wrap \.chart-header \.ind-row,\.chart-wrap \.chart-header \.range-pills\{display:none!important\}/);
-  assert.match(html, /\.chart-exp-btn\{\s*position:static/);
+  assert.match(htmlAndLegacyCss, /\.g2\{grid-template-columns:1fr!important\}/);
+  assert.match(htmlAndLegacyCss, /\.chart-wrap \.chart-header \.ind-row,\.chart-wrap \.chart-header \.range-pills\{display:none!important\}/);
+  assert.match(htmlAndLegacyCss, /\.chart-exp-btn\{\s*position:static/);
   assert.doesNotMatch(html, /<div class="chart-wrap">\s*<button class="chart-exp-btn"/);
 });
 
@@ -48,16 +51,16 @@ test("invalid ticker errors are understandable and hide provider details", () =>
 });
 
 test("mobile tool pages keep the brand and theme control visible", () => {
-  assert.match(html, /#main-nav\[data-view="tool"\] \.theme-toggle\{display:flex!important/);
-  assert.doesNotMatch(html, /#main-nav\[data-view="tool"\] \.nav-logo\{[^}]*(font-size|gap|padding-right)/);
-  assert.doesNotMatch(html, /#main-nav\[data-view="tool"\] \.theme-toggle\{[^}]*(scale|margin-right)/);
-  assert.doesNotMatch(html, /#main-nav\[data-view="tool"\] \.nav-logo>span,\s*#main-nav\[data-view="tool"\] #nav-ticker-bar,\s*#main-nav\[data-view="tool"\] \.theme-toggle\{display:none!important\}/);
+  assert.match(htmlAndLegacyCss, /#main-nav\[data-view="tool"\] \.theme-toggle\{display:flex!important/);
+  assert.doesNotMatch(htmlAndLegacyCss, /#main-nav\[data-view="tool"\] \.nav-logo\{[^}]*(font-size|gap|padding-right)/);
+  assert.doesNotMatch(htmlAndLegacyCss, /#main-nav\[data-view="tool"\] \.theme-toggle\{[^}]*(scale|margin-right)/);
+  assert.doesNotMatch(htmlAndLegacyCss, /#main-nav\[data-view="tool"\] \.nav-logo>span,\s*#main-nav\[data-view="tool"\] #nav-ticker-bar,\s*#main-nav\[data-view="tool"\] \.theme-toggle\{display:none!important\}/);
 });
 
 test("the fixed header covers the top device safe area", () => {
-  assert.match(html, /height:calc\(56px \+ env\(safe-area-inset-top, 0px\)\)/);
-  assert.match(html, /#view-home\{padding-top:calc\(56px \+ env\(safe-area-inset-top, 0px\)\)\}/);
-  assert.match(html, /#view-tool \{[^}]*padding-top:calc\(56px \+ env\(safe-area-inset-top, 0px\)\)/);
+  assert.match(htmlAndLegacyCss, /height:calc\(56px \+ env\(safe-area-inset-top, 0px\)\)/);
+  assert.match(htmlAndLegacyCss, /#view-home\{padding-top:calc\(56px \+ env\(safe-area-inset-top, 0px\)\)\}/);
+  assert.match(htmlAndLegacyCss, /#view-tool \{[^}]*padding-top:calc\(56px \+ env\(safe-area-inset-top, 0px\)\)/);
 });
 
 test("mobile browser chrome follows the selected site theme", () => {
@@ -74,4 +77,41 @@ test("learning module stays in Learn and produces a saved thesis", () => {
   assert.match(productJs, /Save thesis and complete/);
   assert.match(productJs, /\/api\/workspace\/theses\/\$\{encodeURIComponent\(learnState\.ticker\)\}/);
   assert.doesNotMatch(html, /<div class="edu-side-title">Module exercise<\/div>/);
+});
+
+test("product spine presents one reviewable decision workflow", () => {
+  assert.match(productJs, /const DECISION_PATH = \[/);
+  assert.match(productJs, /label: "Search".*section: "analyze"/s);
+  assert.match(productJs, /label: "Evidence".*section: "financials"/s);
+  assert.match(productJs, /label: "Model".*section: "projection"/s);
+  assert.match(productJs, /label: "Thesis".*section: "education"/s);
+  assert.match(productJs, /label: "Review".*section: "workspace"/s);
+  assert.match(productJs, /Turn a ticker into a reviewable investment record\./);
+  assert.match(productJs, /window\.navGoTo\(section\)/);
+});
+
+test("primary navigation avoids duplicate tool destinations", () => {
+  assert.doesNotMatch(html, /<span>Chart<\/span>/);
+  assert.doesNotMatch(html, /Scenario Builder/);
+  assert.match(html, /<span class="sb-item-label">Analyze<\/span>/);
+  assert.match(html, /Start with a company/);
+  assert.match(html, /Load a ticker, read the evidence, model the range, then save a reviewable thesis\./);
+  assert.match(html, /Popular starting points/);
+});
+
+test("quote results make data trust visible before decisions", () => {
+  assert.match(productJs, /function renderTrust\(result\)/);
+  assert.match(productJs, /impliedLensProvenance/);
+  assert.match(productJs, /Evidence quality/);
+  assert.match(productJs, /Latest available context/);
+  assert.match(productJs, /retrievedAt/);
+  assert.match(productJs, /latestTimestamp/);
+  assert.match(productJs, /trustField\("Range", range\)/);
+  assert.match(productJs, /trustField\("Interval", interval\)/);
+  assert.match(productJs, /Use this as latest available context, not a real-time trading signal/);
+  assert.match(productJs, /href="\/data-sources"/);
+  assert.match(productJs, /escapeHtml/);
+  assert.match(productCss, /\.il-trust-panel\{/);
+  assert.match(productCss, /\.il-trust-grid\{display:grid;grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
+  assert.match(productCss, /\.il-trust-note\{/);
 });
