@@ -11,6 +11,7 @@ const staticCss = fs.readFileSync(path.join(__dirname, "..", "public", "static-p
 const signupHtml = fs.readFileSync(path.join(__dirname, "..", "public", "signup.html"), "utf8");
 const productJs = fs.readFileSync(path.join(__dirname, "..", "public", "product-system.js"), "utf8");
 const productCss = fs.readFileSync(path.join(__dirname, "..", "public", "product-system.css"), "utf8");
+const landingPreviewPng = fs.readFileSync(path.join(__dirname, "..", "public", "landing-product-preview.png"));
 const htmlAndLegacyCss = `${html}\n${legacyCss}`;
 
 test("chart rebuilds keep prices and timestamps on one aligned series", () => {
@@ -207,7 +208,7 @@ test("premium landing visual system matches the generated product preview direct
 });
 
 test("premium visual system is applied across app and static pages", () => {
-  assert.match(html, /legacy-app\.css\?v=20260625-17/);
+  assert.match(html, /legacy-app\.css\?v=20260625-18/);
   assert.match(html, /product-system\.css\?v=20260625-1/);
   assert.match(signupHtml, /static-polish\.css\?v=20260625-2/);
   assert.match(html, /<a class="btn-nav" id="nav-signup" href="\/signup">Claim \$0\.99<\/a>/);
@@ -235,6 +236,9 @@ test("gold ripple image is the default backdrop across landing, market, and tool
   assert.match(legacyCss, /Site-wide ripple backdrop final pass/);
   assert.match(legacyCss, /Literal shared image backdrop/);
   assert.match(legacyCss, /Light-mode polish baseline/);
+  assert.match(legacyCss, /Remove text-card backgrounds/);
+  assert.match(legacyCss, /\.il-landing-copy,[\s\S]*\.il-workflow-copy,[\s\S]*background:transparent!important/);
+  assert.match(legacyCss, /\.il-landing-preview,[\s\S]*\.il-landing-preview\.image-preview,[\s\S]*background:transparent!important/);
   assert.match(legacyCss, /--gold-ripple-bg:url\("\/gold-ripple-background\.jpg\?v=20260625-3"\)/);
   assert.match(legacyCss, /--gold-ripple-overlay:none/);
   assert.match(legacyCss, /body::before\{[\s\S]*background-color:#E2BD6E!important;[\s\S]*background-image:var\(--gold-ripple-bg\)!important/);
@@ -243,6 +247,11 @@ test("gold ripple image is the default backdrop across landing, market, and tool
   assert.match(legacyCss, /background-attachment:fixed!important/);
   assert.match(legacyCss, /background-attachment:scroll!important/);
   assert.match(legacyCss, /backdrop-filter:blur\(20px\) saturate\(1\.08\)!important/);
+});
+
+test("landing promo workspace image has transparency around the product", () => {
+  assert.equal(landingPreviewPng.toString("ascii", 1, 4), "PNG");
+  assert.equal(landingPreviewPng[25], 6, "landing preview PNG should use RGBA color type");
 });
 
 test("tool containers use premium rounded surfaces instead of sharp rectangles", () => {

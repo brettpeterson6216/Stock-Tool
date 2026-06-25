@@ -4763,3 +4763,70 @@ html[data-theme="dark"] #view-tool .m-sub,
 html[data-theme="dark"] #view-tool .fc-label{
   color:rgba(23,18,11,.68)!important;
 }
+
+/* Remove text-card backgrounds; let copy and promo art sit directly on the gold backdrop. */
+.il-landing-copy,
+.il-workflow-copy,
+.il-landing-social,
+.il-landing-band,
+.il-landing-band>div,
+.il-landing-pricing,
+.il-landing-pricing>div,
+.il-workflow-visual,
+html[data-theme="dark"] .il-landing-copy,
+html[data-theme="dark"] .il-workflow-copy,
+html[data-theme="dark"] .il-landing-social,
+html[data-theme="dark"] .il-landing-band,
+html[data-theme="dark"] .il-landing-band>div,
+html[data-theme="dark"] .il-landing-pricing,
+html[data-theme="dark"] .il-landing-pricing>div,
+html[data-theme="dark"] .il-workflow-visual{
+  background:transparent!important;
+  background-color:transparent!important;
+  background-image:none!important;
+  border-color:transparent!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+.il-landing-preview,
+.il-landing-preview.image-preview,
+html[data-theme="dark"] .il-landing-preview,
+html[data-theme="dark"] .il-landing-preview.image-preview{
+  background:transparent!important;
+  background-color:transparent!important;
+  background-image:none!important;
+  border-color:transparent!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  overflow:visible!important;
+}
+.il-landing-preview.image-preview img{
+  background:transparent!important;
+  filter:drop-shadow(0 24px 44px rgba(77,52,14,.24));
+}
+#view-tool .app-section-hdr,
+#view-tool .tool-welcome,
+#view-tool .tool-intro,
+#market-page .home-main,
+#market-page .home-grid,
+#market-page .home-lower,
+#market-page .home-proof,
+#market-page .home-guide-showcase,
+html[data-theme="dark"] #view-tool .app-section-hdr,
+html[data-theme="dark"] #view-tool .tool-welcome,
+html[data-theme="dark"] #view-tool .tool-intro,
+html[data-theme="dark"] #market-page .home-main,
+html[data-theme="dark"] #market-page .home-grid,
+html[data-theme="dark"] #market-page .home-lower,
+html[data-theme="dark"] #market-page .home-proof,
+html[data-theme="dark"] #market-page .home-guide-showcase{
+  background:transparent!important;
+  background-color:transparent!important;
+  background-image:none!important;
+  border-color:transparent!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
