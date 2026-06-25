@@ -184,12 +184,18 @@ test("premium landing visual system matches the generated product preview direct
 });
 
 test("premium visual system is applied across app and static pages", () => {
-  assert.match(html, /legacy-app\.css\?v=20260625-8/);
-  assert.match(signupHtml, /static-polish\.css\?v=20260625-1/);
+  assert.match(html, /legacy-app\.css\?v=20260625-10/);
+  assert.match(signupHtml, /static-polish\.css\?v=20260625-2/);
   assert.match(html, /<a class="btn-nav" id="nav-signup" href="\/signup">Claim \$0\.99<\/a>/);
   assert.match(legacyCss, /Site-wide premium polish/);
+  assert.match(legacyCss, /Gold theme harmonization/);
+  assert.match(legacyCss, /\.il-landing-preview\{[\s\S]*linear-gradient\(180deg,#F6E3B7,#E9C986\)!important/);
+  assert.match(legacyCss, /html\[data-theme="dark"\] \.app-section,[\s\S]*html\[data-theme="dark"\] \.il-learn-preview>div\{[\s\S]*linear-gradient\(180deg,rgba\(31,34,38,.96\),rgba\(14,16,18,.98\)\)!important/);
+  assert.match(staticCss, /Static theme harmonization/);
   assert.match(legacyCss, /#market-page \.home-grid,[\s\S]*#market-page \.home-lower\{[\s\S]*gap:16px!important/);
   assert.match(legacyCss, /#market-page \.hc,[\s\S]*#market-page \.hl-report\{[\s\S]*border-radius:16px!important/);
+  assert.match(legacyCss, /#market-page \.hc,[\s\S]*#market-page \.hg-market \.mo-bv2-card\{[\s\S]*rgba\(255,250,239,.94\)/);
+  assert.match(legacyCss, /html\[data-theme="dark"\] #market-page \.hc,[\s\S]*html\[data-theme="dark"\] #market-page \.hg-market \.mo-bv2-card\{[\s\S]*rgba\(34,37,41,.96\)/);
   assert.match(legacyCss, /#market-page \.mo-tab\.on,[\s\S]*#market-page \.movers-tab\.active\{[\s\S]*linear-gradient\(180deg,var\(--lens-gold-2\),var\(--lens-gold\)\)/);
   assert.match(legacyCss, /\.home-ticker-strip,\s*\.ht-card,\s*\.hc,\s*\.hg-market/s);
   assert.match(legacyCss, /\.pricing-card,\s*\.pricing-compare,\s*\.modal,\s*\.nav-acct-menu/s);

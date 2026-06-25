@@ -3445,3 +3445,355 @@ html[data-theme="dark"] .il-landing{
   border-color:rgba(230,188,99,.10)!important;
   color:rgba(245,235,215,.72)!important;
 }
+
+/* Gold theme harmonization: keep the page warm, let information boxes follow the theme toggle. */
+body,
+#view-home,
+#view-tool,
+.home-shell,
+.hs-main,
+.app-shell,
+.app-main,
+.app-content-scroll{
+  background:
+    radial-gradient(980px 520px at 84% 0%,rgba(217,179,94,.26),transparent 64%),
+    linear-gradient(180deg,#FBF2DE 0%,#F1D8A6 100%)!important;
+  color:#17120B!important;
+}
+html[data-theme="dark"] body,
+html[data-theme="dark"] #view-home,
+html[data-theme="dark"] #view-tool,
+html[data-theme="dark"] .home-shell,
+html[data-theme="dark"] .hs-main,
+html[data-theme="dark"] .app-shell,
+html[data-theme="dark"] .app-main,
+html[data-theme="dark"] .app-content-scroll{
+  background:
+    radial-gradient(980px 520px at 84% 0%,rgba(217,179,94,.22),transparent 64%),
+    linear-gradient(180deg,#FBF2DE 0%,#E9C986 100%)!important;
+  color:#17120B!important;
+}
+.il-landing-preview{
+  background:
+    radial-gradient(720px 300px at 100% 0%,rgba(217,179,94,.22),transparent 70%),
+    linear-gradient(180deg,#F6E3B7,#E9C986)!important;
+}
+html[data-theme="dark"] .il-landing-preview{
+  background:
+    radial-gradient(720px 300px at 100% 0%,rgba(217,179,94,.24),transparent 70%),
+    linear-gradient(180deg,#F4DCA8,#D9B35E)!important;
+}
+.app-section,
+.chart-wrap,
+.metric-card,
+.panel-box,
+.il-tool-shell,
+.il-trust-panel,
+.il-proj-evidence,
+.il-proj-review,
+.il-projection-explain,
+.il-tool-decision-wrap,
+.il-learn-workshop,
+.il-onboarding,
+.hc,
+.hg-market,
+.home-ticker-strip,
+.ht-card,
+.pricing-card,
+.pricing-compare,
+.modal,
+.nav-acct-menu,
+.acc-body,
+.il-shell-top,
+.il-shell-ticker>div,
+.il-shell-preview>div,
+.il-trust-field,
+.il-drawer-grid>div,
+.il-result-summary>div,
+.il-evidence-grid .il-trust-field,
+.il-template-row,
+.il-assumption-checklist>div,
+.il-decision-step,
+.il-tool-guide-toggle,
+.il-tool-guide-body>div,
+.il-learn-stepper span,
+.il-learn-examples button,
+.il-learn-search,
+.il-learn-quiz button,
+.il-learn-preview>div{
+  background:linear-gradient(180deg,rgba(255,250,239,.94),rgba(244,224,181,.92))!important;
+  border-color:rgba(98,69,22,.18)!important;
+  color:#17120B!important;
+  box-shadow:0 22px 58px rgba(83,57,15,.14),inset 0 1px 0 rgba(255,255,255,.54)!important;
+}
+html[data-theme="dark"] .app-section,
+html[data-theme="dark"] .chart-wrap,
+html[data-theme="dark"] .metric-card,
+html[data-theme="dark"] .panel-box,
+html[data-theme="dark"] .il-tool-shell,
+html[data-theme="dark"] .il-trust-panel,
+html[data-theme="dark"] .il-proj-evidence,
+html[data-theme="dark"] .il-proj-review,
+html[data-theme="dark"] .il-projection-explain,
+html[data-theme="dark"] .il-tool-decision-wrap,
+html[data-theme="dark"] .il-learn-workshop,
+html[data-theme="dark"] .il-onboarding,
+html[data-theme="dark"] .hc,
+html[data-theme="dark"] .hg-market,
+html[data-theme="dark"] .home-ticker-strip,
+html[data-theme="dark"] .ht-card,
+html[data-theme="dark"] .pricing-card,
+html[data-theme="dark"] .pricing-compare,
+html[data-theme="dark"] .modal,
+html[data-theme="dark"] .nav-acct-menu,
+html[data-theme="dark"] .acc-body,
+html[data-theme="dark"] .il-shell-top,
+html[data-theme="dark"] .il-shell-ticker>div,
+html[data-theme="dark"] .il-shell-preview>div,
+html[data-theme="dark"] .il-trust-field,
+html[data-theme="dark"] .il-drawer-grid>div,
+html[data-theme="dark"] .il-result-summary>div,
+html[data-theme="dark"] .il-evidence-grid .il-trust-field,
+html[data-theme="dark"] .il-template-row,
+html[data-theme="dark"] .il-assumption-checklist>div,
+html[data-theme="dark"] .il-decision-step,
+html[data-theme="dark"] .il-tool-guide-toggle,
+html[data-theme="dark"] .il-tool-guide-body>div,
+html[data-theme="dark"] .il-learn-stepper span,
+html[data-theme="dark"] .il-learn-examples button,
+html[data-theme="dark"] .il-learn-search,
+html[data-theme="dark"] .il-learn-quiz button,
+html[data-theme="dark"] .il-learn-preview>div{
+  background:linear-gradient(180deg,rgba(31,34,38,.96),rgba(14,16,18,.98))!important;
+  border-color:rgba(230,188,99,.18)!important;
+  color:var(--lens-text)!important;
+  box-shadow:0 24px 70px rgba(0,0,0,.30),inset 0 1px 0 rgba(255,255,255,.05)!important;
+}
+.app-main h1,
+.app-main h2,
+.app-main h3,
+.app-section-title,
+.chart-title,
+.il-shell-top strong,
+.il-shell-ticker strong,
+.il-proj-head strong,
+.il-drawer-head h2,
+.il-learn-card h3,
+.il-learn-complete h3,
+.hc-title,
+.ht-sym,
+.ht-price,
+.wl-sym,
+.wl-price,
+.learn-title,
+.pricing-card h3,
+.pricing-card .p-amount,
+.pricing-card .p-dollar,
+.modal h3,
+.modal .plan-opt-price,
+.nav-acct-name{
+  color:#17120B!important;
+}
+html[data-theme="dark"] .app-main h1,
+html[data-theme="dark"] .app-main h2,
+html[data-theme="dark"] .app-main h3,
+html[data-theme="dark"] .app-section-title,
+html[data-theme="dark"] .chart-title,
+html[data-theme="dark"] .il-shell-top strong,
+html[data-theme="dark"] .il-shell-ticker strong,
+html[data-theme="dark"] .il-proj-head strong,
+html[data-theme="dark"] .il-drawer-head h2,
+html[data-theme="dark"] .il-learn-card h3,
+html[data-theme="dark"] .il-learn-complete h3,
+html[data-theme="dark"] .hc-title,
+html[data-theme="dark"] .ht-sym,
+html[data-theme="dark"] .ht-price,
+html[data-theme="dark"] .wl-sym,
+html[data-theme="dark"] .wl-price,
+html[data-theme="dark"] .learn-title,
+html[data-theme="dark"] .pricing-card h3,
+html[data-theme="dark"] .pricing-card .p-amount,
+html[data-theme="dark"] .pricing-card .p-dollar,
+html[data-theme="dark"] .modal h3,
+html[data-theme="dark"] .modal .plan-opt-price,
+html[data-theme="dark"] .nav-acct-name{
+  color:var(--lens-text)!important;
+}
+.app-main p,
+.app-main li,
+.m-sub,
+.panel-box .muted,
+.il-guidance-copy span,
+.il-trust-note,
+.il-observed-note,
+.il-result-note,
+.il-shell-preview span,
+.il-drawer-body p,
+.il-learn-card>p,
+.il-learn-copy,
+.ht-name,
+.hc-sub,
+.wl-meta,
+.learn-sub,
+.pricing-card .p-desc,
+.pricing-card .p-per,
+.pricing-card .p-features li,
+.pricing-compare-row>span,
+.modal p,
+.modal-note,
+.nav-acct-email{
+  color:rgba(23,18,11,.68)!important;
+}
+html[data-theme="dark"] .app-main p,
+html[data-theme="dark"] .app-main li,
+html[data-theme="dark"] .m-sub,
+html[data-theme="dark"] .panel-box .muted,
+html[data-theme="dark"] .il-guidance-copy span,
+html[data-theme="dark"] .il-trust-note,
+html[data-theme="dark"] .il-observed-note,
+html[data-theme="dark"] .il-result-note,
+html[data-theme="dark"] .il-shell-preview span,
+html[data-theme="dark"] .il-drawer-body p,
+html[data-theme="dark"] .il-learn-card>p,
+html[data-theme="dark"] .il-learn-copy,
+html[data-theme="dark"] .ht-name,
+html[data-theme="dark"] .hc-sub,
+html[data-theme="dark"] .wl-meta,
+html[data-theme="dark"] .learn-sub,
+html[data-theme="dark"] .pricing-card .p-desc,
+html[data-theme="dark"] .pricing-card .p-per,
+html[data-theme="dark"] .pricing-card .p-features li,
+html[data-theme="dark"] .pricing-compare-row>span,
+html[data-theme="dark"] .modal p,
+html[data-theme="dark"] .modal-note,
+html[data-theme="dark"] .nav-acct-email{
+  color:rgba(245,235,215,.72)!important;
+}
+.ticker-input,
+.search-row,
+input,
+select,
+textarea,
+.il-shell-search,
+.il-notes-card textarea,
+.il-notes-card input,
+.il-learn-search input,
+.il-learn-field textarea,
+.il-learn-date input{
+  background:rgba(255,250,239,.78)!important;
+  border-color:rgba(98,69,22,.20)!important;
+  color:#17120B!important;
+}
+html[data-theme="dark"] .ticker-input,
+html[data-theme="dark"] .search-row,
+html[data-theme="dark"] input,
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] .il-shell-search,
+html[data-theme="dark"] .il-notes-card textarea,
+html[data-theme="dark"] .il-notes-card input,
+html[data-theme="dark"] .il-learn-search input,
+html[data-theme="dark"] .il-learn-field textarea,
+html[data-theme="dark"] .il-learn-date input{
+  background:#0C0E10!important;
+  border-color:rgba(230,188,99,.20)!important;
+  color:var(--lens-text)!important;
+}
+#market-page .hs-main{
+  background:
+    linear-gradient(90deg,rgba(118,82,29,.045) 1px,transparent 1px),
+    linear-gradient(rgba(118,82,29,.035) 1px,transparent 1px),
+    radial-gradient(760px 360px at 100% 0%,rgba(217,179,94,.18),transparent 70%),
+    #F1D8A6!important;
+  background-size:56px 56px,56px 56px,auto,auto!important;
+}
+html[data-theme="dark"] #market-page .hs-main{
+  background:
+    linear-gradient(90deg,rgba(118,82,29,.045) 1px,transparent 1px),
+    linear-gradient(rgba(118,82,29,.035) 1px,transparent 1px),
+    radial-gradient(760px 360px at 100% 0%,rgba(217,179,94,.16),transparent 70%),
+    #E9C986!important;
+  background-size:56px 56px,56px 56px,auto,auto!important;
+}
+#market-page .hc,
+#market-page .hg-market,
+#market-page .hg-watch,
+#market-page .hg-signals,
+#market-page .hg-insights,
+#market-page .hg-movers,
+#market-page .hl-learning,
+#market-page .hl-report,
+#market-page .hg-market .mo-idx-item,
+#market-page .hg-market .mo-bv2-card{
+  background:linear-gradient(180deg,rgba(255,250,239,.94),rgba(244,224,181,.92))!important;
+  border-color:rgba(98,69,22,.18)!important;
+  color:#17120B!important;
+}
+html[data-theme="dark"] #market-page .hc,
+html[data-theme="dark"] #market-page .hg-market,
+html[data-theme="dark"] #market-page .hg-watch,
+html[data-theme="dark"] #market-page .hg-signals,
+html[data-theme="dark"] #market-page .hg-insights,
+html[data-theme="dark"] #market-page .hg-movers,
+html[data-theme="dark"] #market-page .hl-learning,
+html[data-theme="dark"] #market-page .hl-report,
+html[data-theme="dark"] #market-page .hg-market .mo-idx-item,
+html[data-theme="dark"] #market-page .hg-market .mo-bv2-card{
+  background:linear-gradient(180deg,rgba(34,37,41,.96),rgba(14,16,18,.98))!important;
+  border-color:rgba(230,188,99,.18)!important;
+  color:var(--lens-text)!important;
+}
+#market-page .mo-title,
+#market-page .hc-title,
+#market-page .ht-sym,
+#market-page .ht-price,
+#market-page .wl-sym,
+#market-page .wl-price,
+#market-page .learn-title,
+#market-page .report-title,
+#market-page .mo-idx-price,
+#market-page .mo-bv2-val{
+  color:#17120B!important;
+}
+html[data-theme="dark"] #market-page .mo-title,
+html[data-theme="dark"] #market-page .hc-title,
+html[data-theme="dark"] #market-page .ht-sym,
+html[data-theme="dark"] #market-page .ht-price,
+html[data-theme="dark"] #market-page .wl-sym,
+html[data-theme="dark"] #market-page .wl-price,
+html[data-theme="dark"] #market-page .learn-title,
+html[data-theme="dark"] #market-page .report-title,
+html[data-theme="dark"] #market-page .mo-idx-price,
+html[data-theme="dark"] #market-page .mo-bv2-val{
+  color:var(--lens-text)!important;
+}
+#market-page .mo-subtitle,
+#market-page .ht-name,
+#market-page .wl-meta,
+#market-page .learn-desc,
+#market-page .report-sub,
+#market-page .mo-idx-name,
+#market-page .mo-bv2-label,
+#market-page .mo-bv2-sub,
+#market-page .mo-timestamp,
+#market-page .mo-realtime,
+#market-page .hc-link,
+#market-page .wl-table th,
+#market-page .wl-table td{
+  color:rgba(23,18,11,.68)!important;
+}
+html[data-theme="dark"] #market-page .mo-subtitle,
+html[data-theme="dark"] #market-page .ht-name,
+html[data-theme="dark"] #market-page .wl-meta,
+html[data-theme="dark"] #market-page .learn-desc,
+html[data-theme="dark"] #market-page .report-sub,
+html[data-theme="dark"] #market-page .mo-idx-name,
+html[data-theme="dark"] #market-page .mo-bv2-label,
+html[data-theme="dark"] #market-page .mo-bv2-sub,
+html[data-theme="dark"] #market-page .mo-timestamp,
+html[data-theme="dark"] #market-page .mo-realtime,
+html[data-theme="dark"] #market-page .hc-link,
+html[data-theme="dark"] #market-page .wl-table th,
+html[data-theme="dark"] #market-page .wl-table td{
+  color:rgba(245,235,215,.72)!important;
+}
