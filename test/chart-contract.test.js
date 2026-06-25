@@ -214,7 +214,7 @@ test("premium landing visual system matches the generated product preview direct
 });
 
 test("premium visual system is applied across app and static pages", () => {
-  assert.match(html, /legacy-app\.css\?v=20260625-20/);
+  assert.match(html, /legacy-app\.css\?v=20260625-21/);
   assert.match(html, /product-system\.css\?v=20260625-1/);
   assert.match(signupHtml, /static-polish\.css\?v=20260625-2/);
   assert.match(html, /<a class="btn-nav" id="nav-signup" href="\/signup">Claim \$0\.99<\/a>/);
@@ -229,6 +229,12 @@ test("premium visual system is applied across app and static pages", () => {
   assert.match(legacyCss, /html\[data-theme="dark"\] #market-page \.hc,[\s\S]*html\[data-theme="dark"\] #market-page \.hg-market \.mo-bv2-card\{[\s\S]*rgba\(34,37,41,.96\)/);
   assert.match(legacyCss, /#market-page \.mo-tab\.on,[\s\S]*#market-page \.movers-tab\.active\{[\s\S]*linear-gradient\(180deg,var\(--lens-gold-2\),var\(--lens-gold\)\)/);
   assert.match(legacyCss, /\.home-ticker-strip,\s*\.ht-card,\s*\.hc,\s*\.hg-market/s);
+  assert.match(html, /favicons\?sz=64&domain=apple\.com/);
+  assert.match(legacyCss, /Market page readability and density pass/);
+  assert.match(legacyCss, /#market-page \.home-ticker-strip\{[\s\S]*grid-template-columns:repeat\(8,minmax\(118px,1fr\)\)!important/);
+  assert.match(legacyCss, /#market-page \.ht-logo\{[\s\S]*width:42px!important;[\s\S]*height:42px!important/);
+  assert.match(legacyCss, /html\[data-theme="dark"\] #market-page \.hc,[\s\S]*html\[data-theme="dark"\] #market-page \.mo-bv2-card\{[\s\S]*linear-gradient\(180deg,#222529,#111315\)!important/);
+  assert.match(legacyCss, /html\[data-theme="dark"\] #market-page \.mo-tab,[\s\S]*html\[data-theme="dark"\] #market-page \.movers-tab\{[\s\S]*background:#222529!important/);
   assert.match(legacyCss, /\.pricing-card,\s*\.pricing-compare,\s*\.modal,\s*\.nav-acct-menu/s);
   assert.match(legacyCss, /footer\{[\s\S]*#08090A!important/);
   assert.match(staticCss, /Static premium visual system/);

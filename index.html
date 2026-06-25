@@ -96,7 +96,7 @@
 <script defer src="/vendor/hammer.min.js?v=2.0.8"></script>
 <script defer src="/vendor/chartjs-plugin-zoom.min.js?v=2.2.0"></script>
 <script defer src="/model-math.js?v=20260612-1"></script>
-<link href="/legacy-app.css?v=20260625-20" rel="stylesheet">
+<link href="/legacy-app.css?v=20260625-21" rel="stylesheet">
 </head>
 <body>
 <div id="auth-veil"></div>
@@ -4046,7 +4046,7 @@ function buildSparklineSVG(data,up){if(!data||data.length<2)return'';const w=100
 async function loadHomeTickerStrip(){
   const el=document.getElementById('home-ticker-strip');if(!el)return;
   const TICKERS=['AAPL','NVDA','MSFT','TSLA','AMZN','META','GOOGL','SPY'];
-  const LOGOS={AAPL:'https://www.google.com/s2/favicons?sz=32&domain=apple.com',NVDA:'https://www.google.com/s2/favicons?sz=32&domain=nvidia.com',MSFT:'https://www.google.com/s2/favicons?sz=32&domain=microsoft.com',TSLA:'https://www.google.com/s2/favicons?sz=32&domain=tesla.com',AMZN:'https://www.google.com/s2/favicons?sz=32&domain=amazon.com',META:'https://www.google.com/s2/favicons?sz=32&domain=meta.com',GOOGL:'https://www.google.com/s2/favicons?sz=32&domain=google.com',SPY:'https://www.google.com/s2/favicons?sz=32&domain=ssga.com'};
+  const LOGOS={AAPL:'https://www.google.com/s2/favicons?sz=64&domain=apple.com',NVDA:'https://www.google.com/s2/favicons?sz=64&domain=nvidia.com',MSFT:'https://www.google.com/s2/favicons?sz=64&domain=microsoft.com',TSLA:'https://www.google.com/s2/favicons?sz=64&domain=tesla.com',AMZN:'https://www.google.com/s2/favicons?sz=64&domain=amazon.com',META:'https://www.google.com/s2/favicons?sz=64&domain=meta.com',GOOGL:'https://www.google.com/s2/favicons?sz=64&domain=google.com',SPY:'https://www.google.com/s2/favicons?sz=64&domain=ssga.com'};
   el.innerHTML=TICKERS.map(t=>`<div class="ht-card" style="opacity:.3;"><div class="ht-sym">${t}</div></div>`).join('');
   const results=await Promise.allSettled(TICKERS.map(t=>fetch(`/api/quote/${t}?range=1d&preview=1`,{credentials:'same-origin'}).then(r=>r.ok?r.json():null).catch(()=>null)));
   const watchData=[];
