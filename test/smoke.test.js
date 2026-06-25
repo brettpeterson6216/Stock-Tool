@@ -141,7 +141,7 @@ test("GET / serves the homepage with a successful status", async () => {
   assert.match(html, /id="mbn-workspace"/);
   assert.match(html, /aria-label="Home"/);
   assert.match(html, /viewport-fit=cover/);
-  assert.match(html, /legacy-app\.css\?v=20260625-10/);
+  assert.match(html, /legacy-app\.css\?v=20260625-11/);
   assert.match(legacyCss, /input,select,textarea\{font-size:16px!important\}/);
   assert.match(legacyCss, /#main-nav\[data-view="tool"\] #nav-ticker-bar\{display:none!important\}/);
   assert.match(legacyCss, /\.nav-acct-wrap,\.nav-acct-btn\{min-width:0;max-width:100%\}/);

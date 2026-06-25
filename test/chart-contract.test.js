@@ -184,7 +184,8 @@ test("premium landing visual system matches the generated product preview direct
 });
 
 test("premium visual system is applied across app and static pages", () => {
-  assert.match(html, /legacy-app\.css\?v=20260625-10/);
+  assert.match(html, /legacy-app\.css\?v=20260625-11/);
+  assert.match(html, /product-system\.css\?v=20260625-1/);
   assert.match(signupHtml, /static-polish\.css\?v=20260625-2/);
   assert.match(html, /<a class="btn-nav" id="nav-signup" href="\/signup">Claim \$0\.99<\/a>/);
   assert.match(legacyCss, /Site-wide premium polish/);
@@ -218,10 +219,10 @@ test("tool guidance is collapsed so tutorials do not block tool use", () => {
 
 test("analyze and projection share a research workspace shell", () => {
   assert.match(productJs, /function installToolShells\(\)/);
-  assert.match(productJs, /Analyze Workspace/);
-  assert.match(productJs, /Projection Builder/);
+  assert.match(productJs, /Ticker workspace/);
+  assert.match(productJs, /Projection builder/);
   assert.match(productJs, /data-il-current-ticker/);
-  assert.match(productJs, /Sources and Freshness/);
+  assert.match(productJs, /data-il-drawer="sources"/);
   assert.match(productJs, /function openNotesPanel\(\)/);
   assert.match(productJs, /il-notes-/);
   assert.match(productJs, /function installResearchTrail\(\)/);
@@ -232,6 +233,20 @@ test("analyze and projection share a research workspace shell", () => {
   assert.match(productCss, /\.il-shell-ticker\{/);
   assert.match(productCss, /\.il-research-drawer/);
   assert.match(productCss, /\.il-notes-panel/);
+});
+
+test("tool pages keep persistent chrome minimal and hide chart controls off chart pages", () => {
+  assert.match(html, /id="view-tool" role="main" data-active-section="analyze"/);
+  assert.match(html, /setAttribute\('data-active-section', id\)/);
+  assert.match(legacyCss, /#view-tool:not\(\[data-active-section="analyze"\]\) #app-chart-toolbar,[\s\S]*#view-tool:not\(\[data-active-section="analyze"\]\) #app-tf-strip\{[\s\S]*display:none!important/);
+  assert.match(legacyCss, /#view-tool \.app-section-hdr\{[\s\S]*display:none!important/);
+  assert.match(legacyCss, /#view-tool \.tool-welcome,[\s\S]*#view-tool #il-tool-decision-path,[\s\S]*#view-tool \.tool-intro\{[\s\S]*display:none!important/);
+  assert.match(productCss, /Product tool declutter/);
+  assert.match(productCss, /\.il-shell-ticker>div:nth-child\(n\+5\)\{display:none\}/);
+  assert.match(productCss, /\.il-shell-actions button span\{display:none\}/);
+  assert.match(productCss, /\.il-guidance\{display:none\}/);
+  assert.match(productJs, /Search a ticker/);
+  assert.doesNotMatch(productJs, /Sources stay visible/);
 });
 
 test("projection builder exposes evidence, checklist, templates, sensitivity, and explanation", () => {

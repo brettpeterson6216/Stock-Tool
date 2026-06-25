@@ -3797,3 +3797,90 @@ html[data-theme="dark"] #market-page .wl-table th,
 html[data-theme="dark"] #market-page .wl-table td{
   color:rgba(245,235,215,.72)!important;
 }
+
+/* Tool declutter: persistent controls stay tool-focused; chart controls only appear on chart pages. */
+#view-tool:not([data-active-section="analyze"]) #app-chart-toolbar,
+#view-tool:not([data-active-section="analyze"]) #app-tf-strip{
+  display:none!important;
+}
+#view-tool[data-active-section="analyze"] #app-chart-toolbar,
+#view-tool[data-active-section="analyze"] #app-tf-strip{
+  display:flex;
+}
+#view-tool .app-section-hdr{
+  min-height:38px;
+}
+#view-tool .ash-actions .ash-btn{
+  color:var(--text4)!important;
+}
+#view-tool .tool-welcome{
+  padding:1.2rem 1rem 1rem;
+  margin-bottom:.55rem;
+}
+#view-tool .fg-label{
+  margin-top:.75rem;
+}
+
+@media(max-width:640px){
+  #view-tool{
+    padding-top:calc(56px + env(safe-area-inset-top, 0px))!important;
+  }
+  #view-tool .app-section-hdr{
+    display:none!important;
+  }
+  #view-tool .mobile-sec-tabs{
+    top:0;
+    z-index:40;
+    background:linear-gradient(180deg,rgba(255,250,239,.98),rgba(239,216,169,.97))!important;
+    border-bottom:1px solid rgba(98,69,22,.18)!important;
+  }
+  html[data-theme="dark"] #view-tool .mobile-sec-tabs{
+    background:linear-gradient(180deg,rgba(29,31,34,.98),rgba(16,18,20,.98))!important;
+    border-bottom-color:rgba(230,188,99,.18)!important;
+  }
+  #view-tool .app-content-scroll{
+    padding:0 0 calc(70px + env(safe-area-inset-bottom, 0px))!important;
+  }
+  #view-tool .app-section .acc-body{
+    padding:.55rem!important;
+  }
+  #view-tool #app-chart-toolbar,
+  #view-tool #app-tf-strip{
+    border-bottom-color:rgba(98,69,22,.16)!important;
+  }
+  #view-tool .app-chart-toolbar{
+    min-height:36px!important;
+    padding:4px 6px!important;
+  }
+  #view-tool .app-tf-strip{
+    height:34px!important;
+    padding:3px 6px!important;
+  }
+  #view-tool .app-chart-toolbar .act-btn{
+    min-height:30px;
+  }
+  #view-tool .tool-welcome,
+  #view-tool #il-tool-decision-path,
+  #view-tool .tool-intro{
+    display:none!important;
+  }
+  #view-tool .search-row{
+    margin-bottom:.55rem!important;
+  }
+  #view-tool .chart-wrap{
+    margin-bottom:.55rem!important;
+  }
+  #view-tool .metrics-grid{
+    gap:6px!important;
+  }
+  #view-tool .metric-card{
+    padding:8px 9px!important;
+  }
+  #view-tool .dash-sidebar,
+  #view-tool .il-trust-note{
+    display:none!important;
+  }
+  #view-tool .il-trust-panel{
+    margin-bottom:.55rem!important;
+  }
+}

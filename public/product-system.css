@@ -175,3 +175,36 @@
   .il-feedback-actions{display:grid}.il-feedback-action{width:100%}
   .il-learn-stepper{display:flex;overflow-x:auto}.il-learn-stepper span{min-width:118px}.il-learn-examples,.il-learn-two,.il-learn-preview{grid-template-columns:1fr}.il-learn-preview header{grid-column:1}.il-learn-search>div{display:grid}.il-learn-nav{align-items:stretch}.il-learn-nav span{display:none}.il-learn-nav button{flex:1}.il-learn-complete{align-items:flex-start;flex-wrap:wrap}.il-learn-complete button{width:100%}
 }
+
+/* Product tool declutter: keep controls persistent, move context into compact or on-demand surfaces. */
+.il-tool-shell{margin-bottom:10px}
+.il-shell-top{grid-template-columns:minmax(132px,.42fr) minmax(220px,.9fr) auto;padding:9px 10px}
+.il-shell-top strong{font:700 12px/1.15 var(--sans)}
+.il-shell-ticker{grid-template-columns:1.15fr repeat(2,minmax(88px,.48fr)) auto}
+.il-shell-ticker>div:nth-child(n+5){display:none}
+.il-shell-preview{grid-template-columns:1fr}
+.il-shell-preview>div{padding:10px 11px;display:flex;align-items:center;gap:9px}
+.il-shell-preview i{font-size:16px}.il-shell-preview strong{margin:0 0 2px}.il-shell-preview span{font-size:10px}
+.il-guidance{padding:8px 10px;margin-bottom:9px}
+.il-guidance-copy span{display:none}
+.il-research-trail{position:relative;top:auto;grid-template-columns:repeat(7,minmax(88px,1fr));margin-bottom:9px}
+.il-research-trail button{padding:7px 8px}
+.il-research-trail button span{display:none}
+
+@media(max-width:640px){
+  .il-tool-shell{margin:0 0 8px;border-radius:7px}
+  .il-shell-top{grid-template-columns:minmax(0,1fr) auto;gap:7px;padding:8px}
+  .il-shell-top>div:first-child{display:none}
+  .il-shell-search{grid-column:1;display:flex!important}
+  .il-shell-search input{padding:8px 9px;font-size:12px!important}
+  .il-shell-search button{min-height:34px;padding:0 10px}
+  .il-shell-actions{grid-column:2;display:flex;gap:3px;justify-content:flex-end;flex-wrap:nowrap}
+  .il-shell-actions button{width:34px;min-width:34px;height:34px;min-height:34px;padding:0;justify-content:center}
+  .il-shell-actions button span{display:none}
+  .il-shell-ticker{display:none}
+  .il-shell-preview{display:none!important}
+  .il-guidance{display:none}
+  .il-research-trail{display:flex;margin:0 0 8px;border-radius:7px}
+  .il-research-trail button{flex:0 0 auto;min-width:84px;padding:8px 9px;text-align:center}
+  .il-research-trail strong{font-size:9px}
+}

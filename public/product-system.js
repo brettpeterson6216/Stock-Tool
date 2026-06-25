@@ -262,13 +262,13 @@
     const isProjection = kind === "projection";
     return `<div class="il-tool-shell" data-il-shell="${kind}">
       <div class="il-shell-top">
-        <div><span>${isProjection ? "Projection Builder" : "Analyze Workspace"}</span><strong>${isProjection ? "Evidence first. Assumptions second." : "Research command center"}</strong></div>
+        <div><span>${isProjection ? "Projection" : "Analyze"}</span><strong>${isProjection ? "Projection builder" : "Ticker workspace"}</strong></div>
         <div class="il-shell-search"><input type="text" aria-label="Search ticker or company" placeholder="Search ticker or company"><button type="button">Analyze</button></div>
         <div class="il-shell-actions">
-          <button type="button" data-il-drawer="${isProjection ? "projection-help" : "analyze-help"}"><i class="ti ti-help-circle"></i> Help</button>
-          <button type="button" data-il-drawer="sources"><i class="ti ti-database"></i> Sources</button>
-          <button type="button" data-il-notes><i class="ti ti-notes"></i> Notes</button>
-          <button type="button" data-il-save><i class="ti ti-bookmark"></i> Save</button>
+          <button type="button" data-il-drawer="${isProjection ? "projection-help" : "analyze-help"}" aria-label="Open help"><i class="ti ti-help-circle"></i><span>Help</span></button>
+          <button type="button" data-il-drawer="sources" aria-label="Open sources"><i class="ti ti-database"></i><span>Sources</span></button>
+          <button type="button" data-il-notes aria-label="Open notes"><i class="ti ti-notes"></i><span>Notes</span></button>
+          <button type="button" data-il-save aria-label="Save"><i class="ti ti-bookmark"></i><span>Save</span></button>
         </div>
       </div>
       <div class="il-shell-ticker">
@@ -280,9 +280,7 @@
         <button type="button" class="il-shell-status">No ticker</button>
       </div>
       <div class="il-shell-preview il-needs-ticker">
-        <div><i class="ti ${isProjection ? "ti-adjustments-horizontal" : "ti-route"}"></i><strong>${isProjection ? "Start with evidence" : "Guided research trail"}</strong><span>${isProjection ? "Load a ticker to compare observed data with your scenario assumptions." : "Load a ticker to move from snapshot to chart, fundamentals, projection, and thesis notes."}</span></div>
-        <div><i class="ti ti-database"></i><strong>Sources stay visible</strong><span>Freshness and provider context remain available through the source drawer.</span></div>
-        <div><i class="ti ti-notes"></i><strong>Ticker-scoped notes</strong><span>Bull case, bear case, risks, watch level, and review date follow the ticker across tools.</span></div>
+        <div><i class="ti ${isProjection ? "ti-adjustments-horizontal" : "ti-search"}"></i><strong>${isProjection ? "Load a ticker first" : "Search a ticker"}</strong><span>${isProjection ? "Then review assumptions and calculate." : "Then use only the controls this tool needs."}</span></div>
       </div>
     </div>`;
   }
