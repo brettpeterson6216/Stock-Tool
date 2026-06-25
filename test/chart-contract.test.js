@@ -25,9 +25,12 @@ test("price charts expose dependable zoom controls and mobile gestures", () => {
   assert.match(html, /chartjs-plugin-zoom\.min\.js\?v=2\.2\.0/);
   assert.match(html, /pinch:\{enabled:true\}/);
   assert.match(html, /mode:'xy'/);
-  assert.match(html, /overScaleMode:'xy'/);
-  assert.match(html, /pan:\{enabled:true,mode:'xy',threshold:compact\?3:6\}/);
+  assert.doesNotMatch(html, /overScaleMode:'xy'/);
+  assert.match(html, /pan:\{enabled:true,mode:'xy',threshold:compact\?0:4\}/);
   assert.match(html, /limits:\{x:\{min:'original',max:'original',minRange:4\},y:\{min:'original',max:'original'\}\}/);
+  assert.match(html, /function fmtChartPrice\(raw\)/);
+  assert.match(html, /label:ctx=>` \$\{ctx\.dataset\.label\|\|''\}: \$\{fmtChartPrice\(ctx\.raw\)\}`/);
+  assert.match(html, /ticks:\{color:t\.text,font:\{size:10\},callback:v=>fmtChartPrice\(v\)\}/);
   assert.match(html, /onclick="zoomPriceChart\(1\.25\)"/);
   assert.match(html, /Zoom price chart out or load older history/);
   assert.match(html, /onclick="resetPriceZoom\(\)"/);
@@ -204,7 +207,7 @@ test("premium landing visual system matches the generated product preview direct
 });
 
 test("premium visual system is applied across app and static pages", () => {
-  assert.match(html, /legacy-app\.css\?v=20260625-15/);
+  assert.match(html, /legacy-app\.css\?v=20260625-16/);
   assert.match(html, /product-system\.css\?v=20260625-1/);
   assert.match(signupHtml, /static-polish\.css\?v=20260625-2/);
   assert.match(html, /<a class="btn-nav" id="nav-signup" href="\/signup">Claim \$0\.99<\/a>/);
@@ -230,10 +233,12 @@ test("premium visual system is applied across app and static pages", () => {
 test("gold ripple image is the default backdrop across landing, market, and tools", () => {
   assert.match(legacyCss, /Gold ripple default background/);
   assert.match(legacyCss, /Site-wide ripple backdrop final pass/);
-  assert.match(legacyCss, /--gold-ripple-bg:url\("\/gold-ripple-background\.jpg\?v=20260625-2"\)/);
-  assert.match(legacyCss, /body::before\{[\s\S]*background-image:var\(--gold-ripple-overlay\),var\(--gold-ripple-bg\)/);
+  assert.match(legacyCss, /Literal shared image backdrop/);
+  assert.match(legacyCss, /--gold-ripple-bg:url\("\/gold-ripple-background\.jpg\?v=20260625-3"\)/);
+  assert.match(legacyCss, /--gold-ripple-overlay:none/);
+  assert.match(legacyCss, /body::before\{[\s\S]*background-color:#E2BD6E!important;[\s\S]*background-image:var\(--gold-ripple-bg\)!important/);
   assert.match(legacyCss, /#view-home,[\s\S]*#view-tool,[\s\S]*\.il-landing,[\s\S]*\.home-shell,[\s\S]*\.app-content-scroll,[\s\S]*#market-page,[\s\S]*background:none!important/);
-  assert.match(legacyCss, /background-image:var\(--gold-ripple-overlay\),var\(--gold-ripple-bg\)!important/);
+  assert.match(legacyCss, /background-image:var\(--gold-ripple-bg\)!important/);
   assert.match(legacyCss, /background-attachment:fixed!important/);
   assert.match(legacyCss, /background-attachment:scroll!important/);
   assert.match(legacyCss, /backdrop-filter:blur\(20px\) saturate\(1\.08\)!important/);

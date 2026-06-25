@@ -4358,3 +4358,169 @@ html[data-theme="dark"] #view-tool .edu-glossary{
     -webkit-backdrop-filter:none!important;
   }
 }
+
+/* Literal shared image backdrop: keep the gold ripple visible behind every current tool. */
+:root{
+  --gold-ripple-bg:url("/gold-ripple-background.jpg?v=20260625-3");
+  --gold-ripple-overlay:none;
+  --site-surface-light:rgba(255,250,239,.70);
+  --site-surface-light-strong:rgba(255,250,239,.82);
+  --site-surface-dark:rgba(13,15,17,.66);
+  --site-surface-dark-strong:rgba(18,20,23,.76);
+}
+html[data-theme="dark"]{
+  --gold-ripple-overlay:none;
+}
+html,
+body,
+body::before{
+  background-color:#E2BD6E!important;
+  background-image:var(--gold-ripple-bg)!important;
+  background-size:cover!important;
+  background-position:center center!important;
+  background-repeat:no-repeat!important;
+  background-attachment:fixed!important;
+}
+#view-home,
+#view-tool,
+.il-landing,
+.home-shell,
+.hs-main,
+.app-shell,
+.app-main,
+.app-content-scroll,
+#market-page,
+#market-page .hs-main,
+#view-tool .app-section,
+#view-tool .app-section.open,
+#view-tool .app-section .acc-body{
+  background:transparent!important;
+  background-color:transparent!important;
+  background-image:none!important;
+}
+nav,
+.app-sidebar,
+.hs-sidebar,
+.app-section-hdr,
+.mobile-sec-tabs,
+.app-tf-strip,
+.app-chart-toolbar,
+.home-ticker-strip,
+.mobile-bottom-nav{
+  background:rgba(255,250,239,.72)!important;
+  backdrop-filter:blur(16px) saturate(1.08)!important;
+  -webkit-backdrop-filter:blur(16px) saturate(1.08)!important;
+}
+html[data-theme="dark"] nav,
+html[data-theme="dark"] .app-sidebar,
+html[data-theme="dark"] .hs-sidebar,
+html[data-theme="dark"] .app-section-hdr,
+html[data-theme="dark"] .mobile-sec-tabs,
+html[data-theme="dark"] .app-tf-strip,
+html[data-theme="dark"] .app-chart-toolbar,
+html[data-theme="dark"] .home-ticker-strip,
+html[data-theme="dark"] .mobile-bottom-nav{
+  background:rgba(8,9,10,.74)!important;
+}
+.il-landing-social div,
+.il-landing-search,
+.il-landing-secondary,
+.il-landing-preview,
+#market-page .hc,
+#market-page .ht-card,
+#market-page .mo-bv2-card,
+#market-page .hg-market,
+#market-page .hl-report,
+#market-page .pricing-card,
+#market-page .pricing-compare,
+#view-tool .search-row,
+#view-tool #featured-grid,
+#view-tool .chart-wrap,
+#view-tool .metric-card,
+#view-tool .panel-box,
+#view-tool .dcf-out,
+#view-tool .scr-filters,
+#view-tool .cmp-table,
+#view-tool .fin-table,
+#view-tool .sidebar-card,
+#view-tool .analyst-target-box,
+#view-tool .analyst-rec-box,
+#view-tool .risk-stat,
+#view-tool .dp-card,
+#view-tool .sa-card,
+#view-tool .pro-gate-card,
+#view-tool .il-tool-shell,
+#view-tool .il-trust-panel,
+#view-tool .il-proj-evidence,
+#view-tool .il-proj-review,
+#view-tool .il-projection-explain,
+#view-tool .il-template-row,
+#view-tool .il-assumption-checklist>div,
+#view-tool .il-result-summary>div,
+#view-tool .il-learn-workshop,
+#view-tool .edu-hero,
+#view-tool .edu-path,
+#view-tool .edu-lesson-panel,
+#view-tool .edu-checklist,
+#view-tool .edu-glossary{
+  background:linear-gradient(180deg,var(--site-surface-light-strong),var(--site-surface-light))!important;
+}
+html[data-theme="dark"] .il-landing-social div,
+html[data-theme="dark"] .il-landing-search,
+html[data-theme="dark"] .il-landing-secondary,
+html[data-theme="dark"] .il-landing-preview,
+html[data-theme="dark"] #market-page .hc,
+html[data-theme="dark"] #market-page .ht-card,
+html[data-theme="dark"] #market-page .mo-bv2-card,
+html[data-theme="dark"] #market-page .hg-market,
+html[data-theme="dark"] #market-page .hl-report,
+html[data-theme="dark"] #market-page .pricing-card,
+html[data-theme="dark"] #market-page .pricing-compare,
+html[data-theme="dark"] #view-tool .search-row,
+html[data-theme="dark"] #view-tool #featured-grid,
+html[data-theme="dark"] #view-tool .chart-wrap,
+html[data-theme="dark"] #view-tool .metric-card,
+html[data-theme="dark"] #view-tool .panel-box,
+html[data-theme="dark"] #view-tool .dcf-out,
+html[data-theme="dark"] #view-tool .scr-filters,
+html[data-theme="dark"] #view-tool .cmp-table,
+html[data-theme="dark"] #view-tool .fin-table,
+html[data-theme="dark"] #view-tool .sidebar-card,
+html[data-theme="dark"] #view-tool .analyst-target-box,
+html[data-theme="dark"] #view-tool .analyst-rec-box,
+html[data-theme="dark"] #view-tool .risk-stat,
+html[data-theme="dark"] #view-tool .dp-card,
+html[data-theme="dark"] #view-tool .sa-card,
+html[data-theme="dark"] #view-tool .pro-gate-card,
+html[data-theme="dark"] #view-tool .il-tool-shell,
+html[data-theme="dark"] #view-tool .il-trust-panel,
+html[data-theme="dark"] #view-tool .il-proj-evidence,
+html[data-theme="dark"] #view-tool .il-proj-review,
+html[data-theme="dark"] #view-tool .il-projection-explain,
+html[data-theme="dark"] #view-tool .il-template-row,
+html[data-theme="dark"] #view-tool .il-assumption-checklist>div,
+html[data-theme="dark"] #view-tool .il-result-summary>div,
+html[data-theme="dark"] #view-tool .il-learn-workshop,
+html[data-theme="dark"] #view-tool .edu-hero,
+html[data-theme="dark"] #view-tool .edu-path,
+html[data-theme="dark"] #view-tool .edu-lesson-panel,
+html[data-theme="dark"] #view-tool .edu-checklist,
+html[data-theme="dark"] #view-tool .edu-glossary{
+  background:linear-gradient(180deg,var(--site-surface-dark-strong),var(--site-surface-dark))!important;
+}
+.chart-wrap,
+.chart-wrap .h240,
+.chart-wrap canvas,
+.cex-workspace,
+.cex-workspace canvas{
+  touch-action:none!important;
+  overscroll-behavior:contain!important;
+}
+@media(max-width:640px){
+  html,
+  body,
+  body::before{
+    background-attachment:scroll!important;
+    background-position:center top!important;
+  }
+}

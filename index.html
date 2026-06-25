@@ -96,7 +96,7 @@
 <script defer src="/vendor/hammer.min.js?v=2.0.8"></script>
 <script defer src="/vendor/chartjs-plugin-zoom.min.js?v=2.2.0"></script>
 <script defer src="/model-math.js?v=20260612-1"></script>
-<link href="/legacy-app.css?v=20260625-15" rel="stylesheet">
+<link href="/legacy-app.css?v=20260625-16" rel="stylesheet">
 </head>
 <body>
 <div id="auth-veil"></div>
@@ -3153,6 +3153,20 @@ Chart.defaults.font.size = 11;
 Chart.defaults.font.weight = '500';
 Chart.defaults.color = ct().text;
 
+function chartPriceValue(raw) {
+  if (Array.isArray(raw)) return Number(raw[raw.length - 1]);
+  if (raw && typeof raw === 'object') return Number(raw.y ?? raw.c ?? raw.close ?? raw.value);
+  return Number(raw);
+}
+function fmtChartPrice(raw) {
+  const value = chartPriceValue(raw);
+  if (!Number.isFinite(value)) return '$--';
+  if (Math.abs(value) >= 1000) return '$' + value.toLocaleString('en-US', { maximumFractionDigits: 0 });
+  if (Math.abs(value) >= 100) return '$' + value.toFixed(2);
+  if (Math.abs(value) >= 1) return '$' + value.toFixed(2);
+  return '$' + value.toFixed(4);
+}
+
 const baseOpts = (extraScales={}) => {
   const t = ct();
   const compact=window.matchMedia('(max-width: 640px)').matches;
@@ -3171,7 +3185,7 @@ const baseOpts = (extraScales={}) => {
         borderColor:t.ttBorder, borderWidth:1, padding:12, caretSize:6,
         cornerRadius:10, displayColors:true, boxWidth:8, boxHeight:8, usePointStyle:true,
         titleFont:{family:'DM Mono',size:11,weight:'600'},bodyFont:{family:'DM Sans',size:12,weight:'600'},
-        callbacks:{ label: ctx => ` ${ctx.dataset.label||''}: ${ctx.formattedValue}` }
+        callbacks:{ label: ctx => ` ${ctx.dataset.label||''}: ${ctx.parsed?.y != null ? Number(ctx.parsed.y).toLocaleString('en-US', { maximumFractionDigits: 2 }) : ctx.formattedValue}` }
       }
     },
     scales:{
@@ -3188,9 +3202,8 @@ function chartZoomOptions() {
       wheel:{enabled:!compact,speed:.045,modifierKey:null},
       pinch:{enabled:true},
       mode:'xy',
-      overScaleMode:'xy',
     },
-    pan:{enabled:true,mode:'xy',threshold:compact?3:6},
+    pan:{enabled:true,mode:'xy',threshold:compact?0:4},
     limits:{x:{min:'original',max:'original',minRange:4},y:{min:'original',max:'original'}},
   };
 }
@@ -3286,8 +3299,8 @@ function expandChart(chartId, title) {
           titleFont:{family:'DM Mono',size:11,weight:'600'},bodyFont:{family:'DM Sans',size:12,weight:'600'}
         },
         zoom: {
-          zoom: { wheel:{enabled:true,speed:0.045}, pinch:{enabled:true}, mode:'xy', overScaleMode:'xy', onZoomComplete({chart}){_expandedHasUserZoom=!chartAtFullHistory(chart);} },
-          pan:  { enabled:true, mode:'xy', threshold:4 },
+          zoom: { wheel:{enabled:true,speed:0.045}, pinch:{enabled:true}, mode:'xy', onZoomComplete({chart}){_expandedHasUserZoom=!chartAtFullHistory(chart);} },
+          pan:  { enabled:true, mode:'xy', threshold:0 },
           limits: { x:{min:'original',max:'original',minRange:4}, y:{min:'original',max:'original'} }
         }
       },
@@ -4584,7 +4597,7 @@ function buildPriceChart(result,closes,timestamps) {
   const opts=baseOpts({
     y:{
       title:{display:true,text:'Price (USD)',color:t.muted,font:{size:9,weight:'500'},padding:{bottom:4}},
-      ticks:{color:t.text,font:{size:10},callback:v=>`$${v>=1000?(v/1000).toFixed(1)+'k':v.toFixed(0)}`},
+      ticks:{color:t.text,font:{size:10},callback:v=>fmtChartPrice(v)},
       grid:{color:t.grid}
     },
     x:{ticks:{color:t.text,font:{size:10},maxTicksLimit:8},grid:{color:t.grid}}
@@ -4594,7 +4607,7 @@ function buildPriceChart(result,closes,timestamps) {
   opts.plugins.zoom=chartZoomOptions();
   opts.plugins.tooltip={...opts.plugins.tooltip,callbacks:{
     title:items=>items[0]?.label||'',
-    label:ctx=>{const raw=Array.isArray(ctx.raw)?ctx.raw[ctx.raw.length-1]:ctx.raw;return ` ${ctx.dataset.label||''}: $${Number(raw||0).toFixed(2)}`;}
+    label:ctx=>` ${ctx.dataset.label||''}: ${fmtChartPrice(ctx.raw)}`
   }};
   const chartJsType = S.chartType==='candle' ? 'bar' : 'line';
   const pluginsArr = S.chartType==='candle' ? [candleWickPlugin] : [];
