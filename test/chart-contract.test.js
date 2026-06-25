@@ -140,6 +140,7 @@ test("charts and trade symbols use vivid market colors without repainting the si
 
 test("homepage defaults to a beginner-friendly landing page before market tools", () => {
   assert.match(html, /id="landing-page"/);
+  assert.match(html, /Find better stock ideas with a process you can follow/);
   assert.match(html, /New user offer: first month \$0\.99/);
   assert.match(html, /Get first month for \$0\.99/);
   assert.match(html, /src="\/landing-product-preview\.png"/);
@@ -160,6 +161,9 @@ test("homepage defaults to a beginner-friendly landing page before market tools"
   assert.match(legacyCss, /\.il-landing-copy\{[\s\S]*background:transparent!important/);
   assert.match(legacyCss, /\.il-landing-copy \.il-landing-kicker,[\s\S]*\.il-landing-copy \.il-offer-card\{[\s\S]*display:none!important/);
   assert.match(legacyCss, /white-space:nowrap/);
+  assert.match(legacyCss, /object-fit:contain!important/);
+  assert.match(legacyCss, /max-height:min\(610px,calc\(100vh - 290px\)\)/);
+  assert.doesNotMatch(legacyCss, /height:min\(72vh,760px\)!important/);
   assert.match(legacyCss, /\.il-workflow-visual\{/);
 });
 
@@ -174,7 +178,7 @@ test("premium landing visual system matches the generated product preview direct
 });
 
 test("premium visual system is applied across app and static pages", () => {
-  assert.match(html, /legacy-app\.css\?v=20260625-3/);
+  assert.match(html, /legacy-app\.css\?v=20260625-5/);
   assert.match(signupHtml, /static-polish\.css\?v=20260625-1/);
   assert.match(html, /<a class="btn-nav" id="nav-signup" href="\/signup">Claim \$0\.99<\/a>/);
   assert.match(legacyCss, /Site-wide premium polish/);
