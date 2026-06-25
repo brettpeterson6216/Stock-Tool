@@ -115,3 +115,20 @@ test("quote results make data trust visible before decisions", () => {
   assert.match(productCss, /\.il-trust-grid\{display:grid;grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
   assert.match(productCss, /\.il-trust-note\{/);
 });
+
+test("market UI uses vivid productive chart and trade colors", () => {
+  assert.match(legacyCss, /--brand-gold:#00A85A/);
+  assert.match(legacyCss, /--brand-gold:#CCFF00/);
+  assert.match(legacyCss, /--chart-positive:#00C805/);
+  assert.match(legacyCss, /--chart-negative:#EB5D2A/);
+  assert.match(legacyCss, /--chart-negative:#FF6A3D/);
+  assert.match(legacyCss, /--chart-ma50:#148BFF/);
+  assert.match(legacyCss, /--chart-ma200:#8B5CF6/);
+  assert.match(legacyCss, /radial-gradient\(circle at 82% 8%,rgba\(0,200,5,.13\)/);
+  assert.match(legacyCss, /\.price-chg\.up\{background:color-mix\(in srgb,var\(--chart-positive\) 14%,transparent\)!important\}/);
+  assert.match(html, /const COLORS = \['#00A85A','#148BFF','#8B5CF6','#FFB020'\]/);
+  assert.match(html, /price:get\('--chart-price','#00A85A'\)/);
+  assert.match(html, /borderWidth:2\.4/);
+  assert.match(html, /borderWidth:2\.7/);
+  assert.match(html, /stop-color="var\(--chart-price\)"/);
+});

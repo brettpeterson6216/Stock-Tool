@@ -538,7 +538,7 @@
           <div class="hh-preview-top"><span>Illustrative AAPL workspace</span><span class="hh-preview-live">Sample context</span></div>
           <div class="hh-preview-main"><div class="hh-preview-chart">
             <div class="hh-preview-symbol"><strong>AAPL <small style="color:var(--text5);font-size:8px;">Apple Inc.</small></strong><span>+1.8%</span></div>
-            <svg class="hh-chart-svg" viewBox="0 0 260 92" role="img" aria-label="Illustrative rising stock chart"><defs><linearGradient id="heroChartFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C6A052" stop-opacity=".28"/><stop offset="1" stop-color="#C6A052" stop-opacity="0"/></linearGradient></defs><path d="M0 75 L20 69 L39 72 L58 58 L78 62 L98 47 L117 51 L137 38 L157 43 L176 28 L196 32 L216 19 L236 23 L260 10 L260 92 L0 92 Z" fill="url(#heroChartFill)"/><path d="M0 75 L20 69 L39 72 L58 58 L78 62 L98 47 L117 51 L137 38 L157 43 L176 28 L196 32 L216 19 L236 23 L260 10" fill="none" stroke="#C6A052" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <svg class="hh-chart-svg" viewBox="0 0 260 92" role="img" aria-label="Illustrative rising stock chart"><defs><linearGradient id="heroChartFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--chart-price)" stop-opacity=".34"/><stop offset="1" stop-color="var(--chart-price)" stop-opacity="0"/></linearGradient></defs><path d="M0 75 L20 69 L39 72 L58 58 L78 62 L98 47 L117 51 L137 38 L157 43 L176 28 L196 32 L216 19 L236 23 L260 10 L260 92 L0 92 Z" fill="url(#heroChartFill)"/><path d="M0 75 L20 69 L39 72 L58 58 L78 62 L98 47 L117 51 L137 38 L157 43 L176 28 L196 32 L216 19 L236 23 L260 10" fill="none" stroke="var(--chart-price)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
             <div class="hh-preview-metrics"><div class="hh-preview-metric"><span>Quality</span><strong>Strong</strong></div><div class="hh-preview-metric"><span>Value range</span><strong>$178–214</strong></div><div class="hh-preview-metric"><span>Review</span><strong>30 days</strong></div></div>
           </div><div class="hh-preview-side"><h3>Reviewable decision</h3><p>Research becomes a process, not a pile of tabs.</p><div class="hh-preview-step done"><i class="ti ti-check"></i>Analyze evidence</div><div class="hh-preview-step done"><i class="ti ti-check"></i>Test valuation</div><div class="hh-preview-step"><i class="ti ti-pencil"></i>Write thesis</div><div class="hh-preview-step"><i class="ti ti-calendar"></i>Schedule review</div></div></div>
         </div>
@@ -1563,9 +1563,9 @@
       <button class="cex-tool" data-markup-tool="freehand" onclick="setMarkupTool('freehand')" title="Freehand drawing"><i class="ti ti-pencil"></i></button>
       <button class="cex-tool" data-markup-tool="eraser" onclick="setMarkupTool('eraser')" title="Erase nearest mark"><i class="ti ti-eraser"></i></button>
       <span class="cex-tool-sep"></span>
-      <button class="cex-color active" data-markup-color="#B88937" onclick="setMarkupColor('#B88937')" style="background:#B88937" title="Lens Gold"></button>
-      <button class="cex-color" data-markup-color="#5F8193" onclick="setMarkupColor('#5F8193')" style="background:#5F8193" title="Steel blue"></button>
-      <button class="cex-color" data-markup-color="#9A7771" onclick="setMarkupColor('#9A7771')" style="background:#9A7771" title="Muted brick"></button>
+      <button class="cex-color active" data-markup-color="#00A85A" onclick="setMarkupColor('#00A85A')" style="background:#00A85A" title="Green"></button>
+      <button class="cex-color" data-markup-color="#148BFF" onclick="setMarkupColor('#148BFF')" style="background:#148BFF" title="Blue"></button>
+      <button class="cex-color" data-markup-color="#EB5D2A" onclick="setMarkupColor('#EB5D2A')" style="background:#EB5D2A" title="Red"></button>
       <span class="cex-tool-sep"></span>
       <button class="cex-tool" onclick="undoMarkup()" title="Undo markup"><i class="ti ti-arrow-back-up"></i></button>
       <button class="cex-tool" onclick="redoMarkup()" title="Redo markup"><i class="ti ti-arrow-forward-up"></i></button>
@@ -1831,7 +1831,7 @@ const S = {
   csrfToken: null,      // fetched from GET /api/csrf on page load
 };
 window.IL_STATE = S;
-const COLORS = ['#B88937','#5F8193','#778673','#9A7771'];
+const COLORS = ['#00A85A','#148BFF','#8B5CF6','#FFB020'];
 // Keep this list in sync with the requirePro-gated API routes in routes/financials.js
 // and routes/market-data.js (screener).
 const PRO_SECTIONS = ['financials','advmetrics','projection','dcf','screener',
@@ -3143,7 +3143,7 @@ function resetPriceZoom(){
 var _expandedChart = null;
 var _expandedSource = null;
 var _expandedHasUserZoom = false;
-var _markup = {tool:'cursor',color:'#B88937',items:[],draft:null,ready:false,observer:null};
+var _markup = {tool:'cursor',color:'#00A85A',items:[],draft:null,ready:false,observer:null};
 
 function expandChart(chartId, title) {
   const src = S.charts[chartId];
@@ -3169,7 +3169,7 @@ function expandChart(chartId, title) {
     pointRadius: ds.type==='bar' ? undefined : 0,
     pointHoverRadius: ds.type==='bar' ? undefined : 6,
     pointHoverBorderWidth: 2,
-    pointHoverBackgroundColor: ds.borderColor || '#C6A052',
+    pointHoverBackgroundColor: ds.borderColor || cp().price,
     pointHoverBorderColor: '#fff',
   }));
 
@@ -3219,12 +3219,12 @@ function cp() {
   const styles=getComputedStyle(document.documentElement);
   const get=(name,fallback)=>styles.getPropertyValue(name).trim()||fallback;
   return {
-    price:get('--chart-price','#B88937'),
-    positive:get('--chart-positive','#73A58C'),
-    negative:get('--chart-negative','#C98285'),
-    ma50:get('--chart-ma50','#68B5E2'),
-    ma200:get('--chart-ma200','#B29ADC'),
-    bands:get('--chart-bands','#D0A457'),
+    price:get('--chart-price','#00A85A'),
+    positive:get('--chart-positive','#00C805'),
+    negative:get('--chart-negative','#EB5D2A'),
+    ma50:get('--chart-ma50','#148BFF'),
+    ma200:get('--chart-ma200','#8B5CF6'),
+    bands:get('--chart-bands','#FFB020'),
     neutral:get('--chart-neutral','#AAB2C0'),
   };
 }
@@ -3958,9 +3958,9 @@ async function loadHomeTickerStrip(){
 async function loadMarketOverview(range,btn){
   if(btn){document.querySelectorAll('.mo-tab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
   const IDXS=[
-    {t:'^GSPC', col:'#5F8193', vi:'ri-sp', vc:'ri-sp-c', label:'S&P 500'},
-    {t:'^IXIC', col:'#B88937', vi:'ri-nq', vc:'ri-nq-c', label:'Nasdaq 100'},
-    {t:'^DJI', col:'#778673', vi:'ri-dj', vc:'ri-dj-c', label:'Dow Jones'}
+    {t:'^GSPC', col:'#148BFF', vi:'ri-sp', vc:'ri-sp-c', label:'S&P 500'},
+    {t:'^IXIC', col:'#00A85A', vi:'ri-nq', vc:'ri-nq-c', label:'Nasdaq 100'},
+    {t:'^DJI', col:'#8B5CF6', vi:'ri-dj', vc:'ri-dj-c', label:'Dow Jones'}
   ];
   // Map range to correct interval for intraday granularity
   const intervalMap={'1d':'5m','5d':'15m','1mo':'1d','3mo':'1d','ytd':'1d','1y':'1d','5y':'1wk'};
@@ -4009,7 +4009,7 @@ async function loadMarketOverview(range,btn){
     afterDraw(chart){
       const {ctx,chartArea}=chart;
       if(!chartArea)return;
-      const colors=['#5F8193','#B88937','#778673'];
+      const colors=['#148BFF','#00A85A','#8B5CF6'];
       chart.data.datasets.forEach((ds,i)=>{
         const pts=ds.data.filter(x=>x!=null);
         if(!pts.length)return;
@@ -4460,22 +4460,22 @@ function buildPriceChart(result,closes,timestamps) {
   syncIndicatorAvailability(vc.length);
   const ma50v=sma(vc,50), ma200v=sma(vc,200), bbv=bollinger(vc,20);
   const hp={pointRadius:0,pointHoverRadius:6,pointHoverBorderWidth:2,pointHoverBorderColor:'#fff'};
-  const fillGrad=ctx=>{const g=ctx.chart.ctx.createLinearGradient(0,0,0,260);g.addColorStop(0,colorAlpha(p.price,.16));g.addColorStop(1,colorAlpha(p.price,0));return g;};
-  const strongGrad=ctx=>{const g=ctx.chart.ctx.createLinearGradient(0,0,0,260);g.addColorStop(0,colorAlpha(p.price,.28));g.addColorStop(1,colorAlpha(p.price,.02));return g;};
+  const fillGrad=ctx=>{const g=ctx.chart.ctx.createLinearGradient(0,0,0,260);g.addColorStop(0,colorAlpha(p.price,.22));g.addColorStop(1,colorAlpha(p.price,0));return g;};
+  const strongGrad=ctx=>{const g=ctx.chart.ctx.createLinearGradient(0,0,0,260);g.addColorStop(0,colorAlpha(p.price,.36));g.addColorStop(1,colorAlpha(p.price,.03));return g;};
   let ds;
   if(S.chartType==='candle') {
     const q2=result.indicators.quote[0];
     const opens2=(q2.open||[]).slice(0,count), closes2=vc;
-    const candleColors=closes2.map((c2,i)=>(c2||0)>=(opens2[i]||0)?colorAlpha(p.positive,.78):colorAlpha(p.negative,.78));
+    const candleColors=closes2.map((c2,i)=>(c2||0)>=(opens2[i]||0)?colorAlpha(p.positive,.9):colorAlpha(p.negative,.9));
     ds=[{label:'Price',data:closes2.map((c2,i)=>[Math.min(opens2[i],c2),Math.max(opens2[i],c2)]),backgroundColor:candleColors,borderColor:candleColors,borderWidth:1,borderRadius:1,order:10,_quote:q2}];
   } else if(S.chartType==='area') {
-    ds=[{label:'Price',data:vc,borderColor:p.price,borderWidth:2,...hp,pointHoverBackgroundColor:p.price,fill:true,backgroundColor:strongGrad,tension:.2,order:10}];
+    ds=[{label:'Price',data:vc,borderColor:p.price,borderWidth:2.7,...hp,pointHoverBackgroundColor:p.price,fill:true,backgroundColor:strongGrad,tension:.22,order:10}];
   } else {
-    ds=[{label:'Price',data:vc,borderColor:p.price,borderWidth:2,...hp,pointHoverBackgroundColor:p.price,fill:true,backgroundColor:fillGrad,tension:.2,order:10}];
+    ds=[{label:'Price',data:vc,borderColor:p.price,borderWidth:2.4,...hp,pointHoverBackgroundColor:p.price,fill:true,backgroundColor:fillGrad,tension:.22,order:10}];
   }
   const lineType = S.chartType==='candle' ? {type:'line'} : {};
-  if(S.inds.ma50&&vc.length>=INDICATOR_REQUIREMENTS.ma50.bars)  ds.push({...lineType,label:'50D average', data:ma50v, borderColor:p.ma50,borderWidth:1.5,...hp,pointHoverBackgroundColor:p.ma50,fill:false,tension:.2,order:9});
-  if(S.inds.ma200&&vc.length>=INDICATOR_REQUIREMENTS.ma200.bars) ds.push({...lineType,label:'200D average',data:ma200v,borderColor:p.ma200,borderWidth:1.5,...hp,pointHoverBackgroundColor:p.ma200,fill:false,tension:.2,order:8});
+  if(S.inds.ma50&&vc.length>=INDICATOR_REQUIREMENTS.ma50.bars)  ds.push({...lineType,label:'50D average', data:ma50v, borderColor:p.ma50,borderWidth:1.8,...hp,pointHoverBackgroundColor:p.ma50,fill:false,tension:.2,order:9});
+  if(S.inds.ma200&&vc.length>=INDICATOR_REQUIREMENTS.ma200.bars) ds.push({...lineType,label:'200D average',data:ma200v,borderColor:p.ma200,borderWidth:1.8,...hp,pointHoverBackgroundColor:p.ma200,fill:false,tension:.2,order:8});
   if(S.inds.bb&&vc.length>=INDICATOR_REQUIREMENTS.bb.bars) {
     ds.push({...lineType,label:'Upper band',data:bbv.map(x=>x.u),borderColor:colorAlpha(p.bands,.62),borderWidth:1,pointRadius:0,fill:false,tension:.2,order:7,borderDash:[4,3]});
     ds.push({...lineType,label:'Lower band',data:bbv.map(x=>x.l),borderColor:colorAlpha(p.bands,.62),borderWidth:1,pointRadius:0,fill:false,tension:.2,order:6,borderDash:[4,3]});
