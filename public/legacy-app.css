@@ -4870,7 +4870,7 @@ html[data-theme="dark"] .il-landing h3,
 html[data-theme="dark"] .il-landing strong,
 html[data-theme="dark"] .il-landing input,
 html[data-theme="dark"] .il-landing button{
-  color:#F8EED6!important;
+  color:#17120B!important;
 }
 html[data-theme="dark"] .il-landing p,
 html[data-theme="dark"] .il-landing span,
@@ -4878,23 +4878,23 @@ html[data-theme="dark"] .il-landing li,
 html[data-theme="dark"] .il-landing .il-landing-band p,
 html[data-theme="dark"] .il-landing .il-landing-pricing p,
 html[data-theme="dark"] .il-landing .il-offer-card span{
-  color:rgba(248,238,214,.78)!important;
+  color:rgba(23,18,11,.72)!important;
 }
 html[data-theme="dark"] .il-landing .il-landing-kicker,
 html[data-theme="dark"] .il-landing .il-landing-proof span{
-  color:#E5B64A!important;
+  color:#7B541C!important;
 }
 html[data-theme="dark"] .il-landing .il-landing-search,
 html[data-theme="dark"] .il-landing .il-offer-card{
-  background:rgba(11,12,12,.72)!important;
-  border-color:rgba(229,182,74,.28)!important;
-  box-shadow:0 16px 42px rgba(0,0,0,.32)!important;
+  background:rgba(255,249,231,.64)!important;
+  border-color:rgba(126,88,29,.24)!important;
+  box-shadow:0 12px 30px rgba(88,58,12,.10)!important;
 }
 html[data-theme="dark"] .il-landing .il-landing-search input{
-  color:#F8EED6!important;
+  color:#17120B!important;
 }
 html[data-theme="dark"] .il-landing .il-landing-search input::placeholder{
-  color:rgba(248,238,214,.50)!important;
+  color:rgba(23,18,11,.52)!important;
 }
 html[data-theme="dark"] .il-landing .il-landing-primary,
 html[data-theme="dark"] .il-landing .il-landing-search button,
@@ -4902,7 +4902,7 @@ html[data-theme="dark"] .il-landing-band button{
   color:#17120B!important;
 }
 html[data-theme="dark"] .il-landing .il-landing-secondary{
-  color:#F8EED6!important;
+  color:#3B2A12!important;
 }
 #view-tool .app-section-hdr,
 #view-tool .tool-welcome,
