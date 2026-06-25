@@ -153,6 +153,16 @@ test("homepage defaults to a beginner-friendly landing page before market tools"
   assert.match(legacyCss, /\.il-landing-preview\.image-preview img\{/);
 });
 
+test("premium landing visual system matches the generated product preview direction", () => {
+  assert.match(legacyCss, /Premium screenshot visual system/);
+  assert.match(legacyCss, /--lens-black:#090A0B/);
+  assert.match(legacyCss, /--lens-gold:#D9B35E/);
+  assert.match(legacyCss, /\.il-landing\{[\s\S]*#FBF2DE/);
+  assert.match(legacyCss, /#view-tool,\.app-shell\{[\s\S]*var\(--lens-black\)/);
+  assert.match(legacyCss, /\.app-section,\.chart-wrap,\.metric-card,\.panel-box,\.il-tool-shell/);
+  assert.match(legacyCss, /green\/red only for market semantics|market green\/red|--chart-positive:#00C805/);
+});
+
 test("tool guidance is collapsed so tutorials do not block tool use", () => {
   assert.match(productJs, /guide\.className = "il-tool-guide compact"/);
   assert.match(productJs, /class="il-tool-guide-toggle" aria-expanded="false"/);
