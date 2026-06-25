@@ -207,7 +207,7 @@ test("premium landing visual system matches the generated product preview direct
 });
 
 test("premium visual system is applied across app and static pages", () => {
-  assert.match(html, /legacy-app\.css\?v=20260625-16/);
+  assert.match(html, /legacy-app\.css\?v=20260625-17/);
   assert.match(html, /product-system\.css\?v=20260625-1/);
   assert.match(signupHtml, /static-polish\.css\?v=20260625-2/);
   assert.match(html, /<a class="btn-nav" id="nav-signup" href="\/signup">Claim \$0\.99<\/a>/);
@@ -234,6 +234,7 @@ test("gold ripple image is the default backdrop across landing, market, and tool
   assert.match(legacyCss, /Gold ripple default background/);
   assert.match(legacyCss, /Site-wide ripple backdrop final pass/);
   assert.match(legacyCss, /Literal shared image backdrop/);
+  assert.match(legacyCss, /Light-mode polish baseline/);
   assert.match(legacyCss, /--gold-ripple-bg:url\("\/gold-ripple-background\.jpg\?v=20260625-3"\)/);
   assert.match(legacyCss, /--gold-ripple-overlay:none/);
   assert.match(legacyCss, /body::before\{[\s\S]*background-color:#E2BD6E!important;[\s\S]*background-image:var\(--gold-ripple-bg\)!important/);
