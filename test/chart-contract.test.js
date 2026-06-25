@@ -24,7 +24,10 @@ test("price charts expose dependable zoom controls and mobile gestures", () => {
   assert.match(html, /function chartZoomOptions\(\)/);
   assert.match(html, /chartjs-plugin-zoom\.min\.js\?v=2\.2\.0/);
   assert.match(html, /pinch:\{enabled:true\}/);
-  assert.match(html, /pan:\{enabled:true,mode:'x',threshold:8\}/);
+  assert.match(html, /mode:'xy'/);
+  assert.match(html, /overScaleMode:'xy'/);
+  assert.match(html, /pan:\{enabled:true,mode:'xy',threshold:compact\?3:6\}/);
+  assert.match(html, /limits:\{x:\{min:'original',max:'original',minRange:4\},y:\{min:'original',max:'original'\}\}/);
   assert.match(html, /onclick="zoomPriceChart\(1\.25\)"/);
   assert.match(html, /Zoom price chart out or load older history/);
   assert.match(html, /onclick="resetPriceZoom\(\)"/);
@@ -33,6 +36,9 @@ test("price charts expose dependable zoom controls and mobile gestures", () => {
   assert.match(html, /CHART_RANGE_ORDER=\['1d','5d','1mo','3mo','6mo','1y','2y','5y','max'\]/);
   assert.match(html, /minRange:4/);
   assert.match(htmlAndLegacyCss, /#price-chart\{touch-action:none\}/);
+  assert.match(legacyCss, /\.chart-wrap canvas,[\s\S]*\.cex-workspace canvas\{[\s\S]*touch-action:none!important/);
+  assert.match(legacyCss, /Pinch\/drag to inspect · expand to annotate/);
+  assert.match(legacyCss, /content:'Pinch \+ drag'/);
 });
 
 test("mobile chart headers reserve room for controls and explain unavailable indicators", () => {
@@ -123,19 +129,33 @@ test("charts and trade symbols use vivid market colors without repainting the si
   assert.match(legacyCss, /--brand-gold:#B88937/);
   assert.doesNotMatch(legacyCss, /--brand-gold:#00A85A/);
   assert.doesNotMatch(legacyCss, /--brand-gold:#CCFF00/);
-  assert.match(legacyCss, /--chart-price:#00A85A/);
-  assert.match(legacyCss, /--chart-price:#CCFF00/);
-  assert.match(legacyCss, /--chart-positive:#00C805/);
-  assert.match(legacyCss, /--chart-negative:#EB5D2A/);
-  assert.match(legacyCss, /--chart-negative:#FF6A3D/);
-  assert.match(legacyCss, /--chart-ma50:#148BFF/);
-  assert.match(legacyCss, /--chart-ma200:#8B5CF6/);
+  assert.match(legacyCss, /--chart-price:#16C784/);
+  assert.match(legacyCss, /--chart-price:#2EE59D/);
+  assert.match(legacyCss, /--chart-positive:#16C784/);
+  assert.match(legacyCss, /--chart-negative:#F45B5B/);
+  assert.match(legacyCss, /--chart-negative:#FF6B6B/);
+  assert.match(legacyCss, /--chart-ma50:#3B82F6/);
+  assert.match(legacyCss, /--chart-ma200:#A78BFA/);
   assert.match(legacyCss, /\.price-chg\.up\{background:color-mix\(in srgb,var\(--chart-positive\) 14%,transparent\)!important\}/);
-  assert.match(html, /const COLORS = \['#00A85A','#148BFF','#8B5CF6','#FFB020'\]/);
-  assert.match(html, /price:get\('--chart-price','#00A85A'\)/);
+  assert.match(html, /const COLORS = \['#16C784','#3B82F6','#A78BFA','#F5B83D'\]/);
+  assert.match(html, /price:get\('--chart-price','#16C784'\)/);
   assert.match(html, /borderWidth:2\.4/);
   assert.match(html, /borderWidth:2\.7/);
   assert.match(html, /stop-color="var\(--chart-price\)"/);
+});
+
+test("expanded charts look premium and support seamless annotation", () => {
+  assert.match(html, /var _markup = \{tool:'cursor',color:'#16C784'/);
+  assert.match(html, /data-markup-color="#16C784"/);
+  assert.match(html, /data-markup-color="#3B82F6"/);
+  assert.match(html, /data-markup-color="#F45B5B"/);
+  assert.match(html, /ctx2\.shadowColor='rgba\(0,0,0,\.22\)'/);
+  assert.match(html, /ctx2\.lineWidth=item\.type==='freehand'\?2\.5:3/);
+  assert.match(legacyCss, /#chart-expand-modal\{[\s\S]*backdrop-filter:blur\(10px\)/);
+  assert.match(legacyCss, /\.cex-box\{[\s\S]*border-radius:22px/);
+  assert.match(legacyCss, /\.cex-body\{[\s\S]*radial-gradient\(900px 420px at 78% -10%,rgba\(217,179,94,\.12\),transparent 70%\)/);
+  assert.match(legacyCss, /\.cex-tool\{[\s\S]*border-radius:10px/);
+  assert.match(legacyCss, /\.cex-color\{[\s\S]*width:24px/);
 });
 
 test("homepage defaults to a beginner-friendly landing page before market tools", () => {
@@ -180,11 +200,11 @@ test("premium landing visual system matches the generated product preview direct
   assert.match(legacyCss, /\.il-landing\{[\s\S]*#FBF2DE/);
   assert.match(legacyCss, /#view-tool,\.app-shell\{[\s\S]*var\(--lens-black\)/);
   assert.match(legacyCss, /\.app-section,\.chart-wrap,\.metric-card,\.panel-box,\.il-tool-shell/);
-  assert.match(legacyCss, /green\/red only for market semantics|market green\/red|--chart-positive:#00C805/);
+  assert.match(legacyCss, /green\/red only for market semantics|market green\/red|--chart-positive:#16C784/);
 });
 
 test("premium visual system is applied across app and static pages", () => {
-  assert.match(html, /legacy-app\.css\?v=20260625-13/);
+  assert.match(html, /legacy-app\.css\?v=20260625-14/);
   assert.match(html, /product-system\.css\?v=20260625-1/);
   assert.match(signupHtml, /static-polish\.css\?v=20260625-2/);
   assert.match(html, /<a class="btn-nav" id="nav-signup" href="\/signup">Claim \$0\.99<\/a>/);

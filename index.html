@@ -96,7 +96,7 @@
 <script defer src="/vendor/hammer.min.js?v=2.0.8"></script>
 <script defer src="/vendor/chartjs-plugin-zoom.min.js?v=2.2.0"></script>
 <script defer src="/model-math.js?v=20260612-1"></script>
-<link href="/legacy-app.css?v=20260625-13" rel="stylesheet">
+<link href="/legacy-app.css?v=20260625-14" rel="stylesheet">
 </head>
 <body>
 <div id="auth-veil"></div>
@@ -1652,9 +1652,9 @@
       <button class="cex-tool" data-markup-tool="freehand" onclick="setMarkupTool('freehand')" title="Freehand drawing"><i class="ti ti-pencil"></i></button>
       <button class="cex-tool" data-markup-tool="eraser" onclick="setMarkupTool('eraser')" title="Erase nearest mark"><i class="ti ti-eraser"></i></button>
       <span class="cex-tool-sep"></span>
-      <button class="cex-color active" data-markup-color="#00A85A" onclick="setMarkupColor('#00A85A')" style="background:#00A85A" title="Green"></button>
-      <button class="cex-color" data-markup-color="#148BFF" onclick="setMarkupColor('#148BFF')" style="background:#148BFF" title="Blue"></button>
-      <button class="cex-color" data-markup-color="#EB5D2A" onclick="setMarkupColor('#EB5D2A')" style="background:#EB5D2A" title="Red"></button>
+      <button class="cex-color active" data-markup-color="#16C784" onclick="setMarkupColor('#16C784')" style="background:#16C784" title="Green"></button>
+      <button class="cex-color" data-markup-color="#3B82F6" onclick="setMarkupColor('#3B82F6')" style="background:#3B82F6" title="Blue"></button>
+      <button class="cex-color" data-markup-color="#F45B5B" onclick="setMarkupColor('#F45B5B')" style="background:#F45B5B" title="Red"></button>
       <span class="cex-tool-sep"></span>
       <button class="cex-tool" onclick="undoMarkup()" title="Undo markup"><i class="ti ti-arrow-back-up"></i></button>
       <button class="cex-tool" onclick="redoMarkup()" title="Redo markup"><i class="ti ti-arrow-forward-up"></i></button>
@@ -1920,7 +1920,7 @@ const S = {
   csrfToken: null,      // fetched from GET /api/csrf on page load
 };
 window.IL_STATE = S;
-const COLORS = ['#00A85A','#148BFF','#8B5CF6','#FFB020'];
+const COLORS = ['#16C784','#3B82F6','#A78BFA','#F5B83D'];
 // Keep this list in sync with the requirePro-gated API routes in routes/financials.js
 // and routes/market-data.js (screener).
 const PRO_SECTIONS = ['financials','advmetrics','projection','dcf','screener',
@@ -3160,21 +3160,23 @@ const baseOpts = (extraScales={}) => {
   const yExtra=extraScales.y||{};
   return {
     responsive:true, maintainAspectRatio:false, normalized:true, resizeDelay:60,
-    interaction:{mode:'index',intersect:false},
-    layout:{padding:{top:3,right:compact?2:5,bottom:2,left:2}},
+    interaction:{mode:'index',intersect:false,axis:'xy'},
+    animation:{duration:compact?0:180,easing:'easeOutQuart'},
+    layout:{padding:{top:compact?6:8,right:compact?8:12,bottom:4,left:4}},
     plugins:{
       legend:{display:false},
       tooltip:{
         mode:'index', intersect:false,
         backgroundColor:t.ttBg, titleColor:t.ttTitle, bodyColor:t.ttBody,
-        borderColor:t.ttBorder, borderWidth:1, padding:11, caretSize:5,
-        titleFont:{family:'DM Mono',size:11,weight:'500'},bodyFont:{family:'DM Sans',size:12,weight:'500'},
+        borderColor:t.ttBorder, borderWidth:1, padding:12, caretSize:6,
+        cornerRadius:10, displayColors:true, boxWidth:8, boxHeight:8, usePointStyle:true,
+        titleFont:{family:'DM Mono',size:11,weight:'600'},bodyFont:{family:'DM Sans',size:12,weight:'600'},
         callbacks:{ label: ctx => ` ${ctx.dataset.label||''}: ${ctx.formattedValue}` }
       }
     },
     scales:{
-      x:{ ...xExtra, border:{display:false,...(xExtra.border||{})}, title:{...(xExtra.title||{}),display:false}, ticks:{color:t.text,font:{family:'DM Mono',size:compact?9:10,weight:'500'},maxTicksLimit:compact?5:8,padding:7,...(xExtra.ticks||{})}, grid:{display:false,color:t.grid,...(xExtra.grid||{})} },
-      y:{ ...yExtra, border:{display:false,...(yExtra.border||{})}, title:{...(yExtra.title||{}),display:false}, ticks:{color:t.text,font:{family:'DM Mono',size:compact?9:10,weight:'500'},padding:7,maxTicksLimit:compact?6:8,...(yExtra.ticks||{})}, grid:{color:t.grid,lineWidth:1,...(yExtra.grid||{})} }
+      x:{ ...xExtra, border:{display:false,...(xExtra.border||{})}, title:{...(xExtra.title||{}),display:false}, ticks:{color:t.text,font:{family:'DM Mono',size:compact?9:10,weight:'600'},maxTicksLimit:compact?4:8,padding:8,autoSkip:true,...(xExtra.ticks||{})}, grid:{display:false,color:t.grid,drawTicks:false,...(xExtra.grid||{})} },
+      y:{ ...yExtra, border:{display:false,...(yExtra.border||{})}, title:{...(yExtra.title||{}),display:false}, ticks:{color:t.text,font:{family:'DM Mono',size:compact?9:10,weight:'600'},padding:8,maxTicksLimit:compact?5:8,...(yExtra.ticks||{})}, grid:{color:t.grid,lineWidth:1,drawTicks:false,...(yExtra.grid||{})} }
     }
   };
 };
@@ -3183,12 +3185,13 @@ function chartZoomOptions() {
   const compact=window.matchMedia('(max-width: 640px)').matches;
   return {
     zoom:{
-      wheel:{enabled:!compact,speed:.07},
+      wheel:{enabled:!compact,speed:.045,modifierKey:null},
       pinch:{enabled:true},
-      mode:'x',
+      mode:'xy',
+      overScaleMode:'xy',
     },
-    pan:{enabled:true,mode:'x',threshold:8},
-    limits:{x:{min:'original',max:'original',minRange:4}},
+    pan:{enabled:true,mode:'xy',threshold:compact?3:6},
+    limits:{x:{min:'original',max:'original',minRange:4},y:{min:'original',max:'original'}},
   };
 }
 
@@ -3233,7 +3236,7 @@ function resetPriceZoom(){
 var _expandedChart = null;
 var _expandedSource = null;
 var _expandedHasUserZoom = false;
-var _markup = {tool:'cursor',color:'#00A85A',items:[],draft:null,ready:false,observer:null};
+var _markup = {tool:'cursor',color:'#16C784',items:[],draft:null,ready:false,observer:null};
 
 function expandChart(chartId, title) {
   const src = S.charts[chartId];
@@ -3277,14 +3280,15 @@ function expandChart(chartId, title) {
         legend: { display: true, labels: { color:theme.text, font:{family:'DM Sans',size:11,weight:'500'}, boxWidth:20, boxHeight:2, padding:16, usePointStyle:false } },
         tooltip: {
           mode:'index', intersect:false,
-          backgroundColor:ttbg(), titleColor:'#888', bodyColor:ttbody(),
-          borderColor:ttborder(), borderWidth:1, padding:12, caretSize:5,
-          titleFont:{family:'DM Mono',size:11,weight:'500'},bodyFont:{family:'DM Sans',size:12,weight:'500'}
+          backgroundColor:ttbg(), titleColor:theme.muted, bodyColor:ttbody(),
+          borderColor:ttborder(), borderWidth:1, padding:12, caretSize:6,
+          cornerRadius:10, displayColors:true, boxWidth:8, boxHeight:8, usePointStyle:true,
+          titleFont:{family:'DM Mono',size:11,weight:'600'},bodyFont:{family:'DM Sans',size:12,weight:'600'}
         },
         zoom: {
-          zoom: { wheel:{enabled:true,speed:0.07}, pinch:{enabled:true}, mode:'x', onZoomComplete({chart}){_expandedHasUserZoom=!chartAtFullHistory(chart);} },
-          pan:  { enabled:true, mode:'x', threshold:8 },
-          limits: { x:{min:'original',max:'original',minRange:4} }
+          zoom: { wheel:{enabled:true,speed:0.045}, pinch:{enabled:true}, mode:'xy', overScaleMode:'xy', onZoomComplete({chart}){_expandedHasUserZoom=!chartAtFullHistory(chart);} },
+          pan:  { enabled:true, mode:'xy', threshold:4 },
+          limits: { x:{min:'original',max:'original',minRange:4}, y:{min:'original',max:'original'} }
         }
       },
       scales: {
@@ -3309,12 +3313,12 @@ function cp() {
   const styles=getComputedStyle(document.documentElement);
   const get=(name,fallback)=>styles.getPropertyValue(name).trim()||fallback;
   return {
-    price:get('--chart-price','#00A85A'),
-    positive:get('--chart-positive','#00C805'),
-    negative:get('--chart-negative','#EB5D2A'),
-    ma50:get('--chart-ma50','#148BFF'),
-    ma200:get('--chart-ma200','#8B5CF6'),
-    bands:get('--chart-bands','#FFB020'),
+    price:get('--chart-price','#16C784'),
+    positive:get('--chart-positive','#16C784'),
+    negative:get('--chart-negative','#F45B5B'),
+    ma50:get('--chart-ma50','#3B82F6'),
+    ma200:get('--chart-ma200','#A78BFA'),
+    bands:get('--chart-bands','#F5B83D'),
     neutral:get('--chart-neutral','#AAB2C0'),
   };
 }
@@ -3371,9 +3375,9 @@ function resizeMarkupCanvas(){
 function drawMarkup(){
   const canvas=document.getElementById('chart-markup');if(!canvas)return;
   const ctx2=canvas.getContext('2d'),dpr=window.devicePixelRatio||1,w=canvas.width/dpr,h=canvas.height/dpr;
-  ctx2.setTransform(dpr,0,0,dpr,0,0);ctx2.clearRect(0,0,w,h);ctx2.lineCap='round';ctx2.lineJoin='round';
+  ctx2.setTransform(dpr,0,0,dpr,0,0);ctx2.clearRect(0,0,w,h);ctx2.lineCap='round';ctx2.lineJoin='round';ctx2.shadowColor='rgba(0,0,0,.22)';ctx2.shadowBlur=3;ctx2.shadowOffsetY=1;
   [..._markup.items,...(_markup.draft?[_markup.draft]:[])].forEach(item=>{
-    ctx2.strokeStyle=item.color;ctx2.lineWidth=2;ctx2.beginPath();
+    ctx2.strokeStyle=item.color;ctx2.lineWidth=item.type==='freehand'?2.5:3;ctx2.beginPath();
     if(item.type==='horizontal'){ctx2.moveTo(0,item.a.y*h);ctx2.lineTo(w,item.a.y*h);}
     else if(item.type==='line'){ctx2.moveTo(item.a.x*w,item.a.y*h);ctx2.lineTo(item.b.x*w,item.b.y*h);}
     else if(item.type==='freehand'&&item.points.length){ctx2.moveTo(item.points[0].x*w,item.points[0].y*h);item.points.slice(1).forEach(p=>ctx2.lineTo(p.x*w,p.y*h));}
@@ -4551,22 +4555,22 @@ function buildPriceChart(result,closes,timestamps) {
   syncIndicatorAvailability(vc.length);
   const ma50v=sma(vc,50), ma200v=sma(vc,200), bbv=bollinger(vc,20);
   const hp={pointRadius:0,pointHoverRadius:6,pointHoverBorderWidth:2,pointHoverBorderColor:'#fff'};
-  const fillGrad=ctx=>{const g=ctx.chart.ctx.createLinearGradient(0,0,0,260);g.addColorStop(0,colorAlpha(p.price,.22));g.addColorStop(1,colorAlpha(p.price,0));return g;};
-  const strongGrad=ctx=>{const g=ctx.chart.ctx.createLinearGradient(0,0,0,260);g.addColorStop(0,colorAlpha(p.price,.36));g.addColorStop(1,colorAlpha(p.price,.03));return g;};
+  const fillGrad=ctx=>{const h=ctx.chart.chartArea?.bottom||260;const g=ctx.chart.ctx.createLinearGradient(0,0,0,h);g.addColorStop(0,colorAlpha(p.price,.28));g.addColorStop(.55,colorAlpha(p.price,.10));g.addColorStop(1,colorAlpha(p.price,0));return g;};
+  const strongGrad=ctx=>{const h=ctx.chart.chartArea?.bottom||260;const g=ctx.chart.ctx.createLinearGradient(0,0,0,h);g.addColorStop(0,colorAlpha(p.price,.40));g.addColorStop(.62,colorAlpha(p.price,.13));g.addColorStop(1,colorAlpha(p.price,.02));return g;};
   let ds;
   if(S.chartType==='candle') {
     const q2=result.indicators.quote[0];
     const opens2=(q2.open||[]).slice(0,count), closes2=vc;
-    const candleColors=closes2.map((c2,i)=>(c2||0)>=(opens2[i]||0)?colorAlpha(p.positive,.9):colorAlpha(p.negative,.9));
-    ds=[{label:'Price',data:closes2.map((c2,i)=>[Math.min(opens2[i],c2),Math.max(opens2[i],c2)]),backgroundColor:candleColors,borderColor:candleColors,borderWidth:1,borderRadius:1,order:10,_quote:q2}];
+    const candleColors=closes2.map((c2,i)=>(c2||0)>=(opens2[i]||0)?colorAlpha(p.positive,.88):colorAlpha(p.negative,.88));
+    ds=[{label:'Price',data:closes2.map((c2,i)=>[Math.min(opens2[i],c2),Math.max(opens2[i],c2)]),backgroundColor:candleColors,borderColor:candleColors,borderWidth:1,borderRadius:3,order:10,_quote:q2}];
   } else if(S.chartType==='area') {
     ds=[{label:'Price',data:vc,borderColor:p.price,borderWidth:2.7,...hp,pointHoverBackgroundColor:p.price,fill:true,backgroundColor:strongGrad,tension:.22,order:10}];
   } else {
     ds=[{label:'Price',data:vc,borderColor:p.price,borderWidth:2.4,...hp,pointHoverBackgroundColor:p.price,fill:true,backgroundColor:fillGrad,tension:.22,order:10}];
   }
   const lineType = S.chartType==='candle' ? {type:'line'} : {};
-  if(S.inds.ma50&&vc.length>=INDICATOR_REQUIREMENTS.ma50.bars)  ds.push({...lineType,label:'50D average', data:ma50v, borderColor:p.ma50,borderWidth:1.8,...hp,pointHoverBackgroundColor:p.ma50,fill:false,tension:.2,order:9});
-  if(S.inds.ma200&&vc.length>=INDICATOR_REQUIREMENTS.ma200.bars) ds.push({...lineType,label:'200D average',data:ma200v,borderColor:p.ma200,borderWidth:1.8,...hp,pointHoverBackgroundColor:p.ma200,fill:false,tension:.2,order:8});
+  if(S.inds.ma50&&vc.length>=INDICATOR_REQUIREMENTS.ma50.bars)  ds.push({...lineType,label:'50D average', data:ma50v, borderColor:p.ma50,borderWidth:2,...hp,pointHoverBackgroundColor:p.ma50,fill:false,tension:.2,order:9});
+  if(S.inds.ma200&&vc.length>=INDICATOR_REQUIREMENTS.ma200.bars) ds.push({...lineType,label:'200D average',data:ma200v,borderColor:p.ma200,borderWidth:2,...hp,pointHoverBackgroundColor:p.ma200,fill:false,tension:.2,order:8});
   if(S.inds.bb&&vc.length>=INDICATOR_REQUIREMENTS.bb.bars) {
     ds.push({...lineType,label:'Upper band',data:bbv.map(x=>x.u),borderColor:colorAlpha(p.bands,.62),borderWidth:1,pointRadius:0,fill:false,tension:.2,order:7,borderDash:[4,3]});
     ds.push({...lineType,label:'Lower band',data:bbv.map(x=>x.l),borderColor:colorAlpha(p.bands,.62),borderWidth:1,pointRadius:0,fill:false,tension:.2,order:6,borderDash:[4,3]});
