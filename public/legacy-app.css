@@ -3282,3 +3282,166 @@ footer .il-build{
     grid-template-columns:1fr!important;
   }
 }
+
+/* Landing readability + premium market finish. */
+.il-landing{
+  background-color:#FBF2DE!important;
+  background:
+    radial-gradient(900px 520px at 82% 0%,rgba(217,179,94,.22),transparent 64%),
+    linear-gradient(180deg,#FBF2DE 0%,#F4DFAF 46%,#0C0E10 46%,#08090A 100%)!important;
+}
+html[data-theme="dark"] .il-landing{
+  background-color:#FBF2DE!important;
+  background:
+    radial-gradient(900px 520px at 82% 0%,rgba(217,179,94,.18),transparent 64%),
+    linear-gradient(180deg,#FBF2DE 0%,#F1D8A6 46%,#0C0E10 46%,#08090A 100%)!important;
+}
+.il-landing,
+html[data-theme="dark"] .il-landing{
+  background-color:#FBF2DE!important;
+}
+.il-landing h1,
+.il-workflow-copy h2{
+  color:#17120B!important;
+}
+.il-workflow-copy p{
+  color:rgba(23,18,11,.68)!important;
+}
+.il-workflow-visual .il-landing-kicker{
+  color:#7B541C!important;
+}
+.il-workflow-visual{
+  background-color:#F1D8A6!important;
+}
+.il-landing-band .il-landing-kicker,
+.il-landing-pricing .il-landing-kicker{
+  color:var(--lens-gold-2)!important;
+}
+.il-landing-band,
+.il-landing-pricing{
+  background-color:#0C0E10!important;
+}
+.il-landing-band h2,
+.il-landing-pricing h2{
+  color:var(--lens-text)!important;
+}
+.il-landing-band p,
+.il-landing-pricing p{
+  color:rgba(245,235,215,.74)!important;
+}
+.il-landing-band button,
+.il-landing-pricing .il-landing-secondary{
+  background:rgba(255,255,255,.07)!important;
+  border-color:rgba(230,188,99,.22)!important;
+  color:rgba(245,235,215,.90)!important;
+}
+
+#market-page{
+  background:
+    radial-gradient(980px 540px at 78% 0%,rgba(217,179,94,.12),transparent 64%),
+    linear-gradient(180deg,#090A0B 0%,#111315 46%,#08090A 100%)!important;
+}
+#market-page .hs-sidebar{
+  background:linear-gradient(180deg,rgba(9,10,11,.96),rgba(14,16,18,.98))!important;
+  border-right:1px solid rgba(230,188,99,.16)!important;
+  box-shadow:18px 0 58px rgba(0,0,0,.22)!important;
+}
+#market-page .hs-main{
+  background:
+    linear-gradient(90deg,rgba(230,188,99,.045) 1px,transparent 1px),
+    linear-gradient(rgba(230,188,99,.035) 1px,transparent 1px),
+    radial-gradient(760px 360px at 100% 0%,rgba(217,179,94,.10),transparent 70%),
+    #090A0B!important;
+  background-size:56px 56px,56px 56px,auto,auto!important;
+}
+#market-page .home-ticker-strip{
+  margin:14px 18px 0!important;
+  border:1px solid rgba(230,188,99,.14)!important;
+  border-radius:14px!important;
+  background:rgba(9,10,11,.80)!important;
+  box-shadow:0 18px 48px rgba(0,0,0,.22)!important;
+}
+#market-page .home-grid,
+#market-page .home-lower{
+  gap:16px!important;
+  padding:18px!important;
+  border:0!important;
+  background:transparent!important;
+}
+#market-page .hc,
+#market-page .hg-market,
+#market-page .hg-watch,
+#market-page .hg-signals,
+#market-page .hg-insights,
+#market-page .hg-movers,
+#market-page .hl-learning,
+#market-page .hl-report{
+  border:1px solid rgba(230,188,99,.18)!important;
+  border-radius:16px!important;
+  overflow:hidden!important;
+  background:
+    linear-gradient(180deg,rgba(34,37,41,.94),rgba(14,16,18,.97))!important;
+  box-shadow:0 24px 70px rgba(0,0,0,.30),inset 0 1px 0 rgba(255,255,255,.05)!important;
+}
+#market-page .hg-market{
+  background:
+    radial-gradient(560px 320px at 100% 0%,rgba(217,179,94,.12),transparent 70%),
+    linear-gradient(180deg,rgba(31,34,38,.96),rgba(11,13,15,.98))!important;
+}
+#market-page .hc-hdr,
+#market-page .hg-market .mo-header{
+  background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.012))!important;
+  border-bottom:1px solid rgba(230,188,99,.16)!important;
+}
+#market-page .hg-market .mo-indices,
+#market-page .hg-market .mo-footer{
+  background:rgba(9,10,11,.34)!important;
+  border-color:rgba(230,188,99,.14)!important;
+}
+#market-page .hg-market .mo-idx-item,
+#market-page .hg-market .mo-bv2-card{
+  background:rgba(9,10,11,.38)!important;
+  border-color:rgba(230,188,99,.12)!important;
+}
+#market-page .mo-title,
+#market-page .hc-title,
+#market-page .ht-sym,
+#market-page .wl-sym,
+#market-page .wl-price,
+#market-page .learn-title,
+#market-page .report-title,
+#market-page .mo-idx-price,
+#market-page .mo-bv2-val{
+  color:var(--lens-text)!important;
+}
+#market-page .mo-subtitle,
+#market-page .ht-name,
+#market-page .wl-meta,
+#market-page .learn-desc,
+#market-page .report-sub,
+#market-page .mo-idx-name,
+#market-page .mo-bv2-label,
+#market-page .mo-bv2-sub,
+#market-page .mo-timestamp,
+#market-page .mo-realtime,
+#market-page .hc-link{
+  color:rgba(245,235,215,.68)!important;
+}
+#market-page .mo-tab,
+#market-page .movers-tab{
+  background:rgba(255,255,255,.045)!important;
+  border-color:rgba(230,188,99,.16)!important;
+  color:rgba(245,235,215,.72)!important;
+}
+#market-page .mo-tab.on,
+#market-page .movers-tab.on,
+#market-page .movers-tab.active{
+  background:linear-gradient(180deg,var(--lens-gold-2),var(--lens-gold))!important;
+  border-color:rgba(87,55,9,.34)!important;
+  color:#14100A!important;
+}
+#market-page .wl-table th,
+#market-page .wl-table td{
+  border-color:rgba(230,188,99,.10)!important;
+  color:rgba(245,235,215,.72)!important;
+}

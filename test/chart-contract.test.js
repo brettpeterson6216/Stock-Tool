@@ -140,6 +140,7 @@ test("charts and trade symbols use vivid market colors without repainting the si
 
 test("homepage defaults to a beginner-friendly landing page before market tools", () => {
   assert.match(html, /id="landing-page"/);
+  assert.match(html, /<div class="home-shell" id="market-page" style="display:none;">/);
   assert.match(html, /Find better stock ideas with a process you can follow/);
   assert.match(html, /New user offer: first month \$0\.99/);
   assert.match(html, /Get first month for \$0\.99/);
@@ -164,6 +165,11 @@ test("homepage defaults to a beginner-friendly landing page before market tools"
   assert.match(legacyCss, /object-fit:contain!important/);
   assert.match(legacyCss, /max-height:min\(610px,calc\(100vh - 290px\)\)/);
   assert.doesNotMatch(legacyCss, /height:min\(72vh,760px\)!important/);
+  assert.match(legacyCss, /Landing readability \+ premium market finish/);
+  assert.match(legacyCss, /html\[data-theme="dark"\] \.il-landing\{/);
+  assert.match(legacyCss, /\.il-landing,[\s\S]*html\[data-theme="dark"\] \.il-landing\{[\s\S]*background-color:#FBF2DE!important/);
+  assert.match(legacyCss, /\.il-landing-band \.il-landing-kicker,[\s\S]*\.il-landing-pricing \.il-landing-kicker\{[\s\S]*var\(--lens-gold-2\)!important/);
+  assert.match(legacyCss, /\.il-landing-band,[\s\S]*\.il-landing-pricing\{[\s\S]*background-color:#0C0E10!important/);
   assert.match(legacyCss, /\.il-workflow-visual\{/);
 });
 
@@ -178,10 +184,13 @@ test("premium landing visual system matches the generated product preview direct
 });
 
 test("premium visual system is applied across app and static pages", () => {
-  assert.match(html, /legacy-app\.css\?v=20260625-5/);
+  assert.match(html, /legacy-app\.css\?v=20260625-8/);
   assert.match(signupHtml, /static-polish\.css\?v=20260625-1/);
   assert.match(html, /<a class="btn-nav" id="nav-signup" href="\/signup">Claim \$0\.99<\/a>/);
   assert.match(legacyCss, /Site-wide premium polish/);
+  assert.match(legacyCss, /#market-page \.home-grid,[\s\S]*#market-page \.home-lower\{[\s\S]*gap:16px!important/);
+  assert.match(legacyCss, /#market-page \.hc,[\s\S]*#market-page \.hl-report\{[\s\S]*border-radius:16px!important/);
+  assert.match(legacyCss, /#market-page \.mo-tab\.on,[\s\S]*#market-page \.movers-tab\.active\{[\s\S]*linear-gradient\(180deg,var\(--lens-gold-2\),var\(--lens-gold\)\)/);
   assert.match(legacyCss, /\.home-ticker-strip,\s*\.ht-card,\s*\.hc,\s*\.hg-market/s);
   assert.match(legacyCss, /\.pricing-card,\s*\.pricing-compare,\s*\.modal,\s*\.nav-acct-menu/s);
   assert.match(legacyCss, /footer\{[\s\S]*#08090A!important/);
