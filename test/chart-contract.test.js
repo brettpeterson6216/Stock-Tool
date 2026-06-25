@@ -184,7 +184,7 @@ test("premium landing visual system matches the generated product preview direct
 });
 
 test("premium visual system is applied across app and static pages", () => {
-  assert.match(html, /legacy-app\.css\?v=20260625-12/);
+  assert.match(html, /legacy-app\.css\?v=20260625-13/);
   assert.match(html, /product-system\.css\?v=20260625-1/);
   assert.match(signupHtml, /static-polish\.css\?v=20260625-2/);
   assert.match(html, /<a class="btn-nav" id="nav-signup" href="\/signup">Claim \$0\.99<\/a>/);
@@ -214,6 +214,18 @@ test("gold ripple image is the default backdrop across landing, market, and tool
   assert.match(legacyCss, /background-image:var\(--gold-ripple-overlay\),var\(--gold-ripple-bg\)!important/);
   assert.match(legacyCss, /background-attachment:fixed!important/);
   assert.match(legacyCss, /background-attachment:scroll!important/);
+});
+
+test("tool containers use premium rounded surfaces instead of sharp rectangles", () => {
+  assert.match(legacyCss, /Premium tool surface polish/);
+  assert.match(legacyCss, /--tool-radius-xl:22px/);
+  assert.match(legacyCss, /#view-tool \.acc-body,[\s\S]*#view-tool \.chart-wrap,[\s\S]*#view-tool \.metric-card,[\s\S]*#view-tool \.panel-box/);
+  assert.match(legacyCss, /#view-tool \.il-tool-shell,[\s\S]*#view-tool \.il-proj-evidence,[\s\S]*#view-tool \.il-learn-workshop/);
+  assert.match(legacyCss, /border-radius:var\(--tool-radius-lg\)!important/);
+  assert.match(legacyCss, /box-shadow:var\(--tool-shadow-light\)!important/);
+  assert.match(legacyCss, /html\[data-theme="dark"\] #view-tool \.acc-body,[\s\S]*box-shadow:var\(--tool-shadow-dark\)!important/);
+  assert.match(legacyCss, /#view-tool \.ticker-input,[\s\S]*#view-tool \.il-learn-nav button\{[\s\S]*border-radius:12px!important/);
+  assert.match(legacyCss, /#view-tool \.app-section \.acc-body\{[\s\S]*background:transparent!important/);
 });
 
 test("tool guidance is collapsed so tutorials do not block tool use", () => {

@@ -3948,3 +3948,201 @@ body,
     background-position:center top!important;
   }
 }
+
+/* Premium tool surface polish: rounded, layered containers that match the landing preview. */
+:root{
+  --tool-radius-xl:22px;
+  --tool-radius-lg:18px;
+  --tool-radius-md:14px;
+  --tool-surface-light:linear-gradient(180deg,rgba(255,250,239,.92),rgba(244,224,181,.84));
+  --tool-surface-dark:linear-gradient(180deg,rgba(31,34,38,.95),rgba(13,15,17,.96));
+  --tool-border-light:rgba(98,69,22,.20);
+  --tool-border-dark:rgba(230,188,99,.18);
+  --tool-shadow-light:0 24px 60px rgba(83,57,15,.16),inset 0 1px 0 rgba(255,255,255,.52);
+  --tool-shadow-dark:0 28px 70px rgba(0,0,0,.34),inset 0 1px 0 rgba(255,255,255,.055);
+}
+#view-tool .acc-body,
+#view-tool .tool-welcome,
+#view-tool .search-row,
+#view-tool #featured-grid,
+#view-tool .chart-wrap,
+#view-tool .metric-card,
+#view-tool .panel-box,
+#view-tool .dcf-out,
+#view-tool .scr-filters,
+#view-tool .cmp-table,
+#view-tool .fin-table,
+#view-tool .sidebar-card,
+#view-tool .analyst-target-box,
+#view-tool .analyst-rec-box,
+#view-tool .risk-stat,
+#view-tool .dp-card,
+#view-tool .sa-card,
+#view-tool .pro-gate-card,
+#view-tool .il-tool-shell,
+#view-tool .il-trust-panel,
+#view-tool .il-proj-evidence,
+#view-tool .il-proj-review,
+#view-tool .il-projection-explain,
+#view-tool .il-template-row,
+#view-tool .il-assumption-checklist>div,
+#view-tool .il-result-summary>div,
+#view-tool .il-learn-workshop,
+#view-tool .edu-hero,
+#view-tool .edu-path,
+#view-tool .edu-lesson-panel,
+#view-tool .edu-checklist,
+#view-tool .edu-glossary{
+  border-radius:var(--tool-radius-lg)!important;
+  border-color:var(--tool-border-light)!important;
+  background:var(--tool-surface-light)!important;
+  box-shadow:var(--tool-shadow-light)!important;
+  overflow:hidden;
+}
+html[data-theme="dark"] #view-tool .acc-body,
+html[data-theme="dark"] #view-tool .tool-welcome,
+html[data-theme="dark"] #view-tool .search-row,
+html[data-theme="dark"] #view-tool #featured-grid,
+html[data-theme="dark"] #view-tool .chart-wrap,
+html[data-theme="dark"] #view-tool .metric-card,
+html[data-theme="dark"] #view-tool .panel-box,
+html[data-theme="dark"] #view-tool .dcf-out,
+html[data-theme="dark"] #view-tool .scr-filters,
+html[data-theme="dark"] #view-tool .cmp-table,
+html[data-theme="dark"] #view-tool .fin-table,
+html[data-theme="dark"] #view-tool .sidebar-card,
+html[data-theme="dark"] #view-tool .analyst-target-box,
+html[data-theme="dark"] #view-tool .analyst-rec-box,
+html[data-theme="dark"] #view-tool .risk-stat,
+html[data-theme="dark"] #view-tool .dp-card,
+html[data-theme="dark"] #view-tool .sa-card,
+html[data-theme="dark"] #view-tool .pro-gate-card,
+html[data-theme="dark"] #view-tool .il-tool-shell,
+html[data-theme="dark"] #view-tool .il-trust-panel,
+html[data-theme="dark"] #view-tool .il-proj-evidence,
+html[data-theme="dark"] #view-tool .il-proj-review,
+html[data-theme="dark"] #view-tool .il-projection-explain,
+html[data-theme="dark"] #view-tool .il-template-row,
+html[data-theme="dark"] #view-tool .il-assumption-checklist>div,
+html[data-theme="dark"] #view-tool .il-result-summary>div,
+html[data-theme="dark"] #view-tool .il-learn-workshop,
+html[data-theme="dark"] #view-tool .edu-hero,
+html[data-theme="dark"] #view-tool .edu-path,
+html[data-theme="dark"] #view-tool .edu-lesson-panel,
+html[data-theme="dark"] #view-tool .edu-checklist,
+html[data-theme="dark"] #view-tool .edu-glossary{
+  border-color:var(--tool-border-dark)!important;
+  background:var(--tool-surface-dark)!important;
+  box-shadow:var(--tool-shadow-dark)!important;
+}
+#view-tool .chart-wrap{
+  padding:1.05rem 1.05rem .85rem!important;
+}
+#view-tool .chart-wrap .chart-header,
+#view-tool .il-shell-top,
+#view-tool .il-tool-decision-head,
+#view-tool .il-proj-head,
+#view-tool .il-trust-panel-head{
+  border-radius:calc(var(--tool-radius-lg) - 2px) calc(var(--tool-radius-lg) - 2px) 0 0!important;
+  background:linear-gradient(180deg,rgba(255,255,255,.34),rgba(255,255,255,.08))!important;
+}
+html[data-theme="dark"] #view-tool .chart-wrap .chart-header,
+html[data-theme="dark"] #view-tool .il-shell-top,
+html[data-theme="dark"] #view-tool .il-tool-decision-head,
+html[data-theme="dark"] #view-tool .il-proj-head,
+html[data-theme="dark"] #view-tool .il-trust-panel-head{
+  background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.012))!important;
+}
+#view-tool .ticker-input,
+#view-tool .btn-search,
+#view-tool .fc-input,
+#view-tool .fc-select,
+#view-tool input,
+#view-tool select,
+#view-tool textarea,
+#view-tool .act-btn,
+#view-tool .tf-pill,
+#view-tool .tf-tog,
+#view-tool .rpill,
+#view-tool .ind-pill,
+#view-tool .indicator-control,
+#view-tool .il-shell-search,
+#view-tool .il-shell-search button,
+#view-tool .il-shell-actions button,
+#view-tool .il-template-row button,
+#view-tool .il-primary-action,
+#view-tool .il-tool-guide-toggle,
+#view-tool .il-learn-search,
+#view-tool .il-learn-search input,
+#view-tool .il-learn-search button,
+#view-tool .il-learn-quiz button,
+#view-tool .il-learn-nav button{
+  border-radius:12px!important;
+}
+#view-tool .btn-search,
+#view-tool .il-shell-search button,
+#view-tool .il-primary-action,
+#view-tool .btn-run{
+  border-radius:0 12px 12px 0!important;
+}
+#view-tool .il-shell-search,
+#view-tool .search-row{
+  border-radius:16px!important;
+}
+#view-tool .chart-exp-btn,
+#view-tool .ash-btn,
+#view-tool .il-drawer-head button{
+  border-radius:12px!important;
+}
+#view-tool .metric-card:hover,
+#view-tool .chart-wrap:hover,
+#view-tool .panel-box:hover,
+#view-tool .edu-path:hover{
+  transform:translateY(-1px);
+  border-color:rgba(118,82,29,.34)!important;
+}
+html[data-theme="dark"] #view-tool .metric-card:hover,
+html[data-theme="dark"] #view-tool .chart-wrap:hover,
+html[data-theme="dark"] #view-tool .panel-box:hover,
+html[data-theme="dark"] #view-tool .edu-path:hover{
+  border-color:rgba(230,188,99,.30)!important;
+}
+@media(max-width:640px){
+  :root{
+    --tool-radius-xl:18px;
+    --tool-radius-lg:16px;
+    --tool-radius-md:13px;
+  }
+  #view-tool .app-section .acc-body{
+    border-radius:0!important;
+    background:transparent!important;
+    border-color:transparent!important;
+    box-shadow:none!important;
+    overflow:visible;
+  }
+  #view-tool .chart-wrap,
+  #view-tool .metric-card,
+  #view-tool .panel-box,
+  #view-tool .dcf-out,
+  #view-tool .scr-filters,
+  #view-tool .il-tool-shell,
+  #view-tool .il-trust-panel,
+  #view-tool .il-proj-evidence,
+  #view-tool .il-proj-review,
+  #view-tool .il-projection-explain,
+  #view-tool .il-learn-workshop,
+  #view-tool .edu-hero,
+  #view-tool .edu-path,
+  #view-tool .edu-lesson-panel,
+  #view-tool .edu-checklist,
+  #view-tool .edu-glossary{
+    border-radius:var(--tool-radius-lg)!important;
+  }
+  #view-tool .chart-wrap{
+    padding:.85rem .7rem .6rem!important;
+  }
+  #view-tool .btn-search,
+  #view-tool .il-shell-search button{
+    border-radius:12px!important;
+  }
+}
