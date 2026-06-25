@@ -2939,3 +2939,155 @@ nav{
   box-shadow:0 12px 38px rgba(75,51,14,.08),inset 0 -1px 0 rgba(255,255,255,.34)!important;
 }
 html[data-theme="dark"] nav{background:rgba(8,9,10,.86)!important}
+
+/* Landing hero final composition: make the generated product image the stage. */
+.il-landing-hero{
+  display:block!important;
+  min-height:calc(100vh - 56px)!important;
+  padding:clamp(28px,4vw,58px)!important;
+  overflow:hidden!important;
+}
+.il-landing-hero::before{
+  inset:0!important;
+  height:auto!important;
+  background:linear-gradient(90deg,rgba(7,8,8,.86) 0%,rgba(7,8,8,.66) 34%,rgba(7,8,8,.18) 62%,rgba(7,8,8,.02) 100%)!important;
+  z-index:2;
+}
+.il-landing-hero::after{z-index:3;opacity:.34}
+.il-landing-preview{
+  position:absolute!important;
+  inset:clamp(16px,3vw,42px)!important;
+  z-index:1!important;
+  max-width:none!important;
+  transform:none!important;
+  border-radius:24px!important;
+}
+.il-landing-preview.image-preview img{
+  width:100%!important;
+  height:100%!important;
+  min-height:640px;
+  object-fit:cover!important;
+  object-position:center center;
+}
+.il-landing-copy{
+  position:relative!important;
+  z-index:4!important;
+  width:min(720px,calc(100vw - 52px));
+  max-width:720px!important;
+  margin:clamp(36px,6vw,82px) 0 clamp(28px,6vw,72px) clamp(4px,4vw,54px);
+  padding:clamp(20px,3vw,34px);
+  border:1px solid rgba(242,213,138,.22);
+  border-radius:18px;
+  background:linear-gradient(180deg,rgba(7,8,8,.78),rgba(12,14,16,.68));
+  box-shadow:0 28px 80px rgba(0,0,0,.34),inset 0 1px 0 rgba(255,255,255,.08);
+  backdrop-filter:blur(18px) saturate(1.08);
+}
+.il-landing-copy .il-landing-kicker{color:var(--lens-gold-2)!important}
+.il-landing-copy .il-landing-kicker::before{background:var(--chart-positive)}
+.il-landing h1{
+  max-width:680px!important;
+  color:var(--lens-text)!important;
+  text-shadow:0 2px 22px rgba(0,0,0,.38)!important;
+  font-size:clamp(44px,6.4vw,94px)!important;
+}
+.il-landing-copy p{
+  max-width:620px;
+  color:rgba(245,235,215,.78)!important;
+  font-size:clamp(15px,1.35vw,18px)!important;
+}
+.il-landing-actions{margin-top:22px!important}
+.il-landing-secondary{
+  background:rgba(255,255,255,.08)!important;
+  border-color:rgba(242,213,138,.22)!important;
+  color:rgba(245,235,215,.84)!important;
+}
+.il-landing-search{
+  max-width:630px!important;
+  margin-top:18px!important;
+  background:#090A0B!important;
+  border-color:rgba(242,213,138,.24)!important;
+  box-shadow:0 16px 44px rgba(0,0,0,.32)!important;
+}
+.il-landing-search i{color:var(--lens-gold-2)!important}
+.il-landing-search input{
+  color:var(--lens-text)!important;
+  font-family:var(--sans)!important;
+  font-weight:800!important;
+  letter-spacing:0!important;
+}
+.il-landing-search input::placeholder{color:rgba(245,235,215,.50)!important}
+.il-landing-search button{
+  background:rgba(255,255,255,.06)!important;
+  color:var(--lens-text)!important;
+  border-left-color:rgba(242,213,138,.18)!important;
+}
+.il-landing-proof span{
+  color:rgba(245,235,215,.72)!important;
+  font-weight:800!important;
+}
+.il-offer-card{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  max-width:630px;
+  margin-top:18px;
+  padding:13px 14px;
+  border:1px solid rgba(0,200,5,.24);
+  border-radius:12px;
+  background:linear-gradient(135deg,rgba(0,200,5,.14),rgba(217,179,94,.08));
+}
+.il-offer-card strong{flex:0 0 auto;color:#CCFF00;font:900 13px var(--mono);text-transform:uppercase;letter-spacing:.04em}
+.il-offer-card span{color:rgba(245,235,215,.72);font:600 12px/1.45 var(--sans)}
+.il-preview-caption{
+  left:auto!important;
+  right:22px!important;
+  bottom:22px!important;
+  z-index:5!important;
+}
+.il-workflow-visual{
+  display:grid;
+  grid-template-columns:minmax(280px,.42fr) minmax(0,.58fr);
+  gap:clamp(18px,3vw,42px);
+  align-items:center;
+  padding:clamp(44px,6vw,78px) clamp(18px,6vw,84px);
+  border-bottom:1px solid rgba(98,69,22,.16);
+  background:linear-gradient(180deg,#F8EBCF,#F1D8A6);
+}
+.il-workflow-copy h2{
+  margin:0 0 10px;
+  color:#17120B;
+  font:600 clamp(30px,4vw,54px)/1.02 var(--serif);
+}
+.il-workflow-copy p{
+  max-width:520px;
+  margin:0;
+  color:rgba(23,18,11,.66);
+  font:600 15px/1.65 var(--sans);
+}
+.il-workflow-visual img{
+  display:block;
+  width:100%;
+  border:1px solid rgba(95,59,9,.30);
+  border-radius:18px;
+  box-shadow:0 32px 80px rgba(57,36,7,.20);
+}
+.il-landing-pricing{
+  background:linear-gradient(180deg,#0C0E10,#151719)!important;
+  color:var(--lens-text)!important;
+}
+.il-landing-pricing h2{color:var(--lens-text)!important}
+.il-landing-pricing p{color:rgba(245,235,215,.72)!important}
+@media(max-width:980px){
+  .il-landing-hero{min-height:auto!important;padding:16px!important}
+  .il-landing-preview{position:relative!important;inset:auto!important}
+  .il-landing-preview.image-preview img{min-height:380px}
+  .il-landing-copy{margin:-100px 10px 18px!important;width:auto;max-width:none!important}
+  .il-workflow-visual{grid-template-columns:1fr}
+}
+@media(max-width:640px){
+  .il-landing-copy{margin:-70px 0 12px!important;padding:18px}
+  .il-landing h1{font-size:40px!important}
+  .il-landing-preview.image-preview img{min-height:320px}
+  .il-offer-card{display:grid}
+  .il-offer-card strong{flex:auto}
+}

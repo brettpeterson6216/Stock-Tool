@@ -138,10 +138,12 @@ test("charts and trade symbols use vivid market colors without repainting the si
 
 test("homepage defaults to a beginner-friendly landing page before market tools", () => {
   assert.match(html, /id="landing-page"/);
-  assert.match(html, /Premium stock research for beginners/);
-  assert.match(html, /Start 7-day free trial/);
+  assert.match(html, /New user offer: first month \$0\.99/);
+  assert.match(html, /Get first month for \$0\.99/);
   assert.match(html, /src="\/landing-product-preview\.png"/);
+  assert.match(html, /src="\/landing-workflow-strip\.png"/);
   assert.match(html, /Sample workspace/);
+  assert.match(html, /\$0\.99 first month/);
   assert.doesNotMatch(html, /id="landingChartFill"/);
   assert.match(html, /function landingSearch\(\)/);
   assert.match(html, /id="market-page" style="display:none;"/);
@@ -151,6 +153,8 @@ test("homepage defaults to a beginner-friendly landing page before market tools"
   assert.match(html, /\/\?view=home&amp;market=1/);
   assert.match(legacyCss, /#market-page \.home-hero,#market-page \.home-feat-strip,#market-page \.home-proof,#market-page \.home-guide-showcase,#market-page #pricing,#market-page \.cta-strip\{display:none!important\}/);
   assert.match(legacyCss, /\.il-landing-preview\.image-preview img\{/);
+  assert.match(legacyCss, /Landing hero final composition/);
+  assert.match(legacyCss, /\.il-workflow-visual\{/);
 });
 
 test("premium landing visual system matches the generated product preview direction", () => {
