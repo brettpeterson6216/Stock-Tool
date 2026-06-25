@@ -11,7 +11,9 @@ const staticCss = fs.readFileSync(path.join(__dirname, "..", "public", "static-p
 const signupHtml = fs.readFileSync(path.join(__dirname, "..", "public", "signup.html"), "utf8");
 const productJs = fs.readFileSync(path.join(__dirname, "..", "public", "product-system.js"), "utf8");
 const productCss = fs.readFileSync(path.join(__dirname, "..", "public", "product-system.css"), "utf8");
-const landingPreviewPng = fs.readFileSync(path.join(__dirname, "..", "public", "landing-product-preview.png"));
+const landingPreviewLightPng = fs.readFileSync(path.join(__dirname, "..", "public", "landing-product-preview-light.png"));
+const landingPreviewDarkPng = fs.readFileSync(path.join(__dirname, "..", "public", "landing-product-preview-dark.png"));
+const landingWorkflowLightPng = fs.readFileSync(path.join(__dirname, "..", "public", "landing-workflow-strip-light.png"));
 const htmlAndLegacyCss = `${html}\n${legacyCss}`;
 
 test("chart rebuilds keep prices and timestamps on one aligned series", () => {
@@ -168,8 +170,10 @@ test("homepage defaults to a beginner-friendly landing page before market tools"
   assert.match(html, /Find better stock ideas with a process you can follow/);
   assert.match(html, /New user offer: first month \$0\.99/);
   assert.match(html, /Get first month for \$0\.99/);
-  assert.match(html, /src="\/landing-product-preview\.png"/);
-  assert.match(html, /src="\/landing-workflow-strip\.png"/);
+  assert.match(html, /class="il-theme-img il-theme-img-light" src="\/landing-product-preview-light\.png"/);
+  assert.match(html, /class="il-theme-img il-theme-img-dark" src="\/landing-product-preview-dark\.png"/);
+  assert.match(html, /class="il-theme-img il-theme-img-light" src="\/landing-workflow-strip-light\.png"/);
+  assert.match(html, /class="il-theme-img il-theme-img-dark" src="\/landing-workflow-strip-dark\.png"/);
   assert.match(html, /Sample workspace/);
   assert.match(html, /\$0\.99 first month/);
   assert.doesNotMatch(html, /id="landingChartFill"/);
@@ -181,6 +185,9 @@ test("homepage defaults to a beginner-friendly landing page before market tools"
   assert.match(html, /\/\?view=home&amp;market=1/);
   assert.match(legacyCss, /#market-page \.home-hero,#market-page \.home-feat-strip,#market-page \.home-proof,#market-page \.home-guide-showcase,#market-page #pricing,#market-page \.cta-strip\{display:none!important\}/);
   assert.match(legacyCss, /\.il-landing-preview\.image-preview img\{/);
+  assert.match(legacyCss, /\.il-theme-img-light\{[\s\S]*display:block!important/);
+  assert.match(legacyCss, /html\[data-theme="dark"\] \.il-theme-img-light\{[\s\S]*display:none!important/);
+  assert.match(legacyCss, /html\[data-theme="dark"\] \.il-theme-img-dark\{[\s\S]*display:block!important/);
   assert.match(legacyCss, /Landing hero final composition: one clean headline row above the generated image/);
   assert.match(legacyCss, /\.il-landing-hero\{[\s\S]*flex-direction:column/);
   assert.match(legacyCss, /\.il-landing-copy\{[\s\S]*background:transparent!important/);
@@ -208,7 +215,7 @@ test("premium landing visual system matches the generated product preview direct
 });
 
 test("premium visual system is applied across app and static pages", () => {
-  assert.match(html, /legacy-app\.css\?v=20260625-18/);
+  assert.match(html, /legacy-app\.css\?v=20260625-19/);
   assert.match(html, /product-system\.css\?v=20260625-1/);
   assert.match(signupHtml, /static-polish\.css\?v=20260625-2/);
   assert.match(html, /<a class="btn-nav" id="nav-signup" href="\/signup">Claim \$0\.99<\/a>/);
@@ -249,9 +256,13 @@ test("gold ripple image is the default backdrop across landing, market, and tool
   assert.match(legacyCss, /backdrop-filter:blur\(20px\) saturate\(1\.08\)!important/);
 });
 
-test("landing promo workspace image has transparency around the product", () => {
-  assert.equal(landingPreviewPng.toString("ascii", 1, 4), "PNG");
-  assert.equal(landingPreviewPng[25], 6, "landing preview PNG should use RGBA color type");
+test("landing promo images support theme-specific clean cutouts", () => {
+  assert.equal(landingPreviewLightPng.toString("ascii", 1, 4), "PNG");
+  assert.equal(landingPreviewDarkPng.toString("ascii", 1, 4), "PNG");
+  assert.equal(landingWorkflowLightPng.toString("ascii", 1, 4), "PNG");
+  assert.equal(landingPreviewLightPng[25], 6, "light landing preview PNG should use RGBA color type");
+  assert.equal(landingPreviewDarkPng[25], 6, "dark landing preview PNG should use RGBA color type");
+  assert.equal(landingWorkflowLightPng[25], 6, "light workflow strip PNG should use RGBA color type");
 });
 
 test("tool containers use premium rounded surfaces instead of sharp rectangles", () => {
