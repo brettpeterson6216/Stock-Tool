@@ -808,8 +808,15 @@
       const body = document.getElementById(`body-${id}`);
       if (!body || body.querySelector(".il-tool-guide")) return;
       const guide = document.createElement("div");
-      guide.className = "il-tool-guide";
-      guide.innerHTML = `<div><span>Start here</span><strong>${copy[0]}</strong></div><div><span>Research check</span><strong>${copy[1]}</strong></div>`;
+      guide.className = "il-tool-guide compact";
+      guide.innerHTML = `<button type="button" class="il-tool-guide-toggle" aria-expanded="false"><i class="ti ti-info-circle"></i><span>Guide</span></button><div class="il-tool-guide-body" hidden><div><span>Start here</span><strong>${copy[0]}</strong></div><div><span>Research check</span><strong>${copy[1]}</strong></div></div>`;
+      const toggle = guide.querySelector(".il-tool-guide-toggle");
+      const panel = guide.querySelector(".il-tool-guide-body");
+      toggle?.addEventListener("click", () => {
+        const open = toggle.getAttribute("aria-expanded") === "true";
+        toggle.setAttribute("aria-expanded", String(!open));
+        if (panel) panel.hidden = open;
+      });
       body.insertBefore(guide, body.firstChild);
     });
   }

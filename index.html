@@ -103,12 +103,13 @@
 
 <!-- ══════════ NAV ══════════ -->
 <nav id="main-nav" data-view="home">
-  <a class="nav-logo" href="/?view=home" onclick="navGoTo('home');return false;" style="display:flex;align-items:center;gap:9px;text-decoration:none;">
+  <a class="nav-logo" href="/" onclick="navGoTo('home');return false;" style="display:flex;align-items:center;gap:9px;text-decoration:none;">
     <img src="/logo.svg" alt="Implied Lens" style="width:28px;height:28px;border-radius:50%;flex-shrink:0;">
     <span>Implied<em style="font-style:italic;color:var(--gold-d);">Lens</em></span>
   </a>
   <div class="nav-links" id="nav-links">
-    <a href="/?view=home" id='nav-home' class="nav-tab active-tab" onclick="navGoTo('home');return false;">Market</a>
+    <a href="/" id='nav-home' class="nav-tab active-tab" onclick="navGoTo('home');return false;">Home</a>
+    <a href="/?view=home&amp;market=1" id="nav-market" class="nav-tab" onclick="showMarketPage();return false;">Market</a>
     <a href="/?view=tool&amp;section=education" class="nav-tab" id="nav-education-link" onclick="navGoTo('education');return false;">Learn</a>
     <a href="/?view=tool&amp;section=reports" class="nav-tab" id="nav-saved-link" onclick="navGoTo('reports');return false;">Saved</a>
     <a href="/?view=tool&amp;section=workspace&amp;workspace_tab=guide" class="nav-tab" id="nav-guide-link" style="display:none;" onclick="openPortfolioGuide();return false;">Portfolio Guide</a>
@@ -153,6 +154,39 @@
   </div>
   <script>
   // ── View + nav controller ──
+  function setHomeMode(mode) {
+    const landing = document.getElementById('landing-page');
+    const market = document.getElementById('market-page');
+    if (landing) landing.style.display = mode === 'market' ? 'none' : 'block';
+    if (market) market.style.display = mode === 'market' ? 'flex' : 'none';
+    document.querySelectorAll('.nav-tab').forEach(a => a.classList.remove('active-tab'));
+    const active = document.getElementById(mode === 'market' ? 'nav-market' : 'nav-home');
+    if (active) active.classList.add('active-tab');
+    const homeBtn = document.querySelector('.hsb-home');
+    if (homeBtn) homeBtn.classList.toggle('active', mode === 'market');
+  }
+
+  function showLandingPage() {
+    const home = document.getElementById('view-home');
+    const tool = document.getElementById('view-tool');
+    if (tool) tool.style.display = 'none';
+    if (home) home.style.display = 'block';
+    const nav = document.getElementById('main-nav'); if(nav) nav.setAttribute('data-view','home');
+    setHomeMode('landing');
+    history.replaceState(null, '', '/');
+  }
+
+  function showMarketPage() {
+    const home = document.getElementById('view-home');
+    const tool = document.getElementById('view-tool');
+    if (tool) tool.style.display = 'none';
+    if (home) home.style.display = 'block';
+    const nav = document.getElementById('main-nav'); if(nav) nav.setAttribute('data-view','home');
+    setHomeMode('market');
+    history.replaceState(null, '', '/?view=home&market=1');
+    if (typeof initializeHomeDashboard === 'function') initializeHomeDashboard();
+  }
+
   function showView(view) {
     const home = document.getElementById('view-home');
     const tool = document.getElementById('view-tool');
@@ -165,12 +199,7 @@
       document.querySelectorAll('.nav-tab').forEach(a => a.classList.remove('active-tab'));
       const tt = document.getElementById('nav-tool-link'); if(tt) tt.classList.add('active-tab');
     } else {
-      if (tool) tool.style.display = 'none';
-      if (home) home.style.display = 'block';
-      history.replaceState(null, '', '/?view=home');
-      const nav2 = document.getElementById('main-nav'); if(nav2) nav2.setAttribute('data-view','home');
-      document.querySelectorAll('.nav-tab').forEach(a => a.classList.remove('active-tab'));
-      const ht = document.getElementById('nav-home'); if(ht) ht.classList.add('active-tab');
+      showLandingPage();
     }
   }
 
@@ -187,7 +216,7 @@
 
   function navGoTo(id, attempt) {
     if (id === 'adveducation') id = 'education';
-    if (id === 'home') { showView('home'); updateNavToolLink(true); initializeHomeDashboard(); return; }
+    if (id === 'home') { showLandingPage(); updateNavToolLink(true); return; }
     if (typeof openSection !== 'function' || !document.getElementById('sec-' + id)) {
       const nextAttempt = (attempt || 0) + 1;
       if (nextAttempt <= 100) setTimeout(() => navGoTo(id, nextAttempt), 50);
@@ -209,8 +238,11 @@
       showView('tool');
       if (requestedSection) setTimeout(() => navGoTo(requestedSection), 0);
     }
-    else if (!window.location.search.includes('view=home')) {
-      // nav data-view defaults to "home" — no action needed
+    else if (params.get('market') === '1') {
+      showMarketPage();
+    }
+    else {
+      showLandingPage();
     }
   });
 
@@ -468,11 +500,77 @@
 
 <!-- ══════════ VIEW: HOME ══════════ -->
 <div id="view-home" role="main">
-<div class="home-shell">
+<section class="il-landing" id="landing-page" aria-label="Implied Lens landing page">
+  <div class="il-landing-hero">
+    <div class="il-landing-copy">
+      <span class="il-landing-kicker">Beginner friendly stock research</span>
+      <h1>Implied Lens turns a ticker into a decision you can understand.</h1>
+      <p>Search a company, read the evidence, test the valuation range, and save a thesis with review triggers. Built for self-directed investors who want structure without a finance degree.</p>
+      <div class="il-landing-actions">
+        <a class="il-landing-primary" href="/signup">Start 7-day free trial</a>
+        <button type="button" class="il-landing-secondary" onclick="heroLoadTicker('AAPL')"><i class="ti ti-player-play"></i>Try an example</button>
+      </div>
+      <div class="il-landing-search" role="search">
+        <i class="ti ti-search" aria-hidden="true"></i>
+        <input type="text" id="landing-search" placeholder="Enter a ticker like NVDA, AAPL, or TSLA" autocomplete="off" spellcheck="false" onkeydown="if(event.key==='Enter'){landingSearch()}">
+        <button type="button" onclick="landingSearch()">Analyze</button>
+      </div>
+      <div class="il-landing-proof" aria-label="Platform highlights">
+        <span><i class="ti ti-school"></i>Guided workflow</span>
+        <span><i class="ti ti-chart-candle"></i>Real chart tools</span>
+        <span><i class="ti ti-notes"></i>Saved thesis</span>
+      </div>
+    </div>
+    <div class="il-landing-preview" aria-label="Preview of Implied Lens research workflow">
+      <div class="il-preview-toolbar"><span>AAPL Research Workspace</span><strong>Sample</strong></div>
+      <div class="il-preview-grid">
+        <div class="il-preview-chart">
+          <div class="il-preview-symbol"><strong>AAPL</strong><span class="up">+1.8%</span></div>
+          <svg viewBox="0 0 360 150" role="img" aria-label="Sample green price chart">
+            <defs><linearGradient id="landingChartFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--chart-price)" stop-opacity=".35"/><stop offset="1" stop-color="var(--chart-price)" stop-opacity="0"/></linearGradient></defs>
+            <path d="M0 128 L28 112 L54 120 L82 94 L110 101 L139 73 L168 80 L196 61 L225 68 L254 39 L282 46 L312 25 L340 31 L360 18 L360 150 L0 150 Z" fill="url(#landingChartFill)"></path>
+            <path d="M0 128 L28 112 L54 120 L82 94 L110 101 L139 73 L168 80 L196 61 L225 68 L254 39 L282 46 L312 25 L340 31 L360 18" fill="none" stroke="var(--chart-price)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+          <div class="il-preview-stats"><span>Fair value range <strong>$178-214</strong></span><span>Risk check <strong>Margin pressure</strong></span></div>
+        </div>
+        <div class="il-preview-path">
+          <div class="done"><i class="ti ti-check"></i><span>Load price and sources</span></div>
+          <div class="done"><i class="ti ti-check"></i><span>Review fundamentals</span></div>
+          <div><i class="ti ti-calculator"></i><span>Model upside and downside</span></div>
+          <div><i class="ti ti-pencil"></i><span>Save thesis and review date</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="il-landing-steps" aria-label="How Implied Lens works">
+    <div><span>01</span><strong>Start simple</strong><p>Type a ticker or use an example. The workflow starts with plain-English context and keeps the next action obvious.</p></div>
+    <div><span>02</span><strong>Check the evidence</strong><p>Charts, financials, filings, analyst context, and valuation assumptions are grouped around the decision.</p></div>
+    <div><span>03</span><strong>Save the thesis</strong><p>Turn your research into a reviewable record with the bull case, bear case, risk, and next check.</p></div>
+  </div>
+  <div class="il-landing-band">
+    <div>
+      <span class="il-landing-kicker">Market dashboard</span>
+      <h2>Want the live market page?</h2>
+      <p>Open the market dashboard when you need indexes, watchlist context, movers, and breadth. It stays separate so the first visit is focused on starting research.</p>
+    </div>
+    <button type="button" onclick="showMarketPage()"><i class="ti ti-chart-area"></i>Open market dashboard</button>
+  </div>
+  <div class="il-landing-pricing" id="landing-pricing">
+    <span class="il-landing-kicker">Simple pricing</span>
+    <h2>Try Pro free for 7 days.</h2>
+    <p>Free includes a daily research habit. Pro unlocks unlimited analyses, valuation tools, comparison, screener, earnings research, and PDF export.</p>
+    <div class="il-landing-actions centered">
+      <a class="il-landing-primary" href="/signup">Start 7-day free trial</a>
+      <a class="il-landing-secondary" href="/signup">Create free account</a>
+    </div>
+  </div>
+</section>
+
+<div class="home-shell" id="market-page" style="display:none;">
 
   <!-- ── Left sidebar ── -->
   <aside class="hs-sidebar">
-    <a class="hsb-home active" href="/?view=home" onclick="navGoTo('home');return false;"><i class="ti ti-globe"></i><span>Market</span></a>
+    <a class="hsb-home active" href="/?view=home&amp;market=1" onclick="showMarketPage();return false;"><i class="ti ti-globe"></i><span>Market</span></a>
 
     <div class="hsb-section">
       <div class="hsb-label">Analyze</div>
@@ -485,7 +583,7 @@
 
     <div class="hsb-section">
       <div class="hsb-label">Market</div>
-      <a class="hsb-item" href="#" onclick="navGoTo('home');document.querySelector('.hg-market')?.scrollIntoView({behavior:'smooth'});return false;"><i class="ti ti-chart-area"></i><span>Market Overview</span></a>
+      <a class="hsb-item" href="#" onclick="showMarketPage();setTimeout(()=>document.querySelector('.hg-market')?.scrollIntoView({behavior:'smooth'}),0);return false;"><i class="ti ti-chart-area"></i><span>Market Overview</span></a>
       <a class="hsb-item" href="#" onclick="navGoTo('earnings');return false;"><i class="ti ti-calendar"></i><span>Earnings Calendar</span></a>
       <a class="hsb-item" href="#" onclick="navGoTo('screener');return false;"><i class="ti ti-grid-dots"></i><span>Sector Screener</span></a>
     </div>
@@ -844,7 +942,7 @@
   <div class="app-shell">
     <!-- ── Left sidebar ── -->
     <div class="app-sidebar">
-      <a href="#" class="sb-home-btn" id="sb-home-btn"><i class="ti ti-globe" aria-hidden="true"></i><span>Market</span></a>
+      <a href="#" class="sb-home-btn" id="sb-home-btn"><i class="ti ti-home" aria-hidden="true"></i><span>Home</span></a>
 
       <div class="sb-group-pad">
         <div class="sb-group-label">Analyze</div>
@@ -1536,7 +1634,7 @@
         <div class="asf-item"><div class="asf-l">EPS TTM</div><div class="asf-v" id="asf-eps">—</div></div>
         <div class="asf-item"><div class="asf-l">52W Hi</div><div class="asf-v pos" id="asf-52hi">—</div></div>
         <div class="asf-item"><div class="asf-l">52W Lo</div><div class="asf-v neg" id="asf-52lo">—</div></div>
-        <div class="asf-item" style="flex:0.6;"><a href="#" onclick="navGoTo('home');return false;" style="font-size:9px;color:var(--text5);text-decoration:none;">← Market</a></div>
+        <div class="asf-item" style="flex:0.6;"><a href="#" onclick="navGoTo('home');return false;" style="font-size:9px;color:var(--text5);text-decoration:none;">&larr; Home</a></div>
       </div>
     </div><!-- /app-main -->
   </div><!-- /app-shell -->
@@ -3596,6 +3694,7 @@ let _moversCache={},_moversActive='gainers',_marketOverviewChart=null,_globeRAF=
 
 function heroSearch(){const v=(document.getElementById('hero-search')||{}).value;if(!v||!v.trim())return;const mi=document.getElementById('main-ticker');if(mi)mi.value=v.trim().toUpperCase();navGoTo('analyze');if(typeof fetchAndRender==='function')fetchAndRender();}
 function heroLoadTicker(t){const mi=document.getElementById('main-ticker');if(mi)mi.value=t;navGoTo('analyze');if(typeof fetchAndRender==='function')fetchAndRender();}
+function landingSearch(){const v=(document.getElementById('landing-search')||{}).value;if(!v||!v.trim())return;heroLoadTicker(v.trim().toUpperCase());}
 (function(){const hi=document.getElementById('hero-search');if(hi)hi.addEventListener('keydown',e=>{if(e.key==='Enter')heroSearch();});})();
 window._pricingAnnual=false;
 function setPricingPeriod(period){
