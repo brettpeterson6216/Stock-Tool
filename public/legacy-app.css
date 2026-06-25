@@ -3884,3 +3884,67 @@ html[data-theme="dark"] #market-page .wl-table td{
     margin-bottom:.55rem!important;
   }
 }
+
+/* Gold ripple default background: one premium backdrop across landing, market, and tools. */
+:root{
+  --gold-ripple-bg:url("/gold-ripple-background.jpg");
+  --gold-ripple-overlay:linear-gradient(180deg,rgba(255,250,239,.58),rgba(235,202,133,.42));
+}
+html[data-theme="dark"]{
+  --gold-ripple-overlay:linear-gradient(180deg,rgba(255,250,239,.46),rgba(205,158,67,.34));
+}
+html,
+body{
+  background-color:#F5E4BC!important;
+  background-image:var(--gold-ripple-overlay),var(--gold-ripple-bg)!important;
+  background-size:cover!important;
+  background-position:center top!important;
+  background-attachment:fixed!important;
+}
+body,
+#view-home,
+#view-tool,
+.il-landing,
+.home-shell,
+.hs-main,
+.app-shell,
+.app-main,
+.app-content-scroll,
+#market-page,
+#market-page .hs-main{
+  background-color:transparent!important;
+  background-image:var(--gold-ripple-overlay),var(--gold-ripple-bg)!important;
+  background-size:cover!important;
+  background-position:center top!important;
+  background-repeat:no-repeat!important;
+  background-attachment:fixed!important;
+}
+.app-content-scroll,
+.hs-main{
+  background-blend-mode:normal!important;
+}
+.il-landing-preview,
+#market-page .home-ticker-strip,
+#view-tool .mobile-sec-tabs,
+.app-section-hdr,
+.app-chart-toolbar,
+.app-tf-strip{
+  backdrop-filter:blur(18px) saturate(1.05)!important;
+}
+@media(max-width:640px){
+  html,
+  body,
+  #view-home,
+  #view-tool,
+  .il-landing,
+  .home-shell,
+  .hs-main,
+  .app-shell,
+  .app-main,
+  .app-content-scroll,
+  #market-page,
+  #market-page .hs-main{
+    background-attachment:scroll!important;
+    background-position:center top!important;
+  }
+}

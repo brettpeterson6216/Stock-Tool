@@ -184,7 +184,7 @@ test("premium landing visual system matches the generated product preview direct
 });
 
 test("premium visual system is applied across app and static pages", () => {
-  assert.match(html, /legacy-app\.css\?v=20260625-11/);
+  assert.match(html, /legacy-app\.css\?v=20260625-12/);
   assert.match(html, /product-system\.css\?v=20260625-1/);
   assert.match(signupHtml, /static-polish\.css\?v=20260625-2/);
   assert.match(html, /<a class="btn-nav" id="nav-signup" href="\/signup">Claim \$0\.99<\/a>/);
@@ -205,6 +205,15 @@ test("premium visual system is applied across app and static pages", () => {
   assert.match(staticCss, /--sp-black:#090A0B/);
   assert.match(staticCss, /\.auth-card,\s*\.feat,\s*\.guide,\s*\.source-card/s);
   assert.match(staticCss, /\.btn-primary,\s*\.btn\.primary,\s*\.cta a/s);
+});
+
+test("gold ripple image is the default backdrop across landing, market, and tools", () => {
+  assert.match(legacyCss, /Gold ripple default background/);
+  assert.match(legacyCss, /--gold-ripple-bg:url\("\/gold-ripple-background\.jpg"\)/);
+  assert.match(legacyCss, /body,[\s\S]*#view-home,[\s\S]*#view-tool,[\s\S]*\.il-landing,[\s\S]*\.home-shell,[\s\S]*\.app-content-scroll,[\s\S]*#market-page/);
+  assert.match(legacyCss, /background-image:var\(--gold-ripple-overlay\),var\(--gold-ripple-bg\)!important/);
+  assert.match(legacyCss, /background-attachment:fixed!important/);
+  assert.match(legacyCss, /background-attachment:scroll!important/);
 });
 
 test("tool guidance is collapsed so tutorials do not block tool use", () => {

@@ -141,7 +141,7 @@ test("GET / serves the homepage with a successful status", async () => {
   assert.match(html, /id="mbn-workspace"/);
   assert.match(html, /aria-label="Home"/);
   assert.match(html, /viewport-fit=cover/);
-  assert.match(html, /legacy-app\.css\?v=20260625-11/);
+  assert.match(html, /legacy-app\.css\?v=20260625-12/);
   assert.match(legacyCss, /input,select,textarea\{font-size:16px!important\}/);
   assert.match(legacyCss, /#main-nav\[data-view="tool"\] #nav-ticker-bar\{display:none!important\}/);
   assert.match(legacyCss, /\.nav-acct-wrap,\.nav-acct-btn\{min-width:0;max-width:100%\}/);
@@ -235,6 +235,13 @@ test("GET /social-card.png serves a large PNG social preview", async () => {
   const res = await req("/social-card.png");
   assert.equal(res.status, 200);
   assert.match(res.headers.get("content-type"), /image\/png/);
+  assert.ok(Number(res.headers.get("content-length")) > 100000);
+});
+
+test("GET /gold-ripple-background.jpg serves the shared gold backdrop", async () => {
+  const res = await req("/gold-ripple-background.jpg");
+  assert.equal(res.status, 200);
+  assert.match(res.headers.get("content-type"), /image\/jpeg/);
   assert.ok(Number(res.headers.get("content-length")) > 100000);
 });
 
