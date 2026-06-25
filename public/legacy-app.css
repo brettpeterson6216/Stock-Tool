@@ -3091,3 +3091,179 @@ html[data-theme="dark"] nav{background:rgba(8,9,10,.86)!important}
   .il-offer-card{display:grid}
   .il-offer-card strong{flex:auto}
 }
+
+/* Site-wide premium polish: carry the generated landing direction through the product. */
+#view-home,
+.home-shell,
+.hs-main{
+  background:
+    radial-gradient(900px 520px at 100% 0%,rgba(217,179,94,.12),transparent 65%),
+    linear-gradient(180deg,#0A0B0C 0%,#101214 54%,#0A0B0C 100%)!important;
+  color:var(--lens-text)!important;
+}
+.home-left,
+.home-top,
+.home-grid,
+.home-lower,
+.home-ticker-strip,
+#market-page .home-grid,
+#market-page .home-lower{
+  border-color:rgba(230,188,99,.14)!important;
+}
+.home-ticker-strip,
+.ht-card,
+.hc,
+.hg-market,
+.hg-watch,
+.hg-signals,
+.hg-insights,
+.hg-movers,
+.hl-learning,
+.hl-report,
+.home-metric,
+.pricing-card,
+.pricing-compare,
+.modal,
+.nav-acct-menu{
+  background:linear-gradient(180deg,rgba(31,34,38,.94),rgba(16,18,21,.96))!important;
+  border-color:rgba(230,188,99,.18)!important;
+  color:var(--lens-text)!important;
+  box-shadow:0 22px 62px rgba(0,0,0,.26),inset 0 1px 0 rgba(255,255,255,.045)!important;
+}
+.home-ticker-strip{background:rgba(9,10,11,.86)!important;backdrop-filter:blur(16px)}
+.ht-card:hover,
+.hc:hover,
+.pricing-card:hover{
+  border-color:rgba(230,188,99,.34)!important;
+  box-shadow:0 30px 72px rgba(0,0,0,.34),0 0 0 1px rgba(230,188,99,.08) inset!important;
+}
+.hh-kicker,
+.home-section-label,
+.hc-kicker,
+.mo-label,
+.learn-kicker,
+.pricing-tier,
+.pricing-pop,
+.modal .plan-opt-name,
+.nav-acct-badge{
+  color:var(--lens-gold-2)!important;
+}
+.hh-title,
+.ht-sym,
+.ht-price,
+.hc-title,
+.wl-sym,
+.wl-price,
+.learn-title,
+.pricing-card h3,
+.pricing-card .p-amount,
+.pricing-card .p-dollar,
+.modal h3,
+.modal .plan-opt-price,
+.nav-acct-name{
+  color:var(--lens-text)!important;
+}
+.hh-sub,
+.ht-name,
+.hc-sub,
+.wl-meta,
+.mo-name,
+.learn-sub,
+.pricing-card .p-desc,
+.pricing-card .p-per,
+.pricing-card .p-features li,
+.pricing-compare-row>span,
+.modal p,
+.modal-note,
+.nav-acct-email{
+  color:rgba(245,235,215,.70)!important;
+}
+.pricing-card.featured,
+.modal .plan-opt:hover,
+.modal .plan-opt.sel{
+  background:linear-gradient(180deg,rgba(217,179,94,.16),rgba(16,18,21,.96))!important;
+  border-color:rgba(230,188,99,.44)!important;
+}
+.pricing-compare-row{
+  background:rgba(230,188,99,.14)!important;
+}
+.pricing-compare-row>span{
+  background:#111315!important;
+}
+.pricing-compare-row.head>span{
+  color:var(--lens-text)!important;
+}
+.modal-bg{
+  background:rgba(2,3,4,.72)!important;
+  backdrop-filter:blur(14px);
+}
+.modal .plan-opt,
+#acct-modal-bg div[style*="cream2"],
+#upgrade-modal-unverified{
+  background:rgba(9,10,11,.78)!important;
+  border-color:rgba(230,188,99,.16)!important;
+  color:var(--lens-text)!important;
+}
+.modal-close{
+  color:rgba(245,235,215,.62)!important;
+}
+.btn-modal-cta,
+.btn-plan-gold,
+.pricing-toggle button.active{
+  background:linear-gradient(180deg,var(--lens-gold-2),var(--lens-gold))!important;
+  border-color:rgba(87,55,9,.34)!important;
+  color:#14100A!important;
+  box-shadow:0 12px 30px rgba(129,84,12,.22),inset 0 1px 0 rgba(255,255,255,.38)!important;
+}
+.btn-plan-dark,
+.pricing-toggle,
+.pricing-toggle button,
+.btn-secondary,
+.btn-nav-outline{
+  background:rgba(255,255,255,.045)!important;
+  border-color:rgba(230,188,99,.16)!important;
+  color:rgba(245,235,215,.78)!important;
+}
+.il-landing-band{
+  background:linear-gradient(180deg,#151719,#0C0E10)!important;
+  border-color:rgba(230,188,99,.16)!important;
+}
+.il-landing-band h2,
+.il-landing-band p{
+  color:var(--lens-text)!important;
+}
+.il-landing-band p{
+  color:rgba(245,235,215,.72)!important;
+}
+footer{
+  background:
+    radial-gradient(680px 280px at 50% 0%,rgba(217,179,94,.10),transparent 70%),
+    #08090A!important;
+  border-top-color:rgba(230,188,99,.14)!important;
+}
+footer .f-logo,
+footer .f-logo em{
+  color:var(--lens-gold-2)!important;
+}
+footer .f-links a,
+footer .f-links .il-feedback-link{
+  color:rgba(245,235,215,.68)!important;
+}
+footer .f-links a:hover,
+footer .f-links .il-feedback-link:hover{
+  color:var(--lens-gold-2)!important;
+}
+footer .f-copy,
+footer .il-build{
+  color:rgba(245,235,215,.46)!important;
+}
+@media(max-width:768px){
+  .home-ticker-strip,
+  .home-grid,
+  .home-lower{
+    background:#0A0B0C!important;
+  }
+  .pricing-grid{
+    grid-template-columns:1fr!important;
+  }
+}

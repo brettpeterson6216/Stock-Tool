@@ -7,6 +7,8 @@ const path = require("node:path");
 
 const html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
 const legacyCss = fs.readFileSync(path.join(__dirname, "..", "public", "legacy-app.css"), "utf8");
+const staticCss = fs.readFileSync(path.join(__dirname, "..", "public", "static-polish.css"), "utf8");
+const signupHtml = fs.readFileSync(path.join(__dirname, "..", "public", "signup.html"), "utf8");
 const productJs = fs.readFileSync(path.join(__dirname, "..", "public", "product-system.js"), "utf8");
 const productCss = fs.readFileSync(path.join(__dirname, "..", "public", "product-system.css"), "utf8");
 const htmlAndLegacyCss = `${html}\n${legacyCss}`;
@@ -165,6 +167,20 @@ test("premium landing visual system matches the generated product preview direct
   assert.match(legacyCss, /#view-tool,\.app-shell\{[\s\S]*var\(--lens-black\)/);
   assert.match(legacyCss, /\.app-section,\.chart-wrap,\.metric-card,\.panel-box,\.il-tool-shell/);
   assert.match(legacyCss, /green\/red only for market semantics|market green\/red|--chart-positive:#00C805/);
+});
+
+test("premium visual system is applied across app and static pages", () => {
+  assert.match(html, /legacy-app\.css\?v=20260625-1/);
+  assert.match(signupHtml, /static-polish\.css\?v=20260625-1/);
+  assert.match(html, /<a class="btn-nav" id="nav-signup" href="\/signup">Claim \$0\.99<\/a>/);
+  assert.match(legacyCss, /Site-wide premium polish/);
+  assert.match(legacyCss, /\.home-ticker-strip,\s*\.ht-card,\s*\.hc,\s*\.hg-market/s);
+  assert.match(legacyCss, /\.pricing-card,\s*\.pricing-compare,\s*\.modal,\s*\.nav-acct-menu/s);
+  assert.match(legacyCss, /footer\{[\s\S]*#08090A!important/);
+  assert.match(staticCss, /Static premium visual system/);
+  assert.match(staticCss, /--sp-black:#090A0B/);
+  assert.match(staticCss, /\.auth-card,\s*\.feat,\s*\.guide,\s*\.source-card/s);
+  assert.match(staticCss, /\.btn-primary,\s*\.btn\.primary,\s*\.cta a/s);
 });
 
 test("tool guidance is collapsed so tutorials do not block tool use", () => {
