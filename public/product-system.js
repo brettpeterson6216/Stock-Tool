@@ -132,6 +132,239 @@
   function trustField(label, value) {
     return `<div class="il-trust-field"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`;
   }
+  function fmtMoney(value) {
+    const number = Number(value);
+    if (!Number.isFinite(number)) return "Unavailable";
+    if (Math.abs(number) >= 1e12) return `$${(number / 1e12).toFixed(2)}T`;
+    if (Math.abs(number) >= 1e9) return `$${(number / 1e9).toFixed(2)}B`;
+    if (Math.abs(number) >= 1e6) return `$${(number / 1e6).toFixed(1)}M`;
+    return `$${number.toFixed(number >= 100 ? 0 : 2)}`;
+  }
+  function fmtNum(value, suffix = "") {
+    const number = Number(value);
+    return Number.isFinite(number) ? `${number.toFixed(Math.abs(number) >= 100 ? 0 : 2)}${suffix}` : "Unavailable";
+  }
+  function currentTickerContext() {
+    const result = window.IL_STATE?.data;
+    const meta = result?.meta || {};
+    const price = meta.regularMarketPrice ?? meta.chartPreviousClose;
+    const prev = meta.chartPreviousClose ?? meta.previousClose;
+    const change = Number.isFinite(Number(price)) && Number.isFinite(Number(prev)) ? Number(price) - Number(prev) : null;
+    const changePct = change !== null && prev ? change / Number(prev) * 100 : null;
+    const p = provenanceLabel(result?.impliedLensProvenance);
+    return {
+      ticker: window.IL_STATE?.ticker || "",
+      name: meta.longName || meta.shortName || "",
+      exchange: meta.fullExchangeName || meta.exchangeName || meta.exchange || "",
+      price,
+      change,
+      changePct,
+      marketCap: meta.marketCap,
+      pe: meta.trailingPE || meta.forwardPE,
+      eps: meta.epsTrailingTwelveMonths || meta.trailingEps || (Number(price) && Number(meta.trailingPE) ? Number(price) / Number(meta.trailingPE) : null),
+      source: p.source,
+      freshness: p.freshness,
+      warn: p.warn,
+      provenance: result?.impliedLensProvenance || null,
+    };
+  }
+  function notesKey() {
+    return `il-notes-${(window.IL_STATE?.ticker || "workspace").toUpperCase()}`;
+  }
+  function readNote() {
+    try { return JSON.parse(localStorage.getItem(notesKey()) || "{}"); } catch (_) { return {}; }
+  }
+  function writeNote(note) {
+    try { localStorage.setItem(notesKey(), JSON.stringify(note)); } catch (_) {}
+  }
+  function sourceRows() {
+    const ctx = currentTickerContext();
+    const p = ctx.provenance || {};
+    return [
+      ["Price source", ctx.source || "Aggregated market data"],
+      ["Data freshness", ctx.freshness || "Provider timing varies"],
+      ["Latest bar", trustDateLabel(p.latestTimestamp, "Unavailable")],
+      ["Retrieved", trustDateLabel(p.retrievedAt, "This session")],
+      ["Range", p.range ? String(p.range).toUpperCase() : "Current chart range"],
+      ["Interval", p.interval || "Provider default"],
+      ["Limitation", p.delayed ? "Delayed or end-of-day provider context." : "Latest available provider context."],
+    ];
+  }
+  function openResearchDrawer(kind) {
+    const drawer = document.getElementById("il-research-drawer");
+    if (!drawer) return;
+    const title = drawer.querySelector("#il-drawer-title");
+    const body = drawer.querySelector("#il-drawer-body");
+    if (kind === "sources") {
+      title.textContent = "Sources and Freshness";
+      body.innerHTML = `<div class="il-drawer-grid">${sourceRows().map(([label, value]) => `<div><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`).join("")}</div><p>Provider coverage can differ by symbol, exchange, range, and account state. Missing data is shown as unavailable instead of estimated.</p><a href="/data-sources">Open full methodology</a>`;
+    } else if (kind === "projection-help") {
+      title.textContent = "Projection Help";
+      body.innerHTML = `<p>Projection is an assumption model, not a prediction. Observed data anchors the starting point; user assumptions drive the range.</p><ul><li><strong>EPS growth</strong> compounds starting earnings.</li><li><strong>Exit P/E</strong> is the terminal market multiple.</li><li><strong>Dilution/buyback</strong> adjusts per-share economics.</li><li><strong>Probabilities</strong> must total 100%.</li></ul>`;
+    } else {
+      title.textContent = "Analyze Help";
+      body.innerHTML = `<p>Analyze is the command center for a ticker. Start with the snapshot, then move through price action, fundamentals, valuation, filings, projection, and thesis notes.</p><ul><li>Use sources to check freshness.</li><li>Use Projection only after reviewing assumptions.</li><li>Save a thesis when your view changes.</li></ul>`;
+    }
+    drawer.classList.add("open");
+    drawer.querySelector(".il-drawer-close")?.focus();
+  }
+  function closeResearchDrawer() {
+    document.getElementById("il-research-drawer")?.classList.remove("open");
+  }
+  function openNotesPanel() {
+    const panel = document.getElementById("il-notes-panel");
+    if (!panel) return;
+    const note = readNote();
+    panel.querySelector("#il-note-bull").value = note.bull || "";
+    panel.querySelector("#il-note-bear").value = note.bear || "";
+    panel.querySelector("#il-note-risk").value = note.risk || "";
+    panel.querySelector("#il-note-watch").value = note.watch || "";
+    panel.querySelector("#il-note-review").value = note.review || "";
+    panel.classList.add("open");
+    panel.querySelector("textarea")?.focus();
+  }
+  function saveNotesPanel() {
+    writeNote({
+      bull: document.getElementById("il-note-bull")?.value || "",
+      bear: document.getElementById("il-note-bear")?.value || "",
+      risk: document.getElementById("il-note-risk")?.value || "",
+      watch: document.getElementById("il-note-watch")?.value || "",
+      review: document.getElementById("il-note-review")?.value || "",
+      updatedAt: new Date().toISOString(),
+    });
+    const status = document.getElementById("il-note-status");
+    if (status) status.textContent = "Notes saved for this ticker.";
+    if (typeof window.toast === "function") window.toast("Ticker notes saved", "ok");
+  }
+  function updateShellContext() {
+    const ctx = currentTickerContext();
+    document.querySelectorAll("[data-il-current-ticker]").forEach(el => { el.textContent = ctx.ticker || "No ticker selected"; });
+    document.querySelectorAll("[data-il-current-name]").forEach(el => { el.textContent = ctx.name || "Load a company to start."; });
+    document.querySelectorAll("[data-il-current-exchange]").forEach(el => { el.textContent = ctx.exchange || "Exchange unavailable"; });
+    document.querySelectorAll("[data-il-current-price]").forEach(el => { el.textContent = fmtMoney(ctx.price); });
+    document.querySelectorAll("[data-il-current-move]").forEach(el => {
+      el.textContent = ctx.change === null ? "Move unavailable" : `${ctx.change >= 0 ? "+" : ""}${fmtNum(ctx.change)} (${ctx.changePct >= 0 ? "+" : ""}${fmtNum(ctx.changePct, "%")})`;
+      el.classList.toggle("up", Number(ctx.change) >= 0);
+      el.classList.toggle("dn", Number(ctx.change) < 0);
+    });
+    document.querySelectorAll("[data-il-current-cap]").forEach(el => { el.textContent = fmtMoney(ctx.marketCap); });
+    document.querySelectorAll("[data-il-current-pe]").forEach(el => { el.textContent = fmtNum(ctx.pe, "x"); });
+    document.querySelectorAll("[data-il-current-eps]").forEach(el => { el.textContent = fmtMoney(ctx.eps); });
+    document.querySelectorAll("[data-il-current-freshness]").forEach(el => { el.textContent = ctx.freshness || "Provider timing varies"; });
+    document.querySelectorAll("[data-il-current-source]").forEach(el => { el.textContent = ctx.source || "Source pending"; });
+    document.querySelectorAll(".il-shell-status").forEach(el => {
+      el.textContent = ctx.ticker ? (ctx.warn ? "Delayed" : "Latest") : "No ticker";
+      el.classList.toggle("warn", Boolean(ctx.warn));
+    });
+    document.querySelectorAll(".il-needs-ticker").forEach(el => el.classList.toggle("has-ticker", Boolean(ctx.ticker)));
+  }
+  function shellHtml(kind) {
+    const isProjection = kind === "projection";
+    return `<div class="il-tool-shell" data-il-shell="${kind}">
+      <div class="il-shell-top">
+        <div><span>${isProjection ? "Projection Builder" : "Analyze Workspace"}</span><strong>${isProjection ? "Evidence first. Assumptions second." : "Research command center"}</strong></div>
+        <div class="il-shell-search"><input type="text" aria-label="Search ticker or company" placeholder="Search ticker or company"><button type="button">Analyze</button></div>
+        <div class="il-shell-actions">
+          <button type="button" data-il-drawer="${isProjection ? "projection-help" : "analyze-help"}"><i class="ti ti-help-circle"></i> Help</button>
+          <button type="button" data-il-drawer="sources"><i class="ti ti-database"></i> Sources</button>
+          <button type="button" data-il-notes><i class="ti ti-notes"></i> Notes</button>
+          <button type="button" data-il-save><i class="ti ti-bookmark"></i> Save</button>
+        </div>
+      </div>
+      <div class="il-shell-ticker">
+        <div><span data-il-current-ticker>No ticker selected</span><strong data-il-current-name>Load a company to start.</strong><em data-il-current-exchange>Exchange unavailable</em></div>
+        <div><span>Price</span><strong data-il-current-price>Unavailable</strong><em data-il-current-move>Move unavailable</em></div>
+        <div><span>Market cap</span><strong data-il-current-cap>Unavailable</strong><em>Observed</em></div>
+        <div><span>P/E</span><strong data-il-current-pe>Unavailable</strong><em>Observed when available</em></div>
+        <div><span>EPS TTM</span><strong data-il-current-eps>Unavailable</strong><em>Observed or derived</em></div>
+        <button type="button" class="il-shell-status">No ticker</button>
+      </div>
+      <div class="il-shell-preview il-needs-ticker">
+        <div><i class="ti ${isProjection ? "ti-adjustments-horizontal" : "ti-route"}"></i><strong>${isProjection ? "Start with evidence" : "Guided research trail"}</strong><span>${isProjection ? "Load a ticker to compare observed data with your scenario assumptions." : "Load a ticker to move from snapshot to chart, fundamentals, projection, and thesis notes."}</span></div>
+        <div><i class="ti ti-database"></i><strong>Sources stay visible</strong><span>Freshness and provider context remain available through the source drawer.</span></div>
+        <div><i class="ti ti-notes"></i><strong>Ticker-scoped notes</strong><span>Bull case, bear case, risks, watch level, and review date follow the ticker across tools.</span></div>
+      </div>
+    </div>`;
+  }
+  function installResearchDrawerAndNotes() {
+    if (!document.getElementById("il-research-drawer")) {
+      const drawer = document.createElement("div");
+      drawer.id = "il-research-drawer";
+      drawer.className = "il-research-drawer";
+      drawer.setAttribute("role", "dialog");
+      drawer.setAttribute("aria-modal", "true");
+      drawer.innerHTML = `<div class="il-drawer-card"><div class="il-drawer-head"><h2 id="il-drawer-title">Sources</h2><button type="button" class="il-drawer-close" aria-label="Close drawer"><i class="ti ti-x"></i></button></div><div id="il-drawer-body"></div></div>`;
+      document.body.appendChild(drawer);
+      drawer.querySelector(".il-drawer-close").onclick = closeResearchDrawer;
+      drawer.onclick = event => { if (event.target === drawer) closeResearchDrawer(); };
+    }
+    if (!document.getElementById("il-notes-panel")) {
+      const panel = document.createElement("div");
+      panel.id = "il-notes-panel";
+      panel.className = "il-notes-panel";
+      panel.innerHTML = `<div class="il-notes-card"><div class="il-drawer-head"><h2>Ticker Notes</h2><button type="button" aria-label="Close notes" onclick="document.getElementById('il-notes-panel').classList.remove('open')"><i class="ti ti-x"></i></button></div><label>Bull case<textarea id="il-note-bull"></textarea></label><label>Bear case<textarea id="il-note-bear"></textarea></label><label>Key risk<textarea id="il-note-risk"></textarea></label><div class="il-notes-two"><label>Watch level<input id="il-note-watch" type="text"></label><label>Review date<input id="il-note-review" type="date"></label></div><div class="il-notes-actions"><button type="button" id="il-note-save">Save Notes</button><span id="il-note-status"></span></div></div>`;
+      document.body.appendChild(panel);
+      panel.querySelector("#il-note-save").onclick = saveNotesPanel;
+    }
+  }
+  function installToolShells() {
+    installResearchDrawerAndNotes();
+    const analyze = document.getElementById("body-analyze");
+    if (analyze && !document.querySelector('[data-il-shell="analyze"]')) analyze.insertAdjacentHTML("afterbegin", shellHtml("analyze"));
+    const projection = document.getElementById("body-projection");
+    if (projection && !document.querySelector('[data-il-shell="projection"]')) projection.insertAdjacentHTML("afterbegin", shellHtml("projection"));
+    document.querySelectorAll(".il-shell-search").forEach(search => {
+      const input = search.querySelector("input");
+      const button = search.querySelector("button");
+      const run = () => {
+        const symbol = input.value.trim().toUpperCase();
+        if (!symbol) return;
+        const main = document.getElementById("main-ticker");
+        if (main) main.value = symbol;
+        if (typeof window.fetchAndRender === "function") window.fetchAndRender();
+      };
+      button.onclick = run;
+      input.onkeydown = event => { if (event.key === "Enter") run(); };
+    });
+    document.querySelectorAll("[data-il-drawer]").forEach(button => button.onclick = () => openResearchDrawer(button.dataset.ilDrawer));
+    document.querySelectorAll("[data-il-notes]").forEach(button => button.onclick = openNotesPanel);
+    document.querySelectorAll("[data-il-save]").forEach(button => button.onclick = () => window.saveAnalysis?.(window.IL_STATE?.ticker ? "price" : "note"));
+    updateShellContext();
+  }
+  function syncToolUrl(section, mode) {
+    try {
+      const url = new URL(window.location.href);
+      if (section && section !== "home") {
+        url.searchParams.set("view", "tool");
+        url.searchParams.set("section", section);
+      }
+      const ticker = window.IL_STATE?.ticker || document.getElementById("main-ticker")?.value?.trim()?.toUpperCase();
+      if (ticker) url.searchParams.set("symbol", ticker);
+      else url.searchParams.delete("symbol");
+      if (mode) url.searchParams.set("mode", mode);
+      const next = `${url.pathname}${url.search}${url.hash}`;
+      const current = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+      if (next !== current) window.history.replaceState({}, "", next);
+    } catch (_) {}
+  }
+  function installUrlState() {
+    if (window.__ilUrlStateInstalled) return;
+    window.__ilUrlStateInstalled = true;
+    if (typeof window.navGoTo === "function") {
+      const original = window.navGoTo;
+      window.navGoTo = function (section, attempt) {
+        const output = original.call(this, section, attempt);
+        if (!attempt && section !== "home") syncToolUrl(section);
+        return output;
+      };
+    }
+    const params = new URLSearchParams(window.location.search);
+    const symbol = params.get("symbol");
+    if (symbol && !window.IL_STATE?.ticker) {
+      const input = document.getElementById("main-ticker");
+      if (input) input.value = symbol.toUpperCase();
+    }
+  }
   function renderTrust(result) {
     const host = document.getElementById("r-time");
     if (!host) return;
@@ -169,6 +402,10 @@
       window.renderStock = function (result, ticker) {
         const output = originalRender(result, ticker);
         renderTrust(result);
+        updateShellContext();
+        syncToolUrl(window.IL_STATE?.section || new URLSearchParams(window.location.search).get("section") || "analyze");
+        renderProjectionWorkspace();
+        installResearchTrail();
         renderTickerGuidance(ticker);
         decorateMetricLearning();
         return output;
@@ -577,6 +814,136 @@
     });
   }
 
+  function projectionScenarioKeys() {
+    return ["bear", "base", "bull"];
+  }
+  function projectionInputFromForm(reviewed = false) {
+    const ctx = currentTickerContext();
+    const scenarios = {};
+    projectionScenarioKeys().forEach(key => {
+      scenarios[key] = {
+        key,
+        name: key[0].toUpperCase() + key.slice(1),
+        growth: Number(document.getElementById(`adv-g-${key}`)?.value),
+        exitPE: Number(document.getElementById(`adv-pe-${key}`)?.value),
+        dividendYield: Number(document.getElementById(`adv-div-${key}`)?.value),
+        dividendGrowth: Number(document.getElementById(`adv-div-g-${key}`)?.value),
+        annualDilution: Number(document.getElementById(`adv-dil-${key}`)?.value),
+        probability: Number(document.getElementById(`adv-prob-${key}`)?.value),
+      };
+    });
+    return {
+      ticker: ctx.ticker,
+      currentPrice: Number(document.getElementById("adv-price")?.value || ctx.price),
+      currentEps: Number(document.getElementById("il-proj-eps-override")?.value || ctx.eps),
+      currentPE: Number(document.getElementById("adv-pe-now")?.value || ctx.pe),
+      years: Number(document.getElementById("adv-years")?.value || 5),
+      reviewed,
+      scenarios,
+    };
+  }
+  function checklistHtml(validation) {
+    return `<div class="il-assumption-checklist">${validation.items.map(item => `<div class="${item.ok ? "ok" : "missing"}"><i class="ti ${item.ok ? "ti-check" : "ti-alert-circle"}"></i><span>${escapeHtml(item.label)}</span></div>`).join("")}</div>`;
+  }
+  function sensitivityHtml(sensitivity) {
+    if (!sensitivity?.ok) return `<div class="il-result-note">Sensitivity unavailable until price, EPS, P/E, and base assumptions are valid.</div>`;
+    return `<div class="il-sensitivity-table"><table><thead><tr><th>Growth / P/E</th>${sensitivity.peSteps.map(pe => `<th>${pe.toFixed(1)}x</th>`).join("")}</tr></thead><tbody>${sensitivity.rows.map(row => `<tr><th>${(row.growth * 100).toFixed(1)}%</th>${row.cells.map(cell => `<td class="${cell.current ? "current" : ""}">${cell.value === null ? "--" : fmtMoney(cell.value)}</td>`).join("")}</tr>`).join("")}</tbody></table>${sensitivity.conclusionFlips ? `<p>Warning: small growth or multiple changes can reverse the conclusion.</p>` : ""}</div>`;
+  }
+  function renderProjectionWorkspace(result) {
+    const body = document.getElementById("body-projection");
+    if (!body) return;
+    let workspace = document.getElementById("il-projection-builder");
+    if (!workspace) {
+      workspace = document.createElement("div");
+      workspace.id = "il-projection-builder";
+      workspace.className = "il-projection-builder";
+      const intro = body.querySelector(".tool-intro");
+      (intro || body.firstChild)?.insertAdjacentElement("afterend", workspace);
+    }
+    const ctx = currentTickerContext();
+    const validation = window.ImpliedLensMath?.validateProjectionContext ? window.ImpliedLensMath.validateProjectionContext(projectionInputFromForm(false)) : null;
+    const note = readNote();
+    workspace.innerHTML = `<div class="il-proj-grid">
+      <section class="il-proj-evidence"><div class="il-proj-head"><span>Evidence Panel</span><strong>${ctx.ticker || "No ticker loaded"}</strong></div>
+        <div class="il-evidence-grid">
+          ${trustField("Current price", fmtMoney(ctx.price))}
+          ${trustField("Current P/E", fmtNum(ctx.pe, "x"))}
+          ${trustField("EPS TTM", fmtMoney(ctx.eps))}
+          ${trustField("Market cap", fmtMoney(ctx.marketCap))}
+          ${trustField("Freshness", ctx.freshness || "Provider timing varies")}
+          ${trustField("Source", ctx.source || "Source pending")}
+        </div>
+        <label class="il-manual-eps"><span>User assumption</span> Starting EPS override<input type="number" id="il-proj-eps-override" step="0.01" placeholder="Use normalized EPS if provider EPS is unavailable"></label>
+        <div class="il-observed-note"><span>Observed</span> Values above come from loaded provider context when available. The EPS override is a user assumption and is only used when filled.</div>
+      </section>
+      <section class="il-proj-review"><div class="il-proj-head"><span>Assumption Review Gate</span><strong>${validation?.ok ? "Ready after confirmation" : "Needs review"}</strong></div>
+        ${validation ? checklistHtml(validation) : ""}
+        <label class="il-review-check"><input type="checkbox" id="il-assumptions-reviewed"> I reviewed these assumptions.</label>
+        <button type="button" id="il-calc-projection" class="il-primary-action">Calculate Projection</button>
+      </section>
+    </div>
+    <div class="il-template-row"><span>Templates are starting points, not recommendations.</span>${[
+      ["conservative", "Conservative", 3, 16, 35, 8, 22, 45, 14, 28, 20],
+      ["base", "Base", 2, 18, 25, 10, 24, 50, 18, 30, 25],
+      ["optimistic", "Optimistic", 4, 20, 20, 14, 28, 45, 24, 38, 35],
+    ].map(t => `<button type="button" data-il-template="${t.slice(0,1)}" data-values="${t.slice(2).join(",")}">${t[1]}</button>`).join("")}</div>
+    <div id="il-projection-explain" class="il-projection-explain">${note.updatedAt ? `<div class="il-result-note">Ticker notes last updated ${trustDateLabel(note.updatedAt, "recently")}.</div>` : `<div class="il-result-note">Attach projection notes from the Notes panel.</div>`}</div>`;
+    workspace.querySelectorAll("[data-il-template]").forEach(button => button.onclick = () => {
+      const values = button.dataset.values.split(",").map(Number);
+      const fields = [
+        "adv-g-bear", "adv-pe-bear", "adv-prob-bear",
+        "adv-g-base", "adv-pe-base", "adv-prob-base",
+        "adv-g-bull", "adv-pe-bull", "adv-prob-bull",
+      ];
+      fields.forEach((id, index) => {
+        const field = document.getElementById(id);
+        if (field) {
+          field.value = values[index];
+          field.dataset.userEdited = "true";
+        }
+      });
+      renderProjectionWorkspace();
+      const explain = document.getElementById("il-projection-explain");
+      if (explain) explain.innerHTML = `<div class="il-result-note">Template applied. Changed: growth, exit P/E, and probabilities for bear/base/bull. Review before calculating.</div>`;
+    });
+    const calc = workspace.querySelector("#il-calc-projection");
+    calc.onclick = () => {
+      const reviewed = Boolean(document.getElementById("il-assumptions-reviewed")?.checked);
+      const built = window.ImpliedLensMath?.buildProjection?.(projectionInputFromForm(reviewed));
+      if (!built?.ok) {
+        const explain = document.getElementById("il-projection-explain");
+        if (explain) explain.innerHTML = `<div class="il-result-error"><strong>Projection prerequisites not met.</strong>${built?.checklist ? checklistHtml({ items: built.checklist }) : ""}${built?.warnings?.length ? `<p>${built.warnings.map(escapeHtml).join(" ")}</p>` : ""}</div>`;
+        return;
+      }
+      window.runAdvancedProjection?.();
+      const explain = document.getElementById("il-projection-explain");
+      if (explain) explain.innerHTML = `<div class="il-result-summary"><div><span>Probability-weighted value</span><strong>${fmtMoney(built.probabilityWeightedValue)}</strong><em>${(built.upsideDownsidePercent * 100).toFixed(1)}% vs current price</em></div><div><span>What drove the result</span><p>${escapeHtml(built.explanation.drivers)}</p></div><div><span>Most sensitive assumption</span><p>${escapeHtml(built.explanation.mostSensitive)}</p></div><div><span>What could break it</span><p>${escapeHtml(built.explanation.breakpoints)}</p></div></div>${sensitivityHtml(built.sensitivity)}${built.warnings.length ? `<div class="il-result-note">${built.warnings.map(escapeHtml).join(" ")}</div>` : ""}`;
+    };
+  }
+
+  function installResearchTrail() {
+    const stock = document.getElementById("stock-result");
+    if (!stock || document.getElementById("il-research-trail")) return;
+    const trail = document.createElement("div");
+    trail.id = "il-research-trail";
+    trail.className = "il-research-trail";
+    trail.innerHTML = [
+      ["price", "Price action", ".chart-wrap"],
+      ["quality", "Business quality", "#metrics-grid"],
+      ["valuation", "Valuation", ".dash-sidebar"],
+      ["earnings", "Earnings", "#sec-earnings"],
+      ["ownership", "Ownership / filings", "#sec-institutional"],
+      ["projection", "Projection", "#il-projection-builder"],
+      ["notes", "Thesis notes", "#il-notes-panel"],
+    ].map(([key, label, target]) => `<button type="button" data-target="${escapeHtml(target)}"><span>${escapeHtml(key)}</span><strong>${escapeHtml(label)}</strong></button>`).join("");
+    stock.insertBefore(trail, stock.querySelector(".metrics-grid"));
+    trail.querySelectorAll("button").forEach(button => button.onclick = () => {
+      const target = document.querySelector(button.dataset.target);
+      if (button.dataset.target === "#il-notes-panel") openNotesPanel();
+      else if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+
   function improveControlSemantics() {
     document.querySelectorAll("#view-tool button:not([type])").forEach(button => button.type = "button");
     document.querySelectorAll("#view-tool label:not([for])").forEach(label => {
@@ -589,6 +956,9 @@
     installChartPersistence();
     installQuoteTrust();
     installDecisionSpine();
+    installToolShells();
+    installUrlState();
+    renderProjectionWorkspace();
     installEducationContext();
     installOnboarding();
     installBuildBadge();
@@ -598,6 +968,8 @@
     window.refreshToolEnhancements = () => {
       installToolGuidance();
       improveControlSemantics();
+      installToolShells();
+      renderProjectionWorkspace();
     };
     const toolView = document.getElementById("view-tool");
     if (toolView) new MutationObserver(improveControlSemantics).observe(toolView, { childList: true, subtree: true });

@@ -88,6 +88,81 @@ test("project cases keeps bear, base, and bull assumptions independent", () => {
   assert.equal(first.scenarios[2].model.terminalPrice, changedBear.scenarios[2].model.terminalPrice);
 });
 
+test("projection builder validates prerequisites and percent conversion", () => {
+  const missing = math.buildProjection({
+    ticker: "AAPL",
+    currentPrice: 100,
+    currentEps: 5,
+    years: 5,
+    reviewed: false,
+    scenarios: {
+      bear: { growth: 2, exitPE: 15, probability: 25 },
+      base: { growth: 8, exitPE: 20, probability: 50 },
+      bull: { growth: 15, exitPE: 30, probability: 25 },
+    },
+  });
+  assert.equal(missing.ok, false);
+  assert.equal(missing.checklist.find(item => item.key === "reviewed").ok, false);
+
+  const result = math.buildProjection({
+    ticker: "AAPL",
+    currentPrice: 100,
+    currentEps: 5,
+    years: 5,
+    reviewed: true,
+    scenarios: {
+      bear: { growth: 2, exitPE: 15, probability: 25 },
+      base: { growth: 8, exitPE: 20, probability: 50 },
+      bull: { growth: 15, exitPE: 30, probability: 25 },
+    },
+  });
+  assert.equal(result.ok, true);
+  assert.ok(Math.abs(result.scenarios.base.growth - 0.08) < 0.000001);
+  assert.ok(Math.abs(result.scenarios.base.probability - 0.5) < 0.000001);
+  assert.ok(Number.isFinite(result.probabilityWeightedValue));
+});
+
+test("projection builder handles missing and negative EPS with checklist guidance", () => {
+  const missing = math.validateProjectionContext({
+    ticker: "LOSS",
+    currentPrice: 40,
+    currentEps: null,
+    years: 5,
+    reviewed: true,
+    scenarios: {
+      bear: { growth: 0.02, exitPE: 10, probability: 0.25 },
+      base: { growth: 0.08, exitPE: 15, probability: 0.5 },
+      bull: { growth: 0.12, exitPE: 20, probability: 0.25 },
+    },
+  });
+  assert.equal(missing.ok, false);
+  assert.equal(missing.items.find(item => item.key === "eps").ok, false);
+
+  const negative = math.validateProjectionContext({
+    ticker: "LOSS",
+    currentPrice: 40,
+    currentEps: -2,
+    years: 5,
+    reviewed: true,
+    scenarios: {
+      bear: { growth: 0.02, exitPE: 10, probability: 0.25 },
+      base: { growth: 0.08, exitPE: 15, probability: 0.5 },
+      bull: { growth: 0.12, exitPE: 20, probability: 0.25 },
+    },
+  });
+  assert.equal(negative.ok, false);
+  assert.match(negative.warnings.join(" "), /positive EPS/);
+});
+
+test("projection sensitivity flags conclusion flips", () => {
+  const sensitivity = math.projectionSensitivity({ currentPrice: 100, currentEps: 5, currentPE: 20, years: 5, growth: 0.08, exitPE: 20 });
+  assert.equal(sensitivity.ok, true);
+  assert.equal(sensitivity.rows.length, 5);
+  assert.equal(sensitivity.rows[0].cells.length, 5);
+  assert.ok(sensitivity.rows.some(row => row.cells.some(cell => cell.current)));
+  assert.equal(typeof sensitivity.conclusionFlips, "boolean");
+});
+
 test("EPS DCF discounts both forecast earnings and terminal value", () => {
   const result = math.epsDcf({ eps: 5, growth1: 0.1, growth2: 0.05, terminalGrowth: 0.03, discountRate: 0.1 });
   assert.equal(result.ok, true);

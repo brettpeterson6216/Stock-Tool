@@ -119,6 +119,127 @@
     };
   }
 
+  function asDecimalRate(value) {
+    const number = Number(value);
+    if (!finite(number)) return NaN;
+    return Math.abs(number) > 1 ? number / 100 : number;
+  }
+
+  function validateProjectionContext(input) {
+    const price = Number(input.currentPrice ?? input.price);
+    const eps = Number(input.currentEps ?? input.eps);
+    const currentPE = Number(input.currentPE ?? input.currentPe ?? (price > 0 && eps > 0 ? price / eps : NaN));
+    const years = Number(input.years);
+    const scenarios = input.scenarios || {};
+    const scenarioList = Array.isArray(scenarios) ? scenarios : ["bear", "base", "bull"].map(key => ({ key, ...(scenarios[key] || {}) }));
+    const items = [
+      { key: "ticker", label: "Ticker loaded", ok: Boolean(input.ticker) },
+      { key: "price", label: "Current price available or entered", ok: finite(price) && price > 0 },
+      { key: "eps", label: "Positive starting EPS available or entered", ok: finite(eps) && eps > 0 },
+      { key: "horizon", label: "Projection horizon selected", ok: finite(years) && years > 0 },
+    ];
+    scenarioList.forEach(scenario => {
+      const key = scenario.key || String(scenario.name || "scenario").toLowerCase();
+      const growth = asDecimalRate(scenario.growth);
+      const exitPE = Number(scenario.exitPE);
+      const probability = asDecimalRate(scenario.probability);
+      items.push({ key: `${key}-growth`, label: `${scenario.name || key} growth entered`, ok: finite(growth) && growth > -1 });
+      items.push({ key: `${key}-exit-pe`, label: `${scenario.name || key} exit P/E entered`, ok: finite(exitPE) && exitPE > 0 });
+      items.push({ key: `${key}-probability`, label: `${scenario.name || key} probability entered`, ok: finite(probability) && probability >= 0 && probability <= 1 });
+    });
+    const probabilityTotal = scenarioList.reduce((sum, scenario) => sum + (finite(asDecimalRate(scenario.probability)) ? asDecimalRate(scenario.probability) : 0), 0);
+    items.push({ key: "probability-total", label: "Scenario probabilities total 100%", ok: Math.abs(probabilityTotal - 1) < 0.0001 });
+    items.push({ key: "reviewed", label: "Assumptions reviewed", ok: Boolean(input.reviewed) });
+    const warnings = [];
+    if (finite(eps) && eps <= 0) warnings.push("Projection needs positive EPS. Use a manual normalized EPS for unprofitable companies.");
+    scenarioList.forEach(scenario => {
+      const name = scenario.name || scenario.key || "Scenario";
+      const growth = asDecimalRate(scenario.growth);
+      const exitPE = Number(scenario.exitPE);
+      const dividendGrowth = asDecimalRate(scenario.dividendGrowth ?? 0);
+      const annualDilution = asDecimalRate(scenario.annualDilution ?? 0);
+      if (finite(growth) && growth > 0.35) warnings.push(`${name} uses very high earnings growth.`);
+      if (finite(exitPE) && exitPE > 60) warnings.push(`${name} uses an extreme exit P/E.`);
+      if (finite(dividendGrowth) && dividendGrowth > 0.25) warnings.push(`${name} uses very high dividend growth.`);
+      if (finite(annualDilution) && annualDilution > 0.10) warnings.push(`${name} assumes heavy annual dilution.`);
+    });
+    return { ok: items.every(item => item.ok), items, warnings, price, eps, currentPE, years, probabilityTotal };
+  }
+
+  function projectionSensitivity(input) {
+    const price = Number(input.currentPrice ?? input.price);
+    const eps = Number(input.currentEps ?? input.eps);
+    const currentPE = Number(input.currentPE ?? input.currentPe ?? (price > 0 && eps > 0 ? price / eps : NaN));
+    const years = Number(input.years);
+    const baseGrowth = asDecimalRate(input.growth ?? 0.08);
+    const baseExitPE = Number(input.exitPE ?? currentPE);
+    if (![price, eps, currentPE, years, baseGrowth, baseExitPE].every(finite) || price <= 0 || eps <= 0 || currentPE <= 0 || years <= 0 || baseExitPE <= 0) {
+      return { ok: false, error: "Sensitivity requires price, positive EPS, current P/E, horizon, growth, and exit P/E." };
+    }
+    const growthSteps = [-0.05, -0.025, 0, 0.025, 0.05].map(delta => Math.max(-0.95, baseGrowth + delta));
+    const peSteps = [-10, -5, 0, 5, 10].map(delta => Math.max(1, baseExitPE + delta));
+    const rows = growthSteps.map(growth => ({
+      growth,
+      cells: peSteps.map(exitPE => {
+        const model = projectScenario({ price, currentPE, years, growth, exitPE });
+        return { exitPE, value: model.ok ? model.terminalPrice : null, current: Math.abs(growth - baseGrowth) < 0.00001 && Math.abs(exitPE - baseExitPE) < 0.00001 };
+      }),
+    }));
+    const flat = rows.flatMap(row => row.cells).map(cell => cell.value).filter(value => value !== null);
+    const conclusionFlips = flat.some(value => value < price) && flat.some(value => value > price);
+    return { ok: true, growthSteps, peSteps, rows, conclusionFlips };
+  }
+
+  function explainProjection(result) {
+    if (!result || !result.ok) return { drivers: "Run a valid projection to see the drivers.", mostSensitive: "Unavailable", needsToBeTrue: "Unavailable", breakpoints: "Unavailable" };
+    const scenarios = Array.isArray(result.scenarios) ? result.scenarios : Object.values(result.scenarios || {});
+    const base = scenarios.find(s => /base/i.test(s.name || s.key || "")) || scenarios[Math.floor(scenarios.length / 2)] || scenarios[0];
+    const currentPE = Number(result.currentPE || result.currentPe || 0);
+    const exitPE = Number(base?.exitPE || 0);
+    const growth = asDecimalRate(base?.growth || 0);
+    const multipleText = currentPE && exitPE
+      ? `exit multiple ${exitPE > currentPE ? "expansion" : exitPE < currentPE ? "compression" : "holding near today's level"} from ${currentPE.toFixed(1)}x to ${exitPE.toFixed(1)}x`
+      : "the selected exit multiple";
+    return {
+      drivers: `The base case is mostly driven by ${multipleText} and ${(growth * 100).toFixed(1)}% annual EPS growth.`,
+      mostSensitive: "The result is usually most sensitive to the exit P/E and earnings growth assumptions.",
+      needsToBeTrue: "Earnings need to compound near the selected growth rate and the market needs to award the selected terminal multiple.",
+      breakpoints: "The model can break if EPS is not durable, the company remains unprofitable, dilution rises, or the exit multiple falls toward the bear case.",
+    };
+  }
+
+  function buildProjection(input) {
+    const validation = validateProjectionContext(input);
+    if (!validation.ok) return { ok: false, checklist: validation.items, warnings: validation.warnings };
+    const scenarioInput = (Array.isArray(input.scenarios) ? input.scenarios : ["bear", "base", "bull"].map(key => ({ key, name: key[0].toUpperCase() + key.slice(1), ...(input.scenarios[key] || {}) }))).map(scenario => ({
+      ...scenario,
+      growth: asDecimalRate(scenario.growth),
+      dividendYield: asDecimalRate(scenario.dividendYield ?? 0),
+      dividendGrowth: asDecimalRate(scenario.dividendGrowth ?? scenario.growth ?? 0),
+      annualDilution: asDecimalRate(scenario.annualDilution ?? 0),
+      probability: asDecimalRate(scenario.probability),
+    }));
+    const projected = projectCases({ price: validation.price, currentPE: validation.currentPE, years: validation.years, scenarios: scenarioInput });
+    if (!projected.ok) return { ok: false, error: projected.error, checklist: validation.items, warnings: validation.warnings };
+    const scenarios = {};
+    projected.scenarios.forEach(scenario => { scenarios[(scenario.key || scenario.name || "").toLowerCase()] = scenario; });
+    const base = scenarioInput.find(scenario => /base/i.test(scenario.name || scenario.key || "")) || scenarioInput[1] || scenarioInput[0];
+    const sensitivity = projectionSensitivity({ currentPrice: validation.price, currentEps: validation.eps, currentPE: validation.currentPE, years: validation.years, growth: base.growth, exitPE: base.exitPE });
+    const output = {
+      ok: true,
+      scenarios,
+      probabilityWeightedValue: projected.expectedTotalValue,
+      currentPrice: validation.price,
+      currentPE: validation.currentPE,
+      upsideDownsidePercent: projected.expectedTotalValue / validation.price - 1,
+      sensitivity,
+      warnings: validation.warnings.concat(sensitivity.ok && sensitivity.conclusionFlips ? ["Small changes in growth or exit P/E can reverse the conclusion."] : []),
+      raw: projected,
+    };
+    output.explanation = explainProjection(output);
+    return output;
+  }
+
   function epsDcf(input) {
     const eps = Number(input.eps);
     const growth1 = Number(input.growth1);
@@ -199,5 +320,5 @@
     return { ok: true, low, base, high, realValue };
   }
 
-  return { cagr, cumulativeDividends, projectScenario, projectCases, epsDcf, annualizedVolatility, futureValue, compoundScenarios };
+  return { cagr, cumulativeDividends, projectScenario, projectCases, asDecimalRate, validateProjectionContext, projectionSensitivity, explainProjection, buildProjection, epsDcf, annualizedVolatility, futureValue, compoundScenarios };
 });

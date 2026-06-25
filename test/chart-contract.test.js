@@ -135,3 +135,37 @@ test("charts and trade symbols use vivid market colors without repainting the si
   assert.match(html, /borderWidth:2\.7/);
   assert.match(html, /stop-color="var\(--chart-price\)"/);
 });
+
+test("analyze and projection share a research workspace shell", () => {
+  assert.match(productJs, /function installToolShells\(\)/);
+  assert.match(productJs, /Analyze Workspace/);
+  assert.match(productJs, /Projection Builder/);
+  assert.match(productJs, /data-il-current-ticker/);
+  assert.match(productJs, /Sources and Freshness/);
+  assert.match(productJs, /function openNotesPanel\(\)/);
+  assert.match(productJs, /il-notes-/);
+  assert.match(productJs, /function installResearchTrail\(\)/);
+  assert.match(productJs, /Price action/);
+  assert.match(productJs, /Thesis notes/);
+  assert.match(productJs, /function syncToolUrl\(section, mode\)/);
+  assert.match(productCss, /\.il-tool-shell\{/);
+  assert.match(productCss, /\.il-shell-ticker\{/);
+  assert.match(productCss, /\.il-research-drawer/);
+  assert.match(productCss, /\.il-notes-panel/);
+});
+
+test("projection builder exposes evidence, checklist, templates, sensitivity, and explanation", () => {
+  assert.match(productJs, /function renderProjectionWorkspace/);
+  assert.match(productJs, /Evidence Panel/);
+  assert.match(productJs, /Assumption Review Gate/);
+  assert.match(productJs, /il-proj-eps-override/);
+  assert.match(productJs, /Starting EPS override/);
+  assert.match(productJs, /Templates are starting points, not recommendations/);
+  assert.match(productJs, /Calculate Projection/);
+  assert.match(productJs, /Probability-weighted value/);
+  assert.match(productJs, /sensitivityHtml/);
+  assert.match(productJs, /What drove the result/);
+  assert.match(productCss, /\.il-projection-builder/);
+  assert.match(productCss, /\.il-assumption-checklist/);
+  assert.match(productCss, /\.il-sensitivity-table/);
+});
