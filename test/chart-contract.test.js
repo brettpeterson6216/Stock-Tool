@@ -33,6 +33,9 @@ test("price charts expose dependable zoom controls and mobile gestures", () => {
   assert.match(html, /function fmtChartPrice\(raw\)/);
   assert.match(html, /label:ctx=>` \$\{ctx\.dataset\.label\|\|''\}: \$\{fmtChartPrice\(ctx\.raw\)\}`/);
   assert.match(html, /ticks:\{color:t\.text,font:\{size:10\},callback:v=>fmtChartPrice\(v\)\}/);
+  assert.match(html, /function gcol\(\)\{ return 'rgba\(217,179,94,\.105\)'; \}/);
+  assert.match(html, /ttBg:\s*'rgba\(10,12,14,\.98\)'/);
+  assert.match(html, /text:\s*'rgba\(246,235,210,\.84\)'/);
   assert.match(html, /onclick="zoomPriceChart\(1\.25\)"/);
   assert.match(html, /Zoom price chart out or load older history/);
   assert.match(html, /onclick="resetPriceZoom\(\)"/);
@@ -214,7 +217,7 @@ test("premium landing visual system matches the generated product preview direct
 });
 
 test("premium visual system is applied across app and static pages", () => {
-  assert.match(html, /legacy-app\.css\?v=20260625-22/);
+  assert.match(html, /legacy-app\.css\?v=20260625-23/);
   assert.match(html, /product-system\.css\?v=20260625-1/);
   assert.match(signupHtml, /static-polish\.css\?v=20260625-2/);
   assert.match(html, /<a class="btn-nav" id="nav-signup" href="\/signup">Claim \$0\.99<\/a>/);
@@ -285,6 +288,11 @@ test("tool containers use premium rounded surfaces instead of sharp rectangles",
   assert.match(legacyCss, /#view-tool \.btn-search,[\s\S]*#view-tool \.btn-run,[\s\S]*linear-gradient\(180deg,var\(--tool-sample-gold-2\),var\(--tool-sample-gold\)\)!important/);
   assert.match(legacyCss, /#view-tool \.price-chg\.up,[\s\S]*var\(--tool-sample-green-bright\)!important/);
   assert.match(legacyCss, /#view-tool \.price-chg\.dn,[\s\S]*var\(--tool-sample-red-bright\)!important/);
+  assert.match(legacyCss, /Solid live workspace chrome and deeper chart panels/);
+  assert.match(legacyCss, /#view-tool \.app-sidebar,[\s\S]*#view-tool \.app-chart-toolbar,[\s\S]*background:linear-gradient\(180deg,#24272B,#0C0E10\)!important/);
+  assert.match(legacyCss, /#view-tool \.chart-wrap::before\{[\s\S]*background-size:100% 36px,72px 100%/);
+  assert.match(legacyCss, /#view-tool \.chart-wrap canvas\{[\s\S]*filter:drop-shadow\(0 10px 18px rgba\(22,199,132,\.12\)\)/);
+  assert.match(legacyCss, /#view-tool \.app-chart-toolbar \.act-btn,[\s\S]*#view-tool \.indicator-control\{[\s\S]*background:#161A1D!important/);
 });
 
 test("tool guidance is collapsed so tutorials do not block tool use", () => {

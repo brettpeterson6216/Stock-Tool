@@ -96,7 +96,7 @@
 <script defer src="/vendor/hammer.min.js?v=2.0.8"></script>
 <script defer src="/vendor/chartjs-plugin-zoom.min.js?v=2.2.0"></script>
 <script defer src="/model-math.js?v=20260612-1"></script>
-<link href="/legacy-app.css?v=20260625-22" rel="stylesheet">
+<link href="/legacy-app.css?v=20260625-23" rel="stylesheet">
 </head>
 <body>
 <div id="auth-veil"></div>
@@ -3103,22 +3103,21 @@ function calcATR(highs,lows,closes,p=14) { const tr=closes.map((c2,i)=>{ if(i===
 function destroyChart(id) { if(S.charts[id]){S.charts[id].destroy();delete S.charts[id];} }
 /* Returns a theme-aware chart grid color */
 function isDark(){ return document.documentElement.getAttribute('data-theme')==='dark'; }
-function gcol(){ return isDark() ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.07)'; }
-function ttbg(){ return isDark() ? 'rgba(16,20,32,.97)' : 'rgba(255,255,255,.98)'; }
-function ttbody(){ return isDark() ? '#dde2ea' : '#1a1c20'; }
-function ttborder(){ return isDark() ? 'rgba(255,255,255,.12)' : 'rgba(0,0,0,.12)'; }
+function gcol(){ return 'rgba(217,179,94,.105)'; }
+function ttbg(){ return 'rgba(10,12,14,.98)'; }
+function ttbody(){ return '#F6EBD2'; }
+function ttborder(){ return 'rgba(217,179,94,.28)'; }
 function ct() {
-  const dark = isDark();
   return {
-    text:     dark ? 'rgba(226,231,238,.82)' : 'rgba(30,34,42,.82)',
-    muted:    dark ? 'rgba(210,218,228,.52)' : 'rgba(40,44,55,.52)',
-    grid:     dark ? 'rgba(255,255,255,.075)' : 'rgba(20,24,32,.085)',
-    zeroline: dark ? 'rgba(255,255,255,.18)'  : 'rgba(0,0,0,.18)',
-    ttBg:     dark ? 'rgba(16,20,32,.97)'     : 'rgba(255,255,255,.98)',
-    ttTitle:  dark ? 'rgba(210,218,228,.5)'   : 'rgba(40,44,55,.5)',
-    ttBody:   dark ? '#dde2ea'                : '#1a1c20',
-    ttBorder: dark ? 'rgba(255,255,255,.12)'  : 'rgba(0,0,0,.12)',
-    legendBg: dark ? 'rgba(255,255,255,0)'    : 'rgba(0,0,0,0)',
+    text:     'rgba(246,235,210,.84)',
+    muted:    'rgba(184,174,155,.62)',
+    grid:     'rgba(217,179,94,.105)',
+    zeroline: 'rgba(217,179,94,.24)',
+    ttBg:     'rgba(10,12,14,.98)',
+    ttTitle:  'rgba(217,179,94,.72)',
+    ttBody:   '#F6EBD2',
+    ttBorder: 'rgba(217,179,94,.28)',
+    legendBg: 'rgba(255,255,255,0)',
   };
 }
 
@@ -3132,8 +3131,7 @@ const crosshairPlugin = {
     ctx.beginPath();
     ctx.moveTo(chart._crosshairX, top);
     ctx.lineTo(chart._crosshairX, bottom);
-    ctx.strokeStyle = document.documentElement.getAttribute('data-theme')==='dark'
-      ? 'rgba(255,255,255,.18)' : 'rgba(0,0,0,.18)';
+    ctx.strokeStyle = 'rgba(217,179,94,.32)';
     ctx.lineWidth = 1;
     ctx.setLineDash([4,3]);
     ctx.stroke();
