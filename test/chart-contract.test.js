@@ -217,7 +217,7 @@ test("premium landing visual system matches the generated product preview direct
 });
 
 test("premium visual system is applied across app and static pages", () => {
-  assert.match(html, /legacy-app\.css\?v=20260625-26/);
+  assert.match(html, /legacy-app\.css\?v=20260625-27/);
   assert.match(html, /product-system\.css\?v=20260625-1/);
   assert.match(signupHtml, /static-polish\.css\?v=20260625-2/);
   assert.match(html, /<a class="btn-nav" id="nav-signup" href="\/signup">Claim \$0\.99<\/a>/);
@@ -305,6 +305,9 @@ test("tool containers use premium rounded surfaces instead of sharp rectangles",
   assert.match(legacyCss, /#view-tool \.sb-item:hover,[\s\S]*#view-tool \.indicator-control:hover,[\s\S]*background:#202428!important/);
   assert.match(legacyCss, /#view-tool \.sb-item:hover \.sb-item-label,[\s\S]*#view-tool \.indicator-control:hover \*\{[\s\S]*color:#F8EED6!important/);
   assert.match(legacyCss, /#view-tool \.sb-item\.active \.sb-item-label,[\s\S]*#view-tool \.indicator-control\.active \*\{[\s\S]*color:#17120B!important/);
+  assert.match(legacyCss, /Light mode top toolbar should sit on the gold system/);
+  assert.match(legacyCss, /:root:not\(\[data-theme="dark"\]\) #main-nav,[\s\S]*background:linear-gradient\(180deg,rgba\(255,250,239,\.94\),rgba\(245,225,181,\.88\)\)!important/);
+  assert.match(legacyCss, /:root:not\(\[data-theme="dark"\]\) #main-nav \.nav-tab\{[\s\S]*color:rgba\(23,18,11,\.72\)!important/);
 });
 
 test("tool guidance is collapsed so tutorials do not block tool use", () => {
