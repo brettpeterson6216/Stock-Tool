@@ -214,7 +214,7 @@ test("premium landing visual system matches the generated product preview direct
 });
 
 test("premium visual system is applied across app and static pages", () => {
-  assert.match(html, /legacy-app\.css\?v=20260625-21/);
+  assert.match(html, /legacy-app\.css\?v=20260625-22/);
   assert.match(html, /product-system\.css\?v=20260625-1/);
   assert.match(signupHtml, /static-polish\.css\?v=20260625-2/);
   assert.match(html, /<a class="btn-nav" id="nav-signup" href="\/signup">Claim \$0\.99<\/a>/);
@@ -277,6 +277,14 @@ test("tool containers use premium rounded surfaces instead of sharp rectangles",
   assert.match(legacyCss, /html\[data-theme="dark"\] #view-tool \.acc-body,[\s\S]*box-shadow:var\(--tool-shadow-dark\)!important/);
   assert.match(legacyCss, /#view-tool \.ticker-input,[\s\S]*#view-tool \.il-learn-nav button\{[\s\S]*border-radius:12px!important/);
   assert.match(legacyCss, /#view-tool \.app-section \.acc-body\{[\s\S]*background:transparent!important/);
+  assert.match(legacyCss, /Live tool workspace match to the generated sample/);
+  assert.match(legacyCss, /--tool-sample-charcoal:#111417/);
+  assert.match(legacyCss, /--tool-sample-green:#16C784/);
+  assert.match(legacyCss, /--tool-sample-red:#F45B5B/);
+  assert.match(legacyCss, /#view-tool \.search-row,[\s\S]*#view-tool \.chart-wrap,[\s\S]*#view-tool \.metric-card,[\s\S]*linear-gradient\(180deg,var\(--tool-sample-card-2\),var\(--tool-sample-card\)\)!important/);
+  assert.match(legacyCss, /#view-tool \.btn-search,[\s\S]*#view-tool \.btn-run,[\s\S]*linear-gradient\(180deg,var\(--tool-sample-gold-2\),var\(--tool-sample-gold\)\)!important/);
+  assert.match(legacyCss, /#view-tool \.price-chg\.up,[\s\S]*var\(--tool-sample-green-bright\)!important/);
+  assert.match(legacyCss, /#view-tool \.price-chg\.dn,[\s\S]*var\(--tool-sample-red-bright\)!important/);
 });
 
 test("tool guidance is collapsed so tutorials do not block tool use", () => {

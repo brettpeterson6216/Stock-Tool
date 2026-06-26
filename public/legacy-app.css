@@ -5126,3 +5126,403 @@ html[data-theme="dark"] #market-page .wl-table td{
     scroll-snap-align:start;
   }
 }
+
+/* Live tool workspace match to the generated sample: charcoal panels, gold trim, vivid market colors. */
+:root{
+  --tool-sample-black:#090A0B;
+  --tool-sample-charcoal:#111417;
+  --tool-sample-card:#171A1D;
+  --tool-sample-card-2:#202428;
+  --tool-sample-border:rgba(217,179,94,.22);
+  --tool-sample-border-soft:rgba(217,179,94,.13);
+  --tool-sample-text:#F6EBD2;
+  --tool-sample-muted:#B8AE9B;
+  --tool-sample-faint:#7D766B;
+  --tool-sample-gold:#D9B35E;
+  --tool-sample-gold-2:#F2D37A;
+  --tool-sample-green:#16C784;
+  --tool-sample-green-bright:#2EE59D;
+  --tool-sample-red:#F45B5B;
+  --tool-sample-red-bright:#FF6B6B;
+  --chart-price:#16C784;
+  --chart-positive:#16C784;
+  --chart-negative:#F45B5B;
+}
+#view-tool,
+html[data-theme="dark"] #view-tool,
+#view-tool .app-shell,
+#view-tool .app-main,
+#view-tool .app-content-scroll{
+  color:var(--tool-sample-text)!important;
+}
+#view-tool .app-content-scroll{
+  padding:14px!important;
+}
+#view-tool .app-section,
+#view-tool .app-section.open,
+#view-tool .app-section .acc-body,
+html[data-theme="dark"] #view-tool .app-section,
+html[data-theme="dark"] #view-tool .app-section.open,
+html[data-theme="dark"] #view-tool .app-section .acc-body{
+  background:transparent!important;
+  background-color:transparent!important;
+  background-image:none!important;
+  box-shadow:none!important;
+}
+#view-tool .search-row,
+#view-tool #featured-grid,
+#view-tool .chart-wrap,
+#view-tool .metric-card,
+#view-tool .panel-box,
+#view-tool .dcf-out,
+#view-tool .scr-filters,
+#view-tool .cmp-table,
+#view-tool .fin-table,
+#view-tool .earn-table,
+#view-tool .inst-table,
+#view-tool .scr-table-wrap,
+#view-tool .cmp-table-wrap,
+#view-tool .sidebar-card,
+#view-tool .analyst-target-box,
+#view-tool .analyst-rec-box,
+#view-tool .risk-stat,
+#view-tool .dp-card,
+#view-tool .sa-card,
+#view-tool .pro-gate-card,
+#view-tool .il-tool-shell,
+#view-tool .il-trust-panel,
+#view-tool .il-proj-evidence,
+#view-tool .il-proj-review,
+#view-tool .il-projection-explain,
+#view-tool .il-template-row,
+#view-tool .il-assumption-checklist>div,
+#view-tool .il-result-summary>div,
+#view-tool .il-learn-workshop,
+#view-tool .edu-hero,
+#view-tool .edu-path,
+#view-tool .edu-lesson-panel,
+#view-tool .edu-checklist,
+#view-tool .edu-glossary,
+#view-tool .sec-card,
+#view-tool .advm-card,
+#view-tool .report-box,
+#view-tool #report-no-stock,
+#view-tool .sec-filing-row,
+#view-tool .proj-out,
+#view-tool .il-sensitivity-table table,
+html[data-theme="dark"] #view-tool .search-row,
+html[data-theme="dark"] #view-tool #featured-grid,
+html[data-theme="dark"] #view-tool .chart-wrap,
+html[data-theme="dark"] #view-tool .metric-card,
+html[data-theme="dark"] #view-tool .panel-box,
+html[data-theme="dark"] #view-tool .dcf-out,
+html[data-theme="dark"] #view-tool .scr-filters,
+html[data-theme="dark"] #view-tool .cmp-table,
+html[data-theme="dark"] #view-tool .fin-table,
+html[data-theme="dark"] #view-tool .earn-table,
+html[data-theme="dark"] #view-tool .inst-table,
+html[data-theme="dark"] #view-tool .scr-table-wrap,
+html[data-theme="dark"] #view-tool .cmp-table-wrap,
+html[data-theme="dark"] #view-tool .sidebar-card,
+html[data-theme="dark"] #view-tool .analyst-target-box,
+html[data-theme="dark"] #view-tool .analyst-rec-box,
+html[data-theme="dark"] #view-tool .risk-stat,
+html[data-theme="dark"] #view-tool .dp-card,
+html[data-theme="dark"] #view-tool .sa-card,
+html[data-theme="dark"] #view-tool .pro-gate-card,
+html[data-theme="dark"] #view-tool .il-tool-shell,
+html[data-theme="dark"] #view-tool .il-trust-panel,
+html[data-theme="dark"] #view-tool .il-proj-evidence,
+html[data-theme="dark"] #view-tool .il-proj-review,
+html[data-theme="dark"] #view-tool .il-projection-explain,
+html[data-theme="dark"] #view-tool .il-template-row,
+html[data-theme="dark"] #view-tool .il-assumption-checklist>div,
+html[data-theme="dark"] #view-tool .il-result-summary>div,
+html[data-theme="dark"] #view-tool .il-learn-workshop,
+html[data-theme="dark"] #view-tool .edu-hero,
+html[data-theme="dark"] #view-tool .edu-path,
+html[data-theme="dark"] #view-tool .edu-lesson-panel,
+html[data-theme="dark"] #view-tool .edu-checklist,
+html[data-theme="dark"] #view-tool .edu-glossary,
+html[data-theme="dark"] #view-tool .sec-card,
+html[data-theme="dark"] #view-tool .advm-card,
+html[data-theme="dark"] #view-tool .report-box,
+html[data-theme="dark"] #view-tool #report-no-stock,
+html[data-theme="dark"] #view-tool .sec-filing-row,
+html[data-theme="dark"] #view-tool .proj-out,
+html[data-theme="dark"] #view-tool .il-sensitivity-table table{
+  background:linear-gradient(180deg,var(--tool-sample-card-2),var(--tool-sample-card))!important;
+  border-color:var(--tool-sample-border-soft)!important;
+  color:var(--tool-sample-text)!important;
+  box-shadow:0 18px 46px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.04)!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+#view-tool .chart-wrap,
+html[data-theme="dark"] #view-tool .chart-wrap{
+  background:
+    radial-gradient(760px 320px at 82% -18%,rgba(217,179,94,.10),transparent 66%),
+    linear-gradient(180deg,#171A1D,#0E1113)!important;
+  border-color:rgba(217,179,94,.18)!important;
+}
+#view-tool .metric-card:hover,
+#view-tool .chart-wrap:hover,
+#view-tool .panel-box:hover,
+#view-tool .sec-card:hover,
+#view-tool .edu-path:hover{
+  border-color:rgba(217,179,94,.36)!important;
+  box-shadow:0 22px 54px rgba(0,0,0,.36),0 0 0 1px rgba(217,179,94,.08) inset!important;
+}
+#view-tool .chart-header,
+#view-tool .tool-tabs,
+#view-tool .tool-header,
+#view-tool .app-section-hdr,
+#view-tool .acc-header,
+#view-tool .cmp-table th,
+#view-tool .fin-table th,
+#view-tool .earn-table th,
+#view-tool .scr-table th,
+#view-tool .inst-table th,
+html[data-theme="dark"] #view-tool .chart-header,
+html[data-theme="dark"] #view-tool .tool-tabs,
+html[data-theme="dark"] #view-tool .tool-header,
+html[data-theme="dark"] #view-tool .app-section-hdr,
+html[data-theme="dark"] #view-tool .acc-header,
+html[data-theme="dark"] #view-tool .cmp-table th,
+html[data-theme="dark"] #view-tool .fin-table th,
+html[data-theme="dark"] #view-tool .earn-table th,
+html[data-theme="dark"] #view-tool .scr-table th,
+html[data-theme="dark"] #view-tool .inst-table th{
+  background:#111417!important;
+  border-color:var(--tool-sample-border-soft)!important;
+  color:var(--tool-sample-muted)!important;
+}
+#view-tool .res-name,
+#view-tool .price-big,
+#view-tool .panel-box-title,
+#view-tool .chart-title,
+#view-tool .cmp-hdr,
+#view-tool .scr-ticker,
+#view-tool .edu-title,
+#view-tool .advm-val,
+#view-tool .risk-val,
+#view-tool .dcf-val:not(.up):not(.dn):not(.gold),
+#view-tool .proj-val,
+#view-tool .m-val:not(.up):not(.dn),
+#view-tool .il-tool-title,
+#view-tool .il-result-summary strong,
+#view-tool .tw-title,
+html[data-theme="dark"] #view-tool .res-name,
+html[data-theme="dark"] #view-tool .price-big,
+html[data-theme="dark"] #view-tool .panel-box-title,
+html[data-theme="dark"] #view-tool .chart-title,
+html[data-theme="dark"] #view-tool .cmp-hdr,
+html[data-theme="dark"] #view-tool .scr-ticker,
+html[data-theme="dark"] #view-tool .edu-title,
+html[data-theme="dark"] #view-tool .advm-val,
+html[data-theme="dark"] #view-tool .risk-val,
+html[data-theme="dark"] #view-tool .dcf-val:not(.up):not(.dn):not(.gold),
+html[data-theme="dark"] #view-tool .proj-val,
+html[data-theme="dark"] #view-tool .m-val:not(.up):not(.dn),
+html[data-theme="dark"] #view-tool .il-tool-title,
+html[data-theme="dark"] #view-tool .il-result-summary strong,
+html[data-theme="dark"] #view-tool .tw-title{
+  color:var(--tool-sample-text)!important;
+}
+#view-tool .price-time,
+#view-tool .m-lbl,
+#view-tool .m-sub,
+#view-tool .fc-label,
+#view-tool .cmp-ig label,
+#view-tool .cmp-table td,
+#view-tool .fin-table td,
+#view-tool .earn-table td,
+#view-tool .inst-table td,
+#view-tool .scr-table td,
+#view-tool .advm-lbl,
+#view-tool .edu-body,
+#view-tool .news-text,
+#view-tool .report-section-lbl,
+#view-tool .sec-filing-desc,
+#view-tool .dcf-lbl,
+#view-tool .proj-lbl,
+#view-tool .risk-name,
+#view-tool .tw-sub,
+#view-tool .fg-label,
+#view-tool .il-trust-note,
+#view-tool .il-trust-field span,
+html[data-theme="dark"] #view-tool .price-time,
+html[data-theme="dark"] #view-tool .m-lbl,
+html[data-theme="dark"] #view-tool .m-sub,
+html[data-theme="dark"] #view-tool .fc-label,
+html[data-theme="dark"] #view-tool .cmp-ig label,
+html[data-theme="dark"] #view-tool .cmp-table td,
+html[data-theme="dark"] #view-tool .fin-table td,
+html[data-theme="dark"] #view-tool .earn-table td,
+html[data-theme="dark"] #view-tool .inst-table td,
+html[data-theme="dark"] #view-tool .scr-table td,
+html[data-theme="dark"] #view-tool .advm-lbl,
+html[data-theme="dark"] #view-tool .edu-body,
+html[data-theme="dark"] #view-tool .news-text,
+html[data-theme="dark"] #view-tool .report-section-lbl,
+html[data-theme="dark"] #view-tool .sec-filing-desc,
+html[data-theme="dark"] #view-tool .dcf-lbl,
+html[data-theme="dark"] #view-tool .proj-lbl,
+html[data-theme="dark"] #view-tool .risk-name,
+html[data-theme="dark"] #view-tool .tw-sub,
+html[data-theme="dark"] #view-tool .fg-label,
+html[data-theme="dark"] #view-tool .il-trust-note,
+html[data-theme="dark"] #view-tool .il-trust-field span{
+  color:var(--tool-sample-muted)!important;
+}
+#view-tool .res-ticker-lbl,
+#view-tool .panel-box-title,
+#view-tool .tool-tab.active,
+#view-tool .sec-filter-btn.active,
+#view-tool .ind-pill.on,
+#view-tool .gold,
+#view-tool .dcf-val.gold,
+#view-tool .proj-val.gold,
+#view-tool .il-trust-chip,
+#view-tool .il-learn-stepper span.active,
+html[data-theme="dark"] #view-tool .res-ticker-lbl,
+html[data-theme="dark"] #view-tool .panel-box-title,
+html[data-theme="dark"] #view-tool .tool-tab.active,
+html[data-theme="dark"] #view-tool .sec-filter-btn.active,
+html[data-theme="dark"] #view-tool .ind-pill.on,
+html[data-theme="dark"] #view-tool .gold,
+html[data-theme="dark"] #view-tool .dcf-val.gold,
+html[data-theme="dark"] #view-tool .proj-val.gold,
+html[data-theme="dark"] #view-tool .il-trust-chip,
+html[data-theme="dark"] #view-tool .il-learn-stepper span.active{
+  color:var(--tool-sample-gold-2)!important;
+}
+#view-tool .price-chg.up,
+#view-tool .m-val.up,
+#view-tool .dcf-val.up,
+#view-tool .proj-val.up,
+#view-tool .sc-irr.up,
+#view-tool .scr-pos,
+#view-tool .up,
+html[data-theme="dark"] #view-tool .price-chg.up,
+html[data-theme="dark"] #view-tool .m-val.up,
+html[data-theme="dark"] #view-tool .dcf-val.up,
+html[data-theme="dark"] #view-tool .proj-val.up,
+html[data-theme="dark"] #view-tool .sc-irr.up,
+html[data-theme="dark"] #view-tool .scr-pos,
+html[data-theme="dark"] #view-tool .up{
+  color:var(--tool-sample-green-bright)!important;
+}
+#view-tool .price-chg.dn,
+#view-tool .m-val.dn,
+#view-tool .dcf-val.dn,
+#view-tool .proj-val.dn,
+#view-tool .sc-irr.dn,
+#view-tool .scr-neg,
+#view-tool .dn,
+html[data-theme="dark"] #view-tool .price-chg.dn,
+html[data-theme="dark"] #view-tool .m-val.dn,
+html[data-theme="dark"] #view-tool .dcf-val.dn,
+html[data-theme="dark"] #view-tool .proj-val.dn,
+html[data-theme="dark"] #view-tool .sc-irr.dn,
+html[data-theme="dark"] #view-tool .scr-neg,
+html[data-theme="dark"] #view-tool .dn{
+  color:var(--tool-sample-red-bright)!important;
+}
+#view-tool input,
+#view-tool select,
+#view-tool textarea,
+#view-tool .ticker-input,
+#view-tool .fc-input,
+#view-tool .fc-select,
+#view-tool .cmp-ig input,
+#view-tool .scr-input,
+html[data-theme="dark"] #view-tool input,
+html[data-theme="dark"] #view-tool select,
+html[data-theme="dark"] #view-tool textarea,
+html[data-theme="dark"] #view-tool .ticker-input,
+html[data-theme="dark"] #view-tool .fc-input,
+html[data-theme="dark"] #view-tool .fc-select,
+html[data-theme="dark"] #view-tool .cmp-ig input,
+html[data-theme="dark"] #view-tool .scr-input{
+  background:#0E1113!important;
+  border-color:var(--tool-sample-border-soft)!important;
+  color:var(--tool-sample-text)!important;
+}
+#view-tool input::placeholder,
+#view-tool textarea::placeholder,
+html[data-theme="dark"] #view-tool input::placeholder,
+html[data-theme="dark"] #view-tool textarea::placeholder{
+  color:rgba(246,235,210,.42)!important;
+}
+#view-tool .btn-search,
+#view-tool .btn-run,
+#view-tool .rpill.active,
+#view-tool .rpill:hover,
+#view-tool .quick-btn:hover,
+#view-tool .act-btn:hover,
+#view-tool .il-tool-guide-toggle:hover,
+#view-tool .il-learn-nav button,
+html[data-theme="dark"] #view-tool .btn-search,
+html[data-theme="dark"] #view-tool .btn-run,
+html[data-theme="dark"] #view-tool .rpill.active,
+html[data-theme="dark"] #view-tool .rpill:hover,
+html[data-theme="dark"] #view-tool .quick-btn:hover,
+html[data-theme="dark"] #view-tool .act-btn:hover,
+html[data-theme="dark"] #view-tool .il-tool-guide-toggle:hover,
+html[data-theme="dark"] #view-tool .il-learn-nav button{
+  background:linear-gradient(180deg,var(--tool-sample-gold-2),var(--tool-sample-gold))!important;
+  border-color:rgba(217,179,94,.74)!important;
+  color:#17120B!important;
+  box-shadow:0 10px 24px rgba(217,179,94,.24)!important;
+}
+#view-tool .rpill,
+#view-tool .ind-pill,
+#view-tool .quick-btn,
+#view-tool .act-btn,
+#view-tool .sec-filter-btn,
+#view-tool .il-tool-guide-toggle,
+#view-tool .il-learn-quiz button,
+html[data-theme="dark"] #view-tool .rpill,
+html[data-theme="dark"] #view-tool .ind-pill,
+html[data-theme="dark"] #view-tool .quick-btn,
+html[data-theme="dark"] #view-tool .act-btn,
+html[data-theme="dark"] #view-tool .sec-filter-btn,
+html[data-theme="dark"] #view-tool .il-tool-guide-toggle,
+html[data-theme="dark"] #view-tool .il-learn-quiz button{
+  background:#111417!important;
+  border-color:var(--tool-sample-border-soft)!important;
+  color:var(--tool-sample-muted)!important;
+}
+#view-tool .cmp-table th,
+#view-tool .cmp-table td,
+#view-tool .fin-table th,
+#view-tool .fin-table td,
+#view-tool .earn-table th,
+#view-tool .earn-table td,
+#view-tool .inst-table th,
+#view-tool .inst-table td,
+#view-tool .scr-table th,
+#view-tool .scr-table td,
+#view-tool .dcf-row,
+#view-tool .proj-row,
+#view-tool .risk-row,
+#view-tool .news-item,
+#view-tool .sec-filing-row{
+  border-color:rgba(217,179,94,.12)!important;
+}
+#view-tool .cmp-table tr:hover td,
+#view-tool .fin-table tr:hover td,
+#view-tool .earn-table tr:hover td,
+#view-tool .scr-table tr:hover td{
+  background:rgba(217,179,94,.07)!important;
+}
+@media(max-width:640px){
+  #view-tool .app-content-scroll{padding:10px!important}
+  #view-tool .chart-wrap,
+  #view-tool .metric-card,
+  #view-tool .panel-box,
+  #view-tool .il-tool-shell{
+    border-radius:16px!important;
+  }
+}
