@@ -30,21 +30,21 @@ test("locked paid accounts reconcile against Stripe before Pro rejection", () =>
 });
 
 test("Stripe webhooks preserve a durable link from checkout to subscription updates", () => {
-  assert.match(billingSource, /function firstMonthDiscounts\(\)/);
-  assert.match(billingSource, /STRIPE_FIRST_MONTH_COUPON/);
-  assert.match(billingSource, /STRIPE_FIRST_MONTH_PROMOTION_CODE/);
-  assert.match(billingSource, /subscription_data: \{ metadata \}/);
-  assert.match(billingSource, /if \(discounts\.length\) params\.discounts = discounts/);
+  assert.match(billingSource, /subscription_data: \{ trial_period_days: 7, metadata \}/);
+  assert.match(billingSource, /allow_promotion_codes: true/);
   assert.match(billingSource, /client_reference_id: String\(req\.session\.userId\)/);
   assert.match(billingSource, /async function findUserIdForStripeEvent/);
   assert.match(billingSource, /sess\.customer_details\?\.email \|\| sess\.customer_email \|\| await stripeCustomerEmail\(customerId\)/);
   assert.match(billingSource, /stripe_customer_id=\?, stripe_subscription_id=\?/);
 });
 
-test("the first-month offer is configured before advertising monthly checkout", () => {
-  assert.match(html, /Claim \$0\.99 first month/);
-  assert.match(billingSource, /\$0\.99 first-month offer is not configured yet/);
-  assert.match(billingSource, /track\("checkout_started", \{ annual, plan: annual \? "annual" : "monthly", firstMonthOffer: !annual \}/);
+test("discount-code sales work through Stripe Checkout without replacing the trial", () => {
+  assert.match(html, /Start 7-day free trial/);
+  assert.match(html, /Discount codes can be entered in Checkout/);
+  assert.match(html, /\$0\.99 paid month/);
+  assert.doesNotMatch(billingSource, /firstMonthDiscounts/);
+  assert.doesNotMatch(billingSource, /\$0\.99 first-month offer is not configured yet/);
+  assert.match(billingSource, /track\("checkout_started", \{ annual, plan: annual \? "annual" : "monthly", trialDays: 7, promotionCodes: true \}/);
 });
 
 test("protected sections wait for authoritative auth state before gating", () => {

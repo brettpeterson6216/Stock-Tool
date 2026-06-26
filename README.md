@@ -26,24 +26,13 @@ After a push, verify the exact live commit:
 npm run verify:deploy -- 7b1bd95
 ```
 
-## Stripe first-month offer
+## Stripe trial and promo-code offers
 
-Monthly Checkout is configured to require a one-time Stripe discount before it can launch the advertised `$0.99` first-month offer.
+Checkout starts Pro subscriptions with a 7-day free trial and allows Stripe promotion codes.
 
-In Stripe, create either:
+To run a `$0.99` paid-month sale, create a Stripe coupon/promotion code that reduces a monthly invoice to `$0.99`, then give the promotion code to the customer. They can enter it directly in Stripe Checkout. For example, if `STRIPE_PRICE_MONTHLY` is `$7.99/month`, create an `amount_off=$7.00` coupon and attach a customer-facing promotion code.
 
-- A coupon with `duration=once` that reduces the first monthly invoice to `$0.99`.
-- A promotion code backed by that same one-time coupon.
-
-For example, if `STRIPE_PRICE_MONTHLY` is `$7.99/month`, create an `amount_off=$7.00` coupon. Then set one of these environment variables in Render:
-
-```bash
-STRIPE_FIRST_MONTH_COUPON=coupon_...
-# or
-STRIPE_FIRST_MONTH_PROMOTION_CODE=promo_...
-```
-
-Keep `STRIPE_PRICE_MONTHLY`, `STRIPE_PRICE_ANNUAL`, `STRIPE_SECRET_KEY`, and `STRIPE_WEBHOOK_SECRET` set as before.
+Keep `STRIPE_PRICE_MONTHLY`, `STRIPE_PRICE_ANNUAL`, `STRIPE_SECRET_KEY`, and `STRIPE_WEBHOOK_SECRET` set in Render.
 
 ## Frontend structure
 

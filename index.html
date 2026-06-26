@@ -404,7 +404,7 @@
         // Email verification result toasts
         const _verifParam = _initialParams.get('verif');
         if (_verifParam === 'ok') {
-          toast('Email verified! You can now claim the $0.99 first-month offer.', 'ok');
+          toast('Email verified! You can now start your trial.', 'ok');
           if (typeof S !== 'undefined') S.emailVerified = true;
           const _vb = document.getElementById('verif-banner');
           if (_vb) _vb.style.display = 'none';
@@ -915,7 +915,7 @@
       <div class="pricing-toggle" role="group" aria-label="Pro billing period"><button class="active" id="pricing-period-monthly" onclick="setPricingPeriod('monthly')">Monthly</button><button id="pricing-period-annual" onclick="setPricingPeriod('annual')">Annual · save 37%</button></div>
       <div class="pricing-grid">
         <div class="pricing-card"><div class="pricing-tier">Free</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">0</span><span class="p-per">/month</span></div><p class="p-desc">Build a repeatable research habit before paying.</p><ul class="p-features"><li>5 stock analyses per day</li><li>Charts, indicators, and scenarios</li><li>Cloud-saved analyses</li><li>Decision workspace and thesis tracking</li><li>AI Portfolio Guide</li><li>Review-date reminders</li></ul><button class="btn-plan btn-plan-dark" id="pricing-free-btn">Create free account</button></div>
-        <div class="pricing-card featured"><div class="pricing-pop">First month $0.99</div><div class="pricing-tier">Pro</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount" id="pricing-pro-amount">7.99</span><span class="p-per" id="pricing-pro-period">/month</span></div><p class="p-desc" id="pricing-pro-note">New monthly users get the first month for $0.99, then Pro renews at $7.99/month unless canceled. Annual billing is available for $59.99/year.</p><ul class="p-features"><li>Unlimited stock analyses</li><li>Intrinsic value and advanced projections</li><li>Earnings-call research center</li><li>4-stock side-by-side comparison</li><li>Full stock screener</li><li>PDF report export</li></ul><button class="btn-plan btn-plan-gold" id="pricing-pro-btn">Claim $0.99 first month &rarr;</button></div>
+        <div class="pricing-card featured"><div class="pricing-pop">7-day free trial</div><div class="pricing-tier">Pro</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount" id="pricing-pro-amount">7.99</span><span class="p-per" id="pricing-pro-period">/month</span></div><p class="p-desc" id="pricing-pro-note">Start with a 7-day free trial. Have a discount code? Enter it in Stripe Checkout for offers like a $0.99 paid month.</p><ul class="p-features"><li>Unlimited stock analyses</li><li>Intrinsic value and advanced projections</li><li>Earnings-call research center</li><li>4-stock side-by-side comparison</li><li>Full stock screener</li><li>PDF report export</li></ul><button class="btn-plan btn-plan-gold" id="pricing-pro-btn">Start 7-day free trial &rarr;</button></div>
       </div>
       <div class="pricing-compare" aria-label="Free and Pro feature comparison"><div class="pricing-compare-row head"><span>Capability</span><span>Free</span><span>Pro</span></div><div class="pricing-compare-row"><span>Workspace, thesis, watchlist, Portfolio Guide</span><span class="yes">Included</span><span class="yes">Included</span></div><div class="pricing-compare-row"><span>Daily stock analyses</span><span>5 / day</span><span class="yes">Unlimited</span></div><div class="pricing-compare-row"><span>Advanced valuation, calls, screener, export</span><span>Preview</span><span class="yes">Included</span></div></div>
     </div></section>
@@ -1699,7 +1699,7 @@
   <div class="modal">
     <button class="modal-close" id="modal-close-btn">✕</button>
     <h3>Upgrade to Pro</h3>
-    <p>Get full access to all Pro features with the $0.99 first-month offer.</p>
+    <p>Get full access to all Pro features with a 7-day free trial. Discount codes can be entered in Checkout.</p>
     <button class="btn-modal-cta" id="modal-see-plans-btn">See plans →</button>
   </div>
 </div>
@@ -1772,7 +1772,7 @@
     <button class="modal-close" id="upgrade-modal-close-btn">✕</button>
     <div style="font-family:var(--mono);font-size:.68rem;color:var(--gold-d);text-transform:uppercase;letter-spacing:.14em;margin-bottom:.5rem;">Pro Plan</div>
     <h3 style="font-family:var(--serif);font-size:1.6rem;letter-spacing:-.01em;margin-bottom:.5rem;">Unlock <em style="color:var(--gold-d);font-style:italic;">all</em> the tools.</h3>
-    <p style="font-size:.9rem;color:var(--ink4);margin-bottom:1.5rem;">First month $0.99 for new monthly users. Renews at the standard rate unless canceled.</p>
+    <p style="font-size:.9rem;color:var(--ink4);margin-bottom:1.5rem;">7-day free trial. Have a discount code? Enter it in Checkout for offers like a $0.99 paid month.</p>
 
     <div class="modal-2col" style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1.25rem;">
       <div id="plan-monthly" class="plan-opt sel" onclick="selectUpgradePlan('monthly')" style="cursor:pointer;">
@@ -1796,12 +1796,12 @@
       <li style="font-size:.82rem;color:var(--ink3);">✓ Risk dashboard</li>
     </ul>
 
-    <button id="upgrade-cta-btn" class="btn-modal-cta" onclick="handleUpgradeClick()">Claim $0.99 first month →</button>
-    <div class="modal-note" style="margin-top:.75rem;">Card required. Monthly checkout charges $0.99 today, then renews at the standard monthly rate unless canceled.</div>
+    <button id="upgrade-cta-btn" class="btn-modal-cta" onclick="handleUpgradeClick()">Start 7-day free trial →</button>
+    <div class="modal-note" style="margin-top:.75rem;">Card required. You won't be charged during the 7-day trial. Discount codes can be entered in Checkout.</div>
 
     <!-- Shown instead of CTA when user is not logged in -->
     <div id="upgrade-modal-auth" style="display:none;margin-top:.75rem;">
-      <div style="font-size:.8rem;color:var(--ink4);margin-bottom:.75rem;text-align:center;">Create a free account to claim the $0.99 first-month offer.</div>
+      <div style="font-size:.8rem;color:var(--ink4);margin-bottom:.75rem;text-align:center;">Create a free account to start your trial.</div>
       <div style="display:flex;flex-direction:column;gap:.5rem;">
         <a id="upgrade-signup-btn" href="/signup" class="btn-modal-cta" style="text-align:center;text-decoration:none;">Create free account →</a>
         <a id="upgrade-login-btn" href="/login" style="display:block;text-align:center;font-size:.82rem;color:var(--gold-d);margin-top:.25rem;">Already have an account? Sign in</a>
@@ -2136,8 +2136,8 @@ function sectionProGateHtml(id) {
     return `<div class="pro-gate-card"><div class="pgc-body">
       <div class="pgc-badge">⚡ Pro Feature</div>
       <div class="pgc-title">Pro Feature${titleSuffix}</div>
-      <button class="pgc-btn js-pgc-upgrade">Claim $0.99 first month →</button>
-      <div class="pgc-note">$0.99 first month · Card required · Cancel anytime</div>
+      <button class="pgc-btn js-pgc-upgrade">Start 7-day free trial →</button>
+      <div class="pgc-note">7-day free trial · Discount codes accepted in Checkout</div>
     </div></div>`;
   }
 
@@ -2156,8 +2156,8 @@ function sectionProGateHtml(id) {
       <ul class="pgc-bullets">
         ${cfg.bullets.map(b => `<li>${b}</li>`).join('\n        ')}
       </ul>
-      <button class="pgc-btn js-pgc-upgrade">Claim $0.99 first month →</button>
-      <div class="pgc-note">$0.99 first month · Card required · Cancel anytime</div>
+      <button class="pgc-btn js-pgc-upgrade">Start 7-day free trial →</button>
+      <div class="pgc-note">7-day free trial · Discount codes accepted in Checkout</div>
     </div>
   </div>`;
 }
@@ -2238,8 +2238,8 @@ function handleSectionError(e, sectionId, container) {
         <li>Advanced projections, institutional data, and analyst targets</li>
         <li>Comes back tomorrow free, or unlock everything now</li>
       </ul>
-      <button class="pgc-btn js-pgc-upgrade">Claim $0.99 first month →</button>
-      <div class="pgc-note">$0.99 first month · Card required · Cancel anytime</div>
+      <button class="pgc-btn js-pgc-upgrade">Start 7-day free trial →</button>
+      <div class="pgc-note">7-day free trial · Discount codes accepted in Checkout</div>
     </div></div>`;
     container.style.display = 'block';
   } else {
@@ -2880,14 +2880,14 @@ async function handleUpgradeClick() {
   const btn = document.getElementById('upgrade-cta-btn');
   btn.disabled = true; btn.textContent = 'Redirecting to checkout…';
   await startTrial(_upgradePlan === 'annual');
-  btn.disabled = false; btn.textContent = 'Claim $0.99 first month →';
+  btn.disabled = false; btn.textContent = 'Start 7-day free trial →';
 }
 
 // Reset modal state when closed
 function _resetUpgradeModal() {
   const cta = document.getElementById('upgrade-cta-btn');
   const note = document.querySelector('#upgrade-modal-bg .modal-note');
-  if (cta)  { cta.style.display = ''; cta.disabled = false; cta.textContent = 'Claim $0.99 first month →'; }
+  if (cta)  { cta.style.display = ''; cta.disabled = false; cta.textContent = 'Start 7-day free trial →'; }
   if (note) note.style.display = '';
   const authDiv  = document.getElementById('upgrade-modal-auth');
   const unverifDiv = document.getElementById('upgrade-modal-unverified');
@@ -3714,8 +3714,8 @@ function setPricingPeriod(period){
   const btn=document.getElementById('pricing-pro-btn');
   if(amount)amount.textContent=annual?'59.99':'7.99';
   if(per)per.textContent=annual?'/year':'/month';
-  if(note)note.textContent=annual?'Equivalent to about $5/month. Save 37% versus monthly billing.':'New monthly users get the first month for $0.99, then Pro renews at $7.99/month unless canceled. Annual billing is available for $59.99/year.';
-  if(btn)btn.textContent=annual?'Start annual Pro \u2192':'Claim $0.99 first month \u2192';
+  if(note)note.textContent=annual?'Equivalent to about $5/month. Save 37% versus monthly billing. Discount codes can be entered in Checkout.':'Start with a 7-day free trial. Have a discount code? Enter it in Stripe Checkout for offers like a $0.99 paid month.';
+  if(btn)btn.textContent=annual?'Start annual Pro \u2192':'Start 7-day free trial \u2192';
 }
 
 async function initGlobe(){

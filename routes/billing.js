@@ -9,9 +9,7 @@ const { subscriptionStatusToPlan } = require("../lib/plan");
 const { validateCsrf } = require("../lib/csrf");
 const { track }        = require("../lib/analytics");
 const { STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET,
-        STRIPE_PRICE_MONTHLY, STRIPE_PRICE_ANNUAL,
-        STRIPE_FIRST_MONTH_COUPON, STRIPE_FIRST_MONTH_PROMOTION_CODE,
-        APP_URL }   = require("../lib/config");
+        STRIPE_PRICE_MONTHLY, STRIPE_PRICE_ANNUAL, APP_URL }   = require("../lib/config");
 
 const stripe = STRIPE_SECRET_KEY ? Stripe(STRIPE_SECRET_KEY) : null;
 const router = express.Router();
@@ -56,12 +54,6 @@ async function findUserIdForStripeEvent({ userId, customerId, subscriptionId, em
   return null;
 }
 
-function firstMonthDiscounts() {
-  if (STRIPE_FIRST_MONTH_COUPON) return [{ coupon: STRIPE_FIRST_MONTH_COUPON }];
-  if (STRIPE_FIRST_MONTH_PROMOTION_CODE) return [{ promotion_code: STRIPE_FIRST_MONTH_PROMOTION_CODE }];
-  return [];
-}
-
 // ============================================================
 //  POST /api/stripe/create-checkout
 // ============================================================
@@ -101,23 +93,19 @@ router.post("/stripe/create-checkout", validateCsrf, async (req, res) => {
 
     const priceId = annual ? STRIPE_PRICE_ANNUAL : STRIPE_PRICE_MONTHLY;
     if (!priceId) return res.status(503).json({ error: "Price not configured." });
-    const discounts = annual ? [] : firstMonthDiscounts();
-    if (!annual && !discounts.length) {
-      return res.status(503).json({ error: "$0.99 first-month offer is not configured yet." });
-    }
 
     const metadata = { userId: String(req.session.userId) };
     const params = {
       mode: "subscription",
       payment_method_types: ["card"],
       line_items: [{ price: priceId, quantity: 1 }],
-      subscription_data: { metadata },
+      subscription_data: { trial_period_days: 7, metadata },
       success_url: `${APP_URL}/?upgraded=1`,
       cancel_url:  `${APP_URL}/?checkout=cancelled`,
       client_reference_id: String(req.session.userId),
       metadata,
+      allow_promotion_codes: true,
     };
-    if (discounts.length) params.discounts = discounts;
     if (user.stripe_customer_id) {
       params.customer = user.stripe_customer_id;
     } else {
@@ -127,7 +115,7 @@ router.post("/stripe/create-checkout", validateCsrf, async (req, res) => {
     const checkoutSession = await stripe.checkout.sessions.create(params, {
       idempotencyKey: `checkout:${req.session.userId}:${annual ? "annual" : "monthly"}:${Math.floor(Date.now() / (5 * 60 * 1000))}`,
     });
-    track("checkout_started", { annual, plan: annual ? "annual" : "monthly", firstMonthOffer: !annual },
+    track("checkout_started", { annual, plan: annual ? "annual" : "monthly", trialDays: 7, promotionCodes: true },
           req.sessionID, req.session.userId).catch(() => {});
     res.json({ url: checkoutSession.url });
   } catch (err) {
