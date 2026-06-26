@@ -5877,17 +5877,30 @@ html[data-theme="dark"] #view-tool .indicator-control:hover *{
   text-shadow:none!important;
 }
 
-/* Final mode-specific toolbar fixes: visible dark ripple, light borders, safe hover contrast. */
+/* Final shared light/dark ripple and toolbar fixes. */
+:root,
+html[data-theme="dark"]{
+  --gold-ripple-bg:url("/gold-ripple-background.jpg?v=20260625-3");
+  --gold-ripple-overlay:none;
+  --gold-ripple-stack:var(--gold-ripple-bg);
+}
+html,
+body,
+body::before,
 html[data-theme="dark"],
 html[data-theme="dark"] body,
 html[data-theme="dark"] body::before{
   background-color:#E2BD6E!important;
-  background-image:var(--gold-ripple-bg)!important;
+  background-image:var(--gold-ripple-stack)!important;
   background-size:cover!important;
   background-position:center center!important;
   background-repeat:no-repeat!important;
   background-attachment:fixed!important;
 }
+body{
+  position:relative!important;
+}
+body::before,
 html[data-theme="dark"] body::before{
   content:""!important;
   position:fixed!important;
@@ -5896,6 +5909,19 @@ html[data-theme="dark"] body::before{
   opacity:1!important;
   pointer-events:none!important;
 }
+#view-home,
+#view-tool,
+.il-landing,
+.home-shell,
+.hs-main,
+.app-shell,
+.app-main,
+.app-content-scroll,
+#market-page,
+#market-page .hs-main,
+#view-tool .app-section,
+#view-tool .app-section.open,
+#view-tool .app-section .acc-body,
 html[data-theme="dark"] #view-home,
 html[data-theme="dark"] #view-tool,
 html[data-theme="dark"] .il-landing,
@@ -5912,6 +5938,17 @@ html[data-theme="dark"] #view-tool .app-section .acc-body{
   background:transparent!important;
   background-color:transparent!important;
   background-image:none!important;
+}
+@media(max-width:640px){
+  html,
+  body,
+  body::before,
+  html[data-theme="dark"],
+  html[data-theme="dark"] body,
+  html[data-theme="dark"] body::before{
+    background-attachment:scroll!important;
+    background-position:center top!important;
+  }
 }
 #main-nav,
 #view-tool .app-sidebar,

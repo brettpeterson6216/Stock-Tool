@@ -217,7 +217,7 @@ test("premium landing visual system matches the generated product preview direct
 });
 
 test("premium visual system is applied across app and static pages", () => {
-  assert.match(html, /legacy-app\.css\?v=20260625-25/);
+  assert.match(html, /legacy-app\.css\?v=20260625-26/);
   assert.match(html, /product-system\.css\?v=20260625-1/);
   assert.match(signupHtml, /static-polish\.css\?v=20260625-2/);
   assert.match(html, /<a class="btn-nav" id="nav-signup" href="\/signup">Claim \$0\.99<\/a>/);
@@ -297,8 +297,10 @@ test("tool containers use premium rounded surfaces instead of sharp rectangles",
   assert.match(legacyCss, /#main-nav \.nav-logo img,[\s\S]*width:34px!important;[\s\S]*box-shadow:0 0 0 3px rgba\(217,179,94,\.10\)/);
   assert.match(legacyCss, /#main-nav \.nav-tab\.active-tab,[\s\S]*color:#17120B!important/);
   assert.match(legacyCss, /#view-tool \.app-chart-toolbar \.act-btn\.on,[\s\S]*#view-tool \.app-tf-strip \.tf-pill\.on,[\s\S]*color:#17120B!important/);
-  assert.match(legacyCss, /Final mode-specific toolbar fixes: visible dark ripple, light borders, safe hover contrast/);
-  assert.match(legacyCss, /html\[data-theme="dark"\],[\s\S]*html\[data-theme="dark"\] body::before\{[\s\S]*background-image:var\(--gold-ripple-bg\)!important/);
+  assert.match(legacyCss, /Final shared light\/dark ripple and toolbar fixes/);
+  assert.match(legacyCss, /:root,[\s\S]*html\[data-theme="dark"\]\{[\s\S]*--gold-ripple-stack:var\(--gold-ripple-bg\)/);
+  assert.match(legacyCss, /html,[\s\S]*body,[\s\S]*body::before,[\s\S]*html\[data-theme="dark"\],[\s\S]*html\[data-theme="dark"\] body::before\{[\s\S]*background-image:var\(--gold-ripple-stack\)!important/);
+  assert.match(legacyCss, /#view-home,[\s\S]*#view-tool,[\s\S]*\.il-landing,[\s\S]*html\[data-theme="dark"\] #view-home,[\s\S]*html\[data-theme="dark"\] #view-tool,[\s\S]*background:transparent!important/);
   assert.match(legacyCss, /#main-nav,[\s\S]*#view-tool \.app-tf-strip,[\s\S]*border-color:rgba\(255,244,214,\.36\)!important/);
   assert.match(legacyCss, /#view-tool \.sb-item:hover,[\s\S]*#view-tool \.indicator-control:hover,[\s\S]*background:#202428!important/);
   assert.match(legacyCss, /#view-tool \.sb-item:hover \.sb-item-label,[\s\S]*#view-tool \.indicator-control:hover \*\{[\s\S]*color:#F8EED6!important/);
