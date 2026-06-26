@@ -5699,3 +5699,180 @@ html[data-theme="dark"] #view-tool .edu-lesson-panel{
   border-color:rgba(217,179,94,.18)!important;
   box-shadow:0 18px 48px rgba(0,0,0,.36),inset 0 1px 0 rgba(255,255,255,.045),inset 0 -1px 0 rgba(0,0,0,.34)!important;
 }
+
+/* Toolbar legibility and stronger brand recognition. */
+#main-nav .nav-logo,
+html[data-theme="dark"] #main-nav .nav-logo{
+  min-height:44px!important;
+  padding:0 1rem 0 0!important;
+  gap:10px!important;
+  color:#F8EED6!important;
+  text-shadow:0 1px 0 rgba(0,0,0,.72),0 0 18px rgba(217,179,94,.18)!important;
+}
+#main-nav .nav-logo img,
+html[data-theme="dark"] #main-nav .nav-logo img{
+  width:34px!important;
+  height:34px!important;
+  border:1px solid rgba(217,179,94,.58)!important;
+  box-shadow:0 0 0 3px rgba(217,179,94,.10),0 8px 18px rgba(0,0,0,.42),0 0 18px rgba(217,179,94,.18)!important;
+  background:#090A0B!important;
+}
+#main-nav .nav-logo span,
+html[data-theme="dark"] #main-nav .nav-logo span{
+  color:#F8EED6!important;
+  font-size:1.24rem!important;
+  font-weight:800!important;
+  letter-spacing:-.02em!important;
+}
+#main-nav .nav-logo em,
+html[data-theme="dark"] #main-nav .nav-logo em{
+  color:var(--tool-sample-gold-2)!important;
+  text-shadow:0 0 16px rgba(217,179,94,.36)!important;
+}
+#main-nav .nav-tab,
+html[data-theme="dark"] #main-nav .nav-tab{
+  color:rgba(248,238,214,.78)!important;
+  border:1px solid transparent!important;
+  border-radius:10px!important;
+  margin:0 2px!important;
+  padding:.36rem .72rem!important;
+  text-shadow:0 1px 0 rgba(0,0,0,.45)!important;
+}
+#main-nav .nav-tab:hover,
+html[data-theme="dark"] #main-nav .nav-tab:hover{
+  background:#171A1D!important;
+  border-color:rgba(217,179,94,.28)!important;
+  color:#FFFFFF!important;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.03)!important;
+}
+#main-nav .nav-tab.active-tab,
+html[data-theme="dark"] #main-nav .nav-tab.active-tab{
+  background:linear-gradient(180deg,var(--tool-sample-gold-2),var(--tool-sample-gold))!important;
+  border-color:rgba(217,179,94,.72)!important;
+  color:#17120B!important;
+  text-shadow:none!important;
+  box-shadow:0 10px 22px rgba(217,179,94,.22),inset 0 1px 0 rgba(255,255,255,.30)!important;
+}
+#main-nav .nav-tab.active-tab:hover,
+html[data-theme="dark"] #main-nav .nav-tab.active-tab:hover{
+  color:#17120B!important;
+  background:linear-gradient(180deg,#FFE695,var(--tool-sample-gold))!important;
+}
+#view-tool .sb-item,
+#view-tool .sb-home-btn,
+#view-tool .mobile-sec-tabs button,
+html[data-theme="dark"] #view-tool .sb-item,
+html[data-theme="dark"] #view-tool .sb-home-btn,
+html[data-theme="dark"] #view-tool .mobile-sec-tabs button{
+  color:#EDE0C2!important;
+}
+#view-tool .sb-item .sb-item-label,
+#view-tool .sb-item .sb-item-icon,
+#view-tool .sb-home-btn span,
+#view-tool .sb-home-btn i,
+#view-tool .mobile-sec-tabs button,
+html[data-theme="dark"] #view-tool .sb-item .sb-item-label,
+html[data-theme="dark"] #view-tool .sb-item .sb-item-icon,
+html[data-theme="dark"] #view-tool .sb-home-btn span,
+html[data-theme="dark"] #view-tool .sb-home-btn i,
+html[data-theme="dark"] #view-tool .mobile-sec-tabs button{
+  color:#EDE0C2!important;
+  text-shadow:0 1px 0 rgba(0,0,0,.45)!important;
+}
+#view-tool .sb-item:hover,
+#view-tool .sb-item.active,
+#view-tool .sb-home-btn:hover,
+#view-tool .mobile-sec-tabs button:hover,
+#view-tool .mobile-sec-tabs button.active,
+html[data-theme="dark"] #view-tool .sb-item:hover,
+html[data-theme="dark"] #view-tool .sb-item.active,
+html[data-theme="dark"] #view-tool .sb-home-btn:hover,
+html[data-theme="dark"] #view-tool .mobile-sec-tabs button:hover,
+html[data-theme="dark"] #view-tool .mobile-sec-tabs button.active{
+  background:linear-gradient(180deg,var(--tool-sample-gold-2),var(--tool-sample-gold))!important;
+  border-color:rgba(217,179,94,.72)!important;
+  color:#17120B!important;
+  text-shadow:none!important;
+}
+#view-tool .sb-item:hover .sb-item-label,
+#view-tool .sb-item:hover .sb-item-icon,
+#view-tool .sb-item.active .sb-item-label,
+#view-tool .sb-item.active .sb-item-icon,
+#view-tool .sb-home-btn:hover span,
+#view-tool .sb-home-btn:hover i,
+#view-tool .mobile-sec-tabs button:hover,
+#view-tool .mobile-sec-tabs button.active,
+html[data-theme="dark"] #view-tool .sb-item:hover .sb-item-label,
+html[data-theme="dark"] #view-tool .sb-item:hover .sb-item-icon,
+html[data-theme="dark"] #view-tool .sb-item.active .sb-item-label,
+html[data-theme="dark"] #view-tool .sb-item.active .sb-item-icon,
+html[data-theme="dark"] #view-tool .sb-home-btn:hover span,
+html[data-theme="dark"] #view-tool .sb-home-btn:hover i,
+html[data-theme="dark"] #view-tool .mobile-sec-tabs button:hover,
+html[data-theme="dark"] #view-tool .mobile-sec-tabs button.active{
+  color:#17120B!important;
+  text-shadow:none!important;
+}
+#view-tool .app-chart-toolbar .act-btn,
+#view-tool .app-tf-strip .tf-pill,
+#view-tool .app-tf-strip .tf-tog,
+#view-tool .indicator-control,
+html[data-theme="dark"] #view-tool .app-chart-toolbar .act-btn,
+html[data-theme="dark"] #view-tool .app-tf-strip .tf-pill,
+html[data-theme="dark"] #view-tool .app-tf-strip .tf-tog,
+html[data-theme="dark"] #view-tool .indicator-control{
+  color:#EDE0C2!important;
+  font-weight:700!important;
+  text-shadow:0 1px 0 rgba(0,0,0,.45)!important;
+}
+#view-tool .app-chart-toolbar .act-btn.on,
+#view-tool .app-chart-toolbar .act-btn.active,
+#view-tool .app-chart-toolbar .act-btn:hover,
+#view-tool .app-tf-strip .tf-pill.on,
+#view-tool .app-tf-strip .tf-pill.active,
+#view-tool .app-tf-strip .tf-pill:hover,
+#view-tool .app-tf-strip .tf-tog.on,
+#view-tool .app-tf-strip .tf-tog.active,
+#view-tool .app-tf-strip .tf-tog:hover,
+#view-tool .indicator-control.on,
+#view-tool .indicator-control.active,
+#view-tool .indicator-control:hover,
+html[data-theme="dark"] #view-tool .app-chart-toolbar .act-btn.on,
+html[data-theme="dark"] #view-tool .app-chart-toolbar .act-btn.active,
+html[data-theme="dark"] #view-tool .app-chart-toolbar .act-btn:hover,
+html[data-theme="dark"] #view-tool .app-tf-strip .tf-pill.on,
+html[data-theme="dark"] #view-tool .app-tf-strip .tf-pill.active,
+html[data-theme="dark"] #view-tool .app-tf-strip .tf-pill:hover,
+html[data-theme="dark"] #view-tool .app-tf-strip .tf-tog.on,
+html[data-theme="dark"] #view-tool .app-tf-strip .tf-tog.active,
+html[data-theme="dark"] #view-tool .app-tf-strip .tf-tog:hover,
+html[data-theme="dark"] #view-tool .indicator-control.on,
+html[data-theme="dark"] #view-tool .indicator-control.active,
+html[data-theme="dark"] #view-tool .indicator-control:hover{
+  background:linear-gradient(180deg,var(--tool-sample-gold-2),var(--tool-sample-gold))!important;
+  border-color:rgba(217,179,94,.78)!important;
+  color:#17120B!important;
+  text-shadow:none!important;
+  box-shadow:0 10px 24px rgba(217,179,94,.22),inset 0 1px 0 rgba(255,255,255,.28)!important;
+}
+#view-tool .app-chart-toolbar .act-btn.on *,
+#view-tool .app-chart-toolbar .act-btn.active *,
+#view-tool .app-chart-toolbar .act-btn:hover *,
+#view-tool .app-tf-strip .tf-pill.on *,
+#view-tool .app-tf-strip .tf-pill.active *,
+#view-tool .app-tf-strip .tf-pill:hover *,
+#view-tool .indicator-control.on *,
+#view-tool .indicator-control.active *,
+#view-tool .indicator-control:hover *,
+html[data-theme="dark"] #view-tool .app-chart-toolbar .act-btn.on *,
+html[data-theme="dark"] #view-tool .app-chart-toolbar .act-btn.active *,
+html[data-theme="dark"] #view-tool .app-chart-toolbar .act-btn:hover *,
+html[data-theme="dark"] #view-tool .app-tf-strip .tf-pill.on *,
+html[data-theme="dark"] #view-tool .app-tf-strip .tf-pill.active *,
+html[data-theme="dark"] #view-tool .app-tf-strip .tf-pill:hover *,
+html[data-theme="dark"] #view-tool .indicator-control.on *,
+html[data-theme="dark"] #view-tool .indicator-control.active *,
+html[data-theme="dark"] #view-tool .indicator-control:hover *{
+  color:#17120B!important;
+  text-shadow:none!important;
+}

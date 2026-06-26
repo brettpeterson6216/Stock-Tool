@@ -217,7 +217,7 @@ test("premium landing visual system matches the generated product preview direct
 });
 
 test("premium visual system is applied across app and static pages", () => {
-  assert.match(html, /legacy-app\.css\?v=20260625-23/);
+  assert.match(html, /legacy-app\.css\?v=20260625-24/);
   assert.match(html, /product-system\.css\?v=20260625-1/);
   assert.match(signupHtml, /static-polish\.css\?v=20260625-2/);
   assert.match(html, /<a class="btn-nav" id="nav-signup" href="\/signup">Claim \$0\.99<\/a>/);
@@ -293,6 +293,12 @@ test("tool containers use premium rounded surfaces instead of sharp rectangles",
   assert.match(legacyCss, /#view-tool \.chart-wrap::before\{[\s\S]*background-size:100% 36px,72px 100%/);
   assert.match(legacyCss, /#view-tool \.chart-wrap canvas\{[\s\S]*filter:drop-shadow\(0 10px 18px rgba\(22,199,132,\.12\)\)/);
   assert.match(legacyCss, /#view-tool \.app-chart-toolbar \.act-btn,[\s\S]*#view-tool \.indicator-control\{[\s\S]*background:#161A1D!important/);
+  assert.match(legacyCss, /Toolbar legibility and stronger brand recognition/);
+  assert.match(legacyCss, /#main-nav \.nav-logo img,[\s\S]*width:34px!important;[\s\S]*box-shadow:0 0 0 3px rgba\(217,179,94,\.10\)/);
+  assert.match(legacyCss, /#main-nav \.nav-tab\.active-tab,[\s\S]*color:#17120B!important/);
+  assert.match(legacyCss, /#view-tool \.sb-item:hover \.sb-item-label,[\s\S]*#view-tool \.sb-item\.active \.sb-item-icon,[\s\S]*color:#17120B!important/);
+  assert.match(legacyCss, /#view-tool \.app-chart-toolbar \.act-btn\.on,[\s\S]*#view-tool \.app-tf-strip \.tf-pill\.on,[\s\S]*color:#17120B!important/);
+  assert.match(legacyCss, /#view-tool \.app-chart-toolbar \.act-btn\.on \*,[\s\S]*#view-tool \.indicator-control:hover \*\{[\s\S]*color:#17120B!important/);
 });
 
 test("tool guidance is collapsed so tutorials do not block tool use", () => {
