@@ -26,6 +26,25 @@ After a push, verify the exact live commit:
 npm run verify:deploy -- 7b1bd95
 ```
 
+## Stripe first-month offer
+
+Monthly Checkout is configured to require a one-time Stripe discount before it can launch the advertised `$0.99` first-month offer.
+
+In Stripe, create either:
+
+- A coupon with `duration=once` that reduces the first monthly invoice to `$0.99`.
+- A promotion code backed by that same one-time coupon.
+
+For example, if `STRIPE_PRICE_MONTHLY` is `$7.99/month`, create an `amount_off=$7.00` coupon. Then set one of these environment variables in Render:
+
+```bash
+STRIPE_FIRST_MONTH_COUPON=coupon_...
+# or
+STRIPE_FIRST_MONTH_PROMOTION_CODE=promo_...
+```
+
+Keep `STRIPE_PRICE_MONTHLY`, `STRIPE_PRICE_ANNUAL`, `STRIPE_SECRET_KEY`, and `STRIPE_WEBHOOK_SECRET` set as before.
+
 ## Frontend structure
 
 The legacy application remains in `index.html`. New cross-cutting product behavior lives in:
