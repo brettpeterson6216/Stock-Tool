@@ -308,6 +308,9 @@ test("tool containers use premium rounded surfaces instead of sharp rectangles",
   assert.match(legacyCss, /Light mode top toolbar should sit on the gold system/);
   assert.match(legacyCss, /:root:not\(\[data-theme="dark"\]\) #main-nav,[\s\S]*background:linear-gradient\(180deg,rgba\(255,250,239,\.94\),rgba\(245,225,181,\.88\)\)!important/);
   assert.match(legacyCss, /:root:not\(\[data-theme="dark"\]\) #main-nav \.nav-tab\{[\s\S]*color:rgba\(23,18,11,\.72\)!important/);
+  assert.match(legacyCss, /Light mode tool chrome: chart and side toolbars should be cream\/gold, not charcoal/);
+  assert.match(legacyCss, /:root:not\(\[data-theme="dark"\]\) #view-tool \.app-sidebar,[\s\S]*#view-tool \.app-chart-toolbar,[\s\S]*background:linear-gradient\(180deg,rgba\(255,250,239,\.92\),rgba\(244,224,181,\.84\)\)!important/);
+  assert.match(legacyCss, /:root:not\(\[data-theme="dark"\]\) #view-tool \.sb-item,[\s\S]*#view-tool \.app-chart-toolbar \.act-btn,[\s\S]*color:#2B2112!important/);
 });
 
 test("tool guidance is collapsed so tutorials do not block tool use", () => {

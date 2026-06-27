@@ -6106,3 +6106,100 @@ html[data-theme="dark"] #view-tool .indicator-control.active *{
   color:#17120B!important;
   text-shadow:none!important;
 }
+
+/* Light mode tool chrome: chart and side toolbars should be cream/gold, not charcoal. */
+:root:not([data-theme="dark"]) #view-tool .app-sidebar,
+:root:not([data-theme="dark"]) #view-tool .app-section-hdr,
+:root:not([data-theme="dark"]) #view-tool .mobile-sec-tabs,
+:root:not([data-theme="dark"]) #view-tool .app-chart-toolbar,
+:root:not([data-theme="dark"]) #view-tool .app-tf-strip,
+:root:not([data-theme="dark"]) #view-tool .tool-tabs,
+:root:not([data-theme="dark"]) #view-tool .tool-header{
+  background:linear-gradient(180deg,rgba(255,250,239,.92),rgba(244,224,181,.84))!important;
+  background-color:rgba(255,250,239,.88)!important;
+  border-color:rgba(116,82,29,.20)!important;
+  color:#17120B!important;
+  box-shadow:0 10px 28px rgba(99,67,14,.10),inset 0 1px 0 rgba(255,255,255,.58)!important;
+  backdrop-filter:blur(14px) saturate(1.06)!important;
+  -webkit-backdrop-filter:blur(14px) saturate(1.06)!important;
+}
+:root:not([data-theme="dark"]) #view-tool .sb-group-label{
+  color:rgba(83,58,19,.72)!important;
+}
+:root:not([data-theme="dark"]) #view-tool .sb-item,
+:root:not([data-theme="dark"]) #view-tool .sb-home-btn,
+:root:not([data-theme="dark"]) #view-tool .mst-btn,
+:root:not([data-theme="dark"]) #view-tool .mobile-sec-tabs button,
+:root:not([data-theme="dark"]) #view-tool .app-chart-toolbar .act-btn,
+:root:not([data-theme="dark"]) #view-tool .app-tf-strip .tf-pill,
+:root:not([data-theme="dark"]) #view-tool .app-tf-strip .tf-tog,
+:root:not([data-theme="dark"]) #view-tool .indicator-control{
+  background:rgba(255,250,239,.56)!important;
+  border-color:rgba(116,82,29,.22)!important;
+  color:#2B2112!important;
+  text-shadow:none!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.42)!important;
+}
+:root:not([data-theme="dark"]) #view-tool .sb-item .sb-item-label,
+:root:not([data-theme="dark"]) #view-tool .sb-item .sb-item-icon,
+:root:not([data-theme="dark"]) #view-tool .sb-home-btn span,
+:root:not([data-theme="dark"]) #view-tool .sb-home-btn i,
+:root:not([data-theme="dark"]) #view-tool .app-chart-toolbar .act-btn *,
+:root:not([data-theme="dark"]) #view-tool .app-tf-strip .tf-pill *,
+:root:not([data-theme="dark"]) #view-tool .app-tf-strip .tf-tog *,
+:root:not([data-theme="dark"]) #view-tool .indicator-control *{
+  color:#2B2112!important;
+  text-shadow:none!important;
+}
+:root:not([data-theme="dark"]) #view-tool .sb-item:hover,
+:root:not([data-theme="dark"]) #view-tool .sb-home-btn:hover,
+:root:not([data-theme="dark"]) #view-tool .mst-btn:hover,
+:root:not([data-theme="dark"]) #view-tool .mobile-sec-tabs button:hover,
+:root:not([data-theme="dark"]) #view-tool .app-chart-toolbar .act-btn:hover,
+:root:not([data-theme="dark"]) #view-tool .app-tf-strip .tf-pill:hover,
+:root:not([data-theme="dark"]) #view-tool .app-tf-strip .tf-tog:hover,
+:root:not([data-theme="dark"]) #view-tool .indicator-control:hover{
+  background:rgba(217,179,94,.20)!important;
+  border-color:rgba(154,109,31,.36)!important;
+  color:#17120B!important;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.38),0 8px 18px rgba(99,67,14,.10)!important;
+}
+:root:not([data-theme="dark"]) #view-tool .sb-item:hover .sb-item-label,
+:root:not([data-theme="dark"]) #view-tool .sb-item:hover .sb-item-icon,
+:root:not([data-theme="dark"]) #view-tool .sb-home-btn:hover span,
+:root:not([data-theme="dark"]) #view-tool .sb-home-btn:hover i,
+:root:not([data-theme="dark"]) #view-tool .app-chart-toolbar .act-btn:hover *,
+:root:not([data-theme="dark"]) #view-tool .app-tf-strip .tf-pill:hover *,
+:root:not([data-theme="dark"]) #view-tool .app-tf-strip .tf-tog:hover *,
+:root:not([data-theme="dark"]) #view-tool .indicator-control:hover *{
+  color:#17120B!important;
+}
+:root:not([data-theme="dark"]) #view-tool .sb-item.active,
+:root:not([data-theme="dark"]) #view-tool .mobile-sec-tabs button.active,
+:root:not([data-theme="dark"]) #view-tool .app-chart-toolbar .act-btn.on,
+:root:not([data-theme="dark"]) #view-tool .app-chart-toolbar .act-btn.active,
+:root:not([data-theme="dark"]) #view-tool .app-tf-strip .tf-pill.on,
+:root:not([data-theme="dark"]) #view-tool .app-tf-strip .tf-pill.active,
+:root:not([data-theme="dark"]) #view-tool .app-tf-strip .tf-tog.on,
+:root:not([data-theme="dark"]) #view-tool .app-tf-strip .tf-tog.active,
+:root:not([data-theme="dark"]) #view-tool .indicator-control.on,
+:root:not([data-theme="dark"]) #view-tool .indicator-control.active{
+  background:linear-gradient(180deg,var(--tool-sample-gold-2),var(--tool-sample-gold))!important;
+  border-color:rgba(154,109,31,.46)!important;
+  color:#17120B!important;
+  box-shadow:0 8px 18px rgba(217,179,94,.18),inset 0 1px 0 rgba(255,255,255,.36)!important;
+}
+:root:not([data-theme="dark"]) #view-tool .sb-item.active .sb-item-label,
+:root:not([data-theme="dark"]) #view-tool .sb-item.active .sb-item-icon,
+:root:not([data-theme="dark"]) #view-tool .mobile-sec-tabs button.active,
+:root:not([data-theme="dark"]) #view-tool .app-chart-toolbar .act-btn.on *,
+:root:not([data-theme="dark"]) #view-tool .app-chart-toolbar .act-btn.active *,
+:root:not([data-theme="dark"]) #view-tool .app-tf-strip .tf-pill.on *,
+:root:not([data-theme="dark"]) #view-tool .app-tf-strip .tf-pill.active *,
+:root:not([data-theme="dark"]) #view-tool .app-tf-strip .tf-tog.on *,
+:root:not([data-theme="dark"]) #view-tool .app-tf-strip .tf-tog.active *,
+:root:not([data-theme="dark"]) #view-tool .indicator-control.on *,
+:root:not([data-theme="dark"]) #view-tool .indicator-control.active *{
+  color:#17120B!important;
+  text-shadow:none!important;
+}
