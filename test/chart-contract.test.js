@@ -197,6 +197,9 @@ test("homepage defaults to a beginner-friendly landing page before market tools"
   assert.match(legacyCss, /white-space:nowrap/);
   assert.match(legacyCss, /object-fit:contain!important/);
   assert.match(legacyCss, /max-height:min\(610px,calc\(100vh - 290px\)\)/);
+  assert.match(legacyCss, /Homepage product preview cleanup: no awkward crop, readable sample-data label/);
+  assert.match(legacyCss, /\.il-landing-hero \.il-landing-preview\.image-preview img\{[\s\S]*aspect-ratio:1463\/962!important;[\s\S]*object-position:center center!important/);
+  assert.match(legacyCss, /\.il-landing-hero \.il-preview-caption\{[\s\S]*left:50%!important;[\s\S]*background:rgba\(10,11,12,\.88\)!important/);
   assert.doesNotMatch(legacyCss, /height:min\(72vh,760px\)!important/);
   assert.match(legacyCss, /Landing readability \+ premium market finish/);
   assert.match(legacyCss, /html\[data-theme="dark"\] \.il-landing\{/);

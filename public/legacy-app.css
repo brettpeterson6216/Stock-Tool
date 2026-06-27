@@ -6203,3 +6203,108 @@ html[data-theme="dark"] #view-tool .indicator-control.active *{
   color:#17120B!important;
   text-shadow:none!important;
 }
+
+/* Homepage product preview cleanup: no awkward crop, readable sample-data label. */
+.il-landing-hero{
+  grid-template-columns:1fr!important;
+  justify-items:center!important;
+  align-items:start!important;
+  gap:22px!important;
+  min-height:auto!important;
+  padding:clamp(40px,5vw,72px) clamp(18px,5vw,72px) clamp(38px,5vw,64px)!important;
+}
+.il-landing-hero .il-landing-copy{
+  order:1!important;
+  width:min(100%,1180px)!important;
+  max-width:1180px!important;
+  text-align:center!important;
+}
+.il-landing-hero .il-landing-preview{
+  order:2!important;
+  width:min(100%,1120px)!important;
+  max-width:1120px!important;
+  margin:0 auto!important;
+  transform:none!important;
+  border-radius:24px!important;
+  overflow:visible!important;
+}
+.il-landing-hero .il-landing-preview.image-preview,
+html[data-theme="dark"] .il-landing-hero .il-landing-preview.image-preview{
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+.il-landing-hero .il-landing-preview.image-preview img{
+  display:block!important;
+  width:100%!important;
+  max-width:100%!important;
+  height:auto!important;
+  aspect-ratio:1463/962!important;
+  object-fit:contain!important;
+  object-position:center center!important;
+  border-radius:24px!important;
+  filter:drop-shadow(0 28px 44px rgba(70,46,8,.28))!important;
+}
+.il-landing-hero .il-preview-caption{
+  left:50%!important;
+  right:auto!important;
+  bottom:clamp(16px,2vw,26px)!important;
+  transform:translateX(-50%)!important;
+  display:inline-flex!important;
+  padding:10px 18px!important;
+  gap:10px!important;
+  border-radius:999px!important;
+  border:1px solid rgba(255,244,214,.24)!important;
+  background:rgba(10,11,12,.88)!important;
+  box-shadow:0 16px 34px rgba(0,0,0,.30),inset 0 1px 0 rgba(255,255,255,.07)!important;
+  backdrop-filter:blur(12px) saturate(1.08)!important;
+  -webkit-backdrop-filter:blur(12px) saturate(1.08)!important;
+  white-space:nowrap!important;
+}
+.il-landing-hero .il-preview-caption span,
+.il-landing-hero .il-preview-caption strong{
+  color:#FFF4D6!important;
+  font:900 clamp(10px,1vw,13px)/1 var(--mono)!important;
+  letter-spacing:.14em!important;
+  text-transform:uppercase!important;
+  text-shadow:0 1px 0 rgba(0,0,0,.7)!important;
+}
+.il-landing-hero .il-preview-caption strong{
+  color:#D9B35E!important;
+}
+.il-landing-hero .il-landing-kicker,
+.il-landing-hero .il-landing-actions,
+.il-landing-hero .il-landing-search,
+.il-landing-hero .il-landing-proof,
+.il-landing-hero .il-offer-card,
+.il-landing-hero .il-landing-copy p{
+  display:none!important;
+}
+.il-landing-hero h1{
+  max-width:1280px!important;
+  margin:0 auto 6px!important;
+  font-size:clamp(38px,4.8vw,68px)!important;
+  line-height:1.02!important;
+}
+@media(max-width:760px){
+  .il-landing-hero{
+    padding:30px 14px 28px!important;
+    gap:16px!important;
+  }
+  .il-landing-hero h1{
+    font-size:clamp(30px,9vw,46px)!important;
+  }
+  .il-landing-hero .il-landing-preview{
+    width:100%!important;
+  }
+  .il-landing-hero .il-preview-caption{
+    bottom:10px!important;
+    padding:8px 12px!important;
+    max-width:calc(100% - 24px)!important;
+  }
+  .il-landing-hero .il-preview-caption span,
+  .il-landing-hero .il-preview-caption strong{
+    font-size:9px!important;
+    letter-spacing:.08em!important;
+  }
+}
