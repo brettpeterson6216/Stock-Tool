@@ -96,7 +96,7 @@
 <script defer src="/vendor/hammer.min.js?v=2.0.8"></script>
 <script defer src="/vendor/chartjs-plugin-zoom.min.js?v=2.2.0"></script>
 <script defer src="/model-math.js?v=20260612-1"></script>
-<link href="/legacy-app.css?v=20260625-27" rel="stylesheet">
+<link href="/legacy-app.css?v=20260627-1" rel="stylesheet">
 </head>
 <body>
 <div id="auth-veil"></div>
@@ -131,7 +131,7 @@
     </button>
     <span class="nav-live" title="ImpliedLens is live">Live</span>
     <a class="btn-nav-outline" id="nav-login" href="/login">Log in</a>
-    <a class="btn-nav" id="nav-signup" href="/signup">Claim $0.99</a>
+    <a class="btn-nav" id="nav-signup" href="/signup">Start trial</a>
     <a class="btn-nav" id="nav-upgrade" href="/signup" style="display:none; background:var(--gold-d); font-size:.78rem; padding:.35rem .9rem;">Upgrade to Pro</a>
     <!-- Account dropdown (shown when logged in) -->
     <div class="nav-acct-wrap" id="nav-acct-wrap" style="display:none;">
@@ -503,16 +503,15 @@
 <section class="il-landing" id="landing-page" aria-label="Implied Lens landing page">
   <div class="il-landing-hero">
     <div class="il-landing-preview image-preview" aria-label="Sample Implied Lens stock research workspace">
-      <img class="il-theme-img il-theme-img-light" src="/landing-product-preview-dark.png" alt="Sample Implied Lens stock research workspace showing chart, valuation, thesis, and source panels" loading="eager" decoding="async">
-      <img class="il-theme-img il-theme-img-dark" src="/landing-product-preview-dark.png" alt="" aria-hidden="true" loading="eager" decoding="async">
+      <img class="il-theme-img il-product-preview-img" src="/landing-product-preview-dark.png" alt="Sample Implied Lens stock research workspace showing chart, valuation, thesis, and source panels" loading="eager" decoding="async">
       <div class="il-preview-caption"><span>Sample workspace</span><strong>Not live data</strong></div>
     </div>
     <div class="il-landing-copy">
-      <span class="il-landing-kicker">New user offer: first month $0.99</span>
+      <span class="il-landing-kicker">Start with a 7-day free trial</span>
       <h1>Find better stock ideas with a process you can follow.</h1>
       <p>Implied Lens turns any ticker into a guided workspace for charts, valuation, sources, thesis notes, and review dates. Built for self-directed investors who want sharper decisions without starting from a blank screen.</p>
       <div class="il-landing-actions">
-        <a class="il-landing-primary" href="/signup">Get first month for $0.99</a>
+        <a class="il-landing-primary" href="/signup">Start 7-day free trial</a>
         <button type="button" class="il-landing-secondary" onclick="heroLoadTicker('AAPL')"><i class="ti ti-player-play"></i>Try an example</button>
       </div>
       <div class="il-landing-search" role="search">
@@ -526,8 +525,8 @@
         <span><i class="ti ti-notes"></i>Saved thesis</span>
       </div>
       <div class="il-offer-card" aria-label="Introductory offer">
-        <strong>$0.99 first month</strong>
-        <span>For new users. Then Pro renews at the standard monthly price unless canceled.</span>
+        <strong>Discount codes accepted</strong>
+        <span>Apply a code in Stripe Checkout for limited offers like a $0.99 paid month.</span>
       </div>
     </div>
   </div>
@@ -549,11 +548,11 @@
     <button type="button" onclick="showMarketPage()"><i class="ti ti-chart-area"></i>Open market dashboard</button>
   </div>
   <div class="il-landing-pricing" id="landing-pricing">
-    <span class="il-landing-kicker">Intro offer</span>
-    <h2>First month of Pro for $0.99.</h2>
-    <p>New users can start with the full Pro workflow for less than a dollar. Pro unlocks unlimited analyses, valuation tools, comparison, screener, earnings research, and PDF export.</p>
+    <span class="il-landing-kicker">Try the full workflow</span>
+    <h2>Start with a 7-day Pro trial.</h2>
+    <p>Use the full Pro workflow before you commit. Discount codes can be entered in Stripe Checkout for limited offers like a $0.99 paid month.</p>
     <div class="il-landing-actions centered">
-      <a class="il-landing-primary" href="/signup">Claim $0.99 first month</a>
+      <a class="il-landing-primary" href="/signup">Start 7-day free trial</a>
       <a class="il-landing-secondary" href="/signup">Create free account</a>
     </div>
   </div>

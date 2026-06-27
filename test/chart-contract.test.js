@@ -170,14 +170,14 @@ test("homepage defaults to a beginner-friendly landing page before market tools"
   assert.match(html, /id="landing-page"/);
   assert.match(html, /<div class="home-shell" id="market-page" style="display:none;">/);
   assert.match(html, /Find better stock ideas with a process you can follow/);
-  assert.match(html, /New user offer: first month \$0\.99/);
-  assert.match(html, /Get first month for \$0\.99/);
-  assert.match(html, /class="il-theme-img il-theme-img-light" src="\/landing-product-preview-dark\.png"/);
-  assert.match(html, /class="il-theme-img il-theme-img-dark" src="\/landing-product-preview-dark\.png"/);
+  assert.match(html, /Start with a 7-day free trial/);
+  assert.match(html, /Start 7-day free trial/);
+  assert.match(html, /class="il-theme-img il-product-preview-img" src="\/landing-product-preview-dark\.png"/);
+  assert.doesNotMatch(html, /class="il-theme-img il-theme-img-dark" src="\/landing-product-preview-dark\.png"/);
   assert.match(html, /class="il-theme-img il-theme-img-light" src="\/landing-workflow-strip-dark\.png"/);
   assert.match(html, /class="il-theme-img il-theme-img-dark" src="\/landing-workflow-strip-dark\.png"/);
   assert.match(html, /Sample workspace/);
-  assert.match(html, /\$0\.99 first month/);
+  assert.match(html, /Discount codes accepted/);
   assert.doesNotMatch(html, /id="landingChartFill"/);
   assert.match(html, /function landingSearch\(\)/);
   assert.match(html, /id="market-page" style="display:none;"/);
@@ -200,6 +200,9 @@ test("homepage defaults to a beginner-friendly landing page before market tools"
   assert.match(legacyCss, /Homepage product preview cleanup: no awkward crop, readable sample-data label/);
   assert.match(legacyCss, /\.il-landing-hero \.il-landing-preview\.image-preview img\{[\s\S]*aspect-ratio:1463\/962!important;[\s\S]*object-position:center center!important/);
   assert.match(legacyCss, /\.il-landing-hero \.il-preview-caption\{[\s\S]*left:50%!important;[\s\S]*background:rgba\(10,11,12,\.88\)!important/);
+  assert.match(legacyCss, /Homepage single-preview polish and shared product-surface finish/);
+  assert.match(legacyCss, /\.il-landing-hero \.il-landing-preview\.image-preview img\.il-product-preview-img\{[\s\S]*clip-path:inset\(7px 9px 18px 9px round 28px\)!important/);
+  assert.match(legacyCss, /\.il-landing-hero \.il-landing-actions\{[\s\S]*display:flex!important/);
   assert.doesNotMatch(legacyCss, /height:min\(72vh,760px\)!important/);
   assert.match(legacyCss, /Landing readability \+ premium market finish/);
   assert.match(legacyCss, /html\[data-theme="dark"\] \.il-landing\{/);
@@ -220,10 +223,10 @@ test("premium landing visual system matches the generated product preview direct
 });
 
 test("premium visual system is applied across app and static pages", () => {
-  assert.match(html, /legacy-app\.css\?v=20260625-27/);
+  assert.match(html, /legacy-app\.css\?v=20260627-1/);
   assert.match(html, /product-system\.css\?v=20260625-1/);
   assert.match(signupHtml, /static-polish\.css\?v=20260625-2/);
-  assert.match(html, /<a class="btn-nav" id="nav-signup" href="\/signup">Claim \$0\.99<\/a>/);
+  assert.match(html, /<a class="btn-nav" id="nav-signup" href="\/signup">Start trial<\/a>/);
   assert.match(legacyCss, /Site-wide premium polish/);
   assert.match(legacyCss, /Gold theme harmonization/);
   assert.match(legacyCss, /\.il-landing-preview\{[\s\S]*linear-gradient\(180deg,#F6E3B7,#E9C986\)!important/);
