@@ -96,7 +96,7 @@
 <script defer src="/vendor/hammer.min.js?v=2.0.8"></script>
 <script defer src="/vendor/chartjs-plugin-zoom.min.js?v=2.2.0"></script>
 <script defer src="/model-math.js?v=20260612-1"></script>
-<link href="/legacy-app.css?v=20260628-5" rel="stylesheet">
+<link href="/legacy-app.css?v=20260628-6" rel="stylesheet">
 </head>
 <body>
 <div id="auth-veil"></div>
@@ -3100,43 +3100,109 @@ function ttbg(){ return 'rgba(10,12,14,.98)'; }
 function ttbody(){ return '#F6EBD2'; }
 function ttborder(){ return 'rgba(217,179,94,.28)'; }
 function ct() {
+  var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+  if (dark) {
+    return {
+      text:     'rgba(238,233,224,.86)',
+      muted:    'rgba(190,182,168,.60)',
+      grid:     'rgba(220,186,110,.10)',
+      zeroline: 'rgba(220,186,110,.26)',
+      ttBg:     'rgba(16,18,21,.97)',
+      ttTitle:  'rgba(229,191,99,.80)',
+      ttBody:   '#F3ECDC',
+      ttBorder: 'rgba(229,191,99,.26)',
+      axisLabelBg: 'rgba(24,27,31,.96)',
+      axisLabelText: '#F3ECDC',
+      legendBg: 'rgba(255,255,255,0)',
+    };
+  }
+  // Light theme — dark text on light surfaces for real contrast
   return {
-    text:     'rgba(246,235,210,.84)',
-    muted:    'rgba(184,174,155,.62)',
-    grid:     'rgba(217,179,94,.105)',
-    zeroline: 'rgba(217,179,94,.24)',
-    ttBg:     'rgba(10,12,14,.98)',
-    ttTitle:  'rgba(217,179,94,.72)',
-    ttBody:   '#F6EBD2',
-    ttBorder: 'rgba(217,179,94,.28)',
+    text:     'rgba(38,30,18,.82)',
+    muted:    'rgba(90,76,52,.62)',
+    grid:     'rgba(120,86,30,.10)',
+    zeroline: 'rgba(120,86,30,.22)',
+    ttBg:     'rgba(255,253,249,.98)',
+    ttTitle:  '#8a6418',
+    ttBody:   '#27200f',
+    ttBorder: 'rgba(120,86,30,.22)',
+    axisLabelBg: '#1f1813',
+    axisLabelText: '#fdf6e7',
     legendBg: 'rgba(255,255,255,0)',
   };
 }
 
-/* Crosshair plugin — draws a vertical line at hover position */
+/* TradingView-style crosshair — vertical + horizontal hairlines with floating
+   price (y-axis) and date (x-axis) labels. Theme-aware via ct(). */
 const crosshairPlugin = {
   id:'crosshair',
   afterDraw(chart){
-    if(!chart._crosshairX) return;
-    const {ctx,chartArea:{top,bottom}}=chart;
+    const cx = chart._crosshairX, cy = chart._crosshairY;
+    if(cx==null) return;
+    const area = chart.chartArea; if(!area) return;
+    const {ctx} = chart;
+    const t = ct();
+    const line = t.zeroline;
     ctx.save();
-    ctx.beginPath();
-    ctx.moveTo(chart._crosshairX, top);
-    ctx.lineTo(chart._crosshairX, bottom);
-    ctx.strokeStyle = 'rgba(217,179,94,.32)';
     ctx.lineWidth = 1;
-    ctx.setLineDash([4,3]);
-    ctx.stroke();
+    ctx.setLineDash([3,3]);
+    ctx.strokeStyle = line;
+    // vertical
+    ctx.beginPath(); ctx.moveTo(cx, area.top); ctx.lineTo(cx, area.bottom); ctx.stroke();
+    // horizontal (only when pointer is inside vertically and chart opts in)
+    if(chart._crosshairAxes && cy!=null && cy>=area.top && cy<=area.bottom){
+      ctx.beginPath(); ctx.moveTo(area.left, cy); ctx.lineTo(area.right, cy); ctx.stroke();
+    }
+    ctx.setLineDash([]);
+    // Axis labels (price + date) only on charts that opt in
+    if(chart._crosshairAxes){
+      const yScale = chart.scales.y, xScale = chart.scales.x;
+      ctx.font = "600 10px 'DM Mono', monospace";
+      ctx.textBaseline = 'middle';
+      // price label on right edge
+      if(cy!=null && cy>=area.top && cy<=area.bottom && yScale){
+        const val = yScale.getValueForPixel(cy);
+        const label = (chart._crosshairFmt||((v)=>('$'+Number(v).toFixed(2))))(val);
+        const padX=6, h=16, w=ctx.measureText(label).width+padX*2;
+        const lx=area.right+1, ly=cy;
+        ctx.fillStyle=t.axisLabelBg;
+        ctx.beginPath();
+        (ctx.roundRect?ctx.roundRect(lx,ly-h/2,w,h,3):ctx.rect(lx,ly-h/2,w,h));
+        ctx.fill();
+        ctx.fillStyle=t.axisLabelText; ctx.textAlign='left';
+        ctx.fillText(label, lx+padX, ly);
+      }
+      // date label on bottom edge
+      if(xScale){
+        const idx = Math.round(xScale.getValueForPixel(cx));
+        const lbl = chart.data.labels && chart.data.labels[idx];
+        if(lbl){
+          const txt=String(lbl);
+          const padX=6, h=16, w=ctx.measureText(txt).width+padX*2;
+          let bx=cx-w/2; bx=Math.max(area.left, Math.min(bx, area.right-w));
+          const by=area.bottom+2;
+          ctx.fillStyle=t.axisLabelBg;
+          ctx.beginPath();
+          (ctx.roundRect?ctx.roundRect(bx,by,w,h,3):ctx.rect(bx,by,w,h));
+          ctx.fill();
+          ctx.fillStyle=t.axisLabelText; ctx.textAlign='left';
+          ctx.fillText(txt, bx+padX, by+h/2);
+        }
+      }
+    }
     ctx.restore();
   },
   afterEvent(chart, args){
     const evt = args.event;
-    if(evt.type==='mousemove' && evt.x >= chart.chartArea.left && evt.x <= chart.chartArea.right){
+    const area = chart.chartArea;
+    if((evt.type==='mousemove'||evt.type==='pointermove') && area && evt.x>=area.left && evt.x<=area.right){
       chart._crosshairX = evt.x;
+      chart._crosshairY = evt.y;
     } else {
       chart._crosshairX = null;
+      chart._crosshairY = null;
     }
-    chart.draw();
+    args.changed = true;
   }
 };
 Chart.register(crosshairPlugin);
@@ -3191,11 +3257,17 @@ function chartZoomOptions() {
   const compact=window.matchMedia('(max-width: 640px)').matches;
   return {
     zoom:{
-      wheel:{enabled:!compact,speed:.045,modifierKey:null},
+      wheel:{enabled:!compact,speed:.08,modifierKey:null},
       pinch:{enabled:true},
-      mode:'xy',
+      drag:{enabled:false},
+      mode:'x',                 // zoom time axis, like TradingView/Robinhood
     },
-    pan:{enabled:true,mode:'xy',threshold:compact?0:4},
+    pan:{
+      enabled:true,
+      mode:'x',                 // pan horizontally through history; no vertical drift
+      threshold:compact?0:3,
+      modifierKey:null,
+    },
     limits:{x:{min:'original',max:'original',minRange:4},y:{min:'original',max:'original'}},
   };
 }
@@ -4569,7 +4641,7 @@ function buildPriceChart(result,closes,timestamps) {
     const q2=result.indicators.quote[0];
     const opens2=(q2.open||[]).slice(0,count), closes2=vc;
     const candleColors=closes2.map((c2,i)=>(c2||0)>=(opens2[i]||0)?colorAlpha(p.positive,.88):colorAlpha(p.negative,.88));
-    ds=[{label:'Price',data:closes2.map((c2,i)=>[Math.min(opens2[i],c2),Math.max(opens2[i],c2)]),backgroundColor:candleColors,borderColor:candleColors,borderWidth:1,borderRadius:3,order:10,_quote:q2}];
+    ds=[{label:'Price',data:closes2.map((c2,i)=>[Math.min(opens2[i],c2),Math.max(opens2[i],c2)]),backgroundColor:candleColors,borderColor:candleColors,borderWidth:0,borderRadius:1,order:10,_quote:q2}];
   } else if(S.chartType==='area') {
     ds=[{label:'Price',data:vc,borderColor:p.price,borderWidth:2.7,...hp,pointHoverBackgroundColor:p.price,fill:true,backgroundColor:strongGrad,tension:.22,order:10}];
   } else {
@@ -4596,8 +4668,9 @@ function buildPriceChart(result,closes,timestamps) {
     },
     x:{ticks:{color:t.text,font:{size:10},maxTicksLimit:8},grid:{color:t.grid}}
   });
+  opts.layout={padding:{top:8,right:54,bottom:20,left:4}};
   opts.plugins.legend={display:false};
-  opts.datasets={bar:{barPercentage:.82,categoryPercentage:.9,maxBarThickness:14}};
+  opts.datasets={bar:{barPercentage:.72,categoryPercentage:.9,maxBarThickness:12}};
   opts.plugins.zoom=chartZoomOptions();
   opts.plugins.tooltip={...opts.plugins.tooltip,callbacks:{
     title:items=>items[0]?.label||'',
@@ -4605,7 +4678,10 @@ function buildPriceChart(result,closes,timestamps) {
   }};
   const chartJsType = S.chartType==='candle' ? 'bar' : 'line';
   const pluginsArr = S.chartType==='candle' ? [candleWickPlugin] : [];
-  S.charts['price-chart']=new Chart(document.getElementById('price-chart'),{type:chartJsType,data:{labels:vl,datasets:ds},options:opts,plugins:pluginsArr});
+  const _pc=new Chart(document.getElementById('price-chart'),{type:chartJsType,data:{labels:vl,datasets:ds},options:opts,plugins:pluginsArr});
+  _pc._crosshairAxes=true;
+  _pc._crosshairFmt=(v)=>fmtChartPrice(v);
+  S.charts['price-chart']=_pc;
 }
 
 function buildRSIChart(rsiVals,timestamps) {

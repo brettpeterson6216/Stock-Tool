@@ -7052,3 +7052,19 @@ html[data-theme="dark"] #market-page .hg-market{
   background:transparent!important;
   background-image:none!important;
 }
+
+/* ── Chart polish: clean container, crisp canvas, premium feel (both themes) ── */
+#view-tool .chart-wrap,
+#view-tool .h240,
+#view-tool .h200,
+#view-tool .h150{
+  position:relative;
+}
+#view-tool canvas#price-chart{
+  cursor:crosshair;
+}
+/* subtle inner frame around the main price chart so it reads as a pro chart panel */
+#view-tool .h240{
+  border-radius:12px;
+  overflow:visible;
+}
