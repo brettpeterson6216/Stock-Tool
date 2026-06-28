@@ -6959,3 +6959,96 @@ html[data-theme="dark"] .hs-sidebar .sb-item .sb-item-label{
   -webkit-backdrop-filter:blur(22px) saturate(1.3)!important;
   backdrop-filter:blur(22px) saturate(1.3)!important;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   v2 fix: Market page consistency — sidebar + dashboard cards match the tool's
+   frosted-glass system in both themes, and the Market sidebar items get the
+   same look/active/hover treatment as the tool sidebar.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Market sidebar surface (light = frosted, dark = gold-tinted glass) ─────── */
+:root:not([data-theme="dark"]) #market-page .hs-sidebar,
+:root:not([data-theme="dark"]) .home-shell .hs-sidebar{
+  background:var(--glass-strong)!important;
+  border-right:1px solid var(--glass-line)!important;
+  -webkit-backdrop-filter:blur(22px) saturate(1.3)!important;
+  backdrop-filter:blur(22px) saturate(1.3)!important;
+}
+html[data-theme="dark"] #market-page .hs-sidebar,
+html[data-theme="dark"] .home-shell .hs-sidebar{
+  background:
+    linear-gradient(180deg,rgba(40,34,22,.55),rgba(24,22,18,.62)),
+    rgba(26,30,35,.92)!important;
+  border-right:1px solid rgba(230,190,110,.22)!important;
+  -webkit-backdrop-filter:blur(22px) saturate(1.3)!important;
+  backdrop-filter:blur(22px) saturate(1.3)!important;
+}
+
+/* ── Market sidebar items: same language as tool .sb-item ───────────────────── */
+.hsb-home{
+  color:var(--on-glass-2)!important;
+  border-bottom:1px solid var(--glass-line)!important;
+  font-weight:700!important;
+}
+.hsb-home .ti{color:var(--brand-gold)!important}
+.hsb-home.active{
+  background:var(--brand-gold-soft)!important;
+  color:var(--brand-gold-strong)!important;
+}
+.hsb-label{color:var(--on-glass-3)!important;letter-spacing:.12em!important}
+.hsb-item{
+  color:var(--on-glass-2)!important;
+  border-radius:9px!important;
+  margin:1px 8px!important;
+  padding:.42rem .7rem!important;
+  transition:background .14s,color .14s!important;
+}
+.hsb-item .ti{color:var(--on-glass-3)!important}
+.hsb-item:hover{
+  background:var(--brand-gold-soft)!important;
+  color:var(--on-glass)!important;
+}
+.hsb-item:hover .ti{color:var(--brand-gold)!important}
+.hsb-item.active{
+  background:linear-gradient(180deg,var(--gold-hi,#E9B949),var(--gold-bright,#C8901F))!important;
+  color:#1a1206!important;
+  box-shadow:0 4px 14px rgba(200,144,31,.30)!important;
+}
+.hsb-item.active .ti{color:#1a1206!important}
+
+/* ── Market dashboard cards = frosted glass (both themes) ───────────────────── */
+:root:not([data-theme="dark"]) #market-page .hc,
+:root:not([data-theme="dark"]) #market-page .ht-card,
+:root:not([data-theme="dark"]) #market-page .hg-market,
+:root:not([data-theme="dark"]) #market-page .home-ticker-strip{
+  background:var(--glass)!important;
+  border-color:var(--glass-line)!important;
+  color:var(--on-glass-2)!important;
+}
+html[data-theme="dark"] #market-page .hc,
+html[data-theme="dark"] #market-page .hg-market{
+  background:rgba(20,24,28,.78)!important;
+  border-color:rgba(230,190,110,.16)!important;
+}
+/* Card titles + values readable on the frosted cards in light mode */
+:root:not([data-theme="dark"]) #market-page .hc h2,
+:root:not([data-theme="dark"]) #market-page .hc h3,
+:root:not([data-theme="dark"]) #market-page .hc-title,
+:root:not([data-theme="dark"]) #market-page .mo-header strong,
+:root:not([data-theme="dark"]) #market-page .ht-card .htc-sym,
+:root:not([data-theme="dark"]) #market-page .ht-card .htc-price{
+  color:var(--on-glass)!important;
+}
+:root:not([data-theme="dark"]) #market-page .hc-link,
+:root:not([data-theme="dark"]) #market-page .hc-sub,
+:root:not([data-theme="dark"]) #market-page th{
+  color:var(--on-glass-3)!important;
+}
+
+/* Whole market shell transparent so ripple shows in the gutters (light) */
+:root:not([data-theme="dark"]) #market-page,
+:root:not([data-theme="dark"]) #market-page .hs-main,
+:root:not([data-theme="dark"]) .home-shell{
+  background:transparent!important;
+  background-image:none!important;
+}

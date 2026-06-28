@@ -96,7 +96,7 @@
 <script defer src="/vendor/hammer.min.js?v=2.0.8"></script>
 <script defer src="/vendor/chartjs-plugin-zoom.min.js?v=2.2.0"></script>
 <script defer src="/model-math.js?v=20260612-1"></script>
-<link href="/legacy-app.css?v=20260628-4" rel="stylesheet">
+<link href="/legacy-app.css?v=20260628-5" rel="stylesheet">
 </head>
 <body>
 <div id="auth-veil"></div>
@@ -564,33 +564,26 @@
   <aside class="hs-sidebar">
     <a class="hsb-home active" href="/?view=home&amp;market=1" onclick="showMarketPage();return false;"><i class="ti ti-globe"></i><span>Market</span></a>
 
-    <div class="hsb-section">
+    <div class="hsb-section" data-home-analyze>
       <div class="hsb-label">Analyze</div>
       <a class="hsb-item" href="/?view=tool&amp;section=analyze" onclick="navGoTo('analyze');return false;"><i class="ti ti-chart-candle"></i><span>Analyze</span></a>
       <a class="hsb-item" href="/?view=tool&amp;section=financials" onclick="navGoTo('financials');return false;"><i class="ti ti-table"></i><span>Financials</span></a>
       <a class="hsb-item" href="/?view=tool&amp;section=advmetrics" onclick="navGoTo('advmetrics');return false;"><i class="ti ti-report-analytics"></i><span>Metrics</span></a>
-      <a class="hsb-item" href="/?view=tool&amp;section=earnings" onclick="navGoTo('earnings');return false;"><i class="ti ti-calendar-event"></i><span>Earnings</span></a>
+      <a class="hsb-item" href="/?view=tool&amp;section=earnings" onclick="navGoTo('earnings');return false;"><i class="ti ti-trending-up"></i><span>Earnings</span></a>
+      <a class="hsb-item" href="/?view=tool&amp;section=secfilings" onclick="navGoTo('secfilings');return false;"><i class="ti ti-file-text"></i><span>SEC Filings</span></a>
+      <a class="hsb-item" href="/?view=tool&amp;section=institutional" onclick="navGoTo('institutional');return false;"><i class="ti ti-building-bank"></i><span>Institutional</span></a>
+    </div>
+
+    <div class="hsb-section" data-home-tools>
+      <div class="hsb-label">Tools</div>
+      <a class="hsb-item" href="/?view=tool&amp;section=compare" onclick="navGoTo('compare');return false;"><i class="ti ti-adjustments-horizontal"></i><span>Compare</span></a>
+      <a class="hsb-item" href="/?view=tool&amp;section=projection" onclick="navGoTo('projection');return false;"><i class="ti ti-timeline"></i><span>Projection</span></a>
+      <a class="hsb-item" href="/?view=tool&amp;section=dcf" onclick="navGoTo('dcf');return false;"><i class="ti ti-calculator"></i><span>EPS Value</span></a>
       <a class="hsb-item" href="/?view=tool&amp;section=screener" onclick="navGoTo('screener');return false;"><i class="ti ti-filter"></i><span>Screener</span></a>
     </div>
 
     <div class="hsb-section">
-      <div class="hsb-label">Market</div>
-      <a class="hsb-item" href="#" onclick="showMarketPage();setTimeout(()=>document.querySelector('.hg-market')?.scrollIntoView({behavior:'smooth'}),0);return false;"><i class="ti ti-chart-area"></i><span>Market Overview</span></a>
-      <a class="hsb-item" href="#" onclick="navGoTo('earnings');return false;"><i class="ti ti-calendar"></i><span>Earnings Calendar</span></a>
-      <a class="hsb-item" href="#" onclick="navGoTo('screener');return false;"><i class="ti ti-grid-dots"></i><span>Sector Screener</span></a>
-    </div>
-
-    <div class="hsb-section">
-      <div class="hsb-label">Tools</div>
-      <a class="hsb-item" href="#" onclick="navGoTo('compare');return false;"><i class="ti ti-arrows-split-2"></i><span>Compare</span></a>
-      <a class="hsb-item" href="#" onclick="navGoTo('projection');return false;"><i class="ti ti-trending-up"></i><span>Projection Builder</span></a>
-      <a class="hsb-item" href="#" onclick="navGoTo('dcf');return false;"><i class="ti ti-calculator"></i><span>Intrinsic Value</span></a>
-    </div>
-
-    <div class="hsb-section">
       <div class="hsb-label">Library</div>
-      <a class="hsb-item" href="/?view=tool&amp;section=workspace" onclick="navGoTo('workspace');return false;"><i class="ti ti-briefcase"></i><span>Workspace</span></a>
-      <a class="hsb-item" href="/?view=tool&amp;section=workspace&amp;workspace_tab=guide" onclick="openPortfolioGuide();return false;"><i class="ti ti-sparkles"></i><span>Portfolio Guide</span></a>
       <a class="hsb-item" href="#" onclick="navGoTo('reports');return false;"><i class="ti ti-bookmark"></i><span>Saved</span></a>
       <a class="hsb-item" href="/?view=tool&amp;section=education" onclick="navGoTo('education');return false;"><i class="ti ti-school"></i><span>Learn</span></a>
     </div>
