@@ -22,13 +22,13 @@
   function toastMsg(message, kind) { if (typeof window.toast === "function") window.toast(message, kind); }
 
   function injectNavigation() {
-    const homeAnalyze = document.querySelector(".hs-sidebar .hsb-section:first-of-type");
-    if (homeAnalyze && !homeAnalyze.querySelector('[data-il-nav="calls"]')) {
-      homeAnalyze.insertAdjacentHTML("beforeend", `<a class="hsb-item" data-il-nav="calls" href="/?view=tool&amp;section=calls" onclick="navGoTo('calls');return false;"><i class="ti ti-headphones"></i><span>Call Research</span></a>`);
+    const homeEarnings = document.querySelector('.hs-sidebar .hsb-item[href*="section=earnings"]');
+    if (homeEarnings && !document.querySelector('.hs-sidebar [data-il-nav="calls"]')) {
+      homeEarnings.insertAdjacentHTML("afterend", `<a class="hsb-item" data-il-nav="calls" href="/?view=tool&amp;section=calls" onclick="navGoTo('calls');return false;"><i class="ti ti-headphones"></i><span>Call Research</span></a>`);
     }
-    const homeTools = [...document.querySelectorAll(".hs-sidebar .hsb-section")].find(section => section.querySelector(".hsb-label")?.textContent.trim() === "Tools");
-    if (homeTools && !homeTools.querySelector('[data-il-nav="wealth"]')) {
-      homeTools.insertAdjacentHTML("beforeend", `<a class="hsb-item" data-il-nav="wealth" href="/?view=tool&amp;section=wealth" onclick="navGoTo('wealth');return false;"><i class="ti ti-chart-dots-3"></i><span>Wealth Planner</span></a>`);
+    const homeDcf = document.querySelector('.hs-sidebar .hsb-item[href*="section=dcf"]');
+    if (homeDcf && !document.querySelector('.hs-sidebar [data-il-nav="wealth"]')) {
+      homeDcf.insertAdjacentHTML("afterend", `<a class="hsb-item" data-il-nav="wealth" href="/?view=tool&amp;section=wealth" onclick="navGoTo('wealth');return false;"><i class="ti ti-chart-dots-3"></i><span>Wealth Planner</span></a>`);
     }
     const earnings = document.querySelector('.app-sidebar .sb-item[data-sec="earnings"]');
     if (earnings && !document.querySelector('.app-sidebar .sb-item[data-sec="calls"]')) {

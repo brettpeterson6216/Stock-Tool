@@ -93,6 +93,11 @@
     if (document.getElementById("sec-workspace")) return;
     const reports = document.querySelector('.app-sidebar .sb-item[data-sec="reports"]');
     if (reports) reports.insertAdjacentHTML("beforebegin", `<div class="sb-item" data-sec="workspace"><i class="ti ti-briefcase sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Workspace</span></div>`);
+    // Mirror into the Market page sidebar so both navs match exactly.
+    const homeReports = document.querySelector('.hs-sidebar .hsb-item[onclick*="reports"]');
+    if (homeReports && !document.querySelector('.hs-sidebar [data-il-nav="workspace"]')) {
+      homeReports.insertAdjacentHTML("beforebegin", `<a class="hsb-item" data-il-nav="workspace" href="/?view=tool&amp;section=workspace" onclick="navGoTo('workspace');return false;"><i class="ti ti-briefcase"></i><span>Workspace</span></a>`);
+    }
     const mobile = document.getElementById("mobile-sec-tabs");
     if (mobile) mobile.insertAdjacentHTML("beforeend", `<button class="mst-btn" data-sec="workspace">Workspace</button>`);
     const scroll = document.querySelector(".app-content-scroll");
