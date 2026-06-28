@@ -6919,3 +6919,43 @@ html[data-theme="dark"] #view-tool .app-content-scroll{
   color:#1a1206!important;
   border-color:transparent!important;
 }
+
+/* ── v2 fix: dark-mode sidebar should read as elevated gold-tinted glass,
+   not flat black. Covers both #view-tool sidebar and the home/market sidebar. ─ */
+html[data-theme="dark"] .app-sidebar,
+html[data-theme="dark"] .hs-sidebar,
+html[data-theme="dark"] #view-tool .app-sidebar,
+html[data-theme="dark"] #view-tool .hs-sidebar{
+  background:
+    linear-gradient(180deg,rgba(40,34,22,.55),rgba(24,22,18,.62)),
+    rgba(26,30,35,.92)!important;
+  background-color:rgba(26,30,35,.92)!important;
+  border-right:1px solid rgba(230,190,110,.22)!important;
+  box-shadow:inset -1px 0 0 rgba(230,190,110,.06)!important;
+  -webkit-backdrop-filter:blur(22px) saturate(1.3)!important;
+  backdrop-filter:blur(22px) saturate(1.3)!important;
+}
+/* Sidebar group labels + items readable on the dark glass */
+html[data-theme="dark"] .app-sidebar .sb-group-label,
+html[data-theme="dark"] .hs-sidebar .sb-group-label{
+  color:rgba(214,196,160,.55)!important;
+}
+html[data-theme="dark"] .app-sidebar .sb-item,
+html[data-theme="dark"] .hs-sidebar .sb-item,
+html[data-theme="dark"] .app-sidebar .sb-home-btn{
+  color:rgba(228,222,210,.82)!important;
+}
+html[data-theme="dark"] .app-sidebar .sb-item .sb-item-label,
+html[data-theme="dark"] .app-sidebar .sb-item .sb-item-icon,
+html[data-theme="dark"] .hs-sidebar .sb-item .sb-item-label{
+  color:rgba(228,222,210,.82)!important;
+}
+
+/* Also ensure the light-mode home/market sidebar (.hs-sidebar) is frosted, not dark */
+:root:not([data-theme="dark"]) .hs-sidebar,
+:root:not([data-theme="dark"]) #view-tool .hs-sidebar{
+  background:var(--glass-strong)!important;
+  border-right:1px solid var(--glass-line)!important;
+  -webkit-backdrop-filter:blur(22px) saturate(1.3)!important;
+  backdrop-filter:blur(22px) saturate(1.3)!important;
+}
