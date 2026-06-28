@@ -6880,3 +6880,42 @@ html[data-theme="dark"] #view-tool .app-tf-strip .tf-pill.on{
   background:var(--brand-gold-soft)!important;
   border-color:var(--brand-gold-line)!important;
 }
+
+/* ── v2 fix: light-mode tool shell must be transparent (let gold ripple show),
+   not the hard-coded charcoal gradient from earlier passes. ─────────────────── */
+:root:not([data-theme="dark"]) #view-tool,
+:root:not([data-theme="dark"]) .app-shell,
+:root:not([data-theme="dark"]) #view-tool .app-shell,
+:root:not([data-theme="dark"]) #view-tool .app-main,
+:root:not([data-theme="dark"]) #view-tool .app-content-scroll,
+:root:not([data-theme="dark"]) .home-shell,
+:root:not([data-theme="dark"]) .hs-main{
+  background:transparent!important;
+  background-color:transparent!important;
+  background-image:none!important;
+  color:var(--on-glass-2)!important;
+}
+/* Dark mode keeps its dim gold sheen behind glass */
+html[data-theme="dark"] #view-tool,
+html[data-theme="dark"] .app-shell,
+html[data-theme="dark"] #view-tool .app-main,
+html[data-theme="dark"] #view-tool .app-content-scroll{
+  background:transparent!important;
+  background-image:none!important;
+}
+
+/* The black COMPARE toolbar button → match the other toolbar buttons (frosted) */
+#view-tool .act-btn.compare-btn,
+#view-tool .act-btn[data-compare],
+#view-tool .app-chart-toolbar .act-btn.compare,
+:root:not([data-theme="dark"]) #view-tool .app-chart-toolbar .act-btn{
+  background:var(--glass-quiet)!important;
+  color:var(--on-glass-2)!important;
+  border:1px solid var(--glass-line)!important;
+}
+:root:not([data-theme="dark"]) #view-tool .app-chart-toolbar .act-btn.on,
+:root:not([data-theme="dark"]) #view-tool .app-chart-toolbar .act-btn.active{
+  background:linear-gradient(180deg,var(--gold-hi,#E9B949),var(--gold-bright,#C8901F))!important;
+  color:#1a1206!important;
+  border-color:transparent!important;
+}
