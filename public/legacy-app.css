@@ -7807,7 +7807,11 @@ body.il-dashboard-on #body-analyze::before{
 #view-tool .acc-body > p:first-of-type{
   color:var(--on-glass-2)!important;
 }
-/* The whole accordion body gets a calm frosted card so nothing floats on gold */
+/* The whole accordion body gets a calm frosted card so nothing floats on gold.
+   Must out-specify the earlier "#view-tool .app-section .acc-body { transparent }"
+   rule, so match that selector depth. */
+#view-tool .app-section .acc-body,
+#view-tool .app-section.open .acc-body,
 #view-tool .acc-body{
   background:var(--glass)!important;
   border:1px solid var(--glass-line)!important;
@@ -7818,10 +7822,13 @@ body.il-dashboard-on #body-analyze::before{
 }
 /* But the analyze body holds its own panels — keep it transparent so those
    panels read as separate cards (avoid a card-in-card look). */
+#view-tool .app-section #body-analyze,
+#view-tool .app-section.open #body-analyze,
 #view-tool #body-analyze{
   background:transparent!important;
   border:0!important;
   box-shadow:none!important;
+  padding:0!important;
   -webkit-backdrop-filter:none!important;
   backdrop-filter:none!important;
 }
