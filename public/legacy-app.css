@@ -7844,3 +7844,48 @@ body.il-dashboard-on #body-analyze::before{
   background:var(--brand-gold)!important;
   color:#1a1206!important;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FINAL POLISH: ensure no tool content ever floats illegibly on the ripple.
+   Frost the wrappers that hold tables/filters, and keep nested cards calm so
+   we don't get harsh card-in-card. Applies in both themes.
+   ═══════════════════════════════════════════════════════════════════════════ */
+/* Table wrappers + filter bars solid so rows never show ripple behind them */
+#view-tool .scr-table-wrap,
+#view-tool .cmp-table-wrap,
+#view-tool .fin-table-wrap,
+#view-tool .earn-table-wrap,
+#view-tool .inst-table-wrap{
+  background:var(--surface)!important;
+  border-radius:12px!important;
+  overflow:hidden!important;
+}
+/* Table body rows get the surface so zebra/hover read correctly over it */
+#view-tool .fin-table,
+#view-tool .earn-table,
+#view-tool .inst-table,
+#view-tool .cmp-table,
+#view-tool .scr-table,
+#view-tool .wl-table{
+  background:var(--surface)!important;
+}
+/* When a section body is frosted, its immediate nested panels go flat (no
+   card-in-card): keep one level of elevation only. */
+#view-tool .app-section .acc-body > .panel-box,
+#view-tool .app-section .acc-body > .scr-filters,
+#view-tool .app-section .acc-body > .il-tool-shell{
+  box-shadow:none!important;
+  background:var(--surface-2)!important;
+}
+/* Analyze keeps its multi-panel look (its body is transparent), so its panels
+   keep their elevation — explicitly restore in case the rule above is too broad. */
+#view-tool #body-analyze .panel-box,
+#view-tool #body-analyze .chart-wrap{
+  box-shadow:var(--glass-shadow)!important;
+}
+/* Generic safety: any stray text node directly in a frosted body stays readable */
+#view-tool .app-section .acc-body{ color:var(--on-glass-2)!important; }
+#view-tool .app-section .acc-body h1,
+#view-tool .app-section .acc-body h2,
+#view-tool .app-section .acc-body h3,
+#view-tool .app-section .acc-body strong{ color:var(--on-glass)!important; }
