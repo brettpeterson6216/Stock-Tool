@@ -7308,3 +7308,137 @@ html[data-theme="dark"] #market-page .hg-market{
   /* The standalone in-tool section header is redundant now the strip names the section */
   #view-tool .app-section-hdr{ display:none!important; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PREMIUM POLISH v3 + ACCESSIBILITY — 2026-06-28
+   Site-wide focus-visible rings, contrast, reduced-motion, and a cleaner,
+   more cohesive tool control area.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── A11y 1: visible keyboard focus on EVERYTHING interactive ───────────────── */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible,
+.nav-tab:focus-visible,
+.mst-btn:focus-visible,
+.act-btn:focus-visible,
+.tf-pill:focus-visible,
+.tf-tog:focus-visible,
+.hsb-item:focus-visible,
+.sb-item:focus-visible,
+.il-panel-collapse:focus-visible,
+.il-landing-primary:focus-visible,
+.il-landing-secondary:focus-visible{
+  outline:2px solid var(--brand-gold)!important;
+  outline-offset:2px!important;
+  border-radius:6px;
+}
+/* Inputs that previously had outline:none — give them a clear focus ring + glow */
+.ticker-input:focus-visible,
+.il-landing-search input:focus-visible,
+.hh-search input:focus-visible,
+.fc-input:focus-visible,.fc-select:focus-visible,
+.input-light:focus-visible,
+.il-ws-field input:focus-visible,.il-ws-field textarea:focus-visible,.il-ws-field select:focus-visible,
+.il-score-field textarea:focus-visible,
+.il-wealth-field input:focus-visible,
+.scr-slider:focus-visible,
+.edu-glossary-head input:focus-visible{
+  outline:2px solid var(--brand-gold)!important;
+  outline-offset:1px!important;
+  box-shadow:0 0 0 4px var(--brand-gold-soft)!important;
+}
+/* Don't show the ring on mouse click, only keyboard (focus-visible already handles this) */
+
+/* ── A11y 2: skip-to-content link ───────────────────────────────────────────── */
+.skip-link{
+  position:fixed; top:-60px; left:12px; z-index:1000;
+  padding:10px 16px; border-radius:8px;
+  background:var(--brand-gold); color:#1a1206;
+  font:700 .8rem var(--sans); text-decoration:none;
+  transition:top .15s;
+}
+.skip-link:focus{ top:12px; outline:2px solid #1a1206; outline-offset:2px; }
+
+/* ── A11y 3: stronger reduced-motion handling ───────────────────────────────── */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.001ms!important;
+    scroll-behavior:auto!important;
+  }
+}
+
+/* ── A11y 4: nudge muted text up for contrast (dark + light) ─────────────────── */
+:root{ --text5:#5a5040; }
+html[data-theme="dark"]{ --text5:rgba(206,199,186,.66); }
+
+/* ── Polish 1: normalize ALL chart toolbar buttons (kills the black COMPARE) ── */
+#view-tool .app-chart-toolbar .act-btn,
+#view-tool .app-chart-toolbar button{
+  background:var(--glass-quiet)!important;
+  border:1px solid var(--glass-line)!important;
+  color:var(--on-glass-2)!important;
+  font-weight:600!important;
+}
+#view-tool .app-chart-toolbar .act-btn i{ color:var(--on-glass-3)!important; }
+#view-tool .app-chart-toolbar .act-btn:hover{
+  background:var(--brand-gold-soft)!important;
+  border-color:var(--brand-gold-line)!important;
+  color:var(--on-glass)!important;
+}
+#view-tool .app-chart-toolbar .act-btn.on,
+#view-tool .app-chart-toolbar .act-btn.active{
+  background:var(--brand-gold)!important;
+  border-color:var(--brand-gold)!important;
+  color:#1a1206!important;
+}
+#view-tool .app-chart-toolbar .act-btn.on i,
+#view-tool .app-chart-toolbar .act-btn.active i{ color:#1a1206!important; }
+
+/* ── Polish 2: tighten the stacked control rows into one cohesive header zone ── */
+@media(min-width:961px){
+  #view-tool .app-chart-toolbar{
+    border-radius:12px 12px 0 0!important;
+    border-bottom:0!important;
+  }
+  #view-tool .app-tf-strip{
+    border-radius:0 0 12px 12px!important;
+    margin-bottom:6px;
+  }
+  /* the section strip is the primary tool switcher — give it clear separation */
+  #view-tool .mobile-sec-tabs{
+    margin-bottom:clamp(14px,1.6vw,20px)!important;
+  }
+}
+
+/* ── Polish 3: cleaner ticker-workspace search panel header ─────────────────── */
+#view-tool .tool-welcome .ash-kicker,
+#view-tool .search-row .sr-kicker{
+  letter-spacing:.14em!important;
+  text-transform:uppercase!important;
+  font-size:.58rem!important;
+  color:var(--on-glass-3)!important;
+}
+
+/* ── Polish 4: consistent rounded inputs across the tool ────────────────────── */
+#view-tool input[type="text"],
+#view-tool input[type="number"],
+#view-tool .ticker-input,
+#view-tool select,
+#view-tool textarea{
+  border-radius:9px!important;
+}
+
+/* ── Polish 5: premium scrollbars in the tool content ──────────────────────── */
+#view-tool .app-content-scroll::-webkit-scrollbar{ width:8px; height:8px; }
+#view-tool .app-content-scroll::-webkit-scrollbar-thumb{
+  background:var(--glass-line); border-radius:8px;
+}
+#view-tool .app-content-scroll::-webkit-scrollbar-thumb:hover{
+  background:var(--brand-gold-line);
+}
