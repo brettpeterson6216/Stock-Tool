@@ -96,7 +96,7 @@
 <script defer src="/vendor/hammer.min.js?v=2.0.8"></script>
 <script defer src="/vendor/chartjs-plugin-zoom.min.js?v=2.2.0"></script>
 <script defer src="/model-math.js?v=20260612-1"></script>
-<link href="/legacy-app.css?v=20260628-8" rel="stylesheet">
+<link href="/legacy-app.css?v=20260628-9" rel="stylesheet">
 </head>
 <body>
 <div id="auth-veil"></div>
@@ -110,35 +110,9 @@
   <div class="nav-links" id="nav-links">
     <a href="/" id='nav-home' class="nav-tab active-tab" onclick="navGoTo('home');return false;">Home</a>
     <a href="/?view=home&amp;market=1" id="nav-market" class="nav-tab" onclick="showMarketPage();return false;">Market</a>
+    <a href="/?view=tool&amp;section=analyze" id="nav-analyze" class="nav-tab" onclick="navGoTo('analyze');return false;">Analyze</a>
     <a href="/?view=tool&amp;section=education" class="nav-tab" id="nav-education-link" onclick="navGoTo('education');return false;">Learn</a>
-    <a href="/?view=tool&amp;section=reports" class="nav-tab" id="nav-saved-link" onclick="navGoTo('reports');return false;">Saved</a>
-    <a href="/?view=tool&amp;section=workspace&amp;workspace_tab=guide" class="nav-tab" id="nav-guide-link" style="display:none;" onclick="openPortfolioGuide();return false;">Portfolio Guide</a>
-    <a href='/blog' class="nav-tab" id="nav-blog-link">Blog</a>
     <a href='/about' class="nav-tab" id="nav-about-link">About</a>
-  </div>
-  <div class="nav-tooltabs" id="tool-tabbar" role="tablist" aria-label="Tool sections">
-    <button class="ntt" data-sec="analyze" onclick="openSection('analyze');return false;"><i class="ti ti-chart-candle"></i><span>Chart</span></button>
-    <button class="ntt" data-sec="financials" onclick="openSection('financials');return false;"><i class="ti ti-table"></i><span>Financials</span></button>
-    <button class="ntt" data-sec="advmetrics" onclick="openSection('advmetrics');return false;"><i class="ti ti-report-analytics"></i><span>Metrics</span></button>
-    <div class="ntt-group" data-group="research">
-      <button class="ntt ntt-trigger" type="button" aria-haspopup="true" aria-expanded="false"><i class="ti ti-microscope"></i><span>Research</span><i class="ti ti-chevron-down ntt-caret"></i></button>
-      <div class="ntt-menu">
-        <button data-sec="earnings" onclick="openSection('earnings');return false;"><i class="ti ti-trending-up"></i>Earnings</button>
-        <button data-sec="calls" onclick="navGoTo('calls');return false;"><i class="ti ti-headphones"></i>Call Research</button>
-        <button data-sec="secfilings" onclick="openSection('secfilings');return false;"><i class="ti ti-file-text"></i>SEC Filings</button>
-        <button data-sec="institutional" onclick="openSection('institutional');return false;"><i class="ti ti-building-bank"></i>Institutional</button>
-      </div>
-    </div>
-    <div class="ntt-group" data-group="valuation">
-      <button class="ntt ntt-trigger" type="button" aria-haspopup="true" aria-expanded="false"><i class="ti ti-calculator"></i><span>Valuation</span><i class="ti ti-chevron-down ntt-caret"></i></button>
-      <div class="ntt-menu">
-        <button data-sec="dcf" onclick="openSection('dcf');return false;"><i class="ti ti-calculator"></i>EPS Value</button>
-        <button data-sec="projection" onclick="openSection('projection');return false;"><i class="ti ti-timeline"></i>Projection</button>
-        <button data-sec="wealth" onclick="navGoTo('wealth');return false;"><i class="ti ti-chart-dots-3"></i>Wealth Planner</button>
-      </div>
-    </div>
-    <button class="ntt" data-sec="compare" onclick="openSection('compare');return false;"><i class="ti ti-adjustments-horizontal"></i><span>Compare</span></button>
-    <button class="ntt" data-sec="screener" onclick="openSection('screener');return false;"><i class="ti ti-filter"></i><span>Screener</span></button>
   </div>
   <div id="nav-ticker-bar">
     <span class="ntb-sym" id="ntb-sym"></span>
@@ -2303,17 +2277,14 @@ function openSection(id, skipProCheck) {
   document.querySelectorAll('.sb-item').forEach(el => {
     el.classList.toggle('active', el.dataset.sec === id);
   });
-  // Update top-bar tool tab active state (flat tabs + grouped menu items)
-  document.querySelectorAll('#tool-tabbar .ntt[data-sec]').forEach(el => {
-    el.classList.toggle('active', el.dataset.sec === id);
-  });
-  document.querySelectorAll('#tool-tabbar .ntt-group').forEach(g => {
-    const has = !!g.querySelector('[data-sec="' + id + '"]');
-    g.querySelector('.ntt-trigger')?.classList.toggle('active', has);
-    g.querySelectorAll('.ntt-menu [data-sec]').forEach(mi => {
-      mi.classList.toggle('active', mi.dataset.sec === id);
-    });
-  });
+  // Top-bar nav active state: highlight "Analyze" for tool sections,
+  // "Learn" for education, leaving Home/Market/About to their own handlers.
+  document.querySelectorAll('#nav-links .nav-tab').forEach(el => el.classList.remove('active-tab'));
+  if (id === 'education') {
+    document.getElementById('nav-education-link')?.classList.add('active-tab');
+  } else {
+    document.getElementById('nav-analyze')?.classList.add('active-tab');
+  }
   // Open the target section
   const sec = document.getElementById('sec-' + id);
   const bod = document.getElementById('body-' + id);
@@ -6344,31 +6315,7 @@ document.addEventListener('click', function(e) {
 })();
 
 
-/* ── Top-bar tool-tab dropdown menus (Research / Valuation) ─────────────────── */
-(function(){
-  function closeAllToolMenus(except){
-    document.querySelectorAll('#tool-tabbar .ntt-group.open').forEach(g=>{
-      if(g!==except){ g.classList.remove('open'); g.querySelector('.ntt-trigger')?.setAttribute('aria-expanded','false'); }
-    });
-  }
-  document.addEventListener('click', function(e){
-    const trigger = e.target.closest('#tool-tabbar .ntt-trigger');
-    if(trigger){
-      e.preventDefault();
-      const group = trigger.closest('.ntt-group');
-      const willOpen = !group.classList.contains('open');
-      closeAllToolMenus(group);
-      group.classList.toggle('open', willOpen);
-      trigger.setAttribute('aria-expanded', willOpen?'true':'false');
-      return;
-    }
-    // clicking a menu item or anywhere else closes menus
-    if(e.target.closest('#tool-tabbar .ntt-menu [data-sec]') || !e.target.closest('#tool-tabbar .ntt-group')){
-      closeAllToolMenus(null);
-    }
-  });
-  document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeAllToolMenus(null); });
-})();
+/* (top-bar dropdown menus removed — nav is now flat: Home, Market, Analyze, Learn, About) */
 
   } else {
     _attachBatch2();

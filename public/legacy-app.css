@@ -7209,63 +7209,7 @@ html[data-theme="dark"] #market-page .hg-market{
    NAV OVERHAUL — single top bar with tool tabs; left sidebar removed (desktop)
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* Tool tab bar lives in the top nav; only visible in tool view on desktop */
-.nav-tooltabs{ display:none; }
-#main-nav[data-view="tool"] .nav-tooltabs{
-  display:flex; align-items:center; gap:2px;
-  margin-left:.5rem; padding-left:.85rem;
-  border-left:1px solid var(--glass-line);
-  flex:1 1 auto; min-width:0; overflow:visible;
-}
-/* When tool tabs are showing, the site-level links collapse to essentials */
-#main-nav[data-view="tool"] #nav-links{ display:none; }
-
-.nav-tooltabs .ntt,
-.nav-tooltabs .ntt-trigger{
-  display:inline-flex; align-items:center; gap:6px;
-  height:34px; padding:0 11px;
-  border:1px solid transparent; border-radius:9px;
-  background:transparent; color:var(--on-glass-2);
-  font:600 .76rem var(--sans); white-space:nowrap; cursor:pointer;
-  transition:background .14s,color .14s,border-color .14s;
-}
-.nav-tooltabs .ntt i{ font-size:15px; color:var(--on-glass-3); }
-.nav-tooltabs .ntt span{ line-height:1; }
-.nav-tooltabs .ntt:hover,
-.nav-tooltabs .ntt-trigger:hover{
-  background:var(--brand-gold-soft); color:var(--on-glass);
-}
-.nav-tooltabs .ntt:hover i{ color:var(--brand-gold); }
-.nav-tooltabs .ntt.active,
-.nav-tooltabs .ntt-trigger.active{
-  background:var(--brand-gold-soft);
-  color:var(--brand-gold-strong);
-  box-shadow:inset 0 -2px 0 var(--brand-gold);
-}
-.nav-tooltabs .ntt.active i{ color:var(--brand-gold); }
-.nav-tooltabs .ntt-caret{ font-size:13px!important; opacity:.7; margin-left:-1px; }
-
-/* Dropdown groups */
-.nav-tooltabs .ntt-group{ position:relative; }
-.nav-tooltabs .ntt-menu{
-  position:absolute; top:calc(100% + 8px); left:0; z-index:600;
-  display:none; flex-direction:column; min-width:200px; padding:6px;
-  background:var(--glass-strong); border:1px solid var(--glass-line);
-  border-radius:12px; box-shadow:var(--glass-shadow-lg);
-  -webkit-backdrop-filter:blur(22px) saturate(1.3); backdrop-filter:blur(22px) saturate(1.3);
-}
-.nav-tooltabs .ntt-group.open .ntt-menu{ display:flex; }
-.nav-tooltabs .ntt-menu button{
-  display:flex; align-items:center; gap:9px;
-  padding:9px 11px; border:0; border-radius:8px;
-  background:transparent; color:var(--on-glass-2);
-  font:600 .78rem var(--sans); text-align:left; cursor:pointer; white-space:nowrap;
-}
-.nav-tooltabs .ntt-menu button i{ font-size:15px; color:var(--on-glass-3); width:16px; }
-.nav-tooltabs .ntt-menu button:hover{ background:var(--brand-gold-soft); color:var(--on-glass); }
-.nav-tooltabs .ntt-menu button:hover i{ color:var(--brand-gold); }
-.nav-tooltabs .ntt-menu button.active{ color:var(--brand-gold-strong); }
-.nav-tooltabs .ntt-menu button.active i{ color:var(--brand-gold); }
+/* (top-bar tool-tab styles removed — nav is flat now) */
 
 /* ── Remove the left sidebar on desktop; tool content takes full width ──────── */
 @media(min-width:961px){
@@ -7316,4 +7260,51 @@ html[data-theme="dark"] #market-page .hg-market{
 /* Vertical resize handle on the main price chart container */
 #view-tool .h240{
   resize:vertical; overflow:auto; min-height:160px; max-height:80vh;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FLAT NAV MODEL — top bar is Home/Market/Analyze/Learn/About only.
+   Inside the tool, a single in-content section strip switches tools
+   (no left sidebar, no top-bar dropdowns).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Promote the section-tab strip to desktop as the in-tool tool switcher */
+@media(min-width:961px){
+  #view-tool .mobile-sec-tabs{
+    display:flex!important;
+    flex-wrap:wrap;
+    gap:6px;
+    padding:12px clamp(16px,2vw,26px)!important;
+    border-bottom:1px solid var(--glass-line)!important;
+    position:sticky; top:0; z-index:6;
+    background:var(--glass-strong)!important;
+    -webkit-backdrop-filter:blur(22px) saturate(1.3)!important;
+    backdrop-filter:blur(22px) saturate(1.3)!important;
+    overflow:visible!important;
+  }
+  #view-tool .mobile-sec-tabs .mst-btn{
+    flex:0 0 auto;
+    height:32px; padding:0 14px;
+    border:1px solid var(--glass-line)!important;
+    border-radius:8px!important;
+    background:transparent!important;
+    color:var(--on-glass-2)!important;
+    font:600 .76rem var(--sans)!important;
+    letter-spacing:.01em;
+    white-space:nowrap; cursor:pointer;
+    transition:background .14s,color .14s,border-color .14s;
+  }
+  #view-tool .mobile-sec-tabs .mst-btn:hover{
+    background:var(--brand-gold-soft)!important;
+    border-color:var(--brand-gold-line)!important;
+    color:var(--on-glass)!important;
+  }
+  #view-tool .mobile-sec-tabs .mst-btn.active{
+    background:var(--brand-gold)!important;
+    border-color:var(--brand-gold)!important;
+    color:#1a1206!important;
+    box-shadow:0 2px 8px rgba(200,144,31,.25)!important;
+  }
+  /* The standalone in-tool section header is redundant now the strip names the section */
+  #view-tool .app-section-hdr{ display:none!important; }
 }
