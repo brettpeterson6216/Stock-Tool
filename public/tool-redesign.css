@@ -1,0 +1,306 @@
+/* ════════════════════════════════════════════════════════════════════════════
+   IMPLIED LENS — TOOL DESIGN SYSTEM (authoritative, loaded last)
+   A calm data-terminal aesthetic: deep neutral surfaces, gold as a sharp
+   accent only, one type scale, one spacing grid. Data is the hero.
+   Scoped to #view-tool and #market-page so the marketing home keeps its brand.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Design tokens ──────────────────────────────────────────────────────────── */
+:root{
+  /* light tool surfaces */
+  --t-bg:        #f4f2ec;
+  --t-surface:   #ffffff;
+  --t-surface-2: #faf9f5;
+  --t-surface-3: #f0eee8;
+  --t-line:      rgba(26,22,14,.10);
+  --t-line-2:    rgba(26,22,14,.16);
+  --t-text:      #1c1813;
+  --t-text-2:    #4a4234;
+  --t-text-3:    #8a8170;
+  --t-gold:      #9a6e15;
+  --t-gold-2:    #c8901f;
+  --t-gold-soft: rgba(200,144,31,.10);
+  --t-gold-line: rgba(200,144,31,.30);
+  --t-pos:       #1f7a52;
+  --t-neg:       #b4474d;
+  --t-elev:      0 1px 2px rgba(30,22,10,.04), 0 4px 16px rgba(30,22,10,.05);
+  --t-elev-2:    0 8px 30px rgba(30,22,10,.08);
+  /* spacing scale */
+  --t-s1:6px; --t-s2:10px; --t-s3:14px; --t-s4:20px; --t-s5:28px; --t-s6:40px;
+  --t-r:10px; --t-r-lg:14px;
+}
+html[data-theme="dark"]{
+  --t-bg:        #0a0c0e;
+  --t-surface:   #14171b;
+  --t-surface-2: #181c21;
+  --t-surface-3: #1e232a;
+  --t-line:      rgba(255,255,255,.07);
+  --t-line-2:    rgba(255,255,255,.12);
+  --t-text:      #e9edf2;
+  --t-text-2:    rgba(225,230,236,.74);
+  --t-text-3:    rgba(180,188,198,.55);
+  --t-gold:      #d8a13f;
+  --t-gold-2:    #e9b949;
+  --t-gold-soft: rgba(216,154,55,.13);
+  --t-gold-line: rgba(216,154,55,.28);
+  --t-pos:       #4db38a;
+  --t-neg:       #d97a7e;
+  --t-elev:      0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.3);
+  --t-elev-2:    0 14px 40px rgba(0,0,0,.45);
+}
+
+/* ── 1. Kill the gold ripple inside the tool & market. Calm surface instead. ── */
+#view-tool,
+#market-page,
+html[data-theme="dark"] #view-tool,
+html[data-theme="dark"] #market-page{
+  background:var(--t-bg)!important;
+  background-image:none!important;
+}
+/* Hide the fixed gold-ripple pseudo-element whenever the tool or market view is
+   active, so the calm surface shows instead. Uses :has() (universally supported). */
+html:has(#main-nav[data-view="tool"]) body::before,
+html:has(#main-nav[data-view="market"]) body::before{
+  display:none!important;
+}
+/* Belt-and-suspenders: an opaque fixed backdrop painted under the tool/market. */
+#view-tool::after,
+#market-page::after{
+  content:""; position:fixed; inset:0; z-index:-2;
+  background:var(--t-bg); pointer-events:none;
+}
+#view-tool .app-shell,
+#view-tool .app-main,
+#view-tool .app-content-scroll,
+#market-page .hs-main{
+  background:transparent!important;
+}
+
+/* ── 2. Nav: solid, quiet, gold accent on active ────────────────────────────── */
+#main-nav[data-view="tool"], nav#main-nav{
+  background:color-mix(in srgb, var(--t-surface) 92%, transparent)!important;
+  border-bottom:1px solid var(--t-line)!important;
+  box-shadow:none!important;
+  backdrop-filter:blur(18px) saturate(1.1)!important;
+  -webkit-backdrop-filter:blur(18px) saturate(1.1)!important;
+}
+
+/* ── 3. Control bars (toolbar / timeframe / section strip) ───────────────────── */
+#view-tool .app-chart-toolbar,
+#view-tool .app-tf-strip,
+#view-tool .mobile-sec-tabs{
+  background:var(--t-surface)!important;
+  border:1px solid var(--t-line)!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+#view-tool .mobile-sec-tabs{
+  border-radius:var(--t-r);
+  padding:var(--t-s2) var(--t-s3)!important;
+  gap:var(--t-s1)!important;
+}
+#view-tool .app-chart-toolbar{ border-radius:var(--t-r) var(--t-r) 0 0; }
+#view-tool .app-tf-strip{ border-radius:0 0 var(--t-r) var(--t-r); border-top:0!important; }
+
+/* All pills/buttons in the tool: one quiet style, gold when active */
+#view-tool .mst-btn,
+#view-tool .act-btn,
+#view-tool .tf-pill,
+#view-tool .tf-tog{
+  background:transparent!important;
+  border:1px solid transparent!important;
+  color:var(--t-text-2)!important;
+  font:600 .74rem var(--sans)!important;
+  border-radius:8px!important;
+  box-shadow:none!important;
+  text-shadow:none!important;
+  transition:background .13s, color .13s, border-color .13s!important;
+}
+#view-tool .act-btn{ border-color:var(--t-line)!important; }
+#view-tool .mst-btn:hover,
+#view-tool .act-btn:hover,
+#view-tool .tf-pill:hover,
+#view-tool .tf-tog:hover{
+  background:var(--t-gold-soft)!important;
+  color:var(--t-text)!important;
+  border-color:var(--t-gold-line)!important;
+}
+#view-tool .mst-btn.active,
+#view-tool .act-btn.on,
+#view-tool .act-btn.active,
+#view-tool .tf-pill.on,
+#view-tool .tf-pill.active,
+#view-tool .tf-tog.on{
+  background:var(--t-gold-2)!important;
+  color:#16120a!important;
+  border-color:var(--t-gold-2)!important;
+}
+#view-tool .act-btn i, #view-tool .mst-btn i{ color:inherit!important; }
+
+/* ── 4. Panels / cards: one surface, one radius, one shadow ──────────────────── */
+#view-tool .panel-box,
+#view-tool .chart-wrap,
+#view-tool .metric-card,
+#view-tool .sidebar-card,
+#view-tool .il-trust-panel,
+#view-tool .analyst-target-box,
+#view-tool .analyst-rec-box,
+#view-tool .dp-card,
+#view-tool .sa-card,
+#view-tool .scr-filters,
+#view-tool .result-header,
+#view-tool .metrics-grid,
+#view-tool #app-stats-footer,
+#view-tool .il-research-shell,
+#view-tool .il-research-panel,
+#view-tool .edu-hero{
+  background:var(--t-surface)!important;
+  border:1px solid var(--t-line)!important;
+  border-radius:var(--t-r-lg)!important;
+  box-shadow:var(--t-elev)!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  color:var(--t-text-2)!important;
+}
+/* metric tiles nest quietly */
+#view-tool .metric-card{
+  background:var(--t-surface-2)!important;
+  box-shadow:none!important;
+  border-radius:var(--t-r)!important;
+}
+/* section bodies: flat container, no card-in-card */
+#view-tool .app-section .acc-body,
+html[data-theme="dark"] #view-tool .app-section .acc-body,
+:root:not([data-theme="dark"]) #view-tool .app-section .acc-body{
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  padding:var(--t-s4) 0!important;
+}
+
+/* ── 5. Typography: one scale, readable, confident ───────────────────────────── */
+#view-tool{ color:var(--t-text-2)!important; }
+#view-tool h1,#view-tool h2,#view-tool h3,
+#view-tool .chart-title,#view-tool .panel-box-title,#view-tool .sidebar-card-title{
+  color:var(--t-text)!important;
+}
+#view-tool .chart-title,#view-tool .panel-box-title{
+  font:700 .8rem var(--sans)!important; letter-spacing:.01em!important;
+}
+#view-tool .m-lbl,#view-tool .sb-group-label,#view-tool .asf-lbl{
+  color:var(--t-text-3)!important;
+  font:700 .58rem var(--mono)!important;
+  letter-spacing:.1em!important; text-transform:uppercase!important;
+}
+#view-tool .m-val,#view-tool .asf-val,#view-tool strong{ color:var(--t-text)!important; }
+#view-tool .pos,#view-tool [class*="positive"]{ color:var(--t-pos)!important; }
+#view-tool .neg,#view-tool [class*="negative"]{ color:var(--t-neg)!important; }
+
+/* ── 6. Tables: clean financial-terminal styling ─────────────────────────────── */
+#view-tool .fin-table,#view-tool .earn-table,#view-tool .inst-table,
+#view-tool .cmp-table,#view-tool .scr-table,#view-tool .wl-table{
+  background:var(--t-surface)!important;
+  border:1px solid var(--t-line)!important;
+  border-radius:var(--t-r-lg)!important;
+  overflow:hidden;
+}
+#view-tool .fin-table thead th,#view-tool .earn-table thead th,
+#view-tool .inst-table thead th,#view-tool .cmp-table thead th,
+#view-tool .scr-table thead th,#view-tool .wl-table thead th{
+  background:var(--t-surface-3)!important;
+  color:var(--t-gold)!important;
+  font:800 .6rem var(--mono)!important;
+  letter-spacing:.09em!important; text-transform:uppercase!important;
+  padding:11px 14px!important;
+  border-bottom:1px solid var(--t-line)!important;
+}
+#view-tool .fin-table td,#view-tool .earn-table td,#view-tool .inst-table td,
+#view-tool .cmp-table td,#view-tool .scr-table td,#view-tool .wl-table td{
+  padding:10px 14px!important;
+  border-bottom:1px solid var(--t-line)!important;
+  color:var(--t-text-2)!important; font-size:.78rem!important;
+}
+#view-tool tbody tr:nth-child(even) td{ background:color-mix(in srgb,var(--t-gold) 3%,transparent)!important; }
+#view-tool tbody tr:hover td{ background:var(--t-gold-soft)!important; }
+#view-tool tbody td:first-child{ color:var(--t-text)!important; font-weight:700!important; }
+
+/* ── 7. Inputs ───────────────────────────────────────────────────────────────── */
+#view-tool input[type=text],#view-tool input[type=number],
+#view-tool .ticker-input,#view-tool select,#view-tool textarea{
+  background:var(--t-surface-2)!important;
+  border:1px solid var(--t-line-2)!important;
+  color:var(--t-text)!important;
+  border-radius:var(--t-r)!important;
+}
+#view-tool input::placeholder{ color:var(--t-text-3)!important; }
+
+/* ── 8. Scrollbars ───────────────────────────────────────────────────────────── */
+#view-tool .app-content-scroll::-webkit-scrollbar{ width:9px; height:9px; }
+#view-tool .app-content-scroll::-webkit-scrollbar-thumb{ background:var(--t-line-2); border-radius:8px; }
+#view-tool .app-content-scroll::-webkit-scrollbar-thumb:hover{ background:var(--t-gold-line); }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   CUT FILLER — lead with data, hide the coaching/process clutter.
+   ════════════════════════════════════════════════════════════════════════════ */
+/* Decision-path & guidance banners — remove from the working view */
+#view-tool .il-tool-decision-wrap,
+#view-tool .decision-path,
+#view-tool .il-decision-path,
+#view-tool .il-guidance,
+#view-tool .il-research-trail,
+#view-tool .il-research-hero,
+#view-tool .fg-label,
+#view-tool .il-shell-preview .il-shell-hint{
+  display:none!important;
+}
+/* The verbose empty-state coaching only matters before a ticker loads.
+   Once a ticker is present (body has data), hide it. */
+#view-tool .has-ticker .tool-welcome,
+#view-tool .il-shell-preview.has-ticker{
+  display:none!important;
+}
+/* Tighten the analyze header shell: keep the ticker line + price, drop chrome */
+#view-tool .il-tool-shell{
+  background:var(--t-surface)!important;
+  border:1px solid var(--t-line)!important;
+  border-radius:var(--t-r-lg)!important;
+  box-shadow:var(--t-elev)!important;
+  padding:var(--t-s3) var(--t-s4)!important;
+}
+#view-tool .il-shell-top{ background:transparent!important; }
+/* Kicker labels ("ANALYZE", "Ticker workspace") quieter/smaller */
+#view-tool .il-shell-kicker,
+#view-tool .ash-kicker{
+  font:700 .56rem var(--mono)!important;
+  letter-spacing:.12em!important; text-transform:uppercase!important;
+  color:var(--t-text-3)!important;
+}
+/* Stats footer: tighten into a compact data ribbon */
+#view-tool #app-stats-footer{
+  border-radius:0!important;
+  border-left:0!important; border-right:0!important; border-bottom:0!important;
+  box-shadow:none!important;
+  background:var(--t-surface)!important;
+}
+
+/* ── Spacing rhythm in the content scroll ───────────────────────────────────── */
+@media(min-width:961px){
+  #view-tool .app-content-scroll{
+    padding:var(--t-s5) var(--t-s5)!important;
+    display:flex; flex-direction:column; gap:var(--t-s4);
+    max-width:1320px; margin:0 auto;
+  }
+}
+
+/* ── Section header (when shown) calm + uppercase ───────────────────────────── */
+#view-tool .app-section-hdr{
+  background:transparent!important;
+  border:0!important;
+  color:var(--t-text)!important;
+  font:800 .72rem var(--mono)!important;
+  letter-spacing:.12em!important; text-transform:uppercase!important;
+  padding:var(--t-s3) 0!important;
+}
