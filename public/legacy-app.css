@@ -7068,3 +7068,139 @@ html[data-theme="dark"] #market-page .hg-market{
   border-radius:12px;
   overflow:visible;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DECLUTTER PASS v1 — 2026-06-28
+   Spacious black+gold direction inspired by 1000xstocks: more breathing room,
+   bold uppercase section headings, fewer hard borders, calmer control bars.
+   Incremental + mostly additive; scoped to the tool so marketing pages are safe.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Section headers: bold, uppercase, confident, with room ─────────────────── */
+#view-tool .app-section-hdr{
+  padding:18px clamp(16px,2vw,26px)!important;
+  letter-spacing:.14em!important;
+  text-transform:uppercase!important;
+  font-weight:800!important;
+  font-size:.74rem!important;
+}
+#view-tool .app-section-hdr i{color:var(--brand-gold)!important}
+
+/* ── More generous spacing between stacked panels ──────────────────────────── */
+#view-tool .app-content-scroll{
+  padding:clamp(16px,2vw,28px)!important;
+  display:flex; flex-direction:column; gap:clamp(14px,1.6vw,22px);
+}
+#view-tool .acc-body{
+  padding:clamp(18px,2vw,26px)!important;
+}
+#view-tool .chart-wrap,
+#view-tool .panel-box{
+  padding:clamp(18px,2vw,24px)!important;
+}
+
+/* ── Calmer toolbar: group as one clean bar, softer separators ──────────────── */
+#view-tool .app-chart-toolbar{
+  gap:6px!important;
+  padding:8px 12px!important;
+  border-radius:14px!important;
+  flex-wrap:wrap;
+  align-items:center;
+}
+#view-tool .act-sep{
+  width:1px!important;height:18px!important;
+  background:var(--glass-line)!important;
+  margin:0 4px!important;opacity:.7;
+}
+#view-tool .app-chart-toolbar .act-btn,
+#view-tool .app-tf-strip .tf-pill,
+#view-tool .app-tf-strip .tf-tog{
+  font-size:.7rem!important;
+  font-weight:600!important;
+  padding:6px 11px!important;
+  border-radius:8px!important;
+  letter-spacing:.01em!important;
+}
+/* Timeframe strip reads as a single segmented control */
+#view-tool .app-tf-strip{
+  gap:3px!important;
+  padding:5px 8px!important;
+  border-radius:12px!important;
+  align-items:center;
+}
+#view-tool .app-tf-strip .tf-pill{
+  border:0!important;
+  background:transparent!important;
+  color:var(--on-glass-3)!important;
+}
+#view-tool .app-tf-strip .tf-pill:hover{
+  background:var(--brand-gold-soft)!important;
+  color:var(--on-glass)!important;
+}
+#view-tool .app-tf-strip .tf-pill.on,
+#view-tool .app-tf-strip .tf-pill.active{
+  background:var(--brand-gold)!important;
+  color:#1a1206!important;
+  box-shadow:0 2px 8px rgba(200,144,31,.25)!important;
+}
+
+/* ── Metric tiles: more air, lighter chrome, clearer hierarchy ──────────────── */
+#view-tool .metric-card{
+  padding:14px 16px!important;
+  border-radius:12px!important;
+}
+#view-tool .m-lbl{
+  letter-spacing:.1em!important;
+  text-transform:uppercase!important;
+  font-size:.6rem!important;
+  margin-bottom:4px!important;
+}
+
+/* ── Decision path: calmer, more spacious, less boxed ───────────────────────── */
+#view-tool .decision-path,
+#view-tool .il-decision-path,
+#view-tool .dp-card{
+  padding:clamp(16px,1.8vw,22px)!important;
+}
+#view-tool .dp-card{
+  border:1px solid var(--glass-line-soft)!important;
+  border-radius:12px!important;
+  background:var(--glass-quiet)!important;
+}
+
+/* ── Empty-state ("Start with a company"): centered, spacious, premium ──────── */
+#view-tool .tool-welcome{
+  text-align:center!important;
+  padding:clamp(28px,4vw,52px) clamp(20px,3vw,40px)!important;
+}
+#view-tool .tool-welcome h1,
+#view-tool .tool-welcome h2,
+#view-tool .tw-title{
+  font-family:var(--serif)!important;
+  font-size:clamp(1.6rem,3vw,2.4rem)!important;
+  margin-bottom:.5rem!important;
+}
+#view-tool .tw-sub,
+#view-tool .tool-welcome p{
+  max-width:560px!important;
+  margin-left:auto!important;margin-right:auto!important;
+  color:var(--on-glass-3)!important;
+}
+
+/* ── Softer borders site-wide in the tool (fewer hard lines = less clutter) ─── */
+#view-tool .panel-box,
+#view-tool .chart-wrap,
+#view-tool .sidebar-card,
+#view-tool .cmp-table,
+#view-tool .fin-table{
+  border-color:var(--glass-line-soft)!important;
+}
+
+/* ── Bigger, bolder headings across the tool (1000x feel) ───────────────────── */
+#view-tool .chart-title,
+#view-tool .panel-box-title,
+#view-tool .sidebar-card-title{
+  font-size:.82rem!important;
+  font-weight:700!important;
+  letter-spacing:.01em!important;
+}
