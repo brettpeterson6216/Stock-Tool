@@ -7889,3 +7889,39 @@ body.il-dashboard-on #body-analyze::before{
 #view-tool .app-section .acc-body h2,
 #view-tool .app-section .acc-body h3,
 #view-tool .app-section .acc-body strong{ color:var(--on-glass)!important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FIX (specificity, definitive): an earlier rule
+   `html[data-theme="dark"] #view-tool .app-section .acc-body { transparent }`
+   (specificity 0,1,3,0) was beating the frost rule in dark mode. Match that
+   specificity in BOTH themes, authored last, so section bodies are frosted.
+   Analyze body stays transparent (its own panels are the cards).
+   ═══════════════════════════════════════════════════════════════════════════ */
+html[data-theme="dark"] #view-tool .app-section .acc-body,
+html[data-theme="dark"] #view-tool .app-section.open .acc-body,
+:root:not([data-theme="dark"]) #view-tool .app-section .acc-body,
+:root:not([data-theme="dark"]) #view-tool .app-section.open .acc-body{
+  background:var(--glass)!important;
+  background-color:var(--glass)!important;
+  background-image:none!important;
+  border:1px solid var(--glass-line)!important;
+  border-radius:16px!important;
+  box-shadow:var(--glass-shadow)!important;
+  -webkit-backdrop-filter:blur(20px) saturate(1.2)!important;
+  backdrop-filter:blur(20px) saturate(1.2)!important;
+}
+/* Keep the Analyze body transparent at the same specificity so its panels read
+   as individual cards rather than a card-in-card. */
+html[data-theme="dark"] #view-tool .app-section #body-analyze,
+html[data-theme="dark"] #view-tool .app-section.open #body-analyze,
+:root:not([data-theme="dark"]) #view-tool .app-section #body-analyze,
+:root:not([data-theme="dark"]) #view-tool .app-section.open #body-analyze{
+  background:transparent!important;
+  background-color:transparent!important;
+  background-image:none!important;
+  border:0!important;
+  box-shadow:none!important;
+  padding:0!important;
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+}
