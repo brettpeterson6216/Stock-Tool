@@ -7614,3 +7614,73 @@ html[data-theme="dark"]{ --text5:rgba(206,199,186,.66); }
   -webkit-backdrop-filter:blur(20px) saturate(1.2)!important;
   backdrop-filter:blur(20px) saturate(1.2)!important;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FULL IMPLEMENTATION — PART 3: DRAGGABLE DASHBOARD WIDGETS (Analyze)
+   Only active when body.il-dashboard-on. Additive; doesn't affect normal view.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Widget header bar is hidden until dashboard mode is on */
+.il-widget-bar{ display:none; }
+body.il-dashboard-on #body-analyze .panel-box,
+body.il-dashboard-on #body-analyze .chart-wrap{
+  position:relative;
+  resize:vertical; overflow:auto; min-height:120px;
+}
+body.il-dashboard-on #body-analyze .il-widget-bar{
+  display:flex; align-items:center; gap:6px;
+  margin:-6px -6px 10px; padding:6px 8px;
+  border-bottom:1px solid var(--glass-line-soft);
+  background:color-mix(in srgb, var(--brand-gold) 4%, transparent);
+  border-radius:10px 10px 0 0;
+}
+.il-widget-bar .il-drag-handle,
+.il-widget-bar .il-widget-min{
+  width:26px; height:26px; display:grid; place-items:center;
+  border:1px solid var(--glass-line); border-radius:7px;
+  background:var(--glass-quiet); color:var(--on-glass-2); cursor:pointer;
+  transition:background .14s,color .14s,border-color .14s;
+}
+.il-widget-bar .il-drag-handle{ cursor:grab; }
+.il-widget-bar .il-drag-handle:active{ cursor:grabbing; }
+.il-widget-bar .il-drag-handle:hover,
+.il-widget-bar .il-widget-min:hover{
+  background:var(--brand-gold-soft); border-color:var(--brand-gold-line); color:var(--on-glass);
+}
+.il-widget-bar .il-widget-spacer{ flex:1; }
+.il-widget-bar i{ font-size:15px; }
+
+/* Collapsed widget: hide its body, keep the bar */
+body.il-dashboard-on #body-analyze .panel-box.il-collapsed,
+body.il-dashboard-on #body-analyze .chart-wrap.il-collapsed{
+  resize:none; min-height:0; height:auto!important;
+}
+body.il-dashboard-on #body-analyze .panel-box.il-collapsed > *:not(.il-widget-bar),
+body.il-dashboard-on #body-analyze .chart-wrap.il-collapsed > *:not(.il-widget-bar){
+  display:none!important;
+}
+
+/* Dragging visuals */
+#body-analyze .panel-box.il-dragging,
+#body-analyze .chart-wrap.il-dragging{
+  opacity:.92; z-index:50; cursor:grabbing;
+  box-shadow:var(--glass-shadow-lg), 0 0 0 2px var(--brand-gold-line)!important;
+}
+.il-drop-placeholder{
+  border:2px dashed var(--brand-gold-line);
+  border-radius:14px;
+  background:var(--brand-gold-soft);
+  margin:8px 0;
+}
+
+/* Dashboard toggle button active state already covered by .act-btn.on */
+#il-dash-toggle.on{ box-shadow:0 2px 8px rgba(200,144,31,.25)!important; }
+
+/* Small hint banner the first time dashboard mode is on */
+body.il-dashboard-on #body-analyze::before{
+  content:"Dashboard mode — drag the grip to reorder, drag the bottom edge to resize, click − to collapse.";
+  display:block; margin-bottom:12px; padding:9px 13px;
+  border:1px solid var(--brand-gold-line); border-radius:10px;
+  background:var(--brand-gold-soft); color:var(--on-glass-2);
+  font:600 .72rem var(--sans);
+}
