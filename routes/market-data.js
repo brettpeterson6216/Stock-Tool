@@ -217,8 +217,14 @@ router.get("/quote/:ticker", checkAnalysisLimit, async (req, res) => {
     const ticker = req.params.ticker;
     const rawRange = String(req.query.range || "1y").toLowerCase();
     const range = VALID_RANGES.has(rawRange) ? rawRange : "1y";
-    const rawInterval = String(req.query.interval || "1d").toLowerCase();
-    const interval = VALID_INTERVALS.has(rawInterval) ? rawInterval : "1d";
+    const rawInterval = String(req.query.interval || "").toLowerCase();
+    // Auto-pick a sensible interval per range so long ranges return COMPLETE
+    // history (Yahoo caps daily-interval responses on multi-year ranges).
+    const AUTO_INTERVAL = {
+      "1d":"5m","5d":"30m","1mo":"1d","3mo":"1d","6mo":"1d",
+      "ytd":"1d","1y":"1d","2y":"1d","5y":"1wk","10y":"1wk","max":"1mo"
+    };
+    let interval = VALID_INTERVALS.has(rawInterval) ? rawInterval : (AUTO_INTERVAL[range] || "1d");
     const cacheKey = `quote:${ticker}:${range}:${interval}`;
     const cached = getCached(cacheKey, 60 * 1000);
     if (cached) return res.json(cached);
@@ -269,8 +275,10 @@ router.get("/quote/:ticker", checkAnalysisLimit, async (req, res) => {
       try {
         const now2      = Math.floor(Date.now() / 1000);
         const rangeSecs = { "1d":86400,"5d":5*86400,"1mo":30*86400,"3mo":90*86400,"6mo":180*86400,"1y":365*86400,"2y":730*86400,"5y":1825*86400,"10y":3650*86400,"max":10950*86400 };
-        const period1   = now2 - (rangeSecs[range] || 365*86400);
-        const csvUrl    = `https://query1.finance.yahoo.com/v7/finance/download/${encodeURIComponent(ticker)}?period1=${period1}&period2=${now2}&interval=1d&events=history&includeAdjustedClose=true`;
+        // "max" → start at the epoch so we get the company's full listed history.
+        const period1   = range === "max" ? 0 : now2 - (rangeSecs[range] || 365*86400);
+        const csvInterval = (range === "5y" || range === "10y") ? "1wk" : (range === "max" ? "1mo" : "1d");
+        const csvUrl    = `https://query1.finance.yahoo.com/v7/finance/download/${encodeURIComponent(ticker)}?period1=${period1}&period2=${now2}&interval=${csvInterval}&events=history&includeAdjustedClose=true`;
         const r         = await fetchWithTimeout(csvUrl, { headers: YH }, 4000);
         if (r.ok) {
           const csv   = await r.text();
