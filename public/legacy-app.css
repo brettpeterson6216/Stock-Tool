@@ -7442,3 +7442,175 @@ html[data-theme="dark"]{ --text5:rgba(206,199,186,.66); }
 #view-tool .app-content-scroll::-webkit-scrollbar-thumb:hover{
   background:var(--brand-gold-line);
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FULL IMPLEMENTATION — PART 1: PREMIUM DATA TABLES (1000x-style)
+   Structured rows, gold uppercase headers, sticky head, zebra, aligned numbers.
+   ═══════════════════════════════════════════════════════════════════════════ */
+#view-tool .fin-table,
+#view-tool .earn-table,
+#view-tool .inst-table,
+#view-tool .cmp-table,
+#view-tool .scr-table,
+#view-tool .wl-table{
+  width:100%;
+  border-collapse:separate!important;
+  border-spacing:0!important;
+  font-variant-numeric:tabular-nums;
+  border-radius:12px;
+  overflow:hidden;
+}
+#view-tool .fin-table thead th,
+#view-tool .earn-table thead th,
+#view-tool .inst-table thead th,
+#view-tool .cmp-table thead th,
+#view-tool .scr-table thead th,
+#view-tool .wl-table thead th{
+  position:sticky; top:0; z-index:3;
+  background:var(--glass-strong)!important;
+  -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
+  color:var(--brand-gold-strong)!important;
+  font:800 .62rem var(--mono)!important;
+  letter-spacing:.1em!important;
+  text-transform:uppercase!important;
+  padding:11px 14px!important;
+  border-bottom:1px solid var(--brand-gold-line)!important;
+  white-space:nowrap;
+}
+#view-tool .fin-table tbody td,
+#view-tool .earn-table tbody td,
+#view-tool .inst-table tbody td,
+#view-tool .cmp-table tbody td,
+#view-tool .scr-table tbody td,
+#view-tool .wl-table tbody td{
+  padding:10px 14px!important;
+  border-bottom:1px solid var(--glass-line-soft)!important;
+  color:var(--on-glass-2)!important;
+  font-size:.78rem!important;
+}
+/* Zebra striping */
+#view-tool .fin-table tbody tr:nth-child(even),
+#view-tool .earn-table tbody tr:nth-child(even),
+#view-tool .inst-table tbody tr:nth-child(even),
+#view-tool .scr-table tbody tr:nth-child(even),
+#view-tool .wl-table tbody tr:nth-child(even){
+  background:color-mix(in srgb, var(--brand-gold) 3%, transparent)!important;
+}
+/* Row hover */
+#view-tool .fin-table tbody tr:hover,
+#view-tool .earn-table tbody tr:hover,
+#view-tool .inst-table tbody tr:hover,
+#view-tool .scr-table tbody tr:hover,
+#view-tool .wl-table tbody tr:hover,
+#view-tool .cmp-table tbody tr:hover{
+  background:var(--brand-gold-soft)!important;
+}
+/* First column = label (left, semibold); numeric columns right-aligned */
+#view-tool .fin-table tbody td:first-child,
+#view-tool .earn-table tbody td:first-child,
+#view-tool .inst-table tbody td:first-child,
+#view-tool .scr-table tbody td:first-child{
+  font-weight:700!important;
+  color:var(--on-glass)!important;
+}
+#view-tool .fin-table tbody td:not(:first-child),
+#view-tool .fin-table thead th:not(:first-child),
+#view-tool .earn-table tbody td:not(:first-child),
+#view-tool .earn-table thead th:not(:first-child){
+  text-align:right!important;
+}
+
+/* ── Empty-state ("Ticker workspace") — cleaner, less redundant, premium ────── */
+#view-tool .tool-welcome,
+#view-tool .search-row{
+  border-radius:16px!important;
+}
+#view-tool .tool-welcome .tw-eyebrow,
+#view-tool .search-row .ash-kicker{
+  display:inline-block;
+  letter-spacing:.16em!important;
+  text-transform:uppercase!important;
+  font:800 .56rem var(--mono)!important;
+  color:var(--brand-gold)!important;
+  margin-bottom:6px;
+}
+/* Quieter "No ticker selected / Unavailable" placeholders so they don't shout */
+#view-tool .metric-card .m-val:empty::after,
+#view-tool .ash-metric .am-val{ color:var(--on-glass-2)!important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FULL IMPLEMENTATION — PART 2: HOME / MARKET / SECONDARY PAGE POLISH
+   Bolder hero, more whitespace, premium 1000x spacing & typography.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Landing hero: bigger, bolder, more confident ──────────────────────────── */
+.il-landing-hero h1,
+.home-hero h1{
+  letter-spacing:-.015em!important;
+  line-height:1.0!important;
+}
+.il-landing-hero{
+  padding-top:clamp(56px,7vw,104px)!important;
+  padding-bottom:clamp(44px,5vw,72px)!important;
+}
+.il-landing-kicker{
+  font-weight:800!important;
+  letter-spacing:.16em!important;
+}
+/* Section rhythm: more air between landing bands */
+.il-workflow-visual,
+.il-landing-band,
+.il-landing-pricing,
+.home-proof,
+.home-guide-showcase{
+  padding-top:clamp(44px,5vw,80px)!important;
+  padding-bottom:clamp(44px,5vw,80px)!important;
+}
+
+/* ── Market dashboard: clearer hierarchy + breathing room ───────────────────── */
+#market-page .home-grid,
+#market-page .home-lower{
+  gap:1px!important;
+}
+#market-page .hc{
+  padding:clamp(16px,1.6vw,22px)!important;
+}
+#market-page .hc-title,
+#market-page .mo-header strong{
+  font-weight:700!important;
+  letter-spacing:.01em!important;
+}
+/* Ticker strip cards: tidy, equal, gold hover */
+#market-page .ht-card{
+  transition:background .14s, transform .14s;
+}
+#market-page .ht-card:hover{
+  background:var(--brand-gold-soft)!important;
+  transform:translateY(-1px);
+}
+/* Card section labels uppercase like 1000x */
+#market-page .hc-title,
+#market-page .hc-head strong{
+  text-transform:uppercase!important;
+  letter-spacing:.08em!important;
+  font-size:.66rem!important;
+  color:var(--on-glass-3)!important;
+}
+
+/* ── Secondary pages (Learn / About / auth) inherit premium surface ─────────── */
+.static-page, .auth-shell, .blog-shell, .about-shell{
+  color:var(--text2);
+}
+.static-page h1, .about-shell h1, .blog-shell h1{
+  font-family:var(--serif);
+  letter-spacing:-.01em;
+}
+/* Auth cards as frosted glass */
+.auth-card, .login-card, .signup-card, .reset-card{
+  background:var(--glass-strong)!important;
+  border:1px solid var(--glass-line)!important;
+  box-shadow:var(--glass-shadow-lg)!important;
+  border-radius:16px!important;
+  -webkit-backdrop-filter:blur(20px) saturate(1.2)!important;
+  backdrop-filter:blur(20px) saturate(1.2)!important;
+}
