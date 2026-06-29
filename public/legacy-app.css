@@ -7684,3 +7684,97 @@ body.il-dashboard-on #body-analyze::before{
   background:var(--brand-gold-soft); color:var(--on-glass-2);
   font:600 .72rem var(--sans);
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FIX: restore the tool scroll container's height chain (regressed when the
+   sidebar was removed). Without this the inner scroll expands to full content
+   height and the chart/data stack far down the page. Desktop only.
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media(min-width:961px){
+  #view-tool{
+    display:flex!important;
+    flex-direction:column!important;
+    height:calc(100vh - 56px)!important;
+    min-height:0!important;
+    overflow:hidden!important;
+  }
+  #view-tool .app-shell{
+    display:flex!important;
+    flex-direction:column!important;
+    flex:1 1 auto!important;
+    min-height:0!important;
+    overflow:hidden!important;
+  }
+  #view-tool .app-main{
+    display:flex!important;
+    flex-direction:column!important;
+    flex:1 1 auto!important;
+    min-height:0!important;
+    overflow:hidden!important;
+  }
+  #view-tool .app-content-scroll{
+    flex:1 1 auto!important;
+    min-height:0!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FIX: Analyze result content was rendering transparent on the gold ripple
+   (washed-out price hero, guidance, trust panel, metrics). Give these the same
+   frosted-glass surface as other panels so text is readable in both themes.
+   ═══════════════════════════════════════════════════════════════════════════ */
+#view-tool .il-guidance,
+#view-tool .result-header,
+#view-tool .il-trust-panel,
+#view-tool .metrics-grid,
+#view-tool .il-research-trail,
+#view-tool .il-research-shell,
+#view-tool .il-research-hero,
+#view-tool .il-research-panel,
+#view-tool .edu-hero,
+#view-tool .analyst-target-box,
+#view-tool .analyst-rec-box{
+  background:var(--glass)!important;
+  border:1px solid var(--glass-line)!important;
+  border-radius:14px!important;
+  box-shadow:var(--glass-shadow)!important;
+  -webkit-backdrop-filter:blur(20px) saturate(1.2)!important;
+  backdrop-filter:blur(20px) saturate(1.2)!important;
+}
+/* spacing between the stacked result blocks */
+#view-tool .dash-layout > *,
+#view-tool #body-analyze > div > .il-guidance,
+#view-tool #body-analyze > div > .result-header{
+  margin-bottom:14px;
+}
+/* The big price hero text must be readable (was gold-on-gold) */
+#view-tool .result-header,
+#view-tool .result-header *{
+  color:var(--on-glass-2)!important;
+}
+#view-tool .result-header .rh-name,
+#view-tool .result-header h1,
+#view-tool .result-header h2,
+#view-tool .result-header .rh-price,
+#view-tool .result-header .big-price{
+  color:var(--on-glass)!important;
+}
+/* keep positive/negative change colors intact */
+#view-tool .result-header .pos,
+#view-tool .result-header .up,
+#view-tool .result-header [class*="positive"]{ color:var(--positive)!important; }
+#view-tool .result-header .neg,
+#view-tool .result-header .down,
+#view-tool .result-header [class*="negative"]{ color:var(--negative)!important; }
+
+/* guidance banner readable */
+#view-tool .il-guidance,
+#view-tool .il-guidance *{ color:var(--on-glass-2)!important; }
+#view-tool .il-guidance strong,
+#view-tool .il-guidance b{ color:var(--on-glass)!important; }
+
+/* ── FIX: remove the duplicate ticker search. Keep the prominent "Ticker
+   workspace" search in .il-tool-shell; hide the redundant plain .search-row. ── */
+#body-analyze .search-row{ display:none!important; }
