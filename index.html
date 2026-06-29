@@ -96,7 +96,7 @@
 <script defer src="/vendor/hammer.min.js?v=2.0.8"></script>
 <script defer src="/vendor/chartjs-plugin-zoom.min.js?v=2.2.0"></script>
 <script defer src="/model-math.js?v=20260612-1"></script>
-<link href="/legacy-app.css?v=20260628-14" rel="stylesheet">
+<link href="/legacy-app.css?v=20260628-15" rel="stylesheet">
 </head>
 <body>
 <a href="#main-content" class="skip-link">Skip to content</a>
@@ -2278,6 +2278,11 @@ function openSection(id, skipProCheck) {
   // Update sidebar active state
   document.querySelectorAll('.sb-item').forEach(el => {
     el.classList.toggle('active', el.dataset.sec === id);
+  });
+  // Sync the in-tool section strip (.mst-btn) active state — it's now the
+  // primary desktop section switcher, not just mobile.
+  document.querySelectorAll('.mst-btn').forEach(b => {
+    b.classList.toggle('active', b.getAttribute('data-sec') === id);
   });
   // Top-bar nav active state: highlight "Analyze" for tool sections,
   // "Learn" for education, leaving Home/Market/About to their own handlers.

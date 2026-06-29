@@ -7778,3 +7778,62 @@ body.il-dashboard-on #body-analyze::before{
 /* ── FIX: remove the duplicate ticker search. Keep the prominent "Ticker
    workspace" search in .il-tool-shell; hide the redundant plain .search-row. ── */
 #body-analyze .search-row{ display:none!important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FIX (live audit round 2): stats footer + section intros washed out on gold
+   ═══════════════════════════════════════════════════════════════════════════ */
+/* OHLC stats footer bar — was transparent on the ripple, illegible */
+#view-tool #app-stats-footer,
+#app-stats-footer{
+  background:var(--glass-strong)!important;
+  border-top:1px solid var(--glass-line)!important;
+  -webkit-backdrop-filter:blur(20px) saturate(1.2)!important;
+  backdrop-filter:blur(20px) saturate(1.2)!important;
+}
+#view-tool #app-stats-footer *,
+#app-stats-footer *{ color:var(--on-glass-2)!important; }
+#view-tool #app-stats-footer .asf-val,
+#view-tool #app-stats-footer strong,
+#app-stats-footer .asf-val,
+#app-stats-footer strong{ color:var(--on-glass)!important; }
+
+/* Section intro text + sub-tabs (Income Statement / Balance Sheet / Cash Flow,
+   and similar) were sitting transparent on the gold. Frost their wrappers. */
+#view-tool .acc-body > .fin-intro,
+#view-tool .acc-body > .sec-intro,
+#view-tool .acc-body .fin-tabs,
+#view-tool .acc-body .stmt-tabs,
+#view-tool .fin-controls,
+#view-tool .acc-body > p:first-of-type{
+  color:var(--on-glass-2)!important;
+}
+/* The whole accordion body gets a calm frosted card so nothing floats on gold */
+#view-tool .acc-body{
+  background:var(--glass)!important;
+  border:1px solid var(--glass-line)!important;
+  border-radius:16px!important;
+  box-shadow:var(--glass-shadow)!important;
+  -webkit-backdrop-filter:blur(20px) saturate(1.2)!important;
+  backdrop-filter:blur(20px) saturate(1.2)!important;
+}
+/* But the analyze body holds its own panels — keep it transparent so those
+   panels read as separate cards (avoid a card-in-card look). */
+#view-tool #body-analyze{
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+}
+/* Section sub-tab pills (Income Statement etc.) consistent gold active */
+#view-tool .fin-tab,
+#view-tool .stmt-tab,
+#view-tool .acc-body .tab-pill{
+  color:var(--on-glass-2)!important;
+}
+#view-tool .fin-tab.active,
+#view-tool .stmt-tab.active,
+#view-tool .acc-body .tab-pill.active{
+  background:var(--brand-gold)!important;
+  color:#1a1206!important;
+}
