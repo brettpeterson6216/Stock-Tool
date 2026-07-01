@@ -317,3 +317,30 @@ html[data-theme="dark"] #view-tool .il-tool-shell,
 #view-tool .il-tool-shell button:not(.hh-search-btn):not(.il-shell-analyze){
   opacity:1!important; border-color:var(--brand-gold-line)!important;
 }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   READABILITY — theme-correct accent colors (no dark-theme colors in light)
+   ════════════════════════════════════════════════════════════════════════════ */
+/* Small gold kicker/label text: use the darker gold in light mode for contrast */
+:root:not([data-theme="dark"]) #view-tool .il-shell-kicker,
+:root:not([data-theme="dark"]) #view-tool [class*="kicker"],
+:root:not([data-theme="dark"]) #view-tool .res-ticker-lbl,
+:root:not([data-theme="dark"]) #view-tool .sec-label,
+:root:not([data-theme="dark"]) #view-tool .fg-label,
+:root:not([data-theme="dark"]) #view-tool .m-lbl{
+  color:var(--brand-gold-strong)!important;
+}
+/* Positive/negative values: use the theme's own semantic color, never leak dark→light */
+:root:not([data-theme="dark"]) #view-tool .up,
+:root:not([data-theme="dark"]) #view-tool .pos,
+:root:not([data-theme="dark"]) #view-tool [class*="positive"],
+:root:not([data-theme="dark"]) #view-tool .risk-stat-val.up,
+:root:not([data-theme="dark"]) #view-tool .price-chg.up{
+  color:#1c6b4a!important;
+}
+:root:not([data-theme="dark"]) #view-tool .dn,
+:root:not([data-theme="dark"]) #view-tool .neg,
+:root:not([data-theme="dark"]) #view-tool [class*="negative"],
+:root:not([data-theme="dark"]) #view-tool .price-chg.dn{
+  color:#9e3f45!important;
+}
