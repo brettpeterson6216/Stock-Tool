@@ -1,0 +1,232 @@
+/* ════════════════════════════════════════════════════════════════════════════
+   IMPLIED LENS — PREMIUM RESTRUCTURE LAYER
+   Uses the site's REAL skin (gold ripple, --brand-gold, frosted panels) and
+   restructures the REAL components into a clean, clutter-free premium layout.
+   No new colors, no new background — just organization, spacing, depth, motion.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Shared premium tokens (depth + rhythm), reuse existing gold ─────────────── */
+:root{
+  --pr-1:0 1px 2px rgba(30,22,8,.06),0 6px 20px rgba(30,22,8,.06);
+  --pr-2:0 2px 6px rgba(30,22,8,.08),0 16px 40px rgba(30,22,8,.1);
+  --pr-hairline:linear-gradient(90deg,transparent,var(--brand-gold-line),transparent);
+  --pr-gap:clamp(14px,1.6vw,20px);
+}
+html[data-theme="dark"]{
+  --pr-1:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.34);
+  --pr-2:0 4px 10px rgba(0,0,0,.46),0 20px 48px rgba(0,0,0,.5);
+}
+
+/* ── 1. Generous, centered content column with real rhythm ──────────────────── */
+@media(min-width:961px){
+  #view-tool .app-content-scroll{
+    padding:clamp(20px,2.4vw,34px) clamp(20px,3vw,40px) 60px!important;
+  }
+  #view-tool #body-analyze,
+  #view-tool .acc-body{
+    max-width:1300px; margin-left:auto; margin-right:auto;
+  }
+  #view-tool #stock-result > *{ margin-bottom:var(--pr-gap)!important; }
+  #view-tool #stock-result > *:last-child{ margin-bottom:0!important; }
+}
+
+/* ── 2. Price banner (result-header) — clean, premium, one strong line ───────── */
+#view-tool .result-header{
+  display:flex!important; align-items:flex-end; justify-content:space-between;
+  gap:28px; flex-wrap:wrap;
+  padding:clamp(18px,2vw,26px) clamp(20px,2.2vw,30px)!important;
+  border-radius:18px!important;
+  box-shadow:var(--pr-2)!important;
+  position:relative; overflow:hidden;
+}
+#view-tool .result-header::before{
+  content:""; position:absolute; top:0; left:20px; right:20px; height:1px;
+  background:var(--pr-hairline); opacity:.85; pointer-events:none;
+}
+#view-tool .res-name{ font-size:clamp(1.5rem,2.4vw,2.1rem)!important; line-height:1!important; }
+#view-tool .price-big{ font-size:clamp(2rem,3.2vw,2.8rem)!important; line-height:1!important; }
+#view-tool .price-chg{
+  display:inline-flex; align-items:center; gap:5px;
+  padding:5px 11px; border-radius:9px; font-weight:600;
+}
+
+/* ── 3. Metrics grid — even, spacious tiles ─────────────────────────────────── */
+#view-tool .metrics-grid{
+  display:grid!important;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr))!important;
+  gap:12px!important;
+}
+#view-tool .metrics-grid .metric-card,
+#view-tool .metric-card{
+  border-radius:14px!important;
+  padding:15px 17px!important;
+  box-shadow:var(--pr-1)!important;
+  transition:transform .18s cubic-bezier(.2,.7,.3,1),border-color .18s,box-shadow .18s!important;
+}
+#view-tool .metric-card:hover{
+  transform:translateY(-2px)!important;
+  border-color:var(--brand-gold-line)!important;
+  box-shadow:var(--pr-2)!important;
+}
+
+/* ── 4. Cards & panels — real depth, lift on hover, gold top-hairline ───────── */
+#view-tool .chart-wrap,
+#view-tool .panel-box,
+#view-tool .sidebar-card,
+#view-tool .il-trust-panel,
+#view-tool .analyst-target-box,
+#view-tool .analyst-rec-box,
+#view-tool .dp-card{
+  border-radius:16px!important;
+  box-shadow:var(--pr-1)!important;
+  transition:transform .2s cubic-bezier(.2,.7,.3,1),box-shadow .22s,border-color .2s!important;
+  position:relative;
+}
+#view-tool .chart-wrap:hover,
+#view-tool .panel-box:hover,
+#view-tool .sidebar-card:hover{
+  transform:translateY(-2px)!important;
+  box-shadow:var(--pr-2)!important;
+  border-color:var(--brand-gold-line)!important;
+}
+/* the main price chart gets the most presence */
+#view-tool .dash-main > .chart-wrap:first-child{
+  box-shadow:var(--pr-2)!important;
+  border-radius:18px!important;
+}
+
+/* ── 5. Two-column dashboard — clean gutters ────────────────────────────────── */
+@media(min-width:1100px){
+  #view-tool .dash-layout{ gap:var(--pr-gap)!important; }
+  #view-tool .dash-main{ display:flex; flex-direction:column; gap:var(--pr-gap); }
+  #view-tool .dash-side{ display:flex; flex-direction:column; gap:var(--pr-gap); }
+}
+
+/* ── 6. Control bars — grouped, tactile; one cohesive header ────────────────── */
+#view-tool .app-chart-toolbar{
+  border-radius:14px 14px 0 0!important;
+  box-shadow:var(--pr-1)!important;
+  gap:7px!important; padding:9px 12px!important;
+}
+#view-tool .app-tf-strip{
+  border-radius:0 0 14px 14px!important; border-top:0!important;
+  gap:4px!important; padding:7px 12px!important;
+  margin-bottom:var(--pr-gap)!important;
+}
+#view-tool .mobile-sec-tabs{
+  border-radius:14px!important; box-shadow:var(--pr-1)!important;
+  gap:6px!important; padding:11px 14px!important;
+  margin-bottom:var(--pr-gap)!important;
+}
+/* every pill: tactile hover, gold gradient active */
+#view-tool .act-btn,#view-tool .tf-pill,#view-tool .tf-tog,#view-tool .mst-btn{
+  border-radius:9px!important;
+  transition:transform .14s,background .15s,color .15s,border-color .15s,box-shadow .15s!important;
+}
+#view-tool .act-btn:hover,#view-tool .tf-pill:hover,#view-tool .mst-btn:hover{ transform:translateY(-1px)!important; }
+#view-tool .act-btn.on,#view-tool .act-btn.active,
+#view-tool .tf-pill.on,#view-tool .tf-pill.active,
+#view-tool .tf-tog.on,#view-tool .mst-btn.active{
+  background:var(--gold-grad)!important; color:#1a1206!important;
+  border-color:transparent!important;
+  box-shadow:0 3px 12px var(--gold-tint2),0 1px 0 rgba(255,255,255,.28) inset!important;
+}
+
+/* ── 7. Cut the remaining clutter (decision-path, guidance, verbose labels) ──── */
+#view-tool .il-tool-decision-wrap,
+#view-tool .il-decision-path,
+#view-tool .il-guidance,
+#view-tool .il-research-trail{
+  display:none!important;
+}
+
+/* ── 8. Chart-header + panel titles: quiet uppercase, gold mark ─────────────── */
+#view-tool .chart-title,
+#view-tool .panel-box-title{
+  font-weight:700!important; letter-spacing:.02em!important;
+}
+
+/* ── 9. Tables — premium, rounded, elevated ─────────────────────────────────── */
+#view-tool .fin-table,#view-tool .earn-table,#view-tool .inst-table,
+#view-tool .cmp-table,#view-tool .scr-table{
+  border-radius:14px!important; overflow:hidden; box-shadow:var(--pr-1)!important;
+}
+
+/* ── 10. Nav polish + reduced motion ────────────────────────────────────────── */
+#main-nav .nav-tab{ transition:color .16s,background .16s!important; }
+@media (prefers-reduced-motion: reduce){ *{ transition-duration:.01ms!important; } }
+
+/* ── 11. Mobile: single column, comfortable spacing ─────────────────────────── */
+@media(max-width:960px){
+  #view-tool .dash-layout{ grid-template-columns:1fr!important; }
+  #view-tool .result-header{ flex-direction:column; align-items:flex-start; gap:14px; }
+  #view-tool .app-content-scroll{ padding:16px!important; }
+  #view-tool .metrics-grid{ grid-template-columns:repeat(2,1fr)!important; }
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   HOME / LANDING / MARKET — same premium restructure, real components + skin
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Landing hero: confident rhythm, premium buttons ────────────────────────── */
+.il-landing-hero{ padding-top:clamp(48px,6vw,92px)!important; padding-bottom:clamp(40px,5vw,68px)!important; }
+.il-landing h1{ letter-spacing:-.02em!important; }
+.il-landing-kicker{ letter-spacing:.15em!important; font-weight:800!important; }
+
+.il-landing-primary,.btn-primary,.btn-plan-gold{
+  border-radius:999px!important; font-weight:700!important;
+  box-shadow:var(--gold-glow),0 1px 0 rgba(255,255,255,.32) inset!important;
+  transition:transform .16s cubic-bezier(.2,.7,.3,1),box-shadow .2s,filter .2s!important;
+}
+.il-landing-primary:hover,.btn-primary:hover,.btn-plan-gold:hover{
+  transform:translateY(-2px)!important; filter:brightness(1.04) saturate(1.04)!important;
+}
+.il-landing-secondary{
+  border-radius:999px!important; font-weight:600!important;
+  transition:transform .16s,border-color .18s,background .18s!important;
+}
+.il-landing-secondary:hover{ transform:translateY(-1px)!important; border-color:var(--brand-gold-line)!important; }
+
+/* ── Landing product preview: real depth ────────────────────────────────────── */
+.il-landing-preview{
+  border-radius:18px!important;
+  box-shadow:var(--pr-2)!important;
+}
+
+/* ── Proof + guide + pricing cards: depth, lift, gold hairline ───────────────── */
+.home-proof-card,.home-guide-model,.pricing-card,.hc{
+  border-radius:14px!important;
+  transition:transform .2s cubic-bezier(.2,.7,.3,1),box-shadow .22s,border-color .2s!important;
+  position:relative;
+}
+.home-proof-card{ box-shadow:var(--pr-1)!important; }
+.home-proof-card:hover,.pricing-card:hover{
+  transform:translateY(-3px)!important; box-shadow:var(--pr-2)!important; border-color:var(--brand-gold-line)!important;
+}
+.home-proof-card::before,.pricing-card.featured::before{
+  content:""; position:absolute; top:0; left:16px; right:16px; height:1px;
+  background:var(--pr-hairline); opacity:.8; pointer-events:none;
+}
+.home-proof-card i{ transition:transform .2s; }
+.home-proof-card:hover i{ transform:scale(1.08); }
+
+/* ── Section rhythm on the landing bands ────────────────────────────────────── */
+.il-workflow-visual,.il-landing-band,.il-landing-pricing,.home-guide-showcase,.home-proof{
+  padding-top:clamp(44px,5vw,76px)!important; padding-bottom:clamp(44px,5vw,76px)!important;
+}
+
+/* ── Market dashboard cards: depth + gold hover ─────────────────────────────── */
+#market-page .hc,#market-page .hg-market,#market-page .ht-card{
+  transition:transform .18s cubic-bezier(.2,.7,.3,1),border-color .18s,background .18s!important;
+}
+#market-page .hc:hover,#market-page .ht-card:hover{
+  transform:translateY(-2px)!important; border-color:var(--brand-gold-line)!important;
+}
+#market-page .hg-market{ box-shadow:var(--pr-2)!important; border-radius:16px!important; }
+
+/* ── Market sidebar items — tactile ─────────────────────────────────────────── */
+#market-page .hsb-item{ transition:background .14s,color .14s,transform .14s!important; }
+#market-page .hsb-item:hover{ transform:translateX(2px); }
+
+/* ── CTA strip button ───────────────────────────────────────────────────────── */
+.cta-strip .btn-primary{ transform:none; }
