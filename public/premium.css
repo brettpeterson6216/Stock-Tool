@@ -344,3 +344,35 @@ html[data-theme="dark"] #view-tool .il-tool-shell,
 :root:not([data-theme="dark"]) #view-tool .price-chg.dn{
   color:#9e3f45!important;
 }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   HOME HERO — secondary button was dark-on-dark (invisible over the ripple).
+   Give it a frosted surface + readable text in both themes.
+   ════════════════════════════════════════════════════════════════════════════ */
+.il-landing-secondary,
+.il-landing-hero .il-landing-secondary{
+  background:rgba(255,253,248,.14)!important;
+  border:1px solid rgba(255,244,214,.4)!important;
+  color:#fff4dc!important;
+  -webkit-backdrop-filter:blur(10px) saturate(1.1)!important;
+  backdrop-filter:blur(10px) saturate(1.1)!important;
+  text-shadow:0 1px 2px rgba(0,0,0,.4)!important;
+}
+.il-landing-secondary:hover,
+.il-landing-hero .il-landing-secondary:hover{
+  background:rgba(255,253,248,.22)!important;
+  border-color:rgba(255,244,214,.6)!important;
+  color:#fff!important;
+}
+.il-landing-secondary i{ color:inherit!important; }
+/* Light theme: readable dark text on a light frosted pill */
+:root:not([data-theme="dark"]) .il-landing-secondary{
+  background:rgba(255,255,255,.55)!important;
+  border:1px solid rgba(120,86,30,.3)!important;
+  color:#3b2a12!important;
+  text-shadow:none!important;
+}
+:root:not([data-theme="dark"]) .il-landing-secondary:hover{
+  background:rgba(255,255,255,.75)!important;
+  color:#241c0e!important;
+}
