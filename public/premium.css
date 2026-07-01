@@ -230,3 +230,43 @@ html[data-theme="dark"]{
 
 /* ── CTA strip button ───────────────────────────────────────────────────────── */
 .cta-strip .btn-primary{ transform:none; }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   EMPTY STATE (pre-ticker) — premium first impression
+   ════════════════════════════════════════════════════════════════════════════ */
+#view-tool .tool-welcome{
+  padding:clamp(32px,5vw,56px) 1.5rem clamp(20px,2vw,28px)!important;
+}
+#view-tool .tw-title{
+  font-size:clamp(1.9rem,3.4vw,2.6rem)!important; letter-spacing:-.025em!important;
+}
+#view-tool .tw-sub{ max-width:520px; margin:0 auto!important; }
+
+/* Premium search bar in the empty state */
+#view-tool .search-row{
+  border-radius:14px!important;
+  box-shadow:var(--pr-1)!important;
+  transition:border-color .18s,box-shadow .18s!important;
+}
+#view-tool .search-row:focus-within{
+  border-color:var(--brand-gold-line)!important;
+  box-shadow:0 0 0 3px var(--gold-tint),var(--pr-1)!important;
+}
+#view-tool .search-row .btn-search{
+  background:var(--gold-grad)!important; color:#1a1206!important;
+  font-weight:700!important; transition:filter .16s!important;
+}
+#view-tool .search-row .btn-search:hover{ filter:brightness(1.05)!important; }
+
+/* Featured "popular starting points" — elevated, tactile cards */
+#view-tool #featured-grid{ border-radius:14px!important; box-shadow:var(--pr-1)!important; }
+#view-tool .fstock-card{ transition:background .14s,transform .14s!important; }
+#view-tool .fstock-card:hover{ transform:translateY(-1px); }
+#view-tool .fg-label{ letter-spacing:.13em!important; }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   FINAL: consistent focus rings for accessibility (real gold)
+   ════════════════════════════════════════════════════════════════════════════ */
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:2px solid var(--brand-gold)!important; outline-offset:2px!important;
+}
