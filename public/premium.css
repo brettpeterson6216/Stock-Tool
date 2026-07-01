@@ -376,3 +376,144 @@ html[data-theme="dark"] #view-tool .il-tool-shell,
   background:rgba(255,255,255,.75)!important;
   color:#241c0e!important;
 }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   UNIFIED FROSTED-PANEL SYSTEM — one set style sitewide
+   Every panel = the same frosted glass. Guaranteed readable text. Even, generous
+   spacing. Nothing cut off. Both themes. This is the authoritative panel style;
+   it comes last so it wins.
+   ════════════════════════════════════════════════════════════════════════════ */
+:root{
+  --fp-bg:rgba(255,255,255,.72);
+  --fp-bg-strong:rgba(255,255,255,.85);
+  --fp-border:rgba(120,86,30,.16);
+  --fp-border-hi:rgba(120,86,30,.3);
+  --fp-shadow:0 1px 2px rgba(40,28,8,.05),0 10px 30px rgba(40,28,8,.09);
+  --fp-shadow-hi:0 3px 8px rgba(40,28,8,.08),0 20px 46px rgba(40,28,8,.13);
+  --fp-text:#241c0e;         /* primary text on frost */
+  --fp-text-2:rgba(58,48,28,.86);
+  --fp-text-3:rgba(120,102,64,.8);
+  --fp-radius:16px;
+  --fp-blur:blur(22px) saturate(1.2);
+}
+html[data-theme="dark"]{
+  --fp-bg:rgba(24,28,33,.72);
+  --fp-bg-strong:rgba(28,33,39,.86);
+  --fp-border:rgba(230,190,110,.16);
+  --fp-border-hi:rgba(230,190,110,.32);
+  --fp-shadow:0 1px 2px rgba(0,0,0,.4),0 12px 32px rgba(0,0,0,.4);
+  --fp-shadow-hi:0 4px 10px rgba(0,0,0,.46),0 22px 50px rgba(0,0,0,.5);
+  --fp-text:#f4efe4;
+  --fp-text-2:rgba(238,231,214,.82);
+  --fp-text-3:rgba(210,196,168,.66);
+}
+
+/* One frosted surface for EVERY panel, tool + home + market + education */
+#view-tool .panel-box,
+#view-tool .chart-wrap,
+#view-tool .sidebar-card,
+#view-tool .metric-card,
+#view-tool .result-header,
+#view-tool .il-tool-shell,
+#view-tool .il-trust-panel,
+#view-tool .analyst-target-box,
+#view-tool .analyst-rec-box,
+#view-tool .dp-card,
+#view-tool .sa-card,
+#view-tool .scr-filters,
+#view-tool .il-research-shell,
+#view-tool .il-research-panel,
+#view-tool .edu-hero,
+#view-tool .edu-path,
+#view-tool .edu-lesson-panel,
+#view-tool .fin-table,
+#view-tool .earn-table,
+#view-tool .inst-table,
+#view-tool .cmp-table,
+#view-tool .scr-table,
+.hc,
+.home-proof-card,
+.home-guide-model,
+.pricing-card,
+#market-page .hg-market{
+  background:var(--fp-bg)!important;
+  border:1px solid var(--fp-border)!important;
+  border-radius:var(--fp-radius)!important;
+  box-shadow:var(--fp-shadow)!important;
+  -webkit-backdrop-filter:var(--fp-blur)!important;
+  backdrop-filter:var(--fp-blur)!important;
+  color:var(--fp-text-2)!important;
+  transition:transform .2s cubic-bezier(.2,.7,.3,1),box-shadow .22s,border-color .2s!important;
+}
+/* Hover lift + gold edge, consistent everywhere */
+#view-tool .panel-box:hover,
+#view-tool .chart-wrap:hover,
+#view-tool .sidebar-card:hover,
+.hc:hover,
+.home-proof-card:hover,
+.pricing-card:hover,
+#market-page .hg-market:hover{
+  transform:translateY(-2px)!important;
+  box-shadow:var(--fp-shadow-hi)!important;
+  border-color:var(--fp-border-hi)!important;
+}
+
+/* Guaranteed-readable text INSIDE every panel */
+#view-tool .panel-box,#view-tool .panel-box *,
+#view-tool .chart-wrap,#view-tool .chart-wrap *,
+#view-tool .sidebar-card,#view-tool .sidebar-card *,
+#view-tool .il-tool-shell,#view-tool .il-tool-shell *,
+#view-tool .result-header,#view-tool .result-header *,
+.hc,.hc *,
+.home-proof-card,.home-proof-card *{
+  /* only nudge generic body text; keep semantic (gold/green/red) intact below */
+}
+/* headings/values = strong text */
+#view-tool .panel-box-title,#view-tool .chart-title,#view-tool .sidebar-card-title,
+#view-tool .res-name,#view-tool .price-big,#view-tool .m-val,
+.home-proof-card strong,.hc strong,.hc h2,.hc h3{
+  color:var(--fp-text)!important;
+}
+/* labels/sublabels = muted but readable (never below ~3:1) */
+#view-tool .m-lbl,#view-tool .res-exchange,#view-tool .price-time,
+#view-tool .sb-group-label,.home-proof-card span,.hc .hc-sub{
+  color:var(--fp-text-3)!important;
+}
+/* body copy inside panels */
+#view-tool .panel-box p,#view-tool .sidebar-card p,.home-proof-card span,.hc p{
+  color:var(--fp-text-2)!important;
+}
+/* gold kickers stay gold but theme-correct (strong in light, bright in dark) */
+#view-tool [class*="kicker"],#view-tool .res-ticker-lbl,#view-tool .sec-label,#view-tool .fg-label{
+  color:var(--brand-gold-strong)!important;
+}
+html[data-theme="dark"] #view-tool [class*="kicker"],
+html[data-theme="dark"] #view-tool .res-ticker-lbl,
+html[data-theme="dark"] #view-tool .sec-label,
+html[data-theme="dark"] #view-tool .fg-label{ color:var(--brand-gold)!important; }
+
+/* ── Even, generous spacing so nothing feels cramped, nothing cut off ───────── */
+@media(min-width:961px){
+  #view-tool .app-content-scroll{ padding:clamp(22px,2.4vw,36px)!important; }
+  #view-tool #stock-result > *{ margin-bottom:clamp(16px,1.8vw,22px)!important; }
+  #view-tool .dash-layout{ gap:clamp(16px,1.8vw,22px)!important; }
+  #view-tool .panel-box,#view-tool .chart-wrap,#view-tool .sidebar-card{ padding:clamp(18px,2vw,24px)!important; }
+}
+/* prevent cut-off: allow wrap on tight rows */
+#view-tool .result-header{ flex-wrap:wrap!important; overflow:visible!important; }
+#view-tool .metric-card{ overflow:visible!important; }
+
+/* Tables keep frosted header + readable cells (in-system) */
+#view-tool .fin-table thead th,#view-tool .earn-table thead th,
+#view-tool .inst-table thead th,#view-tool .cmp-table thead th,#view-tool .scr-table thead th{
+  background:var(--fp-bg-strong)!important;
+  color:var(--brand-gold-strong)!important;
+}
+html[data-theme="dark"] #view-tool .fin-table thead th,
+html[data-theme="dark"] #view-tool .earn-table thead th,
+html[data-theme="dark"] #view-tool .inst-table thead th,
+html[data-theme="dark"] #view-tool .cmp-table thead th,
+html[data-theme="dark"] #view-tool .scr-table thead th{ color:var(--brand-gold)!important; }
+#view-tool .fin-table td,#view-tool .earn-table td,#view-tool .inst-table td,
+#view-tool .cmp-table td,#view-tool .scr-table td{ color:var(--fp-text-2)!important; }
+#view-tool .fin-table td:first-child,#view-tool .scr-table td:first-child{ color:var(--fp-text)!important; }
