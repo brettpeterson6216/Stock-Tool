@@ -99,7 +99,7 @@ html[data-theme="dark"]{
 @media(min-width:1100px){
   #view-tool .dash-layout{ gap:var(--pr-gap)!important; }
   #view-tool .dash-main{ display:flex; flex-direction:column; gap:var(--pr-gap); }
-  #view-tool .dash-side{ display:flex; flex-direction:column; gap:var(--pr-gap); }
+  #view-tool .dash-sidebar{ display:flex; flex-direction:column; gap:var(--pr-gap); }
 }
 
 /* ── 6. Control bars — grouped, tactile; one cohesive header ────────────────── */
