@@ -318,8 +318,17 @@
         const symbol = input.value.trim().toUpperCase();
         if (!symbol) return;
         const main = document.getElementById("main-ticker");
-        if (main) main.value = symbol;
-        if (typeof window.fetchAndRender === "function") window.fetchAndRender();
+        if (main) {
+          main.value = symbol;
+          main.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+        // Make sure the analyze section is open before loading.
+        if (typeof window.openSection === "function") window.openSection("analyze");
+        if (typeof window.fetchAndRender === "function") {
+          window.fetchAndRender();
+        } else if (typeof window.quickLoad === "function") {
+          window.quickLoad(symbol);
+        }
       };
       button.onclick = run;
       input.onkeydown = event => { if (event.key === "Enter") run(); };

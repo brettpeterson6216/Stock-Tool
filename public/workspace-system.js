@@ -33,6 +33,9 @@
   }
 
   async function loadWorkspace() {
+    // Wait for auth to be determined so we don't render a stale "logged out"
+    // state (e.g. offering "Create free account") while the user is actually Pro.
+    try { if (window.IL_AUTH_READY) await window.IL_AUTH_READY; } catch (_) {}
     const local = localData();
     if (!window.IL_STATE?.loggedIn) {
       Object.assign(state, local);

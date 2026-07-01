@@ -687,3 +687,14 @@ html[data-theme="dark"] #view-tool .metric-card,
 }
 #view-tool .metric-card .m-val,#view-tool .metric-card div{ color:var(--fp-text)!important; }
 #view-tool .metric-card .m-lbl{ color:var(--fp-text-3)!important; }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   BOTTOM STATS FOOTER — in-context quote strip, not a global footer.
+   Show only on the Analyze section AND only after a ticker is loaded.
+   (Was a pinned global bar showing dashes on Learn/Workspace/etc.)
+   ════════════════════════════════════════════════════════════════════════════ */
+#app-stats-footer{ display:none!important; }
+/* show only when the analyze section is active and a stock is loaded */
+#view-tool[data-active-section="analyze"]:has(.il-shell-preview.has-ticker) #app-stats-footer{
+  display:flex!important;
+}

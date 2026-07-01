@@ -97,7 +97,7 @@
 <script defer src="/vendor/chartjs-plugin-zoom.min.js?v=2.2.0"></script>
 <script defer src="/model-math.js?v=20260612-1"></script>
 <link href="/legacy-app.css?v=20260630-1" rel="stylesheet">
-<link href="/premium.css?v=20260630-7" rel="stylesheet">
+<link href="/premium.css?v=20260630-8" rel="stylesheet">
 </head>
 <body>
 <a href="#main-content" class="skip-link">Skip to content</a>
@@ -455,10 +455,11 @@
         logged_in: !!(typeof S !== 'undefined' && S.loggedIn),
       });
       _dismissVeil();
-      // Auto-load analyzer from ?ticker= query param (landing page CTA flow)
+      // Auto-load analyzer from ?ticker= OR ?symbol= query param.
+      // (syncToolUrl writes ?symbol=, landing CTAs write ?ticker= — accept both.)
       (function _handleTickerParam() {
         const _params = _initialParams;
-        const _t = _params.get('ticker');
+        const _t = _params.get('ticker') || _params.get('symbol');
         if (!_t) return;
         const _clean = _t.toUpperCase().replace(/[^A-Z0-9.\-^]/g, '').slice(0, 10);
         if (!_clean) return;
@@ -6375,8 +6376,8 @@ document.addEventListener('click', function(e) {
   </div>
 </div>
 </div>
-<script src="/product-system.js?v=20260625-1"></script>
-<script src="/workspace-system.js?v=20260628-1"></script>
+<script src="/product-system.js?v=20260630-1"></script>
+<script src="/workspace-system.js?v=20260630-2"></script>
 <script src="/research-system.js?v=20260628-1"></script>
 </body>
 </html>
