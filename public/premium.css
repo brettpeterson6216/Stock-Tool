@@ -698,3 +698,31 @@ html[data-theme="dark"] #view-tool .metric-card,
 #view-tool[data-active-section="analyze"]:has(.il-shell-preview.has-ticker) #app-stats-footer{
   display:flex!important;
 }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   CALMER SURFACES — tone the ripple down so it's a subtle luxe backdrop, not a
+   loud photo behind data. Data (on frosted panels) becomes the visual priority.
+   ════════════════════════════════════════════════════════════════════════════ */
+/* Light: soft cream veil over the ripple — keeps warmth, kills the glare */
+html body::before,
+body::before{
+  background-image:
+    linear-gradient(180deg, rgba(244,239,228,.5), rgba(240,233,218,.58)),
+    var(--gold-ripple-bg)!important;
+  filter:saturate(.82) brightness(1.02)!important;
+}
+/* Dark: deeper veil so panels read as glass over a dim gold sheen */
+html[data-theme="dark"] body::before{
+  background-image:
+    linear-gradient(180deg, rgba(10,12,14,.66), rgba(14,12,9,.72)),
+    var(--gold-ripple-bg)!important;
+  filter:saturate(.85) brightness(.92)!important;
+}
+/* subtle vignette to focus the center and calm bright fabric highlights */
+body::after{
+  content:""; position:fixed; inset:0; z-index:-1; pointer-events:none;
+  box-shadow:inset 0 0 300px 80px rgba(30,20,6,.16);
+}
+html[data-theme="dark"] body::after{
+  box-shadow:inset 0 0 320px 90px rgba(0,0,0,.4);
+}
