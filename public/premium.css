@@ -608,3 +608,82 @@ html[data-theme="dark"] .il-landing-band button{
   color:#2e2210!important;
   text-shadow:none!important;
 }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   TRUST PANEL — source-attribution labels a touch stronger for readability
+   ════════════════════════════════════════════════════════════════════════════ */
+#view-tool .il-trust-field,
+#view-tool .il-trust-field > span:first-child,
+#view-tool .il-trust-label{
+  color:var(--fp-text-3)!important;
+}
+html[data-theme="dark"] #view-tool .il-trust-field,
+html[data-theme="dark"] #view-tool .il-trust-label{
+  color:rgba(214,200,172,.72)!important;
+}
+:root:not([data-theme="dark"]) #view-tool .il-trust-field,
+:root:not([data-theme="dark"]) #view-tool .il-trust-label{
+  color:rgba(110,94,58,.82)!important;
+}
+/* trust chips stay legible (gold on their own dark chip is fine; ensure it) */
+#view-tool .il-trust-chip{
+  color:#f2d37a!important;
+}
+:root:not([data-theme="dark"]) #view-tool .il-trust-chip{
+  color:#8a6418!important;
+  background:rgba(255,251,240,.9)!important;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   ANALYZE DENSITY — reclaim vertical space so the chart/data aren't squished.
+   Compact the pre-chart panels; give the chart real height. Remove the
+   scrapped dashboard/customizable-widget system remnants.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* Kill any residual dashboard/widget controls (system removed) */
+#il-dash-toggle,#il-dash-reset,.il-widget-bar,.il-drag-handle,.il-widget-min,
+body.il-dashboard-on #body-analyze::before{ display:none!important; }
+body.il-dashboard-on #body-analyze .panel-box,
+body.il-dashboard-on #body-analyze .chart-wrap{ resize:none!important; }
+
+@media(min-width:961px){
+  /* Once a stock is LOADED, hide the redundant ticker-workspace search panel
+     and the bulky trust/evidence panel — the price banner already shows the
+     ticker + price, and search is available from the nav. This reclaims ~300px
+     so the chart sits near the top instead of far below the fold.
+     (.il-shell-preview gets .has-ticker when a stock is loaded.) */
+  #view-tool #body-analyze:has(.il-shell-preview.has-ticker) .il-tool-shell{ display:none!important; }
+  #view-tool #body-analyze:has(.il-shell-preview.has-ticker) .il-trust-panel{ display:none!important; }
+
+  /* Result header (price banner): tighter */
+  #view-tool .result-header{ padding:14px 20px!important; }
+
+  /* Tighten the gaps between the stacked pre-chart blocks */
+  #view-tool #stock-result > *{ margin-bottom:12px!important; }
+
+  /* Give the price chart real, usable height */
+  #view-tool #price-chart,
+  #view-tool .chart-wrap .h240,
+  #view-tool .chart-wrap canvas#price-chart{ height:420px!important; min-height:420px!important; }
+
+  /* Control bars stay slim */
+  #view-tool .app-chart-toolbar{ padding:7px 12px!important; }
+  #view-tool .app-tf-strip{ padding:5px 12px!important; }
+  #view-tool .mobile-sec-tabs{ padding:9px 14px!important; }
+}
+
+/* On smaller/standard laptop heights, don't force the chart absurdly tall */
+@media(min-width:961px) and (max-height:760px){
+  #view-tool #price-chart,
+  #view-tool .chart-wrap canvas#price-chart{ height:360px!important; min-height:360px!important; }
+}
+
+/* Ensure metric tiles are never transparent (readable values on the ripple) */
+#view-tool .metric-card,
+html[data-theme="dark"] #view-tool .metric-card,
+:root:not([data-theme="dark"]) #view-tool .metric-card{
+  background-color:var(--fp-bg)!important;
+  background-image:none!important;
+}
+#view-tool .metric-card .m-val,#view-tool .metric-card div{ color:var(--fp-text)!important; }
+#view-tool .metric-card .m-lbl{ color:var(--fp-text-3)!important; }
