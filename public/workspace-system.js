@@ -390,7 +390,7 @@
     const toolbar = document.getElementById("app-chart-toolbar");
     if (!toolbar || document.getElementById("il-chart-workspace")) return;
     const host = document.createElement("div"); host.id = "il-chart-workspace"; host.className = "il-chart-workspace";
-    host.innerHTML = `<input id="il-compare-ticker" aria-label="Comparison ticker" placeholder="Compare"><button class="act-btn" id="il-run-compare" title="Compare current ticker"><i class="ti ti-arrows-diff"></i>Compare</button><button class="act-btn" id="il-save-layout" title="Save chart layout"><i class="ti ti-device-floppy"></i>Layout</button><button class="act-btn" id="il-restore-layout" title="Restore chart layout"><i class="ti ti-history"></i></button>`;
+    host.innerHTML = `<span class="il-compare-group" title="Enter a ticker, then press Compare"><input id="il-compare-ticker" aria-label="Comparison ticker" placeholder="vs TICKER" maxlength="8"><button class="act-btn" id="il-run-compare" title="Compare current ticker"><i class="ti ti-arrows-diff"></i>Compare</button></span><button class="act-btn" id="il-save-layout" title="Save chart layout"><i class="ti ti-device-floppy"></i>Layout</button><button class="act-btn" id="il-restore-layout" title="Restore chart layout" aria-label="Restore chart layout"><i class="ti ti-history"></i></button>`;
     toolbar.querySelector(".act-right")?.before(host);
     document.getElementById("il-run-compare").onclick = () => {
       const first = currentTicker(), second = symbol(document.getElementById("il-compare-ticker").value);

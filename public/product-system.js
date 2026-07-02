@@ -456,7 +456,8 @@
       const button = document.createElement("button");
       button.className = "il-metric-learn";
       button.title = "Learn how to use this metric";
-      button.textContent = "?";
+      button.setAttribute("aria-label", "Learn how to use this metric");
+      button.innerHTML = '<i class="ti ti-school" aria-hidden="true"></i>';
       button.onclick = () => {
         navGoTo("education");
         setTimeout(() => openLesson(document.querySelector("[data-lesson=thesis]")), 50);

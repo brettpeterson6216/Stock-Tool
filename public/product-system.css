@@ -63,7 +63,7 @@
 .il-guidance button{min-height:30px;padding:0 10px;border:1px solid var(--border3);border-radius:5px;background:var(--card);color:var(--text3);font:600 10px var(--sans);cursor:pointer}
 .il-guidance button.primary{background:var(--brand-gold);border-color:var(--brand-gold);color:#17130c}
 .il-guidance button:hover{border-color:var(--brand-gold-line);color:var(--text)}
-.il-metric-learn{display:inline-grid;place-items:center;width:16px;height:16px;margin-left:5px;border:0;border-radius:50%;background:var(--brand-gold-soft);color:var(--brand-gold-strong);font:700 9px var(--sans);vertical-align:middle;cursor:pointer}
+.il-metric-learn{display:inline-grid;place-items:center;width:16px;height:16px;margin-left:5px;border:0;border-radius:50%;background:var(--brand-gold-soft);color:var(--brand-gold-strong);font:700 9px var(--sans);vertical-align:middle;cursor:pointer}.il-metric-learn i{font-size:10px;line-height:1}
 .il-decision-path{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1px;border:1px solid var(--border2);background:var(--border2);border-radius:7px;overflow:hidden;text-align:left}
 .il-decision-step{position:relative;display:grid;grid-template-columns:auto 1fr;grid-template-areas:"num num" "icon label" "icon detail";align-content:start;gap:3px 7px;min-height:92px;padding:10px 11px;border:0;background:var(--panel);color:var(--text3);cursor:pointer}
 .il-decision-step:hover,.il-decision-step:focus-visible{z-index:1;background:var(--brand-gold-soft);outline:1px solid var(--brand-gold-line);outline-offset:-1px}

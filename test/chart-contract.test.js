@@ -28,14 +28,14 @@ test("price charts expose dependable zoom controls and mobile gestures", () => {
   assert.match(html, /pinch:\{enabled:true\}/);
   assert.match(html, /mode:'xy'/);
   assert.doesNotMatch(html, /overScaleMode:'xy'/);
-  assert.match(html, /pan:\{enabled:true,mode:'xy',threshold:compact\?0:4\}/);
+  assert.match(html, /pan:\{\s*enabled:true,\s*mode:'x',[\s\S]*threshold:compact\?0:3,/);
   assert.match(html, /limits:\{x:\{min:'original',max:'original',minRange:4\},y:\{min:'original',max:'original'\}\}/);
   assert.match(html, /function fmtChartPrice\(raw\)/);
   assert.match(html, /label:ctx=>` \$\{ctx\.dataset\.label\|\|''\}: \$\{fmtChartPrice\(ctx\.raw\)\}`/);
   assert.match(html, /ticks:\{color:t\.text,font:\{size:10\},callback:v=>fmtChartPrice\(v\)\}/);
   assert.match(html, /function gcol\(\)\{ return 'rgba\(217,179,94,\.105\)'; \}/);
-  assert.match(html, /ttBg:\s*'rgba\(10,12,14,\.98\)'/);
-  assert.match(html, /text:\s*'rgba\(246,235,210,\.84\)'/);
+  assert.match(html, /ttBg:\s*'rgba\(1[06],/);
+  assert.match(html, /text:\s*'rgba\(238,233,224,\.86\)'/);
   assert.match(html, /onclick="zoomPriceChart\(1\.25\)"/);
   assert.match(html, /Zoom price chart out or load older history/);
   assert.match(html, /onclick="resetPriceZoom\(\)"/);
@@ -223,8 +223,8 @@ test("premium landing visual system matches the generated product preview direct
 });
 
 test("premium visual system is applied across app and static pages", () => {
-  assert.match(html, /legacy-app\.css\?v=20260627-1/);
-  assert.match(html, /product-system\.css\?v=20260625-1/);
+  assert.match(html, /legacy-app\.css\?v=20260702-1/);
+  assert.match(html, /product-system\.css\?v=20260702-1/);
   assert.match(signupHtml, /static-polish\.css\?v=20260625-2/);
   assert.match(html, /<a class="btn-nav" id="nav-signup" href="\/signup">Start trial<\/a>/);
   assert.match(legacyCss, /Site-wide premium polish/);

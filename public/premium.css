@@ -726,3 +726,67 @@ body::after{
 html[data-theme="dark"] body::after{
   box-shadow:inset 0 0 320px 90px rgba(0,0,0,.4);
 }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   CONSISTENCY PASS — toolbar dedupe, badge visibility, disclaimers, panels
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* 1. The sticky chart toolbar already owns chart type, overlays, and ranges.
+      Hide the duplicated pills inside the Price Chart card (state lives in the
+      DOM, so toolbar toggles keep working). */
+#view-tool #body-analyze .chart-header #ind-row,
+#view-tool #body-analyze .chart-header .range-pills{ display:none!important; }
+
+/* 2. Account PRO/TRIAL badge — readable in light mode (was pale gold on cream) */
+:root:not([data-theme="dark"]) .nav-acct-badge{
+  color:#6b4a15!important;
+  background:rgba(185,138,61,.16)!important;
+  border-color:rgba(118,82,29,.38)!important;
+  text-shadow:none!important;
+}
+
+/* 3. Disclaimers / fine print — frosted chip instead of raw text on the ripple */
+#view-tool .tool-disclaimer,
+#view-tool [class*="disclaimer"]{
+  display:block;
+  max-width:980px;
+  margin:14px auto 0!important;
+  padding:9px 14px!important;
+  border:1px solid var(--fp-border)!important;
+  border-radius:10px!important;
+  background:var(--fp-bg)!important;
+  -webkit-backdrop-filter:var(--fp-blur)!important;
+  backdrop-filter:var(--fp-blur)!important;
+  color:var(--fp-text-2)!important;
+  text-shadow:none!important;
+  line-height:1.5!important;
+}
+
+/* 4. Compare-ticker group sits flush with the other toolbar controls */
+#view-tool .il-chart-workspace input{
+  height:31px!important;
+  border-color:var(--fp-border-hi)!important;
+}
+
+/* 5. Empty-state hints ("Search for a stock in the Analyze tab first.") —
+      same frosted chip in every tab */
+#view-tool .tab-nostock,
+#view-tool [id$="-nostock"]{
+  display:block;
+  padding:22px 16px!important;
+  border:1px dashed var(--fp-border-hi)!important;
+  border-radius:12px!important;
+  background:var(--fp-bg)!important;
+  color:var(--fp-text-2)!important;
+  text-align:center;
+  font-size:.85rem!important;
+}
+#view-tool [id$="-nostock"][style*="display: none"],
+#view-tool [id$="-nostock"][style*="display:none"]{ display:none!important; }
+
+/* 6. Loading bars — consistent, quiet, centered */
+#view-tool .loading-bar{
+  padding:26px 0!important;
+  color:var(--fp-text-3)!important;
+  text-shadow:none!important;
+}
