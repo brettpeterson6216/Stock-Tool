@@ -867,3 +867,233 @@ html[data-theme="dark"] body::after{
   #view-tool .dash-layout{ grid-template-columns:1fr 340px!important; }
   #view-tool #body-analyze,#view-tool .acc-body{ max-width:1500px!important; }
 }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   REFINED WORKSPACE FRAME — one centered column, calm backdrop, instrument-
+   cluster price header, crisp opaque cards. Fixes the "broad and empty" feel:
+   bars and content share the same frame, the sidebar stays with you, and the
+   ripple becomes a subtle texture instead of a photo behind the data.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* 1. Calm the ripple inside the tool (texture, not wallpaper) */
+#view-tool{ position:relative; isolation:isolate; }
+#view-tool::before{
+  content:""; position:fixed; inset:0; z-index:-1; pointer-events:none;
+  background:linear-gradient(180deg, rgba(247,243,233,.84), rgba(243,236,222,.9));
+}
+html[data-theme="dark"] #view-tool::before{
+  background:linear-gradient(180deg, rgba(9,10,13,.88), rgba(10,11,14,.93));
+}
+
+/* 2. Crisp, near-opaque surfaces with hairline borders and quiet shadows */
+#view-tool .panel-box,#view-tool .chart-wrap,#view-tool .sidebar-card,
+#view-tool .result-header,#view-tool .scr-filters,
+#view-tool .fin-table,#view-tool .earn-table,#view-tool .inst-table,
+#view-tool .cmp-table,#view-tool .scr-table{
+  background:rgba(255,255,255,.9)!important;
+  box-shadow:0 1px 2px rgba(40,28,8,.05),0 6px 18px rgba(40,28,8,.05)!important;
+  -webkit-backdrop-filter:blur(8px)!important;
+  backdrop-filter:blur(8px)!important;
+}
+html[data-theme="dark"] #view-tool .panel-box,
+html[data-theme="dark"] #view-tool .chart-wrap,
+html[data-theme="dark"] #view-tool .sidebar-card,
+html[data-theme="dark"] #view-tool .result-header,
+html[data-theme="dark"] #view-tool .scr-filters,
+html[data-theme="dark"] #view-tool .fin-table,
+html[data-theme="dark"] #view-tool .earn-table,
+html[data-theme="dark"] #view-tool .inst-table,
+html[data-theme="dark"] #view-tool .cmp-table,
+html[data-theme="dark"] #view-tool .scr-table{
+  background:rgba(19,22,27,.9)!important;
+  box-shadow:0 1px 2px rgba(0,0,0,.45),0 8px 22px rgba(0,0,0,.35)!important;
+}
+
+@media(min-width:961px){
+  /* 3. One centered frame: control bars align with content */
+  #view-tool .app-chart-toolbar,
+  #view-tool .app-tf-strip,
+  #view-tool .mobile-sec-tabs{ width:100%!important; max-width:1280px; margin-left:auto!important; margin-right:auto!important; }
+  #view-tool #body-analyze,#view-tool .acc-body{ max-width:1280px!important; }
+  #view-tool .app-content-scroll{ padding:14px 26px 54px!important; }
+
+  /* 4. Sidebar travels with you — no empty right rail
+        (acc-body must not clip: overflow:hidden breaks position:sticky) */
+  #view-tool .acc-body{ overflow:visible!important; }
+  #view-tool .dash-sidebar{ position:sticky; top:170px; align-self:start; }
+
+  /* 5. Price banner + stat strip = one instrument cluster */
+  #view-tool .result-header{ margin-bottom:0!important; border-radius:12px 12px 0 0!important; border-bottom:0!important; }
+  #view-tool .metrics-grid{
+    display:grid!important; grid-template-columns:repeat(8,1fr)!important; gap:0!important;
+    border:1px solid var(--fp-border)!important;
+    border-radius:0 0 12px 12px!important; overflow:hidden!important;
+    background:rgba(255,255,255,.9)!important;
+    -webkit-backdrop-filter:blur(8px)!important; backdrop-filter:blur(8px)!important;
+  }
+  html[data-theme="dark"] #view-tool .metrics-grid{ background:rgba(19,22,27,.9)!important; }
+  #view-tool .metric-card,
+  html[data-theme="dark"] #view-tool .metric-card{
+    border:0!important; border-left:1px solid var(--fp-border)!important;
+    border-radius:0!important; background:transparent!important;
+    background-color:transparent!important; box-shadow:none!important;
+    padding:9px 12px!important;
+  }
+  #view-tool .metric-card:first-child,
+  html[data-theme="dark"] #view-tool .metric-card:first-child{ border-left:0!important; }
+
+  /* 6. Chart interaction hint only on hover (kills repeated caption noise) */
+  #view-tool .chart-wrap::after{ opacity:0!important; transition:opacity .15s!important; }
+  #view-tool .chart-wrap:hover::after{ opacity:1!important; }
+
+  /* 7. Bottom quote strip sits inside the same frame */
+  #app-stats-footer{ width:100%!important; max-width:1280px!important; margin:0 auto!important; border-radius:10px 10px 0 0!important; }
+}
+@media(min-width:961px) and (max-width:1279px){
+  #view-tool .metrics-grid{ grid-template-columns:repeat(4,1fr)!important; }
+  #view-tool .metric-card:nth-child(n+5),
+  html[data-theme="dark"] #view-tool .metric-card:nth-child(n+5){ border-top:1px solid var(--fp-border)!important; }
+  #view-tool .metric-card:nth-child(5),
+  html[data-theme="dark"] #view-tool .metric-card:nth-child(5){ border-left:0!important; }
+}
+@media(min-width:1500px){
+  #view-tool .dash-layout{ grid-template-columns:1fr 320px!important; }
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   PREMIUM CHROME v2 — single tab bar (chart controls dock into the chart card),
+   neutral premium palette (gold is an accent, not a wash), quiet ghost buttons.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* Neutral hairlines + calmer, near-solid backdrop (defined last = wins) */
+:root{
+  --fp-border:rgba(24,20,12,.1);
+  --fp-border-hi:rgba(24,20,12,.2);
+}
+html[data-theme="dark"]{
+  --fp-border:rgba(255,255,255,.08);
+  --fp-border-hi:rgba(255,255,255,.17);
+}
+#view-tool::before{
+  background:linear-gradient(180deg, rgba(246,244,240,.94), rgba(243,240,233,.97))!important;
+}
+html[data-theme="dark"] #view-tool::before{
+  background:linear-gradient(180deg, rgba(10,11,13,.94), rgba(11,12,15,.97))!important;
+}
+
+@media(min-width:961px){
+  /* ── Docked chart controls: plain rows inside the chart card ─────────────── */
+  body.il-controls-docked #il-chart-dock{
+    display:flex; flex-direction:column; gap:5px;
+    margin:6px 0 10px; padding-bottom:2px;
+    border-bottom:1px solid var(--fp-border);
+  }
+  body.il-controls-docked #view-tool #app-chart-toolbar,
+  body.il-controls-docked #view-tool #app-tf-strip,
+  html[data-theme="dark"] body.il-controls-docked #view-tool #app-chart-toolbar,
+  html[data-theme="dark"] body.il-controls-docked #view-tool #app-tf-strip{
+    position:static!important; width:100%!important; max-width:none!important;
+    height:auto!important; min-height:0!important;
+    background:transparent!important; background-image:none!important;
+    border:0!important; box-shadow:none!important; border-radius:0!important;
+    -webkit-backdrop-filter:none!important; backdrop-filter:none!important;
+    padding:0!important; margin:0!important; overflow:visible!important;
+  }
+  /* ghost buttons: no borders, quiet hover, gold only when active */
+  body.il-controls-docked #view-tool #app-chart-toolbar .act-btn,
+  body.il-controls-docked #view-tool #app-tf-strip .tf-pill,
+  body.il-controls-docked #view-tool #app-tf-strip .tf-tog,
+  html[data-theme="dark"] body.il-controls-docked #view-tool #app-chart-toolbar .act-btn,
+  html[data-theme="dark"] body.il-controls-docked #view-tool #app-tf-strip .tf-pill,
+  html[data-theme="dark"] body.il-controls-docked #view-tool #app-tf-strip .tf-tog{
+    background:transparent!important; background-image:none!important;
+    border-color:transparent!important; box-shadow:none!important;
+    text-shadow:none!important;
+  }
+  body.il-controls-docked #view-tool #app-chart-toolbar .act-btn:hover,
+  body.il-controls-docked #view-tool #app-tf-strip .tf-pill:hover,
+  body.il-controls-docked #view-tool #app-tf-strip .tf-tog:hover,
+  html[data-theme="dark"] body.il-controls-docked #view-tool #app-chart-toolbar .act-btn:hover,
+  html[data-theme="dark"] body.il-controls-docked #view-tool #app-tf-strip .tf-pill:hover,
+  html[data-theme="dark"] body.il-controls-docked #view-tool #app-tf-strip .tf-tog:hover{
+    background:rgba(120,86,30,.1)!important; background-image:none!important;
+    transform:none!important;
+  }
+  html[data-theme="dark"] body.il-controls-docked #view-tool #app-chart-toolbar .act-btn:hover,
+  html[data-theme="dark"] body.il-controls-docked #view-tool #app-tf-strip .tf-pill:hover,
+  html[data-theme="dark"] body.il-controls-docked #view-tool #app-tf-strip .tf-tog:hover{
+    background:rgba(230,190,110,.12)!important;
+  }
+  body.il-controls-docked #view-tool .il-chart-workspace input{
+    background:transparent!important; border-color:var(--fp-border)!important;
+  }
+  /* dock sits on a solid slab so the chart grid pattern never bleeds through */
+  body.il-controls-docked #view-tool #il-chart-dock{
+    position:relative; z-index:1; background:rgba(255,255,255,.92);
+  }
+  html[data-theme="dark"] body.il-controls-docked #view-tool #il-chart-dock{
+    background:rgba(19,22,27,.92);
+  }
+  /* active state survives the ghost pass: gold pill, dark text, both themes */
+  body.il-controls-docked #view-tool #app-chart-toolbar .act-btn.on,
+  body.il-controls-docked #view-tool #app-chart-toolbar .act-btn.active,
+  body.il-controls-docked #view-tool #app-tf-strip .tf-pill.on,
+  body.il-controls-docked #view-tool #app-tf-strip .tf-pill.active,
+  body.il-controls-docked #view-tool #app-tf-strip .tf-tog.on,
+  body.il-controls-docked #view-tool #app-tf-strip .tf-tog.active,
+  html[data-theme="dark"] body.il-controls-docked #view-tool #app-chart-toolbar .act-btn.on,
+  html[data-theme="dark"] body.il-controls-docked #view-tool #app-chart-toolbar .act-btn.active,
+  html[data-theme="dark"] body.il-controls-docked #view-tool #app-tf-strip .tf-pill.on,
+  html[data-theme="dark"] body.il-controls-docked #view-tool #app-tf-strip .tf-pill.active,
+  html[data-theme="dark"] body.il-controls-docked #view-tool #app-tf-strip .tf-tog.on,
+  html[data-theme="dark"] body.il-controls-docked #view-tool #app-tf-strip .tf-tog.active{
+    background:var(--gold-grad)!important; color:#1a1206!important;
+    border-color:transparent!important; box-shadow:none!important; text-shadow:none!important;
+  }
+  body.il-controls-docked #view-tool #app-chart-toolbar .act-btn.on *,
+  body.il-controls-docked #view-tool #app-chart-toolbar .act-btn.active *,
+  body.il-controls-docked #view-tool #app-tf-strip .tf-pill.on *,
+  body.il-controls-docked #view-tool #app-tf-strip .tf-tog.on *,
+  html[data-theme="dark"] body.il-controls-docked #view-tool #app-chart-toolbar .act-btn.on *,
+  html[data-theme="dark"] body.il-controls-docked #view-tool #app-chart-toolbar .act-btn.active *,
+  html[data-theme="dark"] body.il-controls-docked #view-tool #app-tf-strip .tf-pill.on *,
+  html[data-theme="dark"] body.il-controls-docked #view-tool #app-tf-strip .tf-tog.on *{
+    color:#1a1206!important; text-shadow:none!important;
+  }
+
+  /* ── The one remaining chrome row: quiet text tabs, gold active pill ─────── */
+  :root:not([data-theme="dark"]) #view-tool .mobile-sec-tabs,
+  html[data-theme="dark"] #view-tool .mobile-sec-tabs{
+    background:transparent!important; background-image:none!important;
+    border:0!important; box-shadow:none!important; border-radius:0!important;
+    -webkit-backdrop-filter:none!important; backdrop-filter:none!important;
+    padding:8px 0 6px!important; margin-bottom:8px!important;
+    border-bottom:1px solid var(--fp-border)!important;
+  }
+  :root:not([data-theme="dark"]) #view-tool .mobile-sec-tabs .mst-btn,
+  html[data-theme="dark"] #view-tool .mobile-sec-tabs .mst-btn{
+    background:transparent!important; background-image:none!important;
+    border-color:transparent!important; box-shadow:none!important;
+    color:var(--fp-text-2)!important; text-shadow:none!important;
+  }
+  :root:not([data-theme="dark"]) #view-tool .mobile-sec-tabs .mst-btn:hover,
+  html[data-theme="dark"] #view-tool .mobile-sec-tabs .mst-btn:hover{
+    background:rgba(120,86,30,.09)!important; color:var(--fp-text)!important;
+    transform:none!important;
+  }
+  html[data-theme="dark"] #view-tool .mobile-sec-tabs .mst-btn:hover{
+    background:rgba(230,190,110,.12)!important;
+  }
+  :root:not([data-theme="dark"]) #view-tool .mobile-sec-tabs .mst-btn.active,
+  html[data-theme="dark"] #view-tool .mobile-sec-tabs .mst-btn.active{
+    background:var(--gold-grad)!important; color:#1a1206!important;
+    border-color:transparent!important;
+  }
+
+  /* ── Action buttons: confident, not banner-wide ──────────────────────────── */
+  #view-tool #body-analyze .panel-box .btn-run,
+  #view-tool #body-dcf .btn-run,
+  #view-tool #body-projection .btn-run{
+    width:auto!important; min-width:240px; padding:10px 26px!important;
+  }
+}

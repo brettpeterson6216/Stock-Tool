@@ -480,3 +480,24 @@
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", wire); else wire();
   setInterval(wire, 4000); // pro-gated sections re-render their bodies; re-wire quietly
 }());
+
+/* ── Dock chart controls inside the Price Chart card (desktop) ────────────────
+   The page chrome keeps a single tab bar; chart type, overlays, ranges, and
+   scale toggles live where they act — in the chart card, TradingView-style. */
+(function () {
+  function dock() {
+    if (window.innerWidth < 961) return;
+    const card = document.querySelector("#body-analyze .dash-main > .chart-wrap");
+    const toolbar = document.getElementById("app-chart-toolbar");
+    const strip = document.getElementById("app-tf-strip");
+    if (!card || !toolbar || !strip || toolbar.dataset.docked) return;
+    toolbar.dataset.docked = "1";
+    const host = document.createElement("div");
+    host.id = "il-chart-dock";
+    const header = card.querySelector(".chart-header");
+    if (header) header.after(host); else card.prepend(host);
+    host.append(toolbar, strip);
+    document.body.classList.add("il-controls-docked");
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", dock); else dock();
+}());

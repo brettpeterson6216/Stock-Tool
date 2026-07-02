@@ -1820,14 +1820,18 @@ html[data-theme="dark"] .input-light::placeholder{color:rgba(220,225,232,.28)!im
 .cex-color.active{box-shadow:0 0 0 2px var(--gold)}
 .cex-tool-label{font:600 .61rem var(--sans);color:var(--text5);white-space:nowrap;margin:0 4px}
 
-.chart-wrap canvas,
+.chart-wrap canvas{
+  touch-action:pan-y!important;
+  user-select:none;
+  -webkit-user-select:none;
+}
 .cex-workspace canvas{
   touch-action:none!important;
   user-select:none;
   -webkit-user-select:none;
 }
 .chart-wrap::after{
-  content:'Pinch/drag to inspect · expand to annotate';
+  content:'Ctrl+scroll to zoom · drag to pan · expand to annotate';
   position:absolute;
   right:12px;
   bottom:7px;

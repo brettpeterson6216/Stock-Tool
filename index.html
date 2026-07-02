@@ -96,8 +96,8 @@
 <script defer src="/vendor/hammer.min.js?v=2.0.8"></script>
 <script defer src="/vendor/chartjs-plugin-zoom.min.js?v=2.2.0"></script>
 <script defer src="/model-math.js?v=20260612-1"></script>
-<link href="/legacy-app.css?v=20260702-1" rel="stylesheet">
-<link href="/premium.css?v=20260702-2" rel="stylesheet">
+<link href="/legacy-app.css?v=20260702-2" rel="stylesheet">
+<link href="/premium.css?v=20260702-3" rel="stylesheet">
 </head>
 <body>
 <a href="#main-content" class="skip-link">Skip to content</a>
@@ -3272,7 +3272,7 @@ function chartZoomOptions() {
   const compact=window.matchMedia('(max-width: 640px)').matches;
   return {
     zoom:{
-      wheel:{enabled:!compact,speed:.08,modifierKey:null},
+      wheel:{enabled:!compact,speed:.08,modifierKey:'ctrl'},
       pinch:{enabled:true},
       drag:{enabled:false},
       mode:'x',                 // zoom time axis, like TradingView/Robinhood
@@ -6377,7 +6377,7 @@ document.addEventListener('click', function(e) {
 </div>
 </div>
 <script src="/product-system.js?v=20260702-1"></script>
-<script src="/workspace-system.js?v=20260702-2"></script>
+<script src="/workspace-system.js?v=20260702-3"></script>
 <script src="/research-system.js?v=20260628-1"></script>
 </body>
 </html>
