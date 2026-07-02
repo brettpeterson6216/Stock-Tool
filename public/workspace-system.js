@@ -435,3 +435,48 @@
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 }());
+
+/* ── Live modeling: models recalculate as assumptions change ──────────────────
+   After the first manual Calculate, every input change re-runs the model
+   (debounced), so projections behave like a real modeling tool. Also adds
+   "/" to jump to ticker search from anywhere in the tool. */
+(function () {
+  function debounce(fn, ms) { let t; return function () { clearTimeout(t); t = setTimeout(fn, ms); }; }
+  const MODELS = [
+    { sel: "#qdcf-eps,#qdcf-wacc,#qdcf-g1,#qdcf-g2,#qdcf-tg",
+      ready: () => (document.getElementById("qdcf-output")?.innerHTML || "").trim(),
+      run: () => window.runQuickDCF?.() },
+    { sel: "#proj-years,#proj-pe-now,#proj-g-bear,#proj-pe-bear,#proj-g-base,#proj-pe-base,#proj-g-bull,#proj-pe-bull",
+      ready: () => { const r = document.getElementById("proj-results"); return r && r.style.display !== "none"; },
+      run: () => window.runProjection?.() },
+    { sel: "#adv-years,#adv-price,#adv-pe-now,[id^='adv-g-'],[id^='adv-pe-'],[id^='adv-div-'],[id^='adv-dil-'],[id^='adv-prob-bear'],[id^='adv-prob-base'],[id^='adv-prob-bull']",
+      ready: () => (document.getElementById("adv-scenario-cards")?.innerHTML || "").trim(),
+      run: () => window.runAdvancedProjection?.() },
+    { sel: "#dcf-eps,#dcf-g1,#dcf-g2,#dcf-tg,#dcf-wacc,#dcf-price",
+      ready: () => (document.getElementById("dcf-output")?.innerHTML || "").trim(),
+      run: () => window.runDCF?.() },
+  ];
+  function wire() {
+    MODELS.forEach((m) => {
+      const handler = debounce(() => { try { if (m.ready()) m.run(); } catch (_) {} }, 450);
+      document.querySelectorAll(m.sel).forEach((el) => {
+        if (el.dataset.ilLive) return;
+        el.dataset.ilLive = "1";
+        el.addEventListener("input", handler);
+        el.addEventListener("change", handler);
+      });
+    });
+  }
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "/" || e.ctrlKey || e.metaKey || e.altKey) return;
+    const t = e.target;
+    if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT" || t.isContentEditable)) return;
+    const input = document.getElementById("main-ticker");
+    if (!input) return;
+    e.preventDefault();
+    if (window.openSection) window.openSection("analyze");
+    input.focus(); input.select();
+  });
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", wire); else wire();
+  setInterval(wire, 4000); // pro-gated sections re-render their bodies; re-wire quietly
+}());

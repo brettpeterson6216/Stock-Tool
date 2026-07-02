@@ -146,7 +146,7 @@ test("GET / serves the homepage with a successful status", async () => {
   assert.match(legacyCss, /#main-nav\[data-view="tool"\] #nav-ticker-bar\{display:none!important\}/);
   assert.match(legacyCss, /\.nav-acct-wrap,\.nav-acct-btn\{min-width:0;max-width:100%\}/);
   assert.match(legacyCss, /\.nav-acct-menu\{right:0;min-width:min\(220px,calc\(100vw - 1\.5rem\)\)/);
-  assert.match(html, /workspace-system\.js\?v=20260702-1/);
+  assert.match(html, /workspace-system\.js\?v=20260702-2/);
   assert.match(html, /workspace-system\.css\?v=20260702-1/);
   assert.match(html, /__initialWorkspaceTab/);
   assert.match(res.headers.get("cache-control"), /no-cache/);

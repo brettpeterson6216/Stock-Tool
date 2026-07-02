@@ -790,3 +790,80 @@ html[data-theme="dark"] body::after{
   color:var(--fp-text-3)!important;
   text-shadow:none!important;
 }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   DENSE PRO WORKSPACE — data-first density pass.
+   Slimmer chrome, tighter rhythm, more panels per screen. Desktop only;
+   mobile keeps its touch-friendly sizes.
+   ════════════════════════════════════════════════════════════════════════════ */
+@media(min-width:961px){
+
+  /* ── Chrome: two slim control rows + compact section tabs ────────────────── */
+  #view-tool .app-chart-toolbar{ padding:4px 10px!important; gap:5px!important; }
+  #view-tool .app-tf-strip{ padding:3px 10px!important; gap:3px!important; margin-bottom:12px!important; }
+  #view-tool .act-btn{ min-height:27px!important; padding:3px 10px!important; font-size:.7rem!important; }
+  #view-tool .tf-pill,#view-tool .tf-tog{ min-height:24px!important; padding:2px 9px!important; font-size:.68rem!important; }
+  #view-tool .il-chart-workspace input{ height:27px!important; }
+  #view-tool .mobile-sec-tabs{ padding:5px 10px!important; gap:4px!important; margin-bottom:12px!important; }
+  #view-tool .mst-btn{ padding:5px 12px!important; font-size:.73rem!important; border-radius:9px!important; }
+
+  /* ── Content rhythm: tighter column, less dead space ─────────────────────── */
+  #view-tool .app-content-scroll{ padding:14px 22px 44px!important; }
+  #view-tool #stock-result > *{ margin-bottom:10px!important; }
+  #view-tool .dash-layout{ gap:12px!important; }
+  #view-tool .dash-main{ gap:12px!important; }
+  #view-tool .dash-sidebar{ gap:12px!important; }
+  #view-tool .g2{ gap:12px!important; margin-bottom:12px!important; }
+  #view-tool .panel-box,#view-tool .chart-wrap,#view-tool .sidebar-card{ padding:13px 15px!important; border-radius:12px!important; }
+  #view-tool .acc-body{ padding:1rem 1rem 1.4rem!important; }
+
+  /* ── Price banner: one strong line, no bloat ─────────────────────────────── */
+  #view-tool .result-header{ padding:10px 16px!important; border-radius:12px!important; gap:18px!important; }
+  #view-tool .res-name{ font-size:1.35rem!important; }
+  #view-tool .price-big{ font-size:1.9rem!important; }
+
+  /* ── Stat chips: slim data strip, not a card wall ────────────────────────── */
+  #view-tool .metrics-grid{ gap:8px!important; }
+  #view-tool .metric-card{ padding:8px 12px!important; border-radius:10px!important; }
+  #view-tool .m-lbl{ font-size:.54rem!important; margin-bottom:3px!important; }
+  #view-tool .m-val{ font-size:.88rem!important; }
+  #view-tool .m-sub{ font-size:.55rem!important; }
+
+  /* ── Calm hover: no lift-off on every panel (denser = quieter) ───────────── */
+  #view-tool .panel-box:hover,
+  #view-tool .chart-wrap:hover,
+  #view-tool .sidebar-card:hover,
+  #view-tool .metric-card:hover{ transform:none!important; }
+
+  /* ── Bottom quote strip: slim ────────────────────────────────────────────── */
+  #app-stats-footer{ padding:1px 0!important; }
+  #app-stats-footer .asf-lbl{ font-size:.5rem!important; }
+  #app-stats-footer .asf-val{ font-size:.68rem!important; }
+
+  /* ── Tables: pro density across every tab ────────────────────────────────── */
+  #view-tool .fin-table th,#view-tool .earn-table th,#view-tool .inst-table th,
+  #view-tool .cmp-table th{ padding:5px 10px!important; font-size:.57rem!important; }
+  #view-tool .fin-table td,#view-tool .earn-table td,#view-tool .inst-table td,
+  #view-tool .cmp-table td{ padding:5px 10px!important; font-size:.73rem!important; }
+  #view-tool .scr-table th{ padding:5px 9px!important; font-size:.56rem!important; }
+  #view-tool .scr-table td{ padding:5px 9px!important; font-size:.72rem!important; }
+
+  /* ── Model inputs: compact form grid ─────────────────────────────────────── */
+  #view-tool .fc-input,#view-tool .fc-select{ padding:7px 9px!important; font-size:.78rem!important; }
+  #view-tool .fc-label{ font-size:.55rem!important; margin-bottom:3px!important; }
+  #view-tool .btn-run{ padding:9px 16px!important; font-size:.8rem!important; }
+
+  /* ── Empty state: invitation, not a billboard ────────────────────────────── */
+  #view-tool .tool-welcome{ padding:22px 1rem 12px!important; }
+  #view-tool .tw-title{ font-size:clamp(1.45rem,2.2vw,1.9rem)!important; }
+  #view-tool .tw-sub{ font-size:.85rem!important; }
+
+  /* ── Sidebar cards match main density ────────────────────────────────────── */
+  #view-tool .dash-sidebar .panel-box-title{ font-size:.6rem!important; margin-bottom:.5rem!important; }
+}
+
+/* Wide screens: use the room — wider sidebar, taller primary chart */
+@media(min-width:1500px){
+  #view-tool .dash-layout{ grid-template-columns:1fr 340px!important; }
+  #view-tool #body-analyze,#view-tool .acc-body{ max-width:1500px!important; }
+}
