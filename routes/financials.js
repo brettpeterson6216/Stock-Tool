@@ -125,19 +125,28 @@ router.get("/financials/:ticker", requirePro, async (req, res) => {
     const facts = await factsResp.json();
     const gaap  = facts.facts?.["us-gaap"] || {};
 
-    // Step 3: Extract annual (10-K) series for a concept list
+    // Step 3: Extract annual (10-K) series for a concept list.
+    // Facts are grouped by PERIOD END year (u.end), not filing fiscal year —
+    // a 10-K reports prior-year comparatives under the same fy, which used to
+    // collapse the history into a single wrong year. EPS facts live under the
+    // "USD/shares" unit. Duration facts must span a full year (skips quarters).
     function annualSeries(concepts) {
       for (const concept of concepts) {
-        const units  = gaap[concept]?.units?.USD || gaap[concept]?.units?.shares || [];
-        const byYear = {};
+        const unitMap = gaap[concept]?.units || {};
+        const units   = unitMap.USD || unitMap["USD/shares"] || unitMap.shares || [];
+        const byYear  = {};
         for (const u of units) {
-          if (u.form !== "10-K") continue;
-          const yr = u.fy || u.end?.slice(0, 4);
-          if (!yr) continue;
-          if (!byYear[yr] || u.filed > byYear[yr].filed) byYear[yr] = u;
+          if (u.form !== "10-K" && u.form !== "10-K/A") continue;
+          if (!u.end) continue;
+          if (u.start) {
+            const days = (new Date(u.end) - new Date(u.start)) / 86400000;
+            if (days < 300 || days > 400) continue; // annual duration only
+          }
+          const yr = u.end.slice(0, 4);
+          if (!byYear[yr] || (u.filed || "") > (byYear[yr].filed || "")) byYear[yr] = u;
         }
         const sorted = Object.values(byYear)
-          .sort((a, b) => (b.fy || b.end) > (a.fy || a.end) ? 1 : -1)
+          .sort((a, b) => a.end < b.end ? 1 : -1)   // newest first
           .slice(0, 4);
         if (sorted.length) return sorted;
       }
@@ -171,10 +180,10 @@ router.get("/financials/:ticker", requirePro, async (req, res) => {
       return res.json({ noStatements: true, quoteSummary: { result: [{ defaultKeyStatistics:{}, financialData:{} }] } });
     }
 
-    const years = backbone.map(b => String(b.fy || b.end?.slice(0, 4)));
+    const years = backbone.map(b => String(b.end.slice(0, 4)));
 
     function pickVal(series, yr) {
-      const e = series.find(s => String(s.fy || s.end?.slice(0, 4)) === yr);
+      const e = series.find(s => String(s.end?.slice(0, 4)) === yr);
       return e ? { raw: e.val } : null;
     }
 
@@ -202,7 +211,7 @@ router.get("/financials/:ticker", requirePro, async (req, res) => {
     }));
 
     const cfS = years.map(yr => {
-      const capexEntry = capexSeries.find(s => String(s.fy || s.end?.slice(0, 4)) === yr);
+      const capexEntry = capexSeries.find(s => String(s.end?.slice(0, 4)) === yr);
       return {
         endDate:               { fmt: yr, raw: Math.floor(new Date(`${yr}-12-31`).getTime() / 1000) },
         totalCashFromOperatingActivities:      pickVal(ocfSeries,  yr),

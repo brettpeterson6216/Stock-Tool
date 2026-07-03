@@ -1097,3 +1097,27 @@ html[data-theme="dark"] #view-tool::before{
     width:auto!important; min-width:240px; padding:10px 26px!important;
   }
 }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   PROGRESSIVE TABS + PROVENANCE NOTES
+   ════════════════════════════════════════════════════════════════════════════ */
+.il-more-tabs{ position:relative; display:inline-flex; }
+.il-more-menu{
+  position:absolute; top:calc(100% + 8px); right:0; z-index:70;
+  display:none; flex-direction:column; gap:2px; min-width:180px; padding:6px;
+  border:1px solid var(--fp-border); border-radius:12px;
+  background:#fff; box-shadow:0 10px 34px rgba(30,22,8,.14);
+}
+html[data-theme="dark"] .il-more-menu{ background:#15181d; box-shadow:0 10px 34px rgba(0,0,0,.5); }
+.il-more-tabs.open .il-more-menu{ display:flex; }
+.il-more-menu .mst-btn{ width:100%; justify-content:flex-start; text-align:left; border-radius:8px!important; }
+.il-more-btn i{ font-size:12px; transition:transform .15s; }
+.il-more-tabs.open .il-more-btn i{ transform:rotate(180deg); }
+
+.il-source-note{
+  display:flex; align-items:center; gap:6px; margin-top:14px;
+  color:var(--fp-text-3)!important; font:500 .66rem var(--sans);
+}
+.il-source-note i{ color:var(--brand-gold); font-size:12px; }
+.il-source-note a{ color:var(--brand-gold-strong); text-decoration:underline; }
+html[data-theme="dark"] .il-source-note a{ color:var(--brand-gold); }

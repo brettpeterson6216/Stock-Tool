@@ -501,3 +501,70 @@
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", dock); else dock();
 }());
+
+/* ── Progressive disclosure: five core tabs, the rest under "More" ────────────
+   Beginners see Chart, Financials, Value, Compare, Screener. Everything else
+   lives in a More menu; when one of those sections is active its name shows
+   on the More button. Desktop only. */
+(function () {
+  const CORE = new Set(["analyze", "financials", "dcf", "compare", "screener"]);
+  function setup() {
+    if (window.innerWidth < 961) return;
+    const bar = document.getElementById("mobile-sec-tabs");
+    if (!bar || bar.dataset.ilMore) return;
+    const extras = [...bar.querySelectorAll(":scope > .mst-btn")].filter(b => !CORE.has(b.dataset.sec));
+    if (extras.length < 2) return;
+    bar.dataset.ilMore = "1";
+    const wrap = document.createElement("div"); wrap.className = "il-more-tabs";
+    const btn = document.createElement("button");
+    btn.type = "button"; btn.className = "mst-btn il-more-btn";
+    btn.setAttribute("aria-haspopup", "true"); btn.setAttribute("aria-expanded", "false");
+    btn.innerHTML = `<span>More</span> <i class="ti ti-chevron-down" aria-hidden="true"></i>`;
+    const menu = document.createElement("div"); menu.className = "il-more-menu"; menu.setAttribute("role", "menu");
+    extras.forEach(b => menu.appendChild(b));
+    wrap.append(btn, menu); bar.appendChild(wrap);
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const open = wrap.classList.toggle("open");
+      btn.setAttribute("aria-expanded", String(open));
+    });
+    document.addEventListener("click", () => { wrap.classList.remove("open"); btn.setAttribute("aria-expanded", "false"); });
+    menu.addEventListener("click", () => { wrap.classList.remove("open"); });
+    const label = btn.querySelector("span");
+    const sync = () => {
+      const active = menu.querySelector(".mst-btn.active");
+      btn.classList.toggle("active", Boolean(active));
+      label.textContent = active ? active.textContent : "More";
+    };
+    new MutationObserver(sync).observe(bar, { subtree: true, attributes: true, attributeFilter: ["class"] });
+    sync();
+  }
+  // workspace shell injects its own tab shortly after load — retry briefly
+  function init() { setup(); setTimeout(setup, 600); setTimeout(setup, 2000); }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
+}());
+
+/* ── Source provenance notes: every data tab names its providers ─────────────── */
+(function () {
+  const SOURCES = {
+    financials:    "SEC EDGAR XBRL (statements) · Finnhub (ratios)",
+    advmetrics:    "Finnhub fundamentals",
+    earnings:      "Finnhub EPS estimates & surprises",
+    secfilings:    "SEC EDGAR — links open official filings",
+    institutional: "Finnhub ownership · FINRA OTC weekly data",
+    screener:      "Finnhub + exchange reference data",
+    compare:       "Yahoo Finance charts · Finnhub fundamentals",
+  };
+  function inject() {
+    Object.entries(SOURCES).forEach(([sec, label]) => {
+      const body = document.getElementById("body-" + sec);
+      if (!body || body.querySelector(".il-source-note")) return;
+      const note = document.createElement("div");
+      note.className = "il-source-note";
+      note.innerHTML = `<i class="ti ti-database" aria-hidden="true"></i> Sources: ${label} · <a href="/data-sources">methodology</a>`;
+      body.appendChild(note);
+    });
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", inject); else inject();
+  setInterval(inject, 5000); // pro-gated bodies re-render; re-add quietly
+}());
