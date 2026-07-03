@@ -471,10 +471,11 @@
     if (e.key !== "/" || e.ctrlKey || e.metaKey || e.altKey) return;
     const t = e.target;
     if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT" || t.isContentEditable)) return;
-    const input = document.getElementById("main-ticker");
+    const quick = document.getElementById("il-quick-ticker");
+    const input = quick || document.getElementById("main-ticker");
     if (!input) return;
     e.preventDefault();
-    if (window.openSection) window.openSection("analyze");
+    if (!quick && window.openSection) window.openSection("analyze");
     input.focus(); input.select();
   });
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", wire); else wire();
@@ -508,10 +509,24 @@
    on the More button. Desktop only. */
 (function () {
   const CORE = new Set(["analyze", "financials", "dcf", "compare", "screener"]);
+  function sweepLateTabs() {
+    // modules add tabs (Calls, Wealth, Workspace) after init — keep them in More
+    const bar = document.getElementById("mobile-sec-tabs");
+    const menu = bar?.querySelector(".il-more-menu");
+    if (!bar || !menu) return;
+    [...bar.querySelectorAll(":scope > .mst-btn")]
+      .filter(b => !CORE.has(b.dataset.sec))
+      .forEach(b => menu.appendChild(b));
+    const wrap = bar.querySelector(".il-more-tabs");
+    if (wrap && wrap !== bar.lastElementChild) bar.appendChild(wrap); // keep More last (before search)
+    const qs = bar.querySelector(".il-quick-search");
+    if (qs) bar.appendChild(qs);
+  }
   function setup() {
     if (window.innerWidth < 961) return;
     const bar = document.getElementById("mobile-sec-tabs");
-    if (!bar || bar.dataset.ilMore) return;
+    if (!bar) return;
+    if (bar.dataset.ilMore) { sweepLateTabs(); return; }
     const extras = [...bar.querySelectorAll(":scope > .mst-btn")].filter(b => !CORE.has(b.dataset.sec));
     if (extras.length < 2) return;
     bar.dataset.ilMore = "1";
@@ -540,7 +555,7 @@
     sync();
   }
   // workspace shell injects its own tab shortly after load — retry briefly
-  function init() { setup(); setTimeout(setup, 600); setTimeout(setup, 2000); }
+  function init() { setup(); setTimeout(setup, 600); setTimeout(setup, 2000); setTimeout(setup, 4500); }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 }());
 
@@ -669,4 +684,48 @@
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", install); else install();
   setTimeout(install, 800);
+}());
+
+/* ── Scroll guarantee over inline charts ──────────────────────────────────────
+   Capture-phase guard at the document level: when the expand modal is closed,
+   wheel events over any inline chart card are stopped before ANY chart library
+   listener can see them (and declared passive), so the browser's native page
+   scroll always runs. Nothing — cached scripts included — can hijack it. */
+(function () {
+  document.addEventListener("wheel", function (e) {
+    const modal = document.getElementById("chart-expand-modal");
+    if (modal && modal.classList.contains("open")) return; // expanded view keeps zoom
+    const t = e.target;
+    if (t && t.closest && t.closest("#view-tool .chart-wrap")) e.stopPropagation();
+  }, { capture: true, passive: true });
+}());
+
+/* ── Quick ticker switch — always-visible search in the tab bar ───────────────
+   Type a symbol, press Enter: the new ticker loads and you stay on the tab
+   you were using. "/" focuses it from anywhere. */
+(function () {
+  function install() {
+    const bar = document.getElementById("mobile-sec-tabs");
+    if (!bar || document.getElementById("il-quick-ticker")) return;
+    const wrap = document.createElement("div");
+    wrap.className = "il-quick-search";
+    wrap.innerHTML = `<i class="ti ti-search" aria-hidden="true"></i><input id="il-quick-ticker" placeholder="Ticker  ( / )" maxlength="8" autocomplete="off" spellcheck="false" aria-label="Load a different ticker" title="Load a different ticker — press / from anywhere">`;
+    bar.appendChild(wrap);
+    const input = wrap.querySelector("input");
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") { input.value = ""; input.blur(); return; }
+      if (e.key !== "Enter") return;
+      const sym = (input.value || "").trim().toUpperCase().replace(/[^A-Z0-9.^-]/g, "");
+      if (!sym) return;
+      const main = document.getElementById("main-ticker");
+      if (main) main.value = sym;
+      const section = document.getElementById("view-tool")?.dataset.activeSection || "analyze";
+      if (typeof window.fetchAndRender === "function") window.fetchAndRender();
+      if (section && section !== "analyze") setTimeout(() => window.openSection?.(section), 900);
+      input.value = ""; input.blur();
+      if (typeof window.toast === "function") window.toast(`Loading ${sym}…`, "ok");
+    });
+  }
+  function init() { install(); setTimeout(install, 700); setTimeout(install, 2200); }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 }());

@@ -224,7 +224,7 @@ test("premium landing visual system matches the generated product preview direct
 });
 
 test("premium visual system is applied across app and static pages", () => {
-  assert.match(html, /legacy-app\.css\?v=20260703-1/);
+  assert.match(html, /legacy-app\.css\?v=20260703-2/);
   assert.match(html, /product-system\.css\?v=20260702-1/);
   assert.match(signupHtml, /static-polish\.css\?v=20260625-2/);
   assert.match(html, /<a class="btn-nav" id="nav-signup" href="\/signup">Start trial<\/a>/);

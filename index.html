@@ -43,7 +43,7 @@
 <!-- Canonical -->
 <link rel="canonical" href="https://impliedlens.com/">
 <!-- Favicon -->
-<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<link rel="icon" type="image/svg+xml" href="/logo.svg?v=2">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
@@ -81,13 +81,13 @@
     "@type": "Organization",
     "name": "Implied Lens",
     "url": "https://impliedlens.com",
-    "logo": "https://impliedlens.com/logo.svg"
+    "logo": "https://impliedlens.com/logo.svg?v=2"
   }
 }
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.44.0/dist/tabler-icons.min.css" rel="stylesheet">
 <link href="/product-system.css?v=20260702-1" rel="stylesheet">
 <link href="/workspace-system.css?v=20260702-1" rel="stylesheet">
@@ -96,8 +96,8 @@
 <script defer src="/vendor/hammer.min.js?v=2.0.8"></script>
 <script defer src="/vendor/chartjs-plugin-zoom.min.js?v=2.2.0"></script>
 <script defer src="/model-math.js?v=20260612-1"></script>
-<link href="/legacy-app.css?v=20260703-1" rel="stylesheet">
-<link href="/premium.css?v=20260703-4" rel="stylesheet">
+<link href="/legacy-app.css?v=20260703-2" rel="stylesheet">
+<link href="/premium.css?v=20260703-6" rel="stylesheet">
 </head>
 <body>
 <a href="#main-content" class="skip-link">Skip to content</a>
@@ -106,7 +106,7 @@
 <!-- ══════════ NAV ══════════ -->
 <nav id="main-nav" data-view="home">
   <a class="nav-logo" href="/" onclick="navGoTo('home');return false;" style="display:flex;align-items:center;gap:9px;text-decoration:none;">
-    <img src="/logo.svg" alt="Implied Lens" style="width:28px;height:28px;border-radius:50%;flex-shrink:0;">
+    <img src="/logo.svg?v=2" alt="Implied Lens" style="width:28px;height:28px;border-radius:50%;flex-shrink:0;">
     <span>Implied<em style="font-style:italic;color:var(--gold-d);">Lens</em></span>
   </a>
   <div class="nav-links" id="nav-links">
@@ -3268,6 +3268,11 @@ const baseOpts = (extraScales={}) => {
   };
 };
 
+function chartXLabels(tsArr){
+  const multi=tsArr.length>1&&(new Date(tsArr[tsArr.length-1]*1000).getFullYear()!==new Date(tsArr[0]*1000).getFullYear());
+  return tsArr.map(ts=>{const d=new Date(ts*1000);
+    return multi?d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'}).replace(', '," '"):d.toLocaleDateString('en-US',{month:'short',day:'numeric'});});
+}
 function chartZoomOptions() {
   // Inline charts are STATIC: page scrolling is never hijacked. Wheel, pinch,
   // drag zoom and panning live only in the expanded view (expandChart), where
@@ -4647,7 +4652,15 @@ function buildPriceChart(result,closes,timestamps) {
   const p=cp();
   const count=Math.min(closes.length,timestamps.length);
   const vc=closes.slice(0,count).map(Number);
-  const vl=timestamps.slice(0,count).map(ts=>new Date(ts*1000).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+  const _tsArr=timestamps.slice(0,count);
+  const _multiYear=_tsArr.length>1&&(new Date(_tsArr[_tsArr.length-1]*1000).getFullYear()!==new Date(_tsArr[0]*1000).getFullYear());
+  const _intraday=S.range==='1d'||S.range==='5d';
+  const vl=_tsArr.map(ts=>{
+    const d=new Date(ts*1000);
+    if(_intraday)return d.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
+    if(_multiYear)return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'}).replace(', '," '");
+    return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  });
   syncIndicatorAvailability(vc.length);
   const ma50v=sma(vc,50), ma200v=sma(vc,200), bbv=bollinger(vc,20);
   const hp={pointRadius:0,pointHoverRadius:6,pointHoverBorderWidth:2,pointHoverBorderColor:'#fff'};
@@ -4705,7 +4718,7 @@ function buildRSIChart(rsiVals,timestamps) {
   destroyChart('rsi-chart');
   const t=ct();
   const p=cp();
-  const labels=timestamps.map(ts=>new Date(ts*1000).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+  const labels=chartXLabels(timestamps);
   const last=rsiVals[rsiVals.length-1];
   document.getElementById('rsi-readout').textContent=last?`${last.toFixed(1)} — ${last<30?'Oversold':last>70?'Overbought':'Neutral'}`:'';
   const n=labels.length;
@@ -4741,7 +4754,7 @@ function buildMACDChart(closes,timestamps) {
   destroyChart('macd-chart');
   const t=ct();
   const p=cp();
-  const labels=timestamps.map(ts=>new Date(ts*1000).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+  const labels=chartXLabels(timestamps);
   const {line,sig,hist}=macd(closes);
   const last=hist[hist.length-1];
   document.getElementById('macd-readout').textContent=last!=null?`Histogram ${last>0?'+':''}${last.toFixed(3)} — ${last>0?'Bullish':'Bearish'}`:'';
@@ -4774,7 +4787,7 @@ function buildVolChart(vols,timestamps,closes) {
   destroyChart('vol-chart');
   const t=ct();
   const p=cp();
-  const labels=timestamps.map(ts=>new Date(ts*1000).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+  const labels=chartXLabels(timestamps);
   const bg=vols.map((_,i)=>closes[i]>=closes[i-1]?colorAlpha(p.positive,.46):colorAlpha(p.negative,.46));
   S.charts['vol-chart']=new Chart(document.getElementById('vol-chart'),{
     type:'bar',
@@ -6355,7 +6368,7 @@ document.addEventListener('click', function(e) {
 </div>
 </div>
 <script src="/product-system.js?v=20260702-1"></script>
-<script src="/workspace-system.js?v=20260703-3"></script>
+<script src="/workspace-system.js?v=20260703-6"></script>
 <script src="/research-system.js?v=20260628-1"></script>
 </body>
 </html>

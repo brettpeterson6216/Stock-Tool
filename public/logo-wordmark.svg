@@ -7,17 +7,12 @@
     </linearGradient>
     <filter id="g2"><feGaussianBlur stdDeviation="1.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
   </defs>
-  <!-- Icon mark (48×48) -->
-  <circle cx="40" cy="40" r="36" fill="#0B0D0F" stroke="#B98A3D" stroke-width="1.2"/>
-  <circle cx="40" cy="40" r="24" fill="none" stroke="#B98A3D" stroke-width="1.5" opacity="0.5"/>
-  <!-- Mini candlesticks -->
-  <rect x="22" y="43" width="5" height="10" rx="0.5" fill="#d96a70" opacity="0.9"/>
-  <rect x="31" y="36" width="5" height="14" rx="0.5" fill="url(#goldG)" filter="url(#g2)"/>
-  <rect x="40" y="39" width="5" height="11" rx="0.5" fill="#d96a70" opacity="0.9"/>
-  <rect x="49" y="30" width="5" height="18" rx="0.5" fill="url(#goldG)" filter="url(#g2)"/>
-  <line x1="20" y1="55" x2="58" y2="55" stroke="#B98A3D" stroke-width="0.6" opacity="0.3"/>
-  <circle cx="40" cy="40" r="2" fill="#B98A3D" opacity="0.8"/>
-  <!-- Wordmark -->
+  <!-- Icon mark -->
+  <circle cx="40" cy="40" r="36" fill="#0B0D10"/>
+  <circle cx="40" cy="40" r="36" fill="none" stroke="url(#goldG)" stroke-width="2"/>
+  <circle cx="40" cy="40" r="23" fill="none" stroke="url(#goldG)" stroke-width="3" opacity="0.92"/>
+  <polyline points="24,50 34,41 41,45 56,29" fill="none" stroke="url(#goldG)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="56" cy="29" r="3.8" fill="#F2D37A"/>
   <text x="88" y="30" font-family="Georgia, 'Times New Roman', serif" font-size="28" font-weight="400" fill="url(#goldG)" letter-spacing="1">Implied</text>
   <text x="88" y="60" font-family="Georgia, 'Times New Roman', serif" font-size="28" font-weight="400" fill="#F7F4EE" letter-spacing="1">Lens</text>
   <!-- Tagline -->
