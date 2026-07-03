@@ -28,7 +28,8 @@ test("price charts expose dependable zoom controls and mobile gestures", () => {
   assert.match(html, /pinch:\{enabled:true\}/);
   assert.match(html, /mode:'xy'/);
   assert.doesNotMatch(html, /overScaleMode:'xy'/);
-  assert.match(html, /pan:\{\s*enabled:true,\s*mode:'x',[\s\S]*threshold:compact\?0:3,/);
+  assert.match(html, /pan:\s*\{ enabled:true, mode:'xy', threshold:0 \}/); // expanded view only
+  assert.match(html, /zoom:\{ wheel:\{enabled:false\}, pinch:\{enabled:false\}, drag:\{enabled:false\}/); // inline charts static
   assert.match(html, /limits:\{x:\{min:'original',max:'original',minRange:4\},y:\{min:'original',max:'original'\}\}/);
   assert.match(html, /function fmtChartPrice\(raw\)/);
   assert.match(html, /label:ctx=>` \$\{ctx\.dataset\.label\|\|''\}: \$\{fmtChartPrice\(ctx\.raw\)\}`/);

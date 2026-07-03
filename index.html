@@ -97,7 +97,7 @@
 <script defer src="/vendor/chartjs-plugin-zoom.min.js?v=2.2.0"></script>
 <script defer src="/model-math.js?v=20260612-1"></script>
 <link href="/legacy-app.css?v=20260702-2" rel="stylesheet">
-<link href="/premium.css?v=20260703-1" rel="stylesheet">
+<link href="/premium.css?v=20260703-2" rel="stylesheet">
 </head>
 <body>
 <a href="#main-content" class="skip-link">Skip to content</a>
@@ -3269,20 +3269,12 @@ const baseOpts = (extraScales={}) => {
 };
 
 function chartZoomOptions() {
-  const compact=window.matchMedia('(max-width: 640px)').matches;
+  // Inline charts are STATIC: page scrolling is never hijacked. Wheel, pinch,
+  // drag zoom and panning live only in the expanded view (expandChart), where
+  // body scroll is locked. Inline zoom buttons still work via chart.zoom().
   return {
-    zoom:{
-      wheel:{enabled:!compact,speed:.08,modifierKey:'ctrl'},
-      pinch:{enabled:true},
-      drag:{enabled:false},
-      mode:'x',                 // zoom time axis, like TradingView/Robinhood
-    },
-    pan:{
-      enabled:true,
-      mode:'x',                 // pan horizontally through history; no vertical drift
-      threshold:compact?0:3,
-      modifierKey:null,
-    },
+    zoom:{ wheel:{enabled:false}, pinch:{enabled:false}, drag:{enabled:false}, mode:'x' },
+    pan:{ enabled:false, mode:'x' },
     limits:{x:{min:'original',max:'original',minRange:4},y:{min:'original',max:'original'}},
   };
 }
@@ -6292,35 +6284,11 @@ document.addEventListener('click', function(e) {
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', _attachBatch2);
 
-/* ── Panel chrome: collapse + vertical resize on tool panels (dashboard feel) ── */
+/* ── Panel chrome: minimize/collapse system removed (blocked the expand
+      button on hover and added no value). Clean up any leftovers. ── */
 (function(){
-  function enhancePanels(){
-    document.querySelectorAll('#view-tool .panel-box, #view-tool .chart-wrap').forEach(panel=>{
-      if(panel.dataset.ilPanel) return;
-      panel.dataset.ilPanel='1';
-      // collapse toggle button (top-right)
-      const btn=document.createElement('button');
-      btn.type='button'; btn.className='il-panel-collapse'; btn.title='Collapse / expand panel';
-      btn.setAttribute('aria-label','Collapse or expand panel');
-      btn.innerHTML='<i class="ti ti-minus"></i>';
-      btn.addEventListener('click',function(ev){
-        ev.stopPropagation();
-        const collapsed=panel.classList.toggle('il-collapsed');
-        btn.innerHTML = collapsed ? '<i class="ti ti-plus"></i>' : '<i class="ti ti-minus"></i>';
-      });
-      panel.appendChild(btn);
-    });
-  }
-  window.refreshPanelChrome=enhancePanels;
-  document.addEventListener('DOMContentLoaded',enhancePanels);
-  // re-run after section switches / data loads
-  const _os=window.openSection;
-  // (openSection is a function decl; hook via timer-safe observer instead)
-  const mo=new MutationObserver(()=>{ clearTimeout(window._ilPanelT); window._ilPanelT=setTimeout(enhancePanels,120); });
-  document.addEventListener('DOMContentLoaded',()=>{
-    const root=document.getElementById('view-tool');
-    if(root) mo.observe(root,{childList:true,subtree:true});
-  });
+  function strip(){ document.querySelectorAll('.il-panel-collapse').forEach(b=>b.remove()); }
+  document.addEventListener('DOMContentLoaded',strip); strip();
 })();
 
 

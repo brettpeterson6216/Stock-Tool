@@ -1121,3 +1121,35 @@ html[data-theme="dark"] .il-more-menu{ background:#15181d; box-shadow:0 10px 34p
 .il-source-note i{ color:var(--brand-gold); font-size:12px; }
 .il-source-note a{ color:var(--brand-gold-strong); text-decoration:underline; }
 html[data-theme="dark"] .il-source-note a{ color:var(--brand-gold); }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   CHART CONTROLS — one clean flowing row; no minimize chrome; static panels
+   ════════════════════════════════════════════════════════════════════════════ */
+/* kill any cached minimize buttons + panel resizing */
+.il-panel-collapse{ display:none!important; }
+#view-tool .panel-box,#view-tool .chart-wrap{ resize:none!important; }
+
+@media(min-width:961px){
+  /* merge the two docked control rows into one wrapping row with even gaps */
+  body.il-controls-docked #il-chart-dock{
+    flex-direction:row!important; flex-wrap:wrap!important; align-items:center!important;
+    gap:3px 5px!important; row-gap:5px!important;
+  }
+  body.il-controls-docked #view-tool #app-chart-toolbar,
+  body.il-controls-docked #view-tool #app-tf-strip,
+  html[data-theme="dark"] body.il-controls-docked #view-tool #app-chart-toolbar,
+  html[data-theme="dark"] body.il-controls-docked #view-tool #app-tf-strip{
+    display:contents!important;
+  }
+  /* no floating right-aligned clusters — everything flows evenly */
+  body.il-controls-docked #view-tool #app-chart-toolbar .act-right,
+  body.il-controls-docked #view-tool #app-tf-strip .tf-right{
+    display:contents!important;
+  }
+  /* the card header already has an expand button — hide the duplicate */
+  body.il-controls-docked #view-tool #app-chart-toolbar .act-btn[onclick*="expandChart"]{ display:none!important; }
+  /* consistent separator pips between control groups */
+  body.il-controls-docked #view-tool .act-sep{
+    width:1px; height:16px; margin:0 4px; background:var(--fp-border); flex:0 0 auto;
+  }
+}
