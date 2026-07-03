@@ -600,7 +600,9 @@
       `<span class="il-cexc-sep"></span>` +
       INDS.map(([k, l]) => btn(`data-cexc-ind="${k}"`, Boolean(inds[k]), l)).join("") +
       `<span class="il-cexc-sep"></span>` +
-      RANGES.map(([r, l]) => btn(`data-cexc-range="${r}"`, (S.range || "1y") === r, l)).join("");
+      RANGES.map(([r, l]) => btn(`data-cexc-range="${r}"`, (S.range || "1y") === r, l)).join("") +
+      `<span class="il-cexc-sep"></span>` +
+      btn(`data-cexc-tip="1" title="Toggle the hover readout"`, window.__ilTipOn !== false, "Inspect", "ti-crosshair");
     host.querySelectorAll("[data-cexc-type]").forEach(b => b.onclick = () => {
       window.setChartType?.(b.dataset.cexcType, document.getElementById("ct-" + b.dataset.cexcType));
     });
@@ -613,6 +615,14 @@
       const pill = [...document.querySelectorAll(".tf-pill")].find(el => (el.getAttribute("onclick") || "").includes(`'${r}'`));
       window.changeRange?.(r, pill || null);
     });
+    const tipBtn = host.querySelector("[data-cexc-tip]");
+    if (tipBtn) tipBtn.onclick = () => {
+      window.__ilTipOn = !(window.__ilTipOn !== false); // toggle, default true
+      const canvas = document.getElementById("chart-expanded");
+      const chart = (window.Chart && window.Chart.getChart) ? window.Chart.getChart(canvas) : null;
+      if (chart) { chart.options.plugins.tooltip.enabled = window.__ilTipOn; chart.update("none"); }
+      tipBtn.classList.toggle("on", window.__ilTipOn);
+    };
   }
 
   function install() {

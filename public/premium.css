@@ -1179,3 +1179,45 @@ html[data-theme="dark"] .il-cexc:hover{ background:rgba(230,190,110,.12); }
 .il-cexc.on{ background:var(--gold-grad); color:#1a1206; }
 .il-cexc i{ font-size:13px; }
 .il-cexc-sep{ width:1px; height:16px; margin:0 5px; background:var(--fp-border); flex:0 0 auto; }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   EXPANDED CHART — theme-correct modal + readable controls
+   The modal was hardcoded dark; in light mode it now matches the theme, and
+   inactive controls are readable in both.
+   ════════════════════════════════════════════════════════════════════════════ */
+:root:not([data-theme="dark"]) .cex-box{
+  background:linear-gradient(180deg,#fdfcf9,#f5f2ea)!important;
+  border:1px solid rgba(24,20,12,.14)!important;
+  box-shadow:0 34px 92px rgba(40,28,8,.28)!important;
+}
+:root:not([data-theme="dark"]) .cex-header{
+  background:rgba(255,255,255,.7)!important;
+  border-bottom:1px solid rgba(24,20,12,.1)!important;
+}
+:root:not([data-theme="dark"]) .cex-toolbar{
+  background:rgba(250,247,240,.85)!important;
+  border-bottom:1px solid rgba(24,20,12,.1)!important;
+}
+:root:not([data-theme="dark"]) .cex-title{ color:#241c0e!important; }
+:root:not([data-theme="dark"]) .cex-hint{ color:rgba(70,58,34,.6)!important; }
+:root:not([data-theme="dark"]) .cex-btn{
+  background:rgba(255,255,255,.8)!important; border-color:rgba(24,20,12,.16)!important; color:#3a2f18!important;
+}
+:root:not([data-theme="dark"]) .cex-tool{ color:rgba(60,49,26,.7)!important; }
+:root:not([data-theme="dark"]) .cex-tool:hover{ background:rgba(120,86,30,.1)!important; color:#241c0e!important; }
+:root:not([data-theme="dark"]) .cex-tool-label,
+:root:not([data-theme="dark"]) .cex-save-state{ color:rgba(70,58,34,.55)!important; }
+:root:not([data-theme="dark"]) .cex-color{ border-color:rgba(255,255,255,.9)!important; }
+:root:not([data-theme="dark"]) #il-cex-controls{ border-bottom:1px solid rgba(24,20,12,.1)!important; }
+
+/* control-row buttons: explicit per-theme colors (never invisible) */
+:root:not([data-theme="dark"]) .il-cexc{ color:rgba(56,45,24,.78)!important; }
+:root:not([data-theme="dark"]) .il-cexc:hover{ background:rgba(120,86,30,.12)!important; color:#241c0e!important; }
+html[data-theme="dark"] .il-cexc{ color:rgba(235,229,215,.75)!important; }
+html[data-theme="dark"] .il-cexc:hover{ background:rgba(255,255,255,.08)!important; color:#fff!important; }
+.il-cexc.on{ background:var(--gold-grad)!important; color:#1a1206!important; }
+:root:not([data-theme="dark"]) .il-cexc-sep{ background:rgba(24,20,12,.14)!important; }
+html[data-theme="dark"] .il-cexc-sep{ background:rgba(255,255,255,.14)!important; }
+/* markup icons in dark modal: brighter */
+html[data-theme="dark"] .cex-tool{ color:rgba(235,229,215,.66)!important; }
+html[data-theme="dark"] .cex-tool:hover{ color:#fff!important; }

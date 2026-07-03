@@ -97,7 +97,7 @@
 <script defer src="/vendor/chartjs-plugin-zoom.min.js?v=2.2.0"></script>
 <script defer src="/model-math.js?v=20260612-1"></script>
 <link href="/legacy-app.css?v=20260703-1" rel="stylesheet">
-<link href="/premium.css?v=20260703-3" rel="stylesheet">
+<link href="/premium.css?v=20260703-4" rel="stylesheet">
 </head>
 <body>
 <a href="#main-content" class="skip-link">Skip to content</a>
@@ -3363,11 +3363,21 @@ function expandChart(chartId, title) {
         ...(srcCfg.options?.plugins||{}),
         legend: { display: true, labels: { color:theme.text, font:{family:'DM Sans',size:11,weight:'500'}, boxWidth:20, boxHeight:2, padding:16, usePointStyle:false } },
         tooltip: {
+          enabled: window.__ilTipOn !== false,
           mode:'index', intersect:false,
           backgroundColor:ttbg(), titleColor:theme.muted, bodyColor:ttbody(),
           borderColor:ttborder(), borderWidth:1, padding:12, caretSize:6,
           cornerRadius:10, displayColors:true, boxWidth:8, boxHeight:8, usePointStyle:true,
-          titleFont:{family:'DM Mono',size:11,weight:'600'},bodyFont:{family:'DM Sans',size:12,weight:'600'}
+          titleFont:{family:'DM Mono',size:11,weight:'600'},bodyFont:{family:'DM Sans',size:12,weight:'600'},
+          callbacks:{
+            title:items=>items[0]?.label||'',
+            label:ctx=>{
+              const f=x=>(typeof fmtChartPrice==='function'&&typeof x==='number')?fmtChartPrice(x):x;
+              const v=ctx.raw;
+              if(Array.isArray(v)) return ` ${ctx.dataset.label||'Range'}: $${f(v[0])} – $${f(v[1])}`;
+              return ` ${ctx.dataset.label||''}: $${f(v)}`;
+            }
+          }
         },
         zoom: {
           zoom: { wheel:{enabled:true,speed:0.045}, pinch:{enabled:true}, mode:'xy', onZoomComplete({chart}){_expandedHasUserZoom=!chartAtFullHistory(chart);} },
@@ -6345,7 +6355,7 @@ document.addEventListener('click', function(e) {
 </div>
 </div>
 <script src="/product-system.js?v=20260702-1"></script>
-<script src="/workspace-system.js?v=20260703-2"></script>
+<script src="/workspace-system.js?v=20260703-3"></script>
 <script src="/research-system.js?v=20260628-1"></script>
 </body>
 </html>
