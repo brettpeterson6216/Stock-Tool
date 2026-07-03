@@ -917,10 +917,10 @@ html[data-theme="dark"] #view-tool .scr-table{
   #view-tool #body-analyze,#view-tool .acc-body{ max-width:1280px!important; }
   #view-tool .app-content-scroll{ padding:14px 26px 54px!important; }
 
-  /* 4. Sidebar travels with you — no empty right rail
-        (acc-body must not clip: overflow:hidden breaks position:sticky) */
+  /* 4. Right rail is filled with real content (analyst, risk, quick value,
+        market context) and stays put — no sticky float following the scroll */
   #view-tool .acc-body{ overflow:visible!important; }
-  #view-tool .dash-sidebar{ position:sticky; top:170px; align-self:start; }
+  #view-tool .dash-sidebar{ position:static; align-self:start; }
 
   /* 5. Price banner + stat strip = one instrument cluster */
   #view-tool .result-header{ margin-bottom:0!important; border-radius:12px 12px 0 0!important; border-bottom:0!important; }
@@ -1238,3 +1238,31 @@ html[data-theme="dark"] .il-quick-search{ background:rgba(22,26,31,.8); }
 .il-quick-search input::placeholder{ color:var(--fp-text-3); font-weight:600; text-transform:none; letter-spacing:0; }
 .il-quick-search:focus-within{ border-color:var(--brand-gold)!important; box-shadow:0 0 0 3px var(--gold-tint); }
 @media(max-width:960px){ .il-quick-search{ display:none; } }
+
+/* ── Landing capabilities grid: the real product, deep-linked ─────────────── */
+.il-capabilities{ max-width:1200px; margin:0 auto; padding:clamp(40px,5vw,70px) 24px; }
+.il-cap-head{ text-align:center; max-width:640px; margin:0 auto 30px; }
+.il-cap-head h2{ margin:.35em 0 .3em; font-family:var(--serif); font-size:clamp(1.5rem,2.6vw,2.1rem); color:#241c0e; }
+html[data-theme="dark"] .il-cap-head h2{ color:#f0ead9; }
+.il-cap-head p{ color:rgba(60,49,26,.75); font-size:.92rem; line-height:1.6; }
+html[data-theme="dark"] .il-cap-head p{ color:rgba(230,224,210,.62); }
+.il-cap-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+@media(max-width:900px){ .il-cap-grid{ grid-template-columns:repeat(2,1fr); } }
+@media(max-width:600px){ .il-cap-grid{ grid-template-columns:1fr; } }
+.il-cap-card{
+  display:block; padding:18px 18px 16px; text-decoration:none;
+  background:rgba(255,255,255,.82); border:1px solid var(--fp-border); border-radius:14px;
+  -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
+  transition:transform .16s,border-color .16s,box-shadow .18s;
+}
+html[data-theme="dark"] .il-cap-card{ background:rgba(20,23,28,.85); }
+.il-cap-card:hover{ transform:translateY(-2px); border-color:var(--brand-gold-line); box-shadow:0 12px 32px rgba(40,28,8,.12); }
+.il-cap-card i{
+  display:grid; place-items:center; width:36px; height:36px; margin-bottom:10px;
+  border-radius:10px; background:var(--gold-tint); color:var(--brand-gold-strong); font-size:18px;
+}
+html[data-theme="dark"] .il-cap-card i{ color:var(--brand-gold); }
+.il-cap-card strong{ display:block; margin-bottom:4px; color:#241c0e; font:600 .92rem var(--serif); }
+html[data-theme="dark"] .il-cap-card strong{ color:#f0ead9; }
+.il-cap-card span{ color:rgba(60,49,26,.72); font:.78rem/1.55 var(--sans); }
+html[data-theme="dark"] .il-cap-card span{ color:rgba(230,224,210,.6); }

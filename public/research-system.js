@@ -182,6 +182,24 @@
       }).join("") : `<div class="il-call-empty">No transcript is available through the current provider. Use the official links above, then save what changed in the scorecard.</div>`;
       list.dataset.loaded = current;
       list.querySelectorAll("[data-transcript-id]").forEach(button => button.onclick = () => openCallTranscript(button.dataset.transcriptId));
+      // Without transcripts, make the tab useful anyway: recent EPS vs estimate
+      if (!data.transcripts?.length) {
+        try {
+          const earnResp = await fetch(`/api/earnings/${encodeURIComponent(current)}`, { credentials: "same-origin" });
+          const rows = earnResp.ok ? await earnResp.json() : [];
+          if (Array.isArray(rows) && rows.length) {
+            const fmtQ = r => r.year && r.quarter ? `Q${r.quarter} ${r.year}` : (r.period || "—");
+            list.insertAdjacentHTML("beforeend",
+              `<div class="il-call-earnings"><h4>Recent quarters — EPS vs estimate (Finnhub)</h4>` +
+              rows.slice(0, 6).map(r => {
+                const beat = r.actual != null && r.estimate != null ? r.actual - r.estimate : null;
+                const cls = beat == null ? "" : beat >= 0 ? "up" : "dn";
+                const pct = r.surprisePercent != null ? ` (${beat >= 0 ? "+" : ""}${Number(r.surprisePercent).toFixed(1)}%)` : "";
+                return `<div class="il-call-row"><div class="il-call-period">${esc(fmtQ(r))}</div><div class="il-call-title">Est ${r.estimate != null ? "$" + Number(r.estimate).toFixed(2) : "—"} · Actual ${r.actual != null ? "$" + Number(r.actual).toFixed(2) : "—"}<span class="${cls}">${beat == null ? "" : (beat >= 0 ? "Beat" : "Miss") + pct}</span></div></div>`;
+              }).join("") + `</div>`);
+          }
+        } catch (_) {}
+      }
       trackEvent("call_research_loaded", { ticker: current, transcripts: data.transcripts?.length || 0 });
     } catch (error) {
       list.innerHTML = `<div class="il-call-empty">${esc(error.message)}</div>`;

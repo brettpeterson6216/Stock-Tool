@@ -97,7 +97,7 @@
 <script defer src="/vendor/chartjs-plugin-zoom.min.js?v=2.2.0"></script>
 <script defer src="/model-math.js?v=20260612-1"></script>
 <link href="/legacy-app.css?v=20260703-2" rel="stylesheet">
-<link href="/premium.css?v=20260703-6" rel="stylesheet">
+<link href="/premium.css?v=20260703-7" rel="stylesheet">
 </head>
 <body>
 <a href="#main-content" class="skip-link">Skip to content</a>
@@ -530,6 +530,25 @@
         <strong>Discount codes accepted</strong>
         <span>Apply a code in Stripe Checkout for limited offers like a $0.99 paid month.</span>
       </div>
+    </div>
+  </div>
+  <!-- Real capabilities — every card deep-links into the live tool -->
+  <div class="il-capabilities" aria-label="What Implied Lens can do">
+    <div class="il-cap-head">
+      <span class="il-landing-kicker">Everything in one workspace</span>
+      <h2>Nine research tools. One ticker away.</h2>
+      <p>These are the actual tools inside Implied Lens — click any card to open it live with a real ticker. No account needed to look.</p>
+    </div>
+    <div class="il-cap-grid">
+      <a class="il-cap-card" href="/?view=tool&section=analyze&symbol=AAPL"><i class="ti ti-chart-candle"></i><strong>Charts &amp; Technicals</strong><span>Candles, moving averages, Bollinger bands, RSI, MACD, OBV, ATR — with a full-screen annotate-and-markup view.</span></a>
+      <a class="il-cap-card" href="/?view=tool&section=financials"><i class="ti ti-table"></i><strong>SEC-Sourced Financials</strong><span>Four years of income statement, balance sheet, and cash flow pulled straight from EDGAR XBRL filings.</span></a>
+      <a class="il-cap-card" href="/?view=tool&section=dcf"><i class="ti ti-calculator"></i><strong>Intrinsic Value Model</strong><span>Ten-year EPS model with a live sensitivity table. Change any assumption and the value recalculates instantly.</span></a>
+      <a class="il-cap-card" href="/?view=tool&section=projection"><i class="ti ti-timeline"></i><strong>Scenario Lab</strong><span>Bear, base, and bull cases with dividends, dilution, and probability-weighted expected value.</span></a>
+      <a class="il-cap-card" href="/?view=tool&section=compare"><i class="ti ti-adjustments-horizontal"></i><strong>4-Stock Compare</strong><span>Side-by-side fundamentals, normalized performance chart, and a fundamental radar.</span></a>
+      <a class="il-cap-card" href="/?view=tool&section=screener"><i class="ti ti-filter"></i><strong>Market Screener</strong><span>Filter by valuation, size, yield, momentum, and sector across the live universe.</span></a>
+      <a class="il-cap-card" href="/?view=tool&section=earnings"><i class="ti ti-trending-up"></i><strong>Earnings &amp; Estimates</strong><span>EPS estimates vs. actuals, surprise history, and forward quarterly estimates.</span></a>
+      <a class="il-cap-card" href="/?view=tool&section=institutional"><i class="ti ti-building-bank"></i><strong>Ownership &amp; Flow</strong><span>Top institutional holders, FINRA OTC weekly volume, and filing-dated changes.</span></a>
+      <a class="il-cap-card" href="/?view=tool&section=workspace"><i class="ti ti-briefcase"></i><strong>Decision Workspace</strong><span>Save the thesis, downside, conviction, and review date — then get held to it.</span></a>
     </div>
   </div>
   <div class="il-workflow-visual" aria-label="How Implied Lens works">
@@ -1156,6 +1175,13 @@
                   <button class="btn-run" style="margin-top:.6rem;width:100%;" onclick="runQuickDCF()">Calculate →</button>
                   <div id="qdcf-output" style="margin-top:.75rem;"></div>
                 </div>
+                <!-- Market context news (fills the rail; no sticky float) -->
+                <div class="panel-box">
+                  <div class="news-section">
+                    <div class="news-lbl">Market Context</div>
+                    <div id="news-items"></div>
+                  </div>
+                </div>
               </div><!-- /dash-sidebar -->
               </div><!-- /dash-layout -->
 
@@ -1207,13 +1233,6 @@
                 </div>
               </div>
 
-              <!-- News -->
-              <div class="panel-box">
-                <div class="news-section">
-                  <div class="news-lbl">Market Context</div>
-                  <div id="news-items"></div>
-                </div>
-              </div>
             </div><!-- /stock-result -->
           
 
@@ -6368,7 +6387,7 @@ document.addEventListener('click', function(e) {
 </div>
 </div>
 <script src="/product-system.js?v=20260702-1"></script>
-<script src="/workspace-system.js?v=20260703-6"></script>
-<script src="/research-system.js?v=20260628-1"></script>
+<script src="/workspace-system.js?v=20260703-7"></script>
+<script src="/research-system.js?v=20260703-1"></script>
 </body>
 </html>

@@ -131,10 +131,13 @@ router.get("/financials/:ticker", requirePro, async (req, res) => {
     // collapse the history into a single wrong year. EPS facts live under the
     // "USD/shares" unit. Duration facts must span a full year (skips quarters).
     function annualSeries(concepts) {
+      // MERGE facts across all synonym concepts: companies change XBRL tags
+      // over time (e.g. Apple moved Revenues -> RevenueFromContractWithCustomer
+      // in 2018), so per-year we take the best fact from any listed concept.
+      const byYear = {};
       for (const concept of concepts) {
         const unitMap = gaap[concept]?.units || {};
         const units   = unitMap.USD || unitMap["USD/shares"] || unitMap.shares || [];
-        const byYear  = {};
         for (const u of units) {
           if (u.form !== "10-K" && u.form !== "10-K/A") continue;
           if (!u.end) continue;
@@ -145,12 +148,10 @@ router.get("/financials/:ticker", requirePro, async (req, res) => {
           const yr = u.end.slice(0, 4);
           if (!byYear[yr] || (u.filed || "") > (byYear[yr].filed || "")) byYear[yr] = u;
         }
-        const sorted = Object.values(byYear)
-          .sort((a, b) => a.end < b.end ? 1 : -1)   // newest first
-          .slice(0, 4);
-        if (sorted.length) return sorted;
       }
-      return [];
+      return Object.values(byYear)
+        .sort((a, b) => a.end < b.end ? 1 : -1)   // newest first
+        .slice(0, 4);
     }
 
     const revSeries    = annualSeries(["Revenues","RevenueFromContractWithCustomerExcludingAssessedTax","SalesRevenueNet","RevenueFromContractWithCustomerIncludingAssessedTax"]);
