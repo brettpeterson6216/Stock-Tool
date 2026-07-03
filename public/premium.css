@@ -1153,3 +1153,29 @@ html[data-theme="dark"] .il-source-note a{ color:var(--brand-gold); }
     width:1px; height:16px; margin:0 4px; background:var(--fp-border); flex:0 0 auto;
   }
 }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   PASSIVE INLINE CHARTS + FULL-CONTROL EXPANDED VIEW
+   Inline charts are pure visuals: the page always scrolls, and no hover
+   crosshair/tooltip boxes cover the data. All interaction — zoom, pan,
+   tooltips, markup, chart type, overlays, ranges — lives in the expanded view.
+   ════════════════════════════════════════════════════════════════════════════ */
+#view-tool .chart-wrap canvas{ pointer-events:none!important; }
+#view-tool .chart-wrap{ cursor:default; }
+
+/* expanded-view control row: everything on one screen */
+#il-cex-controls{
+  display:flex; flex-wrap:wrap; align-items:center; gap:3px 4px;
+  padding:7px 14px; border-bottom:1px solid var(--fp-border);
+}
+.il-cexc{
+  display:inline-flex; align-items:center; gap:5px;
+  min-height:26px; padding:2px 10px; border:1px solid transparent; border-radius:8px;
+  background:transparent; color:var(--fp-text-2); font:600 .7rem var(--sans);
+  cursor:pointer; transition:background .12s,color .12s;
+}
+.il-cexc:hover{ background:rgba(120,86,30,.1); color:var(--fp-text); }
+html[data-theme="dark"] .il-cexc:hover{ background:rgba(230,190,110,.12); }
+.il-cexc.on{ background:var(--gold-grad); color:#1a1206; }
+.il-cexc i{ font-size:13px; }
+.il-cexc-sep{ width:1px; height:16px; margin:0 5px; background:var(--fp-border); flex:0 0 auto; }

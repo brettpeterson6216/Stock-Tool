@@ -46,7 +46,7 @@ test("price charts expose dependable zoom controls and mobile gestures", () => {
   assert.match(html, /minRange:4/);
   assert.match(htmlAndLegacyCss, /#price-chart\{touch-action:none\}/);
   assert.match(legacyCss, /\.chart-wrap canvas,[\s\S]*\.cex-workspace canvas\{[\s\S]*touch-action:none!important/);
-  assert.match(legacyCss, /Ctrl\+scroll to zoom · drag to pan · expand to annotate/);
+  assert.match(legacyCss, /Expand to zoom, pan & inspect/);
   assert.match(legacyCss, /content:'Pinch \+ drag'/);
 });
 
@@ -224,7 +224,7 @@ test("premium landing visual system matches the generated product preview direct
 });
 
 test("premium visual system is applied across app and static pages", () => {
-  assert.match(html, /legacy-app\.css\?v=20260702-2/);
+  assert.match(html, /legacy-app\.css\?v=20260703-1/);
   assert.match(html, /product-system\.css\?v=20260702-1/);
   assert.match(signupHtml, /static-polish\.css\?v=20260625-2/);
   assert.match(html, /<a class="btn-nav" id="nav-signup" href="\/signup">Start trial<\/a>/);

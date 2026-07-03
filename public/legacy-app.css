@@ -1831,7 +1831,7 @@ html[data-theme="dark"] .input-light::placeholder{color:rgba(220,225,232,.28)!im
   -webkit-user-select:none;
 }
 .chart-wrap::after{
-  content:'Ctrl+scroll to zoom · drag to pan · expand to annotate';
+  content:'Expand to zoom, pan & inspect';
   position:absolute;
   right:12px;
   bottom:7px;

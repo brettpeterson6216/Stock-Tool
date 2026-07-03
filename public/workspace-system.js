@@ -568,3 +568,95 @@
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", inject); else inject();
   setInterval(inject, 5000); // pro-gated bodies re-render; re-add quietly
 }());
+
+/* ── Expanded-chart power features ────────────────────────────────────────────
+   1. Wheel-zoom-out at full view loads older history (1M → 3M → 6M → …) so you
+      never have to leave the chart to see more months.
+   2. The expanded price chart gets the FULL control set on one screen:
+      chart type, overlays, and every range — wired to the same state as the
+      inline controls, and the modal re-renders automatically on any change. */
+(function () {
+  const RANGES = [["1d","1D"],["5d","5D"],["1mo","1M"],["3mo","3M"],["6mo","6M"],["ytd","YTD"],["1y","1Y"],["2y","2Y"],["5y","5Y"],["max","Max"]];
+  const TYPES  = [["candle","Candle","ti-chart-candle"],["line","Line","ti-chart-line"],["area","Area","ti-chart-area"]];
+  const INDS   = [["ma50","50D Avg"],["ma200","200D Avg"],["bb","Bands"]];
+
+  function renderControls(chartId) {
+    const modal = document.getElementById("chart-expand-modal");
+    if (!modal) return;
+    let host = document.getElementById("il-cex-controls");
+    if (!host) {
+      host = document.createElement("div");
+      host.id = "il-cex-controls";
+      modal.querySelector(".cex-toolbar")?.before(host);
+    }
+    if (chartId !== "price-chart") { host.innerHTML = ""; host.style.display = "none"; return; }
+    const S = window.IL_STATE || {};
+    const inds = S.inds || {};
+    const btn = (attr, on, label, icon) =>
+      `<button type="button" class="il-cexc${on ? " on" : ""}" ${attr}>${icon ? `<i class="ti ${icon}" aria-hidden="true"></i> ` : ""}${label}</button>`;
+    host.style.display = "";
+    host.innerHTML =
+      TYPES.map(([t, l, i]) => btn(`data-cexc-type="${t}"`, (S.chartType || "candle") === t, l, i)).join("") +
+      `<span class="il-cexc-sep"></span>` +
+      INDS.map(([k, l]) => btn(`data-cexc-ind="${k}"`, Boolean(inds[k]), l)).join("") +
+      `<span class="il-cexc-sep"></span>` +
+      RANGES.map(([r, l]) => btn(`data-cexc-range="${r}"`, (S.range || "1y") === r, l)).join("");
+    host.querySelectorAll("[data-cexc-type]").forEach(b => b.onclick = () => {
+      window.setChartType?.(b.dataset.cexcType, document.getElementById("ct-" + b.dataset.cexcType));
+    });
+    host.querySelectorAll("[data-cexc-ind]").forEach(b => b.onclick = () => {
+      const k = b.dataset.cexcInd;
+      window.toggleInd?.(document.querySelector(`[data-ind=${k}]`), k);
+    });
+    host.querySelectorAll("[data-cexc-range]").forEach(b => b.onclick = () => {
+      const r = b.dataset.cexcRange;
+      const pill = [...document.querySelectorAll(".tf-pill")].find(el => (el.getAttribute("onclick") || "").includes(`'${r}'`));
+      window.changeRange?.(r, pill || null);
+    });
+  }
+
+  function install() {
+    if (window.__ilCexWrapped || typeof window.expandChart !== "function") return;
+    window.__ilCexWrapped = true;
+
+    const _expand = window.expandChart;
+    window.expandChart = function (chartId, title) {
+      _expand(chartId, title);
+      renderControls(chartId);
+      attachWheelLoader();
+    };
+
+    // any price-chart rebuild (type/overlay/range/new data) refreshes the modal
+    const _build = window.buildPriceChart;
+    if (typeof _build === "function") {
+      window.buildPriceChart = function () {
+        const out = _build.apply(this, arguments);
+        const modal = document.getElementById("chart-expand-modal");
+        if (modal?.classList.contains("open") && modal.dataset.chartId === "price-chart") {
+          setTimeout(() => window.expandChart("price-chart", modal.dataset.chartTitle || "Price Chart"), 30);
+        }
+        return out;
+      };
+    }
+  }
+
+  let wheelCooldown = 0;
+  function attachWheelLoader() {
+    const canvas = document.getElementById("chart-expanded");
+    if (!canvas || canvas.dataset.ilWheel) return;
+    canvas.dataset.ilWheel = "1";
+    canvas.addEventListener("wheel", (e) => {
+      if (e.deltaY <= 0) return; // only zoom-out gestures
+      const chart = (window.Chart && window.Chart.getChart) ? window.Chart.getChart(canvas) : null;
+      if (!chart || !window.chartAtFullHistory || !window.chartAtFullHistory(chart)) return;
+      e.preventDefault(); e.stopPropagation();
+      const now = Date.now();
+      if (now - wheelCooldown < 900) return;
+      wheelCooldown = now;
+      window.zoomExpandedChart?.(0.8); // loads the next-larger range for the price chart
+    }, { passive: false, capture: true });
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", install); else install();
+  setTimeout(install, 800);
+}());
