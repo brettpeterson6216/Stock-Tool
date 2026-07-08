@@ -903,3 +903,78 @@ ${thesis ? `<h2>Saved thesis</h2><div class="rp-thesis"><strong>${esc2(thesis.ti
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", rewire); else rewire();
   setTimeout(rewire, 1500);
 }());
+
+/* ── Valuation range bar: Bear / Base / Bull on one visual track ─────────────
+   Renders above scenario cards whenever a projection is calculated, with the
+   current price marked — the "what range am I buying into?" picture. */
+(function () {
+  function render(hostId) {
+    const host = document.getElementById(hostId);
+    if (!host) return;
+    const prices = [...host.querySelectorAll(".sc-card .sc-price")]
+      .map(el => parseFloat((el.textContent || "").replace(/[$,]/g, ""))).filter(v => isFinite(v));
+    let bar = host.previousElementSibling?.classList?.contains("il-range-bar") ? host.previousElementSibling : null;
+    if (prices.length < 3) { if (bar) bar.remove(); return; }
+    const [bear, base, bull] = [Math.min(...prices), prices.slice().sort((a, b) => a - b)[1], Math.max(...prices)];
+    const cur = window.IL_STATE?.data?.meta?.regularMarketPrice;
+    const lo = Math.min(bear, cur || bear) * 0.96, hi = Math.max(bull, cur || bull) * 1.04;
+    const pct = v => ((v - lo) / (hi - lo) * 100).toFixed(1) + "%";
+    if (!bar) { bar = document.createElement("div"); bar.className = "il-range-bar"; host.before(bar); }
+    bar.innerHTML = `<div class="il-rb-title">Valuation range</div>
+      <div class="il-rb-track">
+        <div class="il-rb-fill" style="left:${pct(bear)};width:${(((bull - bear) / (hi - lo)) * 100).toFixed(1)}%"></div>
+        <span class="il-rb-dot dn" style="left:${pct(bear)}" title="Bear $${bear.toFixed(2)}"></span>
+        <span class="il-rb-dot gold" style="left:${pct(base)}" title="Base $${base.toFixed(2)}"></span>
+        <span class="il-rb-dot up" style="left:${pct(bull)}" title="Bull $${bull.toFixed(2)}"></span>
+        ${cur ? `<span class="il-rb-cur" style="left:${pct(cur)}" title="Current $${cur.toFixed(2)}"></span>` : ""}
+      </div>
+      <div class="il-rb-labels"><span class="dn">Bear $${bear.toFixed(2)}</span><span class="gold">Base $${base.toFixed(2)}</span><span class="up">Bull $${bull.toFixed(2)}</span></div>
+      ${cur ? `<div class="il-rb-cur-label">▲ current $${cur.toFixed(2)}</div>` : ""}`;
+  }
+  const watch = (id) => { const el = document.getElementById(id); if (el) new MutationObserver(() => render(id)).observe(el, { childList: true }); };
+  function init() { watch("scenario-cards"); watch("adv-scenario-cards"); }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
+}());
+
+/* ── Research coverage card: live checklist + visible sources ────────────────
+   Auto-tracked completion states (like a real process, not decoration). */
+(function () {
+  const visited = new Set();
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest?.(".mst-btn[data-sec]"); if (b) visited.add(b.dataset.sec);
+  }, true);
+  let secCount = null, secFor = null;
+  async function filings(t) {
+    if (secFor === t) return secCount;
+    secFor = t; secCount = null;
+    try { const r = await fetch(`/api/sec/${encodeURIComponent(t)}`, { credentials: "same-origin" }); if (r.ok) { const d = await r.json(); secCount = (d.filings || []).length; } } catch (_) {}
+    return secCount;
+  }
+  async function render() {
+    const sidebar = document.querySelector("#view-tool .dash-sidebar");
+    const S = window.IL_STATE || {};
+    if (!sidebar || !S.ticker) return;
+    let thesis = null;
+    try { thesis = (JSON.parse(localStorage.getItem("il-workspace-v1") || "{}").theses || []).find(t => t.ticker === S.ticker); } catch (_) {}
+    const modelRun = Boolean((document.getElementById("dcf-output")?.innerHTML || "").trim() || (document.getElementById("qdcf-output")?.innerHTML || "").trim() || document.getElementById("proj-results")?.style.display === "block");
+    const steps = [
+      ["Price & chart loaded", true, "analyze"],
+      ["Financial statements reviewed", visited.has("financials"), "financials"],
+      ["Valuation model run", modelRun, "dcf"],
+      ["Thesis saved", Boolean(thesis), "workspace"],
+      ["Review date set", Boolean(thesis?.review_date), "workspace"],
+    ];
+    const n = await filings(S.ticker);
+    const newsN = document.querySelectorAll("#news-items .news-item").length;
+    let card = document.getElementById("il-coverage");
+    if (!card) {
+      card = document.createElement("div"); card.className = "sidebar-card"; card.id = "il-coverage";
+      sidebar.appendChild(card);
+    }
+    card.innerHTML = `<div class="sidebar-card-title">Research coverage</div>
+      <div class="il-cov-list">${steps.map(([l, done, sec]) =>
+        `<button type="button" class="il-cov-step${done ? " done" : ""}" onclick="openSection('${sec}')"><i class="ti ${done ? "ti-circle-check-filled" : "ti-circle"}"></i>${l}<span>${done ? "Complete" : "Open"}</span></button>`).join("")}</div>
+      <div class="il-cov-src">${n != null ? `<span><i class="ti ti-file-text"></i>${n} SEC filings</span>` : ""}<span><i class="ti ti-news"></i>${newsN} news items</span><span><i class="ti ti-database"></i>3 data providers</span></div>`;
+  }
+  setInterval(() => { try { render(); } catch (_) {} }, 3000);
+}());
