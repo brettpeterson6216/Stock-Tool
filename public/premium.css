@@ -1274,3 +1274,16 @@ html[data-theme="dark"] .il-cap-card span{ color:rgba(230,224,210,.6); }
 .il-rdcf-sub{ margin:4px 0 10px; color:var(--fp-text-2)!important; font:.78rem/1.55 var(--sans); }
 .il-rdcf-note{ margin-top:10px; color:var(--fp-text-3); font:.75rem var(--sans); }
 #il-reverse-dcf{ margin-top:14px; }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   FINAL SCROLL GUARANTEE — highest-specificity, last-in-cascade. Inline chart
+   areas never capture touch or trackpad gestures; the page always scrolls.
+   ════════════════════════════════════════════════════════════════════════════ */
+#view-tool .chart-wrap,
+#view-tool .chart-wrap *,
+#view-tool .panel-box canvas,
+#market-page canvas,
+.hg-market canvas{
+  touch-action:pan-y!important;
+  overscroll-behavior:auto!important;
+}

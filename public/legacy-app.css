@@ -2704,7 +2704,7 @@ body.has-verif-banner #main-nav{top:calc(42px + env(safe-area-inset-top, 0px))}
   .chart-wrap .chart-header .ind-row,.chart-wrap .chart-header .range-pills{display:none!important}
   .chart-data-note{font-size:.58rem;max-width:230px}
   .chart-exp-btn{width:36px;height:36px;border-radius:7px}
-  #price-chart{touch-action:none}
+  #price-chart{touch-action:pan-y}
   .h240{height:285px!important}.h200{height:220px!important}.h150{height:180px!important}
   .cex-box{width:100vw;height:100dvh;max-height:none;border-radius:0;border:0}
   .cex-header{padding:.55rem .65rem;gap:.5rem;align-items:flex-start}.cex-title{font-family:var(--sans);font-size:.78rem;padding-top:.45rem}.cex-hint{display:none}.cex-body{padding:.35rem}.cex-btn{min-width:38px;min-height:38px;padding:.35rem}.cex-btn span{display:none}.cex-toolbar{padding:.35rem}
@@ -4513,9 +4513,15 @@ html[data-theme="dark"] #view-tool .edu-checklist,
 html[data-theme="dark"] #view-tool .edu-glossary{
   background:linear-gradient(180deg,var(--site-surface-dark-strong),var(--site-surface-dark))!important;
 }
+/* Inline chart cards must NEVER trap scrolling (touchscreens and precision
+   touchpads route scroll through touch-action). Gestures are captured only in
+   the expanded workspace, where page scroll is already locked. */
 .chart-wrap,
 .chart-wrap .h240,
-.chart-wrap canvas,
+.chart-wrap canvas{
+  touch-action:pan-y!important;
+  overscroll-behavior:auto!important;
+}
 .cex-workspace,
 .cex-workspace canvas{
   touch-action:none!important;

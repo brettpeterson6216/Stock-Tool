@@ -44,8 +44,10 @@ test("price charts expose dependable zoom controls and mobile gestures", () => {
   assert.match(html, /async function loadMorePriceHistory\(\)/);
   assert.match(html, /CHART_RANGE_ORDER=\['1d','5d','1mo','3mo','6mo','1y','2y','5y','max'\]/);
   assert.match(html, /minRange:4/);
-  assert.match(htmlAndLegacyCss, /#price-chart\{touch-action:none\}/);
-  assert.match(legacyCss, /\.chart-wrap canvas,[\s\S]*\.cex-workspace canvas\{[\s\S]*touch-action:none!important/);
+  // Inline charts must never trap scroll: pan-y everywhere; gestures only in the expanded workspace
+  assert.match(htmlAndLegacyCss, /#price-chart\{touch-action:pan-y\}/);
+  assert.match(legacyCss, /\.chart-wrap canvas\{[\s\S]*touch-action:pan-y!important/);
+  assert.match(legacyCss, /\.cex-workspace canvas\{[\s\S]*touch-action:none!important/);
   assert.match(legacyCss, /Expand to zoom, pan & inspect/);
   assert.match(legacyCss, /content:'Pinch \+ drag'/);
 });
@@ -224,7 +226,7 @@ test("premium landing visual system matches the generated product preview direct
 });
 
 test("premium visual system is applied across app and static pages", () => {
-  assert.match(html, /legacy-app\.css\?v=20260703-2/);
+  assert.match(html, /legacy-app\.css\?v=20260704-1/);
   assert.match(html, /product-system\.css\?v=20260702-1/);
   assert.match(signupHtml, /static-polish\.css\?v=20260625-2/);
   assert.match(html, /<a class="btn-nav" id="nav-signup" href="\/signup">Start trial<\/a>/);
