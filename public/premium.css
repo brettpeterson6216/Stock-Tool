@@ -1287,3 +1287,56 @@ html[data-theme="dark"] .il-cap-card span{ color:rgba(230,224,210,.6); }
   touch-action:pan-y!important;
   overscroll-behavior:auto!important;
 }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   LANDING DARK-MODE RESCUE + HERO OVERFLOW + EMPTY-STATE CLEANUP
+   The lens layer hardcodes light-mode landing surfaces and near-black text in
+   both themes, and the hero h1 overflowed after the font change.
+   ════════════════════════════════════════════════════════════════════════════ */
+/* hero headline: fluid, wrapping, never off-screen (both themes) */
+.il-landing h1,
+.il-landing-copy h1{
+  font-size:clamp(1.9rem,4.4vw,3.3rem)!important;
+  line-height:1.08!important;
+  max-width:16ch;
+  overflow-wrap:break-word!important;
+  white-space:normal!important;
+}
+.il-landing-copy{ max-width:680px; }
+
+/* dark landing: dark surfaces, light text — no more light-mode leakage */
+html[data-theme="dark"] .il-landing{
+  background:linear-gradient(180deg,rgba(10,11,13,.9),rgba(13,12,10,.94))!important;
+}
+html[data-theme="dark"] .il-landing h1{ color:#f2ecdc!important; text-shadow:0 2px 16px rgba(0,0,0,.5)!important; }
+html[data-theme="dark"] .il-landing-copy p{ color:rgba(235,228,214,.72)!important; }
+html[data-theme="dark"] .il-landing-kicker{ color:var(--brand-gold)!important; }
+html[data-theme="dark"] .il-landing-social div,
+html[data-theme="dark"] .il-landing-search,
+html[data-theme="dark"] .il-landing-secondary,
+html[data-theme="dark"] .il-landing-band,
+html[data-theme="dark"] .il-landing-pricing{
+  background:rgba(22,25,30,.85)!important;
+  border-color:rgba(230,190,110,.18)!important;
+}
+html[data-theme="dark"] .il-landing-secondary{ color:#f2e9d4!important; }
+html[data-theme="dark"] .il-landing-social strong,
+html[data-theme="dark"] .il-landing-band h2,
+html[data-theme="dark"] .il-landing-pricing h2,
+html[data-theme="dark"] .il-workflow-copy h2{ color:#f0ead9!important; }
+html[data-theme="dark"] .il-landing-social span,
+html[data-theme="dark"] .il-landing-band p,
+html[data-theme="dark"] .il-landing-pricing p,
+html[data-theme="dark"] .il-workflow-copy p{ color:rgba(230,224,210,.62)!important; }
+html[data-theme="dark"] .il-landing-search input{ color:#f0ead9!important; }
+html[data-theme="dark"] .il-landing-proof span{ color:rgba(235,228,214,.72)!important; }
+html[data-theme="dark"] .il-offer-card{
+  background:rgba(22,25,30,.85)!important; border-color:rgba(230,190,110,.2)!important;
+}
+html[data-theme="dark"] .il-offer-card strong{ color:var(--brand-gold)!important; }
+html[data-theme="dark"] .il-offer-card span{ color:rgba(230,224,210,.6)!important; }
+
+/* logged-in empty state: no wall of "Unavailable" — the hero search leads */
+@media(min-width:961px){
+  #view-tool #body-analyze:not(:has(.il-shell-preview.has-ticker)) .il-tool-shell{ display:none!important; }
+}
