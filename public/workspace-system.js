@@ -729,3 +729,102 @@
   function init() { install(); setTimeout(install, 700); setTimeout(install, 2200); }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 }());
+
+/* ── Beginner value: Plain-English read of the loaded ticker ──────────────────
+   Turns the indicators beginners don't know how to interpret into sentences.
+   Rebuilds whenever the metric strip re-renders. Context, not advice. */
+(function () {
+  function metric(label) {
+    const card = [...document.querySelectorAll("#metrics-grid .metric-card")]
+      .find(c => (c.querySelector(".m-lbl")?.textContent || "").trim().toUpperCase().startsWith(label));
+    if (!card) return null;
+    return { v: (card.querySelector(".m-val")?.textContent || "").trim(), s: (card.querySelector(".m-sub")?.textContent || "").trim() };
+  }
+  function build() {
+    const sidebar = document.querySelector("#view-tool .dash-sidebar");
+    const grid = document.getElementById("metrics-grid");
+    if (!sidebar || !grid || !grid.children.length) return;
+    const S = window.IL_STATE || {};
+    const t = S.ticker; if (!t) return;
+    const ma50 = metric("MA 50"), ma200 = metric("MA 200"), rsi = metric("RSI"), hi = metric("52W HIGH"), vol = metric("VOLATILITY");
+    const bullets = [];
+    if (ma50 && ma200) {
+      const above50 = /Above/i.test(ma50.s), above200 = /Above/i.test(ma200.s);
+      bullets.push(above50 && above200 ? `Price is above both its 50-day and 200-day averages — the trend has been up.`
+        : !above50 && !above200 ? `Price is below both its 50-day and 200-day averages — the trend has been down.`
+        : `Price is between its short- and long-term averages — the trend is mixed.`);
+    }
+    if (rsi && rsi.v !== "—") bullets.push(/Overbought/i.test(rsi.s) ? `Momentum is unusually strong right now (RSI ${rsi.v}) — big recent gains can cool off.`
+      : /Oversold/i.test(rsi.s) ? `Momentum is unusually weak right now (RSI ${rsi.v}) — heavy recent selling.`
+      : `Momentum is in a normal range (RSI ${rsi.v}).`);
+    if (hi && hi.s) bullets.push(`It trades ${hi.s.replace("from high", "below its 52-week high")}.`);
+    if (vol && vol.v !== "—") bullets.push(`Typical yearly swing is about ${vol.v} — ${parseFloat(vol.v) > 35 ? "a bumpy ride" : parseFloat(vol.v) > 20 ? "average turbulence" : "relatively calm"} for a stock.`);
+    if (!bullets.length) return;
+    let card = document.getElementById("il-plain-read");
+    if (!card) {
+      card = document.createElement("div");
+      card.className = "sidebar-card"; card.id = "il-plain-read";
+      const anchor = document.getElementById("analyst-sidebar");
+      if (anchor) anchor.after(card); else sidebar.prepend(card);
+    }
+    card.innerHTML = `<div class="sidebar-card-title">Plain-English read</div>
+      <ul class="il-plain-list">${bullets.map(b => `<li>${b}</li>`).join("")}</ul>
+      <div class="il-plain-foot">Auto-generated from the numbers above · context, not advice</div>`;
+  }
+  const mo = new MutationObserver(() => { clearTimeout(window.__ilPlainT); window.__ilPlainT = setTimeout(build, 250); });
+  function init() { const g = document.getElementById("metrics-grid"); if (g) mo.observe(g, { childList: true, subtree: true }); build(); }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
+}());
+
+/* ── Advanced value: Reverse DCF — "What's priced in?" ───────────────────────
+   Solves for the 10-year EPS growth rate the CURRENT price implies under the
+   model's discount and terminal assumptions. The question pros actually ask. */
+(function () {
+  function impliedGrowth(eps, price, tg, wacc) {
+    if (!(eps > 0) || !(price > 0) || typeof window.calcDCF !== "function") return null;
+    let lo = -30, hi = 60;
+    const val = g => { const r = window.calcDCF(eps, g, g, tg, wacc); return r && r.ok ? r.intrinsic : null; };
+    const vLo = val(lo), vHi = val(hi);
+    if (vLo == null || vHi == null || vLo > price || vHi < price) return null;
+    for (let i = 0; i < 48; i++) {
+      const mid = (lo + hi) / 2, v = val(mid);
+      if (v == null) return null;
+      if (v < price) lo = mid; else hi = mid;
+    }
+    return (lo + hi) / 2;
+  }
+  function build() {
+    const body = document.getElementById("body-dcf");
+    if (!body || document.getElementById("il-reverse-dcf")) return;
+    const out = document.getElementById("dcf-output");
+    if (!out) return;
+    const card = document.createElement("div");
+    card.className = "panel-box"; card.id = "il-reverse-dcf";
+    card.innerHTML = `<div class="panel-box-title">Reverse DCF — what's priced in?</div>
+      <p class="il-rdcf-sub">Instead of guessing growth, solve for it: the annual EPS growth the current price already implies under your discount and terminal assumptions.</p>
+      <button class="btn-run" id="il-rdcf-run" type="button"><i class="ti ti-arrows-exchange"></i> Solve implied growth</button>
+      <div id="il-rdcf-out"></div>`;
+    out.parentElement.appendChild(card);
+    document.getElementById("il-rdcf-run").onclick = () => {
+      const num = id => parseFloat(document.getElementById(id)?.value);
+      const eps = num("dcf-eps"), tg = num("dcf-tg"), wacc = num("dcf-wacc");
+      let price = num("dcf-price");
+      if (!(price > 0)) price = window.IL_STATE?.data?.meta?.regularMarketPrice;
+      const target = document.getElementById("il-rdcf-out");
+      if (!(eps > 0) || !(price > 0)) { target.innerHTML = `<div class="il-rdcf-note">Enter a starting EPS and a current price (load a ticker to auto-fill).</div>`; return; }
+      const g = impliedGrowth(eps, price, tg, wacc);
+      if (g == null) { target.innerHTML = `<div class="il-rdcf-note">No solution in the −30%…+60% growth range — check the assumptions.</div>`; return; }
+      const read = g <= 5 ? "modest expectations — the market is not paying for much growth"
+        : g <= 12 ? "reasonable expectations for a quality compounder"
+        : g <= 20 ? "demanding — the business must execute for years"
+        : "very aggressive — priced for near-flawless execution";
+      target.innerHTML = `<div class="dcf-out">
+        <div class="dcf-row"><span class="dcf-lbl">Price used</span><span class="dcf-val">$${price.toFixed(2)}</span></div>
+        <div class="dcf-row"><span class="dcf-lbl">Implied EPS growth (10-yr)</span><span class="dcf-val gold">${g.toFixed(1)}%/yr</span></div>
+        <div class="dcf-row"><span class="dcf-lbl">Read</span><span class="dcf-val">${read}</span></div>
+      </div>`;
+    };
+  }
+  function init() { build(); setTimeout(build, 1200); setInterval(build, 5000); }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
+}());
