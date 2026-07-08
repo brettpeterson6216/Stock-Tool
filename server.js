@@ -332,9 +332,49 @@ app.get("*", (_req, res) => res.status(404).sendFile(path.join(__dirname, "index
 // When run directly (node server.js): initialise DB and start listening.
 // When required as a module (tests): export the app so the test can
 // call initDb() itself and app.listen() on a free port.
+// ── Automatic weekly review digest ─────────────────────────────────────────
+// At most one email per user per ISO week, only when a thesis review is due
+// within 7 days. Reuses lifecycle_email_log for idempotent claims.
+async function runReviewDigests() {
+  try {
+    const { sendEmail } = require("./lib/email");
+    const monday = (() => { const d = new Date(); const day = (d.getUTCDay() + 6) % 7; d.setUTCDate(d.getUTCDate() - day); return d.toISOString().slice(0, 10); })();
+    const users = await db.execute({ sql: `
+      SELECT u.id, u.email FROM users u WHERE u.email IS NOT NULL AND EXISTS (
+        SELECT 1 FROM investment_theses t
+        WHERE t.user_id = u.id AND t.review_date IS NOT NULL AND t.review_date != ''
+          AND t.review_date <= date('now', '+7 days') AND t.review_date >= date('now', '-30 days')
+      ) LIMIT 200` });
+    for (const u of users.rows) {
+      const claim = await db.execute({
+        sql: "INSERT OR IGNORE INTO lifecycle_email_log (user_id,email_type,reference_key) VALUES (?,'review_digest_auto',?)",
+        args: [u.id, monday],
+      });
+      if (!Number(claim.rowsAffected || 0)) continue;
+      const due = await db.execute({
+        sql: "SELECT ticker,status,review_date FROM investment_theses WHERE user_id=? AND review_date IS NOT NULL AND review_date <= date('now','+7 days') AND review_date >= date('now','-30 days') ORDER BY review_date ASC LIMIT 20",
+        args: [u.id],
+      });
+      if (!due.rows.length) continue;
+      const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+      const items = due.rows.map(r => `<li style="margin-bottom:6px"><strong>${esc(r.ticker)}</strong> — ${esc(r.status || "thesis")} — review ${esc(r.review_date)}</li>`).join("");
+      const result = await sendEmail({
+        to: u.email,
+        subject: `Implied Lens: ${due.rows.length} thesis review${due.rows.length === 1 ? "" : "s"} due this week`,
+        html: `<div style="font-family:Arial,sans-serif;max-width:560px"><h2 style="color:#9A6A18">Your reviews are due</h2><p>You set these review dates when you saved each thesis. Check the evidence before changing a position — not the price.</p><ul>${items}</ul><p><a href="${process.env.APP_URL || "https://impliedlens.com"}/?view=tool&section=workspace" style="color:#9A6A18;font-weight:bold">Open your workspace →</a></p><p style="color:#999;font-size:12px">Not investment advice. You receive this because a saved thesis has a review date this week.</p></div>`,
+      });
+      if (!result?.sent && !result?.simulated) {
+        await db.execute({ sql: "DELETE FROM lifecycle_email_log WHERE user_id=? AND email_type='review_digest_auto' AND reference_key=?", args: [u.id, monday] }).catch(() => {});
+      }
+    }
+  } catch (e) { console.error("[review-digest] error:", e.message); }
+}
+
 if (require.main === module) {
   initDb().then(() => {
     app.listen(PORT, () => console.log(`Implied Lens running on port ${PORT}`));
+    setTimeout(runReviewDigests, 90 * 1000);               // shortly after boot
+    setInterval(runReviewDigests, 6 * 60 * 60 * 1000);     // then every 6 hours
   }).catch(err => { console.error("DB init failed:", err); process.exit(1); });
 }
 

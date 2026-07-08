@@ -828,3 +828,78 @@
   function init() { build(); setTimeout(build, 1200); setInterval(build, 5000); }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 }());
+
+/* ── Branded research report (PDF via print dialog) ───────────────────────────
+   Replaces raw window.print() with a clean, branded report: header, quote,
+   key metrics, valuation output (if computed), saved thesis, and sources.
+   Users print-to-PDF from the styled window. */
+(function () {
+  function esc2(v) { return String(v ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+  function money2(v) { return (v != null && isFinite(v)) ? "$" + Number(v).toLocaleString("en-US", { maximumFractionDigits: 2 }) : "—"; }
+
+  window.ilGenerateReport = function () {
+    const S = window.IL_STATE || {};
+    if (!S.ticker) { if (window.toast) toast("Load a ticker first", "red"); return; }
+    const m = S.data?.meta || S.meta || {};
+    const metrics = [...document.querySelectorAll("#metrics-grid .metric-card")].map(c => ({
+      l: (c.querySelector(".m-lbl")?.textContent || "").replace(/\?/g, "").trim(),
+      v: (c.querySelector(".m-val")?.textContent || "").trim(),
+      s: (c.querySelector(".m-sub")?.textContent || "").trim(),
+    })).filter(x => x.l && x.v);
+    const plain = [...document.querySelectorAll("#il-plain-read li")].map(li => li.textContent.trim());
+    const dcfOut = document.getElementById("dcf-output")?.innerText.trim() || document.getElementById("qdcf-output")?.innerText.trim() || "";
+    let thesis = null;
+    try {
+      const ws = JSON.parse(localStorage.getItem("il-workspace-v1") || "{}");
+      thesis = (ws.theses || []).find(t => t.ticker === S.ticker) || null;
+    } catch (_) {}
+    const chartCanvas = document.getElementById("price-chart");
+    let chartImg = "";
+    try { if (chartCanvas) chartImg = chartCanvas.toDataURL("image/png"); } catch (_) {}
+    const now = new Date();
+    const pct = m.regularMarketChangePercent != null ? `${m.regularMarketChangePercent >= 0 ? "+" : ""}${m.regularMarketChangePercent.toFixed(2)}%` : "";
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc2(S.ticker)} — Implied Lens research report</title>
+<style>
+  @page{ margin:18mm 15mm; }
+  body{ font:14px/1.5 'DM Sans','Segoe UI',Arial,sans-serif; color:#241c0e; margin:0; padding:28px; }
+  .rp-head{ display:flex; justify-content:space-between; align-items:center; border-bottom:2.5px solid #B98A3D; padding-bottom:12px; margin-bottom:18px; }
+  .rp-brand{ font:700 19px 'Space Grotesk','DM Sans',sans-serif; } .rp-brand em{ color:#9A6A18; font-style:italic; }
+  .rp-date{ color:#8a7a55; font-size:11px; text-align:right; }
+  h1{ font:700 26px 'Space Grotesk',sans-serif; margin:0 0 2px; } .rp-sub{ color:#6b5b36; font-size:12px; margin-bottom:12px; }
+  .rp-quote{ font:700 30px 'Space Grotesk',sans-serif; } .rp-chg{ font-size:14px; font-weight:700; color:${(m.regularMarketChangePercent || 0) >= 0 ? "#1c6b4a" : "#9e3f45"}; margin-left:8px; }
+  h2{ font:700 13px 'Space Grotesk',sans-serif; text-transform:uppercase; letter-spacing:.08em; color:#9A6A18; border-bottom:1px solid #e5dcc6; padding-bottom:4px; margin:22px 0 10px; }
+  table{ width:100%; border-collapse:collapse; } td{ padding:5px 8px; border-bottom:1px solid #f0e9d8; font-size:12.5px; }
+  td.k{ color:#6b5b36; width:38%; } td.v{ font-weight:600; } td.s{ color:#8a7a55; font-size:11px; }
+  .rp-chart{ width:100%; border:1px solid #e5dcc6; border-radius:8px; margin:6px 0 4px; }
+  ul{ margin:6px 0; padding-left:18px; } li{ margin-bottom:5px; font-size:12.5px; }
+  pre{ font:12px 'DM Mono',Consolas,monospace; background:#faf6ec; border:1px solid #eee3c8; border-radius:8px; padding:10px 12px; white-space:pre-wrap; }
+  .rp-thesis{ background:#faf6ec; border-left:3px solid #B98A3D; border-radius:0 8px 8px 0; padding:10px 14px; font-size:12.5px; }
+  .rp-foot{ margin-top:26px; padding-top:10px; border-top:1px solid #e5dcc6; color:#8a7a55; font-size:10px; line-height:1.55; }
+</style></head><body>
+<div class="rp-head"><div class="rp-brand">Implied<em>Lens</em> · Research Report</div><div class="rp-date">Generated ${now.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}<br>${now.toLocaleTimeString()}</div></div>
+<h1>${esc2(S.name || S.ticker)} <span style="color:#9A6A18">(${esc2(S.ticker)})</span></h1>
+<div class="rp-sub">${esc2(m.exchangeName || "")} · ${esc2(m.currency || "USD")}</div>
+<div><span class="rp-quote">${money2(m.regularMarketPrice)}</span><span class="rp-chg">${pct}</span></div>
+${chartImg ? `<h2>Price chart</h2><img class="rp-chart" src="${chartImg}">` : ""}
+${metrics.length ? `<h2>Key metrics</h2><table>${metrics.map(x => `<tr><td class="k">${esc2(x.l)}</td><td class="v">${esc2(x.v)}</td><td class="s">${esc2(x.s)}</td></tr>`).join("")}</table>` : ""}
+${plain.length ? `<h2>Plain-English read</h2><ul>${plain.map(p => `<li>${esc2(p)}</li>`).join("")}</ul>` : ""}
+${dcfOut ? `<h2>Valuation model output</h2><pre>${esc2(dcfOut)}</pre>` : ""}
+${thesis ? `<h2>Saved thesis</h2><div class="rp-thesis"><strong>${esc2(thesis.title || S.ticker + " thesis")}</strong><br>${esc2(thesis.thesis || thesis.summary || "")}${thesis.review_date ? `<br><br><em>Next review: ${esc2(thesis.review_date)}</em>` : ""}</div>` : ""}
+<div class="rp-foot"><strong>Sources:</strong> Yahoo Finance chart data · SEC EDGAR XBRL statements · Finnhub fundamentals &amp; estimates · FINRA OTC data. Methodology: impliedlens.com/data-sources.<br><strong>Disclaimer:</strong> Implied Lens provides market data and modeling tools for informational and educational purposes only. This report reflects user-selected assumptions and is not investment advice. Past performance does not guarantee future results.</div>
+<script>window.onload=()=>setTimeout(()=>window.print(),350)<\/script>
+</body></html>`;
+    const w = window.open("", "_blank", "width=880,height=1000");
+    if (!w) { if (window.toast) toast("Allow pop-ups to export the report", "red"); return; }
+    w.document.write(html); w.document.close();
+  };
+
+  // Point every Export control at the branded report
+  function rewire() {
+    document.querySelectorAll('.ash-btn[onclick*="window.print"], [title="Export analysis"]').forEach(b => {
+      b.onclick = () => { if (window.IL_STATE?.ticker) window.ilGenerateReport(); else if (window.toast) toast("Load a ticker first", "red"); };
+      b.removeAttribute("onclick");
+    });
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", rewire); else rewire();
+  setTimeout(rewire, 1500);
+}());
