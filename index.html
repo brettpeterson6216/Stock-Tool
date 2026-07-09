@@ -6167,6 +6167,33 @@ function _toggleMobileMenu() {
   if (!m) return;
   m.classList.toggle('open');
 }
+// ── Mobile More sheet: ticker search + account access ──
+function mobileTickerGo() {
+  const i = document.getElementById('mmenu-ticker');
+  if (!i) return;
+  const v = (i.value || '').trim();
+  if (!v) { i.focus(); return; }
+  i.value = '';
+  const menu = document.getElementById('mobile-more-menu');
+  if (menu) menu.classList.remove('open');
+  if (typeof heroLoadTicker === 'function') heroLoadTicker(v.toUpperCase());
+}
+function _mobileAccount() {
+  const menu = document.getElementById('mobile-more-menu');
+  if (menu) menu.classList.remove('open');
+  const s = document.getElementById('nav-acct-settings');
+  if (s) { s.click(); } else { window.location.href = '/login'; }
+}
+function syncMobileAuth() {
+  const loggedIn = !!(window.S && S.loggedIn);
+  const state = { 'mmenu-login': !loggedIn, 'mmenu-signup': !loggedIn, 'mmenu-account': loggedIn, 'mmenu-logout': loggedIn };
+  Object.keys(state).forEach(function(id) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = state[id] ? '' : 'none';
+  });
+}
+if (window.IL_AUTH_READY && window.IL_AUTH_READY.then) { window.IL_AUTH_READY.then(syncMobileAuth).catch(function(){}); }
+document.addEventListener('DOMContentLoaded', function(){ setTimeout(syncMobileAuth, 1500); });
 // Close more menu when tapping outside
 document.addEventListener('click', function(e) {
   const menu = document.getElementById('mobile-more-menu');
@@ -6376,7 +6403,13 @@ document.addEventListener('click', function(e) {
 <!-- ── Mobile More Menu (slide-up) ── -->
 <div class="mobile-more-menu" id="mobile-more-menu">
   <div class="mmenu-close"><div class="mmenu-close-bar"></div></div>
+  <div class="mmenu-search">
+    <i class="ti ti-search" aria-hidden="true"></i>
+    <input id="mmenu-ticker" type="text" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Enter a ticker to analyze" placeholder="Enter a ticker — AAPL, NVDA…" onkeydown="if(event.key==='Enter'){mobileTickerGo()}">
+    <button type="button" onclick="mobileTickerGo()">Go</button>
+  </div>
   <div class="mmenu-grid">
+    <a href="#" class="mmenu-item" onclick="showMarketPage();_toggleMobileMenu();return false;"><i class="ti ti-chart-area"></i><span>Market</span></a>
     <a href="#" class="mmenu-item" onclick="navGoTo('financials');_setMobileNav('financials');_toggleMobileMenu();return false;"><i class="ti ti-table"></i><span>Financials</span></a>
     <a href="#" class="mmenu-item" onclick="navGoTo('advmetrics');_setMobileNav('advmetrics');_toggleMobileMenu();return false;"><i class="ti ti-report-analytics"></i><span>Metrics</span></a>
     <a href="#" class="mmenu-item" onclick="navGoTo('earnings');_setMobileNav('earnings');_toggleMobileMenu();return false;"><i class="ti ti-trending-up"></i><span>Earnings</span></a>
@@ -6386,6 +6419,12 @@ document.addEventListener('click', function(e) {
     <a href="#" class="mmenu-item" onclick="navGoTo('projection');_setMobileNav('projection');_toggleMobileMenu();return false;"><i class="ti ti-timeline"></i><span>Projection</span></a>
     <a href="#" class="mmenu-item" onclick="navGoTo('secfilings');_setMobileNav('secfilings');_toggleMobileMenu();return false;"><i class="ti ti-file-text"></i><span>SEC</span></a>
     <a href="#" class="mmenu-item" onclick="navGoTo('institutional');_setMobileNav('institutional');_toggleMobileMenu();return false;"><i class="ti ti-building-bank"></i><span>Inst.</span></a>
+  </div>
+  <div class="mmenu-grid mmenu-acct-row">
+    <a href="/login" class="mmenu-item" id="mmenu-login"><i class="ti ti-login-2"></i><span>Log in</span></a>
+    <a href="/signup" class="mmenu-item" id="mmenu-signup"><i class="ti ti-user-plus"></i><span>Start trial</span></a>
+    <a href="#" class="mmenu-item" id="mmenu-account" style="display:none;" onclick="_mobileAccount();return false;"><i class="ti ti-user-circle"></i><span>Account</span></a>
+    <a href="#" class="mmenu-item" id="mmenu-logout" style="display:none;" onclick="var b=document.getElementById('nav-acct-logout');if(b){b.click();}_toggleMobileMenu();return false;"><i class="ti ti-logout-2"></i><span>Log out</span></a>
   </div>
 </div>
 </div>

@@ -2272,10 +2272,10 @@ body.has-verif-banner { padding-top:calc(42px + env(safe-area-inset-top, 0px)); 
   .dash-sidebar { display:none !important; }
   .dash-main { width:100% !important; min-width:0; }
 
-  /* ── Charts: shorter on mobile ── */
-  #price-chart-canvas { max-height:200px !important; }
-  #rsi-canvas { max-height:110px !important; }
-  #macd-canvas { max-height:110px !important; }
+  /* ── Charts: give real room on mobile ── */
+  #price-chart-canvas { max-height:300px !important; }
+  #rsi-canvas { max-height:150px !important; }
+  #macd-canvas { max-height:150px !important; }
 
   /* ── Metrics grid: 2 cols ── */
   .metrics-grid { grid-template-columns:repeat(2,1fr) !important; }
@@ -7697,4 +7697,45 @@ html[data-theme="dark"] #view-tool .app-section.open #body-analyze,
   padding:0!important;
   -webkit-backdrop-filter:none!important;
   backdrop-filter:none!important;
+}
+
+/* ══════════ MOBILE UX ENHANCEMENTS (2026-07-09) ══════════ */
+@media(max-width:640px){
+  /* Wide data tables: always horizontally scrollable with momentum */
+  #view-tool .cmp-table-wrap,
+  #view-tool .scr-table-wrap,
+  #view-tool .inst-table-wrap,
+  #view-tool .fin-subtab > div{
+    overflow-x:auto!important;
+    -webkit-overflow-scrolling:touch;
+  }
+  /* Keep numeric columns from collapsing so data stays readable */
+  #view-tool .fin-table,
+  #view-tool .cmp-table,
+  #view-tool .scr-table,
+  #view-tool .inst-table{ min-width:max-content; }
+  #view-tool .fin-table th,#view-tool .fin-table td,
+  #view-tool .cmp-table th,#view-tool .cmp-table td,
+  #view-tool .inst-table th,#view-tool .inst-table td{ white-space:nowrap; }
+
+  /* Mobile "More" sheet: ticker search box */
+  .mmenu-search{
+    display:flex;align-items:center;gap:.4rem;
+    margin:0 0 .7rem;padding:.15rem .15rem .15rem .7rem;
+    border:1px solid var(--border3);border-radius:10px;background:var(--card);
+  }
+  .mmenu-search i{ color:var(--brand-gold);font-size:16px;flex:0 0 auto; }
+  .mmenu-search input{
+    flex:1;min-width:0;border:0;background:transparent;outline:0;
+    font:700 15px var(--mono);letter-spacing:.02em;text-transform:uppercase;
+    color:var(--text);padding:.55rem .25rem;
+  }
+  .mmenu-search input::placeholder{ color:var(--text5);font-weight:500;letter-spacing:0;text-transform:none; }
+  .mmenu-search button{
+    flex:0 0 auto;border:0;border-radius:8px;cursor:pointer;
+    padding:.55rem 1rem;font:800 13px var(--sans);
+    background:var(--brand-gold);color:#17130c;
+  }
+  /* Divider above the account links inside the More sheet */
+  .mmenu-acct-row{ margin-top:.5rem;padding-top:.6rem;border-top:1px solid var(--border2); }
 }
