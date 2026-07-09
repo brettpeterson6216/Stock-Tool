@@ -7739,3 +7739,61 @@ html[data-theme="dark"] #view-tool .app-section.open #body-analyze,
   /* Divider above the account links inside the More sheet */
   .mmenu-acct-row{ margin-top:.5rem;padding-top:.6rem;border-top:1px solid var(--border2); }
 }
+
+/* ══════════ UX FOLLOW-UP FIXES (2026-07-09b) ══════════ */
+/* Cleaner ticker/search font (replace DM Mono) + market number spots */
+.ticker-input,
+.il-quick-search input,
+.mmenu-search input,
+#landing-search,
+#market-page .ht-sym,#market-page .ht-price,
+#market-page .wl-sym,#market-page .wl-price,
+.hg-market .mo-idx-price,.hg-market .mo-idx-chg,.hg-market .mo-bv2-val{
+  font-family:var(--sans)!important;
+  font-feature-settings:'tnum' 1,'lnum' 1;
+}
+.ticker-input,.il-quick-search input,.mmenu-search input,#landing-search{ letter-spacing:.02em; }
+
+/* Light-mode quick ticker search: readable placeholder + icon (was near-invisible) */
+.il-quick-search input::placeholder{ color:rgba(60,49,26,.62)!important; }
+html[data-theme="dark"] .il-quick-search input::placeholder{ color:rgba(245,235,215,.5)!important; }
+.il-quick-search i{ color:var(--brand-gold-strong,#503812)!important; }
+html[data-theme="dark"] .il-quick-search i{ color:var(--brand-gold)!important; }
+
+/* Account icon in the top-right nav (mobile only) */
+.nav-acct-mobile{ display:none; }
+/* Bulletproof close for the fullscreen expanded chart (hidden until mobile) */
+.cex-close-mobile{ display:none; }
+
+@media(max-width:640px){
+  /* Person icon next to the theme toggle */
+  .nav-acct-mobile{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:36px;height:36px;flex:0 0 auto;padding:0;
+    border:0;background:transparent;cursor:pointer;color:var(--text3);
+    -webkit-tap-highlight-color:transparent;
+  }
+  .nav-acct-mobile i{ font-size:22px;line-height:1; }
+  .nav-acct-mobile:active{ opacity:.6; }
+  /* Replace the wordy account button with the icon on phones */
+  #main-nav .nav-acct-btn{ display:none!important; }
+
+  /* Fullscreen expanded chart: always-tappable close, clear of the notch */
+  #chart-expand-modal .cex-close-mobile{
+    display:flex;align-items:center;justify-content:center;
+    position:fixed;
+    top:calc(env(safe-area-inset-top,0px) + 8px);
+    right:calc(env(safe-area-inset-right,0px) + 8px);
+    width:46px;height:46px;border-radius:50%;
+    background:var(--brand-gold);color:#17130c;border:0;
+    z-index:10001;box-shadow:0 6px 20px rgba(0,0,0,.45);
+    font-size:24px;cursor:pointer;-webkit-tap-highlight-color:transparent;
+  }
+  #chart-expand-modal .cex-header{
+    position:relative;z-index:9000;
+    padding-top:calc(.55rem + env(safe-area-inset-top,0px))!important;
+    padding-right:64px!important;
+  }
+  /* Hide the redundant header close (X) on mobile; the round button handles it */
+  #chart-expand-modal .cex-btn.gold{ display:none!important; }
+}

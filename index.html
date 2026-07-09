@@ -129,6 +129,7 @@
         <span class="theme-toggle-thumb"></span>
       </span>
     </button>
+    <button class="nav-acct-mobile" id="nav-acct-mobile" type="button" aria-label="Account" title="Account" onclick="navAccountTap()"><i class="ti ti-user-circle"></i></button>
     <span class="nav-live" title="ImpliedLens is live">Live</span>
     <a class="btn-nav-outline" id="nav-login" href="/login">Log in</a>
     <a class="btn-nav" id="nav-signup" href="/signup">Start trial</a>
@@ -1648,6 +1649,7 @@
 
 <!-- ══ CHART EXPAND MODAL ══ -->
 <div id="chart-expand-modal" onclick="if(event.target===this)closeExpandModal()">
+  <button type="button" class="cex-close-mobile" aria-label="Close full-screen chart" onclick="closeExpandModal()"><i class="ti ti-x"></i></button>
   <div class="cex-box">
     <div class="cex-header">
       <span class="cex-title" id="cex-title">Chart</span>
@@ -6166,6 +6168,14 @@ function _toggleMobileMenu() {
   const m = document.getElementById('mobile-more-menu');
   if (!m) return;
   m.classList.toggle('open');
+}
+// ── Top-nav account icon (mobile): open account menu or go to login ──
+function navAccountTap() {
+  if (window.S && S.loggedIn) {
+    const w = document.getElementById('nav-acct-wrap');
+    if (w) { w.style.display = 'block'; w.classList.toggle('open'); return; }
+  }
+  window.location.href = '/login';
 }
 // ── Mobile More sheet: ticker search + account access ──
 function mobileTickerGo() {
