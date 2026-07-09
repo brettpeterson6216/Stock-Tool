@@ -4879,9 +4879,8 @@ html[data-theme="dark"] .il-landing h1,
 html[data-theme="dark"] .il-landing h2,
 html[data-theme="dark"] .il-landing h3,
 html[data-theme="dark"] .il-landing strong,
-html[data-theme="dark"] .il-landing input,
-html[data-theme="dark"] .il-landing button{
-  color:#17120B!important;
+html[data-theme="dark"] .il-landing input{
+  color:#F5EBD7!important;
 }
 html[data-theme="dark"] .il-landing p,
 html[data-theme="dark"] .il-landing span,
@@ -4889,31 +4888,33 @@ html[data-theme="dark"] .il-landing li,
 html[data-theme="dark"] .il-landing .il-landing-band p,
 html[data-theme="dark"] .il-landing .il-landing-pricing p,
 html[data-theme="dark"] .il-landing .il-offer-card span{
-  color:rgba(23,18,11,.72)!important;
+  color:rgba(245,235,215,.70)!important;
 }
 html[data-theme="dark"] .il-landing .il-landing-kicker,
 html[data-theme="dark"] .il-landing .il-landing-proof span{
-  color:#7B541C!important;
+  color:var(--brand-gold)!important;
 }
 html[data-theme="dark"] .il-landing .il-landing-search,
 html[data-theme="dark"] .il-landing .il-offer-card{
-  background:rgba(255,249,231,.64)!important;
-  border-color:rgba(126,88,29,.24)!important;
-  box-shadow:0 12px 30px rgba(88,58,12,.10)!important;
+  background:rgba(18,21,25,.72)!important;
+  border-color:rgba(242,213,138,.22)!important;
+  box-shadow:0 12px 30px rgba(0,0,0,.32)!important;
 }
 html[data-theme="dark"] .il-landing .il-landing-search input{
-  color:#17120B!important;
+  color:#F5EBD7!important;
 }
 html[data-theme="dark"] .il-landing .il-landing-search input::placeholder{
-  color:rgba(23,18,11,.52)!important;
+  color:rgba(245,235,215,.50)!important;
 }
-html[data-theme="dark"] .il-landing .il-landing-primary,
-html[data-theme="dark"] .il-landing .il-landing-search button,
-html[data-theme="dark"] .il-landing-band button{
+html[data-theme="dark"] .il-landing .il-landing-primary{
   color:#17120B!important;
 }
+html[data-theme="dark"] .il-landing .il-landing-search button,
+html[data-theme="dark"] .il-landing-band button{
+  color:#F5EBD7!important;
+}
 html[data-theme="dark"] .il-landing .il-landing-secondary{
-  color:#3B2A12!important;
+  color:rgba(245,235,215,.84)!important;
 }
 #view-tool .app-section-hdr,
 #view-tool .tool-welcome,
