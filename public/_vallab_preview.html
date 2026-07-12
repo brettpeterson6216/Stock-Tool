@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Valuation Lab Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.44.0/dist/tabler-icons.min.css" rel="stylesheet">
+<style>
+  :root{ --sans:'DM Sans',Arial; --serif:'Space Grotesk','DM Sans',Arial; --lens-text:#f5ebd7; --lens-gold:#d9b35e; --gold:#d9b35e; --text5:#8a8069; }
+  body{ margin:0; background:linear-gradient(180deg,#0a0b0c,#101214); min-height:100vh; padding:26px; }
+  .panel-box{ max-width:1200px; margin:0 auto; background:linear-gradient(180deg,#202327,#1b1e21); border:1px solid rgba(230,188,99,.18); border-radius:16px; padding:22px; }
+  h1{ color:#d9b35e; font:800 1rem 'DM Sans'; letter-spacing:.14em; text-transform:uppercase; margin:0 0 16px; }
+</style>
+</head>
+<body>
+<div class="panel-box">
+  <h1>Valuation Lab — preview (mock data)</h1>
+  <div id="mount"></div>
+</div>
+<script>
+  // Mock the app state the module seeds from
+  window.S = { ticker:'DEMO', data:{ meta:{ regularMarketPrice:120, trailingPE:25, marketCap:120e9 } },
+    financialsRaw:{
+      incomeStatementHistory:{ incomeStatementHistory:[
+        { totalRevenue:{raw:10e9}, grossProfit:{raw:7.5e9}, operatingIncome:{raw:2e9}, incomeBeforeTax:{raw:1.9e9}, incomeTaxExpense:{raw:0.4e9}, netIncome:{raw:1.5e9}, dilutedEPS:{raw:1.5} },
+        { totalRevenue:{raw:8.7e9}, grossProfit:{raw:6.4e9}, operatingIncome:{raw:1.5e9}, netIncome:{raw:1.1e9} },
+        { totalRevenue:{raw:7.4e9}, grossProfit:{raw:5.3e9}, operatingIncome:{raw:1.0e9}, netIncome:{raw:0.7e9} } ]},
+      balanceSheetHistory:{ balanceSheetStatements:[ { cash:{raw:5e9}, shortLongTermDebt:{raw:0.5e9}, longTermDebt:{raw:1.5e9} } ]},
+      cashflowStatementHistory:{ cashflowStatements:[ { depreciation:{raw:0.5e9}, capitalExpenditures:{raw:-0.4e9} } ]},
+      defaultKeyStatistics:{ sharesOutstanding:{raw:1e9}, ebitda:{raw:2.5e9} } } };
+</script>
+<script src="./model-math.js?v=preview"></script>
+<script src="./valuation-lab.js?v=preview"></script>
+<script> window.ValuationLab.mount('mount'); </script>
+</body>
+</html>

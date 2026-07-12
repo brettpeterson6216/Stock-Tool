@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projection Lab Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.44.0/dist/tabler-icons.min.css" rel="stylesheet">
+<style>
+  :root{ --sans:'DM Sans',Arial; --serif:'Space Grotesk','DM Sans',Arial; --lens-text:#f5ebd7; --lens-gold:#d9b35e; }
+  body{ margin:0; background:linear-gradient(180deg,#0a0b0c,#101214); min-height:100vh; padding:28px; }
+  .panel-box{ max-width:1180px; margin:0 auto; background:linear-gradient(180deg,#202327,#1b1e21); border:1px solid rgba(230,188,99,.18); border-radius:16px; padding:22px; }
+  h1{ color:#d9b35e; font:800 1rem 'DM Sans'; letter-spacing:.14em; text-transform:uppercase; margin:0 0 16px; }
+</style>
+</head>
+<body>
+<div class="panel-box">
+  <h1>Projection Lab — preview (mock PLTR data)</h1>
+  <div id="mount"></div>
+</div>
+<script src="./model-math.js?v=preview"></script>
+<script src="./projection-lab.js?v=preview"></script>
+<script>
+  window.ProjectionLab.mount('mount', {
+    ticker:'PLTR', startPrice:82.45, startShares:2200128000,
+    baseRevenue:2861000000, currentPE:180, baseMargin:0.20, histGrowth:0.29,
+    baseYear:2024, years:5, seeded:true
+  });
+</script>
+</body>
+</html>
