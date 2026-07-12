@@ -7797,3 +7797,22 @@ html[data-theme="dark"] .il-quick-search i{ color:var(--brand-gold)!important; }
   /* Hide the redundant header close (X) on mobile; the round button handles it */
   #chart-expand-modal .cex-btn.gold{ display:none!important; }
 }
+
+/* ══════════ TOP TOOLBAR: ticker search + Project tab (2026-07-12) ══════════ */
+/* Keep search + ticker contiguous with the right-hand cluster */
+#main-nav .nav-right{ margin-left:.45rem; }
+.nav-search{
+  display:flex;align-items:center;gap:6px;flex-shrink:0;
+  height:34px;padding:0 11px;margin:0 .45rem;
+  border:1px solid var(--border3);border-radius:9px;background:var(--card);max-width:220px;
+}
+.nav-search i{ color:var(--brand-gold-strong,#503812);font-size:15px;flex:0 0 auto; }
+.nav-search input{ border:0;background:transparent;outline:0;width:140px;min-width:0;font:600 .82rem var(--sans);color:var(--text);letter-spacing:.02em; }
+.nav-search input::placeholder{ color:var(--text5);font-weight:500;letter-spacing:0; }
+.nav-search:focus-within{ border-color:var(--brand-gold);box-shadow:0 0 0 3px var(--brand-gold-soft); }
+html[data-theme="dark"] .nav-search{ background:rgba(22,26,31,.72);border-color:rgba(242,213,138,.22); }
+html[data-theme="dark"] .nav-search i{ color:var(--brand-gold); }
+/* The main-nav search replaces the in-tool quick search — hide the duplicate */
+.il-quick-search{ display:none!important; }
+@media(max-width:900px){ .nav-search{ display:none; } }
+@media(max-width:640px){ .nav-search{ display:none!important; } }
