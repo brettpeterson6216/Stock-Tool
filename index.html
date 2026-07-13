@@ -95,10 +95,10 @@
 <script src="/vendor/chart.umd.min.js?v=4.4.1"></script>
 <script defer src="/vendor/hammer.min.js?v=2.0.8"></script>
 <script defer src="/vendor/chartjs-plugin-zoom.min.js?v=2.2.0"></script>
-<script defer src="/model-math.js?v=20260712-1"></script>
-<script defer src="/projection-lab.js?v=20260712-1"></script>
-<script defer src="/valuation-lab.js?v=20260712-1"></script>
-<link href="/legacy-app.css?v=20260712-1" rel="stylesheet">
+<script defer src="/model-math.js?v=20260712-2"></script>
+<script defer src="/projection-lab.js?v=20260712-2"></script>
+<script defer src="/valuation-lab.js?v=20260712-2"></script>
+<link href="/legacy-app.css?v=20260712-2" rel="stylesheet">
 <link href="/premium.css?v=20260712-1" rel="stylesheet">
 </head>
 <body>
@@ -1895,6 +1895,7 @@ const S = {
   csrfToken: null,      // fetched from GET /api/csrf on page load
 };
 window.IL_STATE = S;
+window.S = S;  // alias so external modules (Projection Lab, Valuation Lab) can read app state
 const COLORS = ['#16C784','#3B82F6','#A78BFA','#F5B83D'];
 // Keep this list in sync with the requirePro-gated API routes in routes/financials.js
 // and routes/market-data.js (screener).
@@ -6448,7 +6449,7 @@ document.addEventListener('click', function(e) {
   </div>
 </div>
 </div>
-<script src="/product-system.js?v=20260702-1"></script>
+<script src="/product-system.js?v=20260712-2"></script>
 <script src="/workspace-system.js?v=20260704-2"></script>
 <script src="/research-system.js?v=20260703-1"></script>
 </body>

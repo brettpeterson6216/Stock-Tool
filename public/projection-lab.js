@@ -550,6 +550,9 @@
       ".plab-note{margin-top:10px;font:500 .66rem var(--sans);color:rgba(245,235,215,.4);line-height:1.5;}" +
       ".plab-err{padding:.8rem;border:1px solid rgba(201,107,112,.4);background:rgba(201,107,112,.08);border-radius:10px;color:#e0a6a9;font:600 .8rem var(--sans);}" +
       ".plab-toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%) translateY(10px);background:#12151a;color:#f5ebd7;border:1px solid var(--plab-line);padding:.6rem 1rem;border-radius:10px;font:600 .8rem var(--sans);opacity:0;transition:.2s;z-index:99999;}.plab-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}" +
+      "#view-tool .plab input{background:var(--plab-in)!important;color:var(--lens-text,#f5ebd7)!important;border-color:var(--plab-line)!important;-webkit-text-fill-color:var(--lens-text,#f5ebd7)!important;}" +
+      "#view-tool .plab input::placeholder{color:rgba(245,235,215,.42)!important;}" +
+      "html:not([data-theme='dark']) .plab{background:#0d0f12;border:1px solid var(--plab-line);border-radius:14px;padding:14px;}" +
       "html:not([data-theme='dark']) .plab-meta input,html:not([data-theme='dark']) .plab-yr,html:not([data-theme='dark']) .plab-tabs,html:not([data-theme='dark']) .plab-scard,html:not([data-theme='dark']) .plab-btn,html:not([data-theme='dark']) .plab-rowlbl{background:#12151a;}";
     var s = el("style"); s.id = "plab-css"; s.textContent = css; document.head.appendChild(s);
   }

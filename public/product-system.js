@@ -310,7 +310,8 @@
     const analyze = document.getElementById("body-analyze");
     if (analyze && !document.querySelector('[data-il-shell="analyze"]')) analyze.insertAdjacentHTML("afterbegin", shellHtml("analyze"));
     const projection = document.getElementById("body-projection");
-    if (projection && !document.querySelector('[data-il-shell="projection"]')) projection.insertAdjacentHTML("afterbegin", shellHtml("projection"));
+    // Projection section now hosts the Projection Lab; skip the legacy research shell.
+    if (projection && !document.getElementById("il-projlab-mount") && !document.querySelector('[data-il-shell="projection"]')) projection.insertAdjacentHTML("afterbegin", shellHtml("projection"));
     document.querySelectorAll(".il-shell-search").forEach(search => {
       const input = search.querySelector("input");
       const button = search.querySelector("button");
@@ -867,6 +868,7 @@
   function renderProjectionWorkspace(result) {
     const body = document.getElementById("body-projection");
     if (!body) return;
+    if (document.getElementById("il-projlab-mount")) return;  // Projection Lab replaces the legacy projection workspace
     let workspace = document.getElementById("il-projection-builder");
     if (!workspace) {
       workspace = document.createElement("div");
