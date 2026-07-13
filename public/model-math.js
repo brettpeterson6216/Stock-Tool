@@ -353,6 +353,332 @@
   }
   function shared_startPrice(shared) { return Number(shared.startPrice); }
 
+  // ════════ PROJECTION LAB v2 — one canonical model + pure calculation engine ════════
+  // The model is the single source of truth. All UI components, save, CSV, and
+  // image export derive from plCalculateProjection / plCalculateOutlook — never
+  // from cached seed data or component-local copies.
+  var PL_MODEL_VERSION = 2;
+  var PL_SCENARIO_KEYS = ["bear", "base", "bull"];
+  var PL_MAX_YEARS = 10;
+  var PL_HORIZONS = [3, 5, 10];
+
+  // Whole percent → decimal, applied exactly once. "30" means 30%.
+  function plPct(value) {
+    var n = Number(value);
+    return Number.isFinite(n) ? n / 100 : NaN;
+  }
+
+  // Parse user-typed numbers: commas, $, and K/M/B/T suffixes. Returns NaN when invalid.
+  function plParseNumber(text) {
+    if (typeof text === "number") return Number.isFinite(text) ? text : NaN;
+    if (text == null) return NaN;
+    var s = String(text).trim().replace(/[$,\s]/g, "");
+    if (!s) return NaN;
+    var mult = 1;
+    var m = /^(-?\d*\.?\d+)([kKmMbBtT])$/.exec(s);
+    if (m) {
+      var suffix = m[2].toLowerCase();
+      mult = suffix === "k" ? 1e3 : suffix === "m" ? 1e6 : suffix === "b" ? 1e9 : 1e12;
+      s = m[1];
+    }
+    var n = Number(s);
+    return Number.isFinite(n) ? n * mult : NaN;
+  }
+
+  function plFill(values, length, fallback) {
+    var src = Array.isArray(values) ? values : (values != null ? [values] : []);
+    var out = [];
+    for (var i = 0; i < length; i += 1) {
+      var v = Number(src[i]);
+      if (!Number.isFinite(v)) v = i > 0 ? out[i - 1] : Number(fallback);
+      if (!Number.isFinite(v)) v = 0;
+      out.push(v);
+    }
+    return out;
+  }
+
+  function plNewScenario(spec) {
+    spec = spec || {};
+    return {
+      revGrowth: plFill(spec.revGrowth, PL_MAX_YEARS, 10),
+      netMargin: plFill(spec.netMargin, PL_MAX_YEARS, 10),
+      peLow: plFill(spec.peLow, PL_MAX_YEARS, 15),
+      peHigh: plFill(spec.peHigh, PL_MAX_YEARS, 25),
+    };
+  }
+
+  // Build a canonical model from seeded fundamentals. All percent fields are
+  // whole percents; all currency fields are raw numbers.
+  function plCreateModel(seed) {
+    seed = seed || {};
+    var year = Math.trunc(Number(seed.baseYear)) || new Date().getFullYear();
+    var startPrice = Number(seed.startPrice) > 0 ? Number(seed.startPrice) : 100;
+    var dilutedShares = Number(seed.dilutedShares) > 0 ? Number(seed.dilutedShares) : 1e9;
+    var baseRevenue = Number(seed.baseRevenue) > 0 ? Number(seed.baseRevenue) : 1e9;
+    var baseNetIncome = Number.isFinite(Number(seed.baseNetIncome)) ? Number(seed.baseNetIncome) : baseRevenue * 0.1;
+    var histGrowthPct = Number.isFinite(Number(seed.histGrowth)) ? Math.max(-20, Math.min(60, Number(seed.histGrowth) * 100)) : 12;
+    var marginPct = baseRevenue > 0 ? Math.max(-50, Math.min(60, baseNetIncome / baseRevenue * 100)) : 10;
+    var pe = Number(seed.currentPE) > 0 ? Math.min(80, Number(seed.currentPE)) : 22;
+    function scn(gMult, mDelta, peLoMult, peHiMult) {
+      return plNewScenario({
+        revGrowth: +(histGrowthPct * gMult).toFixed(1),
+        netMargin: +(Math.max(-50, Math.min(60, marginPct + mDelta))).toFixed(1),
+        peLow: Math.max(2, Math.round(pe * peLoMult)),
+        peHigh: Math.max(3, Math.round(pe * peHiMult)),
+      });
+    }
+    var seededValues = {
+      startPrice: startPrice,
+      dilutedShares: dilutedShares,
+      baseRevenue: baseRevenue,
+      baseNetIncome: baseNetIncome,
+    };
+    return {
+      version: PL_MODEL_VERSION,
+      ticker: seed.ticker || "—",
+      companyName: seed.companyName || "",
+      currency: seed.currency || "USD",
+      baseYear: year,
+      startPrice: startPrice,
+      dilutedShares: dilutedShares,
+      baseRevenue: baseRevenue,
+      baseNetIncome: baseNetIncome,
+      selectedScenario: "base",
+      selectedHorizon: PL_HORIZONS.indexOf(Number(seed.horizon)) >= 0 ? Number(seed.horizon) : 5,
+      scenarioWeights: { bear: 25, base: 50, bull: 25 },
+      scenarios: {
+        bear: scn(0.45, -4, 0.55, 0.8),
+        base: scn(1.0, 0, 0.85, 1.2),
+        bull: scn(1.4, 4, 1.1, 1.6),
+      },
+      seed: {
+        source: seed.source || (seed.seeded ? "company financials" : "defaults"),
+        seededAt: new Date().toISOString(),
+        netIncomeDerived: !!seed.netIncomeDerived,
+        values: seededValues,
+      },
+      userEdited: {},
+      userEditedScenarios: false,
+      lastUpdated: new Date().toISOString(),
+    };
+  }
+
+  // Migrate any previously saved model (v1 or malformed) to the canonical v2 shape.
+  function plMigrateSavedModel(raw) {
+    if (!raw || typeof raw !== "object") return null;
+    if (raw.version === PL_MODEL_VERSION && raw.scenarios && raw.scenarios.base) {
+      var model = plCreateModel({ ticker: raw.ticker });
+      ["ticker", "companyName", "currency", "baseYear", "startPrice", "dilutedShares", "baseRevenue",
+        "baseNetIncome", "selectedScenario", "selectedHorizon", "lastUpdated", "userEditedScenarios"].forEach(function (k) {
+        if (raw[k] != null) model[k] = raw[k];
+      });
+      if (raw.scenarioWeights) model.scenarioWeights = { bear: Number(raw.scenarioWeights.bear) || 0, base: Number(raw.scenarioWeights.base) || 0, bull: Number(raw.scenarioWeights.bull) || 0 };
+      PL_SCENARIO_KEYS.forEach(function (k) { model.scenarios[k] = plNewScenario(raw.scenarios[k]); });
+      if (raw.seed && typeof raw.seed === "object") model.seed = raw.seed;
+      if (raw.userEdited && typeof raw.userEdited === "object") model.userEdited = raw.userEdited;
+      return model;
+    }
+    // v1 shape: { ticker, startPrice, startShares, baseRevenue, baseMargin, baseYear, years, active, scenarios }
+    if (raw.scenarios && (raw.startShares != null || raw.baseMargin != null)) {
+      var baseRevenue = Number(raw.baseRevenue) > 0 ? Number(raw.baseRevenue) : 1e9;
+      var margin = Number.isFinite(Number(raw.baseMargin)) ? Number(raw.baseMargin) : 0.1;
+      var migrated = plCreateModel({
+        ticker: raw.ticker,
+        baseYear: raw.baseYear,
+        startPrice: raw.startPrice,
+        dilutedShares: raw.startShares,
+        baseRevenue: baseRevenue,
+        baseNetIncome: baseRevenue * margin,
+        horizon: raw.years,
+        source: "migrated saved model (v1)",
+        netIncomeDerived: true,
+      });
+      if (PL_SCENARIO_KEYS.indexOf(raw.active) >= 0) migrated.selectedScenario = raw.active;
+      PL_SCENARIO_KEYS.forEach(function (k) {
+        if (raw.scenarios[k]) migrated.scenarios[k] = plNewScenario(raw.scenarios[k]);
+      });
+      migrated.userEditedScenarios = true;
+      return migrated;
+    }
+    return null;
+  }
+
+  // Base-year derived values. Net margin and EPS are always computed, never stored.
+  function plBaseDerived(model) {
+    var revenue = Number(model.baseRevenue);
+    var netIncome = Number(model.baseNetIncome);
+    var shares = Number(model.dilutedShares);
+    return {
+      netMargin: revenue > 0 && Number.isFinite(netIncome) ? netIncome / revenue : NaN,
+      eps: shares > 0 && Number.isFinite(netIncome) ? netIncome / shares : NaN,
+    };
+  }
+
+  // Pure per-scenario projection. Never mutates the model.
+  function plCalculateProjection(model, scenarioKey) {
+    model = model || {};
+    var sc = (model.scenarios || {})[scenarioKey];
+    if (!sc) return { ok: false, error: "Unknown scenario “" + scenarioKey + "”." };
+    var baseYear = Math.trunc(Number(model.baseYear)) || new Date().getFullYear();
+    var years = Math.max(1, Math.min(PL_MAX_YEARS, Math.trunc(Number(model.selectedHorizon)) || 5));
+    var startPrice = Number(model.startPrice);
+    var shares = Number(model.dilutedShares);
+    var baseRevenue = Number(model.baseRevenue);
+    var baseNetIncome = Number(model.baseNetIncome);
+    if (!Number.isFinite(startPrice) || startPrice <= 0) return { ok: false, field: "startPrice", error: "Starting share price must be above zero." };
+    if (!Number.isFinite(shares) || shares <= 0) return { ok: false, field: "dilutedShares", error: "Diluted share count must be above zero." };
+    if (!Number.isFinite(baseRevenue) || baseRevenue <= 0) return { ok: false, field: "baseRevenue", error: "Base-year revenue must be above zero." };
+    if (!Number.isFinite(baseNetIncome)) return { ok: false, field: "baseNetIncome", error: "Enter base-year net income (negative is allowed)." };
+    var warnings = [];
+    var rows = [];
+    var revenue = baseRevenue;
+    for (var i = 1; i <= years; i += 1) {
+      var yr = baseYear + i;
+      var g = plPct(sc.revGrowth[i - 1]);
+      var margin = plPct(sc.netMargin[i - 1]);
+      var peLoRaw = Number(sc.peLow[i - 1]);
+      var peHiRaw = Number(sc.peHigh[i - 1]);
+      if (!Number.isFinite(g)) return { ok: false, error: "Enter revenue growth for " + yr + "." };
+      if (g <= -1) return { ok: false, error: "Revenue growth must be greater than −100% (" + yr + ")." };
+      if (!Number.isFinite(margin)) return { ok: false, error: "Enter a net margin for " + yr + "." };
+      if (margin < -1 || margin > 1) return { ok: false, error: "Net margin must stay between −100% and 100% (" + yr + ")." };
+      if (!Number.isFinite(peLoRaw) || peLoRaw <= 0 || !Number.isFinite(peHiRaw) || peHiRaw <= 0) return { ok: false, error: "P/E assumptions must be above zero (" + yr + ")." };
+      var peLo = Math.min(peLoRaw, peHiRaw);
+      var peHi = Math.max(peLoRaw, peHiRaw);
+      if (peLoRaw > peHiRaw) warnings.push("P/E low was above P/E high in " + yr + " — the range was reordered.");
+      revenue = revenue * (1 + g);
+      var netIncome = revenue * margin;
+      var eps = netIncome / shares;
+      var profitable = eps > 0;
+      // A negative EPS must never produce a fake positive price range.
+      var priceLow = profitable ? eps * peLo : null;
+      var priceHigh = profitable ? eps * peHi : null;
+      rows.push({
+        year: yr,
+        yearsOut: i,
+        revenue: revenue,
+        revGrowth: g,
+        netIncome: netIncome,
+        netMargin: margin,
+        eps: eps,
+        shares: shares,
+        peLow: peLo,
+        peHigh: peHi,
+        priceLow: priceLow,
+        priceHigh: priceHigh,
+        priceMid: profitable ? (priceLow + priceHigh) / 2 : null,
+        cagrLow: profitable ? cagr(startPrice, priceLow, i) : null,
+        cagrHigh: profitable ? cagr(startPrice, priceHigh, i) : null,
+        negativeEarnings: !profitable,
+      });
+    }
+    var derived = plBaseDerived(model);
+    var last = rows[rows.length - 1];
+    return {
+      ok: true,
+      scenario: scenarioKey,
+      baseYear: baseYear,
+      years: years,
+      startPrice: startPrice,
+      base: { year: baseYear, revenue: baseRevenue, netIncome: baseNetIncome, netMargin: derived.netMargin, eps: derived.eps, shares: shares, price: startPrice },
+      rows: rows,
+      terminal: last,
+      warnings: warnings,
+    };
+  }
+
+  // All three scenarios plus the probability-weighted expected outcome at the horizon.
+  function plCalculateOutlook(model) {
+    var out = {};
+    for (var i = 0; i < PL_SCENARIO_KEYS.length; i += 1) {
+      var key = PL_SCENARIO_KEYS[i];
+      var res = plCalculateProjection(model, key);
+      if (!res.ok) return { ok: false, error: res.error, field: res.field, scenario: key };
+      out[key] = res;
+    }
+    var w = model.scenarioWeights || {};
+    var weights = { bear: Number(w.bear), base: Number(w.base), bull: Number(w.bull) };
+    var weightTotal = 0;
+    for (var j = 0; j < PL_SCENARIO_KEYS.length; j += 1) {
+      var wv = weights[PL_SCENARIO_KEYS[j]];
+      if (!Number.isFinite(wv) || wv < 0) return { ok: false, error: "Scenario weights must be numbers of 0% or more.", field: "weights" };
+      weightTotal += wv;
+    }
+    if (Math.abs(weightTotal - 100) > 0.01) return { ok: false, error: "Scenario weights must total 100% (currently " + (+weightTotal.toFixed(1)) + "%).", field: "weights", scenarios: out };
+    var expected = null;
+    var mids = PL_SCENARIO_KEYS.map(function (k) { return out[k].terminal.priceMid; });
+    if (mids.every(function (m) { return Number.isFinite(m); })) {
+      var price = 0;
+      PL_SCENARIO_KEYS.forEach(function (k, idx) { price += mids[idx] * (weights[k] / 100); });
+      expected = {
+        price: price,
+        cagr: cagr(Number(model.startPrice), price, out.base.years),
+        year: out.base.terminal.year,
+        horizonYears: out.base.years,
+        weights: weights,
+        midpoints: { bear: mids[0], base: mids[1], bull: mids[2] },
+      };
+    }
+    return {
+      ok: true,
+      scenarios: out,
+      expected: expected,
+      horizonYears: out.base.years,
+      terminalYear: out.base.terminal.year,
+      warnings: out.bear.warnings.concat(out.base.warnings, out.bull.warnings),
+    };
+  }
+
+  // CSV export built straight from the canonical model — raw numeric values.
+  function plBuildCsv(model) {
+    var outlook = plCalculateOutlook(model);
+    if (!outlook.ok) return { ok: false, error: outlook.error };
+    var derived = plBaseDerived(model);
+    var esc = function (v) { return /[",\n]/.test(String(v)) ? '"' + String(v).replace(/"/g, '""') + '"' : String(v); };
+    var lines = [];
+    lines.push("Implied Lens — Projection Lab");
+    lines.push("Ticker," + esc(model.ticker || ""));
+    if (model.companyName) lines.push("Company," + esc(model.companyName));
+    lines.push("Currency," + esc(model.currency || "USD"));
+    lines.push("Model version," + PL_MODEL_VERSION);
+    lines.push("Exported," + new Date().toISOString());
+    lines.push("Seeded from," + esc((model.seed && model.seed.source) || "—"));
+    lines.push("Horizon (years)," + outlook.horizonYears);
+    lines.push("Selected scenario," + esc(model.selectedScenario));
+    lines.push("Weight bear %," + (model.scenarioWeights.bear));
+    lines.push("Weight base %," + (model.scenarioWeights.base));
+    lines.push("Weight bull %," + (model.scenarioWeights.bull));
+    lines.push("Base year," + model.baseYear);
+    lines.push("Start price," + Number(model.startPrice));
+    lines.push("Diluted shares," + Number(model.dilutedShares));
+    lines.push("Base revenue," + Number(model.baseRevenue));
+    lines.push("Base net income," + Number(model.baseNetIncome));
+    lines.push("Base net margin %," + (Number.isFinite(derived.netMargin) ? +(derived.netMargin * 100).toFixed(2) : ""));
+    lines.push("Base EPS," + (Number.isFinite(derived.eps) ? +derived.eps.toFixed(4) : ""));
+    lines.push("");
+    lines.push(["Scenario", "Year", "Revenue", "Revenue growth %", "Net income", "Net margin %", "EPS", "P/E low", "P/E high", "Price low", "Price high", "CAGR low %", "CAGR high %"].join(","));
+    PL_SCENARIO_KEYS.forEach(function (k) {
+      outlook.scenarios[k].rows.forEach(function (r) {
+        lines.push([
+          k, r.year, r.revenue, +(r.revGrowth * 100).toFixed(2), r.netIncome, +(r.netMargin * 100).toFixed(2),
+          +r.eps.toFixed(4), r.peLow, r.peHigh,
+          r.priceLow == null ? "" : +r.priceLow.toFixed(2),
+          r.priceHigh == null ? "" : +r.priceHigh.toFixed(2),
+          r.cagrLow == null ? "" : +(r.cagrLow * 100).toFixed(2),
+          r.cagrHigh == null ? "" : +(r.cagrHigh * 100).toFixed(2),
+        ].join(","));
+      });
+    });
+    lines.push("");
+    if (outlook.expected) {
+      lines.push("Expected price (" + outlook.expected.year + ")," + +outlook.expected.price.toFixed(2));
+      lines.push("Expected CAGR %," + (outlook.expected.cagr == null ? "" : +(outlook.expected.cagr * 100).toFixed(2)));
+    } else {
+      lines.push("Expected price,unavailable (negative earnings in a scenario)");
+    }
+    return { ok: true, csv: lines.join("\n"), outlook: outlook };
+  }
+
   function epsDcf(input) {
     const eps = Number(input.eps);
     const growth1 = Number(input.growth1);
@@ -656,5 +982,7 @@
   }
 
 
-  return { cagr, cumulativeDividends, projectScenario, projectCases, asDecimalRate, validateProjectionContext, projectionSensitivity, explainProjection, buildProjection, projectRevenueModel, projectRevenueScenarios, projectOperatingModel, valueOperatingModel, runValuation, runValuationScenarios, reverseSolveValuation, valuationSensitivityGrid, epsDcf, annualizedVolatility, futureValue, compoundScenarios };
+  return { cagr, cumulativeDividends, projectScenario, projectCases, asDecimalRate, validateProjectionContext, projectionSensitivity, explainProjection, buildProjection, projectRevenueModel, projectRevenueScenarios, projectOperatingModel, valueOperatingModel, runValuation, runValuationScenarios, reverseSolveValuation, valuationSensitivityGrid, epsDcf, annualizedVolatility, futureValue, compoundScenarios,
+    PL_MODEL_VERSION, PL_SCENARIO_KEYS, PL_MAX_YEARS, PL_HORIZONS,
+    plParseNumber, plCreateModel, plMigrateSavedModel, plBaseDerived, plCalculateProjection, plCalculateOutlook, plBuildCsv };
 });
