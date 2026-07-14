@@ -11,7 +11,7 @@ const rateLimit = require("express-rate-limit");
 const { db }               = require("../lib/db");
 const { reconcileEffectivePlan, normalizeTicker, FREE_DAILY_LIMIT, GUEST_DAILY_LIMIT } = require("../lib/plan");
 const { sendEmail }        = require("../lib/email");
-const { BCRYPT_ROUNDS, APP_URL, ADMIN_SECRET } = require("../lib/config");
+const { BCRYPT_ROUNDS, APP_URL, ADMIN_SECRET, FROM_EMAIL } = require("../lib/config");
 const { validateCsrf, getOrCreateToken } = require("../lib/csrf");
 const { track }        = require("../lib/analytics");
 
@@ -50,7 +50,7 @@ function _verifToken() {
 
 async function _sendVerificationEmail(email, token) {
   const link = `${APP_URL}/verify-email?token=${token}`;
-  await sendEmail({
+  return sendEmail({
     to:      email,
     subject: "Verify your ImpliedLens email",
     html:    `<p>Thanks for signing up to ImpliedLens.</p>
@@ -132,7 +132,10 @@ router.post("/auth/signup",           authLimiter, async (req, res) => {
     db.execute({
       sql:  "INSERT INTO email_verif_tokens (token, user_id, expires_at) VALUES (?, ?, ?)",
       args: [verifToken, userId, verifExpiry],
-    }).then(() => _sendVerificationEmail(email, verifToken)).catch(e => console.error("[verif] token/email error:", e));
+    }).then(() => _sendVerificationEmail(email, verifToken)).then(r => {
+      if (!r || !r.sent) console.error("[verif] signup verification email NOT sent to", email, "\u2014", (r && (r.error || (r.simulated ? "RESEND_API_KEY not set" : "unknown"))) || "unknown");
+      else console.log("[verif] signup verification email sent to", email);
+    }).catch(e => console.error("[verif] token/email error:", e));
     return res.status(201).json({ user: { ...(userRow.rows[0] || {}), email_verified: 0 } });
   } catch (err) {
     console.error("signup error:", err);
@@ -219,6 +222,33 @@ router.post("/admin/grant-pro", authLimiter, validateCsrf, async (req, res) => {
     console.error("[admin] grant-pro db error:", err.message);
     return res.status(500).json({ error: err.message });
   }
+});
+
+// ============================================================
+//  Diagnostic: test email delivery config (admin only)
+//  curl -X POST https://impliedlens.com/api/admin/email-test \
+//       -H "x-admin-secret: $ADMIN_SECRET" -H "Content-Type: application/json" \
+//       -d '{"to":"you@example.com"}'
+// ============================================================
+router.post("/admin/email-test", async (req, res) => {
+  const secret = req.headers["x-admin-secret"];
+  if (!secret || !ADMIN_SECRET || secret !== ADMIN_SECRET) {
+    console.warn("[admin] email-test rejected \u2014 bad or missing secret from IP", req.ip);
+    return res.status(403).json({ error: "Forbidden" });
+  }
+  const to = (req.body && req.body.to) || "";
+  if (!to || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(to))) return res.status(400).json({ error: "valid 'to' email required" });
+  const result = await sendEmail({
+    to: String(to),
+    subject: "ImpliedLens email delivery test",
+    html: "<p>If you received this, ImpliedLens email delivery is working.</p>",
+  });
+  return res.json({
+    from: FROM_EMAIL,
+    resendKeyPresent: !!process.env.RESEND_API_KEY,
+    appUrl: APP_URL,
+    result,
+  });
 });
 
 // ============================================================
@@ -656,8 +686,14 @@ router.post("/auth/resend-verification", resendVerifLimiter, validateCsrf, async
       sql:  "INSERT INTO email_verif_tokens (token, user_id, expires_at) VALUES (?, ?, ?)",
       args: [token, req.session.userId, expiry],
     });
-    await _sendVerificationEmail(user.email, token);
-    return res.json({ ok: true });
+    const sendResult = await _sendVerificationEmail(user.email, token);
+    if (sendResult && sendResult.sent) return res.json({ ok: true });
+    if (sendResult && sendResult.simulated) {
+      console.error("[verif] resend: RESEND_API_KEY not set \u2014 email not sent to", user.email);
+      return res.status(500).json({ error: "Email is not configured on the server yet. Please contact support." });
+    }
+    console.error("[verif] resend: provider rejected for", user.email, "\u2014", sendResult && sendResult.error);
+    return res.status(502).json({ error: "The email provider rejected the message (check the sending domain in Resend). Please contact support." });
   } catch (err) {
     console.error("[verif] resend error:", err);
     return res.status(500).json({ error: "Could not send email." });

@@ -33,6 +33,18 @@ const { PORT, SESSION_SECRET } = cfg;
   if (isProd && !process.env.STRIPE_SECRET_KEY)     missing.push("STRIPE_SECRET_KEY");
   if (isProd && !process.env.STRIPE_WEBHOOK_SECRET) missing.push("STRIPE_WEBHOOK_SECRET");
 
+  // Email delivery is non-fatal but must be loud: a broken config means new
+  // users can never verify their accounts.
+  if (isProd) {
+    const fromEmail = process.env.FROM_EMAIL || "";
+    if (!process.env.RESEND_API_KEY) {
+      console.warn("[config] WARNING: RESEND_API_KEY not set \u2014 verification and password-reset emails will NOT be sent. New users cannot verify their accounts.");
+    }
+    if (!fromEmail || /resend\.dev/i.test(fromEmail)) {
+      console.warn("[config] WARNING: FROM_EMAIL is unset or the Resend sandbox (onboarding@resend.dev). Resend only delivers sandbox mail to your own account address, so new users get nothing. Verify a domain in Resend and set FROM_EMAIL, e.g. noreply@impliedlens.com.");
+    }
+  }
+
   if (missing.length === 0) return;
 
   if (isProd) {
