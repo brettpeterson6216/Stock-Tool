@@ -83,7 +83,7 @@ test("the fixed header covers the top device safe area", () => {
 });
 
 test("mobile browser chrome follows the selected site theme", () => {
-  assert.match(html, /dark\?'#0e1114':'#f9f8f5'/);
+  assert.match(html, /dark\?'#12100D':'#f9f8f5'/i);
   assert.match(html, /dark\?'black-translucent':'default'/);
   assert.match(html, /<meta name="apple-mobile-web-app-status-bar-style" content="default">/);
   assert.match(html, /function updateThemeControl\(\) \{\s*window\.syncBrowserChrome\?\.\(\);/);
@@ -227,8 +227,8 @@ test("premium landing visual system matches the generated product preview direct
 
 test("premium visual system is applied across app and static pages", () => {
   assert.match(html, /legacy-app\.css\?v=\d{8}(-\d+)?/);
-  assert.match(html, /product-system\.css\?v=20260702-1/);
-  assert.match(signupHtml, /static-polish\.css\?v=20260625-2/);
+  assert.match(html, /product-system\.css\?v=\d{8}(-\d+)?/);
+  assert.match(signupHtml, /static-polish\.css\?v=\d{8}(-\d+)?/);
   assert.match(html, /<a class="btn-nav" id="nav-signup" href="\/signup">Start trial<\/a>/);
   assert.match(legacyCss, /Site-wide premium polish/);
   assert.match(legacyCss, /Gold theme harmonization/);
@@ -290,7 +290,7 @@ test("tool containers use premium rounded surfaces instead of sharp rectangles",
   assert.match(legacyCss, /#view-tool \.ticker-input,[\s\S]*#view-tool \.il-learn-nav button\{[\s\S]*border-radius:12px!important/);
   assert.match(legacyCss, /#view-tool \.app-section \.acc-body\{[\s\S]*background:transparent!important/);
   assert.match(legacyCss, /Live tool workspace match to the generated sample/);
-  assert.match(legacyCss, /--tool-sample-charcoal:#111417/);
+  assert.match(legacyCss, /--tool-sample-charcoal:#151310/);
   assert.match(legacyCss, /--tool-sample-green:#16C784/);
   assert.match(legacyCss, /--tool-sample-red:#F45B5B/);
   assert.match(legacyCss, /#view-tool \.search-row,[\s\S]*#view-tool \.chart-wrap,[\s\S]*#view-tool \.metric-card,[\s\S]*linear-gradient\(180deg,var\(--tool-sample-card-2\),var\(--tool-sample-card\)\)!important/);

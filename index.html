@@ -9,7 +9,7 @@
     var dark=document.documentElement.getAttribute('data-theme')==='dark';
     var color=document.querySelector('meta[name="theme-color"]');
     var status=document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
-    if(color)color.setAttribute('content',dark?'#0e1114':'#f9f8f5');
+    if(color)color.setAttribute('content',dark?'#12100D':'#f9f8f5');
     if(status)status.setAttribute('content',dark?'black-translucent':'default');
   };
 })();
@@ -89,17 +89,17 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.44.0/dist/tabler-icons.min.css" rel="stylesheet">
-<link href="/product-system.css?v=20260702-1" rel="stylesheet">
+<link href="/product-system.css?v=20260713-2" rel="stylesheet">
 <link href="/workspace-system.css?v=20260702-1" rel="stylesheet">
 <link href="/research-system.css?v=20260611-1" rel="stylesheet">
 <script src="/vendor/chart.umd.min.js?v=4.4.1"></script>
 <script defer src="/vendor/hammer.min.js?v=2.0.8"></script>
 <script defer src="/vendor/chartjs-plugin-zoom.min.js?v=2.2.0"></script>
 <script defer src="/model-math.js?v=20260713-1"></script>
-<script defer src="/projection-lab.js?v=20260713-1"></script>
-<script defer src="/valuation-lab.js?v=20260712-2"></script>
-<link href="/legacy-app.css?v=20260712-2" rel="stylesheet">
-<link href="/premium.css?v=20260712-1" rel="stylesheet">
+<script defer src="/projection-lab.js?v=20260713-2"></script>
+<script defer src="/valuation-lab.js?v=20260713-2"></script>
+<link href="/legacy-app.css?v=20260713-2" rel="stylesheet">
+<link href="/premium.css?v=20260713-2" rel="stylesheet">
 </head>
 <body>
 <a href="#main-content" class="skip-link">Skip to content</a>
@@ -1300,12 +1300,12 @@
           </div><!-- /sec-earnings -->
 
           <div class="app-section" id="sec-secfilings"><div class="acc-body" id="body-secfilings" style="display:none;">
-              <div id="sec-nostock" style="color:rgba(220,225,232,.35);font-size:.85rem;padding:.5rem 0;">Search for a stock in the Analyze tab first.</div>
-              <div id="sec-loading" style="display:none;color:rgba(220,225,232,.4);font-size:.82rem;">Loading filings...</div>
+              <div id="sec-nostock" style="color:rgba(237,232,224,.35);font-size:.85rem;padding:.5rem 0;">Search for a stock in the Analyze tab first.</div>
+              <div id="sec-loading" style="display:none;color:rgba(237,232,224,.4);font-size:.82rem;">Loading filings...</div>
               <div id="sec-error" style="display:none;" class="error-msg"></div>
               <div id="sec-content" style="display:none;">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.75rem;">
-                  <div style="font-family:var(--mono);font-size:.7rem;color:rgba(220,225,232,.35);letter-spacing:.05em;" id="sec-entity-label"></div>
+                  <div style="font-family:var(--mono);font-size:.7rem;color:rgba(237,232,224,.35);letter-spacing:.05em;" id="sec-entity-label"></div>
                   <div style="display:flex;gap:.4rem;flex-wrap:wrap;" id="sec-filter-row">
                     <button class="sec-filter-btn active" data-form="ALL" onclick="filterSecFilings('ALL')">All</button>
                     <button class="sec-filter-btn" data-form="10-K" onclick="filterSecFilings('10-K')">10-K</button>
@@ -1315,7 +1315,7 @@
                   </div>
                 </div>
                 <div id="sec-filings-list" style="display:flex;flex-direction:column;gap:.5rem;"></div>
-                <div style="margin-top:1.25rem;font-size:.69rem;color:rgba(220,225,232,.22);font-family:var(--mono);">Data sourced from SEC EDGAR. Links open official filings in a new tab.</div>
+                <div style="margin-top:1.25rem;font-size:.69rem;color:rgba(237,232,224,.22);font-family:var(--mono);">Data sourced from SEC EDGAR. Links open official filings in a new tab.</div>
               </div>
             </div><!-- /body-secfilings -->
           </div><!-- /sec-secfilings -->
@@ -1720,7 +1720,7 @@
     <div style="display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.5rem;">
       <input type="text" id="am-new-username" placeholder="New username" class="input-light" autocomplete="username" style="text-transform:lowercase;">
       <div id="am-username-msg" style="font-size:.78rem;min-height:1rem;"></div>
-      <button id="am-submit-username" style="align-self:flex-start;background:var(--ink);color:var(--cream);border:none;padding:.55rem 1.25rem;border-radius:var(--r2);font-size:.82rem;font-weight:500;cursor:pointer;transition:background .15s;letter-spacing:.01em;">Update Username</button>
+      <button id="am-submit-username" style="align-self:flex-start;background:var(--ink);color:var(--cream);border:none;padding:.61rem 1.25rem;border-radius:var(--r2);font-size:.82rem;font-weight:500;cursor:pointer;transition:background .15s;letter-spacing:.01em;">Update Username</button>
     </div>
 
     <!-- Divider -->
@@ -1733,7 +1733,7 @@
       <input type="password" id="am-new-pw" placeholder="New password (min 8 characters)" class="input-light">
       <input type="password" id="am-confirm-pw" placeholder="Confirm new password" class="input-light">
       <div id="am-pw-msg" style="font-size:.78rem;min-height:1rem;"></div>
-      <button id="am-submit-password" style="align-self:flex-start;background:var(--ink);color:var(--cream);border:none;padding:.55rem 1.25rem;border-radius:var(--r2);font-size:.82rem;font-weight:500;cursor:pointer;transition:background .15s;letter-spacing:.01em;">Update Password</button>
+      <button id="am-submit-password" style="align-self:flex-start;background:var(--ink);color:var(--cream);border:none;padding:.61rem 1.25rem;border-radius:var(--r2);font-size:.82rem;font-weight:500;cursor:pointer;transition:background .15s;letter-spacing:.01em;">Update Password</button>
     </div>
   </div>
 </div>
@@ -1782,7 +1782,7 @@
     </div>
 
     <!-- Shown when email is not verified -->
-    <div id="upgrade-modal-unverified" style="display:none;margin-top:.75rem;background:rgba(255,160,0,.08);border:1px solid rgba(255,160,0,.25);border-radius:8px;padding:.85rem 1rem;font-size:.82rem;color:rgba(220,225,232,.8);">
+    <div id="upgrade-modal-unverified" style="display:none;margin-top:.75rem;background:rgba(255,160,0,.08);border:1px solid rgba(255,160,0,.25);border-radius:8px;padding:.85rem 1rem;font-size:.82rem;color:rgba(237,232,224,.8);">
       ⚠️ Please verify your email before starting checkout.
       <button onclick="resendVerification()" style="margin-left:.5rem;background:none;border:none;color:var(--gold-d);cursor:pointer;font-size:.82rem;font-weight:600;text-decoration:underline;">Resend email</button>
     </div>
@@ -1793,10 +1793,10 @@
 <div class="toast" id="toast"></div>
 
 <!-- Email verification banner -->
-<div id="verif-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:#2a1f00;border-bottom:1px solid rgba(185,138,61,.4);padding:.55rem 1rem;font-size:.8rem;color:rgba(220,225,232,.85);align-items:center;justify-content:center;gap:.75rem;">
+<div id="verif-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:#2a1f00;border-bottom:1px solid rgba(185,138,61,.4);padding:.61rem 1rem;font-size:.8rem;color:rgba(237,232,224,.85);align-items:center;justify-content:center;gap:.75rem;">
   <span>📧 Please verify your email address to unlock all features.</span>
   <button onclick="resendVerification()" style="background:rgba(185,138,61,.2);border:1px solid rgba(185,138,61,.4);color:#B98A3D;border-radius:5px;padding:.2rem .65rem;font-size:.75rem;cursor:pointer;font-weight:600;">Resend email</button>
-  <button onclick="document.getElementById('verif-banner').style.display='none';document.body.classList.remove('has-verif-banner')" style="background:none;border:none;color:rgba(220,225,232,.35);cursor:pointer;font-size:1rem;line-height:1;padding:0 .25rem;">✕</button>
+  <button onclick="document.getElementById('verif-banner').style.display='none';document.body.classList.remove('has-verif-banner')" style="background:none;border:none;color:rgba(237,232,224,.35);cursor:pointer;font-size:1rem;line-height:1;padding:0 .25rem;">✕</button>
 </div>
 
 <script>
@@ -3034,7 +3034,7 @@ function updateLimitUI(remaining, limit, plan) {
       <div style="height:100%;width:${pct}%;background:${color};border-radius:2px;transition:width .3s;"></div>
     </div>
     ${isGuest
-      ? `<button onclick="startGuestSignup('analysis_limit_counter')" style="font-size:.63rem;padding:.22rem .55rem;background:var(--gold);color:var(--ink);border:none;border-radius:4px;cursor:pointer;font-weight:700;">Create free account for 5/day</button>`
+      ? `<button onclick="startGuestSignup('analysis_limit_counter')" style="font-size:.63rem;padding:.22rem .61rem;background:var(--gold);color:var(--ink);border:none;border-radius:4px;cursor:pointer;font-weight:700;">Create free account for 5/day</button>`
       : remaining === 0 ? `<button onclick="showUpgradeModal()" style="font-size:.63rem;padding:.15rem .45rem;background:var(--gold);color:var(--ink);border:none;border-radius:4px;cursor:pointer;font-weight:700;">Upgrade</button>` : ''}
   `;
 }
@@ -5925,8 +5925,8 @@ async function loadEarnings(ticker) {
           ${fwdQ.map(q => `<div style="background:var(--t-metric-bg);border:1px solid var(--t-metric-border);border-radius:6px;padding:6px 10px;min-width:90px;">
             <div style="font-size:.6rem;color:var(--text5);margin-bottom:2px;">${q.period}</div>
             <div style="font-size:.9rem;font-weight:700;color:var(--text);">$${q.epsAvg.toFixed(2)}</div>
-            <div style="font-size:.58rem;color:var(--text5);">$${(q.epsLow||q.epsAvg).toFixed(2)}–$${(q.epsHigh||q.epsAvg).toFixed(2)}</div>
-            <div style="font-size:.57rem;color:var(--text5);">${q.numberAnalysts||'?'} analysts</div>
+            <div style="font-size:.63rem;color:var(--text5);">$${(q.epsLow||q.epsAvg).toFixed(2)}–$${(q.epsHigh||q.epsAvg).toFixed(2)}</div>
+            <div style="font-size:.62rem;color:var(--text5);">${q.numberAnalysts||'?'} analysts</div>
           </div>`).join('')}
         </div>
       </div>`;
@@ -6016,7 +6016,7 @@ async function loadEarnings(ticker) {
               <div style="height:5px;background:var(--t-acc-border);border-radius:3px;overflow:hidden;">
                 <div style="width:${barWidth}%;background:${barColor};height:100%;border-radius:3px;transition:width .4s ease;"></div>
               </div>
-              <div style="display:flex;justify-content:space-between;font-size:.58rem;color:var(--text5);margin-top:2px;"><span>Miss</span><span>In-Line</span><span>Beat</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:.63rem;color:var(--text5);margin-top:2px;"><span>Miss</span><span>In-Line</span><span>Beat</span></div>
             </div>` : ''}
           </div>
         </td>
@@ -6448,7 +6448,7 @@ document.addEventListener('click', function(e) {
   </div>
 </div>
 </div>
-<script src="/product-system.js?v=20260712-2"></script>
+<script src="/product-system.js?v=20260713-2"></script>
 <script src="/workspace-system.js?v=20260704-2"></script>
 <script src="/research-system.js?v=20260703-1"></script>
 </body>

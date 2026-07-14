@@ -52,7 +52,7 @@
     out.width = base.width;
     out.height = base.height;
     const ctx = out.getContext("2d");
-    ctx.fillStyle = document.documentElement.dataset.theme === "dark" ? "#0e1114" : "#fcfbf8";
+    ctx.fillStyle = document.documentElement.dataset.theme === "dark" ? "#12100D" : "#fcfbf8";
     ctx.fillRect(0, 0, out.width, out.height);
     ctx.drawImage(base, 0, 0, out.width, out.height);
     ctx.drawImage(marks, 0, 0, out.width, out.height);

@@ -30,7 +30,7 @@
   --t-r:10px; --t-r-lg:14px;
 }
 html[data-theme="dark"]{
-  --t-bg:        #0a0c0e;
+  --t-bg:        #0D0B09;
   --t-surface:   #14171b;
   --t-surface-2: #181c21;
   --t-surface-3: #1e232a;
@@ -192,7 +192,7 @@ html[data-theme="dark"] #view-tool .app-section .acc-body,
 }
 #view-tool .m-lbl,#view-tool .sb-group-label,#view-tool .asf-lbl{
   color:var(--t-text-3)!important;
-  font:700 .58rem var(--mono)!important;
+  font:700 .63rem var(--mono)!important;
   letter-spacing:.1em!important; text-transform:uppercase!important;
 }
 #view-tool .m-val,#view-tool .asf-val,#view-tool strong{ color:var(--t-text)!important; }
@@ -274,7 +274,7 @@ html[data-theme="dark"] #view-tool .app-section .acc-body,
 /* Kicker labels ("ANALYZE", "Ticker workspace") quieter/smaller */
 #view-tool .il-shell-kicker,
 #view-tool .ash-kicker{
-  font:700 .56rem var(--mono)!important;
+  font:700 .62rem var(--mono)!important;
   letter-spacing:.12em!important; text-transform:uppercase!important;
   color:var(--t-text-3)!important;
 }
