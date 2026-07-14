@@ -7826,3 +7826,19 @@ body{font-variant-numeric:tabular-nums;}
 .fin-table td,.fin-table th,.scr-table td,.scr-table th,.cmp-table td,.cmp-table th,.earn-table td,.earn-table th,.sensitivity-table{font-variant-numeric:tabular-nums;}
 .tool-disclaimer,.news-text,.edu-body,.p-desc{line-height:1.7;}
 .m-sub,.news-time,.price-time,.sc-irr,.advm-sub{color:var(--text5);}
+
+/* ══════════ HOME DECLUTTER: calm backdrop, no busy gold silk (2026-07-12) ══════════ */
+/* Replace the loud gold-ripple silk texture with a clean, calm premium backdrop.
+   A subtle top gold glow keeps the brand warmth without washing out the panels. */
+html, body { background:#F7F1E6 !important; }
+html[data-theme="dark"], html[data-theme="dark"] body { background:#0A0B0C !important; }
+body::before {
+  background:
+    radial-gradient(1100px 520px at 80% -10%, rgba(217,179,94,.13), transparent 60%),
+    linear-gradient(180deg,#FBF6EC 0%,#F3EAD8 58%,#F7F1E6 100%) !important;
+}
+html[data-theme="dark"] body::before {
+  background:
+    radial-gradient(1150px 560px at 82% -12%, rgba(217,179,94,.10), transparent 62%),
+    linear-gradient(180deg,#0B0C0D 0%,#0E1013 55%,#0A0B0C 100%) !important;
+}
