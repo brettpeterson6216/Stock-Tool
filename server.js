@@ -357,7 +357,8 @@ async function runReviewDigests() {
         WHERE t.user_id = u.id AND t.review_date IS NOT NULL AND t.review_date != ''
           AND t.review_date <= date('now', '+7 days') AND t.review_date >= date('now', '-30 days')
       ) LIMIT 200` });
-    for (const u of users.rows) {
+    for (const u of ((users && users.rows) || [])) {
+      try {
       const claim = await db.execute({
         sql: "INSERT OR IGNORE INTO lifecycle_email_log (user_id,email_type,reference_key) VALUES (?,'review_digest_auto',?)",
         args: [u.id, monday],
@@ -367,7 +368,7 @@ async function runReviewDigests() {
         sql: "SELECT ticker,status,review_date FROM investment_theses WHERE user_id=? AND review_date IS NOT NULL AND review_date <= date('now','+7 days') AND review_date >= date('now','-30 days') ORDER BY review_date ASC LIMIT 20",
         args: [u.id],
       });
-      if (!due.rows.length) continue;
+      if (!due || !due.rows || !due.rows.length) continue;
       const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
       const items = due.rows.map(r => `<li style="margin-bottom:6px"><strong>${esc(r.ticker)}</strong> — ${esc(r.status || "thesis")} — review ${esc(r.review_date)}</li>`).join("");
       const result = await sendEmail({
@@ -378,8 +379,11 @@ async function runReviewDigests() {
       if (!result?.sent && !result?.simulated) {
         await db.execute({ sql: "DELETE FROM lifecycle_email_log WHERE user_id=? AND email_type='review_digest_auto' AND reference_key=?", args: [u.id, monday] }).catch(() => {});
       }
+      } catch (perUserErr) {
+        console.error("[review-digest] user", u && u.id, "failed:", (perUserErr && (perUserErr.stack || perUserErr.message)) || perUserErr);
+      }
     }
-  } catch (e) { console.error("[review-digest] error:", e.message); }
+  } catch (e) { console.error("[review-digest] error:", (e && (e.stack || e.message)) || e); }
 }
 
 if (require.main === module) {

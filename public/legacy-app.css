@@ -7886,10 +7886,21 @@ html[data-theme="dark"] .il-rail-label{color:var(--gold-hi);}
 html[data-theme="dark"] #main-nav a.btn-nav-outline{ color:rgba(245,235,215,.9) !important; border-color:rgba(255,255,255,.22) !important; }
 
 /* 4. CONTRAST: faint placeholders on the header search and cream form inputs. */
-.nav-search input::placeholder{ color:var(--ink4,#5a5040) !important; opacity:1; }
-html[data-theme="dark"] .nav-search input::placeholder{ color:rgba(245,235,215,.55) !important; }
+.nav-search input::placeholder{ color:var(--ink3,#3c3320) !important; opacity:.72 !important; }
+html[data-theme="dark"] .nav-search input::placeholder{ color:rgba(245,235,215,.6) !important; opacity:1 !important; }
+/* Make the empty search field read as an intentional control */
+#main-nav .nav-search{ border:1px solid var(--border2) !important; background:var(--card) !important; }
+html[data-theme="dark"] #main-nav .nav-search{ background:rgba(255,255,255,.05) !important; border-color:rgba(255,255,255,.12) !important; }
 .fc-input::placeholder,.input-light::placeholder,.ticker-input::placeholder,
 .il-learn-search input::placeholder,.il-learn-field textarea::placeholder,
 .il-notes-card textarea::placeholder,.il-notes-card input::placeholder{ color:var(--ink4,#5a5040) !important; opacity:1; }
 html[data-theme="dark"] .fc-input::placeholder,html[data-theme="dark"] .input-light::placeholder,
 html[data-theme="dark"] .il-learn-search input::placeholder{ color:rgba(245,235,215,.5) !important; }
+
+/* Home hero mockup: fill the previously-empty skeleton cards so it reads as a
+   finished (still clearly illustrative) workspace, not a loading state. */
+.ihm-vals{ display:flex; gap:12px; margin-top:2px; }
+.ihm-vals span{ display:flex; flex-direction:column; gap:2px; font:700 .5rem var(--sans); letter-spacing:.1em; text-transform:uppercase; color:rgba(241,237,227,.5); }
+.ihm-vals b{ font:800 .8rem var(--mono); letter-spacing:0; color:#F1EDE3; }
+.ihm-line{ display:block; font:500 .62rem/1.42 var(--sans); color:rgba(241,237,227,.82); }
+.ihm-sub{ color:rgba(241,237,227,.66) !important; }
