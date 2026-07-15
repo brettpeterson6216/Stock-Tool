@@ -10,3 +10,10 @@ local.db
 local.db-journal
 local.db-wal
 local.db-shm
+# Visual audit artifacts (screenshots + chrome profile) — never commit
+visual-audit-shots/
+# Temp scratch/test files
+_*.js
+public/_*.js
+public/_projlab_preview.html
+public/_vallab_preview.html

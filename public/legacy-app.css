@@ -7859,3 +7859,37 @@ html[data-theme="dark"] .il-rail-label{color:var(--gold-hi);}
 .il-landing-rail a.active{background:var(--gold-grad);color:#1A1206;}
 .il-landing-rail a i{font-size:.95rem;flex:0 0 auto;}
 @media(max-width:1439px){.il-landing-rail{display:none;}}
+
+/* ══════════ VISUAL AUDIT FIXES — 2026-07-14 ══════════ */
+/* 1. CRITICAL: the fixed landing rail overlapped the hero headline on wide
+   screens (≥1440px). The top nav already covers navigation, so retire it. */
+.il-landing-rail{ display:none !important; }
+
+/* 2. CRITICAL: mobile landing overflowed horizontally — hero copy, CTA buttons
+   and the product mockup were clipped off the right. Force a single column and
+   clamp every hero child to the viewport width. */
+@media(max-width:640px){
+  html,body{ overflow-x:hidden; }
+  #view-home{ overflow-x:hidden; max-width:100vw; }
+  .il-landing-hero{ grid-template-columns:1fr !important; }
+  .il-landing,.il-landing-hero,.il-landing-copy,.il-landing-preview,.il-hero-mock,
+  .il-landing-band,.il-landing-pricing,.il-capabilities{ max-width:100% !important; }
+  .il-landing-copy{ width:100%; min-width:0 !important; box-sizing:border-box; }
+  .il-landing h1{ overflow-wrap:break-word; max-width:100%; }
+  .il-landing-preview,.il-hero-mock{ width:100% !important; min-width:0 !important; transform:none !important; box-sizing:border-box; }
+  .il-landing-actions{ flex-wrap:wrap; }
+  .il-landing-primary,.il-landing-secondary{ max-width:100%; box-sizing:border-box; }
+}
+
+/* 3. CONTRAST: header "Log in" link was near-invisible in light mode. */
+#main-nav a.btn-nav-outline{ color:var(--ink2,#241c0e) !important; border-color:var(--border2) !important; font-weight:600; }
+html[data-theme="dark"] #main-nav a.btn-nav-outline{ color:rgba(245,235,215,.9) !important; border-color:rgba(255,255,255,.22) !important; }
+
+/* 4. CONTRAST: faint placeholders on the header search and cream form inputs. */
+.nav-search input::placeholder{ color:var(--ink4,#5a5040) !important; opacity:1; }
+html[data-theme="dark"] .nav-search input::placeholder{ color:rgba(245,235,215,.55) !important; }
+.fc-input::placeholder,.input-light::placeholder,.ticker-input::placeholder,
+.il-learn-search input::placeholder,.il-learn-field textarea::placeholder,
+.il-notes-card textarea::placeholder,.il-notes-card input::placeholder{ color:var(--ink4,#5a5040) !important; opacity:1; }
+html[data-theme="dark"] .fc-input::placeholder,html[data-theme="dark"] .input-light::placeholder,
+html[data-theme="dark"] .il-learn-search input::placeholder{ color:rgba(245,235,215,.5) !important; }

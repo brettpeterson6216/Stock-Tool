@@ -461,3 +461,6 @@ html[data-theme="dark"] .static-rail a{color:rgba(238,233,224,.72);}
 html[data-theme="dark"] .static-rail a:hover{color:#F1EDE3;}
 .static-rail a.active{background:linear-gradient(135deg,#E9B949 0%,#C8901F 48%,#9A6A18 100%);color:#1A1206;}
 @media(max-width:1439px){.static-rail{display:none;}}
+
+/* Visual audit: the fixed left rail overlapped page content on wide screens. */
+.static-rail{ display:none !important; }
