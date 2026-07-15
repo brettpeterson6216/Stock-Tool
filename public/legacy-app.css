@@ -7429,7 +7429,7 @@ body.il-dashboard-on #body-analyze::before{
   }
   #view-tool .app-shell{
     display:flex!important;
-    flex-direction:column!important;
+    flex-direction:row!important; /* sidebar | main — row again now the left sidebar is restored (2026-07-13) */
     flex:1 1 auto!important;
     min-height:0!important;
     overflow:hidden!important;

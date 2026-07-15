@@ -98,7 +98,7 @@
 <script defer src="/model-math.js?v=20260713-3"></script>
 <script defer src="/projection-lab.js?v=20260713-3"></script>
 <script defer src="/valuation-lab.js?v=20260713-3"></script>
-<link href="/legacy-app.css?v=20260713-3" rel="stylesheet">
+<link href="/legacy-app.css?v=20260713-4" rel="stylesheet">
 <link href="/premium.css?v=20260713-3" rel="stylesheet">
 </head>
 <body>
@@ -6189,6 +6189,7 @@ function initializeHomeDashboard(){
   loadPortfolioSparklines();
 }
 if(new URLSearchParams(window.location.search).get('view')!=='tool') initializeHomeDashboard();
+else loadFeaturedGrid(); // direct tool-view loads still need the "Popular starting points" cards
 
 // Prime the analysis limit counter for free/guest users
 (async () => {
