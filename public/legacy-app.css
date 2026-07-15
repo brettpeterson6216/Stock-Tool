@@ -7904,3 +7904,20 @@ html[data-theme="dark"] .il-learn-search input::placeholder{ color:rgba(245,235,
 .ihm-vals b{ font:800 .8rem var(--mono); letter-spacing:0; color:#F1EDE3; }
 .ihm-line{ display:block; font:500 .62rem/1.42 var(--sans); color:rgba(241,237,227,.82); }
 .ihm-sub{ color:rgba(241,237,227,.66) !important; }
+
+/* ══════════ HOME HERO: full process graphic as the banner (2026-07-15) ══════════ */
+/* The uploaded graphic already contains the headline, subhead and the 5-step
+   process, so show it full-width and hide the duplicate text headline (kept in the
+   DOM but visually hidden for SEO/screen readers). */
+.il-landing-hero.has-hero-banner{ display:flex!important; flex-direction:column; align-items:center; text-align:center; gap:20px; grid-template-columns:none!important; min-height:auto; }
+.has-hero-banner .il-hero-banner{ display:block; width:100%; max-width:1080px; height:auto; border-radius:18px; border:1px solid var(--brand-gold-line); box-shadow:0 30px 80px rgba(0,0,0,.35); }
+.has-hero-banner .il-landing-preview{ display:none!important; }
+.has-hero-banner .il-landing-copy{ max-width:640px; margin:0 auto; text-align:center; display:flex; flex-direction:column; align-items:center; gap:12px; }
+/* sr-only: keep headline text for SEO but hide it visually (it's in the image) */
+.has-hero-banner .il-landing-copy .il-landing-kicker,
+.has-hero-banner .il-landing-copy h1,
+.has-hero-banner .il-landing-copy > p{ position:absolute!important; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+.has-hero-banner .il-landing-actions{ justify-content:center; }
+.has-hero-banner .il-landing-search{ margin:0 auto; }
+.has-hero-banner .il-landing-proof{ justify-content:center; }
+@media(max-width:640px){ .has-hero-banner .il-hero-banner{ border-radius:12px; } }
