@@ -22,14 +22,7 @@
   function toastMsg(message, kind) { if (typeof window.toast === "function") window.toast(message, kind); }
 
   function injectNavigation() {
-    const homeEarnings = document.querySelector('.hs-sidebar .hsb-item[href*="section=earnings"]');
-    if (homeEarnings && !document.querySelector('.hs-sidebar [data-il-nav="calls"]')) {
-      homeEarnings.insertAdjacentHTML("afterend", `<a class="hsb-item" data-il-nav="calls" href="/?view=tool&amp;section=calls" onclick="navGoTo('calls');return false;"><i class="ti ti-headphones"></i><span>Call Research</span></a>`);
-    }
-    const homeDcf = document.querySelector('.hs-sidebar .hsb-item[href*="section=dcf"]');
-    if (homeDcf && !document.querySelector('.hs-sidebar [data-il-nav="wealth"]')) {
-      homeDcf.insertAdjacentHTML("afterend", `<a class="hsb-item" data-il-nav="wealth" href="/?view=tool&amp;section=wealth" onclick="navGoTo('wealth');return false;"><i class="ti ti-chart-dots-3"></i><span>Wealth Planner</span></a>`);
-    }
+    // (Market-page sidebar mirrors removed 2026-07-13 — each top tab owns its own left panel.)
     const earnings = document.querySelector('.app-sidebar .sb-item[data-sec="earnings"]');
     if (earnings && !document.querySelector('.app-sidebar .sb-item[data-sec="calls"]')) {
       earnings.insertAdjacentHTML("afterend", `<div class="sb-item" data-sec="calls"><i class="ti ti-headphones sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Call Research</span></div>`);

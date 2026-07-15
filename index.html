@@ -98,7 +98,7 @@
 <script defer src="/model-math.js?v=20260713-3"></script>
 <script defer src="/projection-lab.js?v=20260713-3"></script>
 <script defer src="/valuation-lab.js?v=20260713-3"></script>
-<link href="/legacy-app.css?v=20260713-4" rel="stylesheet">
+<link href="/legacy-app.css?v=20260713-5" rel="stylesheet">
 <link href="/premium.css?v=20260713-3" rel="stylesheet">
 </head>
 <body>
@@ -115,8 +115,10 @@
     <a href="/" id='nav-home' class="nav-tab active-tab" onclick="navGoTo('home');return false;">Home</a>
     <a href="/?view=home&amp;market=1" id="nav-market" class="nav-tab" onclick="showMarketPage();return false;">Market</a>
     <a href="/?view=tool&amp;section=analyze" id="nav-analyze" class="nav-tab" onclick="navGoTo('analyze');return false;">Research</a>
-    <a href="/?view=tool&amp;section=projection" id="nav-project" class="nav-tab" onclick="navGoTo('projection');return false;">Project</a>
+    <a href="/?view=tool&amp;section=projection" id="nav-project" class="nav-tab" onclick="navGoTo('projection');return false;">Projections</a>
+    <a href="/?view=tool&amp;section=wealth" id="nav-planner" class="nav-tab" onclick="navGoTo('wealth');return false;">Planner</a>
     <a href="/?view=tool&amp;section=education" class="nav-tab" id="nav-education-link" onclick="navGoTo('education');return false;">Learn</a>
+    <a href="/?view=tool&amp;section=reports" class="nav-tab" id="nav-saved-link" onclick="navGoTo('reports');return false;">Saved</a>
     <a href='/about' class="nav-tab" id="nav-about-link">About</a>
   </div>
   <form class="nav-search" id="nav-search" role="search" onsubmit="return navSearchGo(event)">
@@ -162,6 +164,44 @@
   </div>
   <script>
   // ── View + nav controller ──
+  // Each top-level tab owns its own left panel. The panel only switches sections
+  // WITHIN the active tab — it can never change which top tab you're on.
+  const NAV_GROUPS = {
+    research:    ['analyze','financials','advmetrics','earnings','calls','secfilings','institutional','compare','screener'],
+    projections: ['projection','dcf'],
+    planner:     ['wealth'],
+    learn:       ['education'],
+    saved:       ['reports','workspace'],
+  };
+  const NAV_GROUP_TAB   = { research:'nav-analyze', projections:'nav-project', planner:'nav-planner', learn:'nav-education-link', saved:'nav-saved-link' };
+  const NAV_GROUP_LABEL = { research:'Research', projections:'Projections', planner:'Planner', learn:'Learn', saved:'Saved' };
+  function navGroupOf(sec) {
+    for (const g in NAV_GROUPS) if (NAV_GROUPS[g].includes(sec)) return g;
+    return 'research';
+  }
+  function renderSidebarGroup(group) {
+    const items = NAV_GROUPS[group] || [];
+    document.querySelectorAll('.app-sidebar .sb-item').forEach(it => {
+      it.style.display = items.includes(it.dataset.sec) ? '' : 'none';
+    });
+    const lbl = document.querySelector('.app-sidebar .sb-group-label');
+    if (lbl) lbl.textContent = NAV_GROUP_LABEL[group] || 'Research';
+    document.getElementById('view-tool')?.setAttribute('data-nav-group', group);
+  }
+  window.renderSidebarGroup = renderSidebarGroup;
+  function marketScrollTo(key) {
+    const map = { top: '.home-hero', breadth: '#mo-advancing', movers: '#home-movers-list', insights: '#home-insights-list' };
+    document.querySelectorAll('.hs-sidebar .hsb-item').forEach(a => a.classList.toggle('active', a.dataset.mk === key));
+    const el = document.querySelector(map[key]);
+    if (!el) return;
+    if (key === 'top') { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+    (el.closest('.hc,.hg-market,.hl-report,section') || el).scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  function landingScrollTo(sel, link) {
+    document.querySelectorAll('.il-landing-rail a').forEach(a => a.classList.toggle('active', a === link));
+    if (sel === 'top') { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+    document.querySelector(sel)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
   function setHomeMode(mode) {
     const landing = document.getElementById('landing-page');
     const market = document.getElementById('market-page');
@@ -254,7 +294,7 @@
     window.__initialWorkspaceTab = params.get('workspace_tab');
     if (params.get('view') === 'tool') {
       showView('tool');
-      if (requestedSection) setTimeout(() => navGoTo(requestedSection), 0);
+      setTimeout(() => navGoTo(requestedSection || 'analyze'), 0); // always resolve a section so the tab + left panel group render correctly
     }
     else if (params.get('market') === '1') {
       showMarketPage();
@@ -262,6 +302,14 @@
     else {
       showLandingPage();
     }
+    // Modules (Calls, Wealth, Workspace) inject sidebar items shortly after load —
+    // re-apply the active group filter so late items respect the current tab.
+    [900, 2500, 5000].forEach(function(ms){
+      setTimeout(function(){
+        var vt = document.getElementById('view-tool');
+        if (vt && vt.style.display !== 'none') renderSidebarGroup(vt.getAttribute('data-nav-group') || 'research');
+      }, ms);
+    });
   });
 
   // ── Account dropdown toggle ──
@@ -521,6 +569,13 @@
 <!-- ══════════ VIEW: HOME ══════════ -->
 <div id="view-home" role="main">
 <section class="il-landing" id="landing-page" aria-label="Implied Lens landing page">
+  <aside class="il-landing-rail" aria-label="Home page sections">
+    <div class="il-rail-label">Home</div>
+    <a href="#" class="active" onclick="landingScrollTo('top',this);return false;"><i class="ti ti-home"></i><span>Overview</span></a>
+    <a href="#" onclick="landingScrollTo('.il-capabilities',this);return false;"><i class="ti ti-tools"></i><span>Tools</span></a>
+    <a href="#" onclick="landingScrollTo('.il-workflow-visual',this);return false;"><i class="ti ti-route"></i><span>How It Works</span></a>
+    <a href="#" onclick="landingScrollTo('#landing-pricing',this);return false;"><i class="ti ti-tag"></i><span>Pricing</span></a>
+  </aside>
   <div class="il-landing-hero">
     <div class="il-landing-preview image-preview" aria-label="Illustration of the Implied Lens research workspace">
       <div class="il-hero-mock" role="img" aria-label="Illustration of the Implied Lens research workspace: price chart, valuation range, and thesis panels">
@@ -652,32 +707,14 @@
 
 <div class="home-shell" id="market-page" style="display:none;">
 
-  <!-- ── Left sidebar ── -->
+  <!-- ── Left sidebar — Market-only options (never switches the top tab) ── -->
   <aside class="hs-sidebar">
-    <a class="hsb-home active" href="/?view=home&amp;market=1" onclick="showMarketPage();return false;"><i class="ti ti-globe"></i><span>Market</span></a>
-
-    <div class="hsb-section" data-home-analyze>
-      <div class="hsb-label">Research</div>
-      <a class="hsb-item" href="/?view=tool&amp;section=analyze" onclick="navGoTo('analyze');return false;"><i class="ti ti-chart-candle"></i><span>Chart</span></a>
-      <a class="hsb-item" href="/?view=tool&amp;section=financials" onclick="navGoTo('financials');return false;"><i class="ti ti-table"></i><span>Financials</span></a>
-      <a class="hsb-item" href="/?view=tool&amp;section=advmetrics" onclick="navGoTo('advmetrics');return false;"><i class="ti ti-report-analytics"></i><span>Metrics</span></a>
-      <a class="hsb-item" href="/?view=tool&amp;section=earnings" onclick="navGoTo('earnings');return false;"><i class="ti ti-trending-up"></i><span>Earnings</span></a>
-      <a class="hsb-item" href="/?view=tool&amp;section=secfilings" onclick="navGoTo('secfilings');return false;"><i class="ti ti-file-text"></i><span>SEC Filings</span></a>
-      <a class="hsb-item" href="/?view=tool&amp;section=institutional" onclick="navGoTo('institutional');return false;"><i class="ti ti-building-bank"></i><span>Institutional</span></a>
-    </div>
-
-    <div class="hsb-section" data-home-tools>
-      <div class="hsb-label">Tools</div>
-      <a class="hsb-item" href="/?view=tool&amp;section=compare" onclick="navGoTo('compare');return false;"><i class="ti ti-adjustments-horizontal"></i><span>Compare</span></a>
-      <a class="hsb-item" href="/?view=tool&amp;section=projection" onclick="navGoTo('projection');return false;"><i class="ti ti-timeline"></i><span>Projection</span></a>
-      <a class="hsb-item" href="/?view=tool&amp;section=dcf" onclick="navGoTo('dcf');return false;"><i class="ti ti-calculator"></i><span>EPS Value</span></a>
-      <a class="hsb-item" href="/?view=tool&amp;section=screener" onclick="navGoTo('screener');return false;"><i class="ti ti-filter"></i><span>Screener</span></a>
-    </div>
-
     <div class="hsb-section">
-      <div class="hsb-label">Library</div>
-      <a class="hsb-item" href="#" onclick="navGoTo('reports');return false;"><i class="ti ti-bookmark"></i><span>Saved</span></a>
-      <a class="hsb-item" href="/?view=tool&amp;section=education" onclick="navGoTo('education');return false;"><i class="ti ti-school"></i><span>Learn</span></a>
+      <div class="hsb-label">Market</div>
+      <a class="hsb-item active" data-mk="top" href="#" onclick="marketScrollTo('top');return false;"><i class="ti ti-globe"></i><span>Overview</span></a>
+      <a class="hsb-item" data-mk="breadth" href="#" onclick="marketScrollTo('breadth');return false;"><i class="ti ti-activity"></i><span>Breadth &amp; Volatility</span></a>
+      <a class="hsb-item" data-mk="movers" href="#" onclick="marketScrollTo('movers');return false;"><i class="ti ti-flame"></i><span>Movers</span></a>
+      <a class="hsb-item" data-mk="insights" href="#" onclick="marketScrollTo('insights');return false;"><i class="ti ti-bulb"></i><span>Insights</span></a>
     </div>
 
     <div class="hsb-upgrade" id="hsb-upgrade-box" style="display:none;">
@@ -1019,8 +1056,8 @@
   <div class="app-shell">
     <!-- ── Left sidebar ── -->
     <div class="app-sidebar">
-      <a href="#" class="sb-home-btn" id="sb-home-btn"><i class="ti ti-home" aria-hidden="true"></i><span>Home</span></a>
-
+      <!-- One panel per top-level tab: items are shown/hidden by renderSidebarGroup()
+           so the left panel never navigates across top-level tabs. -->
       <div class="sb-group-pad">
         <div class="sb-group-label">Research</div>
         <div class="sb-item active" data-sec="analyze"><i class="ti ti-chart-candle sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Chart</span></div>
@@ -1029,24 +1066,16 @@
         <div class="sb-item" data-sec="earnings"><i class="ti ti-trending-up sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Earnings</span></div>
         <div class="sb-item" data-sec="secfilings"><i class="ti ti-file-text sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">SEC Filings</span></div>
         <div class="sb-item" data-sec="institutional"><i class="ti ti-building-bank sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Institutional</span></div>
-      </div>
-
-      <div class="sb-sep"></div>
-
-      <div class="sb-group-pad">
-        <div class="sb-group-label">Tools</div>
         <div class="sb-item" data-sec="compare"><i class="ti ti-adjustments-horizontal sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Compare</span></div>
-        <div class="sb-item" data-sec="projection"><i class="ti ti-timeline sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Projection</span></div>
-        <div class="sb-item" data-sec="dcf"><i class="ti ti-calculator sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">EPS Value</span></div>
         <div class="sb-item" data-sec="screener"><i class="ti ti-filter sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Screener</span></div>
-      </div>
-
-      <div class="sb-sep"></div>
-
-      <div class="sb-group-pad">
-        <div class="sb-group-label">Library</div>
-        <div class="sb-item" data-sec="reports"><i class="ti ti-bookmark sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Saved</span></div>
-        <div class="sb-item" data-sec="education"><i class="ti ti-school sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Learn</span></div>
+        <div class="sb-item" data-sec="projection"><i class="ti ti-timeline sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Projection Lab</span></div>
+        <div class="sb-item" data-sec="dcf"><i class="ti ti-calculator sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">EPS Value</span></div>
+        <div class="sb-item" data-sec="education"><i class="ti ti-school sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Lessons &amp; Guides</span></div>
+        <div class="sb-item" data-sec="education" data-scroll=".edu-glossary"><i class="ti ti-book-2 sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Glossary</span></div>
+        <div class="sb-item" data-sec="reports"><i class="ti ti-bookmark sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Saved Analyses</span></div>
+        <div class="sb-item" data-sec="workspace" data-wstab="thesis"><i class="ti ti-notes sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Thesis</span></div>
+        <div class="sb-item" data-sec="workspace" data-wstab="portfolio"><i class="ti ti-chart-donut-3 sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Portfolio</span></div>
+        <div class="sb-item" data-sec="workspace" data-wstab="watchlist"><i class="ti ti-star sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Watchlist</span></div>
       </div>
 
       <div class="sb-bottom">
@@ -2309,25 +2338,22 @@ function openSection(id, skipProCheck) {
     const b = el.querySelector('.acc-body');
     if (b) b.style.display = 'none';
   });
-  // Update sidebar active state
+  // Update sidebar active state (workspace sub-items are activated by the click handler)
+  const wsItems = document.querySelectorAll('.sb-item[data-sec="' + id + '"][data-wstab]');
   document.querySelectorAll('.sb-item').forEach(el => {
-    el.classList.toggle('active', el.dataset.sec === id);
+    el.classList.toggle('active', el.dataset.sec === id && !el.dataset.wstab);
   });
-  // Sync the in-tool section strip (.mst-btn) active state — it's now the
-  // primary desktop section switcher, not just mobile.
+  if (wsItems.length && !document.querySelector('.sb-item.active')) wsItems[0].classList.add('active');
+  // Sync the mobile section strip active state.
   document.querySelectorAll('.mst-btn').forEach(b => {
     b.classList.toggle('active', b.getAttribute('data-sec') === id);
   });
-  // Top-bar nav active state: highlight "Analyze" for tool sections,
-  // "Learn" for education, leaving Home/Market/About to their own handlers.
+  // Top-bar active tab follows the section's nav group; the left panel shows
+  // only that group's options and can never change the top tab.
+  const navGroup = navGroupOf(id);
   document.querySelectorAll('#nav-links .nav-tab').forEach(el => el.classList.remove('active-tab'));
-  if (id === 'education') {
-    document.getElementById('nav-education-link')?.classList.add('active-tab');
-  } else if (id === 'projection') {
-    document.getElementById('nav-project')?.classList.add('active-tab');
-  } else {
-    document.getElementById('nav-analyze')?.classList.add('active-tab');
-  }
+  document.getElementById(NAV_GROUP_TAB[navGroup])?.classList.add('active-tab');
+  renderSidebarGroup(navGroup);
   // Open the target section
   const sec = document.getElementById('sec-' + id);
   const bod = document.getElementById('body-' + id);
@@ -6331,9 +6357,18 @@ document.addEventListener('click', function(e) {
     if (sidebar) {
       sidebar.addEventListener('click', function(e) {
         var item = e.target.closest('.sb-item');
-        if (item && item.dataset.sec) { e.preventDefault(); openSection(item.dataset.sec); }
-        var homeBtn = e.target.closest('#sb-home-btn');
-        if (homeBtn) { e.preventDefault(); navGoTo('home'); }
+        if (item && item.dataset.sec) {
+          e.preventDefault();
+          openSection(item.dataset.sec);
+          if (item.dataset.wstab) {
+            document.querySelectorAll('.sb-item[data-sec="workspace"]').forEach(function(el){ el.classList.toggle('active', el === item); });
+            setTimeout(function(){ document.querySelector('.il-ws-tab[data-tab="' + item.dataset.wstab + '"]')?.click(); }, 60);
+          }
+          if (item.dataset.scroll) {
+            document.querySelectorAll('.sb-item[data-sec="' + item.dataset.sec + '"]').forEach(function(el){ el.classList.toggle('active', el === item); });
+            setTimeout(function(){ document.querySelector(item.dataset.scroll)?.scrollIntoView({ behavior:'smooth', block:'start' }); }, 120);
+          }
+        }
         var proCard = e.target.closest('#sb-pro-card');
         if (proCard) showUpgradeModal();
       });
@@ -6503,7 +6538,7 @@ document.addEventListener('click', function(e) {
 </div>
 </div>
 <script src="/product-system.js?v=20260712-3"></script>
-<script src="/workspace-system.js?v=20260713-3"></script>
-<script src="/research-system.js?v=20260703-1"></script>
+<script src="/workspace-system.js?v=20260713-5"></script>
+<script src="/research-system.js?v=20260713-5"></script>
 </body>
 </html>

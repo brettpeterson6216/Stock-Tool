@@ -7847,3 +7847,15 @@ html[data-theme="dark"] .il-wf-panel{background:linear-gradient(180deg,#171411,#
 .il-wf-notes .w70{width:70%;}
 .il-wf-notes .w45{width:45%;}
 @media(max-width:760px){.il-workflow-panels{grid-template-columns:1fr;}}
+
+
+/* ═══ Per-tab left rails: Home landing + shared rail styles (2026-07-13) ═══ */
+.il-landing-rail{position:fixed;left:18px;top:92px;z-index:40;width:176px;display:flex;flex-direction:column;gap:3px;padding:14px 12px;border:1px solid var(--border2);border-radius:14px;background:var(--card);box-shadow:var(--shadow-sm);}
+html[data-theme="dark"] .il-landing-rail{background:linear-gradient(180deg,#171411,#12100D);border-color:rgba(217,179,94,.16);}
+.il-rail-label{font:700 .6rem var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--gold-amber);margin:0 0 7px 6px;}
+html[data-theme="dark"] .il-rail-label{color:var(--gold-hi);}
+.il-landing-rail a{display:flex;align-items:center;gap:9px;padding:.52rem .65rem;border-radius:9px;font:600 .78rem var(--sans);color:var(--text3);text-decoration:none;transition:background .14s,color .14s;}
+.il-landing-rail a:hover{background:var(--gold-tint);color:var(--text);}
+.il-landing-rail a.active{background:var(--gold-grad);color:#1A1206;}
+.il-landing-rail a i{font-size:.95rem;flex:0 0 auto;}
+@media(max-width:1439px){.il-landing-rail{display:none;}}
