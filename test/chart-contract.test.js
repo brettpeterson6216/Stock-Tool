@@ -11,8 +11,6 @@ const staticCss = fs.readFileSync(path.join(__dirname, "..", "public", "static-p
 const signupHtml = fs.readFileSync(path.join(__dirname, "..", "public", "signup.html"), "utf8");
 const productJs = fs.readFileSync(path.join(__dirname, "..", "public", "product-system.js"), "utf8");
 const productCss = fs.readFileSync(path.join(__dirname, "..", "public", "product-system.css"), "utf8");
-const landingPreviewDarkPng = fs.readFileSync(path.join(__dirname, "..", "public", "landing-product-preview-dark.png"));
-const landingWorkflowDarkPng = fs.readFileSync(path.join(__dirname, "..", "public", "landing-workflow-strip-dark.png"));
 const htmlAndLegacyCss = `${html}\n${legacyCss}`;
 
 test("chart rebuilds keep prices and timestamps on one aligned series", () => {
@@ -110,9 +108,11 @@ test("product spine presents one reviewable decision workflow", () => {
 });
 
 test("primary navigation avoids duplicate tool destinations", () => {
-  assert.doesNotMatch(html, /<span>Chart<\/span>/);
+  assert.doesNotMatch(html, /class="nav-tab"[^>]*>Chart</);
   assert.doesNotMatch(html, /Scenario Builder/);
-  assert.match(html, /<span class="sb-item-label">Analyze<\/span>/);
+  assert.match(html, /id="nav-analyze" class="nav-tab"[^>]*>Research</);
+  assert.match(html, /<div class="sb-group-label">Research<\/div>/);
+  assert.match(html, /<span class="sb-item-label">Chart<\/span>/);
   assert.match(html, /Start with a company/);
   assert.match(html, /Load a ticker, read the evidence, model the range, then save a reviewable thesis\./);
   assert.match(html, /Popular starting points/);
@@ -175,11 +175,8 @@ test("homepage defaults to a beginner-friendly landing page before market tools"
   assert.match(html, /Find better stock ideas with a process you can follow/);
   assert.match(html, /Start with a 7-day free trial/);
   assert.match(html, /Start 7-day free trial/);
-  assert.match(html, /class="il-theme-img il-product-preview-img" src="\/landing-product-preview-dark\.png"/);
-  assert.doesNotMatch(html, /class="il-theme-img il-theme-img-dark" src="\/landing-product-preview-dark\.png"/);
-  assert.match(html, /class="il-theme-img il-theme-img-light" src="\/landing-workflow-strip-dark\.png"/);
-  assert.match(html, /class="il-theme-img il-theme-img-dark" src="\/landing-workflow-strip-dark\.png"/);
-  assert.match(html, /Sample workspace/);
+  assert.match(html, /class="il-hero-mock" role="img"/);
+  assert.match(html, /Illustrative workspace/);
   assert.match(html, /Discount codes accepted/);
   assert.doesNotMatch(html, /id="landingChartFill"/);
   assert.match(html, /function landingSearch\(\)/);
@@ -273,10 +270,14 @@ test("gold ripple image is the default backdrop across landing, market, and tool
   assert.match(legacyCss, /backdrop-filter:blur\(20px\) saturate\(1\.08\)!important/);
 });
 
-test("landing promo images use crisp shared dark artwork", () => {
-  assert.equal(landingPreviewDarkPng.toString("ascii", 1, 4), "PNG");
-  assert.equal(landingWorkflowDarkPng.toString("ascii", 1, 4), "PNG");
-  assert.equal(landingPreviewDarkPng[25], 6, "dark landing preview PNG should use RGBA color type");
+test("landing visuals are honest CSS-built illustrations, not fake screenshots", () => {
+  assert.doesNotMatch(html, /landing-product-preview/);
+  assert.doesNotMatch(html, /landing-workflow-strip/);
+  assert.match(html, /class="il-hero-mock" role="img"/);
+  assert.match(html, /Illustration of the Implied Lens research workspace/);
+  assert.match(html, /class="il-workflow-panels"/);
+  assert.match(legacyCss, /\.il-hero-mock\{/);
+  assert.match(legacyCss, /\.il-workflow-panels\{/);
 });
 
 test("tool containers use premium rounded surfaces instead of sharp rectangles", () => {

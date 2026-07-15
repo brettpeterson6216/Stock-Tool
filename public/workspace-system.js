@@ -503,61 +503,8 @@
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", dock); else dock();
 }());
 
-/* ── Progressive disclosure: five core tabs, the rest under "More" ────────────
-   Beginners see Chart, Financials, Value, Compare, Screener. Everything else
-   lives in a More menu; when one of those sections is active its name shows
-   on the More button. Desktop only. */
-(function () {
-  const CORE = new Set(["analyze", "financials", "dcf", "compare", "screener"]);
-  function sweepLateTabs() {
-    // modules add tabs (Calls, Wealth, Workspace) after init — keep them in More
-    const bar = document.getElementById("mobile-sec-tabs");
-    const menu = bar?.querySelector(".il-more-menu");
-    if (!bar || !menu) return;
-    [...bar.querySelectorAll(":scope > .mst-btn")]
-      .filter(b => !CORE.has(b.dataset.sec))
-      .forEach(b => menu.appendChild(b));
-    const wrap = bar.querySelector(".il-more-tabs");
-    if (wrap && wrap !== bar.lastElementChild) bar.appendChild(wrap); // keep More last (before search)
-    const qs = bar.querySelector(".il-quick-search");
-    if (qs) bar.appendChild(qs);
-  }
-  function setup() {
-    if (window.innerWidth < 961) return;
-    const bar = document.getElementById("mobile-sec-tabs");
-    if (!bar) return;
-    if (bar.dataset.ilMore) { sweepLateTabs(); return; }
-    const extras = [...bar.querySelectorAll(":scope > .mst-btn")].filter(b => !CORE.has(b.dataset.sec));
-    if (extras.length < 2) return;
-    bar.dataset.ilMore = "1";
-    const wrap = document.createElement("div"); wrap.className = "il-more-tabs";
-    const btn = document.createElement("button");
-    btn.type = "button"; btn.className = "mst-btn il-more-btn";
-    btn.setAttribute("aria-haspopup", "true"); btn.setAttribute("aria-expanded", "false");
-    btn.innerHTML = `<span>More</span> <i class="ti ti-chevron-down" aria-hidden="true"></i>`;
-    const menu = document.createElement("div"); menu.className = "il-more-menu"; menu.setAttribute("role", "menu");
-    extras.forEach(b => menu.appendChild(b));
-    wrap.append(btn, menu); bar.appendChild(wrap);
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const open = wrap.classList.toggle("open");
-      btn.setAttribute("aria-expanded", String(open));
-    });
-    document.addEventListener("click", () => { wrap.classList.remove("open"); btn.setAttribute("aria-expanded", "false"); });
-    menu.addEventListener("click", () => { wrap.classList.remove("open"); });
-    const label = btn.querySelector("span");
-    const sync = () => {
-      const active = menu.querySelector(".mst-btn.active");
-      btn.classList.toggle("active", Boolean(active));
-      label.textContent = active ? active.textContent : "More";
-    };
-    new MutationObserver(sync).observe(bar, { subtree: true, attributes: true, attributeFilter: ["class"] });
-    sync();
-  }
-  // workspace shell injects its own tab shortly after load — retry briefly
-  function init() { setup(); setTimeout(setup, 600); setTimeout(setup, 2000); setTimeout(setup, 4500); }
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
-}());
+/* (desktop "More" tab system removed 2026-07-13 — the left sidebar now carries
+   every tool on desktop; the section strip remains mobile-only.) */
 
 /* ── Source provenance notes: every data tab names its providers ─────────────── */
 (function () {
@@ -705,12 +652,16 @@
    you were using. "/" focuses it from anywhere. */
 (function () {
   function install() {
+    const desktop = window.innerWidth >= 961;
+    const hdr = document.getElementById("app-section-hdr");
     const bar = document.getElementById("mobile-sec-tabs");
-    if (!bar || document.getElementById("il-quick-ticker")) return;
+    const host = desktop ? hdr : bar;
+    if (!host || document.getElementById("il-quick-ticker")) return;
     const wrap = document.createElement("div");
     wrap.className = "il-quick-search";
     wrap.innerHTML = `<i class="ti ti-search" aria-hidden="true"></i><input id="il-quick-ticker" placeholder="Ticker  ( / )" maxlength="8" autocomplete="off" spellcheck="false" aria-label="Load a different ticker" title="Load a different ticker — press / from anywhere">`;
-    bar.appendChild(wrap);
+    if (desktop) { const actions = hdr.querySelector(".ash-actions"); if (actions) hdr.insertBefore(wrap, actions); else hdr.appendChild(wrap); }
+    else host.appendChild(wrap);
     const input = wrap.querySelector("input");
     input.addEventListener("keydown", (e) => {
       if (e.key === "Escape") { input.value = ""; input.blur(); return; }

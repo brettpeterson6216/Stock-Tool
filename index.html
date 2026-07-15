@@ -95,11 +95,11 @@
 <script src="/vendor/chart.umd.min.js?v=4.4.1"></script>
 <script defer src="/vendor/hammer.min.js?v=2.0.8"></script>
 <script defer src="/vendor/chartjs-plugin-zoom.min.js?v=2.2.0"></script>
-<script defer src="/model-math.js?v=20260712-3"></script>
-<script defer src="/projection-lab.js?v=20260712-3"></script>
-<script defer src="/valuation-lab.js?v=20260712-3"></script>
-<link href="/legacy-app.css?v=20260712-3" rel="stylesheet">
-<link href="/premium.css?v=20260712-3" rel="stylesheet">
+<script defer src="/model-math.js?v=20260713-3"></script>
+<script defer src="/projection-lab.js?v=20260713-3"></script>
+<script defer src="/valuation-lab.js?v=20260713-3"></script>
+<link href="/legacy-app.css?v=20260713-3" rel="stylesheet">
+<link href="/premium.css?v=20260713-3" rel="stylesheet">
 </head>
 <body>
 <a href="#main-content" class="skip-link">Skip to content</a>
@@ -114,7 +114,7 @@
   <div class="nav-links" id="nav-links">
     <a href="/" id='nav-home' class="nav-tab active-tab" onclick="navGoTo('home');return false;">Home</a>
     <a href="/?view=home&amp;market=1" id="nav-market" class="nav-tab" onclick="showMarketPage();return false;">Market</a>
-    <a href="/?view=tool&amp;section=analyze" id="nav-analyze" class="nav-tab" onclick="navGoTo('analyze');return false;">Analyze</a>
+    <a href="/?view=tool&amp;section=analyze" id="nav-analyze" class="nav-tab" onclick="navGoTo('analyze');return false;">Research</a>
     <a href="/?view=tool&amp;section=projection" id="nav-project" class="nav-tab" onclick="navGoTo('projection');return false;">Project</a>
     <a href="/?view=tool&amp;section=education" class="nav-tab" id="nav-education-link" onclick="navGoTo('education');return false;">Learn</a>
     <a href='/about' class="nav-tab" id="nav-about-link">About</a>
@@ -522,9 +522,47 @@
 <div id="view-home" role="main">
 <section class="il-landing" id="landing-page" aria-label="Implied Lens landing page">
   <div class="il-landing-hero">
-    <div class="il-landing-preview image-preview" aria-label="Sample Implied Lens stock research workspace">
-      <img class="il-theme-img il-product-preview-img" src="/landing-product-preview-dark.png" alt="Sample Implied Lens stock research workspace showing chart, valuation, thesis, and source panels" loading="eager" decoding="async">
-      <div class="il-preview-caption"><span>Sample workspace</span><strong>Not live data</strong></div>
+    <div class="il-landing-preview image-preview" aria-label="Illustration of the Implied Lens research workspace">
+      <div class="il-hero-mock" role="img" aria-label="Illustration of the Implied Lens research workspace: price chart, valuation range, and thesis panels">
+        <div class="ihm-top">
+          <span class="ihm-brand"><img src="/logo.svg?v=3" alt="" aria-hidden="true">Implied<em>Lens</em></span>
+          <span class="ihm-tabs"><span class="on">Chart</span><span>Financials</span><span>Value</span><span>Projection</span><span>Thesis</span></span>
+          <span class="ihm-pill">Illustration</span>
+        </div>
+        <div class="ihm-body">
+          <div class="ihm-main">
+            <div class="ihm-chart">
+              <svg viewBox="0 0 560 220" preserveAspectRatio="none" aria-hidden="true">
+                <defs><linearGradient id="ihmFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="rgba(216,154,55,.30)"/><stop offset="1" stop-color="rgba(216,154,55,0)"/>
+                </linearGradient></defs>
+                <g class="ihm-grid"><line x1="0" y1="55" x2="560" y2="55"/><line x1="0" y1="110" x2="560" y2="110"/><line x1="0" y1="165" x2="560" y2="165"/></g>
+                <path class="ihm-area" d="M0,178 C60,168 90,140 140,146 C190,152 215,120 265,112 C315,104 340,126 390,102 C440,78 470,60 560,44 L560,220 L0,220 Z" fill="url(#ihmFill)"/>
+                <path class="ihm-line" d="M0,178 C60,168 90,140 140,146 C190,152 215,120 265,112 C315,104 340,126 390,102 C440,78 470,60 560,44" fill="none"/>
+                <path class="ihm-ma" d="M0,186 C80,176 150,158 240,140 C330,122 430,96 560,72" fill="none"/>
+              </svg>
+              <div class="ihm-chart-chips"><span class="on">1Y</span><span>Candles</span><span>50D avg</span><span>News pins</span></div>
+            </div>
+          </div>
+          <div class="ihm-side">
+            <div class="ihm-card">
+              <span class="ihm-lbl">Valuation range</span>
+              <div class="ihm-band"><i class="ihm-band-mid"></i><i class="ihm-band-now"></i></div>
+              <span class="ihm-sub">Bear · Base · Bull — your assumptions</span>
+            </div>
+            <div class="ihm-card">
+              <span class="ihm-lbl">Thesis</span>
+              <span class="ihm-note"></span><span class="ihm-note w70"></span><span class="ihm-note w45"></span>
+              <span class="ihm-sub">Written down · review date set</span>
+            </div>
+            <div class="ihm-card">
+              <span class="ihm-lbl">Sources</span>
+              <span class="ihm-sub">SEC EDGAR · Finnhub · exchange data</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="il-preview-caption"><span>Illustrative workspace</span><strong>Open any real ticker free</strong></div>
     </div>
     <div class="il-landing-copy">
       <span class="il-landing-kicker">Try it on a real ticker — no account needed</span>
@@ -575,8 +613,23 @@
       <h2>Search, value, and write the thesis in one premium workspace.</h2>
       <p>No more scattered tabs or unreadable checklists. Implied Lens keeps the workflow visual, source-aware, and easy to revisit.</p>
     </div>
-    <img class="il-theme-img il-theme-img-light" src="/landing-workflow-strip-dark.png" alt="Three clean Implied Lens workflow panels for search, valuation, and thesis review" loading="lazy" decoding="async">
-    <img class="il-theme-img il-theme-img-dark" src="/landing-workflow-strip-dark.png" alt="" aria-hidden="true" loading="lazy" decoding="async">
+    <div class="il-workflow-panels" aria-label="The three-step Implied Lens research loop">
+      <div class="il-wf-panel">
+        <div class="il-wf-head"><i class="ti ti-search" aria-hidden="true"></i><strong>1 · Search</strong></div>
+        <div class="il-wf-mockrow"><span class="il-wf-input">NVDA</span><span class="il-wf-btn">Research →</span></div>
+        <p>Load any ticker and get charts, SEC-sourced financials, and metrics in one place.</p>
+      </div>
+      <div class="il-wf-panel">
+        <div class="il-wf-head"><i class="ti ti-calculator" aria-hidden="true"></i><strong>2 · Value</strong></div>
+        <div class="il-wf-band" aria-hidden="true"><i></i></div>
+        <p>Test Bear, Base, and Bull assumptions — every model shows its math and stays editable.</p>
+      </div>
+      <div class="il-wf-panel">
+        <div class="il-wf-head"><i class="ti ti-notes" aria-hidden="true"></i><strong>3 · Decide</strong></div>
+        <div class="il-wf-notes" aria-hidden="true"><span></span><span class="w70"></span><span class="w45"></span></div>
+        <p>Write the thesis and the downside, set a review date, and get held to it.</p>
+      </div>
+    </div>
   </div>
   <div class="il-landing-band">
     <div>
@@ -604,8 +657,8 @@
     <a class="hsb-home active" href="/?view=home&amp;market=1" onclick="showMarketPage();return false;"><i class="ti ti-globe"></i><span>Market</span></a>
 
     <div class="hsb-section" data-home-analyze>
-      <div class="hsb-label">Analyze</div>
-      <a class="hsb-item" href="/?view=tool&amp;section=analyze" onclick="navGoTo('analyze');return false;"><i class="ti ti-chart-candle"></i><span>Analyze</span></a>
+      <div class="hsb-label">Research</div>
+      <a class="hsb-item" href="/?view=tool&amp;section=analyze" onclick="navGoTo('analyze');return false;"><i class="ti ti-chart-candle"></i><span>Chart</span></a>
       <a class="hsb-item" href="/?view=tool&amp;section=financials" onclick="navGoTo('financials');return false;"><i class="ti ti-table"></i><span>Financials</span></a>
       <a class="hsb-item" href="/?view=tool&amp;section=advmetrics" onclick="navGoTo('advmetrics');return false;"><i class="ti ti-report-analytics"></i><span>Metrics</span></a>
       <a class="hsb-item" href="/?view=tool&amp;section=earnings" onclick="navGoTo('earnings');return false;"><i class="ti ti-trending-up"></i><span>Earnings</span></a>
@@ -969,8 +1022,8 @@
       <a href="#" class="sb-home-btn" id="sb-home-btn"><i class="ti ti-home" aria-hidden="true"></i><span>Home</span></a>
 
       <div class="sb-group-pad">
-        <div class="sb-group-label">Analyze</div>
-        <div class="sb-item active" data-sec="analyze"><i class="ti ti-chart-candle sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Analyze</span></div>
+        <div class="sb-group-label">Research</div>
+        <div class="sb-item active" data-sec="analyze"><i class="ti ti-chart-candle sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Chart</span></div>
         <div class="sb-item" data-sec="financials"><i class="ti ti-table sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Financials</span></div>
         <div class="sb-item" data-sec="advmetrics"><i class="ti ti-report-analytics sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Metrics</span></div>
         <div class="sb-item" data-sec="earnings"><i class="ti ti-trending-up sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Earnings</span></div>
@@ -1271,7 +1324,7 @@
               <div id="fin-balance" class="fin-subtab" style="display:none;"></div>
               <div id="fin-cashflow" class="fin-subtab" style="display:none;"></div>
             </div>
-            <div id="fin-nostock" style="font-size:.85rem;color:var(--text5);">Search for a stock in the Analyze tab first.</div>
+            <div id="fin-nostock" style="font-size:.85rem;color:var(--text5);">Search for a stock in the Research tab first.</div>
 
 
             </div><!-- /body-financials -->
@@ -1282,7 +1335,7 @@
             <div id="advm-loading" style="color:var(--text5);font-size:.82rem;display:none;">Loading metrics…</div>
             <div id="advm-error" style="color:#d96a70;font-size:.82rem;display:none;"></div>
             <div id="advm-content"></div>
-            <div id="advm-nostock" style="color:var(--text5);font-size:.85rem;">Search for a stock in the Analyze tab first.</div>
+            <div id="advm-nostock" style="color:var(--text5);font-size:.85rem;">Search for a stock in the Research tab first.</div>
 
 
             </div><!-- /body-advmetrics -->
@@ -1293,14 +1346,14 @@
             <div id="earn-loading" style="color:var(--text5);font-size:.82rem;display:none;">Loading earnings…</div>
             <div id="earn-error" style="color:#d96a70;font-size:.82rem;display:none;"></div>
             <div id="earn-content"></div>
-            <div id="earn-nostock" style="color:var(--text5);font-size:.85rem;">Search for a stock in the Analyze tab first.</div>
+            <div id="earn-nostock" style="color:var(--text5);font-size:.85rem;">Search for a stock in the Research tab first.</div>
 
 
             </div><!-- /body-earnings -->
           </div><!-- /sec-earnings -->
 
           <div class="app-section" id="sec-secfilings"><div class="acc-body" id="body-secfilings" style="display:none;">
-              <div id="sec-nostock" style="color:rgba(237,232,224,.35);font-size:.85rem;padding:.5rem 0;">Search for a stock in the Analyze tab first.</div>
+              <div id="sec-nostock" style="color:rgba(237,232,224,.35);font-size:.85rem;padding:.5rem 0;">Search for a stock in the Research tab first.</div>
               <div id="sec-loading" style="display:none;color:rgba(237,232,224,.4);font-size:.82rem;">Loading filings...</div>
               <div id="sec-error" style="display:none;" class="error-msg"></div>
               <div id="sec-content" style="display:none;">
@@ -1324,7 +1377,7 @@
           <div class="app-section" id="sec-institutional"><div class="acc-body" id="body-institutional" style="display:none;">
               <div style="font-size:.82rem;color:var(--text4);margin-bottom:1.25rem;">Top institutional holders, OTC trading volume, and short interest data from FINRA &amp; Finnhub.</div>
               <div id="inst-loading" class="loading-bar" style="display:none;"><div class="spinner"></div> Loading institutional data…</div>
-              <div id="inst-nostock" style="color:var(--text5);font-size:.85rem;">Search for a stock in the Analyze tab first.</div>
+              <div id="inst-nostock" style="color:var(--text5);font-size:.85rem;">Search for a stock in the Research tab first.</div>
               <div id="inst-content" style="display:none;">
                 <!-- OTC Activity & Short Interest Cards -->
                 <div class="analyst-box-title" style="margin-bottom:.65rem;">FINRA OTC Activity &amp; Short Interest</div>
@@ -1382,7 +1435,7 @@
             <div class="tool-intro">
               <div><strong>Projection Lab</strong> turns your growth, margin, and P/E assumptions into a year-by-year share-price range for independent Bear, Base, and Bull cases. Open “How this model works” inside the lab for the full method.</div>
             </div>
-            <div id="il-projlab-empty" style="color:var(--text5);font-size:.9rem;padding:1.5rem 0;">Search for a stock in the <a href="#" onclick="navGoTo('analyze');return false;" style="color:var(--gold);">Analyze</a> tab first — then open Projection Lab to model it.</div>
+            <div id="il-projlab-empty" style="color:var(--text5);font-size:.9rem;padding:1.5rem 0;">Search for a stock in the <a href="#" onclick="navGoTo('analyze');return false;" style="color:var(--gold);">Research</a> tab first — then open Projection Lab to model it.</div>
             <div id="il-projlab-mount"></div>
 
             </div><!-- /body-projection -->
@@ -1390,7 +1443,7 @@
 
           <div class="app-section" id="sec-dcf"><div class="acc-body" id="body-dcf" style="display:none;">
 <div class="tool-intro"><div><strong>Valuation Lab</strong> projects the operating business first — revenue, margins, cash flow, and dilution — then values it with a free-cash-flow DCF, exit P/E, and EV/EBITDA across Bear, Base, and Bull cases.</div><div class="tool-intro-note">Auto-seeds from the company's financials. Switch between Simple and Advanced, weight the methods, run the sensitivity grid, and see what today's price implies under “What's priced in?”.</div></div>
-            <div id="vlab-empty" style="color:var(--text5);font-size:.9rem;padding:1.25rem 0;">Search for a stock in the <a href="#" onclick="navGoTo('analyze');return false;" style="color:var(--gold);">Analyze</a> tab first — then open Valuation Lab to model it.</div>
+            <div id="vlab-empty" style="color:var(--text5);font-size:.9rem;padding:1.25rem 0;">Search for a stock in the <a href="#" onclick="navGoTo('analyze');return false;" style="color:var(--gold);">Research</a> tab first — then open Valuation Lab to model it.</div>
             <div id="vlab-mount"></div>
 
 
@@ -6407,7 +6460,7 @@ document.addEventListener('click', function(e) {
     <i class="ti ti-home"></i><span>Home</span>
   </a>
   <a href="#" class="mbn-item" id="mbn-analyze" onclick="navGoTo('analyze');_setMobileNav('analyze');return false;">
-    <i class="ti ti-chart-candle"></i><span>Analyze</span>
+    <i class="ti ti-chart-candle"></i><span>Research</span>
   </a>
   <a href="#" class="mbn-item" id="mbn-screener" onclick="openSection('screener');navGoTo('screener');_setMobileNav('screener');return false;">
     <i class="ti ti-filter"></i><span>Screen</span>
@@ -6449,7 +6502,7 @@ document.addEventListener('click', function(e) {
 </div>
 </div>
 <script src="/product-system.js?v=20260712-3"></script>
-<script src="/workspace-system.js?v=20260704-2"></script>
+<script src="/workspace-system.js?v=20260713-3"></script>
 <script src="/research-system.js?v=20260703-1"></script>
 </body>
 </html>

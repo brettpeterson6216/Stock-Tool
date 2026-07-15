@@ -6984,13 +6984,7 @@ html[data-theme="dark"] #market-page .hg-market{
 
 /* (top-bar tool-tab styles removed — nav is flat now) */
 
-/* ── Remove the left sidebar on desktop; tool content takes full width ──────── */
-@media(min-width:961px){
-  #view-tool .app-sidebar{ display:none!important; }
-  #view-tool .app-shell{ display:block!important; }
-  #view-tool .app-main{ width:100%!important; max-width:100%!important; }
-  /* keep the in-tool section header but it's now the only secondary chrome */
-}
+/* ── Left sidebar is the single tool switcher on desktop (2026-07-13) ──────── */
 
 /* Keep the existing mobile section-tab row on narrow screens; hide top tabs there */
 @media(max-width:960px){
@@ -7041,46 +7035,8 @@ html[data-theme="dark"] #market-page .hg-market{
    (no left sidebar, no top-bar dropdowns).
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* Promote the section-tab strip to desktop as the in-tool tool switcher */
-@media(min-width:961px){
-  #view-tool .mobile-sec-tabs{
-    display:flex!important;
-    flex-wrap:wrap;
-    gap:6px;
-    padding:12px clamp(16px,2vw,26px)!important;
-    border-bottom:1px solid var(--glass-line)!important;
-    position:sticky; top:0; z-index:6;
-    background:var(--glass-strong)!important;
-    -webkit-backdrop-filter:blur(22px) saturate(1.3)!important;
-    backdrop-filter:blur(22px) saturate(1.3)!important;
-    overflow:visible!important;
-  }
-  #view-tool .mobile-sec-tabs .mst-btn{
-    flex:0 0 auto;
-    height:32px; padding:0 14px;
-    border:1px solid var(--glass-line)!important;
-    border-radius:8px!important;
-    background:transparent!important;
-    color:var(--on-glass-2)!important;
-    font:600 .76rem var(--sans)!important;
-    letter-spacing:.01em;
-    white-space:nowrap; cursor:pointer;
-    transition:background .14s,color .14s,border-color .14s;
-  }
-  #view-tool .mobile-sec-tabs .mst-btn:hover{
-    background:var(--brand-gold-soft)!important;
-    border-color:var(--brand-gold-line)!important;
-    color:var(--on-glass)!important;
-  }
-  #view-tool .mobile-sec-tabs .mst-btn.active{
-    background:var(--brand-gold)!important;
-    border-color:var(--brand-gold)!important;
-    color:#1a1206!important;
-    box-shadow:0 2px 8px rgba(200,144,31,.25)!important;
-  }
-  /* The standalone in-tool section header is redundant now the strip names the section */
-  #view-tool .app-section-hdr{ display:none!important; }
-}
+/* (desktop section-strip removed 2026-07-13 — the left sidebar is the tool switcher;
+   the .mobile-sec-tabs strip remains mobile-only) */
 
 /* ═══════════════════════════════════════════════════════════════════════════
    PREMIUM POLISH v3 + ACCESSIBILITY — 2026-06-28
@@ -7842,3 +7798,52 @@ html[data-theme="dark"] body::before {
     radial-gradient(1150px 560px at 82% -12%, rgba(217,179,94,.10), transparent 62%),
     linear-gradient(180deg,#0B0C0D 0%,#0E1013 55%,#0A0B0C 100%) !important;
 }
+
+
+/* ═══ Honest landing visuals — CSS-built workspace illustration (2026-07-13) ═══ */
+.il-hero-mock{position:relative;z-index:1;display:flex;flex-direction:column;width:100%;aspect-ratio:1463/962;border:1px solid var(--brand-gold-line);border-radius:18px;overflow:hidden;background:radial-gradient(720px 300px at 88% -8%,rgba(217,179,94,.16),transparent 68%),linear-gradient(180deg,#171411,#0D0B09);box-shadow:0 30px 80px rgba(35,26,10,.30),0 0 0 1px rgba(242,234,220,.05) inset;}
+.ihm-top{display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid rgba(242,234,220,.09);background:rgba(242,234,220,.025);}
+.ihm-brand{display:inline-flex;align-items:center;gap:7px;font:700 .82rem var(--sans);color:#F1EDE3;}
+.ihm-brand img{width:18px;height:18px;border-radius:50%;}
+.ihm-brand em{font-style:italic;color:#D9B35E;}
+.ihm-tabs{display:inline-flex;gap:4px;margin-left:6px;min-width:0;overflow:hidden;}
+.ihm-tabs span{font:600 .62rem var(--sans);color:rgba(241,237,227,.55);padding:4px 10px;border-radius:7px;border:1px solid transparent;white-space:nowrap;}
+.ihm-tabs span.on{color:#1A1206;background:linear-gradient(135deg,#E9C877,#C8901F);border-color:transparent;font-weight:700;}
+.ihm-pill{margin-left:auto;font:700 .56rem var(--sans);letter-spacing:.1em;text-transform:uppercase;color:rgba(241,237,227,.6);border:1px solid rgba(242,234,220,.18);border-radius:999px;padding:3px 10px;white-space:nowrap;}
+.ihm-body{flex:1;display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:12px;padding:14px 16px 16px;min-height:0;}
+.ihm-main{display:flex;min-height:0;}
+.ihm-chart{position:relative;flex:1;display:flex;flex-direction:column;border:1px solid rgba(242,234,220,.09);border-radius:12px;background:rgba(242,234,220,.02);overflow:hidden;}
+.ihm-chart svg{flex:1;width:100%;height:100%;}
+.ihm-grid line{stroke:rgba(242,234,220,.07);stroke-width:1;}
+.ihm-line{stroke:#E0A53C;stroke-width:2.4;}
+.ihm-ma{stroke:rgba(241,237,227,.35);stroke-width:1.4;stroke-dasharray:5 5;}
+.ihm-chart-chips{display:flex;gap:5px;padding:9px 11px;border-top:1px solid rgba(242,234,220,.08);}
+.ihm-chart-chips span{font:600 .58rem var(--sans);color:rgba(241,237,227,.55);border:1px solid rgba(242,234,220,.13);border-radius:6px;padding:2px 8px;}
+.ihm-chart-chips span.on{color:#1A1206;background:#D9B35E;border-color:#D9B35E;font-weight:700;}
+.ihm-side{display:flex;flex-direction:column;gap:10px;min-height:0;}
+.ihm-card{flex:1;display:flex;flex-direction:column;gap:7px;justify-content:center;border:1px solid rgba(242,234,220,.09);border-radius:12px;background:rgba(242,234,220,.025);padding:11px 13px;min-height:0;}
+.ihm-lbl{font:700 .56rem var(--sans);letter-spacing:.12em;text-transform:uppercase;color:#D9B35E;}
+.ihm-sub{font:500 .62rem/1.45 var(--sans);color:rgba(241,237,227,.55);}
+.ihm-band{position:relative;height:10px;border-radius:6px;background:linear-gradient(90deg,rgba(199,107,112,.55),rgba(217,179,94,.6),rgba(47,156,106,.55));}
+.ihm-band-mid{position:absolute;left:52%;top:-3px;bottom:-3px;width:2px;background:#F1EDE3;border-radius:2px;}
+.ihm-band-now{position:absolute;left:30%;top:-5px;bottom:-5px;width:2px;background:rgba(241,237,227,.5);border-radius:2px;}
+.ihm-note{display:block;height:7px;border-radius:4px;background:rgba(241,237,227,.22);}
+.ihm-note.w70{width:70%;}
+.ihm-note.w45{width:45%;}
+@media(max-width:760px){.ihm-tabs{display:none;}.ihm-body{grid-template-columns:1fr;}.ihm-side{flex-direction:row;}.ihm-card{padding:9px 11px;}.il-hero-mock{aspect-ratio:auto;min-height:340px;}}
+
+.il-workflow-panels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:1.4rem;}
+.il-wf-panel{border:1px solid var(--brand-gold-line);border-radius:14px;background:var(--card);box-shadow:var(--shadow-sm);padding:1.1rem 1.2rem;display:flex;flex-direction:column;gap:.7rem;}
+html[data-theme="dark"] .il-wf-panel{background:linear-gradient(180deg,#171411,#12100D);}
+.il-wf-head{display:flex;align-items:center;gap:8px;font:700 .8rem var(--sans);color:var(--text2);}
+.il-wf-head i{color:var(--gold-bright);font-size:1rem;}
+.il-wf-panel p{font:500 .78rem/1.65 var(--sans);color:var(--text4);margin:0;}
+.il-wf-mockrow{display:flex;gap:6px;}
+.il-wf-input{flex:1;font:700 .74rem var(--mono);letter-spacing:.06em;color:var(--text3);border:1px solid var(--border2);border-radius:8px;padding:.45rem .7rem;background:var(--t-metric-bg);}
+.il-wf-btn{font:700 .72rem var(--sans);color:#1A1206;background:var(--gold-grad);border-radius:8px;padding:.45rem .8rem;white-space:nowrap;}
+.il-wf-band{position:relative;height:10px;border-radius:6px;background:linear-gradient(90deg,rgba(199,107,112,.5),rgba(217,179,94,.55),rgba(47,156,106,.5));}
+.il-wf-band i{position:absolute;left:55%;top:-3px;bottom:-3px;width:2px;background:var(--text2);border-radius:2px;}
+.il-wf-notes span{display:block;height:7px;border-radius:4px;background:var(--border3);margin-bottom:6px;}
+.il-wf-notes .w70{width:70%;}
+.il-wf-notes .w45{width:45%;}
+@media(max-width:760px){.il-workflow-panels{grid-template-columns:1fr;}}
