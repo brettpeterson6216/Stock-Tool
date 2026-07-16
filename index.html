@@ -98,7 +98,8 @@
 <script defer src="/model-math.js?v=20260713-3"></script>
 <script defer src="/projection-lab.js?v=20260713-3"></script>
 <script defer src="/valuation-lab.js?v=20260713-3"></script>
-<link href="/legacy-app.css?v=20260715-3" rel="stylesheet">
+<script defer src="/tool-launch.js?v=20260716-1"></script>
+<link href="/legacy-app.css?v=20260716-1" rel="stylesheet">
 <link href="/premium.css?v=20260713-3" rel="stylesheet">
 </head>
 <body>
@@ -625,6 +626,10 @@
       <span class="il-landing-kicker">Try it on a real ticker — no account needed</span>
       <h1>Find better stock ideas with a process you can follow.</h1>
       <p>Implied Lens turns any ticker into a guided workspace for charts, valuation, sources, thesis notes, and review dates. Built for self-directed investors who want sharper decisions without starting from a blank screen.</p>
+      <div class="il-banner-lede">
+        <h2>Research stocks like a pro — without the blank screen.</h2>
+        <p>Turn any ticker into live charts, SEC-sourced financials, valuation and projection models, and a saved thesis. Free to start.</p>
+      </div>
       <div class="il-landing-actions">
         <button type="button" class="il-landing-primary" onclick="heroLoadTicker('AAPL')"><i class="ti ti-player-play"></i> Analyze AAPL live — free</button>
         <a class="il-landing-secondary" href="/signup">Start 7-day Pro trial</a>
@@ -638,6 +643,13 @@
         <span><i class="ti ti-school"></i>Guided workflow</span>
         <span><i class="ti ti-chart-candle"></i>Real chart tools</span>
         <span><i class="ti ti-notes"></i>Saved thesis</span>
+      </div>
+      <div class="il-trust" aria-label="Data sources and terms">
+        <span><i class="ti ti-file-certificate"></i>SEC EDGAR filings</span>
+        <span class="il-trust-dot" aria-hidden="true">·</span>
+        <span><i class="ti ti-broadcast"></i>Live exchange data</span>
+        <span class="il-trust-dot" aria-hidden="true">·</span>
+        <span><i class="ti ti-credit-card-off"></i>No credit card to start</span>
       </div>
       <div class="il-offer-card" aria-label="Introductory offer">
         <strong>Discount codes accepted</strong>
@@ -1155,8 +1167,10 @@
 
           <div class="app-section open" id="sec-analyze"><div class="acc-body" id="body-analyze">
 <div class="tool-welcome" id="tool-welcome">
-              <div class="tw-title">Start with a company</div>
-              <div class="tw-sub">Load a ticker, read the evidence, model the range, then save a reviewable thesis.</div>
+              <div class="tw-kicker">Research workspace</div>
+              <div class="tw-title">Research any company with a process you can repeat.</div>
+              <div class="tw-sub">Live charts, SEC-sourced financials, valuation and projection models, and a decision workspace — for any ticker. Search a company to begin, or start with a popular name below.</div>
+              <div class="tw-market" id="tw-market"></div>
             </div>
             <div class="search-row">
               <input class="ticker-input" id="main-ticker" type="text" placeholder="Try AAPL, TSLA, NVDA, SPY…" value="">
@@ -1165,6 +1179,10 @@
             <!-- Featured stocks grid (shown before search) -->
             <div class="fg-label" id="fg-label">Popular starting points</div>
             <div id="featured-grid"></div>
+            <div class="tw-extra" id="tw-extra">
+              <div class="tw-launch" id="tw-launch"></div>
+              <div class="tw-continue" id="tw-continue"></div>
+            </div>
             <div id="limit-counter" style="display:none;align-items:center;gap:8px;margin-bottom:.75rem;flex-wrap:wrap;"></div>
             <div class="loading-bar" id="analyze-loading" style="display:none;"><div class="spinner"></div> Fetching live market data…</div>
             <div class="error-msg" id="analyze-error"></div>
@@ -3644,7 +3662,7 @@ async function fetchAndRender() {
     S.ticker=ticker; S.data=result; S.analystTarget=null;
     renderStock(result,ticker);
     track('analyze_completed', { ticker });
-    toast(`${ticker} loaded ✓`,'green'); const _fg=document.getElementById('featured-grid'); if(_fg) _fg.style.display='none'; const _tw=document.getElementById('tool-welcome'); if(_tw) _tw.style.display='none'; const _fl=document.getElementById('fg-label'); if(_fl) _fl.style.display='none';
+    toast(`${ticker} loaded ✓`,'green'); const _fg=document.getElementById('featured-grid'); if(_fg) _fg.style.display='none'; const _tw=document.getElementById('tool-welcome'); if(_tw) _tw.style.display='none'; const _fl=document.getElementById('fg-label'); if(_fl) _fl.style.display='none'; const _tx=document.getElementById('tw-extra'); if(_tx) _tx.style.display='none';
   } catch(e) {
     if (e.message === 'LIMIT_REACHED') {
       track('daily_limit_reached', { ticker });
@@ -6538,9 +6556,4 @@ document.addEventListener('click', function(e) {
     <a href="#" class="mmenu-item" id="mmenu-logout" style="display:none;" onclick="var b=document.getElementById('nav-acct-logout');if(b){b.click();}_toggleMobileMenu();return false;"><i class="ti ti-logout-2"></i><span>Log out</span></a>
   </div>
 </div>
-</div>
-<script src="/product-system.js?v=20260712-3"></script>
-<script src="/workspace-system.js?v=20260713-5"></script>
-<script src="/research-system.js?v=20260713-5"></script>
-</body>
-</html>
+</div
