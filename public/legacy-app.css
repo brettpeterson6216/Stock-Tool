@@ -7921,3 +7921,9 @@ html[data-theme="dark"] .il-learn-search input::placeholder{ color:rgba(245,235,
 .has-hero-banner .il-landing-search{ margin:0 auto; }
 .has-hero-banner .il-landing-proof{ justify-content:center; }
 @media(max-width:640px){ .has-hero-banner .il-hero-banner{ border-radius:12px; } }
+
+/* Hero banner: force horizontal centering + collapse the tall min-height so the
+   graphic sits centered near the top instead of left-aligned/floating. */
+.il-landing-hero.has-hero-banner{ align-items:center!important; justify-content:center!important; text-align:center!important; min-height:auto!important; padding-top:clamp(20px,3.5vw,46px)!important; padding-bottom:clamp(24px,4vw,52px)!important; }
+.il-landing-hero.has-hero-banner .il-hero-banner{ margin-left:auto!important; margin-right:auto!important; }
+.il-landing-hero.has-hero-banner .il-landing-copy{ margin-left:auto!important; margin-right:auto!important; align-items:center!important; }
