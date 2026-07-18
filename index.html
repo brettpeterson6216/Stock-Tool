@@ -100,7 +100,7 @@
 <script defer src="/valuation-lab.js?v=20260713-3"></script>
 <script defer src="/research-system.js?v=20260716-1"></script>
 <script defer src="/tool-launch.js?v=20260716-1"></script>
-<link href="/legacy-app.css?v=20260716-4" rel="stylesheet">
+<link href="/legacy-app.css?v=20260716-5" rel="stylesheet">
 <link href="/premium.css?v=20260713-3" rel="stylesheet">
 </head>
 <body>
@@ -247,7 +247,10 @@
       history.replaceState(null, '', '/?view=tool' + (activeSection ? '&section=' + encodeURIComponent(activeSection) : ''));
       const nav = document.getElementById('main-nav'); if(nav) nav.setAttribute('data-view','tool');
       document.querySelectorAll('.nav-tab').forEach(a => a.classList.remove('active-tab'));
-      const tt = document.getElementById('nav-tool-link'); if(tt) tt.classList.add('active-tab');
+      var _sec = activeSection || document.getElementById('view-tool')?.getAttribute('data-active-section') || 'analyze';
+      var _grp = (typeof navGroupOf==='function') ? navGroupOf(_sec) : 'research';
+      var _tabId = (typeof NAV_GROUP_TAB!=='undefined' && NAV_GROUP_TAB[_grp]) ? NAV_GROUP_TAB[_grp] : 'nav-analyze';
+      var tt = document.getElementById(_tabId); if(tt) tt.classList.add('active-tab');
     } else {
       showLandingPage();
     }
@@ -1741,6 +1744,11 @@
   <div class="cex-box">
     <div class="cex-header">
       <span class="cex-title" id="cex-title">Chart</span>
+      <div class="cex-type-toggle" id="cex-type-toggle" style="display:none;">
+        <button type="button" class="cex-type-btn" data-ctype="candle" onclick="setExpandedChartType('candle')">Candle</button>
+        <button type="button" class="cex-type-btn" data-ctype="line" onclick="setExpandedChartType('line')">Line</button>
+        <button type="button" class="cex-type-btn" data-ctype="area" onclick="setExpandedChartType('area')">Area</button>
+      </div>
       <div class="cex-controls">
         <span class="cex-hint">Scroll to zoom &middot; drag to pan &middot; zoom out at full view to load more history</span>
         <button class="cex-btn cex-icon-btn" onclick="zoomExpandedChart(.8)" title="Zoom out or load older history" aria-label="Zoom expanded chart out or load older history"><i class="ti ti-zoom-out"></i></button>
@@ -2599,6 +2607,20 @@ function setChartType(type, btn) {
   });
   S.chartType = type;
   rebuildPriceChart();
+}
+// Expanded/fullscreen chart type switching (line/area/candle) — price chart only.
+function syncExpandedTypeToggle(){
+  var tg=document.getElementById('cex-type-toggle'); if(!tg) return;
+  var isPrice=_expandedSource&&_expandedSource.chartId==='price-chart';
+  tg.style.display=isPrice?'inline-flex':'none';
+  if(isPrice){ var cur=S.chartType||'area'; tg.querySelectorAll('.cex-type-btn').forEach(function(b){ b.classList.toggle('on', b.dataset.ctype===cur); }); }
+}
+function setExpandedChartType(type){
+  if(!_expandedSource||_expandedSource.chartId!=='price-chart') return;
+  S.chartType=type;
+  document.querySelectorAll('#app-chart-toolbar .act-btn[id^="ct-"]').forEach(function(b){ var sel=b.id==='ct-'+type; b.classList.toggle('on',sel); b.setAttribute('aria-pressed',String(sel)); });
+  rebuildPriceChart();
+  expandChart('price-chart', _expandedSource.title);
 }
 
 
@@ -3564,6 +3586,7 @@ function expandChart(chartId, title) {
   });
   _expandedHasUserZoom=false;
   initMarkupCanvas();
+  syncExpandedTypeToggle();
 }
 function cp() {
   const styles=getComputedStyle(document.documentElement);

@@ -8099,3 +8099,10 @@ html[data-theme="dark"] footer .il-build{color:rgba(231,220,196,.78)!important}
    Fix: lift the footer into its own positioned layer above the veil.
    ============================================================ */
 body > footer{ position:relative!important; z-index:2!important; isolation:isolate; }
+
+/* v20260716-5 — expanded-chart type toggle (line/area/candle) */
+.cex-type-toggle{display:inline-flex;gap:2px;margin-left:14px;padding:3px;border-radius:9px;background:rgba(255,255,255,.05);border:1px solid rgba(217,179,94,.18);vertical-align:middle}
+.cex-type-btn{padding:5px 12px;border:0;border-radius:6px;background:transparent;color:rgba(245,235,215,.62);font:600 12px var(--sans,'DM Sans');cursor:pointer;transition:background .14s,color .14s}
+.cex-type-btn:hover{color:#f5ebd7}
+.cex-type-btn.on{background:linear-gradient(180deg,#e6c877,#d9b35e);color:#1a1408}
+@media(max-width:640px){ .cex-type-toggle{margin-left:0;margin-top:6px} }
