@@ -8087,3 +8087,15 @@ html footer .f-copy,
 html footer .il-build,
 html[data-theme="dark"] footer .f-copy,
 html[data-theme="dark"] footer .il-build{color:rgba(231,220,196,.78)!important}
+
+/* ============================================================
+   v20260716-4 — FOOTER paint fix (the real root cause).
+   #view-tool has isolation:isolate + position:relative (z-index:auto),
+   and its ::before is a near-opaque fixed dark veil
+   (linear-gradient rgba(10,11,13,.94)->(11,12,15,.97); position:fixed; inset:0; z-index:-1).
+   Because #view-tool is POSITIONED, it and its veil paint ABOVE the
+   non-positioned <footer> (a body child) — greying the footer out on
+   tool tabs (Market tab hides #view-tool, so it looked fine there).
+   Fix: lift the footer into its own positioned layer above the veil.
+   ============================================================ */
+body > footer{ position:relative!important; z-index:2!important; isolation:isolate; }

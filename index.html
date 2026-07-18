@@ -100,7 +100,7 @@
 <script defer src="/valuation-lab.js?v=20260713-3"></script>
 <script defer src="/research-system.js?v=20260716-1"></script>
 <script defer src="/tool-launch.js?v=20260716-1"></script>
-<link href="/legacy-app.css?v=20260716-3" rel="stylesheet">
+<link href="/legacy-app.css?v=20260716-4" rel="stylesheet">
 <link href="/premium.css?v=20260713-3" rel="stylesheet">
 </head>
 <body>
@@ -4846,7 +4846,7 @@ function buildPriceChart(result,closes,timestamps) {
   } else if(S.chartType==='area') {
     ds=[{label:'Price',data:vc,borderColor:p.price,borderWidth:2.7,...hp,pointHoverBackgroundColor:p.price,fill:true,backgroundColor:strongGrad,tension:.22,order:10}];
   } else {
-    ds=[{label:'Price',data:vc,borderColor:p.price,borderWidth:2.4,...hp,pointHoverBackgroundColor:p.price,fill:true,backgroundColor:fillGrad,tension:.22,order:10}];
+    ds=[{label:'Price',data:vc,borderColor:p.price,borderWidth:2.4,...hp,pointHoverBackgroundColor:p.price,fill:false,tension:.22,order:10}];
   }
   const lineType = S.chartType==='candle' ? {type:'line'} : {};
   if(S.inds.ma50&&vc.length>=INDICATOR_REQUIREMENTS.ma50.bars)  ds.push({...lineType,label:'50D average', data:ma50v, borderColor:p.ma50,borderWidth:2,...hp,pointHoverBackgroundColor:p.ma50,fill:false,tension:.2,order:9});
