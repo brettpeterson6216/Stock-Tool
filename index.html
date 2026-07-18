@@ -98,8 +98,9 @@
 <script defer src="/model-math.js?v=20260713-3"></script>
 <script defer src="/projection-lab.js?v=20260713-3"></script>
 <script defer src="/valuation-lab.js?v=20260713-3"></script>
+<script defer src="/research-system.js?v=20260716-1"></script>
 <script defer src="/tool-launch.js?v=20260716-1"></script>
-<link href="/legacy-app.css?v=20260716-1" rel="stylesheet">
+<link href="/legacy-app.css?v=20260716-2" rel="stylesheet">
 <link href="/premium.css?v=20260713-3" rel="stylesheet">
 </head>
 <body>
@@ -434,6 +435,20 @@
           if (heroMain) { heroMain.textContent = 'Open live tool →'; heroMain.removeAttribute('onclick'); heroMain.href='#'; heroMain.onclick=function(e){e.preventDefault();navGoTo('analyze');}; }
           if (heroSec)  heroSec.style.display = 'none';
 
+          // New landing hero (banner mode) — don't pitch "free"/"trial" to existing Pro members.
+          const ilP = document.getElementById('il-hero-primary');
+          if (ilP) { ilP.innerHTML = '<i class="ti ti-player-play"></i> Open live tool'; ilP.onclick = function(){ navGoTo('analyze'); }; }
+          const ilS = document.getElementById('il-hero-secondary');
+          if (ilS) ilS.style.display = 'none';
+          const ilNoCard = document.getElementById('il-trust-nocard');
+          if (ilNoCard) ilNoCard.style.display = 'none';
+          const ilNoCardDot = document.getElementById('il-trust-nocard-dot');
+          if (ilNoCardDot) ilNoCardDot.style.display = 'none';
+          const ilLede = document.getElementById('il-lede-sub');
+          if (ilLede) ilLede.textContent = 'Turn any ticker into live charts, SEC-sourced financials, valuation and projection models, and a saved thesis.';
+          const ilPricing = document.getElementById('landing-pricing');
+          if (ilPricing) ilPricing.style.display = 'none';
+
           const pricingSection = document.getElementById('pricing');
           const proBanner      = document.getElementById('pro-member-banner');
           if (pricingSection) pricingSection.style.display = 'none';
@@ -628,11 +643,11 @@
       <p>Implied Lens turns any ticker into a guided workspace for charts, valuation, sources, thesis notes, and review dates. Built for self-directed investors who want sharper decisions without starting from a blank screen.</p>
       <div class="il-banner-lede">
         <h2>Research stocks like a pro — without the blank screen.</h2>
-        <p>Turn any ticker into live charts, SEC-sourced financials, valuation and projection models, and a saved thesis. Free to start.</p>
+        <p id="il-lede-sub">Turn any ticker into live charts, SEC-sourced financials, valuation and projection models, and a saved thesis. Free to start.</p>
       </div>
       <div class="il-landing-actions">
-        <button type="button" class="il-landing-primary" onclick="heroLoadTicker('AAPL')"><i class="ti ti-player-play"></i> Analyze AAPL live — free</button>
-        <a class="il-landing-secondary" href="/signup">Start 7-day Pro trial</a>
+        <button type="button" id="il-hero-primary" class="il-landing-primary" onclick="heroLoadTicker('AAPL')"><i class="ti ti-player-play"></i> Analyze AAPL live — free</button>
+        <a class="il-landing-secondary" id="il-hero-secondary" href="/signup">Start 7-day Pro trial</a>
       </div>
       <div class="il-landing-search" role="search">
         <i class="ti ti-search" aria-hidden="true"></i>
@@ -648,8 +663,8 @@
         <span><i class="ti ti-file-certificate"></i>SEC EDGAR filings</span>
         <span class="il-trust-dot" aria-hidden="true">·</span>
         <span><i class="ti ti-broadcast"></i>Live exchange data</span>
-        <span class="il-trust-dot" aria-hidden="true">·</span>
-        <span><i class="ti ti-credit-card-off"></i>No credit card to start</span>
+        <span class="il-trust-dot" id="il-trust-nocard-dot" aria-hidden="true">·</span>
+        <span id="il-trust-nocard"><i class="ti ti-credit-card-off"></i>No credit card to start</span>
       </div>
       <div class="il-offer-card" aria-label="Introductory offer">
         <strong>Discount codes accepted</strong>
@@ -1484,7 +1499,14 @@
             <div class="tool-intro">
               <div><strong>Projection Lab</strong> turns your growth, margin, and P/E assumptions into a year-by-year share-price range for independent Bear, Base, and Bull cases. Open “How this model works” inside the lab for the full method.</div>
             </div>
-            <div id="il-projlab-empty" style="color:var(--text5);font-size:.9rem;padding:1.5rem 0;">Search for a stock in the <a href="#" onclick="navGoTo('analyze');return false;" style="color:var(--gold);">Research</a> tab first — then open Projection Lab to model it.</div>
+            <div id="il-projlab-empty" class="lab-empty">
+              <div class="lab-empty-title">Model any company</div>
+              <div class="lab-empty-sub">Enter a ticker to build a year-by-year Bear / Base / Bull share-price projection — no need to open Research first.</div>
+              <div class="lab-empty-search">
+                <input id="proj-empty-ticker" type="text" placeholder="Try AAPL, NVDA, TSLA…" autocomplete="off" spellcheck="false" onkeydown="if(event.key==='Enter'){loadTickerInLab('proj-empty-ticker')}">
+                <button type="button" onclick="loadTickerInLab('proj-empty-ticker')">Build projection →</button>
+              </div>
+            </div>
             <div id="il-projlab-mount"></div>
 
             </div><!-- /body-projection -->
@@ -1492,7 +1514,14 @@
 
           <div class="app-section" id="sec-dcf"><div class="acc-body" id="body-dcf" style="display:none;">
 <div class="tool-intro"><div><strong>Valuation Lab</strong> projects the operating business first — revenue, margins, cash flow, and dilution — then values it with a free-cash-flow DCF, exit P/E, and EV/EBITDA across Bear, Base, and Bull cases.</div><div class="tool-intro-note">Auto-seeds from the company's financials. Switch between Simple and Advanced, weight the methods, run the sensitivity grid, and see what today's price implies under “What's priced in?”.</div></div>
-            <div id="vlab-empty" style="color:var(--text5);font-size:.9rem;padding:1.25rem 0;">Search for a stock in the <a href="#" onclick="navGoTo('analyze');return false;" style="color:var(--gold);">Research</a> tab first — then open Valuation Lab to model it.</div>
+            <div id="vlab-empty" class="lab-empty">
+              <div class="lab-empty-title">Value any company</div>
+              <div class="lab-empty-sub">Enter a ticker to auto-seed a DCF, exit P/E, and EV/EBITDA valuation — no need to open Research first.</div>
+              <div class="lab-empty-search">
+                <input id="vlab-empty-ticker" type="text" placeholder="Try AAPL, NVDA, TSLA…" autocomplete="off" spellcheck="false" onkeydown="if(event.key==='Enter'){loadTickerInLab('vlab-empty-ticker')}">
+                <button type="button" onclick="loadTickerInLab('vlab-empty-ticker')">Build valuation →</button>
+              </div>
+            </div>
             <div id="vlab-mount"></div>
 
 
@@ -1599,7 +1628,7 @@
             </div>
 
             <div id="edu-workshop" class="il-learn-workshop">
-              <div class="edu-panel-empty"><i class="ti ti-school"></i><strong>Loading workshop…</strong></div>
+              <div id="edu-lesson-panel"><div class="edu-panel-empty"><i class="ti ti-school"></i><strong>Select a lesson to begin.</strong></div></div>
             </div>
 
             <div class="edu-glossary">
@@ -2361,7 +2390,7 @@ function openSection(id, skipProCheck) {
   // Update sidebar active state (workspace sub-items are activated by the click handler)
   const wsItems = document.querySelectorAll('.sb-item[data-sec="' + id + '"][data-wstab]');
   document.querySelectorAll('.sb-item').forEach(el => {
-    el.classList.toggle('active', el.dataset.sec === id && !el.dataset.wstab);
+    el.classList.toggle('active', el.dataset.sec === id && !el.dataset.wstab && !el.dataset.scroll);
   });
   if (wsItems.length && !document.querySelector('.sb-item.active')) wsItems[0].classList.add('active');
   // Sync the mobile section strip active state.
@@ -2421,6 +2450,7 @@ function openSection(id, skipProCheck) {
   else if (id === 'projection')  { mountProjectionLab(); }
   else if (id === 'dcf')         { mountValuationLab(); }
   else if (id === 'reports')     { setTimeout(renderSavedAnalyses, 100); }
+  else if (id === 'education')   { setTimeout(function(){ var c=document.querySelector('.edu-path[data-lesson]'); if(c && typeof openLesson==='function' && !document.querySelector('#edu-lesson-panel .edu-lesson-content')) openLesson(c); }, 30); }
   if (document.getElementById('view-tool')?.style.display !== 'none') {
     history.replaceState(null, '', '/?view=tool&section=' + encodeURIComponent(id));
   }
@@ -3917,6 +3947,16 @@ let _moversCache={},_moversActive='gainers',_marketOverviewChart=null,_globeRAF=
 
 function heroSearch(){const v=(document.getElementById('hero-search')||{}).value;if(!v||!v.trim())return;const mi=document.getElementById('main-ticker');if(mi)mi.value=v.trim().toUpperCase();navGoTo('analyze');if(typeof fetchAndRender==='function')fetchAndRender();}
 function heroLoadTicker(t){const mi=document.getElementById('main-ticker');if(mi)mi.value=t;navGoTo('analyze');if(typeof fetchAndRender==='function')fetchAndRender();}
+// Load a ticker from within a lab (Projection/Valuation) empty state WITHOUT leaving the current section.
+// fetchAndRender re-mounts whichever lab section is open once data arrives.
+function loadTickerInLab(inputId){
+  const el=document.getElementById(inputId); if(!el)return;
+  const t=(el.value||'').trim().toUpperCase();
+  if(!t){ if(typeof toast==='function')toast('Enter a ticker symbol','red'); el.focus(); return; }
+  const mi=document.getElementById('main-ticker'); if(mi)mi.value=t;
+  if(typeof fetchAndRender==='function') fetchAndRender();
+}
+window.loadTickerInLab=loadTickerInLab;
 function landingSearch(){const v=(document.getElementById('landing-search')||{}).value;if(!v||!v.trim())return;heroLoadTicker(v.trim().toUpperCase());}
 (function(){const hi=document.getElementById('hero-search');if(hi)hi.addEventListener('keydown',e=>{if(e.key==='Enter')heroSearch();});})();
 window._pricingAnnual=false;

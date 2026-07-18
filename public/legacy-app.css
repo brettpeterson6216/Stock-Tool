@@ -8011,3 +8011,51 @@ html[data-theme="dark"] .il-banner-lede p{color:rgba(245,235,215,.72)}
 .il-trust .il-trust-dot{color:rgba(0,0,0,.25);font-weight:400}
 html[data-theme="dark"] .il-trust span{color:rgba(245,235,215,.66)}
 html[data-theme="dark"] .il-trust .il-trust-dot{color:rgba(245,235,215,.3)}
+
+/* ============================================================
+   v20260716-2 — issue fixes: footer readability, nav search
+   inner box, and lab (Projection/Valuation) empty-state search.
+   ============================================================ */
+
+/* (5) Nav ticker search — kill the dark inner input box in dark mode.
+   The global `html[data-theme="dark"] input{background:#0C0E10}` rule was
+   painting a black rectangle inside the search pill. Higher specificity wins. */
+#main-nav .nav-search input,
+html[data-theme="dark"] #main-nav .nav-search input{
+  background:transparent!important;border:0!important;box-shadow:none!important;
+}
+
+/* (4) Footer — readable in both themes (footer bg is dark in both). */
+footer{
+  background:linear-gradient(180deg,#0b0c0e,#08090a)!important;
+  border-top:1px solid rgba(230,188,99,.16)!important;
+}
+footer .f-logo{color:#f0e6cf!important}
+footer .f-logo em{color:var(--brand-gold,#d9b35e)!important}
+footer .f-links a,
+footer .f-links .il-feedback-link{color:rgba(245,235,215,.82)!important;font-weight:500}
+footer .f-links a:hover,
+footer .f-links .il-feedback-link:hover{color:var(--brand-gold,#d9b35e)!important}
+footer .f-copy,
+footer .il-build{color:rgba(245,235,215,.6)!important}
+
+/* (3) Lab empty state — inline ticker search so users can model without
+   opening Research first. Tool surface is dark in both themes. */
+.lab-empty{padding:1.75rem 0 1rem;max-width:560px}
+.lab-empty-title{font:700 clamp(1.15rem,2.2vw,1.5rem)/1.2 var(--sans,'DM Sans');color:#f5ebd7;margin-bottom:6px}
+.lab-empty-sub{font:400 14px/1.55 var(--sans,'DM Sans');color:rgba(245,235,215,.62);margin-bottom:16px}
+.lab-empty-search{display:flex;gap:10px;flex-wrap:wrap}
+.lab-empty-search input{
+  flex:1 1 240px;min-width:0;padding:12px 15px;border-radius:12px;
+  font:600 15px var(--sans,'DM Sans');letter-spacing:.02em;
+  background:rgba(255,255,255,.05)!important;color:#f5ebd7!important;
+  border:1px solid rgba(217,179,94,.28)!important;outline:0;
+}
+.lab-empty-search input::placeholder{color:rgba(245,235,215,.4)!important}
+.lab-empty-search input:focus{border-color:var(--brand-gold,#d9b35e)!important;box-shadow:0 0 0 3px rgba(217,179,94,.16)!important}
+.lab-empty-search button{
+  flex:0 0 auto;padding:12px 20px;border-radius:12px;cursor:pointer;border:0;
+  font:700 14px var(--sans,'DM Sans');color:#1a1408;
+  background:linear-gradient(180deg,#e6c877,#d9b35e);transition:filter .16s,transform .16s;
+}
+.lab-empty-search button:hover{filter:brightness(1.06);transform:translateY(-1px)}
