@@ -8059,3 +8059,31 @@ footer .il-build{color:rgba(245,235,215,.6)!important}
   background:linear-gradient(180deg,#e6c877,#d9b35e);transition:filter .16s,transform .16s;
 }
 .lab-empty-search button:hover{filter:brightness(1.06);transform:translateY(-1px)}
+
+/* ============================================================
+   v20260716-3 — footer: force readable links in BOTH themes
+   (must out-specify html[data-theme="dark"] footer .f-links a)
+   and give a clean, visible divider from the page above.
+   ============================================================ */
+html footer,
+html[data-theme="dark"] footer{
+  background:#07080a!important;
+  border-top:1px solid rgba(217,179,94,.30)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05)!important;
+}
+html footer .f-logo,
+html[data-theme="dark"] footer .f-logo{color:#efe6d1!important}
+html footer .f-logo em,
+html[data-theme="dark"] footer .f-logo em{color:var(--brand-gold,#d9b35e)!important}
+html footer .f-links a,
+html footer .f-links .il-feedback-link,
+html[data-theme="dark"] footer .f-links a,
+html[data-theme="dark"] footer .f-links .il-feedback-link{
+  color:#e7dcc4!important;font-weight:600!important;opacity:1!important;
+}
+html footer .f-links a:hover,
+html[data-theme="dark"] footer .f-links a:hover{color:var(--brand-gold,#d9b35e)!important}
+html footer .f-copy,
+html footer .il-build,
+html[data-theme="dark"] footer .f-copy,
+html[data-theme="dark"] footer .il-build{color:rgba(231,220,196,.78)!important}
