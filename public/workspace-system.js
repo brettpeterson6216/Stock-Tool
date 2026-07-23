@@ -3,7 +3,7 @@
 
   const STORE = "il-workspace-v1";
   const LAYOUTS = "il-chart-layouts-v1";
-  const state = { tab: "thesis", theses: [], positions: [], watchlist: [], prices: {}, priceRequested: new Set(), providers: null, summary: null, portfolioProfile: null, conviction: 3, activationTracked: false };
+  const state = { tab: "review", theses: [], positions: [], watchlist: [], prices: {}, priceRequested: new Set(), thesisMkt: {}, thesisMktRequested: new Set(), providers: null, summary: null, portfolioProfile: null, conviction: 3, activationTracked: false };
 
   function read(key, fallback) { try { return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback)); } catch (_) { return fallback; } }
   function write(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch (_) {} }
@@ -106,8 +106,8 @@
     scroll.insertAdjacentHTML("beforeend", `<div class="app-section" id="sec-workspace"><div class="acc-body" id="body-workspace" style="display:none"><div class="il-ws-shell">
       <div class="il-ws-hero"><div class="il-ws-intro"><div class="il-ws-kicker">Decision dashboard</div><h2>Turn research into a reviewable decision.</h2><p>Continue the work that matters: test a thesis, understand exposure, and revisit decisions on schedule.</p></div><div class="il-ws-stat accent-blue"><span>Theses</span><strong id="il-ws-thesis-count">0</strong></div><div class="il-ws-stat accent-green"><span>Positions</span><strong id="il-ws-position-count">0</strong></div><div class="il-ws-stat accent-gold"><span>Cost basis</span><strong id="il-ws-invested">$0</strong></div><div class="il-ws-stat accent-red"><span>Reviews due</span><strong id="il-ws-review-count">0</strong></div></div>
       <div id="il-ws-activation"></div>
-      <div class="il-ws-tabs"><button class="il-ws-tab active" data-tab="thesis"><i class="ti ti-notes"></i>Thesis</button><button class="il-ws-tab" data-tab="portfolio"><i class="ti ti-chart-donut-3"></i>Portfolio</button><button class="il-ws-tab" data-tab="guide"><i class="ti ti-sparkles"></i>AI Portfolio Guide</button><button class="il-ws-tab" data-tab="watchlist"><i class="ti ti-star"></i>Watchlist</button><button class="il-ws-tab" data-tab="trust"><i class="ti ti-shield-check"></i>Data trust</button></div>
-      <div class="il-ws-panel active" data-panel="thesis"></div><div class="il-ws-panel" data-panel="portfolio"></div><div class="il-ws-panel" data-panel="guide"></div><div class="il-ws-panel" data-panel="watchlist"></div><div class="il-ws-panel" data-panel="trust"></div>
+      <div class="il-ws-tabs"><button class="il-ws-tab active" data-tab="review"><i class="ti ti-checkup-list"></i>Review</button><button class="il-ws-tab" data-tab="thesis"><i class="ti ti-notes"></i>Thesis</button><button class="il-ws-tab" data-tab="portfolio"><i class="ti ti-chart-donut-3"></i>Portfolio</button><button class="il-ws-tab" data-tab="guide"><i class="ti ti-sparkles"></i>AI Portfolio Guide</button><button class="il-ws-tab" data-tab="watchlist"><i class="ti ti-star"></i>Watchlist</button><button class="il-ws-tab" data-tab="trust"><i class="ti ti-shield-check"></i>Data trust</button></div>
+      <div class="il-ws-panel active" data-panel="review"></div><div class="il-ws-panel" data-panel="thesis"></div><div class="il-ws-panel" data-panel="portfolio"></div><div class="il-ws-panel" data-panel="guide"></div><div class="il-ws-panel" data-panel="watchlist"></div><div class="il-ws-panel" data-panel="trust"></div>
     </div></div></div>`);
     document.querySelector(".il-ws-tabs").addEventListener("click", event => {
       const tab = event.target.closest("[data-tab]")?.dataset.tab;
@@ -148,7 +148,7 @@
     document.getElementById("il-ws-position-count").textContent = state.positions.length;
     document.getElementById("il-ws-invested").textContent = money(invested);
     document.getElementById("il-ws-review-count").textContent = Number(state.summary?.dueReviews || 0);
-    renderActivation(); renderThesis(); renderPortfolio(); renderGuide(); renderWatchlist(); renderTrust(); renderHomeWatchlist();
+    renderActivation(); renderReview(); renderThesis(); renderPortfolio(); renderGuide(); renderWatchlist(); renderTrust(); renderHomeWatchlist();
   }
 
   function renderActivation() {
@@ -208,6 +208,144 @@
       sell_conditions: lines(document.getElementById("il-thesis-sell").value), bear_price: document.getElementById("il-thesis-bear").value,
       target_price: document.getElementById("il-thesis-target").value, review_date: document.getElementById("il-thesis-review").value, conviction: state.conviction };
     try { const saved = await persist("thesis", ticker, body); state.theses = [saved, ...state.theses.filter(v => v.ticker !== ticker)]; saveLocal(); track("thesis_saved", { ticker, has_review_date: Boolean(body.review_date) }); await refreshMemberSummary(); renderAll(); toastMsg(`${ticker} thesis saved`, "ok"); } catch (e) { toastMsg(e.message, "red"); }
+  }
+
+  // ── Decision Review: live tracking of every saved thesis against its own
+  //    target, bear case, and review date. This is the recurring reason to
+  //    return — it answers "what changed and what needs my attention now?". ──
+  function parseTs(value) {
+    if (!value) return null;
+    let s = String(value).trim();
+    if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(s)) s = s.replace(" ", "T") + "Z"; // SQLite UTC
+    else if (/^\d{4}-\d{2}-\d{2}$/.test(s)) s = s + "T00:00:00Z";
+    const t = new Date(s).getTime();
+    return Number.isFinite(t) ? t : null;
+  }
+  function pctText(v, sign) { return v == null || !Number.isFinite(v) ? "—" : (sign && v >= 0 ? "+" : "") + v.toFixed(1) + "%"; }
+  function todayUtcMs() { const d = new Date(); return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()); }
+
+  function computeReview(row) {
+    const mkt = state.thesisMkt[row.ticker] || {};
+    const price = Number.isFinite(mkt.price) ? mkt.price : (Number.isFinite(state.prices[row.ticker]) ? state.prices[row.ticker] : null);
+    const entry = Number.isFinite(mkt.entry) ? mkt.entry : null;
+    const target = Number.isFinite(Number(row.target_price)) && row.target_price !== null && row.target_price !== "" ? Number(row.target_price) : null;
+    const bear = Number.isFinite(Number(row.bear_price)) && row.bear_price !== null && row.bear_price !== "" ? Number(row.bear_price) : null;
+    const sincePct = price != null && entry != null && entry > 0 ? (price - entry) / entry * 100 : null;
+    const toTargetPct = price != null && target != null && price > 0 ? (target - price) / price * 100 : null;   // upside remaining
+    const cushionPct = price != null && bear != null && price > 0 ? (price - bear) / price * 100 : null;         // room above bear case
+    const reviewMs = parseTs(row.review_date);
+    const daysToReview = reviewMs != null ? Math.round((reviewMs - todayUtcMs()) / 86400000) : null;
+
+    const signals = [];
+    if (price != null && bear != null && price <= bear) signals.push({ level: "alert", urgency: 100, label: "Below bear case" });
+    if (daysToReview != null && daysToReview < 0) signals.push({ level: "alert", urgency: 92, label: "Review overdue " + Math.abs(daysToReview) + "d" });
+    if (price != null && target != null && price >= target) signals.push({ level: "good", urgency: 82, label: "At / above target" });
+    if (daysToReview != null && daysToReview >= 0 && daysToReview <= 7) signals.push({ level: "warn", urgency: 74, label: daysToReview === 0 ? "Review due today" : "Review due in " + daysToReview + "d" });
+    if (cushionPct != null && cushionPct >= 0 && cushionPct <= 7) signals.push({ level: "warn", urgency: 66, label: "Near bear case" });
+    if (toTargetPct != null && toTargetPct > 0 && toTargetPct <= 7) signals.push({ level: "warn", urgency: 58, label: "Near target" });
+    if (!row.review_date) signals.push({ level: "neutral", urgency: 30, label: "No review scheduled" });
+    signals.sort((a, b) => b.urgency - a.urgency);
+    const top = signals[0] || { level: "good", urgency: 10, label: "On track" };
+    return { row, price, entry, sincePct, target, bear, toTargetPct, cushionPct, daysToReview, top, urgency: top.urgency, asOf: mkt.asOf };
+  }
+
+  function reviewStatusText(r) {
+    if (r.daysToReview == null) return "No review set";
+    if (r.daysToReview < 0) return "Overdue " + Math.abs(r.daysToReview) + "d";
+    if (r.daysToReview === 0) return "Due today";
+    return "In " + r.daysToReview + "d";
+  }
+
+  function renderReview() {
+    const panel = document.querySelector('[data-panel="review"]');
+    if (!panel) return;
+    const theses = state.theses.filter(t => t.ticker);
+    if (!theses.length) {
+      panel.innerHTML = `<div class="il-ws-block"><div class="il-ws-empty il-ws-empty-rich"><i class="ti ti-checkup-list"></i><strong>Your decision review starts with one thesis.</strong><span>Save a company's thesis with a target, a bear case, and a review date. This tab then tracks every decision against the market and tells you what needs attention.</span><button class="il-ws-btn primary" data-review-newthesis>Write your first thesis</button></div></div>`;
+      panel.querySelector("[data-review-newthesis]")?.addEventListener("click", () => document.querySelector('.il-ws-tab[data-tab="thesis"]')?.click());
+      return;
+    }
+    const reviews = theses.map(computeReview).sort((a, b) => b.urgency - a.urgency);
+    const attention = reviews.filter(r => r.urgency >= 66);
+    const pricesReady = reviews.some(r => r.price != null);
+    const asOf = reviews.map(r => r.asOf).filter(Boolean).sort().slice(-1)[0];
+
+    const queueHtml = attention.length
+      ? `<div class="il-ws-queue">${attention.map(r => `<button class="il-ws-queue-row ${r.top.level}" data-open-review="${esc(r.row.ticker)}">
+          <span class="il-ws-signal ${r.top.level}">${esc(r.top.label)}</span>
+          <strong>${esc(r.row.ticker)}</strong>
+          <span class="il-ws-queue-price">${money(r.price)}</span>
+          <span class="il-ws-queue-hint">${r.top.level === "alert" ? "Re-check the thesis and sell conditions" : r.top.level === "good" ? "Target reached — decide to hold or trim" : "Review the evidence on schedule"}</span>
+          <i class="ti ti-arrow-right"></i></button>`).join("")}</div>`
+      : `<div class="il-ws-allclear"><i class="ti ti-circle-check"></i><div><strong>No decisions need attention right now.</strong><span>Every thesis is above its bear case and no review is due within 7 days. Come back when the evidence moves.</span></div></div>`;
+
+    const rows = reviews.map(r => {
+      const since = r.sincePct == null ? "—" : `<b class="${r.sincePct >= 0 ? "pos" : "neg"}">${pctText(r.sincePct, true)}</b>`;
+      const toTarget = r.toTargetPct == null ? "—" : (r.toTargetPct <= 0 ? `<b class="pos">reached</b>` : `${pctText(r.toTargetPct)} up`);
+      const cushion = r.cushionPct == null ? "—" : (r.cushionPct < 0 ? `<b class="neg">breached</b>` : `${pctText(r.cushionPct)} room`);
+      const revClass = r.daysToReview == null ? "" : r.daysToReview < 0 ? "neg" : r.daysToReview <= 7 ? "warn" : "";
+      return `<div class="il-ws-decision">
+        <div class="il-ws-dec-head"><div><strong>${esc(r.row.ticker)}</strong><span>${esc(r.row.status || "watching")} · conviction ${esc(String(r.row.conviction || 3))}/5</span></div><span class="il-ws-signal ${r.top.level}">${esc(r.top.label)}</span></div>
+        <div class="il-ws-dec-metrics">
+          <div class="il-ws-metric"><label>Price</label><span>${money(r.price)}</span></div>
+          <div class="il-ws-metric"><label>Since thesis</label><span>${since}</span></div>
+          <div class="il-ws-metric"><label>To target${r.target != null ? " · " + money(r.target) : ""}</label><span>${toTarget}</span></div>
+          <div class="il-ws-metric"><label>Bear cushion${r.bear != null ? " · " + money(r.bear) : ""}</label><span>${cushion}</span></div>
+          <div class="il-ws-metric"><label>Review</label><span class="${revClass}">${reviewStatusText(r)}</span></div>
+        </div>
+        <div class="il-ws-dec-actions"><button class="il-ws-btn" data-open-review="${esc(r.row.ticker)}"><i class="ti ti-external-link"></i>Open decision</button><button class="il-ws-btn" data-edit-review="${esc(r.row.ticker)}"><i class="ti ti-pencil"></i>Update thesis</button></div>
+      </div>`;
+    }).join("");
+
+    const dueCount = reviews.filter(r => r.daysToReview != null && r.daysToReview <= 7).length;
+    panel.innerHTML = `<div class="il-ws-review">
+      <div class="il-ws-review-head"><div><div class="il-ws-kicker">Decision review</div><h3>What changed and what needs your attention</h3><p>Every saved thesis, tracked against its own target, bear case, and review date. ${pricesReady ? "Latest available prices" + (asOf ? " · updated " + relativeAge(asOf).replace("Checked ", "") : "") : "Loading latest prices…"}.</p></div>
+        <div class="il-ws-review-actions">${dueCount ? `<button class="il-ws-btn primary" id="il-review-email"><i class="ti ti-mail"></i>Email my review list</button>` : ""}<button class="il-ws-btn" id="il-review-refresh"><i class="ti ti-refresh"></i>Refresh prices</button></div>
+      </div>
+      <div class="il-ws-review-kicker-row"><span class="il-ws-kicker">Needs attention${attention.length ? " · " + attention.length : ""}</span></div>
+      ${queueHtml}
+      <div class="il-ws-review-kicker-row"><span class="il-ws-kicker">All decisions · ${reviews.length}</span></div>
+      <div class="il-ws-decisions">${rows}</div>
+      <div class="il-ws-asof"><i class="ti ti-info-circle"></i>Prices are the latest available from market data providers, not a real-time trading feed. Signals compare the current price to the target and bear case you saved — they are not advice.</div>
+    </div>`;
+
+    panel.querySelectorAll("[data-open-review]").forEach(b => b.onclick = () => openTicker(b.dataset.openReview, null));
+    panel.querySelectorAll("[data-edit-review]").forEach(b => b.onclick = () => { const input = document.getElementById("main-ticker"); if (input) input.value = b.dataset.editReview; state.tab = "thesis"; document.querySelector('.il-ws-tab[data-tab="thesis"]')?.click(); renderThesis(); });
+    panel.querySelector("#il-review-refresh")?.addEventListener("click", () => { state.thesisMktRequested.clear(); state.thesisMkt = {}; refreshThesisMarketData(); toastMsg("Refreshing latest prices…", "ok"); });
+    panel.querySelector("#il-review-email")?.addEventListener("click", emailReviews);
+    refreshThesisMarketData();
+  }
+
+  async function refreshThesisMarketData() {
+    const pending = state.theses.filter(t => t.ticker && !state.thesisMktRequested.has(t.ticker)).slice(0, 25);
+    if (!pending.length) return;
+    pending.forEach(t => state.thesisMktRequested.add(t.ticker));
+    await Promise.all(pending.map(async t => {
+      try {
+        const createdMs = parseTs(t.created_at) || Date.now();
+        const ageDays = Math.max(0, (Date.now() - createdMs) / 86400000);
+        const range = ageDays <= 25 ? "1mo" : ageDays <= 80 ? "3mo" : ageDays <= 170 ? "6mo" : ageDays <= 330 ? "1y" : ageDays <= 700 ? "2y" : ageDays <= 1800 ? "5y" : "max";
+        const r = await fetch(`/api/quote/${encodeURIComponent(t.ticker)}?range=${range}&preview=1`, { credentials: "same-origin" });
+        if (!r.ok) { state.thesisMkt[t.ticker] = { price: null }; return; }
+        const d = await r.json();
+        const res = d?.chart?.result?.[0];
+        const meta = res?.meta || d?.meta;
+        const price = Number(meta?.regularMarketPrice ?? meta?.chartPreviousClose);
+        const ts = res?.timestamp || [];
+        const closes = res?.indicators?.quote?.[0]?.close || [];
+        const createdSec = createdMs / 1000;
+        let entry = null, best = Infinity;
+        for (let i = 0; i < ts.length; i++) {
+          const c = closes[i];
+          if (c == null || !Number.isFinite(c)) continue;
+          const diff = Math.abs(ts[i] - createdSec);
+          if (diff < best) { best = diff; entry = Number(c); }
+        }
+        state.thesisMkt[t.ticker] = { price: Number.isFinite(price) ? price : entry, entry, asOf: new Date().toISOString() };
+        if (Number.isFinite(price)) state.prices[t.ticker] = price;
+      } catch (_) { state.thesisMkt[t.ticker] = { price: null }; }
+    }));
+    renderReview();
   }
 
   function formBlock(kind) {
