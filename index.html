@@ -101,7 +101,7 @@
 <script defer src="/research-system.js?v=20260716-1"></script>
 <script defer src="/product-system.js?v=20260722-1"></script>
 <script defer src="/workspace-system.js?v=20260722-1"></script>
-<script defer src="/tool-launch.js?v=20260716-1"></script>
+<script defer src="/tool-launch.js?v=20260722-1"></script>
 <link href="/legacy-app.css?v=20260722-2" rel="stylesheet">
 <link href="/premium.css?v=20260713-3" rel="stylesheet">
 </head>
@@ -2465,6 +2465,7 @@ function openSection(id, skipProCheck) {
   else if (id === 'dcf')         { mountValuationLab(); }
   else if (id === 'reports')     { setTimeout(renderSavedAnalyses, 100); }
   else if (id === 'education')   { setTimeout(function(){ var c=document.querySelector('.edu-path[data-lesson]'); if(c && typeof openLesson==='function' && !document.querySelector('#edu-lesson-panel .edu-lesson-content')) openLesson(c); }, 30); }
+  else if (id === 'analyze')     { if(!S.ticker){ if(typeof loadFeaturedGridOnce==='function') loadFeaturedGridOnce(); if(typeof window.renderToolLaunch==='function') window.renderToolLaunch(); } }
   if (document.getElementById('view-tool')?.style.display !== 'none') {
     history.replaceState(null, '', '/?view=tool&section=' + encodeURIComponent(id));
   }
@@ -6344,8 +6345,15 @@ function initializeHomeDashboard(){
   loadHomeInsights();
   loadPortfolioSparklines();
 }
-if(new URLSearchParams(window.location.search).get('view')!=='tool') initializeHomeDashboard();
-else loadFeaturedGrid(); // direct tool-view loads still need the "Popular starting points" cards
+// Load the tool's "Popular starting points" once, when it is actually needed.
+let _featuredGridLoaded=false;
+function loadFeaturedGridOnce(){ if(_featuredGridLoaded) return; _featuredGridLoaded=true; loadFeaturedGrid(); }
+// Do NOT eagerly load the hidden market dashboard on the landing page — that fired a
+// storm of quote/index/movers/news requests for content the visitor cannot see and was
+// the main driver of slow first paint. Market data now loads when the market page is
+// opened (showMarketPage → initializeHomeDashboard); the featured grid loads when the
+// analyze tool opens (openSection). (audit P1-01)
+if(new URLSearchParams(window.location.search).get('view')==='tool') loadFeaturedGridOnce();
 
 // Prime the analysis limit counter for free/guest users
 (async () => {

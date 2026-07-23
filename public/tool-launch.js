@@ -59,9 +59,15 @@
         return '<a class="tw-recent-card" href="#" onclick="if(typeof heroLoadTicker===\'function\')heroLoadTicker(\'' + esc(a.ticker) + "');return false;\"><span class=\"tw-recent-tk\">" + esc(a.ticker) + '</span><span class="tw-recent-ttl">' + ttl + "</span></a>";
       }).join("") + "</div>";
   }
+  var _stripLoaded = false;
   function render() {
     if (!document.getElementById("tw-market") && !document.getElementById("tw-launch")) return;
-    loadMarketStrip(); renderLaunch(); renderContinue();
+    // Only fetch the index strip when the tool view is actually visible — never on the
+    // hidden landing page, where #tw-market exists but isn't shown. (audit P1-01)
+    var vt = document.getElementById("view-tool");
+    var toolVisible = vt && vt.style.display !== "none";
+    if (toolVisible && !_stripLoaded) { _stripLoaded = true; loadMarketStrip(); }
+    renderLaunch(); renderContinue();
   }
   window.renderToolLaunch = render;
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", render); else render();
