@@ -99,8 +99,10 @@
 <script defer src="/projection-lab.js?v=20260713-3"></script>
 <script defer src="/valuation-lab.js?v=20260713-3"></script>
 <script defer src="/research-system.js?v=20260716-1"></script>
+<script defer src="/product-system.js?v=20260722-1"></script>
+<script defer src="/workspace-system.js?v=20260722-1"></script>
 <script defer src="/tool-launch.js?v=20260716-1"></script>
-<link href="/legacy-app.css?v=20260716-5" rel="stylesheet">
+<link href="/legacy-app.css?v=20260722-2" rel="stylesheet">
 <link href="/premium.css?v=20260713-3" rel="stylesheet">
 </head>
 <body>
@@ -557,13 +559,17 @@
         }
         const _mi = document.getElementById('main-ticker');
         if (_mi) _mi.value = _clean;
-        history.replaceState(null, '', '/?view=tool&section=analyze');
+        // Honor the requested tool section (projection, financials, …) instead of
+        // always forcing analyze. fetchAndRender re-mounts whichever section is open.
+        const _reqSec = _params.get('section');
+        const _targetSec = (_reqSec && document.getElementById('sec-' + _reqSec)) ? _reqSec : 'analyze';
+        history.replaceState(null, '', '/?view=tool&section=' + encodeURIComponent(_targetSec));
         (function _openTicker(attempt) {
           if (typeof openSection !== 'function' || typeof fetchAndRender !== 'function') {
             if (attempt < 100) setTimeout(() => _openTicker(attempt + 1), 50);
             return;
           }
-          navGoTo('analyze');
+          navGoTo(_targetSec);
           fetchAndRender();
         })(0);
       })();
@@ -665,7 +671,7 @@
       <div class="il-trust" aria-label="Data sources and terms">
         <span><i class="ti ti-file-certificate"></i>SEC EDGAR filings</span>
         <span class="il-trust-dot" aria-hidden="true">·</span>
-        <span><i class="ti ti-broadcast"></i>Live exchange data</span>
+        <span><i class="ti ti-broadcast"></i>Latest available market data</span>
         <span class="il-trust-dot" id="il-trust-nocard-dot" aria-hidden="true">·</span>
         <span id="il-trust-nocard"><i class="ti ti-credit-card-off"></i>No credit card to start</span>
       </div>
@@ -851,7 +857,7 @@
             <div class="mo-idx-chg" id="ri-sp-c">—</div>
           </div>
           <div class="mo-idx-item">
-            <div class="mo-idx-top"><div class="mo-idx-dot" style="background:var(--chart-price)"></div><div class="mo-idx-name">Nasdaq 100</div></div>
+            <div class="mo-idx-top"><div class="mo-idx-dot" style="background:var(--chart-price)"></div><div class="mo-idx-name">Nasdaq Composite</div></div>
             <div class="mo-idx-price" id="ri-nq">—</div>
             <div class="mo-idx-chg" id="ri-nq-c">—</div>
           </div>
@@ -924,10 +930,10 @@
 
       </div>
 
-      <!-- MIDDLE top: Your Watchlist -->
+      <!-- MIDDLE top: Popular watchlist (curated, not personalized) -->
       <div class="hg-watch hc">
         <div class="hc-hdr">
-          <span class="hc-title">Your Watchlist</span>
+          <span class="hc-title">Popular watchlist</span>
           <a class="hc-link" href="/?view=tool&amp;section=workspace" onclick="navGoTo('workspace');return false;">Open watchlist &rarr;</a>
         </div>
         <table class="wl-table">
@@ -3191,6 +3197,8 @@ function updateLimitUI(remaining, limit, plan) {
 }
 
 function fmtBig(n) { if(!n) return '—'; if(n>=1e12) return `$${(n/1e12).toFixed(2)}T`; if(n>=1e9) return `$${(n/1e9).toFixed(2)}B`; if(n>=1e6) return `$${(n/1e6).toFixed(2)}M`; return `$${n.toLocaleString()}`; }
+// Share counts (volume) — never prefixed with a currency symbol.
+function fmtShares(n) { if(!n) return '—'; if(n>=1e12) return `${(n/1e12).toFixed(2)}T`; if(n>=1e9) return `${(n/1e9).toFixed(2)}B`; if(n>=1e6) return `${(n/1e6).toFixed(2)}M`; if(n>=1e3) return `${(n/1e3).toFixed(1)}K`; return `${n.toLocaleString()}`; }
 function fmtPct(n) { return n==null?'—':`${n>=0?'+':''}${n.toFixed(2)}%`; }
 function alignQuoteSeries(result) {
   const q=result?.indicators?.quote?.[0]||{};
@@ -3265,6 +3273,38 @@ function sma(data,p) {
     const window=data.slice(i-p+1,i+1);
     return window.every(Number.isFinite) ? window.reduce((a,b)=>a+b,0)/p : null;
   });
+}
+// ── MA/Bollinger look-back: compute overlays from a ~2y daily series so a
+// 50-/200-DAY average spans the whole visible window (even a 1-month view needs
+// 50 prior days). Silently falls back to visible-window SMA if unavailable. ──
+function _alignToVisible(fullTs, fullVals, visibleTs){
+  return visibleTs.map(function(vt){ var lo=0,hi=fullTs.length-1,idx=-1; while(lo<=hi){var mid=(lo+hi)>>1; if(fullTs[mid]<=vt){idx=mid;lo=mid+1;}else hi=mid-1;} return idx>=0?fullVals[idx]:null; });
+}
+function _lookbackDaily(){
+  var lb=window.S&&S.maLookback; if(!lb||!lb.ts||lb.ts.length<60) return null;
+  var gaps=[]; for(var i=1;i<Math.min(lb.ts.length,40);i++) gaps.push(lb.ts[i]-lb.ts[i-1]);
+  gaps.sort(function(a,b){return a-b;}); var med=gaps[gaps.length>>1]||0;
+  return (med>0 && med<86400*2.5) ? lb : null;
+}
+function _lbSeries(kind,period){
+  var lb=_lookbackDaily(); if(!lb) return null;
+  lb._cache=lb._cache||{}; var key=kind+period;
+  if(!lb._cache[key]) lb._cache[key]= (kind==='bb') ? bollinger(lb.close,period) : sma(lb.close,period);
+  return {ts:lb.ts, vals:lb._cache[key]};
+}
+async function ensureMALookback(ticker){
+  try{
+    if(window.S && S.maLookback && S.maLookback.ticker===ticker) return;
+    var r=await fetch('/api/quote/'+encodeURIComponent(ticker)+'?range=2y',{credentials:'same-origin'});
+    if(!r.ok) return;
+    var d=await r.json(); var res=d&&d.chart&&d.chart.result&&d.chart.result[0]; if(!res) return;
+    var ts=res.timestamp||[], cl=(res.indicators&&res.indicators.quote&&res.indicators.quote[0]&&res.indicators.quote[0].close)||[];
+    var T=[],C=[]; var n=Math.min(ts.length,cl.length);
+    for(var i=0;i<n;i++){ if(cl[i]!=null&&Number.isFinite(cl[i])){ T.push(ts[i]); C.push(Number(cl[i])); } }
+    if(C.length<60) return;
+    S.maLookback={ticker:ticker, ts:T, close:C, _cache:{}};
+    if(S.ticker===ticker && document.getElementById('price-chart')){ try{ rebuildPriceChart(); }catch(e){} }
+  }catch(e){ /* fallback to visible-window SMA */ }
 }
 function rsi(c,p=14) {
   return c.map((_,i)=>{ if(i<p)return null; let g=0,l=0; for(let j=i-p+1;j<=i;j++){const d=c[j]-c[j-1]; if(d>0)g+=d; else l-=d;} const rs=g/(l||.0001); return 100-100/(1+rs); });
@@ -3714,6 +3754,7 @@ async function fetchAndRender() {
     const result=await yahooFetch(ticker,S.range);
     S.ticker=ticker; S.data=result; S.analystTarget=null;
     renderStock(result,ticker);
+    ensureMALookback(ticker);
     track('analyze_completed', { ticker });
     toast(`${ticker} loaded ✓`,'green'); const _fg=document.getElementById('featured-grid'); if(_fg) _fg.style.display='none'; const _tw=document.getElementById('tool-welcome'); if(_tw) _tw.style.display='none'; const _fl=document.getElementById('fg-label'); if(_fl) _fl.style.display='none'; const _tx=document.getElementById('tw-extra'); if(_tx) _tx.style.display='none';
   } catch(e) {
@@ -3775,7 +3816,7 @@ function renderStock(result, ticker) {
     {l:'52W High',v:h52?`$${h52.toFixed(2)}`:'—',s:h52?fmtPct((price-h52)/h52*100)+' from high':'',c:h52?(price/h52<0.8?'dn':''):''},
     {l:'52W Low',v:l52?`$${l52.toFixed(2)}`:'—',s:l52?fmtPct((price-l52)/l52*100)+' from low':'',c:''},
     {l:'Market Cap',v:fmtBig(meta.marketCap),s:'',c:''},
-    {l:'Volume',v:fmtBig(meta.regularMarketVolume),s:meta.averageDailyVolume3Month?`${(meta.regularMarketVolume/meta.averageDailyVolume3Month).toFixed(2)}x avg`:'',c:''},
+    {l:'Volume',v:meta.regularMarketVolume!=null?`${fmtShares(meta.regularMarketVolume)} sh`:'—',s:meta.averageDailyVolume3Month?`${(meta.regularMarketVolume/meta.averageDailyVolume3Month).toFixed(2)}x avg`:'',c:''},
     {l:'RSI (14)',v:rsiNow?rsiNow.toFixed(1):'—',s:rsiNow?(rsiNow<30?'Oversold':rsiNow>70?'Overbought':'Neutral'):'',c:rsiNow?(rsiNow<30?'up':rsiNow>70?'dn':''):''},
     {l:'MA 50',v:ma50Now?`$${ma50Now.toFixed(2)}`:'—',s:ma50Now?(price>ma50Now?'Above (Bullish)':'Below (Bearish)'):'',c:ma50Now?(price>ma50Now?'up':'dn'):''},
     {l:'MA 200',v:ma200Now?`$${ma200Now.toFixed(2)}`:'—',s:ma200Now?(price>ma200Now?'Above (Bullish)':'Below (Bearish)'):'',c:ma200Now?(price>ma200Now?'up':'dn'):''},
@@ -4346,7 +4387,7 @@ async function loadMarketOverview(range,btn){
   if(btn){document.querySelectorAll('.mo-tab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
   const IDXS=[
     {t:'^GSPC', col:'#148BFF', vi:'ri-sp', vc:'ri-sp-c', label:'S&P 500'},
-    {t:'^IXIC', col:'#00A85A', vi:'ri-nq', vc:'ri-nq-c', label:'Nasdaq 100'},
+    {t:'^IXIC', col:'#00A85A', vi:'ri-nq', vc:'ri-nq-c', label:'Nasdaq Composite'},
     {t:'^DJI', col:'#8B5CF6', vi:'ri-dj', vc:'ri-dj-c', label:'Dow Jones'}
   ];
   // Map range to correct interval for intraday granularity
@@ -4497,7 +4538,7 @@ function fetchBreadth(results){
     if(volEl)volEl.textContent='—';
     if(volSub)volSub.textContent='NYSE volume';
     const ts=document.getElementById('mo-timestamp');
-    if(ts)ts.textContent=`Market data as of ${new Date().toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true})} ET`;
+    if(ts)ts.textContent=`Market data as of ${new Date().toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit',hour12:true,timeZone:'America/New_York',timeZoneName:'short'})}`;
   }catch(_){}
   // VIX — live from Finnhub via our own server
   fetch('/api/quote/%5EVIX?range=1d&preview=1',{credentials:'same-origin'}).then(r=>r.ok?r.json():null).catch(()=>null).then(d=>{
@@ -4855,8 +4896,14 @@ function buildPriceChart(result,closes,timestamps) {
     if(_multiYear)return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'}).replace(', '," '");
     return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
   });
-  syncIndicatorAvailability(vc.length);
-  const ma50v=sma(vc,50), ma200v=sma(vc,200), bbv=bollinger(vc,20);
+  const _lbD=_lookbackDaily();
+  syncIndicatorAvailability(_lbD ? Math.max(vc.length,_lbD.close.length) : vc.length);
+  let ma50v, ma200v, bbv;
+  { const _s50=_lbSeries('sma',50), _s200=_lbSeries('sma',200), _sbb=_lbSeries('bb',20);
+    ma50v  = _s50  ? _alignToVisible(_s50.ts,_s50.vals,_tsArr)   : sma(vc,50);
+    ma200v = _s200 ? _alignToVisible(_s200.ts,_s200.vals,_tsArr) : sma(vc,200);
+    bbv    = _sbb  ? _alignToVisible(_sbb.ts,_sbb.vals,_tsArr).map(x=>x||{u:null,l:null,mid:null}) : bollinger(vc,20);
+  }
   const hp={pointRadius:0,pointHoverRadius:6,pointHoverBorderWidth:2,pointHoverBorderColor:'#fff'};
   const fillGrad=ctx=>{const h=ctx.chart.chartArea?.bottom||260;const g=ctx.chart.ctx.createLinearGradient(0,0,0,h);g.addColorStop(0,colorAlpha(p.price,.28));g.addColorStop(.55,colorAlpha(p.price,.10));g.addColorStop(1,colorAlpha(p.price,0));return g;};
   const strongGrad=ctx=>{const h=ctx.chart.chartArea?.bottom||260;const g=ctx.chart.ctx.createLinearGradient(0,0,0,h);g.addColorStop(0,colorAlpha(p.price,.40));g.addColorStop(.62,colorAlpha(p.price,.13));g.addColorStop(1,colorAlpha(p.price,.02));return g;};
@@ -4872,9 +4919,9 @@ function buildPriceChart(result,closes,timestamps) {
     ds=[{label:'Price',data:vc,borderColor:p.price,borderWidth:2.4,...hp,pointHoverBackgroundColor:p.price,fill:false,tension:.22,order:10}];
   }
   const lineType = S.chartType==='candle' ? {type:'line'} : {};
-  if(S.inds.ma50&&vc.length>=INDICATOR_REQUIREMENTS.ma50.bars)  ds.push({...lineType,label:'50D average', data:ma50v, borderColor:p.ma50,borderWidth:2,...hp,pointHoverBackgroundColor:p.ma50,fill:false,tension:.2,order:9});
-  if(S.inds.ma200&&vc.length>=INDICATOR_REQUIREMENTS.ma200.bars) ds.push({...lineType,label:'200D average',data:ma200v,borderColor:p.ma200,borderWidth:2,...hp,pointHoverBackgroundColor:p.ma200,fill:false,tension:.2,order:8});
-  if(S.inds.bb&&vc.length>=INDICATOR_REQUIREMENTS.bb.bars) {
+  if(S.inds.ma50&&ma50v.some(v=>v!=null))  ds.push({...lineType,label:'50D average', data:ma50v, borderColor:p.ma50,borderWidth:2,...hp,pointHoverBackgroundColor:p.ma50,fill:false,tension:.2,order:9});
+  if(S.inds.ma200&&ma200v.some(v=>v!=null)) ds.push({...lineType,label:'200D average',data:ma200v,borderColor:p.ma200,borderWidth:2,...hp,pointHoverBackgroundColor:p.ma200,fill:false,tension:.2,order:8});
+  if(S.inds.bb&&bbv.some(x=>x&&x.u!=null)) {
     ds.push({...lineType,label:'Upper band',data:bbv.map(x=>x.u),borderColor:colorAlpha(p.bands,.62),borderWidth:1,pointRadius:0,fill:false,tension:.2,order:7,borderDash:[4,3]});
     ds.push({...lineType,label:'Lower band',data:bbv.map(x=>x.l),borderColor:colorAlpha(p.bands,.62),borderWidth:1,pointRadius:0,fill:false,tension:.2,order:6,borderDash:[4,3]});
   }

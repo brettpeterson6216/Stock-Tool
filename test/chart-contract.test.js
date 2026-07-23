@@ -54,7 +54,7 @@ test("mobile chart headers reserve room for controls and explain unavailable ind
   assert.match(html, /function syncIndicatorAvailability\(barCount\)/);
   assert.match(html, /50D Avg.*bars:50|ma50:\s*\{\s*bars:50/);
   assert.match(html, /ma200:\{\s*bars:200/);
-  assert.match(html, /S\.inds\.ma50&&vc\.length>=INDICATOR_REQUIREMENTS\.ma50\.bars/);
+  assert.match(html, /S\.inds\.ma50&&ma50v\.some\(v=>v!=null\)/);
   assert.match(htmlAndLegacyCss, /\.g2\{grid-template-columns:1fr!important\}/);
   assert.match(htmlAndLegacyCss, /\.chart-wrap \.chart-header \.ind-row,\.chart-wrap \.chart-header \.range-pills\{display:none!important\}/);
   assert.match(htmlAndLegacyCss, /\.chart-exp-btn\{\s*position:static/);
@@ -113,8 +113,8 @@ test("primary navigation avoids duplicate tool destinations", () => {
   assert.match(html, /id="nav-analyze" class="nav-tab"[^>]*>Research</);
   assert.match(html, /<div class="sb-group-label">Research<\/div>/);
   assert.match(html, /<span class="sb-item-label">Chart<\/span>/);
-  assert.match(html, /Start with a company/);
-  assert.match(html, /Load a ticker, read the evidence, model the range, then save a reviewable thesis\./);
+  assert.match(html, /Research any company with a process you can repeat\./);
+  assert.match(html, /Search a company to begin, or start with a popular name below\./);
   assert.match(html, /Popular starting points/);
 });
 

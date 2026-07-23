@@ -2389,6 +2389,51 @@ body.has-verif-banner { padding-top:calc(42px + env(safe-area-inset-top, 0px)); 
   }
 }
 
+/* ── Tablet band (641–1024px): the horizontal link strip needs ~1170px to fit
+   all destinations + search + account cluster, so below that it collapses into a
+   hidden-scroll sliver. Use the same complete bottom navigation phones get across
+   the whole 600–1024px range the audit requires. Content/tool layout stays
+   desktop (the left sidebar remains the in-tool switcher). (audit P0-03) ── */
+@media (min-width:641px) and (max-width:1024px){
+  #main-nav #nav-links,
+  #main-nav[data-view="tool"] #nav-links{ display:none !important; }
+  .mobile-bottom-nav{
+    display:flex !important;
+    position:fixed; top:auto; bottom:0; left:0; right:0;
+    width:100%; max-width:100vw; height:58px;
+    background:var(--card);
+    border-top:1px solid var(--border2);
+    box-shadow:0 -8px 24px rgba(10,12,14,.06);
+    z-index:2000; align-items:stretch;
+    padding-left:env(safe-area-inset-left, 0px);
+    padding-right:env(safe-area-inset-right, 0px);
+    padding-bottom:env(safe-area-inset-bottom, 0px);
+  }
+  .mbn-item{
+    flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:3px; color:var(--text5); text-decoration:none; font-size:.7rem; font-weight:600;
+    letter-spacing:.03em; cursor:pointer; border:none; background:transparent;
+    font-family:var(--sans); padding:.4rem 0; -webkit-tap-highlight-color:transparent; transition:color .14s;
+  }
+  .mbn-item i{ font-size:20px; }
+  .mbn-item.mbn-active{ color:var(--gold, #C6A052); }
+  .mbn-item:active{ opacity:.7; }
+  .mobile-more-menu{
+    position:fixed; bottom:58px; left:0; right:0;
+    background:var(--panel); border-top:1px solid var(--border2);
+    z-index:1999;
+    padding:.75rem max(.75rem, env(safe-area-inset-right)) calc(.75rem + env(safe-area-inset-bottom,0px)) max(.75rem, env(safe-area-inset-left));
+    border-radius:16px 16px 0 0; box-shadow:0 -8px 30px rgba(0,0,0,.18);
+  }
+  .mobile-more-menu.open{ display:block !important; }
+  .mmenu-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:.5rem; }
+  .mmenu-item i{ font-size:18px; color:var(--gold,.8); opacity:.8; }
+  .mmenu-close{ display:flex; justify-content:center; padding:.5rem 0 .25rem; margin-bottom:.5rem; }
+  .mmenu-close-bar{ width:36px; height:4px; background:var(--border3); border-radius:2px; }
+  .hs-main{ padding-bottom:62px; }
+  .app-content-scroll{ padding-bottom:62px; }
+}
+
 @media(max-width:480px){
   .home-feat-strip { grid-template-columns:1fr !important; }
   .hh-title { font-size:1.3rem !important; }
