@@ -4,7 +4,7 @@
 
 **Scope:** Local production candidate in `C:\Users\clash\Downloads\Stock Tool`
 
-**Deployment status:** Not deployed to the public site
+**Deployment status:** Deployed to production on commit `7e3198b` on July 25, 2026
 **Primary model:** LensScore 0.6.0
 
 ## Executive decision
@@ -22,7 +22,7 @@ That thesis is implemented as:
 
 This is the right product direction. The prior experience exposed many tools without a clear decision hierarchy. LensScore creates the hierarchy, keeps the evidence inspectable, and gives the brand a defensible product concept that is not a copy of another creator’s indicator.
 
-The local build is materially stronger and is suitable for controlled internal QA. It is **not yet appropriate for public performance claims or a blind production launch**. The remaining launch work is operational and validation-oriented: configure production providers, monitor their coverage, acquire or reconstruct point-in-time fundamentals for full LensValue backtesting, and complete real-device mobile QA.
+The production build is materially stronger and is now deployed as a monitored release candidate. It is **not yet appropriate for public predictive-performance claims**. The remaining work is validation-oriented: monitor production-provider coverage, acquire or reconstruct point-in-time fundamentals for full LensValue backtesting, and complete physical-device mobile QA.
 
 ## What was implemented
 
@@ -352,4 +352,4 @@ The differentiator is:
 
 The core product idea is now clear and technically present. LensScore is understandable, brandable, responsive to valuation, independent across time horizons, and grounded in live reported evidence. The most serious previous trust defects—synthetic-looking fallbacks, missing provenance, stale-period ratio mixing, misleading dark-pool language, and a score that barely reacted to a halved entry price—have been corrected locally.
 
-The remaining gap is not another redesign. It is disciplined release hardening and evidence. Launch the feature only after the production providers and mobile/browser checks pass; market the model’s decision framework now, but not historical predictive performance until the full point-in-time validation exists.
+The remaining gap is not another redesign. It is disciplined post-deployment monitoring and evidence. Production browser and mobile-viewport checks pass; keep the live feature monitored and market the decision framework, but not historical predictive performance until the full point-in-time validation exists.
