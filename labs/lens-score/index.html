@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="description" content="LensScore combines independent long-term value and tactical setup scores into one transparent 0–10 stock buyability metric.">
+  <meta property="og:title" content="LensScore · Implied Lens">
+  <meta property="og:description" content="See business quality, valuation, support zones, trend, momentum, risk, and source dates in one transparent stock score.">
+  <meta property="og:type" content="website">
+  <title>LensScore · Implied Lens</title>
+  <link rel="icon" href="/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/__lab/lens-score/assets/styles.css">
+  <script defer src="/__lab/lens-score/assets/lens-score-engine.js"></script>
+  <script defer src="/__lab/lens-score/assets/app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#lab-main">Skip to LensScore analysis</a>
+
+  <header class="topbar">
+    <div class="brand">
+      <img src="/logo.svg" alt="" width="34" height="34">
+      <div>
+        <strong>Implied<span>Lens</span></strong>
+        <small>LensScore Research</small>
+      </div>
+    </div>
+    <div class="lab-status" aria-label="Data status">
+      <span class="status-dot"></span>
+      Reported data · production candidate
+    </div>
+    <div class="topbar-actions">
+      <a class="icon-button" href="/?view=tool&amp;section=analyze" aria-label="Return to the Implied Lens research workspace">
+        <span aria-hidden="true">←</span>
+        <span class="action-label">Workspace</span>
+      </a>
+      <button class="icon-button" id="theme-button" type="button" aria-label="Switch color theme">
+        <span aria-hidden="true">◐</span>
+        <span class="action-label">Theme</span>
+      </button>
+      <button class="icon-button" id="methodology-button" type="button" aria-haspopup="dialog">
+        <span aria-hidden="true">ⓘ</span>
+        <span class="action-label">How it works</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="lab-main">
+    <section class="search-shell" aria-labelledby="lab-title">
+      <div>
+        <p class="eyebrow">One answer from all the evidence</p>
+        <h1 id="lab-title">Is this stock <em>buyable right now?</em></h1>
+        <p class="intro">LensScore turns company strength, price, chart signals and risk into one score. Zero is a severe risk profile; ten is an exceptional opportunity with both lenses aligned.</p>
+      </div>
+      <form class="ticker-form" id="ticker-form">
+        <label for="ticker-input">Company or ticker</label>
+        <div class="ticker-control">
+          <input id="ticker-input" name="ticker" value="AAPL" maxlength="10" autocomplete="off" spellcheck="false">
+          <button type="submit">Analyze</button>
+        </div>
+        <div class="quick-tickers" aria-label="Example tickers">
+          <button type="button" data-ticker="AAPL">AAPL</button>
+          <button type="button" data-ticker="MSFT">MSFT</button>
+          <button type="button" data-ticker="NVDA">NVDA</button>
+          <button type="button" data-ticker="TSLA">TSLA</button>
+        </div>
+      </form>
+    </section>
+
+    <div class="notice" id="data-notice" role="status" aria-live="polite">
+      Loading local market data…
+    </div>
+
+    <nav class="company-nav" aria-label="Company analysis">
+      <button type="button" class="active" data-view="snapshot">Overview</button>
+      <button type="button" data-view="chart">Chart &amp; zones</button>
+      <button type="button" data-view="drivers">Why this score</button>
+      <button type="button" data-view="scenario">Test a price</button>
+    </nav>
+
+    <section class="view active" id="view-snapshot" data-view-panel="snapshot">
+      <div class="score-grid">
+        <article class="score-card panel" aria-labelledby="score-heading">
+          <div class="company-line">
+            <div>
+              <p class="eyebrow" id="company-name">Apple Inc.</p>
+              <h2 id="score-heading"><span id="company-ticker">AAPL</span> LensScore</h2>
+            </div>
+            <div class="market-price">
+              <strong id="market-price">—</strong>
+              <span id="market-change">Daily close</span>
+            </div>
+          </div>
+
+          <div class="score-hero">
+            <div class="score-ring" id="score-ring" data-tone="neutral">
+              <div>
+                <strong id="score-value">—</strong>
+                <span>/ 10</span>
+              </div>
+            </div>
+            <div class="score-summary">
+              <span class="score-label" id="score-label">Calculating</span>
+              <p id="score-summary">Gathering the evidence behind this setup.</p>
+              <div class="score-meta">
+                <span>Confidence <strong id="score-confidence">—</strong></span>
+                <span>Model <strong id="model-version">—</strong></span>
+                <span>As of <strong id="as-of">—</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="score-scale" aria-label="LensScore scale from zero to ten">
+            <div class="scale-track">
+              <span class="scale-marker" id="score-marker"></span>
+            </div>
+            <div class="scale-labels">
+              <span>0 Severe risk</span>
+              <span>5 Neutral</span>
+              <span>10 Exceptional</span>
+            </div>
+          </div>
+
+          <div class="dual-lens-grid" aria-label="Independent Implied Lens scores">
+            <section class="lens-card setup">
+              <div class="lens-card-head">
+                <div><span>Tactical</span><h3>LensSetup</h3></div>
+                <span class="horizon-pill">2–12 weeks</span>
+              </div>
+              <div class="lens-card-score"><strong id="setup-score">—</strong><span>/ 10</span></div>
+              <strong class="lens-card-label" id="setup-label">Calculating</strong>
+              <p>Price action, zones, trend, momentum, volume and technical risk.</p>
+            </section>
+            <section class="lens-card value">
+              <div class="lens-card-head">
+                <div><span>Long term</span><h3>LensValue</h3></div>
+                <span class="horizon-pill">1–3 years</span>
+              </div>
+              <div class="lens-card-score"><strong id="value-score">—</strong><span>/ 10</span></div>
+              <strong class="lens-card-label" id="value-label">Calculating</strong>
+              <p>Business quality, valuation, expectations and fundamental downside risk.</p>
+            </section>
+          </div>
+          <div class="golden-lens-signal" id="golden-lens-signal" data-active="false">
+            <div class="golden-lens-mark" aria-hidden="true">◎</div>
+            <div>
+              <strong id="golden-lens-label">Golden Lens not active</strong>
+              <p id="golden-lens-reason">Both independent lenses must reach exceptional levels.</p>
+            </div>
+          </div>
+        </article>
+
+        <aside class="decision-card panel" aria-labelledby="decision-heading">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Plain-language answer</p>
+              <h2 id="decision-heading">Why it scored this way</h2>
+            </div>
+            <span class="horizon-pill">6–18 months</span>
+          </div>
+
+          <div class="decision-section positive">
+            <h3><span aria-hidden="true">↑</span> Supporting the score</h3>
+            <ul id="strength-list"></ul>
+          </div>
+          <div class="decision-section caution">
+            <h3><span aria-hidden="true">↓</span> Holding it back</h3>
+            <ul id="concern-list"></ul>
+          </div>
+
+          <div class="next-move">
+            <span>Nearest buy zone</span>
+            <strong id="buy-zone">—</strong>
+            <p id="buy-zone-note">Waiting for support analysis.</p>
+            <button type="button" id="open-chart-button">Inspect technical setup</button>
+          </div>
+        </aside>
+      </div>
+
+      <div class="snapshot-lower">
+        <article class="expectations-card panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Price versus business</p>
+              <h2>Is the price demanding too much?</h2>
+            </div>
+            <span class="metric-chip" id="valuation-chip">—</span>
+          </div>
+          <div class="expectation-grid">
+            <div>
+              <span>Growth the price assumes</span>
+              <strong id="implied-growth">—</strong>
+              <small>What buyers appear to be paying for</small>
+            </div>
+            <div>
+              <span>Growth our current case supports</span>
+              <strong id="supported-growth">—</strong>
+              <small>The business-growth estimate being tested</small>
+            </div>
+            <div>
+              <span>Difference</span>
+              <strong id="growth-gap">—</strong>
+              <small>Smaller means the price is easier to justify</small>
+            </div>
+            <div>
+              <span>Estimated value range</span>
+              <strong id="dcf-range">—</strong>
+              <small>Conservative case through normalized case</small>
+            </div>
+          </div>
+        </article>
+
+        <article class="alignment-card panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Agreement check</p>
+              <h2>Do the two lenses agree?</h2>
+            </div>
+          </div>
+          <div class="alignment-visual" id="alignment-visual"></div>
+          <p id="alignment-copy">Calculating signal alignment.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="view" id="view-chart" data-view-panel="chart" hidden>
+      <div class="chart-layout">
+        <article class="chart-card panel">
+          <div class="chart-header">
+            <div>
+              <p class="eyebrow">Technical Lens</p>
+              <h2><span id="chart-ticker">AAPL</span> price structure</h2>
+            </div>
+            <div class="chart-presets" aria-label="Chart overlays">
+              <button type="button" class="active" data-preset="clean">Clean</button>
+              <button type="button" data-preset="trend">Trend</button>
+              <button type="button" data-preset="levels">Levels</button>
+            </div>
+          </div>
+          <div class="chart-legend" id="chart-legend"></div>
+          <div class="canvas-shell">
+            <canvas id="price-chart" aria-label="Price chart with support and resistance zones"></canvas>
+            <div class="chart-tooltip" id="chart-tooltip" hidden></div>
+          </div>
+          <div class="chart-footer">
+            <span>Daily bars · confirmed zones only</span>
+            <span id="chart-source">Source: —</span>
+          </div>
+        </article>
+
+        <aside class="zone-panel panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Automatic levels</p>
+              <h2>Support and resistance</h2>
+            </div>
+          </div>
+          <section class="trend-regime-card" aria-labelledby="trend-regime-heading">
+            <div class="trend-regime-head">
+              <div>
+                <span>LensTrend · direction</span>
+                <strong id="trend-regime-heading">Calculating</strong>
+              </div>
+              <strong id="trend-regime-value">—</strong>
+            </div>
+            <div class="trend-regime-meter" aria-label="LensTrend from zero downtrend to ten uptrend">
+              <i id="trend-regime-marker"></i>
+            </div>
+            <div class="trend-regime-scale"><span>0 Downtrend</span><span>5 Transition</span><span>10 Uptrend</span></div>
+            <div class="trend-regime-details">
+              <span>Signal agreement <strong id="trend-agreement">—</strong></span>
+              <span>Condition <strong id="trend-extension">—</strong></span>
+            </div>
+            <div class="trend-regime-votes" id="trend-regime-votes" aria-label="LensTrend signal votes"></div>
+            <p id="trend-regime-copy">LensTrend measures direction, not buyability. It feeds the final LensScore only as a setup modifier.</p>
+          </section>
+          <div class="zone-group">
+            <h3>Support zones</h3>
+            <div id="support-zones"></div>
+          </div>
+          <div class="zone-group">
+            <h3>Resistance zones</h3>
+            <div id="resistance-zones"></div>
+          </div>
+          <div class="invalidation-box">
+            <span>Technical invalidation</span>
+            <strong id="invalidation-price">—</strong>
+            <small>Illustrative: below the primary support zone by one ATR</small>
+          </div>
+        </aside>
+      </div>
+
+      <div class="technical-grid" id="technical-grid"></div>
+    </section>
+
+    <section class="view" id="view-drivers" data-view-panel="drivers" hidden>
+      <div class="drivers-layout">
+        <article class="panel driver-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Why this score</p>
+              <h2>How did the two lenses combine?</h2>
+            </div>
+            <span class="metric-chip">100% accounted for</span>
+          </div>
+          <div id="driver-waterfall" class="driver-waterfall"></div>
+        </article>
+        <article class="panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Guardrails</p>
+              <h2>Caps and data quality</h2>
+            </div>
+          </div>
+          <div class="quality-grid">
+            <div><span>Data coverage</span><strong id="coverage-value">—</strong></div>
+            <div><span>History</span><strong id="history-value">—</strong></div>
+            <div><span>Score caps</span><strong id="cap-value">None</strong></div>
+          </div>
+          <div class="guardrail-list" id="guardrail-list"></div>
+        </article>
+      </div>
+      <article class="panel metric-table-card">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Inputs</p>
+            <h2>Indicator registry</h2>
+          </div>
+          <span class="muted">Advanced details</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Indicator</th><th>Current</th><th>Family</th><th>Interpretation</th></tr></thead>
+            <tbody id="indicator-table"></tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+
+    <section class="view" id="view-scenario" data-view-panel="scenario" hidden>
+      <div class="scenario-layout">
+        <form class="panel assumption-panel" id="assumption-form">
+          <details>
+            <summary>
+              <span><strong>Advanced: change company assumptions</strong><small>Growth, cash flow, debt and valuation inputs</small></span>
+              <span class="summary-count">11 inputs</span>
+            </summary>
+            <div class="advanced-assumption-content">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">Optional advanced controls</p>
+                  <h2>Change the company case</h2>
+                </div>
+                <button type="button" class="text-button" id="reset-assumptions">Reset</button>
+              </div>
+              <p class="form-note">These inputs are loaded automatically from reported filings, consensus feeds, and the Implied Lens valuation model. Adjustments create a personal scenario and never overwrite the reported score.</p>
+              <div id="assumption-inputs" class="assumption-inputs"></div>
+            </div>
+          </details>
+        </form>
+
+        <article class="panel scenario-result">
+          <p class="eyebrow">Start here</p>
+          <h2>How would a different price change the score?</h2>
+          <div class="entry-simulator">
+            <label for="entry-price">Enter a price you might consider</label>
+            <div class="entry-control">
+              <span>$</span>
+              <input id="entry-price" type="number" min="0.01" step="0.01">
+            </div>
+            <input id="entry-slider" type="range" min="1" max="500" step="0.5" aria-label="Scenario entry price">
+            <div class="entry-scale"><span id="entry-low">—</span><span id="entry-high">—</span></div>
+          </div>
+          <div class="scenario-score">
+            <strong id="scenario-score-value">—</strong><span>/ 10</span>
+          </div>
+          <span class="score-label" id="scenario-score-label">Calculating</span>
+          <div class="scenario-delta" id="scenario-delta">Adjust an assumption to test the setup.</div>
+          <div class="scenario-lenses" aria-label="Scenario score breakdown">
+            <div><span>Long-term LensValue</span><strong id="scenario-value-score">—</strong><small>/ 10</small></div>
+            <div><span>Tactical LensSetup</span><strong id="scenario-setup-score">—</strong><small>/ 10</small></div>
+          </div>
+          <div class="scenario-callout">
+            <span>Why the score changes</span>
+            <p id="scenario-explanation">The score will respond to valuation, expectations and risk—not overwrite the current market score.</p>
+          </div>
+          <button type="button" class="primary-action" id="save-scenario">Save scenario</button>
+          <p class="save-status" id="save-status" role="status" aria-live="polite"></p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="methodology-dialog">
+    <div class="dialog-head">
+      <div>
+        <p class="eyebrow">LensScore 0.6 production candidate</p>
+        <h2>Two independent lenses, one final decision</h2>
+      </div>
+      <button type="button" id="close-methodology" aria-label="Close methodology">×</button>
+    </div>
+    <p>LensSetup and LensValue can be used independently. LensScore combines them for a 6–18 month buyability decision. This is a research metric, not investment advice or a prediction.</p>
+    <ol>
+      <li><strong>LensSetup measures tactical entry quality.</strong> Price structure, support and resistance zones, LensTrend, RSI, Stochastic RSI, MACD, volume and volatility produce a 2–12 week setup score.</li>
+      <li><strong>LensValue measures long-term opportunity.</strong> Business quality, valuation, embedded expectations and fundamental downside risk produce a 1–3 year score.</li>
+      <li><strong>LensScore combines the independent conclusions.</strong> Long-term value carries 70% and tactical setup carries 30%; strong agreement earns a bonus and major disagreement is penalized.</li>
+      <li><strong>Golden Lens requires exceptional alignment.</strong> LensValue must be at least 8.5, LensSetup at least 8.0, LensScore at least 8.5, confidence cannot be Low and no quality cap can be active.</li>
+      <li><strong>Severe risks override the formula.</strong> Going-concern, leverage and missing-data rules can cap or suppress the score.</li>
+    </ol>
+    <p><strong>Calibration status:</strong> LensSetup has a no-lookahead walk-forward diagnostic across 525 observations and 15 liquid U.S. symbols. Its separation is positive but still weak, so the current calibration is preliminary. LensValue and Golden Lens do not carry historical-performance claims until point-in-time fundamentals and estimates are validated across a broader, survivorship-bias-controlled universe. <a href="/lens-calibration.json" target="_blank" rel="noopener">View the machine-readable diagnostic.</a></p>
+    <p>Missing essential evidence produces Not Rated. Serious risks can cap the score. Confidence is displayed separately.</p>
+  </dialog>
+</body>
+</html>

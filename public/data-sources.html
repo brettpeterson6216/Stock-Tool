@@ -78,7 +78,7 @@
     <a href="/" class="back">← Back to ImpliedLens</a>
     <button class="static-theme-toggle" type="button" aria-label="Switch theme"><span class="static-theme-thumb"></span></button>
   </div>
-  <div class="wrap">
+  <div class="wrap" role="main">
     <div class="eyebrow">Transparency</div>
     <h1>Data Sources</h1>
     <p class="subtitle">ImpliedLens labels the providers and calculations behind its research surfaces. Here is where the data comes from and how it is used.</p>
@@ -91,15 +91,12 @@
           <div class="src-url">finance.yahoo.com</div>
         </div>
       </div>
-      <p class="src-desc">Used for price history, OHLCV candles, current quote context, and selected key statistics. Data is requested from providers on each analysis request.</p>
+      <p class="src-desc">Used for price history, OHLCV candles, and current quote context. The interface shows the latest provider observation and does not present this as a direct exchange feed.</p>
       <div class="src-tags">
         <span class="tag gold">Price Charts</span>
-        <span class="tag gold">Financials</span>
-        <span class="tag gold">Valuation Inputs</span>
-        <span class="tag gold">Projections</span>
+        <span class="tag gold">LensSetup</span>
         <span class="tag">Current quotes</span>
-        <span class="tag">Earnings history</span>
-        <span class="tag">Key statistics</span>
+        <span class="tag">Market context</span>
       </div>
     </div>
 
@@ -130,9 +127,11 @@
           <div class="src-url">sec.gov/cgi-bin/browse-edgar</div>
         </div>
       </div>
-      <p class="src-desc">Direct access to official SEC filing data. Used for the SEC Filings section, which links to 10-K annual reports, 10-Q quarterly filings, 8-K current reports, and DEF 14A proxy statements. All links point directly to SEC.gov — we do not store or proxy filing documents.</p>
+      <p class="src-desc">Official company facts and filing history. SEC XBRL facts populate annual financial statements, reported EPS history, and the reported inputs used by LensValue. Filing links open the original 10-K, 10-Q, 8-K, and DEF 14A documents on SEC.gov.</p>
       <div class="src-tags">
         <span class="tag gold">SEC Filings</span>
+        <span class="tag gold">Financial Statements</span>
+        <span class="tag gold">LensValue Inputs</span>
         <span class="tag">10-K / 10-Q</span>
         <span class="tag">8-K / DEF 14A</span>
         <span class="tag">Form 4</span>
@@ -140,11 +139,30 @@
       </div>
     </div>
 
+    <div class="source-card">
+      <div class="src-head">
+        <div class="src-icon">🏦</div>
+        <div>
+          <div class="src-name">FINRA OTC Transparency</div>
+          <div class="src-url">finra.org/filing-reporting/otc-transparency</div>
+        </div>
+      </div>
+      <p class="src-desc">Used for delayed, aggregated weekly OTC trading volume and trade counts. This is labeled as OTC activity—not as venue-level dark-pool order flow.</p>
+      <div class="src-tags">
+        <span class="tag gold">OTC Activity</span>
+        <span class="tag">Weekly aggregates</span>
+        <span class="tag">Delayed reporting</span>
+      </div>
+    </div>
+
     <h2>Data Freshness and Delays</h2>
-    <p>Quote data from Yahoo Finance is typically delayed 15 minutes for most exchanges during market hours. Pre-market and after-hours data is available where provided by Yahoo Finance. Historical OHLCV data is end-of-day. Analyst consensus figures are updated periodically and may lag by 24–48 hours. Institutional ownership data from Finnhub reflects the most recent 13F filings, which are filed quarterly.</p>
+    <p>Timing varies by provider, exchange, instrument, and market session. ImpliedLens displays the provider observation time when available and identifies fallback sources; it does not infer a guaranteed delay from the chart interval. Daily OHLCV history reflects the provider's latest completed observation. Analyst estimates and institutional ownership update on their providers' schedules, and FINRA OTC data is published on a delayed basis.</p>
 
     <h2>Reported, Derived, and Modeled Data</h2>
     <p>ImpliedLens separates provider-supplied observations from derived calculations and user-controlled models. Reported figures come from connected providers or SEC filings. Ratios, indicators, projections, intrinsic-value estimates, and wealth scenarios are calculations whose reliability depends on their inputs and assumptions. Missing provider fields are shown as unavailable rather than silently invented.</p>
+
+    <h2>LensScore Calibration Status</h2>
+    <p>LensSetup has a preliminary no-lookahead walk-forward diagnostic across 525 observations and 15 liquid U.S. symbols. Current separation is positive but weak, so no historical-performance claim is made. LensValue and Golden Lens require broader point-in-time fundamental and estimate history before performance claims are allowed. The production interface exposes model version, confidence, inputs, source dates, and missing-data status. <a href="/lens-calibration.json">View the current machine-readable diagnostic.</a></p>
 
     <div class="caveat">
       <p><strong>Important:</strong> Data accuracy depends on the upstream providers. ImpliedLens is not responsible for errors, delays, or omissions in data supplied by Finnhub, Yahoo Finance, or SEC EDGAR. Always verify critical figures against primary sources before making investment decisions.</p>

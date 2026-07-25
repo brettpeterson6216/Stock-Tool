@@ -71,7 +71,7 @@
     "Earnings history and EPS surprise tracker",
     "SEC EDGAR filing browser",
     "Analyst price targets and recommendations",
-    "Dark pool and institutional holdings data",
+    "FINRA OTC activity and institutional holdings data",
     "Curated stock screener",
     "Compare up to 4 stocks side by side",
     "Risk metrics: Sharpe, Sortino, Alpha, Beta, VaR",
@@ -99,8 +99,8 @@
 <script defer src="/projection-lab.js?v=20260713-3"></script>
 <script defer src="/valuation-lab.js?v=20260713-3"></script>
 <script defer src="/research-system.js?v=20260716-1"></script>
-<script defer src="/product-system.js?v=20260722-1"></script>
-<script defer src="/workspace-system.js?v=20260723-1"></script>
+<script defer src="/product-system.js?v=20260724-1"></script>
+<script defer src="/workspace-system.js?v=20260724-2"></script>
 <script defer src="/tool-launch.js?v=20260722-1"></script>
 <link href="/legacy-app.css?v=20260722-2" rel="stylesheet">
 <link href="/premium.css?v=20260713-3" rel="stylesheet">
@@ -685,10 +685,11 @@
   <div class="il-capabilities" aria-label="What Implied Lens can do">
     <div class="il-cap-head">
       <span class="il-landing-kicker">Everything in one workspace</span>
-      <h2>Nine research tools. One ticker away.</h2>
+      <h2>Ten research tools. One ticker away.</h2>
       <p>These are the actual tools inside Implied Lens — click any card to open it live with a real ticker. No account needed to look.</p>
     </div>
     <div class="il-cap-grid">
+      <a class="il-cap-card il-cap-score" href="/lens-score"><i class="ti ti-focus-2"></i><strong>LensScore</strong><span>One branded 0–10 decision metric, with independent tactical and long-term lenses, technical zones, and a Golden Lens alignment signal.</span></a>
       <a class="il-cap-card" href="/?view=tool&section=analyze&symbol=AAPL"><i class="ti ti-chart-candle"></i><strong>Charts &amp; Technicals</strong><span>Candles, moving averages, Bollinger bands, RSI, MACD, OBV, ATR — with a full-screen annotate-and-markup view.</span></a>
       <a class="il-cap-card" href="/?view=tool&section=financials"><i class="ti ti-table"></i><strong>SEC-Sourced Financials</strong><span>Four years of income statement, balance sheet, and cash flow pulled straight from EDGAR XBRL filings.</span></a>
       <a class="il-cap-card" href="/?view=tool&section=dcf"><i class="ti ti-calculator"></i><strong>Intrinsic Value Model</strong><span>Ten-year EPS model with a live sensitivity table. Change any assumption and the value recalculates instantly.</span></a>
@@ -1200,6 +1201,7 @@
               <input class="ticker-input" id="main-ticker" type="text" placeholder="Try AAPL, TSLA, NVDA, SPY…" value="">
               <button class="btn-search" id="search-btn" onclick="fetchAndRender()">Analyze →</button>
             </div>
+            <a class="il-lensscore-launch" href="/lens-score"><i class="ti ti-focus-2" aria-hidden="true"></i><span><strong>Open LensScore</strong><small>Combine value, technical setup, and risk into one transparent 0–10 score.</small></span><i class="ti ti-arrow-right" aria-hidden="true"></i></a>
             <!-- Featured stocks grid (shown before search) -->
             <div class="fg-label" id="fg-label">Popular starting points</div>
             <div id="featured-grid"></div>
@@ -1226,6 +1228,7 @@
                   </div>
                 </div>
               </div>
+              <div id="quote-source" class="il-data-source-line"></div>
 
               <div class="metrics-grid" id="metrics-grid"></div>
 
@@ -1388,6 +1391,7 @@
             <div id="fin-loading" style="font-size:.82rem;display:none;color:var(--text5);">Loading financials…</div>
             <div id="fin-error" style="color:#d96a70;font-size:.82rem;display:none;"></div>
             <div id="fin-content" style="display:none;">
+              <div id="fin-source" class="il-data-source-line"></div>
               <div style="display:flex;gap:.5rem;margin-bottom:1.25rem;flex-wrap:wrap;">
                 <button class="fin-tab-btn active" onclick="showFinTab('income',this)">Income Statement</button>
                 <button class="fin-tab-btn" onclick="showFinTab('balance',this)">Balance Sheet</button>
@@ -1407,6 +1411,7 @@
 <div style="font-size:.82rem;color:var(--text4);margin-bottom:1.25rem;">Deep fundamental metrics: valuation multiples, margins, returns, and leverage.</div>
             <div id="advm-loading" style="color:var(--text5);font-size:.82rem;display:none;">Loading metrics…</div>
             <div id="advm-error" style="color:#d96a70;font-size:.82rem;display:none;"></div>
+            <div id="advm-source" class="il-data-source-line" style="display:none;"></div>
             <div id="advm-content"></div>
             <div id="advm-nostock" style="color:var(--text5);font-size:.85rem;">Search for a stock in the Research tab first.</div>
 
@@ -1418,6 +1423,8 @@
 <div style="font-size:.82rem;color:var(--text4);margin-bottom:1.25rem;">EPS estimates vs. actual results and earnings surprise history.</div>
             <div id="earn-loading" style="color:var(--text5);font-size:.82rem;display:none;">Loading earnings…</div>
             <div id="earn-error" style="color:#d96a70;font-size:.82rem;display:none;"></div>
+            <div id="earn-source" class="il-data-source-line" style="display:none;"></div>
+            <div id="earn-basis-note" class="il-data-basis-note" style="display:none;"></div>
             <div id="earn-content"></div>
             <div id="earn-nostock" style="color:var(--text5);font-size:.85rem;">Search for a stock in the Research tab first.</div>
 
@@ -1448,15 +1455,16 @@
 
           <!-- INSTITUTIONAL & FINRA OTC ACTIVITY -->
           <div class="app-section" id="sec-institutional"><div class="acc-body" id="body-institutional" style="display:none;">
-              <div style="font-size:.82rem;color:var(--text4);margin-bottom:1.25rem;">Top institutional holders, OTC trading volume, and short interest data from FINRA &amp; Finnhub.</div>
+              <div style="font-size:.82rem;color:var(--text4);margin-bottom:1.25rem;">FINRA-reported OTC activity with institutional ownership and short-interest context when the optional Finnhub feed is available.</div>
               <div id="inst-loading" class="loading-bar" style="display:none;"><div class="spinner"></div> Loading institutional data…</div>
               <div id="inst-nostock" style="color:var(--text5);font-size:.85rem;">Search for a stock in the Research tab first.</div>
               <div id="inst-content" style="display:none;">
+                <div id="inst-source" class="il-data-source-line"></div>
                 <!-- OTC Activity & Short Interest Cards -->
                 <div class="analyst-box-title" style="margin-bottom:.65rem;">FINRA OTC Activity &amp; Short Interest</div>
                 <div id="dp-cards" class="dp-grid"></div>
                 <div style="margin-bottom:1.25rem;">
-                  <div class="analyst-box-title" style="margin-bottom:.5rem;">Weekly OTC Weekly Volume (FINRA)</div>
+                  <div class="analyst-box-title" style="margin-bottom:.5rem;">Weekly OTC Volume (FINRA)</div>
                   <div class="dp-chart-wrap"><canvas id="dp-chart"></canvas></div>
                 </div>
                 <!-- Institutional Holders Table -->
@@ -3129,7 +3137,8 @@ async function resendVerification() {
    FETCH
 ══════════════════════════════════════════════════════ */
 async function yahooFetch(ticker, range='1y') {
-  const r = await fetch(`/api/quote/${encodeURIComponent(ticker)}?range=${range}`, { credentials: 'same-origin' });
+  const localPreview = /^(127\.0\.0\.1|localhost)$/.test(window.location.hostname) ? '&preview=1' : '';
+  const r = await fetch(`/api/quote/${encodeURIComponent(ticker)}?range=${range}${localPreview}`, { credentials: 'same-origin' });
 
   // Handle rate limit / daily cap
   if (r.status === 429) {
@@ -3200,6 +3209,26 @@ function updateLimitUI(remaining, limit, plan) {
 function fmtBig(n) { if(!n) return '—'; if(n>=1e12) return `$${(n/1e12).toFixed(2)}T`; if(n>=1e9) return `$${(n/1e9).toFixed(2)}B`; if(n>=1e6) return `$${(n/1e6).toFixed(2)}M`; return `$${n.toLocaleString()}`; }
 // Share counts (volume) — never prefixed with a currency symbol.
 function fmtShares(n) { if(!n) return '—'; if(n>=1e12) return `${(n/1e12).toFixed(2)}T`; if(n>=1e9) return `${(n/1e9).toFixed(2)}B`; if(n>=1e6) return `${(n/1e6).toFixed(2)}M`; if(n>=1e3) return `${(n/1e3).toFixed(1)}K`; return `${n.toLocaleString()}`; }
+function showDataSource(elementId, meta, fallbackSource, fallbackAsOf) {
+  const element = document.getElementById(elementId);
+  if (!element) return;
+  const source = meta?.source || fallbackSource || 'Provider data';
+  const rawAsOf = meta?.asOf || fallbackAsOf || meta?.retrievedAt || null;
+  let asOf = 'as-of time unavailable';
+  if (rawAsOf) {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(String(rawAsOf))) {
+      const reportedDate = new Date(`${rawAsOf}T12:00:00Z`);
+      asOf = `as of ${reportedDate.toLocaleDateString('en-US', { dateStyle:'medium', timeZone:'UTC' })}`;
+    } else {
+      const parsed = new Date(rawAsOf);
+      asOf = Number.isNaN(parsed.getTime())
+        ? `as of ${rawAsOf}`
+        : `as of ${parsed.toLocaleString('en-US', { dateStyle:'medium', timeStyle:'short' })}`;
+    }
+  }
+  element.textContent = `${source} · ${asOf} · no synthetic replacement`;
+  element.style.display = 'flex';
+}
 function fmtPct(n) { return n==null?'—':`${n>=0?'+':''}${n.toFixed(2)}%`; }
 function alignQuoteSeries(result) {
   const q=result?.indicators?.quote?.[0]||{};
@@ -3784,6 +3813,7 @@ async function fetchAndRender() {
 
 function renderStock(result, ticker) {
   const meta=result.meta;
+  const provenance=result.impliedLensProvenance||null;
   const aligned=alignQuoteSeries(result);
   result=aligned.result;
   S.data=result;
@@ -3802,7 +3832,11 @@ function renderStock(result, ticker) {
   const chgEl=document.getElementById('r-change');
   chgEl.textContent=`${chg>=0?'+':''}${chg.toFixed(2)} (${fmtPct(chgPct)})`;
   chgEl.className='price-chg '+(chg>=0?'up':'dn');
-  document.getElementById('r-time').textContent='Latest update · '+new Date().toLocaleTimeString();
+  const providerAsOf = provenance?.asOf ? new Date(provenance.asOf) : null;
+  document.getElementById('r-time').textContent=providerAsOf && !Number.isNaN(providerAsOf.getTime())
+    ? `Provider observation · ${providerAsOf.toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZoneName:'short'})}`
+    : 'Provider observation time unavailable';
+  showDataSource('quote-source', provenance, provenance?.source || 'Market data provider', provenance?.asOf);
 
   // metrics
   const c=closes;
@@ -5774,6 +5808,7 @@ async function loadFinancials(ticker) {
   try {
     const res  = await proAwareFetch('/api/financials/' + ticker, 'financials');
     const data = await res.json();
+    showDataSource('fin-source', data.impliedLens, 'SEC EDGAR XBRL');
 
     // ETF / fund: no XBRL statements available
     if (data.noStatements) {
@@ -5859,7 +5894,7 @@ async function loadFinancials(ticker) {
           const op = getRaw(s.totalCashFromOperatingActivities);
           const cx = getRaw(s.capitalExpenditures);
           if (op==null || cx==null) return null;
-          return op + cx; // capex is stored as negative by Yahoo
+          return op - Math.abs(cx); // SEC XBRL capex is generally reported as a positive cash outflow
         }
       },
       {label:'Investing Activities',    key:'totalCashflowsFromInvestingActivities'},
@@ -5907,12 +5942,18 @@ async function loadAdvMetrics(ticker) {
   if(loading) loading.style.display='block';
   if(error)   error.style.display='none';
   try {
-    const [finRes, metRes] = await Promise.all([
+    const [finResult, metResult] = await Promise.allSettled([
       proAwareFetch('/api/financials/' + ticker, 'advmetrics'),
       proAwareFetch('/api/metrics/' + ticker, 'advmetrics'),
     ]);
-    const finData = await finRes.json();
-    const metData = await metRes.json();
+    if (finResult.status === 'rejected' && metResult.status === 'rejected') throw finResult.reason;
+    const finData = finResult.status === 'fulfilled' ? await finResult.value.json() : {};
+    const metData = metResult.status === 'fulfilled' ? await metResult.value.json() : {};
+    showDataSource(
+      'advm-source',
+      metData.impliedLens || finData.impliedLens,
+      'SEC EDGAR XBRL + Finnhub metrics'
+    );
     // finData may be a noStatements (ETF) response or a full quoteSummary response
     const r = finData.quoteSummary && finData.quoteSummary.result && finData.quoteSummary.result[0];
     const ks  = (r && r.defaultKeyStatistics) || {};
@@ -5952,7 +5993,7 @@ async function loadAdvMetrics(ticker) {
           {lbl:'Net Margin',      val:v(raw(fd.profitMargins)!=null ? raw(fd.profitMargins)*100 : null,'%'), sub:'Net income / revenue'},
           {lbl:'Return on Equity',val:v(raw(fd.returnOnEquity)!=null ? raw(fd.returnOnEquity)*100 : null,'%'), sub:'ROE'},
           {lbl:'Return on Assets',val:v(raw(fd.returnOnAssets)!=null ? raw(fd.returnOnAssets)*100 : null,'%'), sub:'ROA'},
-          {lbl:'ROIC',            val:v(m['roicTTM']!=null?m['roicTTM']:m['roeRfy'],'%'), sub:'Return on invested capital'},
+          {lbl:'ROIC',            val:v(m['roicTTM']!=null?m['roicTTM']:raw(fd.roic)!=null?raw(fd.roic)*100:m['roeRfy'],'%'), sub:'Return on invested capital'},
         ]
       },
       {
@@ -5973,8 +6014,8 @@ async function loadAdvMetrics(ticker) {
           {lbl:'Current Ratio',   val:v(raw(fd.currentRatio),'x'), sub:'Current assets / liabilities'},
           {lbl:'Quick Ratio',     val:v(raw(fd.quickRatio),'x'), sub:'Liquid assets / liabilities'},
           {lbl:'FCF / Share',     val:v(raw(fd.freeCashflow) && raw(ks.sharesOutstanding) ? raw(fd.freeCashflow)/raw(ks.sharesOutstanding) : null,''), sub:'Free cash flow per share'},
-          {lbl:'Cash per Share',  val:v(m['cashPerSharePerShare']!=null?m['cashPerSharePerShare']:m['totalDebtToEquity']!=null&&raw(fd.totalCash)&&raw(ks.sharesOutstanding)?raw(fd.totalCash)/raw(ks.sharesOutstanding):null,''), sub:'Cash / shares outstanding'},
-          {lbl:'Interest Coverage',val:v(m['netInterestCoverageAnnual'],'x'), sub:'EBIT / interest expense'},
+          {lbl:'Cash per Share',  val:v(m['cashPerSharePerShare']!=null?m['cashPerSharePerShare']:raw(fd.totalCash)&&raw(ks.sharesOutstanding)?raw(fd.totalCash)/raw(ks.sharesOutstanding):null,''), sub:'Cash / shares outstanding'},
+          {lbl:'Interest Coverage',val:v(m['netInterestCoverageAnnual']!=null?m['netInterestCoverageAnnual']:raw(fd.interestCoverage),'x'), sub:'Operating income / interest expense'},
         ]
       }
     ];
@@ -5997,7 +6038,7 @@ async function loadAdvMetrics(ticker) {
 }
 
 /* =====================================================
-   INSTITUTIONAL & DARK POOL
+   INSTITUTIONAL & FINRA OTC ACTIVITY
 ===================================================== */
 async function loadInstitutional(ticker) {
   const dpCards  = document.getElementById('dp-cards');
@@ -6010,18 +6051,28 @@ async function loadInstitutional(ticker) {
   if(loading) loading.style.display='flex';
 
   try {
-    const [dpRes, instRes] = await Promise.all([
+    const [dpResult, instResult] = await Promise.allSettled([
       proAwareFetch('/api/darkpool/'+encodeURIComponent(ticker),'institutional'),
       proAwareFetch('/api/institutional/'+encodeURIComponent(ticker),'institutional'),
     ]);
-    const dpData   = await dpRes.json();
-    const instData = await instRes.json();
+    if (dpResult.status === 'rejected' && instResult.status === 'rejected') throw dpResult.reason;
+    const dpData = dpResult.status === 'fulfilled' ? await dpResult.value.json() : {};
+    const instData = instResult.status === 'fulfilled' ? await instResult.value.json() : {};
     if(loading) loading.style.display='none';
+    const instContent = document.getElementById('inst-content');
+    if(instContent) instContent.style.display='block';
+    const sourceParts = [dpData.impliedLens?.source, instData.impliedLens?.source].filter(Boolean).join(' + ');
+    showDataSource('inst-source', {
+      source: sourceParts || 'FINRA OTC Transparency + Finnhub institutional ownership',
+      asOf: dpData.impliedLens?.asOf || instData.impliedLens?.asOf,
+    });
 
     // ── OTC Flow & Short Interest cards ──
-    const dp  = Array.isArray(dpData.darkpool) ? dpData.darkpool : [];
+    const dp  = Array.isArray(dpData.otcActivity)
+      ? dpData.otcActivity
+      : Array.isArray(dpData.darkpool) ? dpData.darkpool : [];
     const si  = dpData.shortInterest || {};
-    const siShares  = si.sharesShort           ? fmtBig(si.sharesShort).replace('$','')   : null;
+    const siShares  = si.sharesShort           ? fmtShares(si.sharesShort)   : null;
     const siRatio   = si.shortRatio            ? si.shortRatio.toFixed(2)+'d'             : null;
     const siPct     = si.shortPercentOfFloat   ? (si.shortPercentOfFloat*100).toFixed(2)+'%' : null;
     const siDate    = si.dateShortInterest     || null;
@@ -6035,9 +6086,9 @@ async function loadInstitutional(ticker) {
 
     if(dpCards) {
       const dpKpi = dp.length ? [
-        { lbl:'Latest Week Vol',  val: dp[0].totalWeeklyShareQuantity ? fmtBig(dp[0].totalWeeklyShareQuantity).replace('$','') : '—', color:'var(--gold)' },
+        { lbl:'Latest Week Vol',  val: dp[0].totalWeeklyShareQuantity ? fmtShares(dp[0].totalWeeklyShareQuantity) : '—', color:'var(--gold)' },
         { lbl:'Latest Trades',   val: dp[0].totalWeeklyTradeCount    ? Number(dp[0].totalWeeklyTradeCount).toLocaleString()        : '—', color:'var(--gold)' },
-        { lbl:'Last Sale Price', val: dp[0].lastSalePrice            ? '$'+Number(dp[0].lastSalePrice).toFixed(2)                 : '—', color:'var(--text)' },
+        { lbl:'Avg Reported Price', val: dp[0].averageReportedPrice ? '$'+Number(dp[0].averageReportedPrice).toFixed(2) : '—', color:'var(--text)' },
       ] : [];
       const allCards = [...dpKpi, ...siCards];
       if(!allCards.length) {
@@ -6064,7 +6115,7 @@ async function loadInstitutional(ticker) {
           plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>' '+Number(ctx.raw).toLocaleString()+' shares'}} },
           scales:{
             x:{ticks:{color:ct().muted,font:{size:9}}, grid:{display:false}},
-            y:{ticks:{color:ct().muted,font:{size:9},callback:v=>fmtBig(v).replace('$','')}, grid:{color:gcol()}}
+            y:{ticks:{color:ct().muted,font:{size:9},callback:v=>fmtShares(v)}, grid:{color:gcol()}}
           }
         }
       });
@@ -6080,11 +6131,11 @@ async function loadInstitutional(ticker) {
         instTbl.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text5);padding:1.5rem;">No institutional holder data available.</td></tr>';
       } else {
         instTbl.innerHTML = holders.map(h => {
-          const shares    = h.share          != null ? fmtBig(h.share).replace('$','')       : '—';
+          const shares    = h.share          != null ? fmtShares(h.share)       : '—';
           const pct       = h.percentageHeld != null ? (h.percentageHeld*100).toFixed(2)+'%' : '—';
           const change    = h.change         != null ? h.change : null;
           const chgColor  = change>0?'#46b184':change<0?'#d96a70':'var(--text4)';
-          const chgStr    = change!=null ? `<span style="color:${chgColor}">${change>0?'+':''}${fmtBig(change).replace('$','')}</span>` : '—';
+          const chgStr    = change!=null ? `<span style="color:${chgColor}">${change>0?'+':change<0?'−':''}${fmtShares(Math.abs(change))}</span>` : '—';
           return `<tr>
             <td>${escapeHtml(h.holderName||h.name||'—')}</td>
             <td>${escapeHtml(shares)}</td>
@@ -6099,7 +6150,7 @@ async function loadInstitutional(ticker) {
     if(loading) loading.style.display='none';
     const instWrap = document.getElementById('body-institutional');
     handleSectionError(e, 'institutional', instWrap);
-    if(e.code !== 'PRO_REQUIRED' && e.code !== 'LOGIN_REQUIRED') console.error('institutional/darkpool error', e);
+    if(e.code !== 'PRO_REQUIRED' && e.code !== 'LOGIN_REQUIRED') console.error('institutional/OTC activity error', e);
   }
 }
 
@@ -6125,6 +6176,13 @@ async function loadEarnings(ticker) {
     const data = res.status==='fulfilled' ? await res.value.json() : [];
     const estData = estRes.status==='fulfilled' ? await estRes.value.json().catch(()=>({})) : {};
     const fwdQ = estData.fwdQuarterly || [];
+    const earningsSource = res.value.headers.get('X-Data-Source') || 'Reported earnings';
+    showDataSource('earn-source', estData.impliedLens, earningsSource, res.value.headers.get('X-Data-As-Of'));
+    const basisNote = document.getElementById('earn-basis-note');
+    if (basisNote) {
+      basisNote.style.display = /SEC/i.test(earningsSource) ? 'block' : 'none';
+      basisNote.textContent = 'SEC EPS is shown on each filing period’s reported per-share basis. Older periods can reflect a different split-adjustment basis; verify long historical comparisons against the original filing.';
+    }
 
     // Build forward estimates banner if available
     let fwdHtml = '';

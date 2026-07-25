@@ -16,7 +16,7 @@
 //    routes/billing.js    — Stripe checkout, webhook, billing portal
 //    routes/market-data.js — quote, screener, news, movers, analyst-signals
 //    routes/financials.js — financials, earnings, metrics, SEC, estimates,
-//                           analyst, institutional, darkpool, me/limit
+//                           analyst, institutional, FINRA OTC activity, me/limit
 // ============================================================
 
 const cfg = require("./lib/config"); // dotenv loaded here first
@@ -56,6 +56,7 @@ const { PORT, SESSION_SECRET } = cfg;
 }());
 
 const path    = require("path");
+const fs      = require("fs");
 const crypto  = require("crypto");
 const express = require("express");
 const session = require("express-session");
@@ -72,6 +73,7 @@ const authRouter        = require("./routes/auth");
 const billingRouter     = require("./routes/billing");
 const marketDataRouter  = require("./routes/market-data");
 const financialsRouter  = require("./routes/financials");
+const lensScoreRouter   = require("./routes/lens-score");
 const stockLandingRouter = require("./routes/stock-landing");
 const workspaceRouter     = require("./routes/workspace");
 const providerHealth      = require("./lib/provider-health");
@@ -201,6 +203,7 @@ app.use([
   "/api/analyst",
   "/api/institutional",
   "/api/darkpool",
+  "/api/lens-score",
 ], marketDataLimiter);
 
 app.use("/api",         authRouter);        // /api/auth/*, /api/saves, /api/admin/*
@@ -209,6 +212,7 @@ app.use("/api",         marketDataRouter);  // /api/quote/*, /api/screener, /api
 app.use("/api",         financialsRouter);  // /api/financials/*, /api/earnings/*, /api/metrics/*,
                                             // /api/sec/*, /api/estimates/*, /api/analyst/*,
                                             // /api/institutional/*, /api/darkpool/*, /api/me/limit
+app.use("/api",         lensScoreRouter);    // /api/lens-score/*
 app.use("/api",         workspaceRouter);    // /api/workspace/*
 
 // ============================================================
@@ -227,6 +231,50 @@ app.get(["/about", "/about.html"], (_req, res) => res.sendFile(path.join(__dirna
 app.get(["/blog",  "/blog.html"],  (_req, res) => res.sendFile(path.join(__dirname, "public", "blog.html")));
 app.get(["/research-process", "/research-process.html"], (_req, res) => res.sendFile(path.join(__dirname, "public", "research-process.html")));
 app.get(["/compound-calculator", "/compound-calculator.html"], (_req, res) => res.sendFile(path.join(__dirname, "public", "compound-calculator.html")));
+
+// Production LensScore surface. It reuses the same independently tested
+// browser engine as the private lab, but is served from a stable public route
+// and consumes only the canonical live research endpoint.
+const lensScoreRoot = path.join(__dirname, "labs", "lens-score");
+app.use("/lens-score/assets", express.static(lensScoreRoot, {
+  etag: true,
+  maxAge: process.env.NODE_ENV === "production" ? "1h" : 0,
+  index: false,
+}));
+app.get(["/lens-score", "/lens-score/"], async (_req, res) => {
+  try {
+    const source = await fs.promises.readFile(path.join(lensScoreRoot, "index.html"), "utf8");
+    const html = source
+      .replace('<meta name="robots" content="noindex,nofollow,noarchive">', '<meta name="robots" content="index,follow">')
+      .replaceAll("/__lab/lens-score/assets/", "/lens-score/assets/")
+      .replace("Reported data · production candidate", "Reported data · live research")
+      .replace('<link rel="icon" href="/logo.svg" type="image/svg+xml">', '<link rel="canonical" href="https://impliedlens.com/lens-score"><link rel="icon" href="/logo.svg" type="image/svg+xml">');
+    res.type("html").send(html);
+  } catch (error) {
+    console.error("[lens-score-page]", error.message);
+    res.status(500).send("LensScore is temporarily unavailable.");
+  }
+});
+
+// Development-only product lab. This route is intentionally absent in
+// production so prototypes cannot be discovered or indexed on the live site.
+if (process.env.NODE_ENV !== "production") {
+  const lensScoreLabRoot = path.join(__dirname, "labs", "lens-score");
+  app.use("/__lab/lens-score/assets", express.static(lensScoreLabRoot, {
+    etag: false,
+    maxAge: 0,
+    index: false,
+    setHeaders(res) {
+      res.setHeader("Cache-Control", "no-store");
+      res.setHeader("X-Robots-Tag", "noindex, nofollow, noarchive");
+    },
+  }));
+  app.get(["/__lab/lens-score", "/__lab/lens-score/"], (_req, res) => {
+    res.setHeader("Cache-Control", "no-store");
+    res.setHeader("X-Robots-Tag", "noindex, nofollow, noarchive");
+    res.sendFile(path.join(lensScoreLabRoot, "index.html"));
+  });
+}
 
 // ============================================================
 //  CSRF token endpoint — returns (or creates) per-session token

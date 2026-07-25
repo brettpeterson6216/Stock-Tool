@@ -10,13 +10,14 @@
 //    GET /api/estimates/:ticker
 //    GET /api/analyst/:ticker
 //    GET /api/institutional/:ticker
-//    GET /api/darkpool/:ticker
+//    GET /api/darkpool/:ticker (legacy path; returns FINRA OTC activity)
 // ============================================================
 const express = require("express");
 
 const { FINNHUB_KEY }  = require("../lib/config");
 const { db }           = require("../lib/db");
 const { requirePro, reconcileEffectivePlan, normalizeTicker, FREE_DAILY_LIMIT, GUEST_DAILY_LIMIT } = require("../lib/plan");
+const { deriveEarnings, loadCompanyFacts, loadFinnhubResearch, loadPriceHistory } = require("../lib/stock-research");
 
 const router = express.Router();
 const UA     = "ImpliedLens/1.0 brettpeterson6216@gmail.com";
@@ -25,6 +26,17 @@ function requestTicker(req, res) {
   const ticker = normalizeTicker(req.params.ticker);
   if (!ticker) res.status(400).json({ error: "Invalid ticker." });
   return ticker;
+}
+
+function sourceMeta(source, { asOf = null, status = "available", note = null } = {}) {
+  return {
+    source,
+    retrievedAt: new Date().toISOString(),
+    asOf,
+    status,
+    synthetic: false,
+    note,
+  };
 }
 
 // ---- Fetch with timeout helper ----
@@ -111,7 +123,12 @@ router.get("/financials/:ticker", requirePro, async (req, res) => {
 
     if (!cik) {
       console.log(`[financials] ${ticker}: CIK not found (ETF/fund)`);
-      return res.json({ noStatements: true, quoteSummary: { result: [{ defaultKeyStatistics:{}, financialData:{} }] } });
+      return res.json({
+        noStatements: true,
+        reason: "SEC EDGAR does not provide company statements for this instrument.",
+        impliedLens: { synthetic: false, source: "SEC EDGAR", retrievedAt: new Date().toISOString(), asOf: null },
+        quoteSummary: { result: [{ defaultKeyStatistics:{}, financialData:{} }] },
+      });
     }
 
     console.log(`[financials] ${ticker}: CIK=${cik}`);
@@ -165,20 +182,29 @@ router.get("/financials/:ticker", requirePro, async (req, res) => {
     const cashSeries   = annualSeries(["CashAndCashEquivalentsAtCarryingValue","Cash"]);
     const stiSeries    = annualSeries(["ShortTermInvestments","AvailableForSaleSecuritiesCurrent"]);
     const tcaSeries    = annualSeries(["AssetsCurrent"]);
+    const tclSeries    = annualSeries(["LiabilitiesCurrent"]);
+    const invSeries    = annualSeries(["InventoryNet","InventoryFinishedGoodsNetOfAllowancesCustomerAdvancesAndProgressBillings"]);
     const tasSeries    = annualSeries(["Assets"]);
     const ltdSeries    = annualSeries(["LongTermDebt","LongTermDebtNoncurrent"]);
     const tlbSeries    = annualSeries(["Liabilities"]);
     const equSeries    = annualSeries(["StockholdersEquity","StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest"]);
     const ocfSeries    = annualSeries(["NetCashProvidedByUsedInOperatingActivities"]);
-    const capexSeries  = annualSeries(["PaymentsToAcquirePropertyPlantAndEquipment","CapitalExpenditures"]);
+    const capexSeries  = annualSeries(["PaymentsToAcquirePropertyPlantAndEquipment","PaymentsToAcquireProductiveAssets","CapitalExpenditures"]);
     const icfSeries    = annualSeries(["NetCashProvidedByUsedInInvestingActivities"]);
     const fcfSeries    = annualSeries(["NetCashProvidedByUsedInFinancingActivities"]);
     const cchSeries    = annualSeries(["CashAndCashEquivalentsPeriodIncreaseDecrease","NetIncreaseDecreaseInCashAndCashEquivalents"]);
+    const shareSeries  = annualSeries(["WeightedAverageNumberOfDilutedSharesOutstanding","CommonStockSharesOutstanding"]);
+    const intSeries    = annualSeries(["InterestExpenseNonOperating","InterestExpense"]);
 
     const backbone = revSeries.length ? revSeries : (niSeries.length ? niSeries : opinSeries);
     if (!backbone.length) {
       console.log(`[financials] ${ticker}: no annual XBRL data (ETF?)`);
-      return res.json({ noStatements: true, quoteSummary: { result: [{ defaultKeyStatistics:{}, financialData:{} }] } });
+      return res.json({
+        noStatements: true,
+        reason: "No annual SEC XBRL statements were available for this company.",
+        impliedLens: { synthetic: false, source: "SEC EDGAR XBRL", retrievedAt: new Date().toISOString(), asOf: null },
+        quoteSummary: { result: [{ defaultKeyStatistics:{}, financialData:{} }] },
+      });
     }
 
     const years = backbone.map(b => String(b.end.slice(0, 4)));
@@ -224,7 +250,7 @@ router.get("/financials/:ticker", requirePro, async (req, res) => {
     });
 
     // Augment with Finnhub metric ratios
-    let m = {}, shares = null;
+    let m = {}, shares = null, marketPrice = null;
     try {
       const [mr, pr] = await Promise.all([
         fetchWithTimeout(`https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FINNHUB_KEY}`, {}, 5000),
@@ -234,36 +260,112 @@ router.get("/financials/:ticker", requirePro, async (req, res) => {
       m      = md.metric || {};
       shares = pd.shareOutstanding ? pd.shareOutstanding * 1e6 : null;
     } catch (_) {}
+    try {
+      const market = await loadPriceHistory(ticker, { range: "1y", interval: "1d" });
+      marketPrice = market.bars.at(-1)?.close || null;
+    } catch (_) {}
+
+    const seriesValue = (series, index = 0) => {
+      const value = series[index]?.val;
+      return value != null && !isNaN(value) ? Number(value) : null;
+    };
+    const currentYear = years[0];
+    const currentValue = series => {
+      const row = series.find(item => String(item.end || "").slice(0, 4) === currentYear);
+      return row?.val != null && !isNaN(row.val) ? Number(row.val) : null;
+    };
+    const safeRatio = (a, b) => a != null && b != null && Number(b) !== 0 ? Number(a) / Number(b) : null;
+    shares = shares || currentValue(shareSeries);
+    const latestRevenue = currentValue(revSeries);
+    const priorRevenue = seriesValue(revSeries, 1);
+    const latestNetIncome = currentValue(niSeries);
+    const latestGrossProfit = currentValue(gpSeries);
+    const latestOperatingIncome = currentValue(opinSeries);
+    const latestEquity = currentValue(equSeries);
+    const latestAssets = currentValue(tasSeries);
+    const latestCurrentAssets = currentValue(tcaSeries);
+    const latestCurrentLiabilities = currentValue(tclSeries);
+    const latestInventory = currentValue(invSeries);
+    const latestDebt = currentValue(ltdSeries);
+    const latestCash = currentValue(cashSeries);
+    const latestShortTermInvestments = currentValue(stiSeries);
+    const latestOcf = currentValue(ocfSeries);
+    const latestCapex = currentValue(capexSeries);
+    const latestEps = currentValue(epsDilSeries);
+    const priorEps = seriesValue(epsDilSeries, 1);
+    const latestInterest = Math.abs(currentValue(intSeries) || 0) || null;
+    const freeCashFlow = latestOcf != null && latestCapex != null
+      ? latestOcf - Math.abs(latestCapex)
+      : null;
+    const marketCap = marketPrice != null && shares != null ? marketPrice * shares : null;
+    const enterpriseValue = marketCap != null
+      ? marketCap + Number(latestDebt || 0) - Number(latestCash || 0)
+      : null;
+    const investedCapital = latestDebt != null && latestEquity != null && latestCash != null
+      ? latestDebt + latestEquity - latestCash
+      : null;
 
     const n   = v => (v != null && !isNaN(v)) ? { raw: v } : null;
     const pct = v => (v != null && !isNaN(v)) ? { raw: v / 100 } : null;
 
     const defaultKeyStatistics = {
-      trailingPE:                   n(m.peNormalizedAnnual || m.peBasicExclExtraTTM),
+      trailingPE:                   n(m.peNormalizedAnnual ?? m.peBasicExclExtraTTM ?? safeRatio(marketPrice, latestEps)),
       forwardPE:                    null,
-      priceToBook:                  n(m.pbQuarterly),
-      priceToSalesTrailing12Months: n(m.psTTM),
-      enterpriseToEbitda:           n(m.evEbitdaTTM),
-      enterpriseToRevenue:          null,
+      priceToBook:                  n(m.pbQuarterly ?? (marketCap != null ? safeRatio(marketCap, latestEquity) : null)),
+      priceToSalesTrailing12Months: n(m.psTTM ?? (marketCap != null ? safeRatio(marketCap, latestRevenue) : null)),
+      enterpriseToEbitda:           n(m.evEbitdaTTM ?? safeRatio(enterpriseValue, latestOperatingIncome)),
+      enterpriseToRevenue:          n(safeRatio(enterpriseValue, latestRevenue)),
       sharesOutstanding:            n(shares),
       bookValuePerShare:            n(m.bookValuePerShareQuarterly),
     };
     const financialData = {
-      grossMargins:     pct(m.grossMarginAnnual    ?? m.grossMarginTTM),
-      operatingMargins: pct(m.operatingProfitMarginAnnual ?? m.operatingProfitMarginTTM),
-      profitMargins:    pct(m.netProfitMarginAnnual ?? m.netProfitMarginTTM),
-      returnOnEquity:   pct(m.roeTTM  ?? m.roeRfy),
-      returnOnAssets:   pct(m.roaTTM  ?? m.roaRfy),
-      revenueGrowth:    pct(m.revenueGrowthQuarterlyYoy ?? m.revenueGrowth3Y),
-      earningsGrowth:   pct(m.epsGrowthTTMYoy ?? m.epsGrowth3Y),
-      debtToEquity:     n(m.totalDebt2EquityQuarterly ?? m.totalDebt2EquityAnnual),
-      currentRatio:     n(m.currentRatioQuarterly  ?? m.currentRatioAnnual),
-      quickRatio:       n(m.quickRatioQuarterly    ?? m.quickRatioAnnual),
-      freeCashflow:     (m.fcfPerShareTTM != null && shares) ? n(m.fcfPerShareTTM * shares) : null,
+      grossMargins:     m.grossMarginAnnual != null || m.grossMarginTTM != null
+        ? pct(m.grossMarginAnnual ?? m.grossMarginTTM)
+        : n(safeRatio(latestGrossProfit, latestRevenue)),
+      operatingMargins: m.operatingProfitMarginAnnual != null || m.operatingProfitMarginTTM != null
+        ? pct(m.operatingProfitMarginAnnual ?? m.operatingProfitMarginTTM)
+        : n(safeRatio(latestOperatingIncome, latestRevenue)),
+      profitMargins:    m.netProfitMarginAnnual != null || m.netProfitMarginTTM != null
+        ? pct(m.netProfitMarginAnnual ?? m.netProfitMarginTTM)
+        : n(safeRatio(latestNetIncome, latestRevenue)),
+      returnOnEquity:   m.roeTTM != null || m.roeRfy != null
+        ? pct(m.roeTTM ?? m.roeRfy)
+        : n(safeRatio(latestNetIncome, latestEquity)),
+      returnOnAssets:   m.roaTTM != null || m.roaRfy != null
+        ? pct(m.roaTTM ?? m.roaRfy)
+        : n(safeRatio(latestNetIncome, latestAssets)),
+      roic:            n(latestOperatingIncome != null && investedCapital > 0
+        ? latestOperatingIncome * 0.79 / investedCapital
+        : null),
+      revenueGrowth:    m.revenueGrowthQuarterlyYoy != null || m.revenueGrowth3Y != null
+        ? pct(m.revenueGrowthQuarterlyYoy ?? m.revenueGrowth3Y)
+        : n(priorRevenue ? safeRatio(latestRevenue - priorRevenue, Math.abs(priorRevenue)) : null),
+      earningsGrowth:   m.epsGrowthTTMYoy != null || m.epsGrowth3Y != null
+        ? pct(m.epsGrowthTTMYoy ?? m.epsGrowth3Y)
+        : n(priorEps ? safeRatio(latestEps - priorEps, Math.abs(priorEps)) : null),
+      debtToEquity:     m.totalDebt2EquityQuarterly != null || m.totalDebt2EquityAnnual != null
+        ? pct(m.totalDebt2EquityQuarterly ?? m.totalDebt2EquityAnnual)
+        : n(safeRatio(latestDebt, latestEquity)),
+      currentRatio:     n(m.currentRatioQuarterly ?? m.currentRatioAnnual ?? safeRatio(latestCurrentAssets, latestCurrentLiabilities)),
+      quickRatio:       n(m.quickRatioQuarterly ?? m.quickRatioAnnual ?? (
+        latestCurrentAssets != null && latestInventory != null
+          ? safeRatio(latestCurrentAssets - latestInventory, latestCurrentLiabilities)
+          : null
+      )),
+      freeCashflow:     (m.fcfPerShareTTM != null && shares) ? n(m.fcfPerShareTTM * shares) : n(freeCashFlow),
+      totalCash:        n(latestCash),
+      interestCoverage: n(latestInterest ? safeRatio(latestOperatingIncome, latestInterest) : null),
     };
 
     console.log(`[financials] ${ticker}: EDGAR OK — years: ${years.join(", ")}`);
+    const hasFinnhubMetrics = Object.keys(m).length > 0;
     return res.json({
+      impliedLens: {
+        synthetic: false,
+        source: hasFinnhubMetrics ? "SEC EDGAR XBRL + Finnhub metrics" : "SEC EDGAR XBRL",
+        retrievedAt: new Date().toISOString(),
+        asOf: [...revSeries, ...niSeries].map(row => row.filed).filter(Boolean).sort().at(-1) || null,
+      },
       quoteSummary: { result: [{
         incomeStatementHistory:            { incomeStatementHistory:  incS },
         balanceSheetHistory:               { balanceSheetStatements:  balS },
@@ -278,7 +380,7 @@ router.get("/financials/:ticker", requirePro, async (req, res) => {
 
   } catch (e) {
     console.error("[financials] error:", e.message);
-    res.status(500).json({ error: "Failed to fetch financials: " + e.message });
+    res.status(503).json({ error: "Reported SEC financials are currently unavailable.", synthetic: false });
   }
 });
 
@@ -289,13 +391,32 @@ router.get("/earnings/:ticker", requirePro, async (req, res) => {
   const ticker = requestTicker(req, res);
   if (!ticker) return;
   try {
-    const url    = `https://finnhub.io/api/v1/stock/earnings?symbol=${ticker}&limit=20&token=${FINNHUB_KEY}`;
-    const r      = await fetchWithTimeout(url);
-    if (!r.ok) return res.status(r.status).json({ error: "Finnhub returned " + r.status });
-    res.json(await r.json());
+    const [factsResult, finnhubResult] = await Promise.allSettled([
+      loadCompanyFacts(ticker),
+      loadFinnhubResearch(ticker),
+    ]);
+    const finnhub = finnhubResult.status === "fulfilled"
+      ? finnhubResult.value
+      : { earnings: [], estimates: null };
+    if (factsResult.status !== "fulfilled" && !finnhub.earnings?.length) {
+      return res.status(503).json({
+        error: "Reported earnings are unavailable from SEC EDGAR and Finnhub.",
+        synthetic: false,
+      });
+    }
+    const earnings = deriveEarnings(
+      factsResult.status === "fulfilled" ? factsResult.value : null,
+      finnhub
+    );
+    if (!earnings.length) {
+      return res.status(404).json({ error: "No reported earnings history is available for this ticker.", synthetic: false });
+    }
+    res.setHeader("X-Data-Source", earnings[0].source);
+    res.setHeader("X-Data-As-Of", earnings[0].asOf || "");
+    res.json(earnings);
   } catch (e) {
     console.error("earnings proxy error:", e.message);
-    res.status(500).json({ error: "Failed to fetch earnings." });
+    res.status(503).json({ error: "Failed to fetch reported earnings.", synthetic: false });
   }
 });
 
@@ -379,11 +500,12 @@ router.get("/metrics/:ticker", requirePro, async (req, res) => {
   try {
     const url    = `https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FINNHUB_KEY}`;
     const r      = await fetchWithTimeout(url);
-    if (!r.ok) return res.status(r.status).json({ error: "Finnhub returned " + r.status });
-    res.json(await r.json());
+    if (!r.ok) return res.status(503).json({ error: "Provider metrics are currently unavailable.", synthetic: false });
+    const data = await r.json();
+    res.json({ ...data, impliedLens: sourceMeta("Finnhub metrics") });
   } catch (e) {
     console.error("metrics proxy error:", e.message);
-    res.status(500).json({ error: "Failed to fetch metrics." });
+    res.status(503).json({ error: "Failed to fetch provider metrics.", synthetic: false });
   }
 });
 
@@ -422,12 +544,26 @@ router.get("/sec/:ticker", requirePro, async (req, res) => {
       } catch (_) {}
     }
 
-    if (!entityId) return res.json({ filings: [], entity: ticker });
+    if (!entityId) {
+      return res.status(404).json({
+        error: "No SEC registrant identifier was found for this ticker.",
+        filings: [],
+        entity: ticker,
+        synthetic: false,
+      });
+    }
 
     const paddedCik = String(entityId).padStart(10, "0");
     const subUrl    = `https://data.sec.gov/submissions/CIK${paddedCik}.json`;
     const subResp   = await fetchWithTimeout(subUrl, { headers: { "User-Agent": UA } });
-    if (!subResp.ok) return res.json({ filings: [], entity: ticker });
+    if (!subResp.ok) {
+      return res.status(503).json({
+        error: "SEC filing history is currently unavailable.",
+        filings: [],
+        entity: ticker,
+        synthetic: false,
+      });
+    }
     const sub = await subResp.json();
 
     const recent  = sub.filings?.recent;
@@ -449,10 +585,17 @@ router.get("/sec/:ticker", requirePro, async (req, res) => {
         });
       }
     }
-    res.json({ entity: sub.name || ticker, cik: paddedCik, filings });
+    res.json({
+      entity: sub.name || ticker,
+      cik: paddedCik,
+      filings,
+      impliedLens: sourceMeta("SEC EDGAR submissions", {
+        asOf: filings.map(row => row.date).filter(Boolean).sort().at(-1) || null,
+      }),
+    });
   } catch (e) {
     console.error("SEC proxy error:", e.message);
-    res.status(500).json({ error: "Failed to fetch SEC data." });
+    res.status(503).json({ error: "Failed to fetch SEC filing data.", synthetic: false });
   }
 });
 
@@ -546,10 +689,30 @@ router.get("/estimates/:ticker", requirePro, async (req, res) => {
       suggestedWACC = Math.max(6, Math.min(20, suggestedWACC));
     }
 
-    return res.json({ ticker, revenueGrowth, epsGrowth, forwardPE, marginTrend, priceTarget, nextYearEPS, fwdQuarterly, suggestedWACC });
+    const available = Boolean(rev || eps || met || pt || fwdQuarterly.length);
+    if (!available) {
+      return res.status(503).json({
+        error: "Analyst estimates are unavailable from the configured provider.",
+        synthetic: false,
+      });
+    }
+    return res.json({
+      ticker,
+      revenueGrowth,
+      epsGrowth,
+      forwardPE,
+      marginTrend,
+      priceTarget,
+      nextYearEPS,
+      fwdQuarterly,
+      suggestedWACC,
+      impliedLens: sourceMeta("Finnhub analyst estimates", {
+        asOf: [...(rev?.data || []), ...(eps?.data || [])].map(row => row.period).filter(Boolean).sort().at(-1) || null,
+      }),
+    });
   } catch (e) {
     console.error("estimates error", e.message);
-    return res.status(500).json({ error: "Could not fetch estimates" });
+    return res.status(503).json({ error: "Could not fetch analyst estimates.", synthetic: false });
   }
 });
 
@@ -564,7 +727,13 @@ router.get("/analyst/:ticker", requirePro, async (req, res) => {
       fetchWithTimeout(`https://finnhub.io/api/v1/stock/price-target?symbol=${ticker}&token=${FINNHUB_KEY}`),
       fetchWithTimeout(`https://finnhub.io/api/v1/stock/recommendation?symbol=${ticker}&token=${FINNHUB_KEY}`),
     ]);
-    const [pt, rec] = await Promise.all([ptResp.json(), recResp.json()]);
+    if (!ptResp.ok && !recResp.ok) {
+      return res.status(503).json({ error: "Analyst data is unavailable from the configured provider.", synthetic: false });
+    }
+    const [pt, rec] = await Promise.all([
+      ptResp.ok ? ptResp.json() : {},
+      recResp.ok ? recResp.json() : [],
+    ]);
 
     let yahooFd = {};
     try {
@@ -596,10 +765,15 @@ router.get("/analyst/:ticker", requirePro, async (req, res) => {
       lastUpdated: pt.lastUpdated || null,
       symbol: ticker,
     };
-    res.json({ priceTarget: merged, recommendations: rec, yahooFd });
+    res.json({
+      priceTarget: merged,
+      recommendations: rec,
+      yahooFd,
+      impliedLens: sourceMeta("Finnhub analyst data", { asOf: merged.lastUpdated }),
+    });
   } catch (e) {
     console.error("analyst proxy error:", e.message);
-    res.status(500).json({ error: "Failed to fetch analyst data." });
+    res.status(503).json({ error: "Failed to fetch analyst data.", synthetic: false });
   }
 });
 
@@ -611,33 +785,96 @@ router.get("/institutional/:ticker", requirePro, async (req, res) => {
   if (!ticker) return;
   try {
     const r    = await fetchWithTimeout(`https://finnhub.io/api/v1/stock/ownership?symbol=${ticker}&limit=10&token=${FINNHUB_KEY}`);
+    if (!r.ok) return res.status(503).json({ error: "Institutional ownership is currently unavailable.", synthetic: false });
     const data = await r.json();
-    res.json(data);
+    res.json({ ...data, impliedLens: sourceMeta("Finnhub institutional ownership") });
   } catch (e) {
     console.error("institutional proxy error:", e.message);
-    res.status(500).json({ error: "Failed to fetch institutional data." });
+    res.status(503).json({ error: "Failed to fetch institutional data.", synthetic: false });
   }
 });
 
 // ============================================================
-//  GET /api/darkpool/:ticker  (Pro)
+//  GET /api/darkpool/:ticker  (Pro; legacy route name for FINRA OTC activity)
 // ============================================================
 router.get("/darkpool/:ticker", requirePro, async (req, res) => {
   const ticker = requestTicker(req, res);
   if (!ticker) return;
   try {
-    const compareFilters = encodeURIComponent(JSON.stringify([
-      { fieldName: "issueSymbolIdentifier", compareType: "equal", fieldValue: ticker },
-    ]));
-    const sortFields = encodeURIComponent(JSON.stringify([{ fieldName: "weekStartDate", sortType: "DESC" }]));
-    const finraUrl   = `https://api.finra.org/data/group/OTCMarket/name/weeklySummary?compareFilters=${compareFilters}&fields=weekStartDate,totalWeeklyShareQuantity,totalWeeklyTradeCount,lastSalePrice&limit=8&sortFields=${sortFields}`;
+    const finraDataUrl = "https://api.finra.org/data/group/OTCMarket/name/weeklySummary";
+    const partitionUrl = "https://api.finra.org/partitions/group/OTCMarket/name/weeklySummary";
+    const finraHeaders = {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      "User-Agent": UA,
+    };
+    const fetchPartition = async (weekStartDate, tierIdentifier) => {
+      const body = {
+        compareFilters: [
+          { fieldName: "weekStartDate", compareType: "EQUAL", fieldValue: weekStartDate },
+          { fieldName: "tierIdentifier", compareType: "EQUAL", fieldValue: tierIdentifier },
+          { fieldName: "issueSymbolIdentifier", compareType: "EQUAL", fieldValue: ticker },
+        ],
+        fields: [
+          "weekStartDate",
+          "issueSymbolIdentifier",
+          "totalWeeklyShareQuantity",
+          "totalWeeklyTradeCount",
+          "totalNotionalSum",
+          "summaryTypeCode",
+        ],
+        limit: 5000,
+      };
+      const response = await fetchWithTimeout(finraDataUrl, {
+        method: "POST",
+        headers: finraHeaders,
+        body: JSON.stringify(body),
+      }, 10000);
+      if (!response.ok) return [];
+      const rows = await response.json().catch(() => []);
+      return Array.isArray(rows) ? rows : [];
+    };
 
-    const [finraResp, metricResp] = await Promise.all([
-      fetchWithTimeout(finraUrl, { headers: { "Accept": "application/json", "User-Agent": UA } }).catch(() => null),
+    const [partitionResp, metricResp] = await Promise.all([
+      fetchWithTimeout(partitionUrl, { headers: finraHeaders }, 10000).catch(() => null),
       fetchWithTimeout(`https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FINNHUB_KEY}`).catch(() => null),
     ]);
 
-    const finraData  = (finraResp?.ok)  ? await finraResp.json().catch(()=>[])    : [];
+    const partitionData = partitionResp?.ok ? await partitionResp.json().catch(() => null) : null;
+    const availablePartitions = Array.isArray(partitionData?.availablePartitions)
+      ? partitionData.availablePartitions.map(row => row.partitions).filter(parts => Array.isArray(parts) && parts.length >= 2)
+      : [];
+    const tierDates = tier => [...new Set(
+      availablePartitions.filter(parts => parts[1] === tier).map(parts => parts[0])
+    )].sort().reverse();
+    const t1Dates = tierDates("T1");
+    const t2Dates = tierDates("T2");
+    const [t1Probe, t2Probe] = await Promise.all([
+      t1Dates[0] ? fetchPartition(t1Dates[0], "T1") : [],
+      t2Dates[0] ? fetchPartition(t2Dates[0], "T2") : [],
+    ]);
+    const selectedTier = t1Probe.length ? "T1" : t2Probe.length ? "T2" : null;
+    const selectedDates = selectedTier === "T1" ? t1Dates.slice(0, 8) : selectedTier === "T2" ? t2Dates.slice(0, 8) : [];
+    const weeklyRows = selectedTier
+      ? await Promise.all(selectedDates.map((date, index) => {
+          if (index === 0) return selectedTier === "T1" ? t1Probe : t2Probe;
+          return fetchPartition(date, selectedTier);
+        }))
+      : [];
+    const finraData = weeklyRows.map((rows, index) => {
+      const shares = rows.reduce((sum, row) => sum + Number(row.totalWeeklyShareQuantity || 0), 0);
+      const trades = rows.reduce((sum, row) => sum + Number(row.totalWeeklyTradeCount || 0), 0);
+      const notional = rows.reduce((sum, row) => sum + Number(row.totalNotionalSum || 0), 0);
+      return {
+        weekStartDate: selectedDates[index],
+        totalWeeklyShareQuantity: shares,
+        totalWeeklyTradeCount: trades,
+        totalNotionalSum: notional,
+        averageReportedPrice: shares > 0 ? notional / shares : null,
+        venuesReported: rows.length,
+        tierIdentifier: selectedTier,
+      };
+    }).filter(row => row.totalWeeklyShareQuantity > 0 || row.totalWeeklyTradeCount > 0);
     const metricData = (metricResp?.ok) ? await metricResp.json().catch(()=>({})) : {};
     const m          = metricData.metric || {};
 
@@ -645,10 +882,33 @@ router.get("/darkpool/:ticker", requirePro, async (req, res) => {
       sharesShort: null, shortRatio: null, shortPercentOfFloat: null,
       dateShortInterest: null, sharesOutstanding: m.sharesOutstanding || null, floatShares: null,
     };
-    res.json({ darkpool: Array.isArray(finraData) ? finraData : [], shortInterest: siData });
+    if (!finraData.length && !metricResp?.ok) {
+      return res.status(503).json({
+        error: "FINRA OTC activity and short-interest context are currently unavailable.",
+        synthetic: false,
+      });
+    }
+    const otcActivity = Array.isArray(finraData) ? finraData : [];
+    const otcSources = [
+      otcActivity.length ? "FINRA OTC Transparency" : null,
+      metricResp?.ok ? "Finnhub metrics" : null,
+    ].filter(Boolean).join(" + ");
+    res.json({
+      otcActivity,
+      darkpool: otcActivity,
+      shortInterest: siData,
+      impliedLens: {
+        ...sourceMeta(otcSources || "FINRA OTC Transparency", {
+          asOf: otcActivity.map(row => row.weekStartDate).filter(Boolean).sort().at(-1) || null,
+          note: "FINRA weekly OTC transparency is delayed aggregate activity, not venue-level dark-pool order flow.",
+        }),
+        finraAvailable: finraData.length > 0,
+        finnhubAvailable: Boolean(metricResp?.ok),
+      },
+    });
   } catch (e) {
     console.error("darkpool proxy error:", e.message);
-    res.status(500).json({ error: "Failed to fetch dark pool data." });
+    res.status(503).json({ error: "Failed to fetch FINRA OTC activity.", synthetic: false });
   }
 });
 

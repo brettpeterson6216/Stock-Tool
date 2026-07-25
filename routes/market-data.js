@@ -35,6 +35,24 @@ function setCached(key, data) {
   _responseCache.set(key, { data, ts: Date.now() });
 }
 
+function marketSessionAt(date = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/New_York",
+    weekday: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(date);
+  const value = Object.fromEntries(parts.map(part => [part.type, part.value]));
+  if (["Sat", "Sun"].includes(value.weekday)) return "closed";
+  const minutes = Number(value.hour) * 60 + Number(value.minute);
+  if (minutes < 4 * 60) return "closed";
+  if (minutes < 9 * 60 + 30) return "pre-market";
+  if (minutes < 16 * 60) return "regular";
+  if (minutes < 20 * 60) return "after-hours";
+  return "closed";
+}
+
 // ---- Fetch with timeout helper ----
 async function fetchWithTimeout(url, options = {}, timeoutMs = 5000) {
   const ctrl  = new AbortController();
@@ -214,7 +232,8 @@ async function getYahooSummary(_ticker, _modules) { return null; }
 router.get("/quote/:ticker", checkAnalysisLimit, async (req, res) => {
   const started = Date.now();
   try {
-    const ticker = req.params.ticker;
+    const ticker = normalizeTicker(req.params.ticker);
+    if (!ticker) return res.status(400).json({ error: "Invalid ticker." });
     const rawRange = String(req.query.range || "1y").toLowerCase();
     const range = VALID_RANGES.has(rawRange) ? rawRange : "1y";
     const rawInterval = String(req.query.interval || "").toLowerCase();
@@ -414,11 +433,16 @@ router.get("/quote/:ticker", checkAnalysisLimit, async (req, res) => {
     data.impliedLens = {
       source: source || "Aggregated market data",
       retrievedAt: new Date().toISOString(),
+      asOf: latestTimestamp ? new Date(latestTimestamp * 1000).toISOString() : null,
       latestTimestamp,
       ageSeconds,
       interval,
       range,
-      delayed: interval !== "1m" && interval !== "2m" && interval !== "5m",
+      marketSession: marketSessionAt(),
+      delayStatus: "provider-dependent",
+      delayed: null,
+      fallback: Boolean(source && (source.startsWith("Stooq") || source.includes("historical CSV"))),
+      synthetic: false,
     };
     setCached(cacheKey, data);
     recordProvider(source?.startsWith("Stooq") ? "Stooq" : "Yahoo Finance", true, Date.now() - started, source);
@@ -426,7 +450,10 @@ router.get("/quote/:ticker", checkAnalysisLimit, async (req, res) => {
   } catch (e) {
     recordProvider("Market prices", false, Date.now() - started, e.message);
     console.error("[quote] proxy error:", e.message);
-    res.status(500).json({ error: "Failed to fetch quote data: " + e.message });
+    res.status(503).json({
+      error: "Live market data is currently unavailable for this ticker.",
+      synthetic: false,
+    });
   }
 });
 

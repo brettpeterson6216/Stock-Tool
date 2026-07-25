@@ -122,7 +122,7 @@ test("quote results make data trust visible before decisions", () => {
   assert.match(productJs, /function renderTrust\(result\)/);
   assert.match(productJs, /impliedLensProvenance/);
   assert.match(productJs, /Evidence quality/);
-  assert.match(productJs, /Latest available context/);
+  assert.match(productJs, /Provider observation/);
   assert.match(productJs, /retrievedAt/);
   assert.match(productJs, /latestTimestamp/);
   assert.match(productJs, /trustField\("Range", range\)/);

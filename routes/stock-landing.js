@@ -15,6 +15,7 @@ const {
   ACQUISITION_TICKER_SET,
   relatedTickers,
 } = require("../lib/acquisition-tickers");
+const { loadPriceHistory } = require("../lib/stock-research");
 
 const router = express.Router();
 const TICKER_RE = /^[A-Z0-9.^-]{1,15}$/;
@@ -72,32 +73,65 @@ function researchQuestions(name, ticker, industry) {
 }
 
 async function fetchQuickQuote(ticker) {
-  if (!FINNHUB_KEY) return null;
+  if (FINNHUB_KEY) {
+    try {
+      const [qRes, pRes] = await Promise.all([
+        fetch(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_KEY}`,           { signal: AbortSignal.timeout(4000) }),
+        fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${FINNHUB_KEY}`,  { signal: AbortSignal.timeout(4000) }),
+      ]);
+      const q = qRes.ok  ? await qRes.json()  : null;
+      const p = pRes.ok  ? await pRes.json()  : null;
+      if (q?.c) {
+        const chgPct = q.pc ? ((q.c - q.pc) / q.pc) * 100 : 0;
+        return {
+          price:     q.c,
+          change:    q.c - (q.pc || q.c),
+          changePct: chgPct,
+          high:      q.h,
+          low:       q.l,
+          open:      q.o,
+          prevClose: q.pc,
+          name:      p?.name    || ticker,
+          exchange:  p?.exchange || "",
+          industry:  p?.finnhubIndustry || "",
+          country:   p?.country  || "",
+          logo:      p?.logo     || "",
+          weburl:    p?.weburl   || "",
+          marketCap: p?.marketCapitalization ? p.marketCapitalization * 1e6 : null,
+          currency:  p?.currency || "USD",
+          asOf:      q.t ? new Date(Number(q.t) * 1000).toISOString() : null,
+          source:    "Finnhub",
+        };
+      }
+    } catch (_) {
+      // Continue to the canonical Yahoo chart fallback below.
+    }
+  }
   try {
-    const [qRes, pRes] = await Promise.all([
-      fetch(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_KEY}`,           { signal: AbortSignal.timeout(4000) }),
-      fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${FINNHUB_KEY}`,  { signal: AbortSignal.timeout(4000) }),
-    ]);
-    const q = qRes.ok  ? await qRes.json()  : null;
-    const p = pRes.ok  ? await pRes.json()  : null;
-    if (!q || !q.c) return null;
-    const chgPct = q.pc ? ((q.c - q.pc) / q.pc) * 100 : 0;
+    const history = await loadPriceHistory(ticker, { range: "1y", interval: "1d" });
+    const latest = history.bars.at(-1);
+    const previous = history.bars.at(-2);
+    if (!latest) return null;
+    const priorClose = previous?.close || history.meta.previousClose || latest.close;
+    const change = latest.close - priorClose;
     return {
-      price:     q.c,
-      change:    q.c - (q.pc || q.c),
-      changePct: chgPct,
-      high:      q.h,
-      low:       q.l,
-      open:      q.o,
-      prevClose: q.pc,
-      name:      p?.name    || ticker,
-      exchange:  p?.exchange || "",
-      industry:  p?.finnhubIndustry || "",
-      country:   p?.country  || "",
-      logo:      p?.logo     || "",
-      weburl:    p?.weburl   || "",
-      marketCap: p?.marketCapitalization ? p.marketCapitalization * 1e6 : null,
-      currency:  p?.currency || "USD",
+      price: latest.close,
+      change,
+      changePct: priorClose ? (change / priorClose) * 100 : 0,
+      high: latest.high,
+      low: latest.low,
+      open: latest.open,
+      prevClose: priorClose,
+      name: history.meta.name || ticker,
+      exchange: history.meta.exchange || "",
+      industry: "",
+      country: "",
+      logo: "",
+      weburl: "",
+      marketCap: null,
+      currency: history.meta.currency || "USD",
+      asOf: history.provenance.asOf,
+      source: history.provenance.name,
     };
   } catch (_) {
     return null;
@@ -117,6 +151,9 @@ function renderPage(ticker, q) {
   const indexable = ACQUISITION_TICKER_SET.has(ticker);
   const questions = researchQuestions(name, ticker, q?.industry);
   const related   = relatedTickers(ticker);
+  const quoteTiming = q?.asOf
+    ? `${q.source || "Provider"} quote · as of ${new Date(q.asOf).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short", timeZone: "America/New_York" })} ET`
+    : "Latest available provider quote";
 
   const metaTitle = q
     ? `${ticker} Stock Analysis — ${name} ${price} (${chgPct}) | ImpliedLens`
@@ -127,7 +164,7 @@ function renderPage(ticker, q) {
     : `Analyze ${ticker} with ImpliedLens — DCF valuation, financials, analyst targets, earnings history, and institutional data.`;
 
   const canonicalUrl = `${APP_URL}/stock/${ticker}`;
-  const analyzeUrl   = `${APP_URL}/?ticker=${ticker}&source=stock_landing`;
+  const analyzeUrl   = `/?ticker=${ticker}&source=stock_landing`;
   const signupNext   = `/?view=tool&section=analyze&ticker=${ticker}&resume_analysis=1&source=stock_landing_signup`;
   const signupUrl    = `/signup?next=${encodeURIComponent(signupNext)}&source=stock_landing&ticker=${encodeURIComponent(ticker)}`;
   const analyzeUrlJson = JSON.stringify(analyzeUrl).replace(/</g, "\\u003c");
@@ -270,14 +307,39 @@ function renderPage(ticker, q) {
       .q-price{font-size:1.8rem}
       .hero,.features,.research,.related{padding-left:1rem;padding-right:1rem}
     }
+    html:not([data-theme="dark"]) body{background:#f7f1e6;color:#25231f}
+    html:not([data-theme="dark"]) .top-bar{background:rgba(255,255,255,.7);border-color:rgba(42,35,24,.12)}
+    html:not([data-theme="dark"]) .logo,
+    html:not([data-theme="dark"]) h1,
+    html:not([data-theme="dark"]) h2,
+    html:not([data-theme="dark"]) .q-price,
+    html:not([data-theme="dark"]) .q-stat-val,
+    html:not([data-theme="dark"]) .feat-title{color:#171510}
+    html:not([data-theme="dark"]) .top-bar .back,
+    html:not([data-theme="dark"]) .breadcrumb,
+    html:not([data-theme="dark"]) .breadcrumb a,
+    html:not([data-theme="dark"]) .exchange-tag,
+    html:not([data-theme="dark"]) .q-label,
+    html:not([data-theme="dark"]) .q-stat-lbl,
+    html:not([data-theme="dark"]) .feat-desc,
+    html:not([data-theme="dark"]) .cta-note,
+    html:not([data-theme="dark"]) footer a{color:rgba(37,35,31,.62)}
+    html:not([data-theme="dark"]) .quote-card,
+    html:not([data-theme="dark"]) .feat,
+    html:not([data-theme="dark"]) .ticker-pill{background:rgba(255,255,255,.58);border-color:rgba(42,35,24,.12)}
+    html:not([data-theme="dark"]) .research-item{color:#3e392f;background:rgba(200,136,42,.08)}
+    html:not([data-theme="dark"]) footer{border-color:rgba(42,35,24,.12)}
   </style>
+  <link rel="stylesheet" href="/static-polish.css?v=20260724">
 </head>
 <body>
   <div class="top-bar">
     <a href="/" class="logo">Implied<em>Lens</em></a>
     <a href="/" class="back">← All analysis</a>
+    <button class="static-theme-toggle" type="button" aria-label="Switch theme"><span class="static-theme-thumb"></span></button>
   </div>
 
+  <main>
   <div class="hero">
     <div class="breadcrumb">
       <a href="/">ImpliedLens</a> › <a href="/stock/${esc(ticker)}">${esc(ticker)}</a>
@@ -291,7 +353,7 @@ function renderPage(ticker, q) {
       <div class="q-main">
         <div class="q-price">${price}</div>
         <div class="q-chg" style="color:${chgColor}">${chgSign} ${chgPct}</div>
-        <div class="q-label">Latest quote · typically 15 min delayed</div>
+        <div class="q-label">${esc(quoteTiming)} · no synthetic replacement</div>
       </div>
       <div class="q-stats">
         <div class="q-stat">
@@ -353,6 +415,7 @@ function renderPage(ticker, q) {
         .join("")}
     </div>
   </div>
+  </main>
 
   <footer>
     <a href="/privacy">Privacy</a>
@@ -362,6 +425,7 @@ function renderPage(ticker, q) {
     <a href="/">ImpliedLens</a>
   </footer>
 
+  <script src="/static-theme.js?v=20260609"></script>
   <script>
     const landingContext = ${landingContextJson};
     function trackLanding(event, properties) {

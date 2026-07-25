@@ -1,0 +1,224 @@
+{
+  "generatedAt": "2026-07-25T00:01:40.988Z",
+  "modelVersion": "0.6.0",
+  "status": "preliminary-technical-calibration",
+  "limitations": [
+    "The default universe is a liquid U.S. large-cap and ETF sample, not a survivorship-bias-free total-market dataset.",
+    "LensValue and Golden Lens require licensed or reconstructed point-in-time fundamentals and estimates before public performance claims are allowed.",
+    "Results are diagnostics, not a promise of future returns."
+  ],
+  "universe": [
+    "AAPL",
+    "MSFT",
+    "NVDA",
+    "GOOGL",
+    "AMZN",
+    "META",
+    "JPM",
+    "UNH",
+    "XOM",
+    "CAT",
+    "COST",
+    "NEE",
+    "SPY",
+    "QQQ",
+    "IWM"
+  ],
+  "failures": [],
+  "observations": 525,
+  "methodology": {
+    "type": "walk-forward",
+    "lookahead": false,
+    "minimumBars": 252,
+    "sampleEvery": 63,
+    "horizons": [
+      21,
+      63
+    ],
+    "note": "Every score is calculated from a price-history prefix ending on the observation date."
+  },
+  "summary": {
+    "21": {
+      "observations": 525,
+      "scoreReturnCorrelation": 0.07282120393418548,
+      "averageReturn": 0.016516484323069194,
+      "highScoreAverageReturn": 0.004239892155738816,
+      "highScorePositiveRate": 0.47368421052631576,
+      "lowScoreAverageReturn": -0.03197362730476629,
+      "lowScorePositiveRate": 0.43137254901960786,
+      "buckets": [
+        {
+          "range": "0.0–0.9",
+          "observations": 0,
+          "averageReturn": null,
+          "medianReturn": null,
+          "positiveRate": null,
+          "averageMaxDrawdown": null
+        },
+        {
+          "range": "1.0–1.9",
+          "observations": 1,
+          "averageReturn": -0.042425460743049204,
+          "medianReturn": -0.042425460743049204,
+          "positiveRate": 0,
+          "averageMaxDrawdown": -0.0659697248078398
+        },
+        {
+          "range": "2.0–2.9",
+          "observations": 14,
+          "averageReturn": -0.06958369946875699,
+          "medianReturn": -0.04535444181163517,
+          "positiveRate": 0.35714285714285715,
+          "averageMaxDrawdown": -0.1433300987049404
+        },
+        {
+          "range": "3.0–3.9",
+          "observations": 36,
+          "averageReturn": -0.01705715942326205,
+          "medianReturn": -0.009385415537144448,
+          "positiveRate": 0.4722222222222222,
+          "averageMaxDrawdown": -0.09895160011448889
+        },
+        {
+          "range": "4.0–4.9",
+          "observations": 67,
+          "averageReturn": 0.019080899230071172,
+          "medianReturn": 0.014085284757113126,
+          "positiveRate": 0.5671641791044776,
+          "averageMaxDrawdown": -0.07211497362400075
+        },
+        {
+          "range": "5.0–5.9",
+          "observations": 123,
+          "averageReturn": 0.03989591825936858,
+          "medianReturn": 0.035784051321685384,
+          "positiveRate": 0.7235772357723578,
+          "averageMaxDrawdown": -0.06656462343789794
+        },
+        {
+          "range": "6.0–6.9",
+          "observations": 149,
+          "averageReturn": 0.019824714597550752,
+          "medianReturn": 0.013608973745222519,
+          "positiveRate": 0.6174496644295302,
+          "averageMaxDrawdown": -0.06205227971133739
+        },
+        {
+          "range": "7.0–7.9",
+          "observations": 116,
+          "averageReturn": 0.009325436567613886,
+          "medianReturn": 0.014354731374288443,
+          "positiveRate": 0.5603448275862069,
+          "averageMaxDrawdown": -0.0635601480103666
+        },
+        {
+          "range": "8.0–8.9",
+          "observations": 19,
+          "averageReturn": 0.004239892155738816,
+          "medianReturn": -0.005573157004515328,
+          "positiveRate": 0.47368421052631576,
+          "averageMaxDrawdown": -0.04793240088435468
+        },
+        {
+          "range": "9.0–9.9",
+          "observations": 0,
+          "averageReturn": null,
+          "medianReturn": null,
+          "positiveRate": null,
+          "averageMaxDrawdown": null
+        }
+      ]
+    },
+    "63": {
+      "observations": 525,
+      "scoreReturnCorrelation": 0.04446374226618318,
+      "averageReturn": 0.05539603099209895,
+      "highScoreAverageReturn": 0.01629001694107114,
+      "highScorePositiveRate": 0.7368421052631579,
+      "lowScoreAverageReturn": -0.005534106333696614,
+      "lowScorePositiveRate": 0.39215686274509803,
+      "buckets": [
+        {
+          "range": "0.0–0.9",
+          "observations": 0,
+          "averageReturn": null,
+          "medianReturn": null,
+          "positiveRate": null,
+          "averageMaxDrawdown": null
+        },
+        {
+          "range": "1.0–1.9",
+          "observations": 1,
+          "averageReturn": -0.03810843409070774,
+          "medianReturn": -0.03810843409070774,
+          "positiveRate": 0,
+          "averageMaxDrawdown": -0.08988717318310613
+        },
+        {
+          "range": "2.0–2.9",
+          "observations": 14,
+          "averageReturn": -0.03828281859224334,
+          "medianReturn": -0.08698566618828807,
+          "positiveRate": 0.35714285714285715,
+          "averageMaxDrawdown": -0.19169174002918063
+        },
+        {
+          "range": "3.0–3.9",
+          "observations": 36,
+          "averageReturn": 0.008106346426766303,
+          "medianReturn": -0.026386782377801232,
+          "positiveRate": 0.4166666666666667,
+          "averageMaxDrawdown": -0.16271748950883946
+        },
+        {
+          "range": "4.0–4.9",
+          "observations": 67,
+          "averageReturn": 0.043242024750838895,
+          "medianReturn": 0.037022977917510635,
+          "positiveRate": 0.6268656716417911,
+          "averageMaxDrawdown": -0.14048726499768646
+        },
+        {
+          "range": "5.0–5.9",
+          "observations": 123,
+          "averageReturn": 0.08853883167616498,
+          "medianReturn": 0.06812787673335374,
+          "positiveRate": 0.7073170731707317,
+          "averageMaxDrawdown": -0.11337365116505735
+        },
+        {
+          "range": "6.0–6.9",
+          "observations": 149,
+          "averageReturn": 0.07085531935096569,
+          "medianReturn": 0.07754175214574421,
+          "positiveRate": 0.7315436241610739,
+          "averageMaxDrawdown": -0.11171861913436232
+        },
+        {
+          "range": "7.0–7.9",
+          "observations": 116,
+          "averageReturn": 0.04060957615708355,
+          "medianReturn": 0.03442859469407644,
+          "positiveRate": 0.6120689655172413,
+          "averageMaxDrawdown": -0.1165977302444585
+        },
+        {
+          "range": "8.0–8.9",
+          "observations": 19,
+          "averageReturn": 0.01629001694107114,
+          "medianReturn": 0.016965155335704862,
+          "positiveRate": 0.7368421052631579,
+          "averageMaxDrawdown": -0.09528437899341843
+        },
+        {
+          "range": "9.0–9.9",
+          "observations": 0,
+          "averageReturn": null,
+          "medianReturn": null,
+          "positiveRate": null,
+          "averageMaxDrawdown": null
+        }
+      ]
+    }
+  }
+}

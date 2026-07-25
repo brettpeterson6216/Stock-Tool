@@ -118,7 +118,12 @@
       freshness = days >= 1 ? `${days}d since latest observation` : mins >= 1 ? `${mins}m since latest observation` : "Latest observation under 1m old";
     }
     if (p.delayed && !Number.isFinite(age)) freshness = "Provider timing varies";
-    return { source: p.source || "Aggregated market data", freshness, warn: Boolean(p.delayed) };
+    if (p.delayStatus === "provider-dependent" && !Number.isFinite(age)) freshness = "Provider timing varies";
+    return {
+      source: p.source || "Aggregated market data",
+      freshness,
+      warn: Boolean(p.delayed || p.fallback),
+    };
   }
   function escapeHtml(value) {
     return String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
@@ -382,7 +387,7 @@
     const interval = provenance?.interval || "Provider default";
     const latest = trustDateLabel(provenance?.latestTimestamp, "Latest observation unavailable");
     const retrieved = trustDateLabel(provenance?.retrievedAt, "Retrieved in this session");
-    host.textContent = "Latest available context";
+    host.textContent = `Provider observation · ${latest}`;
     let row = document.getElementById("il-trust-row");
     if (!row) {
       row = document.createElement("div");

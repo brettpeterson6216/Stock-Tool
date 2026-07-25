@@ -645,13 +645,13 @@
 /* ── Source provenance notes: every data tab names its providers ─────────────── */
 (function () {
   const SOURCES = {
-    financials:    "SEC EDGAR XBRL (statements) · Finnhub (ratios)",
-    advmetrics:    "Finnhub fundamentals",
-    earnings:      "Finnhub EPS estimates & surprises",
+    financials:    "SEC EDGAR XBRL statements · optional Finnhub supplement",
+    advmetrics:    "SEC EDGAR XBRL calculations · optional Finnhub supplement",
+    earnings:      "SEC-reported EPS · optional Finnhub estimates",
     secfilings:    "SEC EDGAR — links open official filings",
-    institutional: "Finnhub ownership · FINRA OTC weekly data",
+    institutional: "FINRA OTC weekly data · optional Finnhub ownership",
     screener:      "Finnhub + exchange reference data",
-    compare:       "Yahoo Finance charts · Finnhub fundamentals",
+    compare:       "Yahoo Finance charts · optional Finnhub fundamentals",
   };
   function inject() {
     Object.entries(SOURCES).forEach(([sec, label]) => {
