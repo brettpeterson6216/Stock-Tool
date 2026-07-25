@@ -13,6 +13,7 @@ const productJs = fs.readFileSync(path.join(__dirname, "..", "public", "product-
 const productCss = fs.readFileSync(path.join(__dirname, "..", "public", "product-system.css"), "utf8");
 const researchJs = fs.readFileSync(path.join(__dirname, "..", "public", "research-system.js"), "utf8");
 const releaseCss = fs.readFileSync(path.join(__dirname, "..", "public", "release-polish.css"), "utf8");
+const lensAppJs = fs.readFileSync(path.join(__dirname, "..", "labs", "lens-score", "app.js"), "utf8");
 const htmlAndLegacyCss = `${html}\n${legacyCss}`;
 
 test("chart rebuilds keep prices and timestamps on one aligned series", () => {
@@ -108,6 +109,12 @@ test("ticker deep links hydrate the requested data tab after quote loading", () 
   assert.match(html, /const requestedDataSection = \[\.\.\.document\.querySelectorAll\('\.app-section\.open'\)\]/);
   assert.match(html, /requestedDataSection !== 'analyze'/);
   assert.match(html, /window\.navGoTo\(requestedDataSection\)/);
+});
+
+test("price scenarios explain why a large price move may not change a capped score", () => {
+  assert.match(lensAppJs, /The tested price is/);
+  assert.match(lensAppJs, /quality cap and chart setup remain in force/);
+  assert.match(lensAppJs, /not a historical backtest/);
 });
 
 test("call research refreshes are idempotent and label reported data honestly", () => {

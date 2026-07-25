@@ -652,13 +652,15 @@
     $("#scenario-score-label").textContent = scenario.label;
     $("#scenario-value-score").textContent = scenario.lenses.value.score.toFixed(1);
     $("#scenario-setup-score").textContent = scenario.lenses.setup.score.toFixed(1);
-    const delta = scenario.score - state.baseline.score;
-    $("#scenario-delta").textContent = Math.abs(delta) < .05
-      ? "This scenario is effectively unchanged from the current setup."
-      : `${delta > 0 ? "+" : ""}${delta.toFixed(1)} points versus the current LensScore of ${state.baseline.score.toFixed(1)}.`;
     const entry = Number(state.entryPrice || state.result.price);
-    const difference = entry / state.result.price - 1;
-    $("#scenario-explanation").textContent = Math.abs(difference) < .001
+    const delta = scenario.score - state.baseline.score;
+    const priceDifference = entry / state.result.price - 1;
+    $("#scenario-delta").textContent = Math.abs(delta) < .05
+      ? Math.abs(priceDifference) >= .01
+        ? `The tested price is ${Math.abs(priceDifference * 100).toFixed(1)}% ${priceDifference < 0 ? "lower" : "higher"}, but the displayed score is unchanged because the current quality cap and chart setup remain in force.`
+        : "This scenario is effectively unchanged from the current setup."
+      : `${delta > 0 ? "+" : ""}${delta.toFixed(1)} points versus the current LensScore of ${state.baseline.score.toFixed(1)}.`;
+    $("#scenario-explanation").textContent = Math.abs(priceDifference) < .001
       ? "Test a different entry price or change the fundamental assumptions to see the score respond. This is a price-only test using today’s evidence, not a historical backtest."
       : `At ${money(entry)}, LensValue becomes ${scenario.lenses.value.score.toFixed(1)}/10 while LensSetup remains ${scenario.lenses.setup.score.toFixed(1)}/10 because the chart history is unchanged. The combined LensScore is ${scenario.score.toFixed(1)}/10. This assumes the company outlook has not deteriorated. It does not reconstruct how the stock would have scored on a past date.`;
     const eps = state.fundamentalModel.referenceEps;
