@@ -154,8 +154,12 @@
       list.innerHTML = `<div class="il-call-empty">Search a company in Analyze, then return here to review its calls.</div>`;
       return;
     }
-    if (!force && callsLoadedTicker === current && list.dataset.loaded === current) return;
+    if (!force && (
+      (callsLoadedTicker === current && list.dataset.loaded === current) ||
+      list.dataset.loading === current
+    )) return;
     callsLoadedTicker = current;
+    list.dataset.loading = current;
     if (title) title.textContent = `${current} recent calls`;
     if (sub) sub.textContent = "Loading transcript availability and official research links.";
     list.innerHTML = `<div class="il-call-empty">Loading ${esc(current)} call research...</div>`;
@@ -181,9 +185,14 @@
           const earnResp = await fetch(`/api/earnings/${encodeURIComponent(current)}`, { credentials: "same-origin" });
           const rows = earnResp.ok ? await earnResp.json() : [];
           if (Array.isArray(rows) && rows.length) {
-            const fmtQ = r => r.year && r.quarter ? `Q${r.quarter} ${r.year}` : (r.period || "—");
+            const fmtQ = r => {
+              if (r.period) return r.period;
+              if (!r.year || !r.quarter) return "—";
+              const quarter = String(r.quarter).toUpperCase();
+              return `${quarter.startsWith("Q") ? quarter : `Q${quarter}`} ${r.year}`;
+            };
             list.insertAdjacentHTML("beforeend",
-              `<div class="il-call-earnings"><h4>Recent quarters — EPS vs estimate (Finnhub)</h4>` +
+              `<div class="il-call-earnings"><h4>Recent quarters — reported EPS vs estimate</h4>` +
               rows.slice(0, 6).map(r => {
                 const beat = r.actual != null && r.estimate != null ? r.actual - r.estimate : null;
                 const cls = beat == null ? "" : beat >= 0 ? "up" : "dn";
@@ -196,6 +205,8 @@
       trackEvent("call_research_loaded", { ticker: current, transcripts: data.transcripts?.length || 0 });
     } catch (error) {
       list.innerHTML = `<div class="il-call-empty">${esc(error.message)}</div>`;
+    } finally {
+      if (list.dataset.loading === current) delete list.dataset.loading;
     }
   }
 

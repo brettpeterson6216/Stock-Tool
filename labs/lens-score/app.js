@@ -12,7 +12,7 @@
     { key: "netDebtEbitda", label: "Net debt / EBITDA", min: -2, max: 7, step: 0.1, format: "multiple", note: "Negative values indicate net cash" },
     { key: "interestCoverage", label: "Interest coverage", min: 0, max: 40, step: 1, format: "multiple", note: "Operating earnings divided by interest" },
     { key: "dilution", label: "Annual dilution", min: -5, max: 10, step: 0.5, format: "percent", note: "Negative values represent buybacks" },
-    { key: "forwardPE", label: "Forward earnings multiple", min: 5, max: 90, step: 1, format: "multiple", note: "Latest price divided by consensus or reported EPS" },
+    { key: "forwardPE", label: "Reference earnings multiple", min: 5, max: 90, step: 1, format: "multiple", note: "Price divided by the disclosed EPS basis" },
     { key: "dcfUpside", label: "Modeled value gap", min: -50, max: 100, step: 1, format: "percent", note: "Price versus the normalized Implied Lens earnings-value model" },
     { key: "impliedGrowthGap", label: "Expectations gap", min: -10, max: 25, step: 1, format: "percent", note: "Implied growth minus supported growth" },
     { key: "bearDownside", label: "Bear-case downside", min: -70, max: -2, step: 1, format: "percent", note: "Modeled downside from the current price" },
@@ -25,6 +25,7 @@
     fundamentals: {},
     reportedFundamentals: {},
     fundamentalFields: {},
+    fundamentalModel: {},
     provenance: null,
     result: null,
     baseline: null,
@@ -60,17 +61,26 @@
 
   function chartColors() {
     const light = document.documentElement.dataset.theme === "light";
+    const styles = getComputedStyle(document.documentElement);
+    const token = (name, fallback) => styles.getPropertyValue(name).trim() || fallback;
     return {
       price: light ? "#27342c" : "#dce5dc",
       grid: light ? "rgba(31,41,34,.10)" : "rgba(229,237,227,.07)",
       axis: light ? "#667168" : "#7e897f",
       baseline: light ? "rgba(31,41,34,.16)" : "rgba(229,237,227,.12)",
-      green: light ? "#187247" : "#68c78d",
-      red: light ? "#b43e47" : "#e37676",
+      green: token("--green", light ? "#087a35" : "#00e676"),
+      red: token("--red", light ? "#c6283d" : "#ff4d5a"),
       gold: light ? "#9b6a17" : "#d2a34c",
       blue: light ? "#315f9d" : "#7ca8df",
       purple: light ? "#704898" : "#b17bd4",
     };
+  }
+
+  function alphaColor(hex, alpha) {
+    const value = String(hex || "").replace("#", "");
+    if (!/^[0-9a-f]{6}$/i.test(value)) return hex;
+    const numeric = Number.parseInt(value, 16);
+    return `rgba(${(numeric >> 16) & 255},${(numeric >> 8) & 255},${numeric & 255},${alpha})`;
   }
 
   async function loadTicker(ticker) {
@@ -101,6 +111,12 @@
       state.fundamentals = { ...(payload.fundamentals?.values || {}) };
       state.reportedFundamentals = { ...state.fundamentals };
       state.fundamentalFields = { ...(payload.fundamentals?.fields || {}) };
+      state.fundamentalModel = {
+        referenceEps: payload.fundamentals?.referenceEps ?? null,
+        referenceEpsBasis: payload.fundamentals?.referenceEpsBasis || "Unavailable",
+        referenceEpsAsOf: payload.fundamentals?.referenceEpsAsOf || null,
+        referenceEpsQuarters: payload.fundamentals?.referenceEpsQuarters || [],
+      };
       setNotice(
         `Research loaded from ${state.source}. Market as of ${formatAsOf(payload.provenance?.asOf?.market)}; company facts as of ${formatAsOf(payload.provenance?.asOf?.fundamentals)}.`,
         "good"
@@ -110,6 +126,7 @@
       state.fundamentals = {};
       state.reportedFundamentals = {};
       state.fundamentalFields = {};
+      state.fundamentalModel = {};
       state.result = null;
       state.baseline = null;
       setNotice(
@@ -510,7 +527,7 @@
       finite(state.fundamentals.roic)
         ? ["Return on invested capital", pct(state.fundamentals.roic), "Fundamentals", state.fundamentalFields.roic?.source || "Reported data"]
         : ["Return on equity", pct(state.fundamentals.returnOnEquity), "Fundamentals", state.fundamentalFields.returnOnEquity?.source || "Reported data"],
-      ["Forward P/E", Number.isFinite(Number(state.fundamentals.forwardPE)) ? `${Number(state.fundamentals.forwardPE).toFixed(1)}×` : "—", "Valuation", state.fundamentalFields.forwardPE?.source || "Reported data"],
+      ["Reference earnings multiple", Number.isFinite(Number(state.fundamentals.forwardPE)) ? `${Number(state.fundamentals.forwardPE).toFixed(1)}×` : "—", "Valuation", state.fundamentalFields.forwardPE?.source || "Reported data"],
       ["Expectations gap", pct(state.fundamentals.impliedGrowthGap), "Valuation", "Implied minus supported growth"],
     ];
     const tbody = $("#indicator-table");
@@ -642,8 +659,18 @@
     const entry = Number(state.entryPrice || state.result.price);
     const difference = entry / state.result.price - 1;
     $("#scenario-explanation").textContent = Math.abs(difference) < .001
-      ? "Test a different entry price or change the fundamental assumptions to see the score respond."
-      : `At ${money(entry)}, LensValue becomes ${scenario.lenses.value.score.toFixed(1)}/10 while LensSetup remains ${scenario.lenses.setup.score.toFixed(1)}/10 because the chart history is unchanged. The combined LensScore is ${scenario.score.toFixed(1)}/10. This assumes the company outlook has not deteriorated.`;
+      ? "Test a different entry price or change the fundamental assumptions to see the score respond. This is a price-only test using today’s evidence, not a historical backtest."
+      : `At ${money(entry)}, LensValue becomes ${scenario.lenses.value.score.toFixed(1)}/10 while LensSetup remains ${scenario.lenses.setup.score.toFixed(1)}/10 because the chart history is unchanged. The combined LensScore is ${scenario.score.toFixed(1)}/10. This assumes the company outlook has not deteriorated. It does not reconstruct how the stock would have scored on a past date.`;
+    const eps = state.fundamentalModel.referenceEps;
+    const basis = state.fundamentalModel.referenceEpsBasis || "Unavailable";
+    const basisText = basis ? `${basis.charAt(0).toLowerCase()}${basis.slice(1)}` : "unavailable EPS";
+    const asOf = state.fundamentalModel.referenceEpsAsOf;
+    $("#scenario-eps-basis").textContent = finite(eps)
+      ? `Valuation uses ${money(eps)} ${basisText}${asOf ? ` through ${formatAsOf(asOf)}` : ""}.`
+      : "No reliable positive EPS basis is available, so earnings-based valuation inputs are not graded.";
+    $("#scenario-score-cap").textContent = scenario.caps?.length
+      ? scenario.caps.join(" ")
+      : "No score cap is active. Price, company quality, valuation, risk and the unchanged chart setup all contribute independently.";
   }
 
   function renderChartLegend() {
@@ -708,8 +735,8 @@
         if (!point || Math.abs(distanceFromTransition) < 0.35) return;
         const alpha = 0.018 + Math.min(1, Math.abs(distanceFromTransition) / 5) * 0.085;
         context.fillStyle = point.trendScore > 5
-          ? `rgba(104,199,141,${alpha})`
-          : `rgba(227,118,118,${alpha})`;
+          ? alphaColor(palette.green, alpha)
+          : alphaColor(palette.red, alpha);
         context.fillRect(x(index) - bandWidth / 2, pad.top, bandWidth + 1, plotBottom - pad.top);
       });
     }
@@ -730,9 +757,9 @@
     }
 
     shownZones.forEach(zone => {
-      context.fillStyle = zone.type === "support" ? "rgba(104,199,141,.12)" : "rgba(227,118,118,.10)";
+      context.fillStyle = zone.type === "support" ? alphaColor(palette.green, .12) : alphaColor(palette.red, .10);
       context.fillRect(pad.left, y(zone.upper), width - pad.left - pad.right, Math.max(2, y(zone.lower) - y(zone.upper)));
-      context.strokeStyle = zone.type === "support" ? "rgba(104,199,141,.48)" : "rgba(227,118,118,.42)";
+      context.strokeStyle = zone.type === "support" ? alphaColor(palette.green, .48) : alphaColor(palette.red, .42);
       context.setLineDash([5, 5]);
       context.beginPath();
       context.moveTo(pad.left, y(zone.center));
@@ -748,7 +775,7 @@
       const px = x(index);
       const up = bar.close >= bar.open;
       context.strokeStyle = up ? palette.green : palette.red;
-      context.fillStyle = up ? "rgba(104,199,141,.78)" : "rgba(227,118,118,.78)";
+      context.fillStyle = up ? alphaColor(palette.green, .78) : alphaColor(palette.red, .78);
       context.beginPath();
       context.moveTo(px, y(bar.high));
       context.lineTo(px, y(bar.low));
@@ -757,7 +784,7 @@
       const bodyBottom = y(Math.min(bar.open, bar.close));
       context.fillRect(px - candleWidth / 2, bodyTop, candleWidth, Math.max(1, bodyBottom - bodyTop));
       const volHeight = (bar.volume || 0) / maxVolume * (volumeHeight - 12);
-      context.fillStyle = up ? "rgba(104,199,141,.26)" : "rgba(227,118,118,.23)";
+      context.fillStyle = up ? alphaColor(palette.green, .26) : alphaColor(palette.red, .23);
       context.fillRect(px - candleWidth / 2, height - pad.bottom - volHeight, candleWidth, volHeight);
       state.chartPoints.push({ x: px, bar });
     });

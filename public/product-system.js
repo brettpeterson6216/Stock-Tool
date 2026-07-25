@@ -529,12 +529,9 @@
   function saveLearnState() { write(KEYS.workshop, learnState); }
   function learnFieldReady(field) { return String(learnState[field] || "").trim().length >= 12; }
   function updateLearnProgress() {
-    const step = learnState.completed ? 6 : Math.min(learnState.step + 1, 6);
-    const label = document.getElementById("edu-progress-label");
-    const fill = document.getElementById("edu-progress-fill");
-    if (label) label.textContent = learnState.completed ? "Complete" : `Step ${step} / 6`;
-    if (fill) fill.style.width = `${learnState.completed ? 100 : step / 6 * 100}%`;
-    document.querySelectorAll(".edu-path").forEach(card => card.classList.toggle("done", learnState.completed));
+    const thesisCard = document.querySelector('.edu-path[data-lesson="thesis"]');
+    if (thesisCard) thesisCard.classList.toggle("done", learnState.completed);
+    if (typeof window.updateEduProgress === "function") window.updateEduProgress();
   }
   function learnCompanyCard() {
     if (!learnState.ticker) return "";
@@ -660,12 +657,6 @@
   }
   function installEducationContext() {
     window.openLearnWorkshop = () => { const host = document.getElementById("edu-workshop"); renderLearnWorkshop(); host?.scrollIntoView({ behavior: "smooth", block: "start" }); };
-    window.openLesson = window.openLearnWorkshop;
-    renderLearnWorkshop();
-    if (typeof window.openSection === "function") {
-      const originalOpen = window.openSection;
-      window.openSection = function (id, skip, historyMode) { const out = originalOpen(id, skip, historyMode); if (id === "education") setTimeout(renderLearnWorkshop, 0); return out; };
-    }
   }
 
   function installOnboarding() {

@@ -10,9 +10,9 @@
   <meta property="og:type" content="website">
   <title>LensScore · Implied Lens</title>
   <link rel="icon" href="/logo.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/__lab/lens-score/assets/styles.css">
-  <script defer src="/__lab/lens-score/assets/lens-score-engine.js"></script>
-  <script defer src="/__lab/lens-score/assets/app.js"></script>
+  <link rel="stylesheet" href="/__lab/lens-score/assets/styles.css?v=20260725-2">
+  <script defer src="/__lab/lens-score/assets/lens-score-engine.js?v=20260725-1"></script>
+  <script defer src="/__lab/lens-score/assets/app.js?v=20260725-3"></script>
 </head>
 <body>
   <a class="skip-link" href="#lab-main">Skip to LensScore analysis</a>
@@ -27,7 +27,7 @@
     </div>
     <div class="lab-status" aria-label="Data status">
       <span class="status-dot"></span>
-      Reported data · production candidate
+      Reported data · production model
     </div>
     <div class="topbar-actions">
       <a class="icon-button" href="/?view=tool&amp;section=analyze" aria-label="Return to the Implied Lens research workspace">
@@ -382,7 +382,12 @@
           </div>
           <div class="scenario-callout">
             <span>Why the score changes</span>
-            <p id="scenario-explanation">The score will respond to valuation, expectations and risk—not overwrite the current market score.</p>
+            <p id="scenario-explanation">The score will respond to valuation, expectations and risk—not overwrite the current market score or reconstruct a past score.</p>
+          </div>
+          <div class="scenario-callout">
+            <span>What the valuation uses</span>
+            <p id="scenario-eps-basis">The earnings basis will appear after live company data loads.</p>
+            <p id="scenario-score-cap">Any active quality or risk cap will appear here.</p>
           </div>
           <button type="button" class="primary-action" id="save-scenario">Save scenario</button>
           <p class="save-status" id="save-status" role="status" aria-live="polite"></p>
@@ -394,7 +399,7 @@
   <dialog id="methodology-dialog">
     <div class="dialog-head">
       <div>
-        <p class="eyebrow">LensScore 0.6 production candidate</p>
+        <p class="eyebrow">LensScore production methodology</p>
         <h2>Two independent lenses, one final decision</h2>
       </div>
       <button type="button" id="close-methodology" aria-label="Close methodology">×</button>

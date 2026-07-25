@@ -11,6 +11,8 @@ const staticCss = fs.readFileSync(path.join(__dirname, "..", "public", "static-p
 const signupHtml = fs.readFileSync(path.join(__dirname, "..", "public", "signup.html"), "utf8");
 const productJs = fs.readFileSync(path.join(__dirname, "..", "public", "product-system.js"), "utf8");
 const productCss = fs.readFileSync(path.join(__dirname, "..", "public", "product-system.css"), "utf8");
+const researchJs = fs.readFileSync(path.join(__dirname, "..", "public", "research-system.js"), "utf8");
+const releaseCss = fs.readFileSync(path.join(__dirname, "..", "public", "release-polish.css"), "utf8");
 const htmlAndLegacyCss = `${html}\n${legacyCss}`;
 
 test("chart rebuilds keep prices and timestamps on one aligned series", () => {
@@ -94,6 +96,25 @@ test("learning module stays in Learn and produces a saved thesis", () => {
   assert.match(productJs, /Save thesis and complete/);
   assert.match(productJs, /\/api\/workspace\/theses\/\$\{encodeURIComponent\(learnState\.ticker\)\}/);
   assert.doesNotMatch(html, /<div class="edu-side-title">Module exercise<\/div>/);
+  assert.match(html, /data-lesson="site-tour"/);
+  assert.match(html, /data-lesson="lens-score"/);
+  assert.match(html, /data-lesson="charts"/);
+  assert.match(html, /data-lesson="financials"/);
+  assert.match(html, /data-lesson="thesis"/);
+  assert.doesNotMatch(productJs, /window\.openLesson\s*=\s*window\.openLearnWorkshop/);
+});
+
+test("ticker deep links hydrate the requested data tab after quote loading", () => {
+  assert.match(html, /const requestedDataSection = \[\.\.\.document\.querySelectorAll\('\.app-section\.open'\)\]/);
+  assert.match(html, /requestedDataSection !== 'analyze'/);
+  assert.match(html, /window\.navGoTo\(requestedDataSection\)/);
+});
+
+test("call research refreshes are idempotent and label reported data honestly", () => {
+  assert.match(researchJs, /list\.dataset\.loading === current/);
+  assert.match(researchJs, /list\.dataset\.loading = current/);
+  assert.match(researchJs, /Recent quarters — reported EPS vs estimate/);
+  assert.doesNotMatch(researchJs, /Recent quarters — EPS vs estimate \(Finnhub\)/);
 });
 
 test("product spine presents one reviewable decision workflow", () => {
@@ -153,6 +174,18 @@ test("charts and trade symbols use vivid market colors without repainting the si
   assert.match(html, /borderWidth:2\.4/);
   assert.match(html, /borderWidth:2\.7/);
   assert.match(html, /stop-color="var\(--chart-price\)"/);
+  assert.match(releaseCss, /--chart-positive: #00a84f/);
+  assert.match(releaseCss, /--chart-positive: #00e676/);
+  assert.match(releaseCss, /--chart-negative: #e23d4f/);
+  assert.match(releaseCss, /--chart-negative: #ff4d5a/);
+});
+
+test("release navigation controls keep identical geometry across active states", () => {
+  assert.match(releaseCss, /grid-template-columns: repeat\(8, minmax\(68px, 1fr\)\)/);
+  assert.match(releaseCss, /#main-nav \.nav-tab\.active-tab,/);
+  assert.match(releaseCss, /font-weight: 600 !important/);
+  assert.match(releaseCss, /flex: 0 0 94px/);
+  assert.match(releaseCss, /height: 40px/);
 });
 
 test("expanded charts look premium and support seamless annotation", () => {

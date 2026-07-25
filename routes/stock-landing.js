@@ -143,7 +143,6 @@ function renderPage(ticker, q) {
   const price     = q ? fmtPrice(q.price)   : "—";
   const chgPct    = q ? fmtPct(q.changePct) : "";
   const isUp      = q ? q.changePct >= 0    : true;
-  const chgColor  = isUp ? "#52d18a" : "#e05a5a";
   const chgSign   = isUp ? "▲" : "▼";
   const mktCap    = q ? fmtBig(q.marketCap) : "—";
   const industry  = q ? esc(q.industry) : "";
@@ -195,6 +194,7 @@ function renderPage(ticker, q) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <script>(function(){if(localStorage.getItem('il-theme')==='dark')document.documentElement.setAttribute('data-theme','dark')})();</script>
   <title>${esc(metaTitle)}</title>
   <meta name="description" content="${esc(metaDesc)}">
   <meta name="robots" content="${indexable ? "index,follow" : "noindex,follow"}">
@@ -330,7 +330,7 @@ function renderPage(ticker, q) {
     html:not([data-theme="dark"]) .research-item{color:#3e392f;background:rgba(200,136,42,.08)}
     html:not([data-theme="dark"]) footer{border-color:rgba(42,35,24,.12)}
   </style>
-  <link rel="stylesheet" href="/static-polish.css?v=20260724">
+  <link rel="stylesheet" href="/static-polish.css?v=20260725-2">
 </head>
 <body>
   <div class="top-bar">
@@ -352,7 +352,7 @@ function renderPage(ticker, q) {
     <div class="quote-card">
       <div class="q-main">
         <div class="q-price">${price}</div>
-        <div class="q-chg" style="color:${chgColor}">${chgSign} ${chgPct}</div>
+        <div class="q-chg ${isUp ? "up" : "dn"}">${chgSign} ${chgPct}</div>
         <div class="q-label">${esc(quoteTiming)} · no synthetic replacement</div>
       </div>
       <div class="q-stats">

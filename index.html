@@ -98,12 +98,13 @@
 <script defer src="/model-math.js?v=20260713-3"></script>
 <script defer src="/projection-lab.js?v=20260713-3"></script>
 <script defer src="/valuation-lab.js?v=20260713-3"></script>
-<script defer src="/research-system.js?v=20260716-1"></script>
-<script defer src="/product-system.js?v=20260724-1"></script>
+<script defer src="/research-system.js?v=20260725-2"></script>
+<script defer src="/product-system.js?v=20260725-1"></script>
 <script defer src="/workspace-system.js?v=20260724-2"></script>
 <script defer src="/tool-launch.js?v=20260722-1"></script>
 <link href="/legacy-app.css?v=20260722-2" rel="stylesheet">
 <link href="/premium.css?v=20260713-3" rel="stylesheet">
+<link href="/release-polish.css?v=20260725-4" rel="stylesheet">
 </head>
 <body>
 <a href="#main-content" class="skip-link">Skip to content</a>
@@ -966,9 +967,9 @@
             </div>
           </div>
           <div class="as-legend">
-            <div class="as-leg-item"><div class="as-leg-dot" style="background:#46b184"></div><span class="as-leg-pct" id="abl-buy">—</span><span class="as-leg-name">Buy</span></div>
+            <div class="as-leg-item"><div class="as-leg-dot" style="background:var(--chart-positive)"></div><span class="as-leg-pct" id="abl-buy">—</span><span class="as-leg-name">Buy</span></div>
             <div class="as-leg-item"><div class="as-leg-dot" style="background:#9ca3af"></div><span class="as-leg-pct" id="abl-hold">—</span><span class="as-leg-name">Hold</span></div>
-            <div class="as-leg-item"><div class="as-leg-dot" style="background:#d96a70"></div><span class="as-leg-pct" id="abl-sell">—</span><span class="as-leg-name">Sell</span></div>
+            <div class="as-leg-item"><div class="as-leg-dot" style="background:var(--chart-negative)"></div><span class="as-leg-pct" id="abl-sell">—</span><span class="as-leg-name">Sell</span></div>
           </div>
         </div>
         <div class="as-note" id="analyst-note">Loading analyst data&hellip;</div>
@@ -1608,7 +1609,7 @@
   <strong>You're not signed in.</strong> Saved analyses are stored locally on this device. <a href="/signup" style="color:var(--gold);font-weight:600;">Create a free account</a> to sync across devices.
 </div>
 <div id="sa-sync-banner" style="display:none;background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.18);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:.78rem;color:var(--ink3);">
-  <span style="color:#46b184;font-weight:600;">✓ Signed in</span> — your saved analyses sync across devices automatically.
+  <span style="color:var(--market-up);font-weight:600;">✓ Signed in</span> — your saved analyses sync across devices automatically.
 </div>
 <div id="sa-list"></div>
               <div id="sa-empty" style="text-align:center;padding:2rem 0;color:var(--text5);font-size:.82rem;display:none;">
@@ -1626,19 +1627,39 @@
             <div class="edu-hero">
               <div>
                 <div class="edu-kicker">ImpliedLens Learn</div>
-                <h2>Build your first stock thesis.</h2>
-                <p>One practical test module connected directly to the research tools inside ImpliedLens.</p>
+                <h2>Learn the product. Read the evidence. Make a decision.</h2>
+                <p>Five practical modules explain the Implied Lens workflow, score, charts, financials, vocabulary, and thesis process.</p>
               </div>
               <div class="edu-progress-card">
-                <div class="edu-progress-top"><span>Workshop progress</span><strong id="edu-progress-label">Step 1 / 6</strong></div>
+                <div class="edu-progress-top"><span>Course progress</span><strong id="edu-progress-label">0 / 5</strong></div>
                 <div class="edu-progress-track"><div id="edu-progress-fill"></div></div>
                 <small>Completed lessons are saved on this device.</small>
               </div>
             </div>
 
             <div class="edu-path-grid">
+              <button class="edu-path" data-lesson="site-tour" onclick="openLesson(this)">
+                <span class="edu-path-num">01</span><i class="ti ti-route"></i>
+                <strong>Use the research workflow</strong><span>Move from a ticker to a sourced, saved decision without getting lost.</span>
+                <em>6 min · Start here</em>
+              </button>
+              <button class="edu-path" data-lesson="lens-score" onclick="openLesson(this)">
+                <span class="edu-path-num">02</span><i class="ti ti-focus-2"></i>
+                <strong>Read LensScore</strong><span>Understand LensValue, LensSetup, Golden Lens, confidence, and caps.</span>
+                <em>8 min · Core metric</em>
+              </button>
+              <button class="edu-path" data-lesson="charts" onclick="openLesson(this)">
+                <span class="edu-path-num">03</span><i class="ti ti-chart-candle"></i>
+                <strong>Read charts and zones</strong><span>Use support, resistance, trend, momentum, volume, and volatility together.</span>
+                <em>9 min · Technical</em>
+              </button>
+              <button class="edu-path" data-lesson="financials" onclick="openLesson(this)">
+                <span class="edu-path-num">04</span><i class="ti ti-report-money"></i>
+                <strong>Read financials and value</strong><span>Separate reported facts, derived metrics, modeled value, and scenarios.</span>
+                <em>9 min · Fundamental</em>
+              </button>
               <button class="edu-path" data-lesson="thesis" onclick="openLesson(this)">
-                <span class="edu-path-num">01</span><i class="ti ti-bulb"></i>
+                <span class="edu-path-num">05</span><i class="ti ti-bulb"></i>
                 <strong>Build a stock thesis</strong><span>Turn a ticker into a clear, falsifiable investment case.</span>
                 <em>12 min · Foundation</em>
               </button>
@@ -1663,6 +1684,20 @@
                 <div class="edu-term" data-term="beta risk volatility capm"><strong>Beta</strong><span>A historical estimate of sensitivity to broad-market returns, not a complete measure of risk.</span><code>Cov(stock, market) ÷ Var(market)</code></div>
                 <div class="edu-term" data-term="free cash flow yield valuation"><strong>FCF yield</strong><span>Free cash flow relative to market value. Useful for comparing cash generation with price.</span><code>Free cash flow ÷ Market cap</code></div>
                 <div class="edu-term" data-term="dilution shares stock compensation"><strong>Dilution</strong><span>Growth in share count that reduces each existing share's claim on earnings and cash flow.</span><code>(New shares ÷ Old shares) − 1</code></div>
+                <div class="edu-term" data-term="lensscore buyability combined score"><strong>LensScore</strong><span>The 0–10 combined buyability score: 70% long-term LensValue and 30% tactical LensSetup, adjusted for agreement and risk caps.</span><code>Value + Setup + alignment</code></div>
+                <div class="edu-term" data-term="lensvalue long term quality valuation"><strong>LensValue</strong><span>The 1–3 year opportunity score built from business quality, valuation, expectations, and fundamental downside risk.</span><code>Long-term evidence</code></div>
+                <div class="edu-term" data-term="lenssetup short term tactical technical"><strong>LensSetup</strong><span>The 2–12 week entry-quality score built from trend, price zones, momentum, volume, and volatility.</span><code>Tactical evidence</code></div>
+                <div class="edu-term" data-term="golden lens signal alignment"><strong>Golden Lens</strong><span>A rare alignment state requiring exceptional Value, Setup, combined score, adequate confidence, and no active quality cap.</span><code>Both lenses exceptional</code></div>
+                <div class="edu-term" data-term="support zone price demand technical"><strong>Support zone</strong><span>An evidence-based price area where demand previously strengthened. It is a zone, not a guaranteed floor.</span><code>Repeated reaction area</code></div>
+                <div class="edu-term" data-term="resistance zone price supply technical"><strong>Resistance zone</strong><span>An area where supply previously strengthened or rallies stalled. A breakout needs price and volume confirmation.</span><code>Repeated rejection area</code></div>
+                <div class="edu-term" data-term="rsi relative strength index momentum"><strong>RSI</strong><span>A 0–100 momentum measure. Extreme readings describe recent price pressure; they are not automatic buy or sell commands.</span><code>14-period momentum</code></div>
+                <div class="edu-term" data-term="macd momentum moving average convergence divergence"><strong>MACD</strong><span>The difference between fast and slow exponential averages, used to describe changes in trend momentum.</span><code>12 EMA − 26 EMA</code></div>
+                <div class="edu-term" data-term="atr average true range volatility"><strong>ATR</strong><span>Average true range measures typical price movement. ATR divided by price makes volatility comparable across stocks.</span><code>ATR ÷ Price</code></div>
+                <div class="edu-term" data-term="ttm trailing twelve months eps"><strong>TTM</strong><span>Trailing twelve months: the latest four reported quarters combined, useful when a full-year filing is stale.</span><code>Latest four quarters</code></div>
+                <div class="edu-term" data-term="observed source reported data provenance"><strong>Observed data</strong><span>A value supplied by a named market-data source or company filing. Check its source badge and as-of date.</span><code>Provider observation</code></div>
+                <div class="edu-term" data-term="derived calculated metric"><strong>Derived metric</strong><span>A transparent calculation from observed inputs, such as free cash flow margin or price divided by EPS.</span><code>Observed inputs → formula</code></div>
+                <div class="edu-term" data-term="modeled value estimate assumption"><strong>Modeled value</strong><span>An Implied Lens estimate produced from disclosed assumptions. Treat it as a range and test its sensitivity.</span><code>Evidence + assumptions</code></div>
+                <div class="edu-term" data-term="scenario hypothetical what if assumption"><strong>Scenario</strong><span>A user-created what-if case. It does not overwrite reported data and is not represented as a forecast.</span><code>Changed input → changed output</code></div>
               </div>
             </div>
             </div><!-- /body-education -->
@@ -3184,7 +3219,7 @@ function updateLimitUI(remaining, limit, plan) {
   wrap.style.display = 'flex';
   const used = limit - remaining;
   const pct  = Math.min(100, (used / limit) * 100);
-  const color = remaining <= 1 ? '#d96a70' : remaining <= 2 ? '#C6A052' : '#46b184';
+  const color = remaining <= 1 ? 'var(--market-down)' : remaining <= 2 ? '#C6A052' : 'var(--market-up)';
   const isGuest = plan === 'guest';
   if (isGuest && used >= 1) {
     try {
@@ -3774,6 +3809,9 @@ function quickLoad(t){ document.getElementById('main-ticker').value=t; fetchAndR
 async function fetchAndRender() {
   const ticker=document.getElementById('main-ticker').value.trim().toUpperCase();
   if(!ticker){ toast('Enter a ticker symbol','red'); return; }
+  const requestedDataSection = [...document.querySelectorAll('.app-section.open')]
+    .map(section => section.id.replace(/^sec-/, ''))
+    .find(Boolean) || 'analyze';
   const btn=document.getElementById('search-btn');
   btn.disabled=true; btn.innerHTML='<span style="display:inline-flex;gap:6px;align-items:center;"><span class="spinner"></span> Loading…</span>';
   document.getElementById('analyze-loading').style.display='flex';
@@ -3784,6 +3822,9 @@ async function fetchAndRender() {
     const result=await yahooFetch(ticker,S.range);
     S.ticker=ticker; S.data=result; S.analystTarget=null;
     renderStock(result,ticker);
+    if(requestedDataSection !== 'analyze' && typeof window.navGoTo === 'function') {
+      window.navGoTo(requestedDataSection);
+    }
     ensureMALookback(ticker);
     track('analyze_completed', { ticker });
     toast(`${ticker} loaded ✓`,'green'); const _fg=document.getElementById('featured-grid'); if(_fg) _fg.style.display='none'; const _tw=document.getElementById('tool-welcome'); if(_tw) _tw.style.display='none'; const _fl=document.getElementById('fg-label'); if(_fl) _fl.style.display='none'; const _tx=document.getElementById('tw-extra'); if(_tx) _tx.style.display='none';
@@ -3889,7 +3930,7 @@ function renderStock(result, ticker) {
         if (!val || !bmVal) return '';
         const diff = ((val - bmVal) / bmVal * 100);
         const better = higherBetter ? diff > 0 : diff < 0;
-        const color = Math.abs(diff) < 10 ? 'var(--text4)' : better ? '#46b184' : '#d96a70';
+        const color = Math.abs(diff) < 10 ? 'var(--text4)' : better ? 'var(--market-up)' : 'var(--market-down)';
         const arrow = diff > 5 ? '↑' : diff < -5 ? '↓' : '→';
         return `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--t-acc-border);">
           <span style="font-size:.72rem;color:var(--text4);">${label}</span>
@@ -4585,7 +4626,7 @@ function fetchBreadth(results){
       const prev=meta?.chartPreviousClose||meta?.previousClose;
       if(sub && prev){
         const chg=v-prev, pct=(chg/prev*100);
-        sub.innerHTML=`<span style="color:${chg<=0?'#46b184':'#d96a70'}">${chg>=0?'+':''}${chg.toFixed(1)} (${pct>=0?'+':''}${pct.toFixed(2)}%)</span>`;
+        sub.innerHTML=`<span style="color:${chg<=0?'var(--market-up)':'var(--market-down)'}">${chg>=0?'+':''}${chg.toFixed(1)} (${pct>=0?'+':''}${pct.toFixed(2)}%)</span>`;
       } else if(sub){
         sub.textContent='Volatility index';
       }
@@ -4768,6 +4809,10 @@ function toggleTheme() {
 }
 
 const EDU_LESSONS = {
+  'site-tour':{title:'Use Implied Lens as one decision workflow',body:'The product is organized around a repeatable sequence. Start with the company and chart, verify the business evidence, test valuation, then record the decision. You do not need to visit every tab for every stock.',points:['Research: load a ticker and confirm the company, price, source badges, and as-of dates.','Chart and LensScore: identify trend, key zones, tactical setup, long-term value, confidence, and active caps.','Financials, Metrics, and Earnings: verify the operating evidence behind the score.','Value or Projection: test a range of assumptions; do not treat one model output as truth.','Saved or Planner: record the thesis, risks, failure condition, and review date.'],formula:'Workflow = Identify → Verify → Value → Decide → Review',example:'If LensValue is high but LensSetup is weak, add the company to Saved with a price zone and review date instead of forcing an entry.',warning:'Do not jump from a green score to a trade. Confirm source dates, missing fields, and the evidence that could invalidate the idea.',tool:'analyze',toolLabel:'Open Research'},
+  'lens-score':{title:'Read the two lenses before the combined score',body:'LensScore is a 0–10 buyability metric, not a prediction. LensValue measures the long-term opportunity; LensSetup measures the current technical entry. The combined score is useful only when you can explain what each lens is saying.',points:['LensValue covers business quality, valuation, embedded expectations, and downside risk over roughly 1–3 years.','LensSetup covers trend, support and resistance, momentum, volume, and volatility over roughly 2–12 weeks.','The combined score weights LensValue 70% and LensSetup 30%, then considers agreement and severe risks.','Confidence reports evidence coverage. A score with missing or stale inputs deserves less trust.','A cap means one attractive feature—such as a lower price—cannot erase weak quality, leverage, or missing evidence.'],formula:'LensScore = 70% LensValue + 30% LensSetup ± alignment, subject to caps',example:'A 9.1 LensValue and 5.0 LensSetup can describe an attractive business at a technically weak entry. Use each lens independently.',warning:'Golden Lens is deliberately rare. It requires both lenses to be exceptional, adequate confidence, and no active quality cap.',tool:'lens-score',toolLabel:'Open LensScore'},
+  charts:{title:'Use technical indicators as a system, not isolated signals',body:'Technical analysis describes price behavior and risk. Start with trend and price structure, then use momentum, volume, and volatility to confirm or challenge that reading.',points:['Support and resistance are zones created from repeated price reactions, not exact promises.','The 20-, 50-, and 200-day moving averages describe short-, intermediate-, and long-term trend structure.','RSI and Stochastic RSI describe momentum location; extreme readings can persist in strong trends.','MACD describes changes in trend momentum. Confirm crossovers with price structure and volume.','ATR/price and drawdown describe risk. Use them to size expectations and avoid treating all charts as equally stable.'],formula:'Technical case = Structure + Trend + Momentum + Volume − Volatility risk',example:'A support retest is stronger when the long-term trend is positive, selling volume fades, and momentum begins improving.',warning:'One oversold reading is not a floor. A broken trend with heavy volume can keep falling through prior support.',tool:'analyze',toolLabel:'Open the chart'},
+  financials:{title:'Separate company facts from valuation assumptions',body:'Financial analysis is most useful when every number has a clear status. Implied Lens distinguishes observed provider data, derived calculations, modeled estimates, and user scenarios.',points:['Observed: revenue, net income, cash flow, balance-sheet values, price, and reported earnings from named sources.','Derived: growth rates, margins, ROIC, leverage, dilution, and multiples calculated from observed inputs.','Modeled: fair multiples, value ranges, and expectations gaps produced by disclosed Implied Lens assumptions.','Scenario: your changed price, growth, margin, or discount-rate inputs; it never replaces reported history.','Always read the source badge, as-of date, EPS basis, unavailable-field message, and sensitivity before acting.'],formula:'Per-share value = Business economics × defensible assumptions ÷ diluted shares',example:'If annual EPS is stale but four newer reported quarters are complete, the valuation can use disclosed trailing-four-quarter actual EPS instead.',warning:'Revenue growth without cash flow, returns on capital, balance-sheet context, and dilution can create a misleading quality impression.',tool:'financials',toolLabel:'Open Financials'},
   thesis:{title:'Build a falsifiable stock thesis',body:'A useful stock thesis states what the market may be missing, identifies the operating evidence that should close the gap, and defines what would prove the idea wrong. It is a testable decision record, not a prediction that the price will rise.',points:['Variant view: state what you believe differently from the market.','Business driver: connect the view to revenue, margins, cash flow, or per-share value.','Evidence: name the result or catalyst that would support the view.','Failure condition: write the measurable fact that would invalidate it.'],formula:'Thesis = Variant view + Business driver + Evidence + Failure condition',example:'Example: recurring-revenue mix lifts operating margin faster than expected over the next four quarters.',warning:'“The stock looks cheap” is not a thesis unless you explain why earnings or cash-flow expectations are wrong.',tool:'analyze',toolLabel:'Choose a stock to research'}
 };
 
@@ -4782,7 +4827,14 @@ function updateEduProgress(){
 }
 function openLesson(card){
   if(!card)return;
-  const lesson=EDU_LESSONS[card.dataset.lesson],panel=document.getElementById('edu-lesson-panel');if(!lesson||!panel)return;
+  if(card.dataset.lesson==='thesis'&&typeof window.openLearnWorkshop==='function'){
+    document.querySelectorAll('.edu-path').forEach(el=>el.classList.toggle('active',el===card));
+    window.openLearnWorkshop();
+    return;
+  }
+  const lesson=EDU_LESSONS[card.dataset.lesson],host=document.getElementById('edu-workshop');if(!lesson||!host)return;
+  host.innerHTML='<div id="edu-lesson-panel"></div>';
+  const panel=document.getElementById('edu-lesson-panel');
   document.querySelectorAll('.edu-path').forEach(el=>el.classList.toggle('active',el===card));
   panel.innerHTML=`<div class="edu-lesson-content"><div class="edu-kicker">Practical lesson</div><h3>${lesson.title}</h3><p>${lesson.body}</p><div class="edu-lesson-points">${lesson.points.map(p=>`<div>${p}</div>`).join('')}</div><div class="edu-lesson-notes"><div class="edu-lesson-note"><strong>Formula</strong>${lesson.formula}</div><div class="edu-lesson-note"><strong>Worked use</strong>${lesson.example}</div><div class="edu-lesson-note"><strong>Failure mode</strong>${lesson.warning}</div></div><div class="edu-lesson-actions"><button onclick="completeLesson('${card.dataset.lesson}')"><i class="ti ti-check"></i> Mark complete</button><button class="secondary" onclick="navGoTo('${lesson.tool}')">${lesson.toolLabel} <i class="ti ti-arrow-right"></i></button></div></div>`;
 }
@@ -4841,7 +4893,7 @@ async function loadAnalyst(ticker) {
           <span style="font-size:.72rem;color:var(--text4);">Analyst Price Target</span>
           <span style="font-size:1.05rem;font-weight:700;color:var(--gold);">$${mean.toFixed(2)}</span>
         </div>
-        ${upside!==null?`<div style="font-size:.7rem;color:${parseFloat(upside)>=0?'#46b184':'#d96a70'};margin-bottom:8px;">${parseFloat(upside)>=0?'▲':'▼'} ${Math.abs(upside)}% from current price</div>`:''}
+        ${upside!==null?`<div style="font-size:.7rem;color:${parseFloat(upside)>=0?'var(--market-up)':'var(--market-down)'};margin-bottom:8px;">${parseFloat(upside)>=0?'▲':'▼'} ${Math.abs(upside)}% from current price</div>`:''}
         ${high||low?`<div style="font-size:.68rem;color:var(--text5);margin-bottom:10px;">Range: ${low?'$'+low.toFixed(2):'—'} – ${high?'$'+high.toFixed(2):'—'}</div>`:''}`;
     } else {
       // Provider doesn't include street targets — say so, and offer the model instead
@@ -5632,13 +5684,13 @@ function renderScreenerTable(stocks) {
     var cap=s.marketCap?fmtBig(s.marketCap):'--';
     var ticker=escapeHtml(s.ticker||'');
     var sector=escapeHtml(s.sector||'--');
-    var revGrStr=revGr==null?'--':(revGr>0?'<span style="color:#46b184">+'+revGr.toFixed(1)+'%</span>':'<span style="color:#d96a70">'+revGr.toFixed(1)+'%</span>');
+    var revGrStr=revGr==null?'--':(revGr>0?'<span style="color:var(--market-up)">+'+revGr.toFixed(1)+'%</span>':'<span style="color:var(--market-down)">'+revGr.toFixed(1)+'%</span>');
     var signal=chg1Y==null?'--':chg1Y>20?'<span class="tag tag-up">Bullish</span>':chg1Y<-15?'<span class="tag tag-dn">Bearish</span>':'<span class="tag tag-neu">Neutral</span>';
     return '<tr role="button" tabindex="0" aria-label="Analyze '+ticker+'" style="cursor:pointer" onclick="loadFromScreener(this)" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();loadFromScreener(this)}" data-ticker="'+ticker+'">'
       +'<td><span class="scr-ticker">'+ticker+'</span></td>'
       +'<td>$'+(s.price||0).toFixed(2)+'</td>'
-      +'<td style="color:'+(chg1D>=0?'#46b184':'#d96a70')+'">'+(chg1D>=0?'+':'')+chg1D.toFixed(2)+'%</td>'
-      +'<td style="color:'+(chg1Y==null?'inherit':chg1Y>=0?'#46b184':'#d96a70')+'">'+(chg1Y!=null?(chg1Y>=0?'+':'')+chg1Y.toFixed(1)+'%':'--')+'</td>'
+      +'<td style="color:'+(chg1D>=0?'var(--market-up)':'var(--market-down)')+'">'+(chg1D>=0?'+':'')+chg1D.toFixed(2)+'%</td>'
+      +'<td style="color:'+(chg1Y==null?'inherit':chg1Y>=0?'var(--market-up)':'var(--market-down)')+'">'+(chg1Y!=null?(chg1Y>=0?'+':'')+chg1Y.toFixed(1)+'%':'--')+'</td>'
       +'<td>'+revGrStr+'</td>'
       +'<td style="font-size:.72rem;color:var(--text4)">'+sector+'</td>'
       +'<td>'+cap+'</td>'
@@ -5730,11 +5782,11 @@ function renderRiskPanel(closes, meta) {
         <div><div style="color:var(--text5);">VaR 95%</div><div style="font-weight:700;color:#d96a70;">${var95}%</div></div>
       </div>`;
   }
-  const col = v => parseFloat(v) >= 0 ? '#46b184' : '#d96a70';
-  const posCol = v => { const f=parseFloat(v); return isNaN(f)?'var(--text4)':f>=0?'#46b184':'#d96a70'; };
+  const col = v => parseFloat(v) >= 0 ? 'var(--market-up)' : 'var(--market-down)';
+  const posCol = v => { const f=parseFloat(v); return isNaN(f)?'var(--text4)':f>=0?'var(--market-up)':'var(--market-down)'; };
   const ratingScore = [parseFloat(annualVol) < 25, maxDDraw > -20, parseFloat(sharpe) > 0.5].filter(Boolean).length;
   const rating = ['High Risk','Moderate Risk','Moderate','Low–Moderate Risk'][ratingScore] || 'Moderate';
-  const ratingColor = ['#d96a70','#C6A052','#C6A052','#46b184'][ratingScore] || '#C6A052';
+  const ratingColor = ['var(--market-down)','#C6A052','#C6A052','var(--market-up)'][ratingScore] || '#C6A052';
 
   const stat = (label, val, valColor, note='') =>
     `<div class="risk-stat">
@@ -6134,7 +6186,7 @@ async function loadInstitutional(ticker) {
           const shares    = h.share          != null ? fmtShares(h.share)       : '—';
           const pct       = h.percentageHeld != null ? (h.percentageHeld*100).toFixed(2)+'%' : '—';
           const change    = h.change         != null ? h.change : null;
-          const chgColor  = change>0?'#46b184':change<0?'#d96a70':'var(--text4)';
+          const chgColor  = change>0?'var(--market-up)':change<0?'var(--market-down)':'var(--text4)';
           const chgStr    = change!=null ? `<span style="color:${chgColor}">${change>0?'+':change<0?'−':''}${fmtShares(Math.abs(change))}</span>` : '—';
           return `<tr>
             <td>${escapeHtml(h.holderName||h.name||'—')}</td>
@@ -6221,15 +6273,15 @@ async function loadEarnings(ticker) {
           <div style="flex:1;min-width:180px;">
             <div style="font-size:.68rem;color:var(--text5);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">${ticker} EPS Beat Rate — Last ${withData.length} Quarters</div>
             <div style="height:6px;background:var(--t-acc-border);border-radius:3px;overflow:hidden;display:flex;">
-              <div style="width:${beatPct}%;background:#46b184;"></div>
+              <div style="width:${beatPct}%;background:var(--chart-positive);"></div>
               <div style="width:${Math.round(inLine/withData.length*100)}%;background:var(--gold);"></div>
-              <div style="width:${Math.round(misses/withData.length*100)}%;background:#d96a70;"></div>
+              <div style="width:${Math.round(misses/withData.length*100)}%;background:var(--chart-negative);"></div>
             </div>
           </div>
           <div style="display:flex;gap:12px;">
-            <span style="font-size:.75rem;color:#46b184;"><strong>${beats}</strong> Beat</span>
+            <span style="font-size:.75rem;color:var(--market-up);"><strong>${beats}</strong> Beat</span>
             <span style="font-size:.75rem;color:var(--gold);"><strong>${inLine}</strong> In-Line</span>
-            <span style="font-size:.75rem;color:#d96a70;"><strong>${misses}</strong> Miss</span>
+            <span style="font-size:.75rem;color:var(--market-down);"><strong>${misses}</strong> Miss</span>
           </div>
         </div>`;
     }
@@ -6249,8 +6301,8 @@ async function loadEarnings(ticker) {
       const surpPct = row.surprisePercent != null ? (row.surprisePercent > 0 ? '+' : '') + row.surprisePercent.toFixed(1) + '%' : '—';
       let badge = '', cls = '', barColor = 'var(--gold)', barWidth = 50;
       if (row.surprisePercent != null) {
-        if      (row.surprisePercent >  2) { badge='<span class="earn-badge beat">BEAT</span>'; cls='earn-beat'; barColor='#46b184'; barWidth=Math.min(100,50+row.surprisePercent*2); }
-        else if (row.surprisePercent < -2) { badge='<span class="earn-badge miss">MISS</span>'; cls='earn-miss'; barColor='#d96a70'; barWidth=Math.max(5,50+row.surprisePercent*2); }
+        if      (row.surprisePercent >  2) { badge='<span class="earn-badge beat">BEAT</span>'; cls='earn-beat'; barColor='var(--chart-positive)'; barWidth=Math.min(100,50+row.surprisePercent*2); }
+        else if (row.surprisePercent < -2) { badge='<span class="earn-badge miss">MISS</span>'; cls='earn-miss'; barColor='var(--chart-negative)'; barWidth=Math.max(5,50+row.surprisePercent*2); }
         else                               { badge='<span class="earn-badge meet">IN-LINE</span>'; cls='earn-meet'; barWidth=50; }
       }
       const detailId = 'earn-det-'+idx;
@@ -6272,11 +6324,11 @@ async function loadEarnings(ticker) {
               </div>
               <div>
                 <div style="font-size:.65rem;color:var(--text5);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">Actual EPS</div>
-                <div style="font-size:.95rem;font-family:var(--mono);color:${cls==='earn-beat'?'#46b184':cls==='earn-miss'?'#d96a70':'var(--text2)'};">${act}</div>
+                <div style="font-size:.95rem;font-family:var(--mono);color:${cls==='earn-beat'?'var(--market-up)':cls==='earn-miss'?'var(--market-down)':'var(--text2)'};">${act}</div>
               </div>
               <div>
                 <div style="font-size:.65rem;color:var(--text5);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">Surprise</div>
-                <div style="font-size:.95rem;font-family:var(--mono);color:${cls==='earn-beat'?'#46b184':cls==='earn-miss'?'#d96a70':'var(--text2)'};">${surp}</div>
+                <div style="font-size:.95rem;font-family:var(--mono);color:${cls==='earn-beat'?'var(--market-up)':cls==='earn-miss'?'var(--market-down)':'var(--text2)'};">${surp}</div>
               </div>
             </div>
             ${row.surprisePercent != null ? `<div style="margin-top:6px;">

@@ -11,9 +11,9 @@
   --line-strong: rgba(229, 237, 227, 0.2);
   --gold: #d2a34c;
   --gold-bright: #efc977;
-  --green: #68c78d;
+  --green: #00e676;
   --green-deep: #214f34;
-  --red: #e37676;
+  --red: #ff4d5a;
   --amber: #e1b65f;
   --blue: #7ca8df;
   --radius: 18px;
@@ -36,9 +36,9 @@ html[data-theme="light"] {
   --line-strong: rgba(31, 41, 34, 0.24);
   --gold: #9b6a17;
   --gold-bright: #865b14;
-  --green: #187247;
+  --green: #087a35;
   --green-deep: #d8eee0;
-  --red: #b43e47;
+  --red: #c6283d;
   --amber: #966509;
   --blue: #315f9d;
   --shadow: 0 24px 60px rgba(61, 49, 27, 0.12);
@@ -473,7 +473,7 @@ html[data-theme="light"] .chart-tooltip { background: rgba(255,253,248,.97); box
   height: 9px;
   margin-top: 17px;
   border-radius: 99px;
-  background: linear-gradient(90deg, #d86666 0%, #a98055 32%, #6f756f 50%, #5f9c77 70%, #68c78d 100%);
+  background: linear-gradient(90deg, var(--red) 0%, #a98055 32%, #6f756f 50%, #16894d 70%, var(--green) 100%);
 }
 .trend-regime-meter::after {
   content: "";
@@ -678,6 +678,9 @@ html[data-theme="light"] .scale-marker { background: #fffdf8; box-shadow: 0 2px 
 @media (max-width: 560px) {
   .topbar { height: 62px; }
   .brand small, .icon-button .action-label { display: none; }
+  .icon-button { justify-content: center; min-width: 42px; min-height: 42px; }
+  .quick-tickers button, .chart-presets button { min-height: 38px; padding: 7px 11px; }
+  .next-move button, .text-button { min-height: 38px; padding: 8px 0; }
   main { width: calc(100% - 20px); padding-top: 24px; }
   h1 { font-size: 38px; }
   .intro { font-size: 14px; }
