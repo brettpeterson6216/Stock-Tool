@@ -185,6 +185,28 @@ test("foreign-currency earnings are normalized before valuing a USD-listed secur
   assert.equal(fundamentals.values.forwardPE, 25);
 });
 
+test("share-class EPS mismatches fall back to the provider-normalized multiple", () => {
+  const fundamentals = deriveFundamentals(null, 500, {
+    metrics: {
+      revenueGrowthQuarterlyYoy: 8,
+      epsGrowthTTMYoy: 10,
+      roiAnnual: 12,
+      netProfitMarginTTM: 10,
+      roeTTM: 14,
+      peNormalizedAnnual: 20,
+    },
+    estimates: null,
+    earnings: celhQuarterlyActuals.map(row => ({ ...row, actual: row.actual * 1000 })),
+    profile: { currency: "USD" },
+    provenance: { retrievedAt: new Date().toISOString() },
+  }, { currency: "USD" });
+  assert.equal(fundamentals.earningsCurrencyMismatch, false);
+  assert.equal(fundamentals.perShareBasisMismatch, true);
+  assert.equal(fundamentals.referenceEpsBasis, "Provider-normalized earnings multiple");
+  assert.equal(fundamentals.referenceEps, 25);
+  assert.equal(fundamentals.values.forwardPE, 20);
+});
+
 test("stale market history is rejected instead of being presented as current LensScore evidence", () => {
   const start = Math.floor(Date.now() / 1000) - 900 * 86400;
   const timestamps = Array.from({ length: 80 }, (_, index) => start + index * 86400);
