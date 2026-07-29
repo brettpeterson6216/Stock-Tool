@@ -163,6 +163,28 @@ test("current provider metrics can rate non-SEC companies without fabricating fi
   assert.ok(fundamentals.coverage >= 0.8);
 });
 
+test("foreign-currency earnings are normalized before valuing a USD-listed security", () => {
+  const retrievedAt = new Date().toISOString();
+  const fundamentals = deriveFundamentals(null, 100, {
+    metrics: {
+      revenueGrowthQuarterlyYoy: 20,
+      epsGrowthTTMYoy: 25,
+      roiAnnual: 18,
+      netProfitMarginTTM: 15,
+      roeTTM: 20,
+      peNormalizedAnnual: 25,
+    },
+    estimates: null,
+    earnings: celhQuarterlyActuals.map(row => ({ ...row, actual: row.actual * 30 })),
+    profile: { currency: "TWD" },
+    provenance: { retrievedAt },
+  }, { currency: "USD" });
+  assert.equal(fundamentals.earningsCurrencyMismatch, true);
+  assert.equal(fundamentals.referenceEpsBasis, "Provider-normalized earnings multiple");
+  assert.equal(fundamentals.referenceEps, 4);
+  assert.equal(fundamentals.values.forwardPE, 25);
+});
+
 test("stale market history is rejected instead of being presented as current LensScore evidence", () => {
   const start = Math.floor(Date.now() / 1000) - 900 * 86400;
   const timestamps = Array.from({ length: 80 }, (_, index) => start + index * 86400);
