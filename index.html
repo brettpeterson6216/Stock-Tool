@@ -99,13 +99,13 @@
 <script defer src="/projection-lab.js?v=20260713-3"></script>
 <script defer src="/valuation-lab.js?v=20260713-3"></script>
 <script defer src="/research-system.js?v=20260725-2"></script>
-<script defer src="/product-system.js?v=20260725-1"></script>
+<script defer src="/product-system.js?v=20260729-2"></script>
 <script defer src="/workspace-system.js?v=20260724-2"></script>
 <script defer src="/tool-launch.js?v=20260722-1"></script>
 <link href="/legacy-app.css?v=20260722-2" rel="stylesheet">
 <link href="/premium.css?v=20260713-3" rel="stylesheet">
 <link href="/release-polish.css?v=20260725-4" rel="stylesheet">
-<link href="/visual-refresh.css?v=20260729-5" rel="stylesheet">
+<link href="/visual-refresh.css?v=20260729-9" rel="stylesheet">
 </head>
 <body>
 <a href="#main-content" class="skip-link">Skip to content</a>
@@ -1197,11 +1197,11 @@
               <div class="tw-kicker">Research workspace</div>
               <div class="tw-title">Research any company with a process you can repeat.</div>
               <div class="tw-sub">Live charts, SEC-sourced financials, valuation and projection models, and a decision workspace — for any ticker. Search a company to begin, or start with a popular name below.</div>
+              <div class="search-row">
+                <input class="ticker-input" id="main-ticker" type="text" aria-label="Company ticker" placeholder="Try AAPL, TSLA, NVDA, SPY…" value="">
+                <button class="btn-search" id="search-btn" onclick="fetchAndRender()">Analyze →</button>
+              </div>
               <div class="tw-market" id="tw-market"></div>
-            </div>
-            <div class="search-row">
-              <input class="ticker-input" id="main-ticker" type="text" placeholder="Try AAPL, TSLA, NVDA, SPY…" value="">
-              <button class="btn-search" id="search-btn" onclick="fetchAndRender()">Analyze →</button>
             </div>
             <a class="il-lensscore-launch" href="/lens-score"><i class="ti ti-focus-2" aria-hidden="true"></i><span><strong>Open LensScore</strong><small>Combine value, technical setup, and risk into one transparent 0–10 score.</small></span><i class="ti ti-arrow-right" aria-hidden="true"></i></a>
             <!-- Featured stocks grid (shown before search) -->
@@ -1549,7 +1549,7 @@
           </div><!-- /sec-dcf -->
 
           <div class="app-section" id="sec-screener"><div class="acc-body" id="body-screener" style="display:none;">
-<div class="tool-intro"><div><strong>Market Screener</strong> narrows the current universe using valuation, size, income, momentum, and sector filters.</div><div class="tool-intro-note">A missing metric is not treated as a failure unless that metric is required by the active filter.</div></div>
+<div class="tool-intro"><div><strong>Market Screener</strong> narrows an actively traded U.S. equity universe using valuation, size, income, momentum, and sector filters.</div><div class="tool-intro-note">Yahoo Finance and optional Finnhub snapshots · refreshed automatically. Missing metrics remain unavailable rather than being treated as zero.</div></div>
 <div class="scr-filters">
               <div class="scr-filter-group"><label>Sector</label><select id="scr-sector" onchange="applyScreener()" style="width:100%;background:var(--card);color:var(--text);border:1px solid var(--border2);border-radius:var(--r);padding:4px 6px;font-size:.72rem;margin-top:6px;"><option value="ALL">All Sectors</option><option value="Tech">Technology</option><option value="Health">Healthcare</option><option value="Finance">Financials</option><option value="Cons.Disc">Consumer Disc.</option><option value="Staples">Consumer Staples</option><option value="Energy">Energy</option><option value="Industrials">Industrials</option><option value="Materials">Materials</option><option value="Real Est.">Real Estate</option><option value="Utilities">Utilities</option><option value="ETF">ETFs</option></select></div>
               <div class="scr-filter-group"><label>Max P/E <span id="scr-pe-val">50x</span></label><input type="range" class="scr-slider" id="scr-pe" min="5" max="200" value="50" oninput="document.getElementById('scr-pe-val').textContent=this.value+'x';applyScreener()"></div>
@@ -3864,7 +3864,12 @@ function renderStock(result, ticker) {
   const closes=aligned.closes; const opens=q.open||[]; const highs=q.high||[]; const lows=q.low||[]; const vols=q.volume||[];
 
   const price=meta.regularMarketPrice||closes[closes.length-1]||0;
-  const prev=meta.previousClose||meta.chartPreviousClose||price;
+  const finiteCloses=closes.filter(Number.isFinite);
+  const previousBar=finiteCloses.length>1?finiteCloses[finiteCloses.length-2]:null;
+  const interval=String(provenance?.interval||'');
+  if(interval==='1d'&&previousBar>0) S.previousClose=previousBar;
+  const intraday=/^[0-9]+(?:m|h)$/.test(interval);
+  const prev=meta.previousClose||(intraday?meta.chartPreviousClose:null)||S.previousClose||previousBar||meta.chartPreviousClose||price;
   const chg=price-prev; const chgPct=(chg/prev)*100;
 
   document.getElementById('r-ticker').textContent=meta.symbol;
@@ -3872,7 +3877,7 @@ function renderStock(result, ticker) {
   document.getElementById('r-exchange').textContent=`${meta.exchangeName||''} · ${meta.currency||'USD'}`;
   document.getElementById('r-price').textContent=`$${price.toFixed(2)}`;
   const chgEl=document.getElementById('r-change');
-  chgEl.textContent=`${chg>=0?'+':''}${chg.toFixed(2)} (${fmtPct(chgPct)})`;
+  chgEl.textContent=`Today ${chg>=0?'+':''}${chg.toFixed(2)} (${fmtPct(chgPct)})`;
   chgEl.className='price-chg '+(chg>=0?'up':'dn');
   const providerAsOf = provenance?.asOf ? new Date(provenance.asOf) : null;
   document.getElementById('r-time').textContent=providerAsOf && !Number.isNaN(providerAsOf.getTime())
@@ -5615,8 +5620,12 @@ document.addEventListener('input',function(event){
 ===================================================== */
 var screenerLoaded=false;
 async function loadScreener() {
-  if(screenerLoaded && S.screenerData) return;
-  document.getElementById('scr-loading').style.display='flex';
+  if(screenerLoaded && S.screenerData) {
+    applyScreener();
+    return;
+  }
+  var loading=document.getElementById('scr-loading');
+  if(loading) loading.style.display='flex';
   try {
     var r=await fetch('/api/screener');
     if(!r.ok) throw new Error('Screener request failed ('+r.status+')');
@@ -5624,15 +5633,25 @@ async function loadScreener() {
     screenerLoaded=true;
     applyScreener();
   } catch(e){ toast('Screener load failed','red'); }
-  finally { document.getElementById('scr-loading').style.display='none'; }
+  finally {
+    loading=document.getElementById('scr-loading');
+    if(loading) loading.style.display='none';
+  }
 }
 function applyScreener() {
   if(!S.screenerData) return;
-  var maxPE=parseFloat(document.getElementById('scr-pe').value);
-  var maxPB=parseFloat(document.getElementById('scr-pb').value);
-  var minDiv=parseFloat(document.getElementById('scr-div').value);
-  var minCap=parseFloat(document.getElementById('scr-cap').value)*1e9;
-  var minRet=parseFloat(document.getElementById('scr-ret').value);
+  var peEl=document.getElementById('scr-pe');
+  var pbEl=document.getElementById('scr-pb');
+  var divEl=document.getElementById('scr-div');
+  var capEl=document.getElementById('scr-cap');
+  var retEl=document.getElementById('scr-ret');
+  var tbody=document.getElementById('scr-body');
+  if(!peEl||!pbEl||!divEl||!capEl||!retEl||!tbody) return;
+  var maxPE=parseFloat(peEl.value);
+  var maxPB=parseFloat(pbEl.value);
+  var minDiv=parseFloat(divEl.value);
+  var minCap=parseFloat(capEl.value)*1e9;
+  var minRet=parseFloat(retEl.value);
   var sectorEl=document.getElementById('scr-sector');
   var sector=sectorEl?sectorEl.value:'ALL';
   var filtered=S.screenerData.filter(function(s){
@@ -5677,6 +5696,7 @@ function sortScreener(col) {
 }
 function renderScreenerTable(stocks) {
   var tbody=document.getElementById('scr-body');
+  if(!tbody) return;
   if(!stocks.length){tbody.innerHTML='<tr><td colspan="11" style="text-align:center;color:var(--text5);padding:2rem;">No stocks match the current filters.</td></tr>';return;}
   tbody.innerHTML=stocks.map(function(s){
     var chg1D=s.change1D||0;
@@ -5697,7 +5717,7 @@ function renderScreenerTable(stocks) {
       +'<td>'+cap+'</td>'
       +'<td>'+(s.pe!=null&&s.pe>0?s.pe.toFixed(1)+'x':'--')+'</td>'
       +'<td>'+(s.pb!=null&&s.pb>0?s.pb.toFixed(1)+'x':'--')+'</td>'
-      +'<td>'+(s.dividendYield?s.dividendYield.toFixed(2)+'%':'0%')+'</td>'
+      +'<td>'+(s.dividendYield!=null?s.dividendYield.toFixed(2)+'%':'--')+'</td>'
       +'<td>'+(s.beta!=null?s.beta.toFixed(2):'--')+'</td>'
       +'</tr>';
   }).join('');
@@ -6604,6 +6624,13 @@ document.addEventListener('click', function(e) {
     // --- Sidebar section navigation ---
     var sidebar = document.querySelector('.app-sidebar');
     if (sidebar) {
+      sidebar.querySelectorAll('.sb-item').forEach(function(item) {
+        item.setAttribute('role', 'button');
+        item.setAttribute('tabindex', '0');
+        if (!item.getAttribute('aria-label')) {
+          item.setAttribute('aria-label', (item.textContent || '').trim().replace(/\s+/g, ' '));
+        }
+      });
       sidebar.addEventListener('click', function(e) {
         var item = e.target.closest('.sb-item');
         if (item && item.dataset.sec) {
@@ -6620,6 +6647,13 @@ document.addEventListener('click', function(e) {
         }
         var proCard = e.target.closest('#sb-pro-card');
         if (proCard) showUpgradeModal();
+      });
+      sidebar.addEventListener('keydown', function(e) {
+        var item = e.target.closest('.sb-item');
+        if (item && (e.key === 'Enter' || e.key === ' ')) {
+          e.preventDefault();
+          item.click();
+        }
       });
     }
 

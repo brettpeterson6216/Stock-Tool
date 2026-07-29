@@ -111,11 +111,15 @@
   function provenanceLabel(p) {
     if (!p) return { source: "Aggregated market data", freshness: "Provider timing varies", warn: true };
     const age = Number(p.ageSeconds);
+    const interval = String(p.interval || "").toLowerCase();
     let freshness = "Latest observation";
     if (Number.isFinite(age)) {
       const mins = Math.round(age / 60);
       const days = Math.floor(age / 86400);
-      freshness = days >= 1 ? `${days}d since latest observation` : mins >= 1 ? `${mins}m since latest observation` : "Latest observation under 1m old";
+      if (interval === "1d" && age < 4 * 86400) freshness = "Latest daily bar";
+      else if (interval === "1wk" && age < 14 * 86400) freshness = "Latest weekly bar";
+      else if (interval === "1mo" && age < 45 * 86400) freshness = "Latest monthly bar";
+      else freshness = days >= 1 ? `${days}d since latest observation` : mins >= 1 ? `${mins}m since latest observation` : "Latest observation under 1m old";
     }
     if (p.delayed && !Number.isFinite(age)) freshness = "Provider timing varies";
     if (p.delayStatus === "provider-dependent" && !Number.isFinite(age)) freshness = "Provider timing varies";

@@ -968,3 +968,74 @@ html[data-theme="light"] .topbar { background: rgba(250, 252, 250, .9) !importan
   .brand small,
   .lab-status { display: none !important; }
 }
+
+/* The empty research state must contain its own obvious primary action.
+   Desktop navigation search remains a shortcut, not the only way in. */
+@media (min-width: 961px) {
+  #view-tool #body-analyze .tool-welcome .search-row {
+    display: flex !important;
+    width: min(690px, 100%) !important;
+    max-width: none !important;
+    margin: 25px 0 21px !important;
+    border: 1px solid rgba(202, 165, 93, .28) !important;
+    border-radius: 12px !important;
+    background: rgba(255, 255, 255, .075) !important;
+    box-shadow: 0 15px 34px rgba(0, 0, 0, .13) !important;
+  }
+  #view-tool #body-analyze .tool-welcome .search-row:focus-within {
+    border-color: rgba(220, 184, 110, .68) !important;
+    box-shadow: 0 0 0 3px rgba(209, 169, 92, .13), 0 18px 40px rgba(0, 0, 0, .16) !important;
+  }
+  #view-tool #body-analyze .tool-welcome .ticker-input {
+    min-height: 54px !important;
+    color: #f7f4ed !important;
+    font-size: .96rem !important;
+  }
+  #view-tool #body-analyze .tool-welcome .ticker-input::placeholder {
+    color: rgba(242, 237, 225, .56) !important;
+  }
+  #view-tool #body-analyze .tool-welcome .btn-search {
+    min-width: 138px !important;
+    min-height: 54px !important;
+    border-radius: 9px !important;
+    margin: 4px !important;
+  }
+}
+
+/* Mobile controls meet a dependable tap-target floor while retaining
+   horizontal scrolling for dense chart and section toolbars. */
+@media (max-width: 760px) {
+  #view-tool #app-chart-toolbar .act-btn,
+  #view-tool #app-tf-strip button,
+  #view-tool .mobile-sec-tabs .mst-btn,
+  #view-tool .il-shell-actions button,
+  #view-tool .scr-sort-btn {
+    min-height: 44px !important;
+  }
+  #view-tool #app-chart-toolbar,
+  #view-tool #app-tf-strip {
+    height: 44px !important;
+    min-height: 44px !important;
+  }
+  #view-tool #app-chart-toolbar .act-btn,
+  #view-tool #app-tf-strip button {
+    height: 44px !important;
+  }
+  #view-tool #app-chart-toolbar .chart-zoom-btn,
+  #view-tool #app-chart-toolbar #il-restore-layout,
+  #view-tool #app-chart-toolbar .act-btn[aria-label^="Expand"],
+  #view-tool #app-tf-strip button {
+    min-width: 44px !important;
+  }
+  #view-tool .il-shell-actions button {
+    width: 44px !important;
+    min-width: 44px !important;
+  }
+  #view-tool #app-tf-strip .tf-pill {
+    min-width: 44px !important;
+  }
+  .il-feedback-link {
+    min-height: 40px !important;
+    padding: 7px 10px !important;
+  }
+}

@@ -172,9 +172,75 @@ const SCREENER_SECTOR = {
 let _screenerCache = { data: null, ts: 0 };
 const SCREENER_TTL = 20 * 60 * 1000;
 
+function yahooRaw(value) {
+  const raw = value && typeof value === "object" ? value.raw : value;
+  return raw !== null && raw !== undefined && raw !== "" && Number.isFinite(Number(raw))
+    ? Number(raw)
+    : null;
+}
+
+async function loadYahooScreenerUniverse() {
+  const screens = ["most_actives", "day_gainers", "day_losers"];
+  const settled = await Promise.allSettled(screens.map(async (screen) => {
+    const url = `https://query1.finance.yahoo.com/v1/finance/screener/predefined/saved?formatted=true&scrIds=${screen}&start=0&count=100`;
+    const response = await fetchWithTimeout(url, {
+      headers: { "User-Agent": "Mozilla/5.0" },
+    }, 8000);
+    if (!response.ok) throw new Error(`Yahoo screener ${screen} returned ${response.status}`);
+    const payload = await response.json();
+    return payload?.finance?.result?.[0]?.quotes || [];
+  }));
+
+  const byTicker = new Map();
+  settled.forEach((result) => {
+    if (result.status !== "fulfilled") return;
+    result.value.forEach((quote) => {
+      const ticker = normalizeTicker(quote?.symbol);
+      const price = yahooRaw(quote?.regularMarketPrice);
+      if (!ticker || !(price > 0) || quote?.quoteType !== "EQUITY") return;
+      const dividendRatio = yahooRaw(quote.trailingAnnualDividendYield);
+      const dividendYield = dividendRatio !== null && dividendRatio >= 0 && dividendRatio <= 0.25
+        ? dividendRatio * 100
+        : null;
+      byTicker.set(ticker, {
+        ticker,
+        name: quote.shortName || quote.longName || ticker,
+        sector: SCREENER_SECTOR[ticker] || "Other",
+        price,
+        change1D: yahooRaw(quote.regularMarketChangePercent) ?? 0,
+        change1Y: yahooRaw(quote.fiftyTwoWeekChangePercent),
+        revenueGrowth: null,
+        marketCap: yahooRaw(quote.marketCap),
+        pe: yahooRaw(quote.trailingPE) ?? yahooRaw(quote.forwardPE),
+        pb: yahooRaw(quote.priceToBook),
+        dividendYield,
+        beta: yahooRaw(quote.beta),
+        rsi: null,
+        epsGrowth: null,
+        averageVolume: yahooRaw(quote.averageDailyVolume3Month),
+        asOf: yahooRaw(quote.regularMarketTime),
+        source: quote.quoteSourceName || "Yahoo Finance screener",
+      });
+    });
+  });
+  return [...byTicker.values()];
+}
+
 router.get("/screener", requirePro, async (req, res) => {
   if (_screenerCache.data && Date.now() - _screenerCache.ts < SCREENER_TTL) {
     return res.json(_screenerCache.data);
+  }
+  const started = Date.now();
+  try {
+    const yahooUniverse = await loadYahooScreenerUniverse();
+    if (yahooUniverse.length >= 10) {
+      _screenerCache = { data: yahooUniverse, ts: Date.now() };
+      recordProvider("Yahoo Finance", true, Date.now() - started, `${yahooUniverse.length} screener symbols`);
+      return res.json(yahooUniverse);
+    }
+    recordProvider("Yahoo Finance", false, Date.now() - started, "Screener universe was empty");
+  } catch (error) {
+    recordProvider("Yahoo Finance", false, Date.now() - started, error.message);
   }
   try {
     const CHUNK     = 20;

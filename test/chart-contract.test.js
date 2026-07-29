@@ -16,6 +16,7 @@ const releaseCss = fs.readFileSync(path.join(__dirname, "..", "public", "release
 const visualCss = fs.readFileSync(path.join(__dirname, "..", "public", "visual-refresh.css"), "utf8");
 const lensAppJs = fs.readFileSync(path.join(__dirname, "..", "labs", "lens-score", "app.js"), "utf8");
 const lensRouteJs = fs.readFileSync(path.join(__dirname, "..", "routes", "lens-score.js"), "utf8");
+const marketRouteJs = fs.readFileSync(path.join(__dirname, "..", "routes", "market-data.js"), "utf8");
 const htmlAndLegacyCss = `${html}\n${legacyCss}`;
 
 test("chart rebuilds keep prices and timestamps on one aligned series", () => {
@@ -156,6 +157,38 @@ test("primary navigation avoids duplicate tool destinations", () => {
   assert.match(html, /Research any company with a process you can repeat\./);
   assert.match(html, /Search a company to begin, or start with a popular name below\./);
   assert.match(html, /Popular starting points/);
+});
+
+test("the research entry point and quote summary stay unambiguous", () => {
+  assert.match(html, /class="tool-welcome"[\s\S]*class="search-row"[\s\S]*id="main-ticker"/);
+  assert.match(html, /id="main-ticker"[^>]*aria-label="Company ticker"/);
+  assert.match(visualCss, /Desktop navigation search remains a shortcut, not the only way in/);
+  assert.match(visualCss, /#view-tool #body-analyze \.tool-welcome \.search-row/);
+  assert.match(html, /const previousBar=finiteCloses\.length>1/);
+  assert.match(html, /Today \$\{chg>=0\?'\+':''\}/);
+  assert.match(productJs, /interval === "1d" && age < 4 \* 86400/);
+  assert.match(productJs, /Latest daily bar/);
+});
+
+test("screener loading is race-safe and has a live provider fallback", () => {
+  assert.match(html, /if\(loading\) loading\.style\.display='flex'/);
+  assert.match(html, /if\(!peEl\|\|!pbEl\|\|!divEl\|\|!capEl\|\|!retEl\|\|!tbody\) return/);
+  assert.match(html, /if\(!tbody\) return/);
+  assert.match(marketRouteJs, /function loadYahooScreenerUniverse\(\)/);
+  assert.match(marketRouteJs, /\["most_actives", "day_gainers", "day_losers"\]/);
+  assert.match(marketRouteJs, /yahooUniverse\.length >= 10/);
+  assert.match(marketRouteJs, /recordProvider\("Yahoo Finance", true/);
+  assert.match(marketRouteJs, /dividendRatio <= 0\.25/);
+  assert.match(html, /s\.dividendYield!=null\?s\.dividendYield\.toFixed\(2\)/);
+});
+
+test("desktop navigation is keyboard-operable and mobile controls are tappable", () => {
+  assert.match(html, /item\.setAttribute\('role', 'button'\)/);
+  assert.match(html, /item\.setAttribute\('tabindex', '0'\)/);
+  assert.match(html, /e\.key === 'Enter' \|\| e\.key === ' '/);
+  assert.match(visualCss, /Mobile controls meet a dependable tap-target floor/);
+  assert.match(visualCss, /#view-tool #app-tf-strip button,[\s\S]*min-height: 44px !important/);
+  assert.match(visualCss, /#view-tool \.il-shell-actions button \{[\s\S]*min-width: 44px !important/);
 });
 
 test("quote results make data trust visible before decisions", () => {
