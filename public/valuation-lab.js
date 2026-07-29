@@ -138,7 +138,7 @@
   }
 
   /* ---- persistence ---- */
-  function save() { try { localStorage.setItem(LS + VL.state.ticker, JSON.stringify(VL.state)); saToast("Valuation saved for " + VL.state.ticker); if (typeof window.saveValuationToAnalyses === "function") window.saveValuationToAnalyses(VL.state); } catch (e) { saToast("Could not save."); } }
+  function save() { try { localStorage.setItem(LS + VL.state.ticker, JSON.stringify(VL.state)); if (typeof window.saveValuationToAnalyses === "function") window.saveValuationToAnalyses(VL.state); else saToast("Valuation saved for " + VL.state.ticker); } catch (e) { saToast("Could not save."); } }
   function loadSaved(tk) { try { var r = localStorage.getItem(LS + tk); if (r) return JSON.parse(r); } catch (e) { } return null; }
   function saToast(m) { if (typeof window.toast === "function") { window.toast(m, "green"); return; } var t = el("div", "vlab-toast", m); document.body.appendChild(t); setTimeout(function () { t.classList.add("show"); }, 10); setTimeout(function () { t.remove(); }, 2400); }
 

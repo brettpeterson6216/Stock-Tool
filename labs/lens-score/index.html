@@ -11,6 +11,7 @@
   <title>LensScore · Implied Lens</title>
   <link rel="icon" href="/logo.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/__lab/lens-score/assets/styles.css?v=20260725-2">
+  <link rel="stylesheet" href="/site-shell.css?v=20260729-1">
   <link rel="stylesheet" href="/visual-refresh.css?v=20260729-9">
   <script defer src="/__lab/lens-score/assets/lens-score-engine.js?v=20260729-1"></script>
   <script defer src="/__lab/lens-score/assets/app.js?v=20260729-1"></script>
@@ -18,7 +19,32 @@
 <body>
   <a class="skip-link" href="#lab-main">Skip to LensScore analysis</a>
 
-  <header class="topbar">
+  <nav class="il-global-nav" aria-label="Primary navigation">
+    <a class="il-global-brand" href="/"><img src="/logo.svg" alt=""><span>Implied<em>Lens</em></span></a>
+    <div class="il-global-links">
+      <a class="il-global-tab" href="/">Home</a>
+      <a class="il-global-tab" href="/?view=home&amp;market=1">Market</a>
+      <a class="il-global-tab" href="/?view=tool&amp;section=analyze">Research</a>
+      <a class="il-global-tab active" href="/lens-score" aria-current="page">LensScore</a>
+      <a class="il-global-tab" href="/?view=tool&amp;section=projection">Projections</a>
+      <a class="il-global-tab" href="/?view=tool&amp;section=wealth">Planner</a>
+      <a class="il-global-tab" href="/?view=tool&amp;section=education">Learn</a>
+      <a class="il-global-tab" href="/?view=tool&amp;section=reports">Saved</a>
+      <a class="il-global-tab" href="/about">About</a>
+    </div>
+    <div class="il-global-actions">
+      <button class="il-global-action" id="theme-button" type="button" aria-label="Switch color theme">
+        <span aria-hidden="true">◐</span>
+        <span class="action-label">Theme</span>
+      </button>
+      <button class="il-global-action" id="methodology-button" type="button" aria-haspopup="dialog">
+        <span aria-hidden="true">?</span>
+        <span class="action-label">How it works</span>
+      </button>
+    </div>
+  </nav>
+
+  <header class="topbar" hidden>
     <div class="brand">
       <img src="/logo.svg" alt="" width="34" height="34">
       <div>
@@ -35,11 +61,11 @@
         <span aria-hidden="true">←</span>
         <span class="action-label">Workspace</span>
       </a>
-      <button class="icon-button" id="theme-button" type="button" aria-label="Switch color theme">
+      <button class="icon-button" id="theme-button-old" type="button" aria-label="Switch color theme">
         <span aria-hidden="true">◐</span>
         <span class="action-label">Theme</span>
       </button>
-      <button class="icon-button" id="methodology-button" type="button" aria-haspopup="dialog">
+      <button class="icon-button" id="methodology-button-old" type="button" aria-haspopup="dialog">
         <span aria-hidden="true">ⓘ</span>
         <span class="action-label">How it works</span>
       </button>

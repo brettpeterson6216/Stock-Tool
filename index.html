@@ -96,8 +96,8 @@
 <script defer src="/vendor/hammer.min.js?v=2.0.8"></script>
 <script defer src="/vendor/chartjs-plugin-zoom.min.js?v=2.2.0"></script>
 <script defer src="/model-math.js?v=20260713-3"></script>
-<script defer src="/projection-lab.js?v=20260713-3"></script>
-<script defer src="/valuation-lab.js?v=20260713-3"></script>
+<script defer src="/projection-lab.js?v=20260729-4"></script>
+<script defer src="/valuation-lab.js?v=20260729-4"></script>
 <script defer src="/research-system.js?v=20260725-2"></script>
 <script defer src="/product-system.js?v=20260729-2"></script>
 <script defer src="/workspace-system.js?v=20260724-2"></script>
@@ -121,6 +121,7 @@
     <a href="/" id='nav-home' class="nav-tab active-tab" onclick="navGoTo('home');return false;">Home</a>
     <a href="/?view=home&amp;market=1" id="nav-market" class="nav-tab" onclick="showMarketPage();return false;">Market</a>
     <a href="/?view=tool&amp;section=analyze" id="nav-analyze" class="nav-tab" onclick="navGoTo('analyze');return false;">Research</a>
+    <a href="/lens-score" id="nav-lensscore-link" class="nav-tab">LensScore</a>
     <a href="/?view=tool&amp;section=projection" id="nav-project" class="nav-tab" onclick="navGoTo('projection');return false;">Projections</a>
     <a href="/?view=tool&amp;section=wealth" id="nav-planner" class="nav-tab" onclick="navGoTo('wealth');return false;">Planner</a>
     <a href="/?view=tool&amp;section=education" class="nav-tab" id="nav-education-link" onclick="navGoTo('education');return false;">Learn</a>
@@ -1601,6 +1602,7 @@
                 <button class="sa-pill active" data-type="ALL">All</button>
                 <button class="sa-pill" data-type="price">Price Snapshot</button>
                 <button class="sa-pill" data-type="dcf">Intrinsic Value</button>
+                <button class="sa-pill" data-type="valuation">Valuation Lab</button>
                 <button class="sa-pill" data-type="projection">Projection</button>
                 <button class="sa-pill" data-type="compare">Compare</button>
                 <button class="sa-pill" data-type="note">Notes</button>
@@ -2558,13 +2560,28 @@ function mountValuationLab() {
 // Persist a Valuation Lab model into the existing Saved Analyses system.
 function saveValuationToAnalyses(state) {
   try {
-    if (typeof getSavedAnalyses !== 'function' || typeof putSavedAnalyses !== 'function') return;
+    if (typeof persistSavedEntry !== 'function') return;
     const entry = { id: Date.now(), type: 'valuation', ticker: (state && state.ticker) || (window.S && S.ticker) || '', title: ((state && state.ticker) || 'Valuation') + ' — Valuation Lab', date: new Date().toISOString(), data: { model: state, price: (window.S && S.data && S.data.meta && S.data.meta.regularMarketPrice) || null } };
-    const all = getSavedAnalyses(); all.unshift(entry); putSavedAnalyses(all.slice(0, 100));
-    if (typeof renderSavedAnalyses === 'function') renderSavedAnalyses();
-    if (window.S && S.loggedIn) {
-      fetch('/api/saves', { method:'POST', credentials:'same-origin', headers:{'Content-Type':'application/json','X-CSRF-Token': S.csrfToken||''}, body: JSON.stringify({ ticker: entry.ticker, type: entry.type, label: entry.title, data: entry }) }).catch(function(){});
-    }
+    persistSavedEntry(entry, 'Valuation saved');
+  } catch (e) {}
+}
+
+function saveProjectionToAnalyses(model) {
+  try {
+    if (typeof persistSavedEntry !== 'function' || !model) return;
+    const ticker = model.ticker || (window.S && S.ticker) || '';
+    const entry = {
+      id: Date.now(),
+      type: 'projection',
+      ticker,
+      title: (ticker || 'Projection') + ' — Projection Lab',
+      date: new Date().toISOString(),
+      data: {
+        model,
+        price: model.startPrice || (window.S && S.data && S.data.meta && S.data.meta.regularMarketPrice) || null
+      }
+    };
+    persistSavedEntry(entry, 'Projection saved');
   } catch (e) {}
 }
 
@@ -2696,6 +2713,49 @@ function getSavedAnalyses() {
 function putSavedAnalyses(arr) {
   try { localStorage.setItem(SA_KEY, JSON.stringify(arr)); } catch(_) {}
 }
+function savedEntrySignature(entry) {
+  return [entry.type || '', entry.ticker || '', entry.title || '', entry.date || ''].join('|');
+}
+async function persistSavedEntry(entry, successMessage) {
+  const localEntry = { ...entry, syncState: S.loggedIn ? 'syncing' : 'local' };
+  const all = getSavedAnalyses();
+  all.unshift(localEntry);
+  putSavedAnalyses(all.slice(0, 100));
+  renderSavedAnalyses();
+
+  if (!S.loggedIn) {
+    toast((successMessage || 'Saved') + ' on this device ✓', 'green');
+    return localEntry;
+  }
+
+  try {
+    const response = await fetch('/api/saves', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': S.csrfToken || '' },
+      body: JSON.stringify({ ticker: entry.ticker, type: entry.type, label: entry.title, data: entry })
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || !result.ok || !result.id) {
+      throw new Error(result.error || 'Cloud save failed');
+    }
+    const saved = getSavedAnalyses().map(item => item.id === entry.id
+      ? { ...item, id: 'db_' + result.id, _dbId: result.id, syncState: 'synced' }
+      : item);
+    putSavedAnalyses(saved);
+    renderSavedAnalyses();
+    toast((successMessage || 'Saved') + ' to your account ✓', 'green');
+    return saved.find(item => item._dbId === result.id) || localEntry;
+  } catch (_) {
+    const saved = getSavedAnalyses().map(item => item.id === entry.id
+      ? { ...item, syncState: 'local' }
+      : item);
+    putSavedAnalyses(saved);
+    renderSavedAnalyses();
+    toast('Saved on this device — cloud sync failed.', 'red');
+    return localEntry;
+  }
+}
 // Load from DB into local cache and re-render
 async function syncSavesFromDB() {
   try {
@@ -2703,14 +2763,29 @@ async function syncSavesFromDB() {
     if (!r.ok) return;
     const rows = await r.json();
     // Merge DB rows into localStorage format
-    const mapped = rows.map(row => ({ ...row.data, id: 'db_' + row.id, _dbId: row.id, ticker: row.ticker, type: row.type, title: row.label || row.ticker }));
-    putSavedAnalyses(mapped);
+    const mapped = rows.map(row => {
+      const payload = row.data && typeof row.data === 'object' ? row.data : {};
+      return {
+        ...payload,
+        id: 'db_' + row.id,
+        _dbId: row.id,
+        ticker: row.ticker,
+        type: row.type,
+        title: row.label || payload.title || row.ticker,
+        date: payload.date || row.created_at,
+        data: payload.data && typeof payload.data === 'object' ? payload.data : payload,
+        syncState: 'synced'
+      };
+    });
+    const remoteSignatures = new Set(mapped.map(savedEntrySignature));
+    const localOnly = getSavedAnalyses().filter(entry => !entry._dbId && !remoteSignatures.has(savedEntrySignature(entry)));
+    putSavedAnalyses([...mapped, ...localOnly].slice(0, 100));
     renderSavedAnalyses();
   } catch(_) {}
 }
 
-function saveAnalysis(type) {
-  if (!S.ticker && type !== 'note') { toast('Load a stock first.', 'err'); return; }
+async function saveAnalysis(type) {
+  if (!S.ticker && type !== 'note' && type !== 'compare') { toast('Load a stock first.', 'err'); return; }
   const meta = S.data?.meta || {};
   let title = '', data = {};
   const price = meta.regularMarketPrice;
@@ -2735,20 +2810,9 @@ function saveAnalysis(type) {
     data = { tickers };
   }
 
-  const entry = { id: Date.now(), type, ticker: S.ticker || '', title, date: now, data };
-  const all = getSavedAnalyses();
-  all.unshift(entry);
-  putSavedAnalyses(all.slice(0, 100));
-  toast('Saved ✓', 'green');
-  renderSavedAnalyses();
-  // Persist to DB if logged in
-  if (S.loggedIn) {
-    fetch('/api/saves', {
-      method: 'POST', credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': S.csrfToken||'' },
-      body: JSON.stringify({ ticker: entry.ticker || S.ticker, type: entry.type, label: entry.title, data: entry })
-    }).catch(() => {});
-  }
+  const entryTicker = type === 'compare' ? (data.tickers?.[0] || S.ticker || '') : (S.ticker || '');
+  const entry = { id: Date.now(), type, ticker: entryTicker, title, date: now, data };
+  return persistSavedEntry(entry, 'Analysis saved');
 }
 
 function setSavedSort(s) {
@@ -2763,38 +2827,97 @@ function setSavedTypeFilter(t) {
   renderSavedAnalyses();
 }
 
-function deleteSavedAnalysis(id) {
+async function deleteSavedAnalysis(id) {
   const all = getSavedAnalyses();
   const entry = all.find(a => a.id === id);
+  if (entry && entry._dbId) {
+    try {
+      const response = await fetch('/api/saves/' + entry._dbId, {
+        method:'DELETE',
+        credentials:'same-origin',
+        headers:{'X-CSRF-Token': S.csrfToken||''}
+      });
+      if (!response.ok) throw new Error('Delete failed');
+    } catch (_) {
+      toast('Could not delete this cloud save. Try again.', 'red');
+      return;
+    }
+  }
   putSavedAnalyses(all.filter(a => a.id !== id));
   renderSavedAnalyses();
-  // Also delete from DB if it has a DB id
-  if (entry && entry._dbId) {
-    fetch('/api/saves/' + entry._dbId, { method:'DELETE', credentials:'same-origin', headers:{'X-CSRF-Token': S.csrfToken||''} }).catch(() => {});
-  }
+  toast('Saved analysis deleted.', 'green');
 }
 
-function clearAllSaved() {
+async function clearAllSaved() {
   if (!confirm('Clear all saved analyses? This cannot be undone.')) return;
+  if (S.loggedIn) {
+    try {
+      const response = await fetch('/api/saves', {
+        method:'DELETE',
+        credentials:'same-origin',
+        headers:{'X-CSRF-Token': S.csrfToken||''}
+      });
+      if (!response.ok) throw new Error('Clear failed');
+    } catch (_) {
+      toast('Could not clear your cloud saves. Try again.', 'red');
+      return;
+    }
+  }
   putSavedAnalyses([]);
   renderSavedAnalyses();
-  fetch('/api/saves', { method:'DELETE', credentials:'same-origin', headers:{'X-CSRF-Token': S.csrfToken||''} }).catch(() => {});
+  toast('Saved analyses cleared.', 'green');
 }
 
-function loadSavedAnalysis(entry) {
+async function loadSavedAnalysis(entry) {
+  if (!entry || !entry.data) {
+    toast('This saved analysis is incomplete.', 'red');
+    return;
+  }
   if (entry.type === 'compare' && entry.data.tickers) {
     entry.data.tickers.forEach((t,i) => {
       const el = document.getElementById('cmp'+(i+1));
       if (el) el.value = t;
     });
     openSection('compare');
-    toast('Compare tickers loaded — click Compare →', 'green');
+    await runCompare();
+    toast('Saved comparison reopened ✓', 'green');
     return;
   }
   if (entry.ticker) {
-    document.getElementById('ticker-input').value = entry.ticker;
-    document.getElementById('btn-analyze').click();
-    toast('Loading ' + entry.ticker + '…', 'green');
+    const ticker = String(entry.ticker).trim().toUpperCase();
+    const input = document.getElementById('main-ticker');
+    if (!input) {
+      toast('Research search is unavailable. Reload and try again.', 'red');
+      return;
+    }
+    if (entry.type === 'projection' && entry.data.model) {
+      try { localStorage.setItem('il-projlab:v2:' + ticker, JSON.stringify(entry.data.model)); } catch (_) {}
+    }
+    if (entry.type === 'valuation' && entry.data.model) {
+      try { localStorage.setItem('il-vlab:' + ticker, JSON.stringify(entry.data.model)); } catch (_) {}
+    }
+    input.value = ticker;
+    if (typeof navGoTo === 'function') navGoTo('analyze');
+    else openSection('analyze');
+    toast('Loading ' + ticker + '…', 'green');
+    await fetchAndRender();
+    if (S.ticker !== ticker) return;
+
+    if (entry.type === 'projection') {
+      if (typeof navGoTo === 'function') navGoTo('projection');
+      else openSection('projection');
+      if (entry.data.assumptions) {
+        Object.entries(entry.data.assumptions).forEach(([id, value]) => {
+          const field = document.getElementById(id);
+          if (field && value != null) field.value = value;
+        });
+        if (typeof runAdvancedProjection === 'function') runAdvancedProjection();
+      }
+    } else if (entry.type === 'dcf' || entry.type === 'valuation') {
+      if (typeof navGoTo === 'function') navGoTo('dcf');
+      else openSection('dcf');
+    }
+    toast((entry.title || ticker + ' analysis') + ' reopened ✓', 'green');
   }
 }
 
@@ -2812,7 +2935,7 @@ function renderSavedAnalyses() {
   if (_savedTypeFilter !== 'ALL') all = all.filter(a => a.type === _savedTypeFilter);
 
   if (_savedSort === 'date') {
-    all.sort((a,b) => b.id - a.id);
+    all.sort((a,b) => (Date.parse(b.date || 0) || 0) - (Date.parse(a.date || 0) || 0));
   } else if (_savedSort === 'stock') {
     all.sort((a,b) => (a.ticker||'').localeCompare(b.ticker||''));
   } else if (_savedSort === 'type') {
@@ -2826,8 +2949,8 @@ function renderSavedAnalyses() {
   }
   if (empty) empty.style.display = 'none';
 
-  const typeLabels = { price:'Price Snapshot', dcf:'Intrinsic Value', projection:'Projection', compare:'Compare', note:'Note' };
-  const typeClass  = { price:'sa-type-price', dcf:'sa-type-dcf', projection:'sa-type-projection', compare:'sa-type-compare', note:'sa-type-note' };
+  const typeLabels = { price:'Price Snapshot', dcf:'Intrinsic Value', valuation:'Valuation Lab', projection:'Projection', compare:'Compare', note:'Note' };
+  const typeClass  = { price:'sa-type-price', dcf:'sa-type-dcf', valuation:'sa-type-dcf', projection:'sa-type-projection', compare:'sa-type-compare', note:'sa-type-note' };
 
   _saListEntries = all;
   list.innerHTML = all.map((entry, idx) => {
@@ -2840,7 +2963,7 @@ function renderSavedAnalyses() {
       <span class="sa-type-badge ${cls}">${escapeHtml(label)}</span>
       <div class="sa-card-body">
         <div class="sa-card-title">${escapeHtml(entry.title)}</div>
-        <div class="sa-card-meta">${escapeHtml(dateStr)}${entry.ticker ? ' · '+escapeHtml(entry.ticker) : ''}</div>
+        <div class="sa-card-meta">${escapeHtml(dateStr)}${entry.ticker ? ' · '+escapeHtml(entry.ticker) : ''}${entry.syncState === 'local' && S.loggedIn ? ' · Saved on this device' : ''}</div>
         <div class="sa-card-actions">
           <button class="sa-btn" data-sa-action="load" data-sa-idx="${idx}">↩ Load</button>
           <button class="sa-del-btn" data-sa-action="del" data-sa-idx="${idx}">✕ Delete</button>

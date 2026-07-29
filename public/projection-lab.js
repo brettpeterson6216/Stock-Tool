@@ -757,7 +757,8 @@
       localStorage.setItem(LS_PREFIX_V2 + (PL.model.ticker || "GEN"), json);
       try { localStorage.removeItem(LS_PREFIX_V1 + (PL.model.ticker || "GEN")); } catch (e0) { /* legacy key may not exist */ }
       PL.savedJson = json;
-      toastPL("Projection saved for " + PL.model.ticker);
+      if (typeof window.saveProjectionToAnalyses === "function") window.saveProjectionToAnalyses(PL.model);
+      else toastPL("Projection saved for " + PL.model.ticker);
       renderStatus(PL.lastOutlook);
     } catch (e) { toastPL("Could not save (storage unavailable)"); }
   }

@@ -1,0 +1,123 @@
+/* Shared top-level navigation for Implied Lens product and editorial pages. */
+[hidden] { display: none !important; }
+.il-global-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  min-height: 58px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 0 max(18px, calc((100vw - 1480px) / 2));
+  border-bottom: 1px solid rgba(232, 195, 119, .14);
+  background: rgba(12, 17, 15, .96);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, .12);
+  backdrop-filter: blur(20px);
+}
+.il-global-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: #f5f2e9 !important;
+  font-family: "Space Grotesk", Inter, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -.04em;
+  text-decoration: none !important;
+  white-space: nowrap;
+}
+.il-global-brand img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  filter: drop-shadow(0 5px 12px rgba(212, 168, 77, .25));
+}
+.il-global-brand em {
+  color: #efc879;
+  font-style: italic;
+}
+.il-global-links {
+  min-width: 0;
+  display: flex;
+  align-items: stretch;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.il-global-links::-webkit-scrollbar { display: none; }
+.il-global-tab {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px;
+  border-radius: 7px;
+  color: rgba(240, 244, 240, .62) !important;
+  font-size: 12px;
+  font-weight: 650;
+  text-decoration: none !important;
+  white-space: nowrap;
+  transition: color .15s, background .15s, box-shadow .15s;
+}
+.il-global-tab:hover {
+  color: #fff !important;
+  background: rgba(239, 200, 121, .08);
+}
+.il-global-tab.active {
+  color: #efc879 !important;
+  background: rgba(239, 200, 121, .11);
+  box-shadow: inset 0 -2px 0 #d9ad57;
+}
+.il-global-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.il-global-action {
+  min-width: 42px;
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 12px;
+  border: 1px solid rgba(239, 200, 121, .16);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .035);
+  color: rgba(244, 242, 235, .72) !important;
+  font: 650 12px/1 Inter, "DM Sans", sans-serif;
+  text-decoration: none !important;
+  cursor: pointer;
+}
+.il-global-action:hover {
+  color: #fff !important;
+  border-color: rgba(239, 200, 121, .38);
+  background: rgba(239, 200, 121, .09);
+}
+.il-global-nav .static-theme-toggle {
+  margin: 0 !important;
+}
+
+@media (max-width: 900px) {
+  .il-global-nav {
+    grid-template-columns: 1fr auto;
+    gap: 8px 12px;
+    padding: 8px 12px;
+  }
+  .il-global-links {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    margin: 0 -4px;
+    padding-top: 7px;
+    border-top: 1px solid rgba(255, 255, 255, .055);
+  }
+  .il-global-tab {
+    min-height: 42px;
+    padding-inline: 11px;
+  }
+}
+
+@media (max-width: 520px) {
+  .il-global-brand { font-size: 17px; }
+  .il-global-actions .action-label { display: none; }
+  .il-global-action { width: 44px; min-width: 44px; padding: 0; }
+}

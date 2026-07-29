@@ -17,6 +17,11 @@ const visualCss = fs.readFileSync(path.join(__dirname, "..", "public", "visual-r
 const lensAppJs = fs.readFileSync(path.join(__dirname, "..", "labs", "lens-score", "app.js"), "utf8");
 const lensRouteJs = fs.readFileSync(path.join(__dirname, "..", "routes", "lens-score.js"), "utf8");
 const marketRouteJs = fs.readFileSync(path.join(__dirname, "..", "routes", "market-data.js"), "utf8");
+const authRouteJs = fs.readFileSync(path.join(__dirname, "..", "routes", "auth.js"), "utf8");
+const projectionJs = fs.readFileSync(path.join(__dirname, "..", "public", "projection-lab.js"), "utf8");
+const siteShellCss = fs.readFileSync(path.join(__dirname, "..", "public", "site-shell.css"), "utf8");
+const aboutHtml = fs.readFileSync(path.join(__dirname, "..", "public", "about.html"), "utf8");
+const lensHtml = fs.readFileSync(path.join(__dirname, "..", "labs", "lens-score", "index.html"), "utf8");
 const htmlAndLegacyCss = `${html}\n${legacyCss}`;
 
 test("chart rebuilds keep prices and timestamps on one aligned series", () => {
@@ -157,6 +162,39 @@ test("primary navigation avoids duplicate tool destinations", () => {
   assert.match(html, /Research any company with a process you can repeat\./);
   assert.match(html, /Search a company to begin, or start with a popular name below\./);
   assert.match(html, /Popular starting points/);
+  assert.match(html, /id="nav-lensscore-link" class="nav-tab">LensScore/);
+});
+
+test("About and LensScore use one global product navigation", () => {
+  for (const page of [aboutHtml, lensHtml]) {
+    assert.match(page, /class="il-global-nav"/);
+    assert.match(page, /class="il-global-tab" href="\/\?view=tool&amp;section=reports">Saved/);
+    assert.match(page, /class="il-global-tab[^"]*" href="\/lens-score"/);
+    assert.match(page, /class="il-global-tab[^"]*" href="\/about"/);
+    assert.match(page, /\/site-shell\.css\?v=/);
+  }
+  assert.match(lensHtml, /<header class="topbar" hidden>/);
+  assert.match(lensHtml, /id="theme-button-old"/);
+  assert.match(siteShellCss, /\.il-global-nav \{/);
+  assert.match(siteShellCss, /@media \(max-width: 900px\)/);
+});
+
+test("saved research persists honestly and reopens real tools", () => {
+  assert.match(html, /async function persistSavedEntry\(entry, successMessage\)/);
+  assert.match(html, /Saved on this device — cloud sync failed\./);
+  assert.match(html, /const remoteSignatures = new Set/);
+  assert.match(html, /async function loadSavedAnalysis\(entry\)/);
+  assert.match(html, /document\.getElementById\('main-ticker'\)/);
+  assert.match(html, /await fetchAndRender\(\)/);
+  assert.match(html, /await runCompare\(\)/);
+  assert.match(html, /async function clearAllSaved\(\)/);
+  assert.match(html, /Could not clear your cloud saves/);
+  assert.match(html, /localStorage\.setItem\('il-projlab:v2:' \+ ticker/);
+  assert.match(html, /localStorage\.setItem\('il-vlab:' \+ ticker/);
+  assert.doesNotMatch(html, /document\.getElementById\('ticker-input'\)\.value = entry\.ticker/);
+  assert.doesNotMatch(html, /document\.getElementById\('btn-analyze'\)\.click\(\)/);
+  assert.match(projectionJs, /window\.saveProjectionToAnalyses\(PL\.model\)/);
+  assert.match(authRouteJs, /"valuation"/);
 });
 
 test("the research entry point and quote summary stay unambiguous", () => {

@@ -409,6 +409,21 @@ test("Free user can POST to /api/saves (cloud saves are free)", async () => {
   assert.ok(typeof body.id === "number", "response should return numeric id");
 });
 
+test("Valuation Lab saves retain their valuation type", async () => {
+  const { cookie, csrfToken } = await makeSession("valuation_saver", "valuation_saver@test.com");
+  const headers = { cookie, "X-CSRF-Token": csrfToken };
+  const created = await req("/api/saves", {
+    method: "POST",
+    headers,
+    body: { ticker: "AAPL", type: "valuation", label: "AAPL Valuation", data: { model: { ticker: "AAPL" } } },
+  });
+  assert.equal(created.status, 200);
+  const list = await req("/api/saves", { headers: { cookie } });
+  assert.equal(list.status, 200);
+  const saves = await list.json();
+  assert.equal(saves[0].type, "valuation");
+});
+
 test("Saved analyses reject invalid tickers and malformed payloads", async () => {
   const { cookie, csrfToken } = await makeSession("save_validation", "save_validation@test.com");
   const headers = { cookie, "X-CSRF-Token": csrfToken };
