@@ -106,6 +106,8 @@
 <link href="/premium.css?v=20260713-3" rel="stylesheet">
 <link href="/release-polish.css?v=20260725-4" rel="stylesheet">
 <link href="/visual-refresh.css?v=20260729-9" rel="stylesheet">
+<link href="/site-shell.css?v=20260729-8" rel="stylesheet">
+<link href="/landing-polish.css?v=20260729-4" rel="stylesheet">
 </head>
 <body>
 <a href="#main-content" class="skip-link">Skip to content</a>
@@ -604,9 +606,8 @@
     <a href="#" onclick="landingScrollTo('.il-workflow-visual',this);return false;"><i class="ti ti-route"></i><span>How It Works</span></a>
     <a href="#" onclick="landingScrollTo('#landing-pricing',this);return false;"><i class="ti ti-tag"></i><span>Pricing</span></a>
   </aside>
-  <div class="il-landing-hero has-hero-banner">
-    <img class="il-hero-banner" src="/hero-process.png?v=1" alt="Find better stock ideas with a process you can follow: 1) Identify opportunities, 2) Analyze deeply, 3) Model outcomes, 4) Compare and prioritize, 5) Invest confidently.">
-    <div class="il-landing-preview image-preview" aria-label="Illustration of the Implied Lens research workspace">
+  <div class="il-landing-hero">
+    <div class="il-landing-preview" aria-label="Illustration of the Implied Lens research workspace">
       <div class="il-hero-mock" role="img" aria-label="Illustration of the Implied Lens research workspace: price chart, valuation range, and thesis panels">
         <div class="ihm-top">
           <span class="ihm-brand"><img src="/logo.svg?v=3" alt="" aria-hidden="true">Implied<em>Lens</em></span>
@@ -653,10 +654,6 @@
       <span class="il-landing-kicker">Try it on a real ticker — no account needed</span>
       <h1>Find better stock ideas with a process you can follow.</h1>
       <p>Implied Lens turns any ticker into a guided workspace for charts, valuation, sources, thesis notes, and review dates. Built for self-directed investors who want sharper decisions without starting from a blank screen.</p>
-      <div class="il-banner-lede">
-        <h2>Research stocks like a pro — without the blank screen.</h2>
-        <p id="il-lede-sub">Turn any ticker into live charts, SEC-sourced financials, valuation and projection models, and a saved thesis. Free to start.</p>
-      </div>
       <div class="il-landing-actions">
         <button type="button" id="il-hero-primary" class="il-landing-primary" onclick="heroLoadTicker('AAPL')"><i class="ti ti-player-play"></i> Analyze AAPL live — free</button>
         <a class="il-landing-secondary" id="il-hero-secondary" href="/signup">Start 7-day Pro trial</a>
@@ -1195,6 +1192,7 @@
 
           <div class="app-section open" id="sec-analyze"><div class="acc-body" id="body-analyze">
 <div class="tool-welcome" id="tool-welcome">
+            <div class="tw-welcome-copy">
               <div class="tw-kicker">Research workspace</div>
               <div class="tw-title">Research any company with a process you can repeat.</div>
               <div class="tw-sub">Live charts, SEC-sourced financials, valuation and projection models, and a decision workspace — for any ticker. Search a company to begin, or start with a popular name below.</div>
@@ -1203,6 +1201,19 @@
                 <button class="btn-search" id="search-btn" onclick="fetchAndRender()">Analyze →</button>
               </div>
               <div class="tw-market" id="tw-market"></div>
+            </div>
+            <aside class="tw-score-preview" aria-label="Example of the Implied Lens scoring workflow">
+              <div class="tw-score-eyebrow">One decision system</div>
+              <div class="tw-score-orbit">
+                <div class="tw-score-value"><strong>8.6</strong><span>LensScore</span></div>
+              </div>
+              <div class="tw-score-signals">
+                <span><i class="tw-signal-value"></i>LensValue <strong>9.1</strong></span>
+                <span><i class="tw-signal-setup"></i>LensSetup <strong>8.2</strong></span>
+                <span><i class="tw-signal-risk"></i>Risk check <strong>Pass</strong></span>
+              </div>
+              <div class="tw-score-caption">Value, technical setup, and risk aligned.</div>
+            </aside>
             </div>
             <a class="il-lensscore-launch" href="/lens-score"><i class="ti ti-focus-2" aria-hidden="true"></i><span><strong>Open LensScore</strong><small>Combine value, technical setup, and risk into one transparent 0–10 score.</small></span><i class="ti ti-arrow-right" aria-hidden="true"></i></a>
             <!-- Featured stocks grid (shown before search) -->

@@ -20,6 +20,7 @@ const marketRouteJs = fs.readFileSync(path.join(__dirname, "..", "routes", "mark
 const authRouteJs = fs.readFileSync(path.join(__dirname, "..", "routes", "auth.js"), "utf8");
 const projectionJs = fs.readFileSync(path.join(__dirname, "..", "public", "projection-lab.js"), "utf8");
 const siteShellCss = fs.readFileSync(path.join(__dirname, "..", "public", "site-shell.css"), "utf8");
+const landingPolishCss = fs.readFileSync(path.join(__dirname, "..", "public", "landing-polish.css"), "utf8");
 const aboutHtml = fs.readFileSync(path.join(__dirname, "..", "public", "about.html"), "utf8");
 const lensHtml = fs.readFileSync(path.join(__dirname, "..", "labs", "lens-score", "index.html"), "utf8");
 const htmlAndLegacyCss = `${html}\n${legacyCss}`;
@@ -175,7 +176,7 @@ test("About and LensScore use one global product navigation", () => {
   }
   assert.match(lensHtml, /<header class="topbar" hidden>/);
   assert.match(lensHtml, /id="theme-button-old"/);
-  assert.match(siteShellCss, /\.il-global-nav \{/);
+  assert.match(siteShellCss, /nav\.il-global-nav \{/);
   assert.match(siteShellCss, /@media \(max-width: 900px\)/);
 });
 
@@ -272,6 +273,10 @@ test("charts and trade symbols use vivid market colors without repainting the si
 
 test("release navigation controls keep identical geometry across active states", () => {
   assert.match(releaseCss, /grid-template-columns: repeat\(8, minmax\(68px, 1fr\)\)/);
+  assert.match(siteShellCss, /#main-nav \.nav-links \{[\s\S]*display: flex !important/);
+  assert.match(siteShellCss, /#main-nav \.nav-tab,[\s\S]*height: 38px !important/);
+  assert.match(siteShellCss, /#main-nav\[data-view="tool"\] #nav-links \{[\s\S]*display: flex !important/);
+  assert.match(siteShellCss, /@media \(min-width: 961px\) and \(max-width: 1100px\)/);
   assert.match(releaseCss, /#main-nav \.nav-tab\.active-tab,/);
   assert.match(releaseCss, /font-weight: 600 !important/);
   assert.match(releaseCss, /flex: 0 0 94px/);
@@ -393,9 +398,16 @@ test("calm premium visual refresh is the final site-wide theme layer", () => {
 test("landing visuals are honest CSS-built illustrations, not fake screenshots", () => {
   assert.doesNotMatch(html, /landing-product-preview/);
   assert.doesNotMatch(html, /landing-workflow-strip/);
+  assert.doesNotMatch(html, /hero-process\.png/);
+  assert.doesNotMatch(html, /has-hero-banner/);
   assert.match(html, /class="il-hero-mock" role="img"/);
   assert.match(html, /Illustration of the Implied Lens research workspace/);
   assert.match(html, /class="il-workflow-panels"/);
+  assert.match(html, /\/landing-polish\.css\?v=/);
+  assert.match(landingPolishCss, /#landing-page\.il-landing \{[\s\S]*padding: 0 !important/);
+  assert.match(landingPolishCss, /grid-template-columns: minmax\(360px, \.82fr\) minmax\(520px, 1\.18fr\)/);
+  assert.match(html, /class="tw-score-preview"/);
+  assert.match(landingPolishCss, /#view-tool \.tool-welcome::after \{[\s\S]*content: none !important/);
   assert.match(legacyCss, /\.il-hero-mock\{/);
   assert.match(legacyCss, /\.il-workflow-panels\{/);
 });
