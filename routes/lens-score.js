@@ -11,7 +11,7 @@ router.get("/lens-score/:ticker", checkAnalysisLimit, async (req, res) => {
   const ticker = normalizeTicker(req.params.ticker);
   if (!ticker) return res.status(400).json({ error: "Invalid ticker." });
 
-  res.setHeader("Cache-Control", "private, max-age=60");
+  res.setHeader("Cache-Control", "private, no-store, max-age=0, must-revalidate");
   try {
     const research = await buildResearchBundle(ticker, { range: "5y", interval: "1d" });
     const score = LensScoreEngine.scoreLens({
@@ -20,12 +20,18 @@ router.get("/lens-score/:ticker", checkAnalysisLimit, async (req, res) => {
       metadata: {
         ticker,
         company: research.company,
-        source: research.provenance.sources.map(source => source.name).join(" + "),
+        source: research.provenance.sources
+          .filter(source => source.status === "available")
+          .map(source => source.name)
+          .join(" + "),
         marketAsOf: research.provenance.asOf.market,
         fundamentalsAsOf: research.provenance.asOf.fundamentals,
         synthetic: false,
       },
     });
+    res.setHeader("X-Data-Retrieved-At", research.provenance.retrievedAt);
+    res.setHeader("X-Market-As-Of", research.provenance.asOf.market || "");
+    res.setHeader("X-Fundamentals-As-Of", research.provenance.asOf.fundamentals || "");
     return res.json({
       schemaVersion: research.schemaVersion,
       ticker,

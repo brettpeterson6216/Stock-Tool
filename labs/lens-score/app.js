@@ -46,6 +46,12 @@
     ? new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 }).format(value)
     : "—";
   const escapeText = value => String(value ?? "");
+  const normalizeTickerInput = value => String(value || "")
+    .trim()
+    .toUpperCase()
+    .replace("/", "-")
+    .replace(/[^A-Z0-9.^-]/g, "")
+    .slice(0, 15);
 
   function applySavedTheme() {
     const saved = window.localStorage.getItem("il-theme");
@@ -84,11 +90,21 @@
   }
 
   async function loadTicker(ticker) {
-    state.ticker = ticker.replace(/[^A-Z0-9.^-]/g, "").slice(0, 10) || "AAPL";
+    state.ticker = normalizeTickerInput(ticker) || "AAPL";
     $("#ticker-input").value = state.ticker;
     state.chartPoints = [];
+    state.bars = [];
+    state.meta = { longName: state.ticker };
+    state.fundamentals = {};
+    state.reportedFundamentals = {};
+    state.fundamentalFields = {};
+    state.fundamentalModel = {};
+    state.provenance = null;
+    state.result = null;
+    state.baseline = null;
     $("#chart-tooltip").hidden = true;
     $("#chart-tooltip").textContent = "";
+    renderUnavailable("Loading current market and company evidence…");
     setNotice("Loading reported company facts, earnings expectations and market history…", "");
     try {
       const response = await fetch(`/api/lens-score/${encodeURIComponent(state.ticker)}?preview=1`, {
@@ -117,9 +133,23 @@
         referenceEpsAsOf: payload.fundamentals?.referenceEpsAsOf || null,
         referenceEpsQuarters: payload.fundamentals?.referenceEpsQuarters || [],
       };
+      const retrieved = formatAsOf(payload.provenance?.retrievedAt);
+      const marketAsOf = formatAsOf(payload.provenance?.asOf?.market);
+      const fundamentalsAsOf = formatAsOf(payload.provenance?.asOf?.fundamentals);
+      const companyEvidence = payload.provenance?.freshness?.fundamentals?.basis === "provider-snapshot"
+        ? `provider metric snapshot retrieved ${fundamentalsAsOf} (reporting-period date unavailable)`
+        : payload.provenance?.asOf?.fundamentals
+          ? `company evidence through ${fundamentalsAsOf}`
+        : "company evidence unavailable";
+      const warningList = Array.isArray(payload.provenance?.warnings)
+        ? payload.provenance.warnings
+        : [];
+      const warnings = warningList.length
+        ? ` ${warningList.join(" ")}`
+        : "";
       setNotice(
-        `Research loaded from ${state.source}. Market as of ${formatAsOf(payload.provenance?.asOf?.market)}; company facts as of ${formatAsOf(payload.provenance?.asOf?.fundamentals)}.`,
-        "good"
+        `Retrieved ${retrieved} from ${state.source}. Market through ${marketAsOf}; ${companyEvidence}.${warnings}`,
+        warningList.length ? "warn" : "good"
       );
     } catch (error) {
       state.bars = [];
@@ -129,6 +159,7 @@
       state.fundamentalModel = {};
       state.result = null;
       state.baseline = null;
+      state.meta = { longName: state.ticker };
       setNotice(
         `${error.message} LensScore is Not Rated; no synthetic replacement was used.`,
         "warn"
@@ -160,6 +191,12 @@
   }
 
   function renderUnavailable(reason = "Required live evidence is unavailable.") {
+    $("#company-name").textContent = state.meta.longName || state.ticker;
+    $("#company-ticker").textContent = state.ticker;
+    $("#chart-ticker").textContent = state.ticker;
+    $("#market-price").textContent = "—";
+    $("#market-change").textContent = "Current quote unavailable";
+    $("#market-change").style.color = "";
     ["#score-value", "#setup-score", "#value-score"].forEach(selector => {
       const element = $(selector);
       if (element) element.textContent = "—";
@@ -168,7 +205,117 @@
     $("#score-summary").textContent = reason;
     $("#score-confidence").textContent = "Low";
     $("#model-version").textContent = engine.VERSION;
-    $("#score-date").textContent = new Date().toLocaleDateString("en-US", { dateStyle: "medium" });
+    $("#setup-label").textContent = "Not Rated";
+    $("#value-label").textContent = "Not Rated";
+    $("#golden-lens-signal").dataset.active = "false";
+    $("#golden-lens-label").textContent = "Golden Lens unavailable";
+    $("#golden-lens-reason").textContent = "Both independent lenses must have sufficient current evidence.";
+    $("#score-ring").dataset.tone = "unknown";
+    $("#score-ring").style.setProperty("--score-progress", 0);
+    $("#score-marker").style.left = "0%";
+    $("#as-of").textContent = "—";
+    $("#chart-source").textContent = "Source: waiting for verified data";
+    $("#buy-zone").textContent = "—";
+    $("#buy-zone-note").textContent = "A current price series is required.";
+    $("#invalidation-price").textContent = "—";
+    $("#implied-growth").textContent = "—";
+    $("#supported-growth").textContent = "—";
+    $("#growth-gap").textContent = "—";
+    $("#dcf-range").textContent = "Unavailable";
+    $("#valuation-chip").textContent = "Not Rated";
+    $("#alignment-copy").textContent = "Both lenses must be rated before LensScore can combine them.";
+    $("#alignment-visual").replaceChildren();
+    $("#trend-regime-heading").textContent = "Trend unavailable";
+    $("#trend-regime-value").textContent = "—";
+    $("#trend-agreement").textContent = "—";
+    $("#trend-extension").textContent = "—";
+    $("#trend-regime-votes").replaceChildren();
+    $("#trend-regime-copy").textContent = "A current price series is required.";
+    $("#coverage-value").textContent = "—";
+    $("#history-value").textContent = "—";
+    $("#cap-value").textContent = "—";
+    $("#guardrail-list").replaceChildren();
+    $("#strength-list").replaceChildren();
+    $("#concern-list").replaceChildren();
+    ["#support-zones", "#resistance-zones", "#technical-grid", "#indicator-table", "#driver-waterfall"].forEach(selector => {
+      const element = $(selector);
+      if (element) element.replaceChildren();
+    });
+    $("#chart-legend").replaceChildren();
+    const canvas = $("#price-chart");
+    if (canvas) {
+      const context = canvas.getContext("2d");
+      context?.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    state.chartPoints = [];
+  }
+
+  function renderPartial(result) {
+    const latest = state.bars[state.bars.length - 1];
+    const previous = state.bars[state.bars.length - 2] || latest;
+    const change = latest && previous ? latest.close / previous.close - 1 : null;
+    $("#company-name").textContent = state.meta.longName || state.ticker;
+    $("#company-ticker").textContent = state.ticker;
+    $("#chart-ticker").textContent = state.ticker;
+    $("#market-price").textContent = latest ? money(latest.close) : "—";
+    $("#market-change").textContent = finite(change)
+      ? `${change >= 0 ? "+" : ""}${pct(change)} last session`
+      : "Current change unavailable";
+    $("#market-change").style.color = finite(change)
+      ? change >= 0 ? "var(--green)" : "var(--red)"
+      : "";
+    $("#score-value").textContent = "—";
+    $("#score-label").textContent = "Combined score unavailable";
+    $("#score-summary").textContent = result.reason;
+    $("#score-confidence").textContent = "Low";
+    $("#model-version").textContent = result.version;
+    $("#as-of").textContent = latest
+      ? new Date(latest.time * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+      : "—";
+    $("#score-ring").dataset.tone = "unknown";
+    $("#score-ring").style.setProperty("--score-progress", 0);
+    $("#score-marker").style.left = "0%";
+    $("#chart-source").textContent = `Source: ${state.source}`;
+
+    const setup = result.lenses?.setup;
+    $("#setup-score").textContent = finite(setup?.score) ? setup.score.toFixed(1) : "—";
+    $("#setup-label").textContent = setup?.label || "Not Rated";
+    $("#value-score").textContent = "—";
+    $("#value-label").textContent = "Insufficient company evidence";
+    $("#golden-lens-signal").dataset.active = "false";
+    $("#golden-lens-label").textContent = "Golden Lens unavailable";
+    $("#golden-lens-reason").textContent = "LensSetup remains usable, but LensValue needs more current reported company evidence.";
+
+    fillList("#strength-list", [], "LensSetup is available in Chart & zones.");
+    fillList("#concern-list", [result.reason], "No company-data limitation was reported.");
+    const support = result.technical?.zones?.support?.[0];
+    if (support) {
+      $("#buy-zone").textContent = `${money(support.lower)}–${money(support.upper)}`;
+      $("#buy-zone-note").textContent = `${support.touches} confirmed reaction${support.touches === 1 ? "" : "s"} · ${Math.round(support.strength)}/100 zone strength`;
+      $("#invalidation-price").textContent = money(support.lower - (result.technical.indicators.atr || 0));
+    } else {
+      $("#buy-zone").textContent = "No confirmed zone";
+      $("#buy-zone-note").textContent = "No qualified nearby support cluster was found.";
+      $("#invalidation-price").textContent = "—";
+    }
+    $("#implied-growth").textContent = "—";
+    $("#supported-growth").textContent = "—";
+    $("#growth-gap").textContent = "—";
+    $("#dcf-range").textContent = "Unavailable";
+    $("#valuation-chip").textContent = "Not Rated";
+    $("#alignment-copy").textContent = "LensSetup is available independently. LensValue and the combined LensScore are withheld until company evidence is sufficient.";
+    $("#coverage-value").textContent = `${result.dataCoverage?.fundamentals?.available || 0}/${result.dataCoverage?.fundamentals?.total || 7} company`;
+    $("#history-value").textContent = `${result.technical?.bars?.length || 0} bars`;
+    $("#cap-value").textContent = "Combined score withheld";
+    $("#driver-waterfall").replaceChildren();
+
+    if (result.technical?.status === "ok") {
+      renderTrendRegime(result);
+      renderZones(result);
+      renderTechnicalMetrics(result);
+      renderIndicatorTable(result);
+      drawChart();
+    }
   }
 
   function normalizePresetForPrice(preset, price) {
@@ -190,7 +337,8 @@
     });
     if (setBaseline) state.baseline = state.result;
     if (state.result.status !== "graded") {
-      renderUnavailable(state.result.reason);
+      if (state.result.technical?.status === "ok") renderPartial(state.result);
+      else renderUnavailable(state.result.reason);
       return;
     }
     renderAll();

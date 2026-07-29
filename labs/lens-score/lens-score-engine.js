@@ -657,15 +657,44 @@
       fundamentalCoverage < 5 ||
       valuationCoverage < 3
     ) {
+      const setupRaw = technical.status === "ok" && finite(technical.setupScore)
+        ? technical.setupScore
+        : null;
+      const setupScore = finite(setupRaw) ? round(setupRaw / 10, 1) : null;
       return {
         status: "not-rated",
         score: null,
         label: "Not Rated",
         confidence: "Low",
+        price: technical.status === "ok" ? technical.price : null,
         reason: technical.status !== "ok"
           ? "At least 60 valid daily bars are required."
           : `Insufficient reported evidence (${fundamentalCoverage}/7 company fields and ${valuationCoverage}/4 valuation fields available).`,
         technical,
+        lenses: {
+          setup: {
+            score: setupScore,
+            rawScore: setupRaw,
+            label: setupLabel(setupScore),
+            status: finite(setupScore) ? "graded" : "not-rated",
+          },
+          value: {
+            score: null,
+            rawScore: null,
+            label: "Not Rated",
+            status: "not-rated",
+          },
+          combined: {
+            score: null,
+            rawScore: null,
+            label: "Not Rated",
+            status: "not-rated",
+          },
+          goldenLens: {
+            active: false,
+            reason: "Golden Lens requires both a rated LensValue and a rated LensSetup.",
+          },
+        },
         dataCoverage: {
           fundamentals: { available: fundamentalCoverage, required: 5, total: 7 },
           valuation: { available: valuationCoverage, required: 3, total: 4 },

@@ -206,6 +206,10 @@ test("null fundamental fields are missing evidence, not zero-valued evidence", (
   });
   assert.equal(result.status, "not-rated");
   assert.match(result.reason, /fundamental|valuation|evidence/i);
+  assert.equal(result.lenses.setup.status, "graded");
+  assert.ok(result.lenses.setup.score >= 0 && result.lenses.setup.score <= 10);
+  assert.equal(result.lenses.value.status, "not-rated");
+  assert.equal(result.lenses.combined.score, null);
 });
 
 test("confirmed pivots expose confirmation indexes and never include the final unconfirmed bars", () => {
