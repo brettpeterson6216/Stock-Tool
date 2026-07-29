@@ -13,7 +13,9 @@ const productJs = fs.readFileSync(path.join(__dirname, "..", "public", "product-
 const productCss = fs.readFileSync(path.join(__dirname, "..", "public", "product-system.css"), "utf8");
 const researchJs = fs.readFileSync(path.join(__dirname, "..", "public", "research-system.js"), "utf8");
 const releaseCss = fs.readFileSync(path.join(__dirname, "..", "public", "release-polish.css"), "utf8");
+const visualCss = fs.readFileSync(path.join(__dirname, "..", "public", "visual-refresh.css"), "utf8");
 const lensAppJs = fs.readFileSync(path.join(__dirname, "..", "labs", "lens-score", "app.js"), "utf8");
+const lensRouteJs = fs.readFileSync(path.join(__dirname, "..", "routes", "lens-score.js"), "utf8");
 const htmlAndLegacyCss = `${html}\n${legacyCss}`;
 
 test("chart rebuilds keep prices and timestamps on one aligned series", () => {
@@ -115,6 +117,16 @@ test("price scenarios explain why a large price move may not change a capped sco
   assert.match(lensAppJs, /The tested price is/);
   assert.match(lensAppJs, /quality cap and chart setup remain in force/);
   assert.match(lensAppJs, /not a historical backtest/);
+});
+
+test("LensScore separates retrieval time, evidence dates, and technical-only coverage", () => {
+  assert.match(lensRouteJs, /private, no-store, max-age=0, must-revalidate/);
+  assert.match(lensRouteJs, /X-Data-Retrieved-At/);
+  assert.match(lensAppJs, /Retrieved \$\{retrieved\}/);
+  assert.match(lensAppJs, /company evidence unavailable/);
+  assert.match(lensAppJs, /function renderPartial\(result\)/);
+  assert.match(lensAppJs, /LensSetup remains usable/);
+  assert.match(lensAppJs, /replace\("\/", "-"\)/);
 });
 
 test("call research refreshes are idempotent and label reported data honestly", () => {
@@ -292,22 +304,19 @@ test("premium visual system is applied across app and static pages", () => {
   assert.match(staticCss, /\.btn-primary,\s*\.btn\.primary,\s*\.cta a/s);
 });
 
-test("gold ripple image is the default backdrop across landing, market, and tools", () => {
-  assert.match(legacyCss, /Gold ripple default background/);
-  assert.match(legacyCss, /Site-wide ripple backdrop final pass/);
-  assert.match(legacyCss, /Literal shared image backdrop/);
-  assert.match(legacyCss, /Light-mode polish baseline/);
-  assert.match(legacyCss, /Remove text-card backgrounds/);
-  assert.match(legacyCss, /\.il-landing-copy,[\s\S]*\.il-workflow-copy,[\s\S]*background:transparent!important/);
-  assert.match(legacyCss, /\.il-landing-preview,[\s\S]*\.il-landing-preview\.image-preview,[\s\S]*background:transparent!important/);
-  assert.match(legacyCss, /--gold-ripple-bg:url\("\/gold-ripple-background\.jpg\?v=20260625-3"\)/);
-  assert.match(legacyCss, /--gold-ripple-overlay:none/);
-  assert.match(legacyCss, /body::before\{[\s\S]*background-color:#E2BD6E!important;[\s\S]*background-image:var\(--gold-ripple-bg\)!important/);
-  assert.match(legacyCss, /#view-home,[\s\S]*#view-tool,[\s\S]*\.il-landing,[\s\S]*\.home-shell,[\s\S]*\.app-content-scroll,[\s\S]*#market-page,[\s\S]*background:none!important/);
-  assert.match(legacyCss, /background-image:var\(--gold-ripple-bg\)!important/);
-  assert.match(legacyCss, /background-attachment:fixed!important/);
-  assert.match(legacyCss, /background-attachment:scroll!important/);
-  assert.match(legacyCss, /backdrop-filter:blur\(20px\) saturate\(1\.08\)!important/);
+test("calm premium visual refresh is the final site-wide theme layer", () => {
+  assert.match(html, /release-polish\.css\?v=\d{8}-\d+[\s\S]*visual-refresh\.css\?v=\d{8}-\d+/);
+  assert.match(signupHtml, /static-polish\.css\?v=\d{8}-\d+[\s\S]*visual-refresh\.css\?v=\d{8}-\d+/);
+  assert.match(visualCss, /Implied Lens visual refresh/);
+  assert.match(visualCss, /--cream: #f1f5f2/);
+  assert.match(visualCss, /--cream: #080e0b/);
+  assert.match(visualCss, /radial-gradient\(850px 520px at 86% -15%/);
+  assert.match(visualCss, /:root:not\(\[data-theme="dark"\]\) nav#main-nav/);
+  assert.match(visualCss, /#view-tool \.tool-welcome\s*\{/);
+  assert.match(visualCss, /linear-gradient\(135deg, #14221b 0%, #0d1712 58%, #0a110e 100%\)/);
+  assert.match(visualCss, /--chart-positive: #21ec85/);
+  assert.match(visualCss, /--chart-negative: #ff6577/);
+  assert.doesNotMatch(visualCss, /gold-ripple-background/);
 });
 
 test("landing visuals are honest CSS-built illustrations, not fake screenshots", () => {

@@ -331,6 +331,7 @@ function renderPage(ticker, q) {
     html:not([data-theme="dark"]) footer{border-color:rgba(42,35,24,.12)}
   </style>
   <link rel="stylesheet" href="/static-polish.css?v=20260725-2">
+  <link rel="stylesheet" href="/visual-refresh.css?v=20260729-5">
 </head>
 <body>
   <div class="top-bar">
