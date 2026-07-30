@@ -332,7 +332,7 @@ function renderPage(ticker, q) {
   </style>
   <link rel="stylesheet" href="/static-polish.css?v=20260725-2">
   <link rel="stylesheet" href="/visual-refresh.css?v=20260730-10">
-  <link rel="stylesheet" href="/site-shell.css?v=20260730-18">
+  <link rel="stylesheet" href="/site-shell.css?v=20260730-19">
 </head>
 <body>
   <a class="il-skip-link" href="#public-main">Skip to content</a>

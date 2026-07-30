@@ -32,8 +32,8 @@ nav.il-global-nav {
 }
 .il-global-brand {
   box-sizing: border-box;
-  flex: 0 0 171px;
-  width: 171px;
+  flex: 0 0 160px;
+  width: 160px;
   display: inline-flex;
   align-items: center;
   gap: 9px;
@@ -77,7 +77,7 @@ nav.il-global-nav {
   min-height: 38px;
   display: inline-flex;
   align-items: center;
-  padding: 0 14.5px;
+  padding: 0 11px;
   border: 1px solid transparent;
   border-radius: 8px;
   color: rgba(240, 244, 240, .62) !important;
