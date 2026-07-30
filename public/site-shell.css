@@ -615,6 +615,11 @@ nav.il-global-nav {
   box-shadow: inset 0 -2px 0 #dfae52 !important;
 }
 
+:root:not([data-theme="dark"]) #main-nav .nav-tab,
+html[data-theme="dark"] #main-nav .nav-tab {
+  margin: 0 !important;
+}
+
 #main-nav .nav-search,
 .il-global-search {
   box-sizing: border-box !important;
