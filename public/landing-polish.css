@@ -140,12 +140,11 @@
   display: none !important;
 }
 
-/* Replace the old empty decorative rings with an informative score preview. */
+/* Keep Research focused on ticker entry. LensScore owns its separate top-level tab. */
 #view-tool .tool-welcome {
   display: grid !important;
-  grid-template-columns: minmax(0, 1fr) minmax(220px, 280px) !important;
+  grid-template-columns: minmax(0, 1fr) !important;
   align-items: center !important;
-  column-gap: clamp(32px, 5vw, 72px) !important;
 }
 
 #view-tool .tool-welcome::after {
@@ -163,111 +162,6 @@
   grid-column: 1 / -1 !important;
   width: 100% !important;
   margin: 0 0 8px !important;
-}
-
-#view-tool .tw-score-preview {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  margin: 0;
-  padding: 18px;
-  border: 1px solid rgba(239, 200, 121, .18);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, .045);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .055), 0 24px 52px rgba(0, 0, 0, .18);
-  backdrop-filter: blur(14px);
-}
-
-#view-tool .tw-score-eyebrow {
-  margin-bottom: 12px;
-  color: rgba(239, 200, 121, .72);
-  font: 750 9px/1 var(--mono);
-  letter-spacing: .14em;
-  text-align: center;
-  text-transform: uppercase;
-}
-
-#view-tool .tw-score-orbit {
-  position: relative;
-  width: 132px;
-  aspect-ratio: 1;
-  margin: 0 auto 16px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at center, #102019 0 49%, transparent 50%),
-    conic-gradient(#20dc7a 0 62%, #e9c676 62% 86%, rgba(255, 255, 255, .1) 86%);
-  box-shadow: 0 0 0 9px rgba(239, 200, 121, .035), 0 18px 38px rgba(0, 0, 0, .24);
-}
-
-#view-tool .tw-score-orbit::after {
-  content: "";
-  position: absolute;
-  inset: 8px;
-  border: 1px solid rgba(255, 255, 255, .1);
-  border-radius: 50%;
-}
-
-#view-tool .tw-score-value {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-#view-tool .app-section .acc-body .tw-score-value strong {
-  color: #f5f8f5 !important;
-  font: 700 34px/1 var(--serif);
-  letter-spacing: -.04em;
-}
-
-#view-tool .tw-score-value span {
-  margin-top: 5px;
-  color: rgba(226, 235, 229, .55);
-  font: 700 8px/1 var(--mono);
-  letter-spacing: .14em;
-  text-transform: uppercase;
-}
-
-#view-tool .tw-score-signals {
-  display: grid;
-  gap: 8px;
-}
-
-#view-tool .tw-score-signals span {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 8px;
-  color: rgba(226, 235, 229, .66);
-  font: 650 10px/1.2 var(--sans);
-}
-
-#view-tool .app-section .acc-body .tw-score-signals strong {
-  color: #f5f8f5 !important;
-  font-family: var(--mono);
-  font-size: 10px;
-}
-
-#view-tool .tw-score-signals i {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-}
-
-#view-tool .tw-signal-value { background: #20dc7a; box-shadow: 0 0 0 4px rgba(32, 220, 122, .1); }
-#view-tool .tw-signal-setup { background: #e9c676; box-shadow: 0 0 0 4px rgba(233, 198, 118, .1); }
-#view-tool .tw-signal-risk { background: #8ca39a; box-shadow: 0 0 0 4px rgba(140, 163, 154, .1); }
-
-#view-tool .tw-score-caption {
-  margin-top: 14px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(255, 255, 255, .08);
-  color: rgba(226, 235, 229, .5);
-  font: 500 10px/1.45 var(--sans);
-  text-align: center;
 }
 
 @media (max-width: 1120px) {
@@ -290,10 +184,6 @@
     width: min(100%, 820px) !important;
     margin: 0 auto !important;
   }
-  #view-tool .tool-welcome {
-    grid-template-columns: 1fr !important;
-  }
-  #view-tool .tw-score-preview { display: none; }
 }
 
 @media (max-width: 640px) {

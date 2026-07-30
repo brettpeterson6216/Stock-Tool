@@ -21,17 +21,19 @@ nav.il-global-nav {
   z-index: 100;
   min-height: 56px !important;
   height: auto !important;
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 6px max(18px, calc((100vw - 1480px) / 2)) !important;
+  gap: 10px;
+  padding: 0 18px !important;
   border-bottom: 1px solid rgba(232, 195, 119, .14);
   background: rgba(12, 17, 15, .96);
   box-shadow: 0 10px 32px rgba(0, 0, 0, .12);
   backdrop-filter: blur(20px);
 }
 .il-global-brand {
+  box-sizing: border-box;
+  flex: 0 0 171px;
+  width: 171px;
   display: inline-flex;
   align-items: center;
   gap: 9px;
@@ -42,10 +44,13 @@ nav.il-global-nav {
   letter-spacing: -.04em;
   text-decoration: none !important;
   white-space: nowrap;
+  min-height: 44px;
+  padding-right: 14px;
+  border-right: 1px solid rgba(239, 200, 121, .14);
 }
 .il-global-brand img {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   filter: drop-shadow(0 5px 12px rgba(212, 168, 77, .25));
 }
@@ -54,11 +59,17 @@ nav.il-global-nav {
   font-style: italic;
 }
 .il-global-links {
+  box-sizing: border-box;
+  flex: 0 1 auto;
+  width: auto;
   min-width: 0;
+  height: 44px;
   display: flex;
-  align-items: stretch;
+  align-items: center;
   gap: 0;
+  padding: 3px;
   overflow-x: auto;
+  overflow-y: hidden;
   scrollbar-width: none;
 }
 .il-global-links::-webkit-scrollbar { display: none; }
@@ -66,7 +77,7 @@ nav.il-global-nav {
   min-height: 38px;
   display: inline-flex;
   align-items: center;
-  padding: 0 10px;
+  padding: 0 14.5px;
   border: 1px solid transparent;
   border-radius: 8px;
   color: rgba(240, 244, 240, .62) !important;
@@ -88,9 +99,12 @@ nav.il-global-nav {
   box-shadow: inset 0 -2px 0 #d9ad57;
 }
 .il-global-actions {
+  flex: 0 0 auto;
+  min-width: 301px;
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-left: auto;
 }
 .il-global-action {
   min-width: 42px;
@@ -114,8 +128,119 @@ nav.il-global-nav {
   background: rgba(239, 200, 121, .09);
 }
 .il-global-nav .static-theme-toggle {
+  position: relative;
+  width: 58px;
+  height: 30px;
+  flex: 0 0 auto;
   margin: 0 !important;
+  border: 1px solid rgba(255, 255, 255, .14);
+  border-radius: 15px;
+  background: rgba(255, 255, 255, .07);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, .1);
+  cursor: pointer;
 }
+.il-global-nav .static-theme-toggle::before,
+.il-global-nav .static-theme-toggle::after {
+  position: absolute;
+  top: 7px;
+  color: rgba(244, 242, 235, .48);
+  font: 12px/1 Arial, sans-serif;
+}
+.il-global-nav .static-theme-toggle::before { content: "\2600"; left: 7px; color: #efc879; }
+.il-global-nav .static-theme-toggle::after { content: "\263e"; right: 7px; }
+.il-global-nav .static-theme-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #efc879;
+  box-shadow: 0 2px 7px rgba(0, 0, 0, .2);
+  transition: transform .2s;
+}
+html[data-theme="dark"] .il-global-nav .static-theme-thumb { transform: translateX(28px); }
+.il-global-search {
+  box-sizing: border-box;
+  flex: 0 1 190px;
+  width: 190px;
+  max-width: 190px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  padding: 0 10px;
+  border: 1px solid rgba(239, 200, 121, .16);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .035);
+}
+.il-global-search span {
+  color: rgba(244, 242, 235, .48);
+  font-size: 15px;
+  line-height: 1;
+}
+.il-global-search input {
+  width: 142px;
+  min-width: 0;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: rgba(244, 242, 235, .9);
+  font: 600 12px/1 "DM Sans", Inter, sans-serif;
+  text-transform: uppercase;
+}
+.il-global-search input::placeholder {
+  color: rgba(244, 242, 235, .42);
+  text-transform: none;
+}
+.il-global-live {
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 9px;
+  border: 1px solid rgba(32, 220, 122, .24);
+  border-radius: 5px;
+  background: rgba(32, 220, 122, .07);
+  color: #52e596;
+  font: 750 10px/1 "DM Sans", Inter, sans-serif;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.il-global-live::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #20dc7a;
+}
+.il-global-login,
+.il-global-trial {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px;
+  border-radius: 6px;
+  font: 650 12px/1 "DM Sans", Inter, sans-serif;
+  text-decoration: none !important;
+  white-space: nowrap;
+}
+.il-global-login {
+  border: 1px solid rgba(239, 200, 121, .18);
+  color: rgba(244, 242, 235, .75) !important;
+  background: rgba(255, 255, 255, .035);
+}
+.il-global-trial {
+  border: 1px solid #d9ad57;
+  background: #d9ad57;
+  color: #17120b !important;
+}
+.il-global-login:hover { color: #fff !important; border-color: rgba(239, 200, 121, .38); }
+.il-global-trial:hover { background: #efc879; border-color: #efc879; }
 
 /* The application shell uses the same compact tab geometry as static pages. */
 #main-nav {
@@ -202,6 +327,13 @@ nav.il-global-nav {
     padding-inline: 8px;
     font-size: 11px;
   }
+  .il-global-search {
+    flex-basis: 150px;
+    width: 150px;
+  }
+  .il-global-search input { width: 102px; }
+  .il-global-live { display: none; }
+  .il-global-actions { min-width: 212px; }
 }
 
 @media (min-width: 961px) and (max-width: 1100px) {
@@ -220,10 +352,12 @@ nav.il-global-nav {
     padding-inline: 6px;
     font-size: 10.5px;
   }
+  .il-global-search { display: none; }
 }
 
 @media (max-width: 900px) {
   nav.il-global-nav {
+    display: grid;
     grid-template-columns: 1fr auto;
     gap: 8px 12px;
     padding: 8px 12px !important;
@@ -239,6 +373,16 @@ nav.il-global-nav {
     min-height: 42px;
     padding-inline: 11px;
   }
+  .il-global-search,
+  .il-global-live,
+  .il-global-login,
+  .il-global-trial { display: none; }
+  .il-global-actions { min-width: 0; }
+  .il-global-nav .static-theme-toggle { height: 40px; border-radius: 20px; }
+  .il-global-nav .static-theme-toggle::before,
+  .il-global-nav .static-theme-toggle::after { top: 12px; }
+  .il-global-nav .static-theme-thumb { top: 8px; }
+  html[data-theme="dark"] .il-global-nav .static-theme-thumb { transform: translateX(24px); }
 }
 
 @media (max-width: 960px) {
@@ -304,6 +448,7 @@ nav.il-global-nav {
   }
   .quick-tickers button,
   .company-nav button,
+  .methodology-inline,
   #open-chart-button,
   #save-scenario {
     min-height: 44px !important;

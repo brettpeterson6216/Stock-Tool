@@ -177,6 +177,18 @@ h1 em { color: var(--gold-bright); font-family: Georgia, serif; font-weight: 500
 h2 { margin-bottom: 0; font-size: 20px; line-height: 1.15; letter-spacing: -0.025em; }
 h3 { font-size: 13px; }
 .intro { max-width: 680px; margin-bottom: 0; color: var(--ink-soft); font-size: 16px; }
+.methodology-inline {
+  min-height: 38px;
+  margin-top: 16px;
+  padding: 0 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  background: transparent;
+  color: var(--gold-bright);
+  font: 750 11px/1 var(--sans);
+  letter-spacing: .04em;
+}
+.methodology-inline:hover { border-color: var(--gold); background: var(--gold-faint); }
 .ticker-form {
   padding: 18px;
   border: 1px solid var(--line);

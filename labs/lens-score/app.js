@@ -37,6 +37,7 @@
 
   const $ = selector => document.querySelector(selector);
   const $$ = selector => Array.from(document.querySelectorAll(selector));
+  let activeRequestController = null;
   const finite = value => value !== null && value !== undefined && value !== "" && Number.isFinite(Number(value));
   const money = value => finite(value)
     ? new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 2 }).format(value)
@@ -55,7 +56,7 @@
 
   function applySavedTheme() {
     const saved = window.localStorage.getItem("il-theme");
-    document.documentElement.dataset.theme = saved === "light" ? "light" : "dark";
+    document.documentElement.dataset.theme = saved === "dark" ? "dark" : "light";
   }
 
   function toggleTheme() {
@@ -90,8 +91,13 @@
   }
 
   async function loadTicker(ticker) {
-    state.ticker = normalizeTickerInput(ticker) || "AAPL";
+    const requestedTicker = normalizeTickerInput(ticker) || "AAPL";
+    if (activeRequestController) activeRequestController.abort();
+    const requestController = new AbortController();
+    activeRequestController = requestController;
+    state.ticker = requestedTicker;
     $("#ticker-input").value = state.ticker;
+    $("#lab-main").setAttribute("aria-busy", "true");
     state.chartPoints = [];
     state.bars = [];
     state.meta = { longName: state.ticker };
@@ -109,8 +115,11 @@
     try {
       const response = await fetch(`/api/lens-score/${encodeURIComponent(state.ticker)}?preview=1`, {
         credentials: "same-origin",
+        cache: "default",
+        signal: requestController.signal,
       });
       const payload = await response.json().catch(() => ({}));
+      if (requestController.signal.aborted || state.ticker !== requestedTicker) return;
       if (!response.ok) throw new Error(payload.error || `Research endpoint returned ${response.status}`);
       if (payload.provenance?.synthetic !== false) throw new Error("Unverified or synthetic data was rejected.");
       state.bars = engine.normalizeBars(payload.market?.bars || []);
@@ -152,6 +161,7 @@
         warningList.length ? "warn" : "good"
       );
     } catch (error) {
+      if (error?.name === "AbortError") return;
       state.bars = [];
       state.fundamentals = {};
       state.reportedFundamentals = {};
@@ -165,6 +175,8 @@
         "warn"
       );
       renderUnavailable();
+      $("#lab-main").setAttribute("aria-busy", "false");
+      if (activeRequestController === requestController) activeRequestController = null;
       return;
     }
     const latest = state.bars[state.bars.length - 1];
@@ -174,6 +186,8 @@
     calculate(true);
     renderAssumptions();
     if (state.result?.status === "graded") configureEntryControls();
+    $("#lab-main").setAttribute("aria-busy", "false");
+    if (activeRequestController === requestController) activeRequestController = null;
   }
 
   function formatAsOf(value) {

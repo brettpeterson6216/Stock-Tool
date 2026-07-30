@@ -16,6 +16,7 @@ const releaseCss = fs.readFileSync(path.join(__dirname, "..", "public", "release
 const visualCss = fs.readFileSync(path.join(__dirname, "..", "public", "visual-refresh.css"), "utf8");
 const lensAppJs = fs.readFileSync(path.join(__dirname, "..", "labs", "lens-score", "app.js"), "utf8");
 const lensRouteJs = fs.readFileSync(path.join(__dirname, "..", "routes", "lens-score.js"), "utf8");
+const stockResearchJs = fs.readFileSync(path.join(__dirname, "..", "lib", "stock-research.js"), "utf8");
 const marketRouteJs = fs.readFileSync(path.join(__dirname, "..", "routes", "market-data.js"), "utf8");
 const authRouteJs = fs.readFileSync(path.join(__dirname, "..", "routes", "auth.js"), "utf8");
 const projectionJs = fs.readFileSync(path.join(__dirname, "..", "public", "projection-lab.js"), "utf8");
@@ -137,7 +138,7 @@ test("price scenarios explain why a large price move may not change a capped sco
 });
 
 test("LensScore separates retrieval time, evidence dates, and technical-only coverage", () => {
-  assert.match(lensRouteJs, /private, no-store, max-age=0, must-revalidate/);
+  assert.match(lensRouteJs, /private, max-age=30, stale-while-revalidate=120/);
   assert.match(lensRouteJs, /X-Data-Retrieved-At/);
   assert.match(lensAppJs, /Retrieved \$\{retrieved\}/);
   assert.match(lensAppJs, /company evidence unavailable/);
@@ -301,11 +302,29 @@ test("every public product region uses the shared navigation and skip link", () 
     assert.match(page, /class="il-skip-link"/, `${file} should provide keyboard bypass navigation`);
     assert.match(page, /<nav class="il-global-nav" aria-label="Primary navigation">/, `${file} should expose the product navigation`);
     assert.match(page, /class="top-bar" hidden/, `${file} should retire its legacy back-to-platform header`);
+    assert.match(page, /class="il-global-search"/, `${file} should preserve the global ticker search`);
+    assert.match(page, /class="il-global-live"/, `${file} should preserve the live status`);
+    assert.match(page, /class="il-global-login"/, `${file} should preserve account entry`);
+    assert.match(page, /class="il-global-trial"/, `${file} should preserve the trial action`);
   }
   assert.match(stockLandingRoute, /site-shell\.css\?v=\d{8}-\d+/);
   assert.match(stockLandingRoute, /class="il-skip-link"/);
   assert.match(stockLandingRoute, /<nav class="il-global-nav" aria-label="Primary navigation">/);
   assert.match(stockLandingRoute, /class="top-bar" hidden/);
+  assert.match(stockLandingRoute, /class="il-global-search"/);
+  assert.match(lensHtml, /class="il-global-search"/);
+  assert.match(lensHtml, /id="methodology-button"/);
+});
+
+test("LensScore avoids repeated slow provider work and caps optional provider latency", () => {
+  assert.match(lensRouteJs, /const responseCache = new Map\(\)/);
+  assert.match(lensRouteJs, /const inFlight = new Map\(\)/);
+  assert.match(lensRouteJs, /X-LensScore-Cache/);
+  assert.match(lensRouteJs, /private, max-age=30, stale-while-revalidate=120/);
+  assert.match(stockResearchJs, /OPTIONAL_RESEARCH_BUDGET_MS = 5500/);
+  assert.match(stockResearchJs, /withinBudget\(loadCompanyFacts/);
+  assert.match(stockResearchJs, /withinBudget\(loadFinnhubResearch/);
+  assert.match(lensAppJs, /new AbortController\(\)/);
 });
 
 test("mobile product controls preserve a 44 pixel interaction floor", () => {
@@ -450,7 +469,9 @@ test("landing visuals are honest CSS-built illustrations, not fake screenshots",
   assert.match(html, /\/landing-polish\.css\?v=/);
   assert.match(landingPolishCss, /#landing-page\.il-landing \{[\s\S]*padding: 0 !important/);
   assert.match(landingPolishCss, /grid-template-columns: minmax\(360px, \.82fr\) minmax\(520px, 1\.18fr\)/);
-  assert.match(html, /class="tw-score-preview"/);
+  assert.doesNotMatch(html, /class="tw-score-preview"/);
+  assert.doesNotMatch(html, /class="il-lensscore-launch"/);
+  assert.match(html, /id="nav-lensscore-link" class="nav-tab">LensScore/);
   assert.match(landingPolishCss, /#view-tool \.tool-welcome::after \{[\s\S]*content: none !important/);
   assert.match(legacyCss, /\.il-hero-mock\{/);
   assert.match(legacyCss, /\.il-workflow-panels\{/);

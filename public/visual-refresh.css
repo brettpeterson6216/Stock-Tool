@@ -523,28 +523,6 @@ html[data-theme="dark"] #view-tool .tw-sub {
 #view-tool .tool-welcome .il-onboarding-step strong,
 #view-tool #tool-welcome .il-onboarding-step strong { color: #efc879 !important; }
 
-#view-tool .il-lensscore-launch {
-  margin: 14px 0 24px !important;
-  padding: 15px 17px !important;
-  border: 1px solid rgba(183, 122, 37, .18) !important;
-  border-radius: 14px !important;
-  background: linear-gradient(110deg, rgba(217, 168, 79, .15), rgba(255, 255, 255, .84) 42%, rgba(255, 255, 255, .94)) !important;
-  box-shadow: var(--shadow) !important;
-}
-html[data-theme="dark"] #view-tool .il-lensscore-launch {
-  background: linear-gradient(110deg, rgba(239, 200, 121, .14), rgba(17, 29, 24, .9) 42%, rgba(14, 23, 19, .96)) !important;
-}
-#view-tool .il-lensscore-launch > i:first-child {
-  border-radius: 11px !important;
-  background: var(--gold-grad) !important;
-  box-shadow: 0 9px 22px rgba(183, 122, 37, .22);
-}
-#view-tool .il-lensscore-launch:hover {
-  border-color: rgba(183, 122, 37, .35) !important;
-  box-shadow: var(--shadow-lg) !important;
-  transform: translateY(-2px);
-}
-
 #view-tool .fg-label,
 #view-tool .tw-sec-lbl {
   color: var(--text5) !important;
@@ -954,7 +932,6 @@ html[data-theme="light"] .topbar { background: rgba(250, 252, 250, .9) !importan
   #view-tool .tw-sub { max-width: 320px !important; font-size: .82rem !important; }
   #view-tool .tw-market { display: grid !important; grid-template-columns: 1fr 1fr; }
   #view-tool .tw-market .twm-cell { min-width: 0 !important; }
-  #view-tool .il-lensscore-launch { margin: 12px 12px 20px !important; }
   #view-tool #featured-grid,
   #view-tool .fg-label,
   #view-tool .tw-extra { margin-left: 12px !important; margin-right: 12px !important; }
