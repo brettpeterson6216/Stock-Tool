@@ -583,6 +583,7 @@ nav.il-global-nav {
   min-height: 38px !important;
   display: inline-flex !important;
   align-items: center !important;
+  margin: 0 !important;
   padding: 0 .72rem !important;
   border: 1px solid transparent !important;
   border-radius: 10px !important;
