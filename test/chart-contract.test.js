@@ -23,6 +23,16 @@ const siteShellCss = fs.readFileSync(path.join(__dirname, "..", "public", "site-
 const landingPolishCss = fs.readFileSync(path.join(__dirname, "..", "public", "landing-polish.css"), "utf8");
 const aboutHtml = fs.readFileSync(path.join(__dirname, "..", "public", "about.html"), "utf8");
 const lensHtml = fs.readFileSync(path.join(__dirname, "..", "labs", "lens-score", "index.html"), "utf8");
+const publicShellPages = [
+  "about.html",
+  "blog.html",
+  "compound-calculator.html",
+  "data-sources.html",
+  "privacy.html",
+  "research-process.html",
+  "terms.html",
+].map(file => [file, fs.readFileSync(path.join(__dirname, "..", "public", file), "utf8")]);
+const stockLandingRoute = fs.readFileSync(path.join(__dirname, "..", "routes", "stock-landing.js"), "utf8");
 const htmlAndLegacyCss = `${html}\n${legacyCss}`;
 
 test("chart rebuilds keep prices and timestamps on one aligned series", () => {
@@ -205,6 +215,8 @@ test("the research entry point and quote summary stay unambiguous", () => {
   assert.match(visualCss, /#view-tool #body-analyze \.tool-welcome \.search-row/);
   assert.match(html, /const previousBar=finiteCloses\.length>1/);
   assert.match(html, /Today \$\{chg>=0\?'\+':''\}/);
+  assert.match(productJs, /const prev = meta\.previousClose \?\? window\.IL_STATE\?\.previousClose \?\? meta\.chartPreviousClose/);
+  assert.doesNotMatch(productJs, /const prev = meta\.chartPreviousClose \?\? meta\.previousClose/);
   assert.match(productJs, /interval === "1d" && age < 4 \* 86400/);
   assert.match(productJs, /Latest daily bar/);
 });
@@ -281,6 +293,38 @@ test("release navigation controls keep identical geometry across active states",
   assert.match(releaseCss, /font-weight: 600 !important/);
   assert.match(releaseCss, /flex: 0 0 94px/);
   assert.match(releaseCss, /height: 40px/);
+});
+
+test("every public product region uses the shared navigation and skip link", () => {
+  for (const [file, page] of publicShellPages) {
+    assert.match(page, /site-shell\.css\?v=\d{8}-\d+/, `${file} should load the shared shell`);
+    assert.match(page, /class="il-skip-link"/, `${file} should provide keyboard bypass navigation`);
+    assert.match(page, /<nav class="il-global-nav" aria-label="Primary navigation">/, `${file} should expose the product navigation`);
+    assert.match(page, /class="top-bar" hidden/, `${file} should retire its legacy back-to-platform header`);
+  }
+  assert.match(stockLandingRoute, /site-shell\.css\?v=\d{8}-\d+/);
+  assert.match(stockLandingRoute, /class="il-skip-link"/);
+  assert.match(stockLandingRoute, /<nav class="il-global-nav" aria-label="Primary navigation">/);
+  assert.match(stockLandingRoute, /class="top-bar" hidden/);
+});
+
+test("mobile product controls preserve a 44 pixel interaction floor", () => {
+  assert.match(siteShellCss, /Mobile interaction floor/);
+  for (const selector of [
+    "#view-home \\.mo-tab",
+    "#view-home \\.movers-tab",
+    "#view-tool \\.sa-pill",
+    "#view-tool \\.il-ws-tab",
+    "#view-tool \\.il-onboarding-close",
+    "\\.quick-tickers button",
+    "\\.company-nav button",
+    "#open-chart-button",
+    "#run",
+  ]) {
+    assert.match(siteShellCss, new RegExp(selector));
+  }
+  assert.match(siteShellCss, /min-height: 44px !important/);
+  assert.match(siteShellCss, /min-width: 44px !important/);
 });
 
 test("expanded charts look premium and support seamless annotation", () => {

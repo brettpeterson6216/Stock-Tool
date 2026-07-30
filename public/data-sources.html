@@ -62,8 +62,27 @@
   </style>
 <link rel="stylesheet" href="/static-polish.css?v=20260725-2">
 <link rel="stylesheet" href="/visual-refresh.css?v=20260729-9">
+<link rel="stylesheet" href="/site-shell.css?v=20260729-13">
 </head>
 <body>
+<a class="il-skip-link" href="#public-main">Skip to content</a>
+<nav class="il-global-nav" aria-label="Primary navigation">
+  <a class="il-global-brand" href="/"><img src="/logo.svg" alt=""><span>Implied<em>Lens</em></span></a>
+  <div class="il-global-links">
+    <a class="il-global-tab" href="/">Home</a>
+    <a class="il-global-tab" href="/?view=home&amp;market=1">Market</a>
+    <a class="il-global-tab" href="/?view=tool&amp;section=analyze">Research</a>
+    <a class="il-global-tab" href="/lens-score">LensScore</a>
+    <a class="il-global-tab" href="/?view=tool&amp;section=projection">Projections</a>
+    <a class="il-global-tab" href="/?view=tool&amp;section=wealth">Planner</a>
+    <a class="il-global-tab" href="/?view=tool&amp;section=education">Learn</a>
+    <a class="il-global-tab" href="/?view=tool&amp;section=reports">Saved</a>
+    <a class="il-global-tab active" href="/about">About</a>
+  </div>
+  <div class="il-global-actions">
+    <button class="static-theme-toggle" type="button" aria-label="Switch theme"><span class="static-theme-thumb"></span></button>
+  </div>
+</nav>
 <aside class="static-rail" aria-label="About Implied Lens">
   <div class="static-rail-label">About</div>
   <a href="/about">About</a>
@@ -74,12 +93,12 @@
   <a href="/terms">Terms</a>
 </aside>
 
-  <div class="top-bar">
+  <div class="top-bar" hidden>
     <a href="/" class="logo">Implied<em>Lens</em></a>
     <a href="/" class="back">← Back to ImpliedLens</a>
     <button class="static-theme-toggle" type="button" aria-label="Switch theme"><span class="static-theme-thumb"></span></button>
   </div>
-  <div class="wrap" role="main">
+  <div class="wrap" id="public-main" role="main">
     <div class="eyebrow">Transparency</div>
     <h1>Data Sources</h1>
     <p class="subtitle">ImpliedLens labels the providers and calculations behind its research surfaces. Here is where the data comes from and how it is used.</p>

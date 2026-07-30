@@ -157,7 +157,9 @@
     const result = window.IL_STATE?.data;
     const meta = result?.meta || {};
     const price = meta.regularMarketPrice ?? meta.chartPreviousClose;
-    const prev = meta.chartPreviousClose ?? meta.previousClose;
+    // Yahoo's chartPreviousClose can represent the first comparison point for
+    // the requested range. Prefer the true prior session close for "current move".
+    const prev = meta.previousClose ?? window.IL_STATE?.previousClose ?? meta.chartPreviousClose;
     const change = Number.isFinite(Number(price)) && Number.isFinite(Number(prev)) ? Number(price) - Number(prev) : null;
     const changePct = change !== null && prev ? change / Number(prev) * 100 : null;
     const p = provenanceLabel(result?.impliedLensProvenance);

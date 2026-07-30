@@ -1,5 +1,20 @@
 /* Shared top-level navigation for Implied Lens product and editorial pages. */
 [hidden] { display: none !important; }
+.il-skip-link {
+  position: fixed;
+  top: 10px;
+  left: 12px;
+  z-index: 10000;
+  transform: translateY(-150%);
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #f2cb7d;
+  color: #111712 !important;
+  font: 700 13px/1 "DM Sans", Inter, sans-serif;
+  text-decoration: none !important;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, .24);
+}
+.il-skip-link:focus { transform: translateY(0); }
 nav.il-global-nav {
   position: sticky;
   top: 0;
@@ -234,4 +249,83 @@ nav.il-global-nav {
   .il-global-brand { font-size: 17px; }
   .il-global-actions .action-label { display: none; }
   .il-global-action { width: 44px; min-width: 44px; padding: 0; }
+}
+
+/* Mobile interaction floor: controls remain dense, but never become hard to tap. */
+@media (max-width: 760px) {
+  #view-home .mo-tab,
+  #view-home .movers-tab,
+  #view-home button[aria-label="Add watch item"],
+  #view-home .il-home-watch-empty button,
+  #view-tool .il-tool-guide-toggle,
+  #view-tool .sa-sort-btn,
+  #view-tool .sa-clear-btn,
+  #view-tool .sa-pill,
+  #view-tool .sa-btn,
+  #view-tool .sa-del-btn,
+  #view-tool .il-ws-btn,
+  #view-tool .il-ws-tab,
+  #view-tool .il-research-btn,
+  #view-tool #il-compare-ticker,
+  #view-tool .il-shell-search input,
+  #view-tool .il-shell-search button,
+  #view-tool .il-onboarding button,
+  #view-tool .il-onboarding-close,
+  #view-tool #body-analyze button,
+  #view-tool .il-primary-action,
+  #view-tool .il-template-row button,
+  #view-tool .edu-lesson-actions button,
+  #principal,
+  #monthly,
+  #years,
+  #return,
+  #variance,
+  #inflation,
+  #run {
+    min-height: 44px !important;
+  }
+  #view-home button[aria-label="Add watch item"],
+  #view-home .il-home-watch-empty button,
+  #view-home .mo-tab,
+  #view-tool .sa-sort-btn,
+  #view-tool .sa-pill,
+  #view-tool .il-onboarding-close {
+    min-width: 44px !important;
+  }
+  #view-tool #il-w-principal,
+  #view-tool #il-w-monthly,
+  #view-tool #il-w-years,
+  #view-tool #il-w-return,
+  #view-tool #il-w-variance,
+  #view-tool #il-w-inflation,
+  #view-tool #il-w-fee,
+  #view-tool #il-w-tax {
+    min-height: 44px !important;
+  }
+  .quick-tickers button,
+  .company-nav button,
+  #open-chart-button,
+  #save-scenario {
+    min-height: 44px !important;
+  }
+  #view-tool .il-shell-top {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  #view-tool .il-shell-search {
+    grid-column: 1 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  #view-tool .il-shell-search input {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  #view-tool .il-shell-actions {
+    grid-column: 1 !important;
+    min-width: 0 !important;
+    justify-content: flex-start !important;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  #view-tool .il-shell-actions::-webkit-scrollbar { display: none; }
 }

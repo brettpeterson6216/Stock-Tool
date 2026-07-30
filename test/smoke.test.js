@@ -215,6 +215,16 @@ test("Auth pages preserve a local return path and expose attribution hooks", asy
   }
 });
 
+test("Auth pages use route-specific canonicals while remaining excluded from search", async () => {
+  for (const pagePath of ["/login", "/signup", "/reset-password"]) {
+    const res = await req(pagePath);
+    assert.equal(res.status, 200);
+    const html = await res.text();
+    assert.match(html, /<meta name="robots" content="noindex, nofollow">/);
+    assert.match(html, new RegExp(`<link rel="canonical" href="https://impliedlens\\.com${pagePath}">`));
+  }
+});
+
 test("Public pages expose canonical, favicon, and social metadata", async () => {
   for (const pagePath of ["/about", "/blog", "/data-sources", "/privacy", "/terms", "/research-process", "/compound-calculator"]) {
     const res = await req(pagePath);

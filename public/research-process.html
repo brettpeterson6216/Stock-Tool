@@ -33,8 +33,27 @@
   </style>
 <link rel="stylesheet" href="/static-polish.css?v=20260725-2">
 <link rel="stylesheet" href="/visual-refresh.css?v=20260729-9">
+<link rel="stylesheet" href="/site-shell.css?v=20260729-13">
 </head>
 <body>
+<a class="il-skip-link" href="#public-main">Skip to content</a>
+<nav class="il-global-nav" aria-label="Primary navigation">
+  <a class="il-global-brand" href="/"><img src="/logo.svg" alt=""><span>Implied<em>Lens</em></span></a>
+  <div class="il-global-links">
+    <a class="il-global-tab" href="/">Home</a>
+    <a class="il-global-tab" href="/?view=home&amp;market=1">Market</a>
+    <a class="il-global-tab active" href="/?view=tool&amp;section=analyze">Research</a>
+    <a class="il-global-tab" href="/lens-score">LensScore</a>
+    <a class="il-global-tab" href="/?view=tool&amp;section=projection">Projections</a>
+    <a class="il-global-tab" href="/?view=tool&amp;section=wealth">Planner</a>
+    <a class="il-global-tab" href="/?view=tool&amp;section=education">Learn</a>
+    <a class="il-global-tab" href="/?view=tool&amp;section=reports">Saved</a>
+    <a class="il-global-tab" href="/about">About</a>
+  </div>
+  <div class="il-global-actions">
+    <button class="static-theme-toggle" type="button" aria-label="Switch theme"><span class="static-theme-thumb"></span></button>
+  </div>
+</nav>
 <aside class="static-rail" aria-label="About Implied Lens">
   <div class="static-rail-label">About</div>
   <a href="/about">About</a>
@@ -45,8 +64,8 @@
   <a href="/terms">Terms</a>
 </aside>
 
-  <div class="top-bar"><a href="/" class="logo">Implied<em>Lens</em></a><a href="/" class="back">Back to the platform</a><button class="static-theme-toggle" type="button" aria-label="Switch theme"><span class="static-theme-thumb"></span></button></div>
-  <main>
+  <div class="top-bar" hidden><a href="/" class="logo">Implied<em>Lens</em></a><a href="/" class="back">Back to the platform</a><button class="static-theme-toggle" type="button" aria-label="Switch theme"><span class="static-theme-thumb"></span></button></div>
+  <main id="public-main">
     <section class="hero"><div class="eyebrow">The ImpliedLens method</div><h1>Research the business. Test the thesis. Revisit the decision.</h1><p>ImpliedLens is built around a simple belief: investing improves when the evidence, assumptions, downside, and next review are written down before price movement changes the story.</p><div class="cta"><a class="btn primary" href="/?view=tool&amp;section=workspace">Open decision workspace</a><a class="btn" href="/?view=tool&amp;section=education">Open Academy</a></div></section>
     <section class="process">
       <article class="step"><div class="num">01 / SOURCE</div><div><h2>Start with evidence.</h2><p>Load current market context, reported financials, official SEC filings, earnings history, and provider-labeled estimates.</p></div><div class="proof">Use direct filing links and the data methodology page to verify the figures that matter most.</div></article>

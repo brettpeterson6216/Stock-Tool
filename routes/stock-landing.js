@@ -332,15 +332,34 @@ function renderPage(ticker, q) {
   </style>
   <link rel="stylesheet" href="/static-polish.css?v=20260725-2">
   <link rel="stylesheet" href="/visual-refresh.css?v=20260729-9">
+  <link rel="stylesheet" href="/site-shell.css?v=20260729-13">
 </head>
 <body>
-  <div class="top-bar">
+  <a class="il-skip-link" href="#public-main">Skip to content</a>
+  <nav class="il-global-nav" aria-label="Primary navigation">
+    <a class="il-global-brand" href="/"><img src="/logo.svg" alt=""><span>Implied<em>Lens</em></span></a>
+    <div class="il-global-links">
+      <a class="il-global-tab" href="/">Home</a>
+      <a class="il-global-tab" href="/?view=home&amp;market=1">Market</a>
+      <a class="il-global-tab active" href="/?view=tool&amp;section=analyze">Research</a>
+      <a class="il-global-tab" href="/lens-score">LensScore</a>
+      <a class="il-global-tab" href="/?view=tool&amp;section=projection">Projections</a>
+      <a class="il-global-tab" href="/?view=tool&amp;section=wealth">Planner</a>
+      <a class="il-global-tab" href="/?view=tool&amp;section=education">Learn</a>
+      <a class="il-global-tab" href="/?view=tool&amp;section=reports">Saved</a>
+      <a class="il-global-tab" href="/about">About</a>
+    </div>
+    <div class="il-global-actions">
+      <button class="static-theme-toggle" type="button" aria-label="Switch theme"><span class="static-theme-thumb"></span></button>
+    </div>
+  </nav>
+  <div class="top-bar" hidden>
     <a href="/" class="logo">Implied<em>Lens</em></a>
     <a href="/" class="back">← All analysis</a>
     <button class="static-theme-toggle" type="button" aria-label="Switch theme"><span class="static-theme-thumb"></span></button>
   </div>
 
-  <main>
+  <main id="public-main">
   <div class="hero">
     <div class="breadcrumb">
       <a href="/">ImpliedLens</a> › <a href="/stock/${esc(ticker)}">${esc(ticker)}</a>
