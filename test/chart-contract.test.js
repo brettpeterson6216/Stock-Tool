@@ -179,10 +179,10 @@ test("primary navigation avoids duplicate tool destinations", () => {
 
 test("About and LensScore use one global product navigation", () => {
   for (const page of [aboutHtml, lensHtml]) {
-    assert.match(page, /class="il-global-nav"/);
-    assert.match(page, /class="il-global-tab" href="\/\?view=tool&amp;section=reports">Saved/);
-    assert.match(page, /class="il-global-tab[^"]*" href="\/lens-score"/);
-    assert.match(page, /class="il-global-tab[^"]*" href="\/about"/);
+    assert.match(page, /class="[^"]*\bil-global-nav\b[^"]*"/);
+    assert.match(page, /class="[^"]*\bil-global-tab\b[^"]*" href="\/\?view=tool&amp;section=reports">Saved/);
+    assert.match(page, /class="[^"]*\bil-global-tab\b[^"]*" href="\/lens-score"/);
+    assert.match(page, /class="[^"]*\bil-global-tab\b[^"]*" href="\/about"/);
     assert.match(page, /\/site-shell\.css\?v=/);
   }
   assert.match(lensHtml, /<header class="topbar" hidden>/);
@@ -300,19 +300,19 @@ test("every public product region uses the shared navigation and skip link", () 
   for (const [file, page] of publicShellPages) {
     assert.match(page, /site-shell\.css\?v=\d{8}-\d+/, `${file} should load the shared shell`);
     assert.match(page, /class="il-skip-link"/, `${file} should provide keyboard bypass navigation`);
-    assert.match(page, /<nav class="il-global-nav" aria-label="Primary navigation">/, `${file} should expose the product navigation`);
+    assert.match(page, /<nav[^>]+class="[^"]*\bil-global-nav\b[^"]*"[^>]+aria-label="Primary navigation">/, `${file} should expose the product navigation`);
     assert.match(page, /class="top-bar" hidden/, `${file} should retire its legacy back-to-platform header`);
-    assert.match(page, /class="il-global-search"/, `${file} should preserve the global ticker search`);
-    assert.match(page, /class="il-global-live"/, `${file} should preserve the live status`);
-    assert.match(page, /class="il-global-login"/, `${file} should preserve account entry`);
-    assert.match(page, /class="il-global-trial"/, `${file} should preserve the trial action`);
+    assert.match(page, /class="[^"]*\bil-global-search\b[^"]*"/, `${file} should preserve the global ticker search`);
+    assert.match(page, /class="[^"]*\bil-global-live\b[^"]*"/, `${file} should preserve the live status`);
+    assert.match(page, /class="[^"]*\bil-global-login\b[^"]*"/, `${file} should preserve account entry`);
+    assert.match(page, /class="[^"]*\bil-global-trial\b[^"]*"/, `${file} should preserve the trial action`);
   }
   assert.match(stockLandingRoute, /site-shell\.css\?v=\d{8}-\d+/);
   assert.match(stockLandingRoute, /class="il-skip-link"/);
   assert.match(stockLandingRoute, /<nav class="il-global-nav" aria-label="Primary navigation">/);
   assert.match(stockLandingRoute, /class="top-bar" hidden/);
   assert.match(stockLandingRoute, /class="il-global-search"/);
-  assert.match(lensHtml, /class="il-global-search"/);
+  assert.match(lensHtml, /class="[^"]*\bil-global-search\b[^"]*"/);
   assert.match(lensHtml, /id="methodology-button"/);
 });
 
