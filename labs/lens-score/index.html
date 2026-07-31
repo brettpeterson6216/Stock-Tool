@@ -22,11 +22,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/__lab/lens-score/assets/styles.css?v=20260730-4">
+  <link rel="stylesheet" href="/__lab/lens-score/assets/styles.css?v=20260730-7">
   <link rel="stylesheet" href="/visual-refresh.css?v=20260730-10">
   <link rel="stylesheet" href="/site-shell.css?v=20260730-27">
-  <script defer src="/__lab/lens-score/assets/lens-score-engine.js?v=20260729-1"></script>
-  <script defer src="/__lab/lens-score/assets/app.js?v=20260730-3"></script>
+  <script defer src="/__lab/lens-score/assets/lens-score-engine.js?v=20260730-1"></script>
+  <script defer src="/__lab/lens-score/assets/app.js?v=20260730-5"></script>
 </head>
 <body>
   <a class="skip-link" href="#lab-main">Skip to LensScore analysis</a>
@@ -130,9 +130,10 @@
 
     <nav class="company-nav" aria-label="Company analysis">
       <button type="button" class="active" data-view="snapshot">Overview</button>
-      <button type="button" data-view="chart">Chart &amp; zones</button>
-      <button type="button" data-view="drivers">Why this score</button>
-      <button type="button" data-view="scenario">Test a price</button>
+      <button type="button" data-view="chart">Setup</button>
+      <button type="button" data-view="value">Value</button>
+      <button type="button" data-view="drivers">Evidence</button>
+      <button type="button" data-view="scenario">Scenario</button>
     </nav>
 
     <section class="view active" id="view-snapshot" data-view-panel="snapshot">
@@ -234,6 +235,18 @@
         </aside>
       </div>
 
+    </section>
+
+    <section class="view" id="view-value" data-view-panel="value" hidden>
+      <div class="value-toolkit-head panel">
+        <div>
+          <p class="eyebrow">LensValue toolkit</p>
+          <h2>Long-term value, separated from short-term price action</h2>
+          <p>LensValue grades what you own, what the market expects, and how much downside the balance sheet and valuation leave exposed.</p>
+        </div>
+        <div class="value-toolkit-score"><strong id="value-page-score">—</strong><span>/ 10</span></div>
+      </div>
+      <div class="value-component-grid" id="value-component-grid"></div>
       <div class="snapshot-lower">
         <article class="expectations-card panel">
           <div class="panel-heading">
@@ -289,9 +302,10 @@
               <h2><span id="chart-ticker">AAPL</span> price structure</h2>
             </div>
             <div class="chart-presets" aria-label="Chart overlays">
-              <button type="button" class="active" data-preset="clean">Clean</button>
+              <button type="button" class="active" data-preset="toolkit">Toolkit</button>
+              <button type="button" data-preset="timing">Timing</button>
               <button type="button" data-preset="trend">Trend</button>
-              <button type="button" data-preset="levels">Levels</button>
+              <button type="button" data-preset="levels">Zones</button>
             </div>
           </div>
           <div class="chart-legend" id="chart-legend"></div>
@@ -312,6 +326,25 @@
               <h2>Support and resistance</h2>
             </div>
           </div>
+          <section class="trend-regime-card timing-card" aria-labelledby="timing-heading">
+            <div class="trend-regime-head">
+              <div>
+                <span>LensTiming · entry pressure</span>
+                <strong id="timing-heading">Calculating</strong>
+              </div>
+              <strong id="timing-value">—</strong>
+            </div>
+            <div class="trend-regime-meter timing-meter" aria-label="LensTiming from zero extended to ten favorable">
+              <i id="timing-marker"></i>
+            </div>
+            <div class="trend-regime-scale"><span>0 Extended</span><span>5 Balanced</span><span>10 Opportunity</span></div>
+            <div class="trend-regime-details">
+              <span>Pressure <strong id="timing-pressure">—</strong></span>
+              <span>Agreement <strong id="timing-agreement">—</strong></span>
+            </div>
+            <div class="trend-regime-votes" id="timing-votes" aria-label="LensTiming indicator votes"></div>
+            <p id="timing-copy">LensTiming converts four momentum conditions into a brandable 0–10 entry scale. It does not override trend, support, or confirmation.</p>
+          </section>
           <section class="trend-regime-card" aria-labelledby="trend-regime-heading">
             <div class="trend-regime-head">
               <div>
@@ -347,6 +380,17 @@
         </aside>
       </div>
 
+      <article class="panel setup-anatomy">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">LensSetup anatomy</p>
+            <h2>What makes this entry buyable—or not</h2>
+          </div>
+          <span class="metric-chip" id="setup-page-score">—</span>
+        </div>
+        <div class="setup-component-grid" id="setup-component-grid"></div>
+        <p class="setup-guardrail-copy" id="setup-guardrail-copy">Checking tactical alignment and guardrails.</p>
+      </article>
       <div class="technical-grid" id="technical-grid"></div>
     </section>
 
@@ -463,7 +507,9 @@
     </div>
     <p>LensSetup and LensValue can be used independently. LensScore combines them for a 6–18 month buyability decision. This is a research metric, not investment advice or a prediction.</p>
     <ol>
-      <li><strong>LensSetup measures tactical entry quality.</strong> Price structure, support and resistance zones, LensTrend, RSI, Stochastic RSI, MACD, volume and volatility produce a 2–12 week setup score.</li>
+      <li><strong>LensTiming measures entry pressure on a branded 0–10 scale.</strong> RSI(14), smoothed Stochastic RSI, MACD(12,26,9) normalized to 100-bar histogram volatility, and Bollinger position (20,2) each vote from seller-side extension to buyer-side opportunity. The four-vote pressure is smoothed over three bars and inverted so 10 is the most favorable entry pressure.</li>
+      <li><strong>LensTrend measures direction only.</strong> Price versus EMA20, EMA20 versus EMA50, EMA50 versus SMA200, and the 20-bar slopes of EMA20 and EMA50 create a separate 0–10 trend score.</li>
+      <li><strong>LensSetup measures tactical buyability.</strong> LensTiming 22%, support/resistance location 20%, LensTrend 16%, price structure 14%, volume 10%, technical risk 10%, and reversal confirmation 8% produce a 2–12 week setup score. Aligned pullbacks can earn a bonus; falling knives and extended entries are capped.</li>
       <li><strong>LensValue measures long-term opportunity.</strong> Business quality, valuation, embedded expectations and fundamental downside risk produce a 1–3 year score.</li>
       <li><strong>LensScore combines the independent conclusions.</strong> Long-term value carries 70% and tactical setup carries 30%; strong agreement earns a bonus and major disagreement is penalized.</li>
       <li><strong>Golden Lens requires exceptional alignment.</strong> LensValue must be at least 8.5, LensSetup at least 8.0, LensScore at least 8.5, confidence cannot be Low and no quality cap can be active.</li>

@@ -253,6 +253,12 @@
     document.querySelectorAll("[data-il-current-name]").forEach(el => { el.textContent = ctx.name || "Load a company to start."; });
     document.querySelectorAll("[data-il-current-exchange]").forEach(el => { el.textContent = ctx.exchange || "Exchange unavailable"; });
     document.querySelectorAll("[data-il-current-price]").forEach(el => { el.textContent = fmtMoney(ctx.price); });
+    document.querySelectorAll("[data-il-lens-link]").forEach(link => {
+      const view = link.dataset.ilLensLink || "snapshot";
+      const ticker = ctx.ticker || "AAPL";
+      link.href = `/lens-score?ticker=${encodeURIComponent(ticker)}${view === "snapshot" ? "" : `&view=${encodeURIComponent(view)}`}`;
+      link.setAttribute("aria-label", `Open ${ticker} in the Lens Toolkit`);
+    });
     document.querySelectorAll("[data-il-current-move]").forEach(el => {
       el.textContent = ctx.change === null ? "Move unavailable" : `${ctx.change >= 0 ? "+" : ""}${fmtNum(ctx.change)} (${ctx.changePct >= 0 ? "+" : ""}${fmtNum(ctx.changePct, "%")})`;
       el.classList.toggle("up", Number(ctx.change) >= 0);
@@ -348,6 +354,30 @@
     document.querySelectorAll("[data-il-drawer]").forEach(button => button.onclick = () => openResearchDrawer(button.dataset.ilDrawer));
     document.querySelectorAll("[data-il-notes]").forEach(button => button.onclick = openNotesPanel);
     document.querySelectorAll("[data-il-save]").forEach(button => button.onclick = () => window.saveAnalysis?.(window.IL_STATE?.ticker ? "price" : "note"));
+    updateShellContext();
+  }
+
+  function installLensToolkitConnections() {
+    const contexts = {
+      financials: ["Feeds LensValue", "Reported growth, margins, cash generation and balance-sheet resilience.", "value"],
+      advmetrics: ["Feeds LensValue", "Quality, capital efficiency, valuation and risk evidence.", "value"],
+      earnings: ["Feeds LensValue", "Expectations, estimate direction and operating confirmation.", "value"],
+      secfilings: ["Feeds Evidence", "Primary-source evidence for quality, risk and score confidence.", "drivers"],
+      institutional: ["Feeds Evidence", "Ownership context is supporting evidence, not a standalone buy signal.", "drivers"],
+      screener: ["Candidate workflow", "Screen broadly, then validate timing, trend, zones and value in one toolkit.", "snapshot"],
+      projection: ["Feeds Scenario", "Send your valuation assumptions into the decision workflow and compare the two lenses.", "scenario"],
+      dcf: ["Feeds LensValue", "Use modeled value as one input alongside quality, expectations and downside.", "value"],
+      reports: ["Decision memory", "Reopen saved LensScore scenarios with their original score, price and assumptions.", "snapshot"],
+    };
+    Object.entries(contexts).forEach(([section, [eyebrow, copy, view]]) => {
+      const body = document.getElementById(`body-${section}`);
+      if (!body || body.querySelector(`[data-il-lens-context="${section}"]`)) return;
+      const row = document.createElement("div");
+      row.className = "il-lens-context";
+      row.dataset.ilLensContext = section;
+      row.innerHTML = `<div><span>${escapeHtml(eyebrow)}</span><strong>${escapeHtml(copy)}</strong></div><a data-il-lens-link="${escapeHtml(view)}" href="/lens-score">Open Lens Toolkit <i class="ti ti-arrow-up-right"></i></a>`;
+      body.insertAdjacentElement("afterbegin", row);
+    });
     updateShellContext();
   }
   function syncToolUrl(section, mode) {
@@ -947,6 +977,7 @@
     trail.id = "il-research-trail";
     trail.className = "il-research-trail";
     trail.innerHTML = [
+      ["lens", "Lens Toolkit", "lens"],
       ["price", "Price action", ".chart-wrap"],
       ["quality", "Business quality", "#metrics-grid"],
       ["valuation", "Valuation", ".dash-sidebar"],
@@ -954,7 +985,10 @@
       ["ownership", "Ownership / filings", "#sec-institutional"],
       ["projection", "Projection", "#il-projection-builder"],
       ["notes", "Thesis notes", "#il-notes-panel"],
-    ].map(([key, label, target]) => `<button type="button" data-target="${escapeHtml(target)}"><span>${escapeHtml(key)}</span><strong>${escapeHtml(label)}</strong></button>`).join("");
+    ].map(([key, label, target]) => target === "lens"
+      ? `<a data-il-lens-link="snapshot" href="/lens-score"><span>${escapeHtml(key)}</span><strong>${escapeHtml(label)}</strong></a>`
+      : `<button type="button" data-target="${escapeHtml(target)}"><span>${escapeHtml(key)}</span><strong>${escapeHtml(label)}</strong></button>`
+    ).join("");
     stock.insertBefore(trail, stock.querySelector(".metrics-grid"));
     trail.querySelectorAll("button").forEach(button => button.onclick = () => {
       const target = document.querySelector(button.dataset.target);
@@ -976,6 +1010,7 @@
     installQuoteTrust();
     installDecisionSpine();
     installToolShells();
+    installLensToolkitConnections();
     installUrlState();
     renderProjectionWorkspace();
     installEducationContext();
@@ -988,6 +1023,7 @@
       installToolGuidance();
       improveControlSemantics();
       installToolShells();
+      installLensToolkitConnections();
       renderProjectionWorkspace();
     };
     const toolView = document.getElementById("view-tool");

@@ -29,7 +29,7 @@
     provenance: null,
     result: null,
     baseline: null,
-    chartPreset: "clean",
+    chartPreset: "toolkit",
     source: "Waiting for live data",
     entryPrice: null,
     chartPoints: [],
@@ -402,8 +402,10 @@
     $("#driver-waterfall").replaceChildren();
 
     if (result.technical?.status === "ok") {
+      renderTiming(result);
       renderTrendRegime(result);
       renderZones(result);
+      renderSetupComponents(result);
       renderTechnicalMetrics(result);
       renderIndicatorTable(result);
       drawChart();
@@ -497,8 +499,11 @@
     renderDecision(result);
     renderExpectations(result);
     renderAlignment(result);
+    renderValueComponents(result);
+    renderTiming(result);
     renderTrendRegime(result);
     renderZones(result);
+    renderSetupComponents(result);
     renderTechnicalMetrics(result);
     renderDrivers(result);
     renderIndicatorTable(result);
@@ -511,6 +516,7 @@
     $("#setup-score").textContent = setup.score.toFixed(1);
     $("#setup-label").textContent = setup.label;
     $("#value-score").textContent = value.score.toFixed(1);
+    $("#value-page-score").textContent = value.score.toFixed(1);
     $("#value-label").textContent = value.label;
     const signal = $("#golden-lens-signal");
     signal.dataset.active = goldenLens.active ? "true" : "false";
@@ -518,6 +524,33 @@
       ? "Golden Lens signal"
       : "Golden Lens not active";
     $("#golden-lens-reason").textContent = goldenLens.reason;
+  }
+
+  function renderValueComponents(result) {
+    const detail = result.componentDetails;
+    const cards = [
+      ["Business quality", detail.fundamentals.score, "Growth, cash generation, capital efficiency and leverage"],
+      ["Valuation", detail.valuation.score, "Modeled upside, earnings multiple and expectations gap"],
+      ["Downside resilience", detail.risk.score, "Balance sheet, dilution and bear-case exposure"],
+      ["Expectations", detail.valuation.parts.expectationsGap, "How achievable the growth embedded in price appears"],
+      ["Capital allocation", detail.fundamentals.parts.dilution, "Share issuance, buybacks and per-share discipline"],
+    ];
+    $("#value-component-grid").replaceChildren(...cards.map(([label, score, note]) => {
+      const card = document.createElement("article");
+      card.className = "value-component-card panel";
+      const head = document.createElement("div");
+      const name = document.createElement("span");
+      name.textContent = label;
+      const value = document.createElement("strong");
+      value.textContent = finite(score) ? `${(Number(score) / 10).toFixed(1)} / 10` : "Not rated";
+      head.append(name, value);
+      const track = document.createElement("i");
+      track.style.setProperty("--value-progress", `${finite(score) ? Math.max(0, Math.min(100, Number(score))) : 0}%`);
+      const copy = document.createElement("p");
+      copy.textContent = note;
+      card.append(head, track, copy);
+      return card;
+    }));
   }
 
   function fillList(selector, items, emptyMessage) {
@@ -629,6 +662,33 @@
     renderZoneRows("#resistance-zones", result.technical.zones.resistance, "resistance");
   }
 
+  function renderTiming(result) {
+    const timing = result.technical.timing;
+    const score = Number(timing.timingScore);
+    $("#timing-heading").textContent = timing.label;
+    $("#timing-value").textContent = Number.isFinite(score) ? `${score.toFixed(1)} / 10` : "—";
+    $("#timing-marker").style.left = Number.isFinite(score)
+      ? `${Math.max(0, Math.min(100, score * 10))}%`
+      : "50%";
+    $("#timing-pressure").textContent = Number.isFinite(Number(timing.pressure))
+      ? `${Number(timing.pressure) > 0 ? "+" : ""}${Number(timing.pressure).toFixed(1)}`
+      : "—";
+    $("#timing-agreement").textContent = `${timing.agreement} of ${timing.total}`;
+    const labels = { rsi: "RSI", stochasticRsi: "Stoch RSI", macd: "MACD", bollinger: "Bands" };
+    $("#timing-votes").replaceChildren(...Object.entries(timing.inputs).map(([key, vote]) => {
+      const chip = document.createElement("span");
+      const direction = vote < -0.15 ? "up" : vote > 0.15 ? "down" : "neutral";
+      chip.className = direction;
+      chip.textContent = `${labels[key]} ${direction === "up" ? "favorable" : direction === "down" ? "extended" : "balanced"}`;
+      return chip;
+    }));
+    $("#timing-copy").textContent = timing.condition === "buyer-extreme"
+      ? "Momentum is deeply compressed. LensSetup still requires support and reversal confirmation before treating this as buyable."
+      : timing.condition === "seller-extreme"
+        ? "Momentum is extended. A strong company or uptrend can still be a poor entry at this price."
+        : "LensTiming grades entry pressure only; LensTrend, zones, volume and confirmation decide whether the setup is actionable.";
+  }
+
   function renderTrendRegime(result) {
     const regime = result.technical.trendRegime;
     const trendScore = Number(regime.trendScore);
@@ -641,15 +701,13 @@
       ? `${Math.max(0, Math.min(100, trendScore * 10))}%`
       : "50%";
     $("#trend-agreement").textContent = `${regime.agreement} of ${regime.total}`;
-    $("#trend-extension").textContent = regime.extension === "extended"
-      ? "Extended"
-      : regime.extension === "washed-out" ? "Washed out" : "Normal";
+    $("#trend-extension").textContent = "Direction only";
     const voteLabels = {
-      structure: "Structure",
-      rsi: "RSI",
-      stochasticRsi: "Stoch RSI",
-      macd: "MACD",
-      bollinger: "Bands",
+      priceVsEma20: "Price / EMA20",
+      ema20Vs50: "EMA20 / 50",
+      ema50Vs200: "EMA50 / 200",
+      ema20Slope: "EMA20 slope",
+      ema50Slope: "EMA50 slope",
     };
     $("#trend-regime-votes").replaceChildren(...Object.entries(regime.inputs).map(([key, vote]) => {
       const chip = document.createElement("span");
@@ -658,11 +716,7 @@
       chip.textContent = `${voteLabels[key]} ${direction === "up" ? "↑" : direction === "down" ? "↓" : "•"}`;
       return chip;
     }));
-    $("#trend-regime-copy").textContent = regime.extension === "extended"
-      ? "LensTrend confirms direction, but price is stretched. The trend can be strong while the entry is unattractive."
-      : regime.extension === "washed-out"
-        ? "Selling pressure is extreme, but a reversal is not confirmed. Cheap or oversold does not automatically mean buyable."
-        : `${regime.agreement} of ${regime.total} inputs agree. LensTrend measures direction; LensScore remains the buyability decision.`;
+    $("#trend-regime-copy").textContent = `${regime.agreement} of ${regime.total} moving-average structure inputs agree. LensTrend measures direction; LensTiming measures entry pressure.`;
   }
 
   function renderTechnicalMetrics(result) {
@@ -671,8 +725,10 @@
       ? `${tech.trendRegime.trendScore.toFixed(1)} / 10`
       : "—";
     const metrics = [
+      ["LensTiming", `${tech.timing.timingScore.toFixed(1)} / 10`, `${tech.timing.label} · entry pressure`],
+      ["Setup confirmation", `${(tech.confirmation / 10).toFixed(1)} / 10`, "Price recovery and momentum follow-through"],
       ["LensTrend", regimeValue, `${tech.trendRegime.label} · direction, not buyability`],
-      ["Signal agreement", `${tech.trendRegime.agreement} / ${tech.trendRegime.total}`, "Structure · RSI · Stoch RSI · MACD · bands"],
+      ["Trend agreement", `${tech.trendRegime.agreement} / ${tech.trendRegime.total}`, "Price and moving-average structure"],
       ["RSI · 14", tech.indicators.rsi?.toFixed(1) || "—", tech.indicators.rsi > 70 ? "Extended" : tech.indicators.rsi < 35 ? "Oversold" : "Balanced"],
       ["Stochastic RSI", tech.indicators.stochasticRsi?.toFixed(1) || "—", tech.indicators.stochasticRsi > 80 ? "High momentum" : tech.indicators.stochasticRsi < 20 ? "Low momentum" : "Middle range"],
       ["MACD", tech.indicators.macd.histogram >= 0 ? "Positive" : "Negative", "Histogram"],
@@ -692,6 +748,43 @@
       card.append(labelEl, valueEl, noteEl);
       return card;
     }));
+  }
+
+  function renderSetupComponents(result) {
+    const tech = result.technical;
+    const definitions = [
+      ["Timing", tech.setupComponents.timing, "22%", "Entry pressure"],
+      ["Location", tech.setupComponents.entryLocation, "20%", "Support / resistance"],
+      ["Trend", tech.setupComponents.trend, "16%", "Price direction"],
+      ["Structure", tech.setupComponents.structure, "14%", "Zone quality"],
+      ["Volume", tech.setupComponents.volume, "10%", "Participation"],
+      ["Risk", tech.setupComponents.risk, "10%", "Volatility / drawdown"],
+      ["Confirmation", tech.setupComponents.confirmation, "8%", "Reversal follow-through"],
+    ];
+    $("#setup-page-score").textContent = `${(tech.setupScore / 10).toFixed(1)} / 10`;
+    $("#setup-component-grid").replaceChildren(...definitions.map(([label, score, weight, note]) => {
+      const card = document.createElement("div");
+      card.className = "setup-component";
+      const top = document.createElement("div");
+      const name = document.createElement("span");
+      name.textContent = label;
+      const value = document.createElement("strong");
+      value.textContent = `${(Number(score) / 10).toFixed(1)}`;
+      top.append(name, value);
+      const track = document.createElement("i");
+      track.style.setProperty("--setup-progress", `${Math.max(0, Math.min(100, Number(score)))}%`);
+      const detail = document.createElement("small");
+      detail.textContent = `${weight} · ${note}`;
+      card.append(top, track, detail);
+      return card;
+    }));
+    const copy = tech.setupGuardrails.length
+      ? `Active guardrail: ${tech.setupGuardrails.join(" ")}`
+      : tech.setupSignals.length
+        ? `Aligned signal: ${tech.setupSignals.join(" ")}`
+        : "No tactical cap is active. The weighted setup remains subject to timing, zone, trend and confirmation alignment.";
+    $("#setup-guardrail-copy").textContent = copy;
+    $("#setup-guardrail-copy").dataset.tone = tech.setupGuardrails.length ? "caution" : tech.setupSignals.length ? "positive" : "neutral";
   }
 
   function renderDrivers(result) {
@@ -733,6 +826,8 @@
       "Confidence is separate from the score.",
       "Confirmed pivots never use bars beyond their confirmation date.",
       "Correlated indicators are grouped before weighting.",
+      "LensTiming, LensTrend, support location and confirmation are graded separately.",
+      ...result.technical.setupGuardrails,
       `Cross-lens agreement bonus: +${(result.modelDetails.crossLensBonus / 10).toFixed(1)} points.`,
       `Cross-lens mismatch penalty: −${(result.modelDetails.mismatchPenalty / 10).toFixed(1)} points.`,
       ...(result.caps.length ? result.caps : ["No score cap is active for this scenario."]),
@@ -749,6 +844,7 @@
       ? `${result.technical.trendRegime.trendScore.toFixed(1)} / 10`
       : "—";
     const rows = [
+      ["LensTiming", `${result.technical.timing.timingScore.toFixed(1)} / 10`, "Entry pressure", `${result.technical.timing.agreement} of ${result.technical.timing.total} momentum inputs agree · ${result.technical.timing.label}`],
       ["Price / 20-day MA", `${money(result.price)} / ${money(i.ma20)}`, "Technical structure", result.price > i.ma20 ? "Above short-term trend" : "Below short-term trend"],
       ["50 / 200-day MA", `${money(i.ma50)} / ${money(i.ma200)}`, "Technical structure", i.ma50 > i.ma200 ? "Long-term alignment positive" : "Long-term alignment negative"],
       ["LensTrend", regimeValue, "Trend direction", `${result.technical.trendRegime.agreement} of ${result.technical.trendRegime.total} inputs agree · ${result.technical.trendRegime.label}`],
@@ -919,7 +1015,11 @@
     const legend = $("#chart-legend");
     legend.replaceChildren();
     const palette = chartColors();
-    const items = state.chartPreset === "trend"
+    const items = state.chartPreset === "toolkit"
+      ? [["Price", palette.price], ["LensTiming heatmap", palette.green], ["Support", palette.green], ["Resistance", palette.red], ["20 / 50 / 200-day", palette.gold]]
+      : state.chartPreset === "timing"
+        ? [["Price", palette.price], ["Favorable timing", palette.green], ["Extended timing", palette.red]]
+      : state.chartPreset === "trend"
       ? [["Price", palette.price], ["LensTrend history", palette.green], ["20-day", palette.gold], ["50-day", palette.blue], ["200-day", palette.purple]]
       : state.chartPreset === "levels"
         ? [["Price", palette.price], ["Support", palette.green], ["Resistance", palette.red]]
@@ -954,7 +1054,7 @@
     const plotBottom = height - pad.bottom - volumeHeight;
     const values = bars.flatMap(bar => [bar.high, bar.low]);
     const zones = state.result.technical.zones;
-    const shownZones = state.chartPreset === "levels"
+    const shownZones = state.chartPreset === "levels" || state.chartPreset === "toolkit"
       ? [...zones.support, ...zones.resistance]
       : [zones.support[0], zones.resistance[0]].filter(Boolean);
     shownZones.forEach(zone => values.push(zone.lower, zone.upper));
@@ -965,6 +1065,23 @@
     max += range * .06;
     const x = index => pad.left + index / Math.max(1, bars.length - 1) * (width - pad.left - pad.right);
     const y = value => pad.top + (max - value) / (max - min) * (plotBottom - pad.top);
+
+    if (state.chartPreset === "timing" || state.chartPreset === "toolkit") {
+      const timingByTime = new Map(
+        state.result.technical.timing.series.map(point => [point.time, point])
+      );
+      const bandWidth = (width - pad.left - pad.right) / Math.max(1, bars.length - 1);
+      bars.forEach((bar, index) => {
+        const point = timingByTime.get(bar.time);
+        const distanceFromBalanced = Number(point?.timingScore) - 5;
+        if (!point || Math.abs(distanceFromBalanced) < 0.35) return;
+        const alpha = 0.018 + Math.min(1, Math.abs(distanceFromBalanced) / 5) * 0.10;
+        context.fillStyle = point.timingScore > 5
+          ? alphaColor(palette.green, alpha)
+          : alphaColor(palette.red, alpha);
+        context.fillRect(x(index) - bandWidth / 2, pad.top, bandWidth + 1, plotBottom - pad.top);
+      });
+    }
 
     if (state.chartPreset === "trend") {
       const regimeByTime = new Map(
@@ -1031,7 +1148,7 @@
       state.chartPoints.push({ x: px, bar });
     });
 
-    if (state.chartPreset === "trend") {
+    if (state.chartPreset === "trend" || state.chartPreset === "toolkit") {
       const allCloses = state.bars.map(bar => bar.close);
       [[20, palette.gold], [50, palette.blue], [200, palette.purple]].forEach(([period, color]) => {
         const series = engine.sma(allCloses, period).slice(-180);
@@ -1059,13 +1176,18 @@
   }
 
   function showView(name) {
+    const validView = ["snapshot", "chart", "value", "drivers", "scenario"].includes(name) ? name : "snapshot";
     $$("[data-view-panel]").forEach(panel => {
-      const active = panel.dataset.viewPanel === name;
+      const active = panel.dataset.viewPanel === validView;
       panel.hidden = !active;
       panel.classList.toggle("active", active);
     });
-    $$(".company-nav [data-view]").forEach(button => button.classList.toggle("active", button.dataset.view === name));
-    if (name === "chart") requestAnimationFrame(drawChart);
+    $$(".company-nav [data-view]").forEach(button => button.classList.toggle("active", button.dataset.view === validView));
+    const url = new URL(window.location.href);
+    if (validView === "snapshot") url.searchParams.delete("view");
+    else url.searchParams.set("view", validView);
+    window.history.replaceState({}, "", `${url.pathname}${url.search}`);
+    if (validView === "chart") requestAnimationFrame(drawChart);
   }
 
   async function saveCurrentScenario() {
@@ -1084,7 +1206,7 @@
         modelVersion: engine.VERSION,
         score: scenario.score,
         entryPrice: state.entryPrice,
-        lenses: state.result?.lenses || null,
+        lenses: scenario.lenses || null,
         confidence: state.result?.confidence || null,
         marketAsOf: state.provenance?.asOf?.market || null,
         fundamentalsAsOf: state.provenance?.asOf?.fundamentals || null,
@@ -1203,6 +1325,8 @@
 
   applySavedTheme();
   bindEvents();
-  const initialTicker = new URLSearchParams(window.location.search).get("ticker");
+  const initialParams = new URLSearchParams(window.location.search);
+  const initialTicker = initialParams.get("ticker");
+  showView(initialParams.get("view") || "snapshot");
   loadTicker((initialTicker || "AAPL").toUpperCase());
 })();

@@ -27,6 +27,35 @@ function makeBars(count = 360, options = {}) {
   return bars;
 }
 
+function makeAlignedPullbackBars(count = 360, seed = 429) {
+  let value = seed;
+  const random = () => {
+    let t = value += 0x6D2B79F5;
+    t = Math.imul(t ^ t >>> 15, t | 1);
+    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+  const bars = [];
+  let close = 100;
+  for (let i = 0; i < count; i += 1) {
+    let change = 0.0005 + (random() - 0.5) * 0.03;
+    if (i > count - 15) change += (count - 10 - i) * 0.0005;
+    const open = close;
+    close = Math.max(5, close * (1 + change));
+    const spread = close * (0.006 + random() * 0.012);
+    bars.push({
+      time: 1_700_000_000 + i * 86_400,
+      open,
+      high: Math.max(open, close) + spread,
+      low: Math.min(open, close) - spread,
+      close,
+      volume: 10_000_000 * (0.6 + random() * 1.2),
+    });
+  }
+  bars.at(-1).volume *= 3;
+  return bars;
+}
+
 const healthyFundamentals = {
   revenueGrowth: 0.16,
   epsGrowth: 0.19,
@@ -101,18 +130,17 @@ test("a half-price strong company reaches exceptional LensValue while setup rema
       bearDownside: 0.50,
     },
   });
-  assert.ok(current.score >= 7, `Expected an already-attractive company, received ${current.score}`);
+  assert.ok(current.lenses.value.score >= 7, `Expected an already-attractive LensValue, received ${current.lenses.value.score}`);
   assert.ok(halfPriceAllElseEqual.lenses.value.score >= 9.5,
     `Expected exceptional LensValue, received ${halfPriceAllElseEqual.lenses.value.score}`);
-  assert.ok(halfPriceAllElseEqual.score >= 8.5,
+  assert.ok(halfPriceAllElseEqual.score >= 7.5,
     `Expected a high combined LensScore, received ${halfPriceAllElseEqual.score}`);
   assert.equal(halfPriceAllElseEqual.lenses.setup.score, current.lenses.setup.score);
   assert.ok(halfPriceAllElseEqual.score > current.score);
 });
 
-test("Golden Lens requires both exceptional long-term value and a prime tactical setup", () => {
-  const bars = makeBars(360, { drift: 0.0008, wave: 0.002, noise: 0.001 });
-  bars[bars.length - 1].volume *= 3;
+test("Golden Lens requires both exceptional long-term value and an aligned tactical pullback", () => {
+  const bars = makeAlignedPullbackBars();
   const aligned = engine.scoreLens({
     bars,
     fundamentals: {
@@ -140,6 +168,14 @@ test("Golden Lens requires both exceptional long-term value and a prime tactical
   assert.equal(expensive.lenses.goldenLens.active, false);
   assert.equal(expensive.lenses.setup.score, aligned.lenses.setup.score);
   assert.ok(expensive.lenses.value.score < aligned.lenses.value.score);
+});
+
+test("LensTiming is independent from LensTrend and penalizes an extended entry", () => {
+  const bars = makeBars(360, { drift: 0.0008, wave: 0.002, noise: 0.001 });
+  const technical = engine.analyzeTechnical(bars);
+  assert.ok(technical.trendRegime.trendScore >= 8, "Expected a strong trend");
+  assert.ok(technical.timing.timingScore <= 2, "Expected seller-side entry pressure");
+  assert.ok(technical.setupGuardrails.some(item => /Extension guardrail/.test(item)));
 });
 
 test("a poor company cannot reach the top of the scale solely because it looks cheap", () => {

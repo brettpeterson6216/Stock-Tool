@@ -44,8 +44,11 @@
 .il-drawer-grid>div{padding:10px;background:var(--panel)}.il-drawer-grid span,.il-drawer-grid strong{display:block}.il-drawer-grid span{color:var(--brand-gold);font:700 8px var(--mono);text-transform:uppercase}.il-drawer-grid strong{color:var(--text3);font:600 11px/1.35 var(--sans)}
 #il-drawer-body p,#il-drawer-body li{color:var(--text4);font:11px/1.55 var(--sans)}#il-drawer-body a{color:var(--brand-gold);font:700 10px var(--mono);text-transform:uppercase;text-decoration:none}
 .il-notes-card label{display:block;margin-bottom:10px;color:var(--text3);font:700 9px var(--mono);text-transform:uppercase}.il-notes-card textarea,.il-notes-card input{display:block;width:100%;box-sizing:border-box;margin-top:5px;border:1px solid var(--border3);border-radius:5px;background:var(--panel);color:var(--text);font:11px/1.45 var(--sans);padding:9px}.il-notes-card textarea{min-height:74px;resize:vertical}.il-notes-two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.il-notes-actions{display:flex;align-items:center;gap:10px}.il-notes-actions span{color:var(--text5);font:9px var(--mono)}
-.il-research-trail{position:sticky;top:0;z-index:3;display:grid;grid-template-columns:repeat(7,minmax(110px,1fr));gap:1px;margin:0 0 12px;border:1px solid var(--border2);background:var(--border2);overflow:auto}
-.il-research-trail button{min-width:0;padding:9px 10px;border:0;background:var(--panel);text-align:left;cursor:pointer}.il-research-trail button:hover{background:var(--brand-gold-soft)}.il-research-trail span,.il-research-trail strong{display:block}.il-research-trail span{color:var(--brand-gold);font:700 8px var(--mono);text-transform:uppercase}.il-research-trail strong{color:var(--text3);font:700 10px/1.25 var(--sans)}
+.il-research-trail{position:sticky;top:0;z-index:3;display:grid;grid-template-columns:repeat(8,minmax(105px,1fr));gap:1px;margin:0 0 12px;border:1px solid var(--border2);background:var(--border2);overflow:auto}
+.il-research-trail button,.il-research-trail a{min-width:0;padding:9px 10px;border:0;background:var(--panel);text-align:left;cursor:pointer;text-decoration:none}.il-research-trail button:hover,.il-research-trail a:hover{background:var(--brand-gold-soft)}.il-research-trail span,.il-research-trail strong{display:block}.il-research-trail span{color:var(--brand-gold);font:700 8px var(--mono);text-transform:uppercase}.il-research-trail strong{color:var(--text3);font:700 10px/1.25 var(--sans)}
+.il-lens-context{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:0 0 10px;padding:10px 12px;border:1px solid color-mix(in srgb,var(--brand-gold) 26%,var(--border2));border-radius:8px;background:linear-gradient(100deg,var(--brand-gold-soft),var(--panel))}
+.il-lens-context div{min-width:0}.il-lens-context span,.il-lens-context strong{display:block}.il-lens-context span{color:var(--brand-gold);font:800 8px var(--mono);letter-spacing:.08em;text-transform:uppercase}.il-lens-context strong{margin-top:2px;color:var(--text3);font:650 10px/1.35 var(--sans)}.il-lens-context a{flex:0 0 auto;display:inline-flex;align-items:center;gap:5px;min-height:34px;padding:7px 10px;border:1px solid var(--border2);border-radius:7px;background:var(--card);color:var(--text);font:750 10px var(--sans);text-decoration:none}
+.sa-lens-summary{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.sa-lens-summary span{padding:4px 7px;border:1px solid var(--border2);border-radius:6px;background:var(--panel);color:var(--text4);font:700 9px var(--sans)}.sa-lens-summary strong{margin-left:3px;color:var(--brand-gold);font-family:var(--mono)}
 .il-projection-builder{margin:0 0 14px}.il-proj-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:12px}.il-proj-evidence,.il-proj-review,.il-projection-explain{border:1px solid var(--border2);border-radius:8px;background:var(--card);padding:13px}.il-proj-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.il-proj-head strong{color:var(--text2);font:700 13px var(--sans)}
 .il-evidence-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;border:1px solid var(--border2);background:var(--border2)}.il-evidence-grid .il-trust-field{background:var(--panel)}
 .il-observed-note,.il-result-note{margin-top:9px;color:var(--text4);font:10px/1.5 var(--sans)}.il-observed-note span{display:inline-block;margin-right:5px;padding:2px 5px;border-radius:4px;background:var(--brand-gold-soft);color:var(--brand-gold);font:800 8px var(--mono);text-transform:uppercase}
@@ -159,7 +162,7 @@
 @media(max-width:700px){
   .il-shell-top,.il-shell-ticker,.il-shell-preview,.il-proj-grid,.il-evidence-grid,.il-result-summary{grid-template-columns:1fr}
   .il-shell-actions{justify-content:flex-start}.il-shell-search{display:grid}.il-shell-search button{min-height:38px}
-  .il-research-trail{display:flex}.il-research-trail button{flex:0 0 132px}
+  .il-research-trail{display:flex}.il-research-trail button,.il-research-trail a{flex:0 0 132px}
   .il-drawer-card,.il-notes-card{width:100%}.il-notes-two{grid-template-columns:1fr}
   .il-trust-panel-head{align-items:flex-start;flex-direction:column}
   .il-trust-grid{grid-template-columns:1fr}
@@ -187,9 +190,9 @@
 .il-shell-preview i{font-size:16px}.il-shell-preview strong{margin:0 0 2px}.il-shell-preview span{font-size:10px}
 .il-guidance{padding:8px 10px;margin-bottom:9px}
 .il-guidance-copy span{display:none}
-.il-research-trail{position:relative;top:auto;grid-template-columns:repeat(7,minmax(88px,1fr));margin-bottom:9px}
-.il-research-trail button{padding:7px 8px}
-.il-research-trail button span{display:none}
+  .il-research-trail{position:relative;top:auto;grid-template-columns:repeat(8,minmax(88px,1fr));margin-bottom:9px}
+  .il-research-trail button,.il-research-trail a{padding:7px 8px}
+  .il-research-trail button span,.il-research-trail a span{display:none}
 
 @media(max-width:640px){
   .il-tool-shell{margin:0 0 8px;border-radius:7px}
@@ -205,6 +208,7 @@
   .il-shell-preview{display:none!important}
   .il-guidance{display:none}
   .il-research-trail{display:flex;margin:0 0 8px;border-radius:7px}
-  .il-research-trail button{flex:0 0 auto;min-width:84px;padding:8px 9px;text-align:center}
+  .il-research-trail button,.il-research-trail a{flex:0 0 auto;min-width:84px;padding:8px 9px;text-align:center}
+  .il-lens-context{align-items:flex-start}.il-lens-context a{min-height:44px}.il-lens-context strong{font-size:9px}
   .il-research-trail strong{font-size:9px}
 }

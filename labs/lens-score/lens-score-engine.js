@@ -6,7 +6,7 @@
 })(typeof globalThis !== "undefined" ? globalThis : this, function () {
   "use strict";
 
-  const VERSION = "0.6.0";
+  const VERSION = "0.7.0";
   const MODEL = Object.freeze({
     qualityFundamentals: 0.75,
     qualityRisk: 0.25,
@@ -245,35 +245,19 @@
     const ema20 = ema(closes, 20);
     const ema50 = ema(closes, 50);
     const ma200 = sma(closes, 200);
-    const rsiValues = rsiSeries(closes, 14);
-    const stochRsiValues = stochasticRsiSeries(closes, 14, 14, 3);
-    const macdValues = macdSeries(closes);
-    const macdVolatility = rollingStandardDeviation(macdValues.histogram, 100);
-    const middleBand = sma(closes, 20);
-    const bandVolatility = rollingStandardDeviation(closes, 20);
 
     const unsmoothed = bars.map((bar, index) => {
-      const structureVotes = [];
-      if (finite(ema20[index])) structureVotes.push(bar.close >= ema20[index] ? 1 : -1);
-      if (finite(ema20[index]) && finite(ema50[index])) structureVotes.push(ema20[index] >= ema50[index] ? 1 : -1);
-      if (finite(ema50[index]) && finite(ma200[index])) structureVotes.push(ema50[index] >= ma200[index] ? 1 : -1);
-      if (index >= 20 && finite(ema20[index]) && finite(ema20[index - 20])) {
-        structureVotes.push(clamp((ema20[index] / ema20[index - 20] - 1) * 20, -1, 1));
-      }
-      const structure = average(structureVotes);
-      const rsiVote = finite(rsiValues[index])
-        ? clamp((rsiValues[index] - 50) / 20, -1, 1)
-        : null;
-      const stochasticVote = finite(stochRsiValues[index])
-        ? clamp((stochRsiValues[index] - 50) / 35, -1, 1)
-        : null;
-      const macdVote = finite(macdValues.histogram[index]) && finite(macdVolatility[index]) && macdVolatility[index] > 0
-        ? clamp(macdValues.histogram[index] / (macdVolatility[index] * 1.5), -1, 1)
-        : null;
-      const bollingerVote = finite(middleBand[index]) && finite(bandVolatility[index]) && bandVolatility[index] > 0
-        ? clamp((bar.close - middleBand[index]) / (bandVolatility[index] * 2), -1, 1)
-        : null;
-      const votes = { structure, rsi: rsiVote, stochasticRsi: stochasticVote, macd: macdVote, bollinger: bollingerVote };
+      const votes = {
+        priceVsEma20: finite(ema20[index]) ? (bar.close >= ema20[index] ? 1 : -1) : null,
+        ema20Vs50: finite(ema20[index]) && finite(ema50[index]) ? (ema20[index] >= ema50[index] ? 1 : -1) : null,
+        ema50Vs200: finite(ema50[index]) && finite(ma200[index]) ? (ema50[index] >= ma200[index] ? 1 : -1) : null,
+        ema20Slope: index >= 20 && finite(ema20[index]) && finite(ema20[index - 20])
+          ? clamp((ema20[index] / ema20[index - 20] - 1) * 20, -1, 1)
+          : null,
+        ema50Slope: index >= 20 && finite(ema50[index]) && finite(ema50[index - 20])
+          ? clamp((ema50[index] / ema50[index - 20] - 1) * 14, -1, 1)
+          : null,
+      };
       const value = average(Object.values(votes));
       return finite(value) ? { value: value * 5, votes } : null;
     });
@@ -301,15 +285,6 @@
 
     const current = series[series.length - 1] || null;
     const currentRaw = unsmoothed[unsmoothed.length - 1];
-    const currentRsi = last(rsiValues);
-    const currentStochastic = last(stochRsiValues);
-    const currentBollinger = currentRaw?.votes?.bollinger;
-    const extension = currentRsi >= 72 && currentStochastic >= 80 && currentBollinger >= 0.8
-      ? "extended"
-      : currentRsi <= 30 && currentStochastic <= 20 && currentBollinger <= -0.8
-        ? "washed-out"
-        : "normal";
-
     return {
       status: current ? "ok" : "insufficient",
       trendScore: current?.trendScore ?? null,
@@ -319,18 +294,101 @@
       tone: current?.tone || "neutral",
       agreement: current?.agreement || 0,
       total: current?.total || 0,
-      extension,
-      inputs: {
-        structure: currentRaw?.votes?.structure ?? null,
-        rsi: currentRaw?.votes?.rsi ?? null,
-        stochasticRsi: currentRaw?.votes?.stochasticRsi ?? null,
-        macd: currentRaw?.votes?.macd ?? null,
-        bollinger: currentRaw?.votes?.bollinger ?? null,
-      },
+      inputs: currentRaw?.votes || {},
+      series,
+    };
+  }
+
+  function classifyTiming(score) {
+    if (!finite(score)) return { key: "unknown", label: "Not enough data", tone: "neutral" };
+    if (score >= 9) return { key: "maximum-opportunity", label: "Maximum buyer-side pressure", tone: "bullish" };
+    if (score >= 7.5) return { key: "favorable", label: "Favorable entry pressure", tone: "positive" };
+    if (score >= 5.5) return { key: "mildly-favorable", label: "Mildly favorable", tone: "positive" };
+    if (score > 4.5) return { key: "balanced", label: "Balanced pressure", tone: "neutral" };
+    if (score > 2.5) return { key: "extended", label: "Seller-side pressure", tone: "weak" };
+    return { key: "maximum-risk", label: "Maximum seller-side pressure", tone: "bearish" };
+  }
+
+  function calculateLensTiming(rawBars) {
+    const bars = normalizeBars(rawBars);
+    if (bars.length < 120) {
+      return {
+        status: "insufficient",
+        timingScore: null,
+        score: null,
+        pressure: null,
+        label: "Not enough data",
+        agreement: 0,
+        total: 0,
+        inputs: {},
+        series: [],
+      };
+    }
+
+    const closes = bars.map(bar => bar.close);
+    const rsiValues = rsiSeries(closes, 14);
+    const stochRsiValues = stochasticRsiSeries(closes, 14, 14, 3);
+    const macdValues = macdSeries(closes);
+    const macdVolatility = rollingStandardDeviation(macdValues.histogram, 100);
+    const middleBand = sma(closes, 20);
+    const bandVolatility = rollingStandardDeviation(closes, 20);
+    const unsmoothed = bars.map((bar, index) => {
+      const votes = {
+        rsi: finite(rsiValues[index]) ? clamp((rsiValues[index] - 50) / 20, -1, 1) : null,
+        stochasticRsi: finite(stochRsiValues[index]) ? clamp((stochRsiValues[index] - 50) / 35, -1, 1) : null,
+        macd: finite(macdValues.histogram[index]) && finite(macdVolatility[index]) && macdVolatility[index] > 0
+          ? clamp(macdValues.histogram[index] / (macdVolatility[index] * 1.5), -1, 1)
+          : null,
+        bollinger: finite(middleBand[index]) && finite(bandVolatility[index]) && bandVolatility[index] > 0
+          ? clamp((bar.close - middleBand[index]) / (bandVolatility[index] * 2), -1, 1)
+          : null,
+      };
+      const voteValues = Object.values(votes).filter(finite);
+      return voteValues.length === 4 ? { raw: voteValues.reduce((sum, vote) => sum + vote, 0), votes } : null;
+    });
+    const smoothedRaw = ema(unsmoothed.map(item => item?.raw ?? null), 3);
+    const series = bars.map((bar, index) => {
+      const item = unsmoothed[index];
+      const raw = smoothedRaw[index];
+      if (!item || !finite(raw)) return null;
+      const pressure = clamp(raw * 1.25, -5, 5);
+      const timingScore = clamp(5 - pressure, 0, 10);
+      const direction = pressure > 0.35 ? 1 : pressure < -0.35 ? -1 : 0;
+      const voteValues = Object.values(item.votes).filter(finite);
+      const agreement = direction === 0
+        ? voteValues.filter(vote => Math.abs(vote) < 0.2).length
+        : voteValues.filter(vote => Math.sign(vote) === direction).length;
+      return {
+        index,
+        time: bar.time,
+        raw: round(raw, 3),
+        pressure: round(pressure, 2),
+        timingScore: round(timingScore, 2),
+        agreement,
+        total: voteValues.length,
+        ...classifyTiming(timingScore),
+      };
+    }).filter(Boolean);
+    const current = series[series.length - 1] || null;
+    const currentRaw = unsmoothed[unsmoothed.length - 1];
+    return {
+      status: current ? "ok" : "insufficient",
+      timingScore: current?.timingScore ?? null,
+      score: current ? current.timingScore * 10 : null,
+      pressure: current?.pressure ?? null,
+      label: current?.label || "Not enough data",
+      key: current?.key || "unknown",
+      tone: current?.tone || "neutral",
+      agreement: current?.agreement || 0,
+      total: current?.total || 0,
+      condition: current?.timingScore >= 8.75
+        ? "buyer-extreme"
+        : current?.timingScore <= 1.25 ? "seller-extreme" : "normal",
+      inputs: currentRaw?.votes || {},
       indicators: {
-        rsi: currentRsi,
-        stochasticRsi: currentStochastic,
-        bollingerPosition: currentBollinger,
+        rsi: last(rsiValues),
+        stochasticRsi: last(stochRsiValues),
+        bollingerPosition: currentRaw?.votes?.bollinger ?? null,
       },
       series,
     };
@@ -483,6 +541,7 @@
     const drawdown = maxDrawdown(closes.slice(-252));
     const zones = detectZones(bars);
     const trendRegime = calculateTrendRegime(bars);
+    const timing = calculateLensTiming(bars);
     const nearestSupport = zones.support[0] || null;
     const nearestResistance = zones.resistance[0] || null;
 
@@ -510,19 +569,12 @@
     }
     structure = clamp(structure);
 
-    let momentum = 50;
-    const regimeMomentum = average([
-      trendRegime.inputs.rsi,
-      trendRegime.inputs.stochasticRsi,
-      trendRegime.inputs.macd,
-      trendRegime.inputs.bollinger,
-    ]);
-    if (finite(regimeMomentum)) momentum += regimeMomentum * 28;
-    if (finite(roc21)) momentum += clamp(roc21 * 120, -8, 8);
-    if (finite(roc63)) momentum += clamp(roc63 * 55, -7, 7);
-    if (trendRegime.extension === "extended") momentum -= 12;
-    if (trendRegime.extension === "washed-out") momentum -= 5;
-    momentum = clamp(momentum);
+    let confirmation = 50;
+    if (finite(roc21)) confirmation += clamp(roc21 * 130, -12, 12);
+    if (finite(roc63)) confirmation += clamp(roc63 * 55, -9, 9);
+    if (finite(ma20)) confirmation += price >= ma20 ? 9 : -9;
+    if (finite(currentMacd?.histogram)) confirmation += currentMacd.histogram >= 0 ? 10 : -10;
+    confirmation = clamp(confirmation);
 
     let volume = 50;
     if (finite(relativeVolume)) {
@@ -560,25 +612,53 @@
       const distance = Math.abs(nearestResistance.distancePct);
       entryLocation += distance <= 2 ? -24 : distance <= 5 ? -15 : distance <= 9 ? -6 : 4;
     }
-    if (trendRegime.extension === "extended") entryLocation -= 14;
-    if (trendRegime.extension === "washed-out") entryLocation -= 8;
+    if (timing.condition === "seller-extreme") entryLocation -= 16;
     entryLocation = clamp(entryLocation);
 
     const setupComponents = {
+      timing: timing.score,
       trend: trendRegime.score,
       structure,
-      momentum,
       volume,
+      confirmation,
       entryLocation,
       risk: technicalRisk,
     };
-    const setupScore =
-      setupComponents.trend * 0.24 +
-      setupComponents.structure * 0.22 +
-      setupComponents.momentum * 0.20 +
+    let setupScore =
+      setupComponents.timing * 0.22 +
+      setupComponents.entryLocation * 0.20 +
+      setupComponents.trend * 0.16 +
+      setupComponents.structure * 0.14 +
       setupComponents.volume * 0.10 +
-      setupComponents.entryLocation * 0.18 +
-      setupComponents.risk * 0.06;
+      setupComponents.risk * 0.10 +
+      setupComponents.confirmation * 0.08;
+    const setupGuardrails = [];
+    const setupSignals = [];
+    const alignedPullback =
+      timing.timingScore >= 7 &&
+      trendRegime.trendScore >= 7 &&
+      nearestSupport &&
+      Math.abs(nearestSupport.distancePct) <= 5;
+    if (alignedPullback) {
+      setupScore += 10;
+      setupSignals.push("LensTiming, the primary support zone and the prevailing trend are aligned.");
+      if (volume >= 65) {
+        setupScore += 2;
+        setupSignals.push("Above-normal volume strengthens the aligned pullback setup.");
+      }
+    }
+    if (timing.timingScore >= 9 && (!nearestSupport || entryLocation < 60)) {
+      setupScore = Math.min(setupScore, 75);
+      setupGuardrails.push("Extreme buyer-side pressure is not near enough to confirmed support.");
+    }
+    if (trendRegime.trendScore < 3 && confirmation < 45) {
+      setupScore = Math.min(setupScore, 68);
+      setupGuardrails.push("Falling-knife guardrail: weak trend and no reversal confirmation.");
+    }
+    if (timing.timingScore <= 2) {
+      setupScore = Math.min(setupScore, 62);
+      setupGuardrails.push("Extension guardrail: seller-side pressure makes the entry unattractive.");
+    }
 
     return {
       status: "ok",
@@ -586,9 +666,10 @@
       price,
       score: structure,
       trend,
-      momentum,
+      momentum: timing.score,
       volume,
-      momentumVolume: average([momentum, volume]),
+      confirmation,
+      momentumVolume: average([confirmation, volume]),
       technicalRisk,
       entryLocation,
       setupScore: clamp(setupScore),
@@ -597,11 +678,14 @@
         ma20, ma50, ma200, rsi: currentRsi, macd: currentMacd,
         atr: currentAtr, atrPct, roc21, roc63, relativeVolume,
         recentVolatility, drawdown,
-        stochasticRsi: trendRegime.indicators.stochasticRsi,
-        bollingerPosition: trendRegime.indicators.bollingerPosition,
+        stochasticRsi: timing.indicators.stochasticRsi,
+        bollingerPosition: timing.indicators.bollingerPosition,
       },
+      timing,
       trendRegime,
       zones,
+      setupGuardrails,
+      setupSignals,
     };
   }
 
@@ -820,9 +904,10 @@
     } else if (technical.trendRegime.trendScore <= 3.5 && technical.trendRegime.agreement >= 4) {
       concerns.push(`${technical.trendRegime.agreement} of ${technical.trendRegime.total} trend signals confirm a downtrend.`);
     }
-    if (technical.trendRegime.extension === "extended") {
-      concerns.push("The trend is strong, but momentum is extended and vulnerable to a pullback.");
-    }
+    if (technical.timing.timingScore >= 7.5) strengths.push("LensTiming shows favorable buyer-side entry pressure.");
+    else if (technical.timing.timingScore <= 2.5) concerns.push("LensTiming shows an extended, seller-dominated entry.");
+    if (technical.setupSignals.length) strengths.push(technical.setupSignals[0]);
+    if (technical.setupGuardrails.length) concerns.push(technical.setupGuardrails[0]);
     if (components.momentum >= 68) strengths.push("Momentum and volume are confirming the move.");
     else if (components.momentum < 42) concerns.push("Momentum or volume confirmation is weak.");
     if (components.risk >= 72) strengths.push("Measured downside and balance-sheet risk are contained.");
@@ -911,6 +996,7 @@
     confirmedPivots,
     detectZones,
     calculateTrendRegime,
+    calculateLensTiming,
     analyzeTechnical,
     scoreFundamentals,
     scoreValuation,
