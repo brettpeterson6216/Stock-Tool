@@ -72,6 +72,28 @@ async function getPayload(ticker) {
   return { payload: await pending, cacheStatus: "MISS" };
 }
 
+function compactPayload(payload) {
+  return {
+    schemaVersion: payload.schemaVersion,
+    ticker: payload.ticker,
+    company: payload.company,
+    market: {
+      ticker: payload.market?.ticker || payload.ticker,
+      meta: payload.market?.meta || {},
+      bars: (payload.market?.bars || []).map(bar => [
+        bar.time,
+        bar.open,
+        bar.high,
+        bar.low,
+        bar.close,
+        bar.volume,
+      ]),
+    },
+    fundamentals: payload.fundamentals,
+    provenance: payload.provenance,
+  };
+}
+
 router.get("/lens-score/:ticker", checkAnalysisLimit, async (req, res) => {
   const ticker = normalizeTicker(req.params.ticker);
   if (!ticker) return res.status(400).json({ error: "Invalid ticker." });
@@ -83,6 +105,10 @@ router.get("/lens-score/:ticker", checkAnalysisLimit, async (req, res) => {
     res.setHeader("X-Data-Retrieved-At", payload.provenance.retrievedAt);
     res.setHeader("X-Market-As-Of", payload.provenance.asOf.market || "");
     res.setHeader("X-Fundamentals-As-Of", payload.provenance.asOf.fundamentals || "");
+    if (req.query.compact === "1") {
+      res.setHeader("X-LensScore-Mode", "compact");
+      return res.json(compactPayload(payload));
+    }
     return res.json(payload);
   } catch (error) {
     const message = String(error?.message || "Research data unavailable.").slice(0, 240);

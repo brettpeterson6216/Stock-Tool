@@ -434,6 +434,21 @@ test("Valuation Lab saves retain their valuation type", async () => {
   assert.equal(saves[0].type, "valuation");
 });
 
+test("LensScore scenarios retain their type in the shared research library", async () => {
+  const { cookie, csrfToken } = await makeSession("lensscore_saver", "lensscore_saver@test.com");
+  const headers = { cookie, "X-CSRF-Token": csrfToken };
+  const created = await req("/api/saves", {
+    method: "POST",
+    headers,
+    body: { ticker: "NVDA", type: "lensscore", label: "NVDA LensScore", data: { score: 8.7, entryPrice: 114 } },
+  });
+  assert.equal(created.status, 200);
+  const list = await req("/api/saves", { headers: { cookie } });
+  assert.equal(list.status, 200);
+  const saves = await list.json();
+  assert.equal(saves[0].type, "lensscore");
+});
+
 test("Saved analyses reject invalid tickers and malformed payloads", async () => {
   const { cookie, csrfToken } = await makeSession("save_validation", "save_validation@test.com");
   const headers = { cookie, "X-CSRF-Token": csrfToken };

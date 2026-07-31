@@ -272,7 +272,7 @@ router.post("/saves", validateCsrf, async (req, res) => {
   if (!req.session.userId) return res.status(401).json({ error: "Not logged in" });
   const { ticker, type, label, data } = req.body || {};
   const symbol = normalizeTicker(ticker);
-  const allowedTypes = new Set(["price", "dcf", "valuation", "projection", "compare", "note"]);
+  const allowedTypes = new Set(["price", "dcf", "valuation", "projection", "lensscore", "compare", "note"]);
   const safeType = allowedTypes.has(type) ? type : "price";
   const safeLabel = String(label || "").trim().slice(0, 160);
   if (!symbol || !data || typeof data !== "object" || Array.isArray(data)) {

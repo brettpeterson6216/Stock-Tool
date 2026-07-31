@@ -327,6 +327,24 @@ test("LensScore avoids repeated slow provider work and caps optional provider la
   assert.match(lensAppJs, /new AbortController\(\)/);
 });
 
+test("LensScore uses compact live transport, instant verified session evidence, and the shared research library", () => {
+  assert.match(lensRouteJs, /function compactPayload\(payload\)/);
+  assert.match(lensRouteJs, /X-LensScore-Mode/);
+  assert.match(lensRouteJs, /req\.query\.compact === "1"/);
+  assert.match(lensAppJs, /compact=1/);
+  assert.match(lensAppJs, /function decodeBars\(rows\)/);
+  assert.match(lensAppJs, /SESSION_CACHE_TTL_MS = 15 \* 60 \* 1000/);
+  assert.match(lensAppJs, /Showing verified session evidence/);
+  assert.match(lensAppJs, /function saveCurrentScenario\(\)/);
+  assert.match(lensAppJs, /type: "lensscore"/);
+  assert.match(authRouteJs, /"lensscore"/);
+  assert.match(html, /data-type="lensscore">LensScore/);
+  assert.match(html, /entry\.type === 'lensscore'/);
+  assert.match(lensHtml, /Validate the score before committing capital/);
+  assert.match(lensHtml, /data-research-section="financials"/);
+  assert.match(siteShellCss, /font-family: Arial, "Helvetica Neue", sans-serif !important/);
+});
+
 test("mobile product controls preserve a 44 pixel interaction floor", () => {
   assert.match(siteShellCss, /Mobile interaction floor/);
   for (const selector of [

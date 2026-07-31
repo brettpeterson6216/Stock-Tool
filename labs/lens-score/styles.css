@@ -253,6 +253,56 @@ html[data-theme="light"] .ticker-form { background: rgba(255, 253, 248, 0.88); }
 .notice.good { border-color: var(--green); background: rgba(104, 199, 141, 0.08); color: #b2ddc1; }
 .notice.error { border-color: var(--red); background: rgba(227, 118, 118, 0.08); color: #e8afaf; }
 
+.diligence-rail {
+  display: grid;
+  grid-template-columns: minmax(210px, .72fr) minmax(0, 1.55fr);
+  align-items: center;
+  gap: 18px;
+  margin: 0 0 18px;
+  padding: 13px 15px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: linear-gradient(100deg, rgba(210, 163, 76, .08), transparent 58%), var(--surface);
+}
+.diligence-intro { display: grid; gap: 2px; }
+.diligence-intro span {
+  color: var(--gold-bright);
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+.diligence-intro strong { font-size: 12px; }
+.diligence-links {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+.diligence-links a {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 7px 9px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--ink-soft);
+  font-size: 10px;
+  font-weight: 750;
+  text-decoration: none;
+}
+.diligence-links a:hover {
+  border-color: rgba(210, 163, 76, .48);
+  color: var(--ink);
+  transform: translateY(-1px);
+}
+.diligence-links span {
+  color: var(--gold-bright);
+  font-family: var(--mono);
+  font-size: 8px;
+}
+
 .company-nav {
   position: sticky;
   top: 70px;
@@ -679,6 +729,7 @@ html[data-theme="light"] .scale-marker { background: #fffdf8; box-shadow: 0 2px 
   main { width: min(100% - 30px, 700px); padding-top: 32px; }
   .search-shell, .snapshot-lower, .drivers-layout, .scenario-layout { grid-template-columns: 1fr; gap: 18px; }
   .search-shell { align-items: stretch; }
+  .diligence-rail { grid-template-columns: 1fr; }
   .score-hero { grid-template-columns: 145px 1fr; gap: 20px; }
   .score-ring { width: 145px; }
   .score-ring strong { font-size: 46px; }
@@ -697,6 +748,9 @@ html[data-theme="light"] .scale-marker { background: #fffdf8; box-shadow: 0 2px 
   h1 { font-size: 38px; }
   .intro { font-size: 14px; }
   .company-nav { top: 62px; overflow-x: auto; scrollbar-width: none; }
+  .diligence-rail { padding: 12px; }
+  .diligence-links { display: flex; overflow-x: auto; scrollbar-width: none; }
+  .diligence-links a { flex: 0 0 auto; min-width: 106px; }
   .company-nav::-webkit-scrollbar { display: none; }
   .score-card, .decision-card, .expectations-card, .alignment-card, .chart-card, .zone-panel, .driver-panel, .drivers-layout > .panel, .metric-table-card, .assumption-panel, .scenario-result { padding: 18px; }
   .score-hero { grid-template-columns: 1fr; justify-items: center; text-align: center; }

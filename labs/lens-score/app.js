@@ -53,6 +53,54 @@
     .replace("/", "-")
     .replace(/[^A-Z0-9.^-]/g, "")
     .slice(0, 15);
+  const SESSION_CACHE_PREFIX = "il:lens-score:v3:";
+  const SESSION_CACHE_INDEX = `${SESSION_CACHE_PREFIX}index`;
+  const SESSION_CACHE_TTL_MS = 15 * 60 * 1000;
+
+  function decodeBars(rows) {
+    return (rows || []).map(row => Array.isArray(row)
+      ? { time: row[0], open: row[1], high: row[2], low: row[3], close: row[4], volume: row[5] }
+      : row
+    );
+  }
+
+  function readSessionPayload(ticker) {
+    try {
+      const cached = JSON.parse(window.sessionStorage.getItem(`${SESSION_CACHE_PREFIX}${ticker}`) || "null");
+      if (!cached || cached.ticker !== ticker || Date.now() - cached.cachedAt > SESSION_CACHE_TTL_MS) return null;
+      return cached.payload || null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function writeSessionPayload(ticker, payload) {
+    try {
+      const keys = JSON.parse(window.sessionStorage.getItem(SESSION_CACHE_INDEX) || "[]")
+        .filter(key => key !== ticker);
+      keys.unshift(ticker);
+      keys.slice(5).forEach(key => window.sessionStorage.removeItem(`${SESSION_CACHE_PREFIX}${key}`));
+      window.sessionStorage.setItem(SESSION_CACHE_INDEX, JSON.stringify(keys.slice(0, 5)));
+      window.sessionStorage.setItem(`${SESSION_CACHE_PREFIX}${ticker}`, JSON.stringify({
+        ticker,
+        cachedAt: Date.now(),
+        payload,
+      }));
+    } catch (_) {
+      // Session caching is a speed enhancement, never a data requirement.
+    }
+  }
+
+  function updateResearchLinks() {
+    $$("[data-research-section]").forEach(link => {
+      const params = new URLSearchParams({
+        view: "tool",
+        section: link.dataset.researchSection,
+        symbol: state.ticker,
+      });
+      link.href = `/?${params.toString()}`;
+    });
+  }
 
   function applySavedTheme() {
     const saved = window.localStorage.getItem("il-theme");
@@ -83,6 +131,58 @@
     };
   }
 
+  function hydratePayload(payload, refreshing) {
+    if (payload.provenance?.synthetic !== false) throw new Error("Unverified or synthetic data was rejected.");
+    state.bars = engine.normalizeBars(decodeBars(payload.market?.bars || []));
+    if (state.bars.length < 60) throw new Error("Insufficient live price history.");
+    state.meta = {
+      ...(payload.market?.meta || {}),
+      longName: payload.company || payload.market?.meta?.name || state.ticker,
+    };
+    state.source = (payload.provenance?.sources || [])
+      .filter(source => source.status === "available")
+      .map(source => source.name)
+      .join(" + ") || "Reported provider data";
+    state.provenance = payload.provenance || null;
+    state.fundamentals = { ...(payload.fundamentals?.values || {}) };
+    state.reportedFundamentals = { ...state.fundamentals };
+    state.fundamentalFields = { ...(payload.fundamentals?.fields || {}) };
+    state.fundamentalModel = {
+      referenceEps: payload.fundamentals?.referenceEps ?? null,
+      referenceEpsBasis: payload.fundamentals?.referenceEpsBasis || "Unavailable",
+      referenceEpsAsOf: payload.fundamentals?.referenceEpsAsOf || null,
+      referenceEpsQuarters: payload.fundamentals?.referenceEpsQuarters || [],
+    };
+
+    const latest = state.bars[state.bars.length - 1];
+    state.entryPrice = latest.close;
+    state.fundamentals = normalizePresetForPrice(state.fundamentals, latest.close);
+    state.reportedFundamentals = { ...state.fundamentals };
+    calculate(true);
+    renderAssumptions();
+    if (state.result?.status === "graded") configureEntryControls();
+
+    const retrieved = formatAsOf(payload.provenance?.retrievedAt);
+    const marketAsOf = formatAsOf(payload.provenance?.asOf?.market);
+    const fundamentalsAsOf = formatAsOf(payload.provenance?.asOf?.fundamentals);
+    const companyEvidence = payload.provenance?.freshness?.fundamentals?.basis === "provider-snapshot"
+      ? `provider metric snapshot retrieved ${fundamentalsAsOf} (reporting-period date unavailable)`
+      : payload.provenance?.asOf?.fundamentals
+        ? `company evidence through ${fundamentalsAsOf}`
+        : "company evidence unavailable";
+    const warningList = Array.isArray(payload.provenance?.warnings)
+      ? payload.provenance.warnings
+      : [];
+    const warnings = warningList.length ? ` ${warningList.join(" ")}` : "";
+    const prefix = refreshing
+      ? `Showing verified session evidence retrieved ${retrieved} while live providers refresh.`
+      : `Retrieved ${retrieved} from ${state.source}.`;
+    setNotice(
+      `${prefix} Market through ${marketAsOf}; ${companyEvidence}.${warnings}`,
+      refreshing || warningList.length ? "warn" : "good"
+    );
+  }
+
   function alphaColor(hex, alpha) {
     const value = String(hex || "").replace("#", "");
     if (!/^[0-9a-f]{6}$/i.test(value)) return hex;
@@ -108,12 +208,25 @@
     state.provenance = null;
     state.result = null;
     state.baseline = null;
+    updateResearchLinks();
     $("#chart-tooltip").hidden = true;
     $("#chart-tooltip").textContent = "";
-    renderUnavailable("Loading current market and company evidence…");
-    setNotice("Loading reported company facts, earnings expectations and market history…", "");
+    let hasUsableCache = false;
+    const sessionPayload = readSessionPayload(state.ticker);
+    if (sessionPayload) {
+      try {
+        hydratePayload(sessionPayload, true);
+        hasUsableCache = true;
+      } catch (_) {
+        hasUsableCache = false;
+      }
+    }
+    if (!hasUsableCache) {
+      renderUnavailable("Loading current market and company evidence…");
+      setNotice("Loading reported company facts, earnings expectations and market history…", "");
+    }
     try {
-      const response = await fetch(`/api/lens-score/${encodeURIComponent(state.ticker)}?preview=1`, {
+      const response = await fetch(`/api/lens-score/${encodeURIComponent(state.ticker)}?preview=1&compact=1`, {
         credentials: "same-origin",
         cache: "default",
         signal: requestController.signal,
@@ -121,47 +234,19 @@
       const payload = await response.json().catch(() => ({}));
       if (requestController.signal.aborted || state.ticker !== requestedTicker) return;
       if (!response.ok) throw new Error(payload.error || `Research endpoint returned ${response.status}`);
-      if (payload.provenance?.synthetic !== false) throw new Error("Unverified or synthetic data was rejected.");
-      state.bars = engine.normalizeBars(payload.market?.bars || []);
-      if (state.bars.length < 60) throw new Error("Insufficient live price history.");
-      state.meta = {
-        ...(payload.market?.meta || {}),
-        longName: payload.company || payload.market?.meta?.name || state.ticker,
-      };
-      state.source = (payload.provenance?.sources || [])
-        .filter(source => source.status === "available")
-        .map(source => source.name)
-        .join(" + ") || "Reported provider data";
-      state.provenance = payload.provenance || null;
-      state.fundamentals = { ...(payload.fundamentals?.values || {}) };
-      state.reportedFundamentals = { ...state.fundamentals };
-      state.fundamentalFields = { ...(payload.fundamentals?.fields || {}) };
-      state.fundamentalModel = {
-        referenceEps: payload.fundamentals?.referenceEps ?? null,
-        referenceEpsBasis: payload.fundamentals?.referenceEpsBasis || "Unavailable",
-        referenceEpsAsOf: payload.fundamentals?.referenceEpsAsOf || null,
-        referenceEpsQuarters: payload.fundamentals?.referenceEpsQuarters || [],
-      };
-      const retrieved = formatAsOf(payload.provenance?.retrievedAt);
-      const marketAsOf = formatAsOf(payload.provenance?.asOf?.market);
-      const fundamentalsAsOf = formatAsOf(payload.provenance?.asOf?.fundamentals);
-      const companyEvidence = payload.provenance?.freshness?.fundamentals?.basis === "provider-snapshot"
-        ? `provider metric snapshot retrieved ${fundamentalsAsOf} (reporting-period date unavailable)`
-        : payload.provenance?.asOf?.fundamentals
-          ? `company evidence through ${fundamentalsAsOf}`
-        : "company evidence unavailable";
-      const warningList = Array.isArray(payload.provenance?.warnings)
-        ? payload.provenance.warnings
-        : [];
-      const warnings = warningList.length
-        ? ` ${warningList.join(" ")}`
-        : "";
-      setNotice(
-        `Retrieved ${retrieved} from ${state.source}. Market through ${marketAsOf}; ${companyEvidence}.${warnings}`,
-        warningList.length ? "warn" : "good"
-      );
+      hydratePayload(payload, false);
+      writeSessionPayload(state.ticker, payload);
     } catch (error) {
       if (error?.name === "AbortError") return;
+      if (hasUsableCache) {
+        setNotice(
+          `Live refresh failed: ${error.message} Showing the verified session evidence above; no synthetic replacement was used.`,
+          "warn"
+        );
+        $("#lab-main").setAttribute("aria-busy", "false");
+        if (activeRequestController === requestController) activeRequestController = null;
+        return;
+      }
       state.bars = [];
       state.fundamentals = {};
       state.reportedFundamentals = {};
@@ -179,13 +264,6 @@
       if (activeRequestController === requestController) activeRequestController = null;
       return;
     }
-    const latest = state.bars[state.bars.length - 1];
-    state.entryPrice = latest.close;
-    state.fundamentals = normalizePresetForPrice(state.fundamentals, latest.close);
-    state.reportedFundamentals = { ...state.fundamentals };
-    calculate(true);
-    renderAssumptions();
-    if (state.result?.status === "graded") configureEntryControls();
     $("#lab-main").setAttribute("aria-busy", "false");
     if (activeRequestController === requestController) activeRequestController = null;
   }
@@ -990,6 +1068,82 @@
     if (name === "chart") requestAnimationFrame(drawChart);
   }
 
+  async function saveCurrentScenario() {
+    const button = $("#save-scenario");
+    const scenario = scenarioResult();
+    const now = new Date().toISOString();
+    const entry = {
+      id: Date.now(),
+      type: "lensscore",
+      ticker: state.ticker,
+      title: `${state.ticker} LensScore ${scenario.score.toFixed(1)} at ${money(state.entryPrice)}`,
+      date: now,
+      syncState: "local",
+      data: {
+        analysisKind: "lensscore",
+        modelVersion: engine.VERSION,
+        score: scenario.score,
+        entryPrice: state.entryPrice,
+        lenses: state.result?.lenses || null,
+        confidence: state.result?.confidence || null,
+        marketAsOf: state.provenance?.asOf?.market || null,
+        fundamentalsAsOf: state.provenance?.asOf?.fundamentals || null,
+        assumptions: Object.fromEntries(ASSUMPTIONS.map(item => [item.key, state.fundamentals[item.key]])),
+        savedAt: now,
+      },
+    };
+
+    try {
+      const savedKey = "impliedLens_savedAnalyses";
+      const existing = JSON.parse(window.localStorage.getItem(savedKey) || "[]");
+      window.localStorage.setItem(savedKey, JSON.stringify([entry, ...existing].slice(0, 100)));
+      window.localStorage.setItem("implied-lens-score-scenario", JSON.stringify(entry.data));
+    } catch (_) {
+      $("#save-status").textContent = "Scenario is active for this session.";
+      return;
+    }
+
+    button.disabled = true;
+    $("#save-status").textContent = "Saved on this device. Checking account sync…";
+    try {
+      const csrfResponse = await fetch("/api/csrf", { credentials: "same-origin" });
+      const csrfPayload = await csrfResponse.json().catch(() => ({}));
+      const response = await fetch("/api/saves", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": csrfPayload.token || "",
+        },
+        body: JSON.stringify({
+          ticker: entry.ticker,
+          type: entry.type,
+          label: entry.title,
+          data: entry,
+        }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (response.status === 401) {
+        $("#save-status").textContent = "Saved on this device. Log in to sync it to Saved.";
+        return;
+      }
+      if (!response.ok || !result.ok || !result.id) throw new Error(result.error || "Account sync failed.");
+      try {
+        const savedKey = "impliedLens_savedAnalyses";
+        const existing = JSON.parse(window.localStorage.getItem(savedKey) || "[]");
+        window.localStorage.setItem(savedKey, JSON.stringify(existing.map(item => item.id === entry.id
+          ? { ...item, id: `db_${result.id}`, _dbId: result.id, syncState: "synced" }
+          : item
+        )));
+      } catch (_) {}
+      $("#save-status").textContent = "Saved to your Implied Lens research library.";
+    } catch (error) {
+      $("#save-status").textContent = `Saved on this device. ${error.message}`;
+    } finally {
+      button.disabled = false;
+    }
+  }
+
   function bindEvents() {
     $("#theme-button").addEventListener("click", toggleTheme);
     $("#ticker-form").addEventListener("submit", event => {
@@ -1024,22 +1178,7 @@
     };
     $("#entry-slider").addEventListener("input", event => setEntry(event.target.value));
     $("#entry-price").addEventListener("input", event => setEntry(event.target.value));
-    $("#save-scenario").addEventListener("click", () => {
-      const scenario = scenarioResult();
-      const payload = {
-        ticker: state.ticker,
-        score: scenario.score,
-        entryPrice: state.entryPrice,
-        assumptions: Object.fromEntries(ASSUMPTIONS.map(item => [item.key, state.fundamentals[item.key]])),
-        savedAt: new Date().toISOString(),
-      };
-      try {
-        window.localStorage.setItem("implied-lens-score-scenario", JSON.stringify(payload));
-        $("#save-status").textContent = "Saved in this browser.";
-      } catch (_) {
-        $("#save-status").textContent = "Scenario is active for this session.";
-      }
-    });
+    $("#save-scenario").addEventListener("click", saveCurrentScenario);
     $("#price-chart").addEventListener("mousemove", event => {
       if (!state.chartPoints.length) return;
       const rect = event.currentTarget.getBoundingClientRect();

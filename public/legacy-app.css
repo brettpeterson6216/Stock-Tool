@@ -1627,6 +1627,7 @@ html[data-theme="dark"] .theme-toggle-thumb{left:16px;background:var(--gold);}
 .sa-type-price{background:rgba(185,138,61,.15);color:var(--gold);}
 .sa-type-dcf{background:rgba(139,195,74,.15);color:#8bc34a;}
 .sa-type-projection{background:rgba(100,181,246,.15);color:#64b5f6;}
+.sa-type-lensscore{background:rgba(239,200,121,.15);color:#d9ad55;}
 .sa-type-compare{background:rgba(206,147,216,.15);color:#ce93d8;}
 .sa-type-note{background:rgba(128,128,128,.15);color:var(--text4);}
 .sa-card-body{flex:1;min-width:0;}

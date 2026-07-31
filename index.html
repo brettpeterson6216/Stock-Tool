@@ -102,11 +102,11 @@
 <script defer src="/product-system.js?v=20260729-4"></script>
 <script defer src="/workspace-system.js?v=20260724-2"></script>
 <script defer src="/tool-launch.js?v=20260722-1"></script>
-<link href="/legacy-app.css?v=20260730-3" rel="stylesheet">
+<link href="/legacy-app.css?v=20260730-4" rel="stylesheet">
 <link href="/premium.css?v=20260713-3" rel="stylesheet">
 <link href="/release-polish.css?v=20260725-4" rel="stylesheet">
 <link href="/visual-refresh.css?v=20260730-10" rel="stylesheet">
-  <link href="/site-shell.css?v=20260730-26" rel="stylesheet">
+  <link href="/site-shell.css?v=20260730-27" rel="stylesheet">
 <link href="/landing-polish.css?v=20260730-5" rel="stylesheet">
 </head>
 <body>
@@ -1602,6 +1602,7 @@
                 <button class="sa-pill" data-type="dcf">Intrinsic Value</button>
                 <button class="sa-pill" data-type="valuation">Valuation Lab</button>
                 <button class="sa-pill" data-type="projection">Projection</button>
+                <button class="sa-pill" data-type="lensscore">LensScore</button>
                 <button class="sa-pill" data-type="compare">Compare</button>
                 <button class="sa-pill" data-type="note">Notes</button>
               </div>
@@ -2881,6 +2882,10 @@ async function loadSavedAnalysis(entry) {
     toast('Saved comparison reopened ✓', 'green');
     return;
   }
+  if (entry.type === 'lensscore' && entry.ticker) {
+    window.location.assign('/lens-score?ticker=' + encodeURIComponent(entry.ticker));
+    return;
+  }
   if (entry.ticker) {
     const ticker = String(entry.ticker).trim().toUpperCase();
     const input = document.getElementById('main-ticker');
@@ -2947,8 +2952,8 @@ function renderSavedAnalyses() {
   }
   if (empty) empty.style.display = 'none';
 
-  const typeLabels = { price:'Price Snapshot', dcf:'Intrinsic Value', valuation:'Valuation Lab', projection:'Projection', compare:'Compare', note:'Note' };
-  const typeClass  = { price:'sa-type-price', dcf:'sa-type-dcf', valuation:'sa-type-dcf', projection:'sa-type-projection', compare:'sa-type-compare', note:'sa-type-note' };
+  const typeLabels = { price:'Price Snapshot', dcf:'Intrinsic Value', valuation:'Valuation Lab', projection:'Projection', lensscore:'LensScore', compare:'Compare', note:'Note' };
+  const typeClass  = { price:'sa-type-price', dcf:'sa-type-dcf', valuation:'sa-type-dcf', projection:'sa-type-projection', lensscore:'sa-type-lensscore', compare:'sa-type-compare', note:'sa-type-note' };
 
   _saListEntries = all;
   list.innerHTML = all.map((entry, idx) => {
