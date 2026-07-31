@@ -34,6 +34,7 @@ Release candidate:
 - Reduction: 78.6% uncompressed and 66.5% compressed.
 - Cached API response: approximately 7–14 ms locally.
 - Browser test: a new ticker rendered in approximately 0.6 seconds when provider evidence was already warm.
+- First production browser verification after deployment reached a rendered AAPL score in approximately 3.3 seconds, down from the observed 8–9 second cold state before this release.
 - Up to five recently viewed tickers now render from verified session evidence immediately while live providers refresh.
 - A failed refresh keeps clearly dated verified session evidence visible instead of blanking the product or substituting synthetic data.
 
@@ -179,6 +180,5 @@ If a component cannot answer one of those questions, improve it, move it behind 
 - [x] Desktop/mobile and light/dark LensScore views were visually checked.
 - [x] Syntax checks pass.
 - [x] Full automated test suite passes.
-- [ ] Production deployment reports the new commit.
-- [ ] Production compact payload and browser performance are remeasured after deployment.
-
+- [x] Production deployment reports the release commit.
+- [x] Production compact payload and browser performance were remeasured after deployment.
