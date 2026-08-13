@@ -696,14 +696,17 @@
     const btn = (attr, on, label, icon) =>
       `<button type="button" class="il-cexc${on ? " on" : ""}" ${attr}>${icon ? `<i class="ti ${icon}" aria-hidden="true"></i> ` : ""}${label}</button>`;
     host.style.display = "";
+    const typeControls = TYPES.map(([t, l, i]) => btn(`data-cexc-type="${t}"`, (S.chartType || "candle") === t, l, i)).join("");
+    const indicatorControls = INDS.map(([k, l]) => btn(`data-cexc-ind="${k}"`, Boolean(inds[k]), l)).join("");
+    const rangeControls = RANGES.map(([r, l]) => btn(`data-cexc-range="${r}"`, (S.range || "1y") === r, l)).join("");
     host.innerHTML =
-      TYPES.map(([t, l, i]) => btn(`data-cexc-type="${t}"`, (S.chartType || "candle") === t, l, i)).join("") +
-      `<span class="il-cexc-sep"></span>` +
-      INDS.map(([k, l]) => btn(`data-cexc-ind="${k}"`, Boolean(inds[k]), l)).join("") +
-      `<span class="il-cexc-sep"></span>` +
-      RANGES.map(([r, l]) => btn(`data-cexc-range="${r}"`, (S.range || "1y") === r, l)).join("") +
-      `<span class="il-cexc-sep"></span>` +
-      btn(`data-cexc-tip="1" title="Toggle the hover readout"`, window.__ilTipOn !== false, "Inspect", "ti-crosshair");
+      `<div class="il-cexc-row il-cexc-primary" role="group" aria-label="Chart display">` +
+        typeControls + `<span class="il-cexc-sep"></span>` + indicatorControls +
+        `<span class="il-cexc-sep"></span>` +
+        btn(`data-cexc-tip="1" title="Toggle the hover readout"`, window.__ilTipOn !== false, "Inspect", "ti-crosshair") +
+        btn(`data-cexc-markup="1" aria-expanded="${modal.classList.contains("markup-open")}" title="Show drawing tools"`, modal.classList.contains("markup-open"), "Draw", "ti-pencil") +
+      `</div>` +
+      `<div class="il-cexc-row il-cexc-ranges" role="group" aria-label="Chart time range">${rangeControls}</div>`;
     host.querySelectorAll("[data-cexc-type]").forEach(b => b.onclick = () => {
       window.setChartType?.(b.dataset.cexcType, document.getElementById("ct-" + b.dataset.cexcType));
     });
@@ -724,6 +727,17 @@
       if (chart) { chart.options.plugins.tooltip.enabled = window.__ilTipOn; chart.update("none"); }
       tipBtn.classList.toggle("on", window.__ilTipOn);
     };
+    const markupBtn = host.querySelector("[data-cexc-markup]");
+    if (markupBtn) markupBtn.onclick = () => {
+      const open = modal.classList.toggle("markup-open");
+      markupBtn.classList.toggle("on", open);
+      markupBtn.setAttribute("aria-expanded", String(open));
+    };
+    requestAnimationFrame(() => {
+      const row = host.querySelector(".il-cexc-ranges");
+      const active = row?.querySelector(".il-cexc.on");
+      if (row && active) row.scrollLeft = Math.max(0, active.offsetLeft - (row.clientWidth - active.offsetWidth) / 2);
+    });
   }
 
   function install() {
@@ -732,7 +746,10 @@
 
     const _expand = window.expandChart;
     window.expandChart = function (chartId, title) {
+      const modal = document.getElementById("chart-expand-modal");
+      const wasOpen = modal?.classList.contains("open");
       _expand(chartId, title);
+      if (!wasOpen) modal?.classList.remove("markup-open");
       renderControls(chartId);
       attachWheelLoader();
     };

@@ -13,6 +13,7 @@ const appLegacyJs = fs.readFileSync(path.join(__dirname, "..", "public", "app-le
 // was inline. Preserve that coverage across the external-module boundary.
 const html = `${indexHtml}\n${themeBootstrapJs}\n${appNavigationJs}\n${appLegacyJs}`;
 const legacyCss = fs.readFileSync(path.join(__dirname, "..", "public", "legacy-app.css"), "utf8");
+const premiumCss = fs.readFileSync(path.join(__dirname, "..", "public", "premium.css"), "utf8");
 const staticCss = fs.readFileSync(path.join(__dirname, "..", "public", "static-polish.css"), "utf8");
 const signupHtml = fs.readFileSync(path.join(__dirname, "..", "public", "signup.html"), "utf8");
 const loginHtml = fs.readFileSync(path.join(__dirname, "..", "public", "login.html"), "utf8");
@@ -59,9 +60,9 @@ test("price charts expose dependable zoom controls and mobile gestures", () => {
   assert.match(html, /function chartZoomOptions\(\)/);
   assert.match(html, /chartjs-plugin-zoom\.min\.js\?v=2\.2\.0/);
   assert.match(html, /pinch:\{enabled:true\}/);
-  assert.match(html, /mode:'xy'/);
+  assert.match(html, /mode:isPriceChart\?'x':'xy'/);
   assert.doesNotMatch(html, /overScaleMode:'xy'/);
-  assert.match(html, /pan:\s*\{ enabled:true, mode:'xy', threshold:0 \}/); // expanded view only
+  assert.match(html, /pan:\s*\{ enabled:true, mode:isPriceChart\?'x':'xy', threshold:0 \}/); // expanded price view never distorts its value axis
   assert.match(html, /zoom:\{ wheel:\{enabled:false\}, pinch:\{enabled:false\}, drag:\{enabled:false\}/); // inline charts static
   assert.match(html, /limits:\{x:\{min:'original',max:'original',minRange:4\},y:\{min:'original',max:'original'\}\}/);
   assert.match(html, /function fmtChartPrice\(raw\)/);
@@ -75,6 +76,7 @@ test("price charts expose dependable zoom controls and mobile gestures", () => {
   assert.match(html, /onclick="resetPriceZoom\(\)"/);
   assert.match(html, /onclick="zoomExpandedChart\(1\.25\)"/);
   assert.match(html, /async function loadMorePriceHistory\(\)/);
+  assert.match(html, /factor<1&&sourceId==='price-chart'&&chartAtFullHistory\(_expandedChart\)/);
   assert.match(html, /CHART_RANGE_ORDER=\['1d','5d','1mo','3mo','6mo','1y','2y','5y','max'\]/);
   assert.match(html, /minRange:4/);
   // Inline charts must never trap scroll: pan-y everywhere; gestures only in the expanded workspace
@@ -117,6 +119,30 @@ test("the fixed header covers the top device safe area", () => {
   assert.match(htmlAndLegacyCss, /#view-tool \{[^}]*padding-top:calc\(56px \+ env\(safe-area-inset-top, 0px\)\)/);
   assert.match(landingPolishCss, /padding-bottom: calc\(88px \+ env\(safe-area-inset-bottom, 0px\)\) !important/);
   assert.match(landingPolishCss, /height: calc\(64px \+ env\(safe-area-inset-bottom, 0px\)\) !important/);
+});
+
+test("expanded mobile price charts fit the evidence instead of anchoring to zero", () => {
+  assert.match(appLegacyJs, /function expandedPriceBounds\(srcCfg\)/);
+  assert.match(appLegacyJs, /const pad=span\*\.08/);
+  assert.match(appLegacyJs, /\.\.\.\(priceBounds\|\|\{\}\),\s*beginAtZero:false/);
+  assert.match(appLegacyJs, /position:isPriceChart\?'right'/);
+  assert.match(appLegacyJs, /maxTicksLimit:compact\?4:10,maxRotation:0,minRotation:0/);
+  assert.match(appLegacyJs, /function fmtChartAxisPrice\(raw\)/);
+  assert.match(appLegacyJs, /legend: \{ display: !compact/);
+  assert.match(appLegacyJs, /Open  \$\{fmtChartPrice\(quote\.open/);
+  assert.doesNotMatch(appLegacyJs, /Range'}: \$\$\{f\(/);
+});
+
+test("expanded mobile chart controls preserve the plot area", () => {
+  assert.match(workspaceJs, /class="il-cexc-row il-cexc-primary"/);
+  assert.match(workspaceJs, /class="il-cexc-row il-cexc-ranges"/);
+  assert.match(workspaceJs, /data-cexc-markup="1"/);
+  assert.match(workspaceJs, /modal\.classList\.toggle\("markup-open"\)/);
+  assert.match(premiumCss, /#chart-expand-modal \.cex-type-toggle\{ display:none!important; \}/);
+  assert.match(premiumCss, /#chart-expand-modal \.cex-toolbar\{ display:none!important; \}/);
+  assert.match(premiumCss, /#chart-expand-modal\.markup-open \.cex-toolbar/);
+  assert.match(premiumCss, /#il-cex-controls \.il-cexc-row\{[\s\S]*overflow-x:auto/);
+  assert.match(premiumCss, /#chart-expand-modal \.cex-body\{[\s\S]*padding:2px 0 4px!important/);
 });
 
 test("authenticated navigation cannot display contradictory login actions", () => {

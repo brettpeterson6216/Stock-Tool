@@ -686,9 +686,9 @@ function setChartType(type, btn) {
 // Expanded/fullscreen chart type switching (line/area/candle) — price chart only.
 function syncExpandedTypeToggle(){
   var tg=document.getElementById('cex-type-toggle'); if(!tg) return;
-  var isPrice=_expandedSource&&_expandedSource.chartId==='price-chart';
-  tg.style.display=isPrice?'inline-flex':'none';
-  if(isPrice){ var cur=S.chartType||'area'; tg.querySelectorAll('.cex-type-btn').forEach(function(b){ b.classList.toggle('on', b.dataset.ctype===cur); }); }
+  // Chart type now lives in the unified expanded toolbar. The duplicate toggle
+  // made the phone header taller than the plot controls themselves.
+  tg.style.display='none';
 }
 function setExpandedChartType(type){
   if(!_expandedSource||_expandedSource.chartId!=='price-chart') return;
@@ -1665,6 +1665,42 @@ function fmtChartPrice(raw) {
   return '$' + value.toFixed(4);
 }
 
+function fmtChartAxisPrice(raw) {
+  const value = chartPriceValue(raw);
+  if (!Number.isFinite(value)) return '$--';
+  if (Math.abs(value) >= 1000) return '$' + value.toLocaleString('en-US', { maximumFractionDigits: 0 });
+  if (Math.abs(value) >= 100) return '$' + value.toFixed(0);
+  if (Math.abs(value) >= 10) return '$' + value.toFixed(1);
+  if (Math.abs(value) >= 1) return '$' + value.toFixed(2);
+  return '$' + value.toFixed(3);
+}
+
+function expandedPriceBounds(srcCfg) {
+  const values=[];
+  const add=value=>{
+    if(value==null||value==='') return;
+    const number=Number(value);
+    if(Number.isFinite(number)&&number>=0) values.push(number);
+  };
+  (srcCfg?.data?.datasets||[]).forEach(dataset=>{
+    if(dataset.hidden) return;
+    (dataset.data||[]).forEach(point=>{
+      if(Array.isArray(point)) point.forEach(add);
+      else if(point&&typeof point==='object') {
+        const value=point.y??point.c??point.close??point.value;
+        Array.isArray(value)?value.forEach(add):add(value);
+      } else add(point);
+    });
+    (dataset._quote?.high||[]).forEach(add);
+    (dataset._quote?.low||[]).forEach(add);
+  });
+  if(!values.length) return null;
+  const low=Math.min(...values), high=Math.max(...values);
+  const span=Math.max(high-low,Math.abs(high)*.035,.01);
+  const pad=span*.08;
+  return {min:Math.max(0,low-pad),max:high+pad};
+}
+
 const baseOpts = (extraScales={}) => {
   const t = ct();
   const compact=window.matchMedia('(max-width: 640px)').matches;
@@ -1781,6 +1817,9 @@ function expandChart(chartId, title) {
   }));
 
   const theme = ct();
+  const compact=window.matchMedia('(max-width: 640px)').matches;
+  const isPriceChart=chartId==='price-chart';
+  const priceBounds=isPriceChart?expandedPriceBounds(srcCfg):null;
   _expandedChart = new Chart(canvas, {
     type: srcCfg.type,
     data: { labels:[...srcCfg.data.labels], datasets },
@@ -1789,9 +1828,13 @@ function expandChart(chartId, title) {
       responsive: true,
       maintainAspectRatio: false,
       animation: false,
+      layout:{
+        ...(srcCfg.options?.layout||{}),
+        padding:compact?{top:4,right:4,bottom:2,left:2}:{top:8,right:16,bottom:8,left:8}
+      },
       plugins: {
         ...(srcCfg.options?.plugins||{}),
-        legend: { display: true, labels: { color:theme.text, font:{family:'DM Sans',size:11,weight:'500'}, boxWidth:20, boxHeight:2, padding:16, usePointStyle:false } },
+        legend: { display: !compact, labels: { color:theme.text, font:{family:'DM Sans',size:11,weight:'500'}, boxWidth:20, boxHeight:2, padding:16, usePointStyle:false } },
         tooltip: {
           enabled: window.__ilTipOn !== false,
           mode:'index', intersect:false,
@@ -1802,29 +1845,42 @@ function expandChart(chartId, title) {
           callbacks:{
             title:items=>items[0]?.label||'',
             label:ctx=>{
-              const f=x=>(typeof fmtChartPrice==='function'&&typeof x==='number')?fmtChartPrice(x):x;
+              const quote=ctx.dataset?._quote;
+              if(quote&&ctx.dataset.label==='Price') {
+                const i=ctx.dataIndex;
+                return [
+                  ` Open  ${fmtChartPrice(quote.open?.[i])}`,
+                  ` High  ${fmtChartPrice(quote.high?.[i])}`,
+                  ` Low   ${fmtChartPrice(quote.low?.[i])}`,
+                  ` Close ${fmtChartPrice(quote.close?.[i])}`,
+                ];
+              }
               const v=ctx.raw;
-              if(Array.isArray(v)) return ` ${ctx.dataset.label||'Range'}: $${f(v[0])} – $${f(v[1])}`;
-              return ` ${ctx.dataset.label||''}: $${f(v)}`;
+              if(Array.isArray(v)) return ` ${ctx.dataset.label||'Range'}: ${fmtChartPrice(v[0])} – ${fmtChartPrice(v[1])}`;
+              return ` ${ctx.dataset.label||''}: ${fmtChartPrice(v)}`;
             }
           }
         },
         zoom: {
-          zoom: { wheel:{enabled:true,speed:0.045}, pinch:{enabled:true}, mode:'xy', onZoomComplete({chart}){_expandedHasUserZoom=!chartAtFullHistory(chart);} },
-          pan:  { enabled:true, mode:'xy', threshold:0 },
-          limits: { x:{min:'original',max:'original',minRange:4}, y:{min:'original',max:'original'} }
+          zoom: { wheel:{enabled:true,speed:0.045}, pinch:{enabled:true}, mode:isPriceChart?'x':'xy', onZoomComplete({chart}){_expandedHasUserZoom=!chartAtFullHistory(chart);} },
+          pan:  { enabled:true, mode:isPriceChart?'x':'xy', threshold:0 },
+          limits: isPriceChart?{x:{min:'original',max:'original',minRange:4}}:{x:{min:'original',max:'original',minRange:4},y:{min:'original',max:'original'}}
         }
       },
       scales: {
         ...(srcCfg.options?.scales||{}),
         x: {
           ...(srcCfg.options?.scales?.x||{}),
-          ticks:{...(srcCfg.options?.scales?.x?.ticks||{}),color:theme.text,font:{family:'DM Mono',size:11,weight:'400'}},
+          ticks:{...(srcCfg.options?.scales?.x?.ticks||{}),color:theme.text,font:{family:'DM Mono',size:compact?9:11,weight:'500'},maxTicksLimit:compact?4:10,maxRotation:0,minRotation:0,autoSkip:true,padding:compact?8:10},
           grid:{color:gcol()}
         },
         y: {
           ...(srcCfg.options?.scales?.y||{}),
-          ticks:{...(srcCfg.options?.scales?.y?.ticks||{}),color:theme.text,font:{family:'DM Mono',size:11,weight:'400'}},
+          ...(priceBounds||{}),
+          beginAtZero:false,
+          position:isPriceChart?'right':(srcCfg.options?.scales?.y?.position||'left'),
+          title:{...(srcCfg.options?.scales?.y?.title||{}),display:false},
+          ticks:{...(srcCfg.options?.scales?.y?.ticks||{}),color:theme.text,font:{family:'DM Mono',size:compact?9:11,weight:'500'},maxTicksLimit:compact?6:8,padding:compact?6:8,callback:isPriceChart?(value=>fmtChartAxisPrice(value)):(srcCfg.options?.scales?.y?.ticks?.callback)},
           grid:{color:gcol()}
         }
       }
@@ -1860,7 +1916,7 @@ async function zoomExpandedChart(factor){
   const modal=document.getElementById('chart-expand-modal');
   const sourceId=modal?.dataset?.chartId||_expandedSource?.chartId;
   const sourceTitle=modal?.dataset?.chartTitle||_expandedSource?.title;
-  if(factor<1&&sourceId==='price-chart'){
+  if(factor<1&&sourceId==='price-chart'&&chartAtFullHistory(_expandedChart)){
     const loaded=await loadMorePriceHistory();
     if(loaded) expandChart(sourceId,sourceTitle||'Price Chart');
     return;

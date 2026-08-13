@@ -1222,6 +1222,105 @@ html[data-theme="dark"] .il-cexc-sep{ background:rgba(255,255,255,.14)!important
 html[data-theme="dark"] .cex-tool{ color:rgba(235,229,215,.66)!important; }
 html[data-theme="dark"] .cex-tool:hover{ color:#fff!important; }
 
+/* Expanded chart usability: protect plot area and make mobile controls
+   deliberate instead of allowing unrelated buttons to wrap unpredictably. */
+.il-cexc-row{
+  display:flex;
+  align-items:center;
+  gap:3px 4px;
+  min-width:0;
+}
+.il-cexc-ranges{ margin-left:2px; }
+
+@media(max-width:640px){
+  #chart-expand-modal .cex-box{
+    height:100dvh!important;
+    min-height:100dvh!important;
+  }
+  #chart-expand-modal .cex-header{
+    min-height:calc(58px + env(safe-area-inset-top,0px));
+    box-sizing:border-box;
+    align-items:center!important;
+    padding:env(safe-area-inset-top,0px) 112px 0 14px!important;
+    gap:8px!important;
+  }
+  #chart-expand-modal .cex-title{
+    padding:0!important;
+    font-size:.82rem!important;
+    white-space:nowrap;
+  }
+  #chart-expand-modal .cex-type-toggle{ display:none!important; }
+  #chart-expand-modal .cex-controls{
+    position:absolute;
+    top:calc(env(safe-area-inset-top,0px) + 7px);
+    right:64px;
+    display:flex;
+    flex-wrap:nowrap;
+  }
+  #chart-expand-modal .cex-controls .cex-icon-btn,
+  #chart-expand-modal .cex-controls .cex-hint{ display:none!important; }
+  #chart-expand-modal .cex-controls .cex-btn:not(.cex-icon-btn):not(.gold){
+    display:flex!important;
+    width:44px;
+    height:44px;
+    min-width:44px;
+    min-height:44px;
+    padding:0!important;
+    border-radius:12px;
+  }
+  #chart-expand-modal .cex-controls .cex-btn:not(.cex-icon-btn):not(.gold) span{ display:none!important; }
+  #chart-expand-modal .cex-close-mobile{
+    top:calc(env(safe-area-inset-top,0px) + 7px)!important;
+    right:10px!important;
+    width:44px!important;
+    height:44px!important;
+  }
+  #il-cex-controls{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    gap:0!important;
+    padding:0!important;
+    flex:0 0 auto;
+    overflow:hidden;
+  }
+  #il-cex-controls .il-cexc-row{
+    width:100%;
+    min-height:46px;
+    box-sizing:border-box;
+    padding:5px 8px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    flex-wrap:nowrap;
+    scrollbar-width:none;
+    overscroll-behavior-x:contain;
+    -webkit-overflow-scrolling:touch;
+  }
+  #il-cex-controls .il-cexc-row::-webkit-scrollbar{ display:none; }
+  #il-cex-controls .il-cexc-primary{ border-bottom:1px solid var(--fp-border); }
+  #il-cex-controls .il-cexc{
+    min-width:max-content;
+    min-height:36px;
+    padding:4px 10px;
+    font-size:.72rem;
+    flex:0 0 auto;
+  }
+  #il-cex-controls .il-cexc-sep{ flex:0 0 1px; }
+  #chart-expand-modal .cex-toolbar{ display:none!important; }
+  #chart-expand-modal.markup-open .cex-toolbar{
+    display:flex!important;
+    min-height:48px;
+    box-sizing:border-box;
+  }
+  #chart-expand-modal .cex-body{
+    min-height:0!important;
+    padding:2px 0 4px!important;
+  }
+  #chart-expand-modal .cex-workspace{
+    min-height:0!important;
+    height:100%!important;
+  }
+}
+
 /* ── Quick ticker search in the tab bar ─────────────────────────────────────── */
 .il-quick-search{
   display:inline-flex; align-items:center; gap:6px;
