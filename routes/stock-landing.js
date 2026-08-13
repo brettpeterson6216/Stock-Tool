@@ -193,7 +193,7 @@ function renderPage(ticker, q) {
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <script>(function(){if(localStorage.getItem('il-theme')==='dark')document.documentElement.setAttribute('data-theme','dark')})();</script>
   <title>${esc(metaTitle)}</title>
   <meta name="description" content="${esc(metaDesc)}">
@@ -332,7 +332,7 @@ function renderPage(ticker, q) {
   </style>
   <link rel="stylesheet" href="/static-polish.css?v=20260725-2">
   <link rel="stylesheet" href="/visual-refresh.css?v=20260730-10">
-  <link rel="stylesheet" href="/site-shell.css?v=20260730-26">
+  <link rel="stylesheet" href="/site-shell.css?v=20260813-1">
 </head>
 <body>
   <a class="il-skip-link" href="#public-main">Skip to content</a>

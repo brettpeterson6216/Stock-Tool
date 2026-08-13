@@ -221,3 +221,35 @@
 @media (max-width: 1180px) {
   #main-nav .nav-search { display: none !important; }
 }
+
+/*
+ * Mobile viewport contract
+ * ------------------------
+ * This file loads after the legacy theme layers. Keep device insets and the
+ * fixed tab bar clearance authoritative here so late desktop polish cannot
+ * reintroduce iPhone status-bar collisions or cover the final controls.
+ */
+@media (max-width: 640px) {
+  #view-tool .app-content-scroll {
+    padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)) !important;
+    scroll-padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+  }
+
+  #view-home,
+  #view-home .hs-main {
+    scroll-padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .mobile-bottom-nav {
+    box-sizing: border-box !important;
+    min-height: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
+    height: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
+    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+  }
+
+  #view-tool button,
+  #view-tool a,
+  #view-tool [tabindex] {
+    scroll-margin-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+  }
+}

@@ -16,6 +16,7 @@ const legacyCss = fs.readFileSync(path.join(__dirname, "..", "public", "legacy-a
 const staticCss = fs.readFileSync(path.join(__dirname, "..", "public", "static-polish.css"), "utf8");
 const signupHtml = fs.readFileSync(path.join(__dirname, "..", "public", "signup.html"), "utf8");
 const productJs = fs.readFileSync(path.join(__dirname, "..", "public", "product-system.js"), "utf8");
+const workspaceJs = fs.readFileSync(path.join(__dirname, "..", "public", "workspace-system.js"), "utf8");
 const productCss = fs.readFileSync(path.join(__dirname, "..", "public", "product-system.css"), "utf8");
 const researchJs = fs.readFileSync(path.join(__dirname, "..", "public", "research-system.js"), "utf8");
 const releaseCss = fs.readFileSync(path.join(__dirname, "..", "public", "release-polish.css"), "utf8");
@@ -104,9 +105,18 @@ test("mobile tool pages keep the brand and theme control visible", () => {
 });
 
 test("the fixed header covers the top device safe area", () => {
-  assert.match(htmlAndLegacyCss, /height:calc\(56px \+ env\(safe-area-inset-top, 0px\)\)/);
+  assert.match(siteShellCss, /#main-nav,[\s\S]*min-height: calc\(56px \+ env\(safe-area-inset-top, 0px\)\) !important;/);
+  assert.match(siteShellCss, /height: calc\(56px \+ env\(safe-area-inset-top, 0px\)\) !important;/);
+  assert.match(siteShellCss, /padding: env\(safe-area-inset-top, 0px\)[^;]+env\(safe-area-inset-right, 0px\)[^;]+env\(safe-area-inset-left, 0px\)/);
   assert.match(htmlAndLegacyCss, /#view-home\{padding-top:calc\(56px \+ env\(safe-area-inset-top, 0px\)\)\}/);
   assert.match(htmlAndLegacyCss, /#view-tool \{[^}]*padding-top:calc\(56px \+ env\(safe-area-inset-top, 0px\)\)/);
+  assert.match(landingPolishCss, /padding-bottom: calc\(88px \+ env\(safe-area-inset-bottom, 0px\)\) !important/);
+  assert.match(landingPolishCss, /height: calc\(64px \+ env\(safe-area-inset-bottom, 0px\)\) !important/);
+});
+
+test("mobile workspace content stays ahead of the legal footer", () => {
+  assert.match(workspaceJs, /const disclaimer = scroll\.querySelector\(":scope > \.tool-disclaimer"\)/);
+  assert.match(workspaceJs, /disclaimer\.insertAdjacentHTML\("beforebegin", workspaceMarkup\)/);
 });
 
 test("mobile browser chrome follows the selected site theme", () => {
@@ -304,6 +314,7 @@ test("release navigation controls keep identical geometry across active states",
 
 test("every public product region uses the shared navigation and skip link", () => {
   for (const [file, page] of publicShellPages) {
+    assert.match(page, /viewport-fit=cover/, `${file} should expose device safe areas`);
     assert.match(page, /site-shell\.css\?v=\d{8}-\d+/, `${file} should load the shared shell`);
     assert.match(page, /class="il-skip-link"/, `${file} should provide keyboard bypass navigation`);
     assert.match(page, /<nav[^>]+class="[^"]*\bil-global-nav\b[^"]*"[^>]+aria-label="Primary navigation">/, `${file} should expose the product navigation`);
@@ -314,11 +325,13 @@ test("every public product region uses the shared navigation and skip link", () 
     assert.match(page, /class="[^"]*\bil-global-trial\b[^"]*"/, `${file} should preserve the trial action`);
   }
   assert.match(stockLandingRoute, /site-shell\.css\?v=\d{8}-\d+/);
+  assert.match(stockLandingRoute, /viewport-fit=cover/);
   assert.match(stockLandingRoute, /class="il-skip-link"/);
   assert.match(stockLandingRoute, /<nav class="il-global-nav" aria-label="Primary navigation">/);
   assert.match(stockLandingRoute, /class="top-bar" hidden/);
   assert.match(stockLandingRoute, /class="il-global-search"/);
   assert.match(lensHtml, /class="[^"]*\bil-global-search\b[^"]*"/);
+  assert.match(lensHtml, /viewport-fit=cover/);
   assert.match(lensHtml, /id="methodology-button"/);
 });
 

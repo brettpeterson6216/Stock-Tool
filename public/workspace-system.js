@@ -103,12 +103,15 @@
     if (mobile) mobile.insertAdjacentHTML("beforeend", `<button class="mst-btn" data-sec="workspace">Workspace</button>`);
     const scroll = document.querySelector(".app-content-scroll");
     if (!scroll) return;
-    scroll.insertAdjacentHTML("beforeend", `<div class="app-section" id="sec-workspace"><div class="acc-body" id="body-workspace" style="display:none"><div class="il-ws-shell">
+    const workspaceMarkup = `<div class="app-section" id="sec-workspace"><div class="acc-body" id="body-workspace" style="display:none"><div class="il-ws-shell">
       <div class="il-ws-hero"><div class="il-ws-intro"><div class="il-ws-kicker">Decision dashboard</div><h2>Turn research into a reviewable decision.</h2><p>Continue the work that matters: test a thesis, understand exposure, and revisit decisions on schedule.</p></div><div class="il-ws-stat accent-blue"><span>Theses</span><strong id="il-ws-thesis-count">0</strong></div><div class="il-ws-stat accent-green"><span>Positions</span><strong id="il-ws-position-count">0</strong></div><div class="il-ws-stat accent-gold"><span>Cost basis</span><strong id="il-ws-invested">$0</strong></div><div class="il-ws-stat accent-red"><span>Reviews due</span><strong id="il-ws-review-count">0</strong></div></div>
       <div id="il-ws-activation"></div>
       <div class="il-ws-tabs"><button class="il-ws-tab active" data-tab="review"><i class="ti ti-checkup-list"></i>Review</button><button class="il-ws-tab" data-tab="thesis"><i class="ti ti-notes"></i>Thesis</button><button class="il-ws-tab" data-tab="portfolio"><i class="ti ti-chart-donut-3"></i>Portfolio</button><button class="il-ws-tab" data-tab="guide"><i class="ti ti-sparkles"></i>AI Portfolio Guide</button><button class="il-ws-tab" data-tab="watchlist"><i class="ti ti-star"></i>Watchlist</button><button class="il-ws-tab" data-tab="trust"><i class="ti ti-shield-check"></i>Data trust</button></div>
       <div class="il-ws-panel active" data-panel="review"></div><div class="il-ws-panel" data-panel="thesis"></div><div class="il-ws-panel" data-panel="portfolio"></div><div class="il-ws-panel" data-panel="guide"></div><div class="il-ws-panel" data-panel="watchlist"></div><div class="il-ws-panel" data-panel="trust"></div>
-    </div></div></div>`);
+    </div></div></div>`;
+    const disclaimer = scroll.querySelector(":scope > .tool-disclaimer");
+    if (disclaimer) disclaimer.insertAdjacentHTML("beforebegin", workspaceMarkup);
+    else scroll.insertAdjacentHTML("beforeend", workspaceMarkup);
     document.querySelector(".il-ws-tabs").addEventListener("click", event => {
       const tab = event.target.closest("[data-tab]")?.dataset.tab;
       if (!tab) return;
