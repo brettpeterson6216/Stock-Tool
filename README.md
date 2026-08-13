@@ -14,6 +14,7 @@ npm audit --audit-level=moderate
 ## Deployment checks
 
 - `GET /healthz` verifies the running build and database connection.
+- `GET /readyz` verifies launch-critical database, market-data, session, billing, email, and public-URL configuration without exposing secrets.
 - `GET /api/version` exposes the deployed commit and startup time without caching.
 - Every response includes `X-ImpliedLens-Build`.
 - GitHub Actions runs syntax checks, smoke tests, and the dependency audit on pushes and pull requests.
@@ -36,9 +37,13 @@ Keep `STRIPE_PRICE_MONTHLY`, `STRIPE_PRICE_ANNUAL`, `STRIPE_SECRET_KEY`, and `ST
 
 ## Frontend structure
 
-The legacy application remains in `index.html`. New cross-cutting product behavior lives in:
+`index.html` owns application markup. Executable behavior is external:
 
+- `public/theme-bootstrap.js`: pre-render theme and browser chrome.
+- `public/app-navigation.js`: global shell, auth bootstrap, navigation, and account UI.
+- `public/app-legacy.js`: extracted legacy application controller and the next incremental migration boundary.
+- `public/model-math.js`: pure projection and valuation formulas.
 - `public/product-system.js`: chart persistence, data trust, education context, onboarding, and build identity.
 - `public/product-system.css`: styles for those product systems.
 
-Keep new cross-cutting features in external modules instead of adding more inline script or style blocks.
+Do not add executable inline scripts. Put domain behavior in the narrowest owned module, and keep financial math DOM-free and independently tested. See `docs/PRODUCT_ARCHITECTURE.md` and `docs/PRODUCTION_AUDIT_2026-08-12.md`.

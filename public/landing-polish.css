@@ -142,7 +142,7 @@
 
 /* Keep Research focused on ticker entry. LensScore owns its separate top-level tab. */
 #view-tool .tool-welcome {
-  display: grid !important;
+  display: grid;
   grid-template-columns: minmax(0, 1fr) !important;
   align-items: center !important;
 }
@@ -215,4 +215,9 @@
   #landing-page .ihm-body { grid-template-columns: 1fr !important; }
   #landing-page .ihm-side { flex-direction: row !important; }
   #landing-page .ihm-card:last-child { display: none; }
+}
+/* Keep the global product tabs on one readable row at laptop widths. Search is
+   still available in every research entry surface and returns at wide desktop. */
+@media (max-width: 1180px) {
+  #main-nav .nav-search { display: none !important; }
 }

@@ -1246,7 +1246,7 @@ html[data-theme="dark"] .il-quick-search{ background:rgba(22,26,31,.8); }
 html[data-theme="dark"] .il-cap-head h2{ color:#f0ead9; }
 .il-cap-head p{ color:rgba(60,49,26,.75); font-size:.92rem; line-height:1.6; }
 html[data-theme="dark"] .il-cap-head p{ color:rgba(230,224,210,.62); }
-.il-cap-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.il-cap-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
 @media(max-width:900px){ .il-cap-grid{ grid-template-columns:repeat(2,1fr); } }
 @media(max-width:600px){ .il-cap-grid{ grid-template-columns:1fr; } }
 .il-cap-card{

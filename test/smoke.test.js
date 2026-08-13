@@ -126,18 +126,19 @@ test("GET / serves the homepage with a successful status", async () => {
   const res = await req("/");
   assert.equal(res.status, 200);
   const html = await res.text();
+  const appSource = `${html}\n${fs.readFileSync(path.join(__dirname, "..", "public", "app-navigation.js"), "utf8")}\n${fs.readFileSync(path.join(__dirname, "..", "public", "app-legacy.js"), "utf8")}`;
   assert.match(html, /ImpliedLens/);
-  assert.match(html, /Create free account for 5\/day/);
-  assert.match(html, /function startGuestSignup/);
-  assert.match(html, /analysis_resumed_after_auth/);
-  assert.match(html, /function openBillingPortal/);
-  assert.match(html, /ImpliedLensMath\.annualizedVolatility\(c,252\)\*100/);
-  assert.match(html, /const _initialParams = new URLSearchParams\(window\.location\.search\)/);
-  assert.match(html, /!document\.getElementById\('sec-' \+ id\)/);
-  assert.match(html, /const activeSection = new URLSearchParams\(window\.location\.search\)\.get\('section'\)/);
+  assert.match(html, /5 stock analyses per day/);
+  assert.match(appSource, /function startGuestSignup/);
+  assert.match(appSource, /analysis_resumed_after_auth/);
+  assert.match(appSource, /function openBillingPortal/);
+  assert.match(appSource, /ImpliedLensMath\.annualizedVolatility\(c,252\)\*100/);
+  assert.match(appSource, /const _initialParams = new URLSearchParams\(window\.location\.search\)/);
+  assert.match(appSource, /!document\.getElementById\('sec-' \+ id\)/);
+  assert.match(appSource, /const activeSection = new URLSearchParams\(window\.location\.search\)\.get\('section'\)/);
   assert.match(html, /Build an AI Portfolio Guide you can actually understand/);
   assert.match(html, /Illustrative AAPL workspace/);
-  assert.match(html, /function setPricingPeriod\(period\)/);
+  assert.match(appSource, /function setPricingPeriod\(period\)/);
   assert.match(html, /id="mbn-workspace"/);
   assert.match(html, /aria-label="Home"/);
   assert.match(html, /viewport-fit=cover/);
@@ -148,7 +149,7 @@ test("GET / serves the homepage with a successful status", async () => {
   assert.match(legacyCss, /\.nav-acct-menu\{right:0;min-width:min\(220px,calc\(100vw - 1\.5rem\)\)/);
   assert.match(html, /workspace-system\.js\?v=\d{8}(-\d+)?/);
   assert.match(html, /workspace-system\.css\?v=\d{8}(-\d+)?/);
-  assert.match(html, /__initialWorkspaceTab/);
+  assert.match(appSource, /__initialWorkspaceTab/);
   assert.match(res.headers.get("cache-control"), /no-cache/);
 });
 
@@ -417,6 +418,32 @@ test("Free user can POST to /api/saves (cloud saves are free)", async () => {
   const body = await res.json();
   assert.ok(body.ok, "response should have ok:true");
   assert.ok(typeof body.id === "number", "response should return numeric id");
+});
+
+test("GET /readyz reports launch capabilities without exposing configuration values", async () => {
+  const res = await req("/readyz");
+  const body = await res.json();
+  assert.equal(res.status, body.ready ? 200 : 503);
+  assert.equal(body.checks.database, true);
+  assert.equal(body.checks.marketData, true);
+  assert.equal(typeof body.checks.billing, "boolean");
+  assert.equal(res.headers.get("cache-control"), "no-store");
+  assert.doesNotMatch(JSON.stringify(body), /smoke-test-secret|test-key|test-admin-secret/);
+});
+
+test("homepage executable scripts are external and CSP blocks inline script blocks", async () => {
+  const res = await req("/");
+  const html = await res.text();
+  const executableInline = [...html.matchAll(/<script(?![^>]*type=["']application\/ld\+json["'])[^>]*>([\s\S]*?)<\/script>/gi)]
+    .filter(match => !/\bsrc=/.test(match[0]) && match[1].trim());
+  assert.equal(executableInline.length, 0);
+  assert.match(html, /src="\/app-navigation\.js/);
+  assert.match(html, /src="\/app-legacy\.js/);
+
+  const csp = res.headers.get("content-security-policy") || "";
+  const scriptSource = csp.split(";").find(part => part.trim().startsWith("script-src ")) || "";
+  assert.doesNotMatch(scriptSource, /'unsafe-inline'/);
+  assert.match(csp, /script-src-attr 'unsafe-inline'/);
 });
 
 test("Valuation Lab saves retain their valuation type", async () => {

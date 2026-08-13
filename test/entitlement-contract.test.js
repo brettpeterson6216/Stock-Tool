@@ -6,7 +6,8 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { subscriptionStatusToPlan } = require("../lib/plan");
 
-const html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
+const indexHtml = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
+const html = `${indexHtml}\n${fs.readFileSync(path.join(__dirname, "..", "public", "app-navigation.js"), "utf8")}\n${fs.readFileSync(path.join(__dirname, "..", "public", "app-legacy.js"), "utf8")}`;
 const authSource = fs.readFileSync(path.join(__dirname, "..", "routes", "auth.js"), "utf8");
 const billingSource = fs.readFileSync(path.join(__dirname, "..", "routes", "billing.js"), "utf8");
 const planSource = fs.readFileSync(path.join(__dirname, "..", "lib", "plan.js"), "utf8");

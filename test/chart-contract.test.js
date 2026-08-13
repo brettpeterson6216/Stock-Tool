@@ -5,7 +5,13 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 
-const html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
+const indexHtml = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
+const themeBootstrapJs = fs.readFileSync(path.join(__dirname, "..", "public", "theme-bootstrap.js"), "utf8");
+const appNavigationJs = fs.readFileSync(path.join(__dirname, "..", "public", "app-navigation.js"), "utf8");
+const appLegacyJs = fs.readFileSync(path.join(__dirname, "..", "public", "app-legacy.js"), "utf8");
+// Contract tests historically inspected index.html when the application code
+// was inline. Preserve that coverage across the external-module boundary.
+const html = `${indexHtml}\n${themeBootstrapJs}\n${appNavigationJs}\n${appLegacyJs}`;
 const legacyCss = fs.readFileSync(path.join(__dirname, "..", "public", "legacy-app.css"), "utf8");
 const staticCss = fs.readFileSync(path.join(__dirname, "..", "public", "static-polish.css"), "utf8");
 const signupHtml = fs.readFileSync(path.join(__dirname, "..", "public", "signup.html"), "utf8");
@@ -104,8 +110,8 @@ test("the fixed header covers the top device safe area", () => {
 });
 
 test("mobile browser chrome follows the selected site theme", () => {
-  assert.match(html, /dark\?'#12100D':'#f9f8f5'/i);
-  assert.match(html, /dark\?'black-translucent':'default'/);
+  assert.match(html, /dark\s*\?\s*["']#12100D["']\s*:\s*["']#f9f8f5["']/i);
+  assert.match(html, /dark\s*\?\s*["']black-translucent["']\s*:\s*["']default["']/);
   assert.match(html, /<meta name="apple-mobile-web-app-status-bar-style" content="default">/);
   assert.match(html, /function updateThemeControl\(\) \{\s*window\.syncBrowserChrome\?\.\(\);/);
 });
@@ -381,7 +387,7 @@ test("expanded charts look premium and support seamless annotation", () => {
 test("homepage defaults to a beginner-friendly landing page before market tools", () => {
   assert.match(html, /id="landing-page"/);
   assert.match(html, /<div class="home-shell" id="market-page" style="display:none;">/);
-  assert.match(html, /Find better stock ideas with a process you can follow/);
+  assert.match(html, /See what a stock&rsquo;s price assumes\. Test whether the business can deliver/);
   assert.match(html, /Start with a 7-day free trial/);
   assert.match(html, /Start 7-day free trial/);
   assert.match(html, /class="il-hero-mock" role="img"/);
@@ -393,7 +399,7 @@ test("homepage defaults to a beginner-friendly landing page before market tools"
   assert.match(html, /function showLandingPage\(\)/);
   assert.match(html, /function showMarketPage\(\)/);
   assert.match(html, /history\.replaceState\(null, '', '\/'\)/);
-  assert.match(html, /\/\?view=home&amp;market=1/);
+  assert.match(html, /\/\?view=home(?:&amp;|&)market=1/);
   assert.match(legacyCss, /#market-page \.home-hero,#market-page \.home-feat-strip,#market-page \.home-proof,#market-page \.home-guide-showcase,#market-page #pricing,#market-page \.cta-strip\{display:none!important\}/);
   assert.match(legacyCss, /\.il-landing-preview\.image-preview img\{/);
   assert.match(legacyCss, /\.il-theme-img-light\{[\s\S]*display:block!important/);

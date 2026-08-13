@@ -77,6 +77,7 @@ const lensScoreRouter   = require("./routes/lens-score");
 const stockLandingRouter = require("./routes/stock-landing");
 const workspaceRouter     = require("./routes/workspace");
 const providerHealth      = require("./lib/provider-health");
+const { productionReadiness } = require("./lib/readiness");
 const { buildSitemapXml } = require("./lib/acquisition-tickers");
 
 // ============================================================
@@ -90,21 +91,18 @@ app.use((_req, res, next) => {
 });
 
 // Content-Security-Policy
-// unsafe-inline is required for both script-src AND script-src-attr because
-// index.html uses inline <script> blocks and inline onclick= event handlers
-// throughout. script-src-attr defaults to 'none' in Helmet, which silently
-// blocks every onclick= attribute — that was the root cause of the UI being
-// completely non-interactive after Helmet was added.
-// A future nonce-based refactor could eliminate unsafe-inline entirely.
+// Executable JavaScript is external, so script-src does not allow inline code.
+// The legacy UI still has inline event attributes; script-src-attr remains
+// narrowly enabled until those handlers move to delegated listeners.
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc:     ["'self'"],
-      scriptSrc:      ["'self'", "'unsafe-inline'",
+      scriptSrc:      ["'self'",
                        "https://cdnjs.cloudflare.com",
                        "https://cdn.jsdelivr.net"],
-      // Must explicitly allow unsafe-inline here too — Helmet defaults this
-      // directive to 'none', which blocks all onclick= / onchange= handlers.
+      // Helmet defaults this directive to 'none', which would block the legacy
+      // onclick= / onchange= handlers that remain in the current UI.
       scriptSrcAttr:  ["'unsafe-inline'"],
       styleSrc:       ["'self'", "'unsafe-inline'",
                        "https://fonts.googleapis.com",
@@ -369,6 +367,21 @@ app.get("/healthz", async (_req, res) => {
   } catch (_) {
     res.status(503).json({ ok: false, database: "unavailable", ...buildInfo });
   }
+});
+
+// Deployment readiness is intentionally stricter than liveness. It never
+// returns secret values; it only reports whether each launch-critical system is
+// configured and reachable.
+app.get("/readyz", async (_req, res) => {
+  res.setHeader("Cache-Control", "no-store");
+  let databaseReady = true;
+  try {
+    await db.execute("SELECT 1");
+  } catch (_) {
+    databaseReady = false;
+  }
+  const readiness = productionReadiness(process.env, databaseReady);
+  res.status(readiness.ready ? 200 : 503).json({ ...readiness, ...buildInfo });
 });
 
 app.get("/api/providers/health", (_req, res) => {
