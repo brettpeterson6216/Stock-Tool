@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script>(function(){if(localStorage.getItem('il-theme')==='dark')document.documentElement.setAttribute('data-theme','dark')})();</script>
+<script src="/theme-bootstrap.js?v=20260813"></script>
 <meta name="robots" content="noindex, nofollow">
 <link rel="canonical" href="https://impliedlens.com/signup">
 <link rel="icon" type="image/svg+xml" href="/logo.svg">
@@ -227,123 +227,7 @@ footer{
 </footer>
 <script src="/static-theme.js?v=20260609"></script>
 
-<script>
-document.getElementById('year').textContent = new Date().getFullYear();
-
-const form    = document.getElementById('signup-form');
-const alertEl = document.getElementById('alert');
-const btn     = document.getElementById('submit-btn');
-const pwInput = document.getElementById('password');
-const meter   = document.getElementById('meter-fill');
-const meterLb = document.getElementById('meter-label');
-const query   = new URLSearchParams(window.location.search);
-
-function safeNext(value) {
-  if (!value) return '/';
-  try {
-    const url = new URL(value, window.location.origin);
-    if (url.origin !== window.location.origin) return '/';
-    return url.pathname + url.search + url.hash;
-  } catch (_) {
-    return '/';
-  }
-}
-
-const nextPath = safeNext(query.get('next'));
-const analytics = {
-  source: query.get('source') || 'direct',
-  ticker: (query.get('ticker') || '').toUpperCase().replace(/[^A-Z0-9.\-^]/g, '').slice(0, 10),
-  entry_path: '/signup',
-  return_path: nextPath.split('?')[0],
-  utm_source: query.get('utm_source') || '',
-  utm_medium: query.get('utm_medium') || '',
-  utm_campaign: query.get('utm_campaign') || '',
-};
-
-function authLink(path) {
-  const params = new URLSearchParams({ next: nextPath, source: analytics.source });
-  if (analytics.ticker) params.set('ticker', analytics.ticker);
-  ['utm_source','utm_medium','utm_campaign'].forEach(key => { if (analytics[key]) params.set(key, analytics[key]); });
-  return path + '?' + params.toString();
-}
-
-document.querySelectorAll('a[href="/login"]').forEach(link => { link.href = authLink('/login'); });
-fetch('/api/track', {
-  method: 'POST',
-  headers: {'Content-Type':'application/json'},
-  body: JSON.stringify({ event:'signup_page_viewed', properties: analytics }),
-  keepalive: true,
-}).catch(() => {});
-
-function showAlert(msg, kind){
-  alertEl.className = 'alert show alert-' + (kind || 'error');
-  alertEl.textContent = msg;
-}
-function clearAlert(){ alertEl.className = 'alert'; alertEl.textContent = ''; }
-
-function scorePassword(pw){
-  let s = 0;
-  if (pw.length >= 8)  s++;
-  if (pw.length >= 12) s++;
-  if (/[a-z]/.test(pw) && /[A-Z]/.test(pw)) s++;
-  if (/\d/.test(pw))   s++;
-  if (/[^A-Za-z0-9]/.test(pw)) s++;
-  return s; // 0..5
-}
-const STRENGTH = [
-  { w:'0%',  c:'#B83030', t:'—' },
-  { w:'20%', c:'#B83030', t:'Very weak' },
-  { w:'40%', c:'#B98A3D', t:'Weak' },
-  { w:'60%', c:'#B98A3D', t:'Okay' },
-  { w:'80%', c:'#1A7A4A', t:'Strong' },
-  { w:'100%',c:'#1A7A4A', t:'Excellent' },
-];
-pwInput.addEventListener('input', () => {
-  const s = scorePassword(pwInput.value);
-  meter.style.width = STRENGTH[s].w;
-  meter.style.background = STRENGTH[s].c;
-  meterLb.textContent = 'Strength: ' + STRENGTH[s].t;
-});
-
-let submitting = false;
-form.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  if (submitting) return;
-  clearAlert();
-  const username = document.getElementById('username').value.trim();
-  const email    = document.getElementById('email').value.trim();
-  const password = pwInput.value;
-
-  if (!username || !email || !password){
-    showAlert('Please fill out every field.');
-    return;
-  }
-  if (password.length < 8){
-    showAlert('Password must be at least 8 characters.');
-    return;
-  }
-
-  submitting = true;
-  btn.disabled = true; btn.textContent = 'Creating account…';
-  try {
-    const r = await fetch('/api/auth/signup', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ username, email, password, analytics }),
-    });
-    const data = await r.json();
-    if (!r.ok) throw new Error(data.error || 'Signup failed.');
-    showAlert('Account created. Redirecting…', 'success');
-    setTimeout(() => { window.location.href = nextPath; }, 500);
-  } catch (err) {
-    showAlert(err.message || 'Signup failed.');
-    setTimeout(() => {
-      submitting = false;
-      btn.disabled = false; btn.textContent = 'Create account →';
-    }, 2000);
-  }
-});
-</script>
+<script src="/signup.js?v=20260813-1"></script>
 
 </body>
 </html>

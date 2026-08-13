@@ -15,6 +15,11 @@ const html = `${indexHtml}\n${themeBootstrapJs}\n${appNavigationJs}\n${appLegacy
 const legacyCss = fs.readFileSync(path.join(__dirname, "..", "public", "legacy-app.css"), "utf8");
 const staticCss = fs.readFileSync(path.join(__dirname, "..", "public", "static-polish.css"), "utf8");
 const signupHtml = fs.readFileSync(path.join(__dirname, "..", "public", "signup.html"), "utf8");
+const loginHtml = fs.readFileSync(path.join(__dirname, "..", "public", "login.html"), "utf8");
+const loginJs = fs.readFileSync(path.join(__dirname, "..", "public", "login.js"), "utf8");
+const signupJs = fs.readFileSync(path.join(__dirname, "..", "public", "signup.js"), "utf8");
+const resetPasswordJs = fs.readFileSync(path.join(__dirname, "..", "public", "reset-password.js"), "utf8");
+const staticAuthJs = fs.readFileSync(path.join(__dirname, "..", "public", "static-auth.js"), "utf8");
 const productJs = fs.readFileSync(path.join(__dirname, "..", "public", "product-system.js"), "utf8");
 const workspaceJs = fs.readFileSync(path.join(__dirname, "..", "public", "workspace-system.js"), "utf8");
 const productCss = fs.readFileSync(path.join(__dirname, "..", "public", "product-system.css"), "utf8");
@@ -115,14 +120,25 @@ test("the fixed header covers the top device safe area", () => {
 });
 
 test("authenticated navigation cannot display contradictory login actions", () => {
-  assert.match(indexHtml, /id="nav-login" href="\/login" hidden/);
-  assert.match(indexHtml, /id="nav-signup" href="\/signup" hidden/);
+  assert.match(indexHtml, /id="nav-login" href="\/login">Log in/);
+  assert.match(indexHtml, /id="nav-signup" href="\/signup">Start trial/);
   assert.match(appNavigationJs, /const setAuthEntryVisibility = loggedIn =>/);
   assert.match(appNavigationJs, /if \(\$login\) \$login\.hidden = loggedIn/);
   assert.match(appNavigationJs, /if \(\$signup\) \$signup\.hidden = loggedIn/);
   assert.match(appNavigationJs, /if \(user\) \{[\s\S]*setAuthEntryVisibility\(true\)/);
   assert.match(appNavigationJs, /else \{\s*setAuthEntryVisibility\(false\)/);
-  assert.match(siteShellCss, /^\[hidden\] \{ display: none !important; \}/m);
+  assert.match(siteShellCss, /#main-nav #nav-login\[hidden\],[\s\S]*display: none !important/);
+  assert.match(staticAuthJs, /querySelectorAll\("\.il-global-login, \.il-global-trial"\)/);
+  assert.match(staticAuthJs, /control\.hidden = true/);
+});
+
+test("auth forms execute under the production content security policy", () => {
+  assert.match(loginHtml, /<script src="\/login\.js\?v=\d{8}-\d+"><\/script>/);
+  assert.match(signupHtml, /<script src="\/signup\.js\?v=\d{8}-\d+"><\/script>/);
+  assert.match(loginJs, /fetch\("\/api\/auth\/login"/);
+  assert.match(signupJs, /fetch\("\/api\/auth\/signup"/);
+  assert.match(resetPasswordJs, /fetch\("\/api\/auth\/forgot-password"/);
+  assert.doesNotMatch(loginHtml, /<script>(?![\s\S]*type="application\/ld\+json")/);
 });
 
 test("mobile workspace content stays ahead of the legal footer", () => {
@@ -474,7 +490,7 @@ test("premium visual system is applied across app and static pages", () => {
   assert.match(html, /legacy-app\.css\?v=\d{8}(-\d+)?/);
   assert.match(html, /product-system\.css\?v=\d{8}(-\d+)?/);
   assert.match(signupHtml, /static-polish\.css\?v=\d{8}(-\d+)?/);
-  assert.match(html, /<a class="btn-nav" id="nav-signup" href="\/signup" hidden>Start trial<\/a>/);
+  assert.match(html, /<a class="btn-nav" id="nav-signup" href="\/signup">Start trial<\/a>/);
   assert.match(legacyCss, /Site-wide premium polish/);
   assert.match(legacyCss, /Gold theme harmonization/);
   assert.match(legacyCss, /\.il-landing-preview\{[\s\S]*linear-gradient\(180deg,#F6E3B7,#E9C986\)!important/);

@@ -206,13 +206,30 @@ test("Ticker landing pages reject malformed symbols instead of creating junk pag
 });
 
 test("Auth pages preserve a local return path and expose attribution hooks", async () => {
-  for (const [pagePath, marker] of [["/signup", "signup_page_viewed"], ["/login", "login_page_viewed"]]) {
+  for (const [pagePath, scriptPath, marker] of [["/signup", "/signup.js", "signup_page_viewed"], ["/login", "/login.js", "login_page_viewed"]]) {
     const res = await req(`${pagePath}?next=https%3A%2F%2Fevil.example%2Fsteal&source=smoke&ticker=AAPL`);
     assert.equal(res.status, 200);
     const html = await res.text();
-    assert.match(html, /function safeNext/);
-    assert.match(html, new RegExp(marker));
-    assert.match(html, /body: JSON\.stringify\(\{ [^}]*analytics/);
+    assert.match(html, new RegExp(`<script src="${scriptPath.replace(".", "\\.")}\\?v=\\d{8}-\\d+"><\\/script>`));
+    const scriptRes = await req(scriptPath);
+    assert.equal(scriptRes.status, 200);
+    const script = await scriptRes.text();
+    assert.match(script, /function safeNext/);
+    assert.match(script, new RegExp(marker));
+    assert.match(script, /body: JSON\.stringify\(\{ [^}]*analytics/);
+  }
+});
+
+test("Auth pages use executable external scripts under the production CSP", async () => {
+  for (const [pagePath, scriptPath] of [["/login", "/login.js"], ["/signup", "/signup.js"], ["/reset-password", "/reset-password.js"]]) {
+    const page = await req(pagePath);
+    assert.equal(page.status, 200);
+    assert.match(page.headers.get("content-security-policy"), /script-src 'self'/);
+    const html = await page.text();
+    assert.match(html, new RegExp(`<script src="${scriptPath.replace(".", "\\.")}\\?v=\\d{8}-\\d+"><\\/script>`));
+    const script = await req(scriptPath);
+    assert.equal(script.status, 200);
+    assert.match(script.headers.get("content-type"), /javascript/);
   }
 });
 

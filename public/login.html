@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script>(function(){if(localStorage.getItem('il-theme')==='dark')document.documentElement.setAttribute('data-theme','dark')})();</script>
+<script src="/theme-bootstrap.js?v=20260813"></script>
 <meta name="robots" content="noindex, nofollow">
 <link rel="canonical" href="https://impliedlens.com/login">
 <link rel="icon" type="image/svg+xml" href="/logo.svg">
@@ -226,83 +226,7 @@ footer{
 </footer>
 <script src="/static-theme.js?v=20260609"></script>
 
-<script>
-document.getElementById('year').textContent = new Date().getFullYear();
-
-const form    = document.getElementById('login-form');
-const alertEl = document.getElementById('alert');
-const btn     = document.getElementById('submit-btn');
-const query   = new URLSearchParams(window.location.search);
-
-function safeNext(value) {
-  if (!value) return '/';
-  try {
-    const url = new URL(value, window.location.origin);
-    if (url.origin !== window.location.origin) return '/';
-    return url.pathname + url.search + url.hash;
-  } catch (_) {
-    return '/';
-  }
-}
-
-const nextPath = safeNext(query.get('next'));
-const analytics = {
-  source: query.get('source') || 'direct',
-  ticker: (query.get('ticker') || '').toUpperCase().replace(/[^A-Z0-9.\-^]/g, '').slice(0, 10),
-  entry_path: '/login',
-  return_path: nextPath.split('?')[0],
-  utm_source: query.get('utm_source') || '',
-  utm_medium: query.get('utm_medium') || '',
-  utm_campaign: query.get('utm_campaign') || '',
-};
-
-function authLink(path) {
-  const params = new URLSearchParams({ next: nextPath, source: analytics.source });
-  if (analytics.ticker) params.set('ticker', analytics.ticker);
-  ['utm_source','utm_medium','utm_campaign'].forEach(key => { if (analytics[key]) params.set(key, analytics[key]); });
-  return path + '?' + params.toString();
-}
-
-document.querySelectorAll('a[href="/signup"]').forEach(link => { link.href = authLink('/signup'); });
-fetch('/api/track', {
-  method: 'POST',
-  headers: {'Content-Type':'application/json'},
-  body: JSON.stringify({ event:'login_page_viewed', properties: analytics }),
-  keepalive: true,
-}).catch(() => {});
-
-function showAlert(msg, kind){
-  alertEl.className = 'alert show alert-' + (kind || 'error');
-  alertEl.textContent = msg;
-}
-function clearAlert(){ alertEl.className = 'alert'; alertEl.textContent = ''; }
-
-form.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  clearAlert();
-  const identifier = document.getElementById('identifier').value.trim();
-  const password   = document.getElementById('password').value;
-  if (!identifier || !password){
-    showAlert('Please enter your username/email and password.');
-    return;
-  }
-  btn.disabled = true; btn.textContent = 'Signing in…';
-  try {
-    const r = await fetch('/api/auth/login', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ identifier, password, analytics }),
-    });
-    const data = await r.json();
-    if (!r.ok) throw new Error(data.error || 'Login failed.');
-    showAlert('Signed in. Redirecting…', 'success');
-    setTimeout(() => { window.location.href = nextPath; }, 400);
-  } catch (err) {
-    showAlert(err.message || 'Login failed.');
-    btn.disabled = false; btn.textContent = 'Log in →';
-  }
-});
-</script>
+<script src="/login.js?v=20260813-1"></script>
 
 </body>
 </html>

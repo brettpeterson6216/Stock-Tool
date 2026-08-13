@@ -1,5 +1,16 @@
 /* Shared top-level navigation for Implied Lens product and editorial pages. */
 [hidden] { display: none !important; }
+
+/* Auth controls have more-specific display rules below. Keep the semantic
+   hidden state authoritative once the session check resolves. */
+#main-nav #nav-login[hidden],
+#main-nav #nav-signup[hidden],
+#main-nav #nav-upgrade[hidden],
+#main-nav #nav-acct-wrap[hidden],
+.il-global-nav .il-global-login[hidden],
+.il-global-nav .il-global-trial[hidden] {
+  display: none !important;
+}
 .il-skip-link {
   position: fixed;
   top: 10px;
@@ -767,7 +778,8 @@ html:not([data-theme="dark"]) #main-nav .theme-toggle-thumb::before {
 }
 
 #main-nav .btn-nav-outline,
-.il-global-login {
+.il-global-login,
+.il-global-account {
   box-sizing: border-box !important;
   min-height: 34px !important;
   display: inline-flex !important;
