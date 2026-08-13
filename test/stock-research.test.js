@@ -4,12 +4,26 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const {
   annualSeries,
+  deriveEarnings,
   deriveFundamentals,
   parseYahooChart,
   researchTicker,
+  reportedQuarterlyEps,
   selectReferenceEps,
   trailingFourQuarterEps,
 } = require("../lib/stock-research");
+
+function amazonEpsFixture() {
+  const rows = [
+    { start: "2025-01-01", end: "2025-03-31", val: 1.59, filed: "2025-05-02", form: "10-Q", fp: "Q1", fy: 2025 },
+    { start: "2025-04-01", end: "2025-06-30", val: 1.68, filed: "2025-08-01", form: "10-Q", fp: "Q2", fy: 2025 },
+    { start: "2025-07-01", end: "2025-09-30", val: 1.95, filed: "2025-10-31", form: "10-Q", fp: "Q3", fy: 2025 },
+    { start: "2025-01-01", end: "2025-12-31", val: 7.17, filed: "2026-02-06", form: "10-K", fp: "FY", fy: 2025 },
+    { start: "2026-01-01", end: "2026-03-31", val: 2.78, filed: "2026-04-30", form: "10-Q", fp: "Q1", fy: 2026 },
+    { start: "2026-04-01", end: "2026-06-30", val: 5.75, filed: "2026-07-31", form: "10-Q", fp: "Q2", fy: 2026 },
+  ];
+  return { facts: { facts: { "us-gaap": { EarningsPerShareDiluted: { units: { "USD/shares": rows } } } } } };
+}
 
 const celhQuarterlyActuals = [
   { period: "2026-03-31", actual: 0.47 },
@@ -33,6 +47,32 @@ test("trailing-four-quarter EPS uses four unique, consecutive reported quarters"
     "2025-09-30",
     "2025-06-30",
   ]);
+});
+
+test("SEC GAAP actuals outrank mismatched provider actuals in earnings history", () => {
+  const companyFacts = amazonEpsFixture();
+  const earnings = deriveEarnings(companyFacts, { earnings: [
+    { period: "2026-06-30", actual: 1.97, estimate: 1.86 },
+    { period: "2026-03-31", actual: 1.61, estimate: 1.67 },
+    { period: "2025-12-31", actual: 1.61, estimate: 1.67 },
+    { period: "2025-09-30", actual: 1.95, estimate: 1.60 },
+  ] });
+  assert.equal(earnings[0].actual, 5.75);
+  assert.equal(earnings[0].consensusActual, 1.97);
+  assert.equal(earnings[0].comparisonStatus, "basis-mismatch");
+  assert.equal(earnings[0].surprisePercent, null);
+  assert.equal(earnings[1].actual, 2.78);
+  assert.equal(earnings[2].actual, 1.95);
+  assert.equal(earnings[2].derived, true);
+  assert.equal(earnings[3].comparisonStatus, "comparable");
+  assert.equal(earnings[3].surprisePercent.toFixed(1), "21.9");
+});
+
+test("standalone Q4 EPS is reconstructed only from a complete SEC fiscal year", () => {
+  const rows = reportedQuarterlyEps(amazonEpsFixture());
+  const q4 = rows.find(row => row.period === "2025-12-31");
+  assert.equal(q4.actual, 1.95);
+  assert.match(q4.actualBasis, /SEC annual diluted GAAP EPS less reported Q1-Q3/);
 });
 
 test("CELH-style quarterly actuals outrank stale annual reported EPS", () => {

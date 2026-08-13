@@ -4390,11 +4390,13 @@ async function loadEarnings(ticker) {
     const estData = estRes.status==='fulfilled' ? await estRes.value.json().catch(()=>({})) : {};
     const fwdQ = estData.fwdQuarterly || [];
     const earningsSource = res.value.headers.get('X-Data-Source') || 'Reported earnings';
-    showDataSource('earn-source', estData.impliedLens, earningsSource, res.value.headers.get('X-Data-As-Of'));
+    showDataSource('earn-source', null, earningsSource, res.value.headers.get('X-Data-As-Of'));
     const basisNote = document.getElementById('earn-basis-note');
     if (basisNote) {
-      basisNote.style.display = /SEC/i.test(earningsSource) ? 'block' : 'none';
-      basisNote.textContent = 'SEC EPS is shown on each filing period’s reported per-share basis. Older periods can reflect a different split-adjustment basis; verify long historical comparisons against the original filing.';
+      basisNote.style.display = 'block';
+      basisNote.textContent = /SEC/i.test(earningsSource)
+        ? 'Actual EPS is diluted GAAP EPS from SEC filings. Period is the fiscal quarter end, not the announcement date. Consensus surprise is shown only when the provider’s consensus-compatible actual agrees with SEC GAAP EPS.'
+        : 'SEC quarterly GAAP EPS is unavailable for this company. Rows use the provider’s consensus-compatible earnings basis and are labeled accordingly.';
     }
 
     // Build forward estimates banner if available
@@ -4404,7 +4406,7 @@ async function loadEarnings(ticker) {
         <div style="font-size:.65rem;color:var(--gold);font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">\u2736 Analyst Forward EPS Estimates</div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;">
           ${fwdQ.map(q => `<div style="background:var(--t-metric-bg);border:1px solid var(--t-metric-border);border-radius:6px;padding:6px 10px;min-width:90px;">
-            <div style="font-size:.6rem;color:var(--text5);margin-bottom:2px;">${q.period}</div>
+            <div style="font-size:.6rem;color:var(--text5);margin-bottom:2px;">Forecast period ${q.period}</div>
             <div style="font-size:.9rem;font-weight:700;color:var(--text);">$${q.epsAvg.toFixed(2)}</div>
             <div style="font-size:.63rem;color:var(--text5);">$${(q.epsLow||q.epsAvg).toFixed(2)}–$${(q.epsHigh||q.epsAvg).toFixed(2)}</div>
             <div style="font-size:.62rem;color:var(--text5);">${q.numberAnalysts||'?'} analysts</div>
@@ -4448,29 +4450,33 @@ async function loadEarnings(ticker) {
     }
     // Build expandable rows
     let tableHtml = '<div style="overflow-x:auto;"><table class="earn-table"><thead><tr>'
-      + '<th style="text-align:left;">Period</th>'
-      + '<th>EPS Est.</th>'
-      + '<th>EPS Actual</th>'
-      + '<th>Surprise %</th>'
+      + '<th style="text-align:left;">Fiscal quarter end</th>'
+      + '<th>Consensus est.</th>'
+      + '<th>Reported GAAP EPS</th>'
+      + '<th>Comparable surprise</th>'
       + '<th>Result</th>'
       + '<th style="width:28px;"></th>'
       + '</tr></thead><tbody>';
     rows.forEach((row, idx) => {
       const est  = row.estimate   != null ? '$'+row.estimate.toFixed(2)   : '—';
       const act  = row.actual     != null ? '$'+row.actual.toFixed(2)     : '—';
+      const streetAct = row.consensusActual != null ? '$'+row.consensusActual.toFixed(2) : null;
       const surp = row.surprise   != null ? (row.surprise > 0 ? '+' : '') + '$'+row.surprise.toFixed(2) : '—';
-      const surpPct = row.surprisePercent != null ? (row.surprisePercent > 0 ? '+' : '') + row.surprisePercent.toFixed(1) + '%' : '—';
+      const basisMismatch = row.comparisonStatus === 'basis-mismatch';
+      const surpPct = row.surprisePercent != null ? (row.surprisePercent > 0 ? '+' : '') + row.surprisePercent.toFixed(1) + '%' : basisMismatch ? 'N/M' : '—';
       let badge = '', cls = '', barColor = 'var(--gold)', barWidth = 50;
       if (row.surprisePercent != null) {
         if      (row.surprisePercent >  2) { badge='<span class="earn-badge beat">BEAT</span>'; cls='earn-beat'; barColor='var(--chart-positive)'; barWidth=Math.min(100,50+row.surprisePercent*2); }
         else if (row.surprisePercent < -2) { badge='<span class="earn-badge miss">MISS</span>'; cls='earn-miss'; barColor='var(--chart-negative)'; barWidth=Math.max(5,50+row.surprisePercent*2); }
         else                               { badge='<span class="earn-badge meet">IN-LINE</span>'; cls='earn-meet'; barWidth=50; }
+      } else if (basisMismatch) {
+        badge='<span class="earn-badge meet">BASIS DIFF</span>';
       }
       const detailId = 'earn-det-'+idx;
       tableHtml += `<tr class="earn-expand-row" role="button" tabindex="0" aria-label="Toggle ${row.period||'earnings'} details" onclick="toggleEarnDetail('${detailId}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleEarnDetail('${detailId}')}" style="cursor:pointer;">
-        <td>${row.period||'—'}</td>
+        <td>${row.period||'—'}${row.actualAsOf ? `<div style="font-size:.58rem;color:var(--text5);margin-top:2px;">Filed ${row.actualAsOf}</div>` : ''}</td>
         <td>${est}</td>
-        <td class="${cls}">${act}</td>
+        <td class="${cls}">${act}${basisMismatch && streetAct ? `<div style="font-size:.58rem;color:var(--text5);margin-top:2px;">Street basis ${streetAct}</div>` : ''}</td>
         <td class="${cls}">${surpPct}</td>
         <td>${badge}</td>
         <td style="text-align:center;color:var(--text5);font-size:.7rem;" id="chev-${detailId}">›</td>
@@ -4480,18 +4486,19 @@ async function loadEarnings(ticker) {
           <div style="background:var(--t-metric-bg);border-radius:6px;padding:10px 14px;margin:2px 0 4px 0;border:1px solid var(--t-metric-border);">
             <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:8px;">
               <div>
-                <div style="font-size:.65rem;color:var(--text5);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">Est. EPS</div>
+                <div style="font-size:.65rem;color:var(--text5);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">Consensus estimate</div>
                 <div style="font-size:.95rem;font-family:var(--mono);color:var(--text2);">${est}</div>
               </div>
               <div>
-                <div style="font-size:.65rem;color:var(--text5);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">Actual EPS</div>
+                <div style="font-size:.65rem;color:var(--text5);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">Reported GAAP EPS</div>
                 <div style="font-size:.95rem;font-family:var(--mono);color:${cls==='earn-beat'?'var(--market-up)':cls==='earn-miss'?'var(--market-down)':'var(--text2)'};">${act}</div>
               </div>
               <div>
-                <div style="font-size:.65rem;color:var(--text5);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">Surprise</div>
+                <div style="font-size:.65rem;color:var(--text5);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;">Comparable surprise</div>
                 <div style="font-size:.95rem;font-family:var(--mono);color:${cls==='earn-beat'?'var(--market-up)':cls==='earn-miss'?'var(--market-down)':'var(--text2)'};">${surp}</div>
               </div>
             </div>
+            <div style="font-size:.65rem;color:var(--text5);line-height:1.5;margin-bottom:6px;"><strong style="color:var(--text3);">Basis:</strong> ${row.actualBasis || 'Provider earnings basis'}${basisMismatch && streetAct ? ` · consensus-compatible actual ${streetAct}` : ''}. ${row.comparisonNote || ''}</div>
             ${row.surprisePercent != null ? `<div style="margin-top:6px;">
               <div style="font-size:.62rem;color:var(--text5);margin-bottom:3px;">EPS Surprise vs Estimate</div>
               <div style="height:5px;background:var(--t-acc-border);border-radius:3px;overflow:hidden;">

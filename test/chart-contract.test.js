@@ -311,6 +311,15 @@ test("charts and trade symbols use vivid market colors without repainting the si
   assert.match(releaseCss, /--chart-negative: #ff4d5a/);
 });
 
+test("earnings UI separates SEC GAAP actuals from consensus-compatible results", () => {
+  assert.match(appLegacyJs, /Reported GAAP EPS/);
+  assert.match(appLegacyJs, /Fiscal quarter end/);
+  assert.match(appLegacyJs, /comparisonStatus === 'basis-mismatch'/);
+  assert.match(appLegacyJs, /BASIS DIFF/);
+  assert.match(appLegacyJs, /showDataSource\('earn-source', null, earningsSource/);
+  assert.doesNotMatch(appLegacyJs, /showDataSource\('earn-source', estData\.impliedLens/);
+});
+
 test("release navigation controls keep identical geometry across active states", () => {
   assert.match(releaseCss, /grid-template-columns: repeat\(8, minmax\(68px, 1fr\)\)/);
   assert.match(siteShellCss, /#main-nav \.nav-links \{[\s\S]*display: flex !important/);

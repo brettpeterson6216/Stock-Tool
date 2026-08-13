@@ -707,7 +707,8 @@ router.get("/estimates/:ticker", requirePro, async (req, res) => {
       fwdQuarterly,
       suggestedWACC,
       impliedLens: sourceMeta("Finnhub analyst estimates", {
-        asOf: [...(rev?.data || []), ...(eps?.data || [])].map(row => row.period).filter(Boolean).sort().at(-1) || null,
+        asOf: null,
+        note: "Estimate periods are forecast periods, not source freshness dates.",
       }),
     });
   } catch (e) {
