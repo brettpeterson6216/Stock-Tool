@@ -114,6 +114,17 @@ test("the fixed header covers the top device safe area", () => {
   assert.match(landingPolishCss, /height: calc\(64px \+ env\(safe-area-inset-bottom, 0px\)\) !important/);
 });
 
+test("authenticated navigation cannot display contradictory login actions", () => {
+  assert.match(indexHtml, /id="nav-login" href="\/login" hidden/);
+  assert.match(indexHtml, /id="nav-signup" href="\/signup" hidden/);
+  assert.match(appNavigationJs, /const setAuthEntryVisibility = loggedIn =>/);
+  assert.match(appNavigationJs, /if \(\$login\) \$login\.hidden = loggedIn/);
+  assert.match(appNavigationJs, /if \(\$signup\) \$signup\.hidden = loggedIn/);
+  assert.match(appNavigationJs, /if \(user\) \{[\s\S]*setAuthEntryVisibility\(true\)/);
+  assert.match(appNavigationJs, /else \{\s*setAuthEntryVisibility\(false\)/);
+  assert.match(siteShellCss, /^\[hidden\] \{ display: none !important; \}/m);
+});
+
 test("mobile workspace content stays ahead of the legal footer", () => {
   assert.match(workspaceJs, /const disclaimer = scroll\.querySelector\(":scope > \.tool-disclaimer"\)/);
   assert.match(workspaceJs, /disclaimer\.insertAdjacentHTML\("beforebegin", workspaceMarkup\)/);
@@ -454,7 +465,7 @@ test("premium visual system is applied across app and static pages", () => {
   assert.match(html, /legacy-app\.css\?v=\d{8}(-\d+)?/);
   assert.match(html, /product-system\.css\?v=\d{8}(-\d+)?/);
   assert.match(signupHtml, /static-polish\.css\?v=\d{8}(-\d+)?/);
-  assert.match(html, /<a class="btn-nav" id="nav-signup" href="\/signup">Start trial<\/a>/);
+  assert.match(html, /<a class="btn-nav" id="nav-signup" href="\/signup" hidden>Start trial<\/a>/);
   assert.match(legacyCss, /Site-wide premium polish/);
   assert.match(legacyCss, /Gold theme harmonization/);
   assert.match(legacyCss, /\.il-landing-preview\{[\s\S]*linear-gradient\(180deg,#F6E3B7,#E9C986\)!important/);

@@ -192,6 +192,10 @@
     const $acctHdrPlan = document.getElementById('nav-acct-header-plan');
     const $acctLogout  = document.getElementById('nav-acct-logout');
     const _initialParams = new URLSearchParams(window.location.search);
+    const setAuthEntryVisibility = loggedIn => {
+      if ($login) $login.hidden = loggedIn;
+      if ($signup) $signup.hidden = loggedIn;
+    };
 
     try {
       const [meRes, csrfRes] = await Promise.all([
@@ -203,8 +207,7 @@
       if (typeof S !== 'undefined' && csrfData.token) S.csrfToken = csrfData.token;
       if (user) {
         // Hide login / signup buttons
-        $login.style.display  = 'none';
-        $signup.style.display = 'none';
+        setAuthEntryVisibility(true);
         if ($guide) $guide.style.display = '';
 
         // Store plan state globally
@@ -354,8 +357,13 @@
             setTimeout(() => startTrial(_resumePlan === 'annual'), 800);
           }
         }
+      } else {
+        setAuthEntryVisibility(false);
       }
-    } catch (_) { /* server not running */ } finally {
+    } catch (_) {
+      // Authentication could not be resolved, so preserve a route back in.
+      setAuthEntryVisibility(false);
+    } finally {
       // Show Go Pro banner only for free/guest users
       const _plan = (typeof S !== 'undefined' && S.userPlan) || 'free';
       const _ub = document.getElementById('hsb-upgrade-box');
