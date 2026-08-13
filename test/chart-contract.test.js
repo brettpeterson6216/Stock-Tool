@@ -35,7 +35,9 @@ const authRouteJs = fs.readFileSync(path.join(__dirname, "..", "routes", "auth.j
 const projectionJs = fs.readFileSync(path.join(__dirname, "..", "public", "projection-lab.js"), "utf8");
 const siteShellCss = fs.readFileSync(path.join(__dirname, "..", "public", "site-shell.css"), "utf8");
 const landingPolishCss = fs.readFileSync(path.join(__dirname, "..", "public", "landing-polish.css"), "utf8");
+const beautyCss = fs.readFileSync(path.join(__dirname, "..", "public", "beauty-system.css"), "utf8");
 const aboutHtml = fs.readFileSync(path.join(__dirname, "..", "public", "about.html"), "utf8");
+const adminHtml = fs.readFileSync(path.join(__dirname, "..", "public", "admin-analytics.html"), "utf8");
 const lensHtml = fs.readFileSync(path.join(__dirname, "..", "labs", "lens-score", "index.html"), "utf8");
 const publicShellPages = [
   "about.html",
@@ -389,7 +391,7 @@ test("every public product region uses the shared navigation and skip link", () 
   assert.match(stockLandingRoute, /site-shell\.css\?v=\d{8}-\d+/);
   assert.match(stockLandingRoute, /viewport-fit=cover/);
   assert.match(stockLandingRoute, /class="il-skip-link"/);
-  assert.match(stockLandingRoute, /<nav class="il-global-nav" aria-label="Primary navigation">/);
+  assert.match(stockLandingRoute, /<nav id="main-nav" class="il-global-nav il-static-main-nav" aria-label="Primary navigation">/);
   assert.match(stockLandingRoute, /class="top-bar" hidden/);
   assert.match(stockLandingRoute, /class="il-global-search"/);
   assert.match(lensHtml, /class="[^"]*\bil-global-search\b[^"]*"/);
@@ -555,6 +557,26 @@ test("calm premium visual refresh is the final site-wide theme layer", () => {
   assert.match(visualCss, /--chart-positive: #21ec85/);
   assert.match(visualCss, /--chart-negative: #ff6577/);
   assert.doesNotMatch(visualCss, /gold-ripple-background/);
+});
+
+test("canonical beauty system owns the final visual hierarchy sitewide", () => {
+  assert.match(indexHtml, /landing-polish\.css\?v=\d{8}-\d+[\s\S]*beauty-system\.css\?v=\d{8}-\d+/);
+  assert.match(indexHtml, /<body class="il-product-page">/);
+  assert.match(lensHtml, /<body class="il-lens-page">/);
+  assert.match(lensHtml, /beauty-system\.css\?v=\d{8}-\d+/);
+  assert.match(adminHtml, /<body class="il-admin-page">/);
+  assert.match(adminHtml, /beauty-system\.css\?v=\d{8}-\d+/);
+  for (const [file, page] of publicShellPages) {
+    assert.match(page, /<body class="il-static-page">/, `${file} should use the static visual scope`);
+    assert.match(page, /beauty-system\.css\?v=\d{8}-\d+/, `${file} should load the canonical visual layer`);
+  }
+  assert.match(beautyCss, /--il-bg: #f3f5f2/);
+  assert.match(beautyCss, /--il-bg: #090d0b/);
+  assert.match(beautyCss, /--il-brass: #9b6b2d/);
+  assert.match(beautyCss, /--il-green: #07864c/);
+  assert.match(beautyCss, /#landing-page \.il-landing-search \{[\s\S]*display: grid !important/);
+  assert.match(beautyCss, /#landing-page \.il-landing-actions #il-hero-primary \{ display: none !important; \}/);
+  assert.match(beautyCss, /body::before \{ content: none !important; \}/);
 });
 
 test("landing visuals are honest CSS-built illustrations, not fake screenshots", () => {

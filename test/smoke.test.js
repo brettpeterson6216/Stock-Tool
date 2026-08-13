@@ -437,6 +437,22 @@ test("Free user can POST to /api/saves (cloud saves are free)", async () => {
   assert.ok(typeof body.id === "number", "response should return numeric id");
 });
 
+test("canonical visual system is served and included on primary product surfaces", async () => {
+  const asset = await req("/beauty-system.css");
+  assert.equal(asset.status, 200);
+  assert.match(asset.headers.get("content-type"), /text\/css/);
+  assert.match(await asset.text(), /Implied Lens — canonical visual layer/);
+  for (const pagePath of ["/", "/about", "/login", "/signup", "/reset-password", "/stock/AAPL"]) {
+    const page = await req(pagePath);
+    assert.equal(page.status, 200);
+    const markup = await page.text();
+    assert.match(markup, /beauty-system\.css\?v=\d{8}-\d+/);
+    if (pagePath === "/stock/AAPL") {
+      assert.match(markup, /<nav id="main-nav" class="il-global-nav il-static-main-nav"/);
+    }
+  }
+});
+
 test("GET /readyz reports launch capabilities without exposing configuration values", async () => {
   const res = await req("/readyz");
   const body = await res.json();

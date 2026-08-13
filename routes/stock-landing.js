@@ -333,10 +333,11 @@ function renderPage(ticker, q) {
   <link rel="stylesheet" href="/static-polish.css?v=20260725-2">
   <link rel="stylesheet" href="/visual-refresh.css?v=20260730-10">
   <link rel="stylesheet" href="/site-shell.css?v=20260813-1">
+  <link rel="stylesheet" href="/beauty-system.css?v=20260813-1">
 </head>
-<body>
+<body class="il-static-page il-stock-page">
   <a class="il-skip-link" href="#public-main">Skip to content</a>
-  <nav class="il-global-nav" aria-label="Primary navigation">
+  <nav id="main-nav" class="il-global-nav il-static-main-nav" aria-label="Primary navigation">
     <a class="il-global-brand" href="/"><img src="/logo.svg" alt=""><span>Implied<em>Lens</em></span></a>
     <div class="il-global-links">
       <a class="il-global-tab" href="/">Home</a>
