@@ -175,7 +175,7 @@ test("mobile workspace content stays ahead of the legal footer", () => {
 });
 
 test("mobile browser chrome follows the selected site theme", () => {
-  assert.match(html, /dark\s*\?\s*["']#12100D["']\s*:\s*["']#f9f8f5["']/i);
+  assert.match(html, /dark\s*\?\s*["']#07080B["']\s*:\s*["']#F6F4EF["']/i);
   assert.match(html, /dark\s*\?\s*["']black-translucent["']\s*:\s*["']default["']/);
   assert.match(html, /<meta name="apple-mobile-web-app-status-bar-style" content="default">/);
   assert.match(html, /function updateThemeControl\(\) \{\s*window\.syncBrowserChrome\?\.\(\);/);

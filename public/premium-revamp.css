@@ -1,0 +1,2754 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   IMPLIED LENS — PREMIUM REVAMP
+   Authoritative final visual layer. Loads after every other stylesheet.
+
+   Design intent
+   -------------
+   Warm gold on cool ink. Layered surfaces with real elevation instead of flat
+   boxes. Editorial display type against a precise UI sans and true tabular
+   monospace for figures. Restrained motion. Nothing decorative competes with
+   the data.
+
+   This layer works by (1) redefining the canonical --il-* tokens that
+   beauty-system.css maps every legacy token onto, so the whole product moves
+   at once, then (2) adding premium surface mechanics on top.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ───────────────────────────────────────────────────────────────────────────
+   1 · TOKENS — DARK (default)
+   ─────────────────────────────────────────────────────────────────────────── */
+
+html[data-theme="dark"],
+html[data-theme="dark"]:root {
+  color-scheme: dark;
+
+  /* Ink surfaces — cool neutral, layered by elevation */
+  --il-bg: #07080B;
+  --il-bg-elevated: #0B0D11;
+  --il-surface: #101319;
+  --il-surface-2: #14181F;
+  --il-surface-3: #1A1F27;
+  --il-surface-4: #212734;
+
+  /* Type */
+  --il-ink: #F2F0EB;
+  --il-ink-2: #D2CFC8;
+  --il-muted: #9A968D;
+  --il-faint: #6E6B65;
+
+  /* Hairlines */
+  --il-line: rgba(255, 255, 255, .075);
+  --il-line-strong: rgba(255, 255, 255, .14);
+  --il-line-gold: rgba(214, 172, 100, .22);
+
+  /* Gold ramp — warm, deep, and used sparingly */
+  --il-brass: #D6AC64;
+  --il-brass-bright: #EDCB84;
+  --il-brass-deep: #A87C33;
+  --il-brass-soft: rgba(214, 172, 100, .10);
+  --il-brass-softer: rgba(214, 172, 100, .05);
+
+  /* Data colors — only ever directional */
+  --il-green: #3BC98B;
+  --il-green-bright: #4EE3A2;
+  --il-red: #E5646E;
+  --il-red-bright: #F5808A;
+
+  /* Elevation */
+  --il-shadow-xs: 0 1px 2px rgba(0, 0, 0, .5);
+  --il-shadow-sm: 0 2px 6px rgba(0, 0, 0, .4), 0 12px 28px -14px rgba(0, 0, 0, .8);
+  --il-shadow-md: 0 4px 12px rgba(0, 0, 0, .45), 0 28px 60px -28px rgba(0, 0, 0, .9);
+  --il-shadow-lg: 0 8px 20px rgba(0, 0, 0, .5), 0 48px 100px -40px rgba(0, 0, 0, 1);
+  --il-glow-gold: 0 12px 40px -12px rgba(214, 172, 100, .45);
+
+  /* Surface finishes */
+  --il-sheen: linear-gradient(180deg, rgba(255, 255, 255, .045) 0%, rgba(255, 255, 255, .012) 42%, rgba(255, 255, 255, 0) 100%);
+  --il-sheen-strong: linear-gradient(180deg, rgba(255, 255, 255, .075) 0%, rgba(255, 255, 255, .018) 46%, rgba(255, 255, 255, 0) 100%);
+  --il-edge: inset 0 1px 0 rgba(255, 255, 255, .07);
+  --il-edge-strong: inset 0 1px 0 rgba(255, 255, 255, .12);
+  --il-header: #06070A;
+  --il-header-line: rgba(255, 255, 255, .07);
+  --il-focus: 0 0 0 3px rgba(214, 172, 100, .28), 0 0 0 1px rgba(214, 172, 100, .55);
+  --il-scrim: rgba(4, 5, 7, .72);
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   2 · TOKENS — LIGHT (refined alternate: warm paper, not flat grey)
+   ─────────────────────────────────────────────────────────────────────────── */
+
+html:not([data-theme="dark"]),
+html[data-theme="light"] {
+  color-scheme: light;
+
+  --il-bg: #F6F4EF;
+  --il-bg-elevated: #FBFAF7;
+  --il-surface: #FFFFFF;
+  --il-surface-2: #FAF8F4;
+  --il-surface-3: #F1EEE7;
+  --il-surface-4: #E7E3D9;
+
+  --il-ink: #14161A;
+  --il-ink-2: #33373E;
+  --il-muted: #6B6F78;
+  --il-faint: #93969E;
+
+  --il-line: rgba(24, 22, 18, .085);
+  --il-line-strong: rgba(24, 22, 18, .16);
+  --il-line-gold: rgba(150, 109, 43, .26);
+
+  --il-brass: #966D2B;
+  --il-brass-bright: #B8892F;
+  --il-brass-deep: #6D4E1B;
+  --il-brass-soft: rgba(150, 109, 43, .075);
+  --il-brass-softer: rgba(150, 109, 43, .04);
+
+  --il-green: #0B7A4C;
+  --il-green-bright: #0E9A60;
+  --il-red: #BE3A4B;
+  --il-red-bright: #D9485A;
+
+  --il-shadow-xs: 0 1px 2px rgba(28, 24, 16, .05);
+  --il-shadow-sm: 0 1px 2px rgba(28, 24, 16, .05), 0 10px 24px -12px rgba(28, 24, 16, .18);
+  --il-shadow-md: 0 2px 6px rgba(28, 24, 16, .06), 0 24px 50px -22px rgba(28, 24, 16, .24);
+  --il-shadow-lg: 0 4px 12px rgba(28, 24, 16, .08), 0 44px 90px -34px rgba(28, 24, 16, .32);
+  --il-glow-gold: 0 12px 36px -14px rgba(150, 109, 43, .38);
+
+  --il-sheen: linear-gradient(180deg, rgba(255, 255, 255, .9) 0%, rgba(255, 255, 255, .35) 60%, rgba(255, 255, 255, 0) 100%);
+  --il-sheen-strong: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, .5) 60%, rgba(255, 255, 255, 0) 100%);
+  --il-edge: inset 0 1px 0 rgba(255, 255, 255, .9);
+  --il-edge-strong: inset 0 1px 0 rgba(255, 255, 255, 1);
+  --il-header: #0A0B0E;
+  --il-header-line: rgba(255, 255, 255, .08);
+  --il-focus: 0 0 0 3px rgba(150, 109, 43, .2), 0 0 0 1px rgba(150, 109, 43, .5);
+  --il-scrim: rgba(20, 18, 14, .5);
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   3 · SHARED TOKENS — geometry, motion, type
+   ─────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* Radii — the single biggest fix for "blocky". */
+  --il-radius-xs: 7px;
+  --il-radius-sm: 10px;
+  --il-radius: 14px;
+  --il-radius-lg: 20px;
+  --il-radius-xl: 28px;
+  --il-radius-pill: 999px;
+
+  --r: 8px;
+  --r2: 12px;
+  --r3: 16px;
+
+  /* Motion */
+  --il-ease: cubic-bezier(.22, .61, .36, 1);
+  --il-ease-out: cubic-bezier(.16, 1, .3, 1);
+  --il-fast: .16s var(--il-ease);
+  --il-mid: .28s var(--il-ease-out);
+  --il-slow: .55s var(--il-ease-out);
+
+  /* Type stacks */
+  --il-display: "Instrument Serif", "Space Grotesk", Georgia, serif;
+  --il-sans: "DM Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --il-mono: "DM Mono", "SF Mono", ui-monospace, Menlo, monospace;
+
+  /* NOTE: legacy --serif means "display sans" throughout the older layers and
+     is used for card titles and labels. It must stay a sans, or product UI
+     turns into a magazine. Editorial serif is applied by explicit selector. */
+  --sans: var(--il-sans);
+  --mono: var(--il-mono);
+
+  /* Rhythm */
+  --il-section-gap: clamp(72px, 9vw, 140px);
+  --il-pad: clamp(18px, 2.2vw, 30px);
+  --il-shell-max: 1320px;
+}
+
+/* Legacy token remap so untouched components inherit the new system */
+:root,
+html[data-theme="dark"] {
+  --shadow-sm: var(--il-shadow-xs);
+  --shadow: var(--il-shadow-sm);
+  --shadow-lg: var(--il-shadow-md);
+  --border: var(--il-line);
+  --border2: var(--il-line);
+  --border3: var(--il-line-strong);
+  --gold-ring: var(--il-line-gold);
+  --gold-tint: var(--il-brass-soft);
+  --gold-tint2: rgba(214, 172, 100, .16);
+  --gold-glow: var(--il-glow-gold);
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   4 · TYPOGRAPHY
+   ─────────────────────────────────────────────────────────────────────────── */
+
+body {
+  font-family: var(--il-sans) !important;
+  font-feature-settings: "kern" 1, "liga" 1, "cv05" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  letter-spacing: -.005em;
+}
+
+/* Editorial display face for marketing headlines only. Product UI stays sans
+   so dense screens keep their precision. */
+#landing-page h1,
+#landing-page h2,
+#landing-page .il-landing-copy h1,
+.il-page-hero h1,
+.il-page-hero h2,
+.about-hero h1,
+.hh-title,
+.il-auth-card h1,
+.lens-hero h1,
+.il-hero-title,
+h1.hero-h1 {
+  font-family: var(--il-display) !important;
+  font-weight: 400 !important;
+  letter-spacing: -.018em !important;
+  line-height: 1.02 !important;
+  color: var(--il-ink) !important;
+  text-wrap: balance;
+}
+
+/* Italic gold emphasis inside display headings */
+#landing-page h1 em,
+#landing-page h2 em,
+.il-page-hero h1 em,
+.hh-title em,
+h1.hero-h1 em {
+  font-style: italic !important;
+  color: var(--il-brass) !important;
+  font-family: var(--il-display) !important;
+}
+
+/* Eyebrow / kicker labels */
+.il-landing-kicker,
+.il-eyebrow,
+.section-eyebrow {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--il-sans) !important;
+  font-size: 10.5px !important;
+  font-weight: 600 !important;
+  letter-spacing: .17em !important;
+  text-transform: uppercase !important;
+  color: var(--il-brass) !important;
+  padding: 6px 13px 6px 11px !important;
+  border: 1px solid var(--il-line-gold) !important;
+  border-radius: var(--il-radius-pill) !important;
+  background: var(--il-brass-softer) !important;
+  backdrop-filter: blur(6px);
+}
+
+.il-landing-kicker::before,
+.il-eyebrow::before {
+  content: "";
+  width: 5px !important;
+  height: 5px !important;
+  border-radius: 50%;
+  background: var(--il-brass) !important;
+  box-shadow: 0 0 0 3px var(--il-brass-soft), 0 0 10px 1px var(--il-brass) !important;
+  flex: 0 0 auto;
+}
+
+/* Numbers read as institutional data, not prose */
+.metric-val, .m-val, .mval, .stat-value, .kpi-value,
+.result-header .rh-price, .price-large, .quote-price,
+td.num, td.numeric, .num, .tabular,
+.ihm-vals b, .il-stat b, .hs-stat-val {
+  font-family: var(--il-mono) !important;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.02em;
+}
+
+table td, table th {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   5 · AMBIENT PAGE BACKGROUND
+   Depth without decoration: a fixed gold horizon, a cool counter-light, a fine
+   grid, and film grain so large dark areas never read as flat void.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+html {
+  background: var(--il-bg) !important;
+}
+
+body {
+  background: var(--il-bg) !important;
+  position: relative;
+}
+
+html body::before,
+html[data-theme="dark"] body::before {
+  content: "" !important;
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: -1 !important;
+  pointer-events: none !important;
+  opacity: 1 !important;
+  filter: none !important;
+  mask-image: none !important;
+  background-color: transparent !important;
+  background-size: auto, auto, auto, 64px 64px, 64px 64px !important;
+  background-position: center !important;
+  background-image:
+    radial-gradient(1100px 620px at 78% -8%, rgba(214, 172, 100, .15), transparent 62%),
+    radial-gradient(900px 560px at 6% 2%, rgba(96, 130, 168, .085), transparent 60%),
+    radial-gradient(1300px 900px at 50% 112%, rgba(214, 172, 100, .05), transparent 66%),
+    linear-gradient(rgba(255, 255, 255, .016) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, .016) 1px, transparent 1px) !important;
+}
+
+html:not([data-theme="dark"]) body::before {
+  background-image:
+    radial-gradient(1100px 620px at 78% -8%, rgba(150, 109, 43, .10), transparent 62%),
+    radial-gradient(900px 560px at 6% 2%, rgba(96, 130, 168, .06), transparent 60%),
+    radial-gradient(1300px 900px at 50% 112%, rgba(150, 109, 43, .04), transparent 66%),
+    linear-gradient(rgba(24, 22, 18, .022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(24, 22, 18, .022) 1px, transparent 1px) !important;
+}
+
+html body::after,
+html[data-theme="dark"] body::after {
+  content: "" !important;
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: -1 !important;
+  pointer-events: none !important;
+  opacity: .3 !important;
+  box-shadow: none !important;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E") !important;
+}
+
+html:not([data-theme="dark"]) body::after { opacity: .16 !important; }
+
+/* The ambient layers sit behind all in-flow content but above the base fill.
+   Nothing else needs a stacking-order change, so sticky nav / modal z-indexes
+   from the older layers keep working exactly as they did. */
+
+/* ───────────────────────────────────────────────────────────────────────────
+   6 · SURFACE PRIMITIVES
+   Every card in the product picks these up.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.card, .panel, .il-card, .il-panel, .acc, .accordion,
+.metric-card, .stat-card, .chart-card, .data-card,
+#landing-page .il-cap-card,
+#landing-page .il-wf-panel,
+.il-landing-band,
+.il-landing-pricing,
+.hs-card, .hsb-upgrade,
+.lens-card, .lens-panel,
+.il-surface {
+  border-radius: var(--il-radius-lg) !important;
+  border: 1px solid var(--il-line) !important;
+  background-color: var(--il-surface) !important;
+  background-image: var(--il-sheen) !important;
+  box-shadow: var(--il-edge), var(--il-shadow-sm) !important;
+  transition: transform var(--il-mid), box-shadow var(--il-mid),
+              border-color var(--il-mid), background-color var(--il-mid) !important;
+}
+
+/* Interactive cards lift */
+a.il-cap-card:hover,
+a.card:hover,
+.il-cap-card:hover,
+.hs-card.clickable:hover,
+.lens-card.clickable:hover {
+  transform: translateY(-3px) !important;
+  border-color: var(--il-line-gold) !important;
+  box-shadow: var(--il-edge-strong), var(--il-shadow-md) !important;
+}
+
+/* Gold hairline that wakes up on hover — the small premium tell */
+#landing-page .il-cap-card,
+#landing-page .il-wf-panel {
+  position: relative;
+  overflow: hidden;
+}
+
+#landing-page .il-cap-card::after,
+#landing-page .il-wf-panel::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 14%; right: 14%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--il-brass), transparent);
+  opacity: 0;
+  transition: opacity var(--il-mid), left var(--il-mid), right var(--il-mid);
+}
+
+#landing-page .il-cap-card:hover::after,
+#landing-page .il-wf-panel:hover::after {
+  opacity: .85;
+  left: 0; right: 0;
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   7 · BUTTONS
+   ─────────────────────────────────────────────────────────────────────────── */
+
+button, .btn, a.btn, input[type="submit"] {
+  font-family: var(--il-sans) !important;
+  transition: transform var(--il-fast), box-shadow var(--il-mid),
+              background-color var(--il-mid), border-color var(--il-mid), color var(--il-fast) !important;
+}
+
+/* Primary — brushed gold with a lit top edge */
+.btn-primary,
+.il-landing-primary,
+.il-global-trial,
+#nav-signup,
+.nav-cta,
+button.primary,
+.il-btn-primary,
+.hh-cta-primary,
+.il-auth-submit,
+.lens-run-btn,
+#landing-page .il-landing-search button,
+.il-landing-band button {
+  position: relative !important;
+  border: 1px solid rgba(255, 255, 255, .16) !important;
+  border-radius: var(--il-radius-pill) !important;
+  background: linear-gradient(180deg, #F0CE8B 0%, #D6AC64 44%, #B78B40 100%) !important;
+  color: #1A1204 !important;
+  font-weight: 700 !important;
+  letter-spacing: -.005em !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .55),
+    inset 0 -1px 0 rgba(0, 0, 0, .18),
+    0 1px 2px rgba(0, 0, 0, .3),
+    0 14px 32px -14px rgba(214, 172, 100, .7) !important;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, .22);
+  overflow: hidden;
+}
+
+.btn-primary::before,
+.il-landing-primary::before,
+.il-global-trial::before,
+.il-auth-submit::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 32%, rgba(255, 255, 255, .5) 48%, transparent 62%);
+  transform: translateX(-130%);
+  transition: transform .75s var(--il-ease-out);
+  pointer-events: none;
+}
+
+.btn-primary:hover::before,
+.il-landing-primary:hover::before,
+.il-global-trial:hover::before,
+.il-auth-submit:hover::before { transform: translateX(130%); }
+
+.btn-primary:hover,
+.il-landing-primary:hover,
+.il-global-trial:hover,
+#nav-signup:hover,
+.il-btn-primary:hover,
+.il-auth-submit:hover,
+#landing-page .il-landing-search button:hover,
+.il-landing-band button:hover {
+  transform: translateY(-1px) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .65),
+    inset 0 -1px 0 rgba(0, 0, 0, .18),
+    0 2px 4px rgba(0, 0, 0, .3),
+    0 20px 44px -14px rgba(214, 172, 100, .85) !important;
+}
+
+.btn-primary:active,
+.il-landing-primary:active,
+.il-auth-submit:active { transform: translateY(0) !important; }
+
+/* Secondary — glass */
+.btn-secondary,
+.il-landing-secondary,
+.il-global-login,
+#nav-login,
+button.secondary,
+.il-btn-secondary,
+.hh-cta-secondary,
+.lens-how-btn {
+  border: 1px solid var(--il-line-strong) !important;
+  border-radius: var(--il-radius-pill) !important;
+  background: var(--il-surface-2) !important;
+  background-image: var(--il-sheen) !important;
+  color: var(--il-ink) !important;
+  font-weight: 600 !important;
+  box-shadow: var(--il-edge), var(--il-shadow-xs) !important;
+  backdrop-filter: blur(10px);
+}
+
+.btn-secondary:hover,
+.il-landing-secondary:hover,
+.il-global-login:hover,
+#nav-login:hover,
+.il-btn-secondary:hover,
+.lens-how-btn:hover {
+  border-color: var(--il-line-gold) !important;
+  color: var(--il-brass-bright) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: var(--il-edge), var(--il-shadow-sm) !important;
+}
+
+/* Quiet tertiary buttons across the tool */
+.btn-ghost, .chip, .pill, .tag, .quick-btn, .range-pill,
+.il-chip, .rpill {
+  border-radius: var(--il-radius-pill) !important;
+  border: 1px solid var(--il-line) !important;
+  background: var(--il-surface-2) !important;
+  transition: all var(--il-fast) !important;
+}
+
+.chip:hover, .pill:hover, .quick-btn:hover, .range-pill:hover, .il-chip:hover {
+  border-color: var(--il-line-gold) !important;
+  color: var(--il-brass-bright) !important;
+  background: var(--il-brass-softer) !important;
+}
+
+.chip.on, .pill.on, .range-pill.on, .il-chip.on,
+.chip.active, .pill.active, .range-pill.active {
+  border-color: var(--il-line-gold) !important;
+  background: var(--il-brass-soft) !important;
+  color: var(--il-brass-bright) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06) !important;
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   8 · INPUTS
+   ─────────────────────────────────────────────────────────────────────────── */
+
+input[type="text"], input[type="email"], input[type="password"],
+input[type="number"], input[type="search"], select, textarea {
+  font-family: var(--il-sans) !important;
+  border-radius: var(--il-radius-sm) !important;
+  border: 1px solid var(--il-line-strong) !important;
+  background: rgba(0, 0, 0, .18) !important;
+  color: var(--il-ink) !important;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, .3) !important;
+  transition: border-color var(--il-fast), box-shadow var(--il-fast), background var(--il-fast) !important;
+}
+
+html:not([data-theme="dark"]) input[type="text"],
+html:not([data-theme="dark"]) input[type="email"],
+html:not([data-theme="dark"]) input[type="password"],
+html:not([data-theme="dark"]) input[type="number"],
+html:not([data-theme="dark"]) input[type="search"],
+html:not([data-theme="dark"]) select,
+html:not([data-theme="dark"]) textarea {
+  background: #FFFFFF !important;
+  box-shadow: inset 0 1px 3px rgba(24, 22, 18, .07) !important;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none !important;
+  border-color: var(--il-brass) !important;
+  box-shadow: var(--il-focus), inset 0 2px 6px rgba(0, 0, 0, .25) !important;
+}
+
+::placeholder { color: var(--il-faint) !important; opacity: 1; }
+
+/* Universal focus ring for keyboard users */
+:focus-visible {
+  outline: 2px solid var(--il-brass) !important;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   9 · GLOBAL NAV
+   ─────────────────────────────────────────────────────────────────────────── */
+
+nav#main-nav,
+nav.il-global-nav {
+  background: color-mix(in srgb, var(--il-header) 72%, transparent) !important;
+  backdrop-filter: saturate(180%) blur(22px) !important;
+  -webkit-backdrop-filter: saturate(180%) blur(22px) !important;
+  border-bottom: 1px solid var(--il-header-line) !important;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .04) inset, 0 18px 40px -28px rgba(0, 0, 0, .9) !important;
+  transition: background var(--il-mid), box-shadow var(--il-mid), border-color var(--il-mid) !important;
+}
+
+/* Solidifies once the page scrolls (class added by premium-motion.js) */
+nav#main-nav.il-nav-scrolled,
+nav.il-global-nav.il-nav-scrolled {
+  background: color-mix(in srgb, var(--il-header) 92%, transparent) !important;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .05) inset, 0 20px 44px -22px rgba(0, 0, 0, 1) !important;
+}
+
+.nav-logo, .il-global-brand {
+  font-family: var(--il-sans) !important;
+  font-weight: 700 !important;
+  letter-spacing: -.035em !important;
+  color: #F4F1EA !important;
+}
+
+.nav-logo em, .il-global-brand em {
+  font-family: var(--il-display) !important;
+  font-style: italic !important;
+  color: var(--il-brass) !important;
+  font-weight: 400 !important;
+  font-size: 1.08em;
+}
+
+.nav-logo img, .il-global-brand img {
+  filter: drop-shadow(0 4px 12px rgba(214, 172, 100, .45)) !important;
+  transition: transform var(--il-mid) !important;
+}
+
+.nav-logo:hover img, .il-global-brand:hover img { transform: rotate(-8deg) scale(1.06) !important; }
+
+a.nav-tab, .il-global-tab {
+  position: relative;
+  border-radius: var(--il-radius-pill) !important;
+  border: 1px solid transparent !important;
+  font-weight: 550 !important;
+  font-size: 12.5px !important;
+  letter-spacing: -.005em !important;
+  color: rgba(240, 238, 232, .58) !important;
+  transition: color var(--il-fast), background var(--il-fast) !important;
+  box-shadow: none !important;
+}
+
+a.nav-tab:hover, .il-global-tab:hover {
+  color: #FFFFFF !important;
+  background: rgba(255, 255, 255, .06) !important;
+}
+
+a.nav-tab.active-tab, .il-global-tab.active {
+  color: #14100A !important;
+  background: linear-gradient(180deg, #EDCB84, #C9A05A) !important;
+  border-color: transparent !important;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .4) inset, 0 6px 18px -8px rgba(214, 172, 100, .8) !important;
+  font-weight: 700 !important;
+}
+
+a.nav-tab + a.nav-tab::before,
+.il-global-tab + .il-global-tab::before { display: none !important; }
+
+/* Nav search */
+.nav-search, #nav-search, .il-global-search {
+  border-radius: var(--il-radius-pill) !important;
+  border: 1px solid rgba(255, 255, 255, .1) !important;
+  background: rgba(255, 255, 255, .045) !important;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, .4) !important;
+  transition: border-color var(--il-fast), background var(--il-fast), box-shadow var(--il-fast) !important;
+}
+
+.nav-search:focus-within, .il-global-search:focus-within {
+  border-color: var(--il-line-gold) !important;
+  background: rgba(255, 255, 255, .07) !important;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, .4), 0 0 0 3px rgba(214, 172, 100, .16) !important;
+}
+
+.nav-search input, .il-global-search input {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: #F2F0EB !important;
+}
+
+.nav-search input:focus, .il-global-search input:focus { box-shadow: none !important; }
+
+/* Live badge */
+.nav-live, .il-global-live {
+  border-radius: var(--il-radius-pill) !important;
+  border: 1px solid rgba(62, 201, 139, .3) !important;
+  background: rgba(62, 201, 139, .12) !important;
+  color: var(--il-green-bright) !important;
+  font-size: 10px !important;
+  letter-spacing: .1em !important;
+  font-weight: 700 !important;
+}
+
+/* Theme toggle */
+.theme-toggle, #theme-toggle, .il-theme-toggle {
+  border-radius: var(--il-radius-pill) !important;
+  border: 1px solid rgba(255, 255, 255, .12) !important;
+  background: rgba(255, 255, 255, .05) !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .4) !important;
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   10 · LANDING — HERO
+   ─────────────────────────────────────────────────────────────────────────── */
+
+#landing-page {
+  padding-top: clamp(48px, 6vw, 88px) !important;
+}
+
+#landing-page .il-landing-hero {
+  gap: clamp(36px, 4.5vw, 72px) !important;
+  align-items: center !important;
+  padding-bottom: var(--il-section-gap) !important;
+  position: relative;
+}
+
+/* Hero horizon glow */
+#landing-page .il-landing-hero::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: -14%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(1180px, 118%);
+  height: 560px;
+  background: radial-gradient(closest-side, rgba(214, 172, 100, .16), transparent 74%);
+  filter: blur(24px);
+  pointer-events: none;
+}
+
+#landing-page .il-landing-copy h1 {
+  font-size: clamp(44px, 5.4vw, 78px) !important;
+  line-height: 1.0 !important;
+  letter-spacing: -.022em !important;
+  margin-bottom: 22px !important;
+  background: linear-gradient(178deg, var(--il-ink) 30%, color-mix(in srgb, var(--il-ink) 62%, var(--il-brass)) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+#landing-page .il-landing-copy > p {
+  font-size: clamp(15.5px, 1.15vw, 17.5px) !important;
+  line-height: 1.68 !important;
+  color: var(--il-muted) !important;
+  max-width: 52ch !important;
+  letter-spacing: -.003em !important;
+}
+
+#landing-page .il-landing-kicker { margin-bottom: 26px !important; }
+
+/* Hero ticker search — the primary action, treated like a piece of hardware */
+#landing-page .il-landing-search {
+  margin-top: 26px !important;
+  padding: 7px 7px 7px 20px !important;
+  gap: 12px !important;
+  border-radius: var(--il-radius-pill) !important;
+  border: 1px solid var(--il-line-strong) !important;
+  background: var(--il-surface-2) !important;
+  background-image: var(--il-sheen) !important;
+  box-shadow: var(--il-edge), var(--il-shadow-md) !important;
+  max-width: 520px !important;
+  transition: border-color var(--il-mid), box-shadow var(--il-mid), transform var(--il-mid) !important;
+}
+
+#landing-page .il-landing-search:focus-within {
+  border-color: var(--il-line-gold) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: var(--il-edge-strong), var(--il-shadow-md), 0 0 0 4px rgba(214, 172, 100, .14) !important;
+}
+
+#landing-page .il-landing-search i { color: var(--il-brass) !important; font-size: 17px !important; }
+
+#landing-page .il-landing-search input {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-size: 15px !important;
+  letter-spacing: -.005em !important;
+  text-transform: none !important;
+  padding: 12px 0 !important;
+}
+
+#landing-page .il-landing-search input:focus { box-shadow: none !important; }
+
+#landing-page .il-landing-search button {
+  padding: 12px 26px !important;
+  font-size: 13.5px !important;
+  flex: 0 0 auto !important;
+}
+
+/* Proof row + trust row */
+#landing-page .il-landing-proof {
+  margin-top: 22px !important;
+  gap: 10px !important;
+  flex-wrap: wrap !important;
+}
+
+#landing-page .il-landing-proof span {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px !important;
+  border-radius: var(--il-radius-pill) !important;
+  border: 1px solid var(--il-line) !important;
+  background: var(--il-surface-2) !important;
+  color: var(--il-ink-2) !important;
+  font-size: 12.5px !important;
+  font-weight: 500 !important;
+  box-shadow: var(--il-edge) !important;
+  transition: border-color var(--il-fast), transform var(--il-fast) !important;
+}
+
+#landing-page .il-landing-proof span:hover {
+  border-color: var(--il-line-gold) !important;
+  transform: translateY(-1px) !important;
+}
+
+#landing-page .il-landing-proof i { color: var(--il-brass) !important; }
+
+#landing-page .il-trust {
+  margin-top: 20px !important;
+  color: var(--il-faint) !important;
+  font-size: 12px !important;
+  letter-spacing: .01em !important;
+}
+
+#landing-page .il-trust i { color: var(--il-brass) !important; opacity: .8; }
+
+/* Offer card */
+#landing-page .il-offer-card {
+  margin-top: 26px !important;
+  padding: 16px 20px !important;
+  border-radius: var(--il-radius) !important;
+  border: 1px dashed var(--il-line-gold) !important;
+  background: var(--il-brass-softer) !important;
+  box-shadow: none !important;
+}
+
+#landing-page .il-offer-card strong { color: var(--il-brass-bright) !important; }
+#landing-page .il-offer-card span { color: var(--il-muted) !important; }
+
+/* ───────────────────────────────────────────────────────────────────────────
+   11 · LANDING — HERO MOCKUP
+   Tilted, lit, and floating so the product looks like an object.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+#landing-page .il-landing-preview {
+  perspective: 1800px;
+  position: relative;
+}
+
+#landing-page .il-hero-mock {
+  border-radius: var(--il-radius-xl) !important;
+  border: 1px solid rgba(255, 255, 255, .1) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, 0) 40%),
+    linear-gradient(165deg, #171B22 0%, #0D1015 60%, #0A0C10 100%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .12),
+    0 2px 6px rgba(0, 0, 0, .5),
+    0 40px 90px -30px rgba(0, 0, 0, .95),
+    0 0 90px -20px rgba(214, 172, 100, .28) !important;
+  transform: perspective(1800px) rotateY(-7deg) rotateX(2.5deg) translateZ(0) !important;
+  transform-style: preserve-3d;
+  transition: transform 1.1s var(--il-ease-out), box-shadow 1.1s var(--il-ease-out) !important;
+  overflow: hidden;
+}
+
+#landing-page .il-landing-preview:hover .il-hero-mock {
+  transform: perspective(1800px) rotateY(-3deg) rotateX(1deg) translateY(-6px) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .16),
+    0 2px 6px rgba(0, 0, 0, .5),
+    0 60px 120px -34px rgba(0, 0, 0, 1),
+    0 0 120px -18px rgba(214, 172, 100, .4) !important;
+}
+
+/* Screen glare */
+#landing-page .il-hero-mock::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(128deg, rgba(255, 255, 255, .07) 0%, transparent 34%, transparent 100%);
+}
+
+#landing-page .il-hero-mock .ihm-top {
+  border-bottom: 1px solid rgba(255, 255, 255, .07) !important;
+  background: rgba(255, 255, 255, .022) !important;
+}
+
+#landing-page .il-hero-mock .ihm-card {
+  border-radius: 12px !important;
+  border: 1px solid rgba(255, 255, 255, .07) !important;
+  background: rgba(255, 255, 255, .035) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05) !important;
+}
+
+#landing-page .il-hero-mock .ihm-lbl {
+  color: var(--il-brass) !important;
+  letter-spacing: .14em !important;
+  font-size: 9px !important;
+  font-weight: 700 !important;
+}
+
+#landing-page .il-hero-mock .ihm-line { stroke-width: 2.4 !important; }
+
+#landing-page .il-preview-caption {
+  margin-top: 18px !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  padding: 9px 18px !important;
+  border-radius: var(--il-radius-pill) !important;
+  border: 1px solid var(--il-line) !important;
+  background: var(--il-surface-2) !important;
+  backdrop-filter: blur(10px);
+  box-shadow: var(--il-edge), var(--il-shadow-xs) !important;
+  width: fit-content;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  font-size: 11px !important;
+  letter-spacing: .08em !important;
+  text-transform: uppercase !important;
+}
+
+#landing-page .il-preview-caption span { color: var(--il-faint) !important; }
+#landing-page .il-preview-caption strong { color: var(--il-brass) !important; }
+
+/* ───────────────────────────────────────────────────────────────────────────
+   12 · LANDING — SECTIONS
+   ─────────────────────────────────────────────────────────────────────────── */
+
+#landing-page .il-capabilities,
+#landing-page .il-workflow-visual,
+#landing-page .il-landing-band,
+#landing-page .il-landing-pricing {
+  margin-bottom: var(--il-section-gap) !important;
+  position: relative;
+}
+
+/* Gradient hairline between sections */
+#landing-page .il-capabilities::before,
+#landing-page .il-workflow-visual::before {
+  content: "";
+  position: absolute;
+  top: calc(var(--il-section-gap) / -2);
+  left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--il-line-strong) 22%, var(--il-line-gold) 50%, var(--il-line-strong) 78%, transparent);
+  opacity: .8;
+}
+
+#landing-page .il-cap-head { margin-bottom: clamp(34px, 4vw, 56px) !important; }
+
+#landing-page .il-cap-head h2,
+#landing-page .il-workflow-copy h2,
+#landing-page .il-landing-band h2,
+#landing-page .il-landing-pricing h2 {
+  font-size: clamp(30px, 3.5vw, 52px) !important;
+  line-height: 1.05 !important;
+  letter-spacing: -.02em !important;
+  margin: 18px 0 16px !important;
+  text-wrap: balance;
+}
+
+#landing-page .il-cap-head p,
+#landing-page .il-workflow-copy p,
+#landing-page .il-landing-band p,
+#landing-page .il-landing-pricing p {
+  font-size: 16px !important;
+  line-height: 1.66 !important;
+  color: var(--il-muted) !important;
+  max-width: 62ch;
+}
+
+/* Capability cards */
+#landing-page .il-cap-grid { gap: 18px !important; }
+
+#landing-page .il-cap-card {
+  padding: 28px 26px 30px !important;
+  border-radius: var(--il-radius-lg) !important;
+  gap: 12px !important;
+}
+
+#landing-page .il-cap-card i {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 44px !important;
+  height: 44px !important;
+  margin-bottom: 8px !important;
+  border-radius: 13px !important;
+  border: 1px solid var(--il-line-gold) !important;
+  background: linear-gradient(160deg, var(--il-brass-soft), transparent) !important;
+  color: var(--il-brass) !important;
+  font-size: 20px !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08) !important;
+  transition: transform var(--il-mid), box-shadow var(--il-mid), color var(--il-mid) !important;
+}
+
+#landing-page .il-cap-card:hover i {
+  transform: translateY(-2px) scale(1.04) !important;
+  color: var(--il-brass-bright) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14), 0 10px 24px -10px rgba(214, 172, 100, .6) !important;
+}
+
+#landing-page .il-cap-card strong {
+  font-size: 17px !important;
+  font-weight: 650 !important;
+  letter-spacing: -.015em !important;
+  color: var(--il-ink) !important;
+}
+
+#landing-page .il-cap-card span {
+  font-size: 14px !important;
+  line-height: 1.62 !important;
+  color: var(--il-muted) !important;
+}
+
+/* Highlighted LensScore card */
+#landing-page .il-cap-card.il-cap-score {
+  border-color: var(--il-line-gold) !important;
+  background-image: var(--il-sheen), radial-gradient(120% 90% at 50% 0%, var(--il-brass-softer), transparent 60%) !important;
+}
+
+/* Workflow panels */
+#landing-page .il-workflow-panels { gap: 14px !important; }
+
+#landing-page .il-wf-panel {
+  padding: 22px 20px !important;
+  border-radius: var(--il-radius) !important;
+}
+
+#landing-page .il-wf-head strong {
+  color: var(--il-ink) !important;
+  font-weight: 650 !important;
+  letter-spacing: -.01em !important;
+}
+
+#landing-page .il-wf-head i { color: var(--il-brass) !important; }
+#landing-page .il-wf-panel p { color: var(--il-muted) !important; font-size: 13px !important; line-height: 1.6 !important; }
+
+#landing-page .il-wf-notes span {
+  background: linear-gradient(90deg, var(--il-surface-4), var(--il-surface-3)) !important;
+  border-radius: 4px !important;
+}
+
+/* Market dashboard band + pricing block */
+#landing-page .il-landing-band,
+#landing-page .il-landing-pricing {
+  padding: clamp(34px, 4vw, 56px) clamp(26px, 3.4vw, 52px) !important;
+  border-radius: var(--il-radius-xl) !important;
+  background-image:
+    var(--il-sheen),
+    radial-gradient(120% 140% at 88% -20%, var(--il-brass-soft), transparent 58%) !important;
+  box-shadow: var(--il-edge), var(--il-shadow-md) !important;
+}
+
+#landing-page .il-landing-pricing { text-align: center; }
+#landing-page .il-landing-pricing p { margin-left: auto; margin-right: auto; }
+
+#landing-page .il-landing-actions { gap: 12px !important; margin-top: 26px !important; }
+#landing-page .il-landing-actions.centered { justify-content: center !important; }
+
+#landing-page .il-landing-primary,
+#landing-page .il-landing-secondary {
+  padding: 14px 28px !important;
+  font-size: 14px !important;
+}
+
+/* Left rail */
+#landing-page .il-landing-rail a {
+  border-radius: var(--il-radius-sm) !important;
+  color: var(--il-faint) !important;
+  transition: all var(--il-fast) !important;
+}
+
+#landing-page .il-landing-rail a:hover {
+  color: var(--il-ink) !important;
+  background: var(--il-surface-2) !important;
+}
+
+#landing-page .il-landing-rail a.active {
+  color: var(--il-brass) !important;
+  background: var(--il-brass-soft) !important;
+  box-shadow: inset 2px 0 0 var(--il-brass) !important;
+}
+
+#landing-page .il-rail-label {
+  color: var(--il-faint) !important;
+  letter-spacing: .16em !important;
+  text-transform: uppercase !important;
+  font-size: 10px !important;
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   13 · PRODUCT WORKSPACE
+   ─────────────────────────────────────────────────────────────────────────── */
+
+#view-tool .il-tool-shell,
+#view-tool .app-content-scroll,
+.hs-main {
+  background: transparent !important;
+}
+
+/* Left sidebar */
+.app-sidebar, .hs-sidebar, .il-tool-rail {
+  background: color-mix(in srgb, var(--il-bg-elevated) 80%, transparent) !important;
+  backdrop-filter: blur(18px);
+  border-right: 1px solid var(--il-line) !important;
+}
+
+.app-sidebar a, .hsb-item, .il-rail-item {
+  border-radius: var(--il-radius-sm) !important;
+  color: var(--il-muted) !important;
+  font-weight: 550 !important;
+  transition: all var(--il-fast) !important;
+  border: 1px solid transparent !important;
+}
+
+.app-sidebar a:hover, .hsb-item:hover, .il-rail-item:hover {
+  color: var(--il-ink) !important;
+  background: var(--il-surface-2) !important;
+  border-color: var(--il-line) !important;
+}
+
+.app-sidebar a.active, .hsb-item.active, .il-rail-item.active,
+.app-sidebar a[aria-current="page"] {
+  color: var(--il-brass-bright) !important;
+  background: var(--il-brass-soft) !important;
+  border-color: var(--il-line-gold) !important;
+  box-shadow: inset 2px 0 0 var(--il-brass), var(--il-edge) !important;
+}
+
+.hsb-label, .app-sidebar-label {
+  color: var(--il-faint) !important;
+  letter-spacing: .16em !important;
+  text-transform: uppercase !important;
+  font-size: 9.5px !important;
+  font-weight: 700 !important;
+}
+
+/* Section headers inside the tool */
+.app-section-hdr, .il-section-hdr {
+  background: color-mix(in srgb, var(--il-bg) 78%, transparent) !important;
+  backdrop-filter: blur(16px) !important;
+  border-bottom: 1px solid var(--il-line) !important;
+}
+
+/* Accordions / expandable panels */
+.acc, .accordion {
+  border-radius: var(--il-radius) !important;
+  overflow: hidden !important;
+}
+
+.acc-hdr, .accordion-header {
+  background: var(--il-surface-2) !important;
+  border-bottom: 1px solid var(--il-line) !important;
+  transition: background var(--il-fast) !important;
+}
+
+.acc-hdr:hover, .accordion-header:hover { background: var(--il-surface-3) !important; }
+
+/* Metric tiles */
+.metric, .metric-card, .m-tile, .stat-tile, .kpi {
+  border-radius: var(--il-radius) !important;
+  border: 1px solid var(--il-line) !important;
+  background: var(--il-surface-2) !important;
+  background-image: var(--il-sheen) !important;
+  box-shadow: var(--il-edge) !important;
+  transition: border-color var(--il-fast), transform var(--il-fast), box-shadow var(--il-fast) !important;
+}
+
+.metric:hover, .metric-card:hover, .m-tile:hover, .stat-tile:hover, .kpi:hover {
+  border-color: var(--il-line-strong) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: var(--il-edge), var(--il-shadow-sm) !important;
+}
+
+.metric-lbl, .m-lbl, .metric-label {
+  color: var(--il-faint) !important;
+  letter-spacing: .1em !important;
+  text-transform: uppercase !important;
+  font-size: 9.5px !important;
+  font-weight: 650 !important;
+}
+
+/* Price / result header */
+.result-header {
+  border-radius: var(--il-radius-lg) !important;
+  border: 1px solid var(--il-line) !important;
+  background-color: var(--il-surface) !important;
+  background-image:
+    var(--il-sheen),
+    radial-gradient(120% 160% at 90% -30%, var(--il-brass-soft), transparent 55%) !important;
+  box-shadow: var(--il-edge), var(--il-shadow-md) !important;
+}
+
+/* Tables */
+table.data-table, table.fin-table, .tbl, table {
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+}
+
+table thead th, .tbl thead th {
+  background: var(--il-surface-2) !important;
+  color: var(--il-faint) !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: .11em !important;
+  text-transform: uppercase !important;
+  border-bottom: 1px solid var(--il-line-strong) !important;
+  position: sticky;
+  top: 0;
+  backdrop-filter: blur(8px);
+}
+
+table tbody tr { transition: background var(--il-fast) !important; }
+table tbody tr:hover { background: var(--il-brass-softer) !important; }
+table tbody td { border-bottom: 1px solid var(--il-line) !important; }
+
+/* Chart wells */
+.chart-box, .chart-wrap, .chart-card, .canvas-wrap {
+  border-radius: var(--il-radius) !important;
+  border: 1px solid var(--il-line) !important;
+  background: rgba(0, 0, 0, .16) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04) !important;
+}
+
+html:not([data-theme="dark"]) .chart-box,
+html:not([data-theme="dark"]) .chart-wrap,
+html:not([data-theme="dark"]) .chart-card,
+html:not([data-theme="dark"]) .canvas-wrap {
+  background: var(--il-surface-2) !important;
+}
+
+/* Tabs */
+.tab-row, .il-tabs, .seg {
+  border-radius: var(--il-radius-pill) !important;
+  border: 1px solid var(--il-line) !important;
+  background: var(--il-surface-2) !important;
+  padding: 4px !important;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, .25) !important;
+}
+
+.tab-row > *, .il-tabs > *, .seg > * {
+  border-radius: var(--il-radius-pill) !important;
+  transition: all var(--il-fast) !important;
+}
+
+.tab-row > .active, .il-tabs > .active, .seg > .active,
+.tab-row > .on, .il-tabs > .on {
+  background: var(--il-surface-4) !important;
+  color: var(--il-ink) !important;
+  box-shadow: var(--il-edge), var(--il-shadow-xs) !important;
+}
+
+/* Upgrade box */
+.hsb-upgrade, .upgrade-box {
+  border-radius: var(--il-radius) !important;
+  border: 1px solid var(--il-line-gold) !important;
+  background-image:
+    var(--il-sheen),
+    radial-gradient(130% 110% at 50% 0%, var(--il-brass-soft), transparent 62%) !important;
+}
+
+/* Alert / notice strips */
+.notice, .alert, .banner-note, .il-notice {
+  border-radius: var(--il-radius) !important;
+  border: 1px solid var(--il-line) !important;
+  border-left: 3px solid var(--il-brass) !important;
+  background: var(--il-brass-softer) !important;
+  box-shadow: var(--il-edge) !important;
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   14 · AUTH & STATIC PAGES
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.il-auth-card, .auth-card, .login-card, .il-static-card {
+  border-radius: var(--il-radius-xl) !important;
+  border: 1px solid var(--il-line) !important;
+  background-color: var(--il-surface) !important;
+  background-image:
+    var(--il-sheen),
+    radial-gradient(120% 130% at 50% -10%, var(--il-brass-soft), transparent 58%) !important;
+  box-shadow: var(--il-edge-strong), var(--il-shadow-lg) !important;
+  padding: clamp(30px, 3.4vw, 46px) !important;
+}
+
+.il-page-hero, .static-hero {
+  padding-top: clamp(48px, 6vw, 90px) !important;
+  padding-bottom: clamp(30px, 4vw, 54px) !important;
+}
+
+.il-page-hero h1, .static-hero h1 {
+  font-size: clamp(36px, 4.6vw, 66px) !important;
+  line-height: 1.03 !important;
+}
+
+/* Prose in legal / editorial pages */
+.il-prose, .legal-body, .static-body {
+  color: var(--il-ink-2) !important;
+  font-size: 15.5px !important;
+  line-height: 1.75 !important;
+}
+
+.il-prose h2, .legal-body h2, .static-body h2 {
+  font-family: var(--il-sans) !important;
+  font-size: 19px !important;
+  font-weight: 650 !important;
+  letter-spacing: -.015em !important;
+  color: var(--il-ink) !important;
+  margin-top: 42px !important;
+  padding-top: 22px !important;
+  border-top: 1px solid var(--il-line) !important;
+}
+
+.il-prose a, .legal-body a { color: var(--il-brass) !important; text-underline-offset: 3px; }
+
+/* ───────────────────────────────────────────────────────────────────────────
+   15 · FOOTER
+   ─────────────────────────────────────────────────────────────────────────── */
+
+footer, .site-footer, .il-footer {
+  position: relative;
+  background: var(--il-header) !important;
+  border-top: 1px solid var(--il-header-line) !important;
+  padding-top: clamp(44px, 5vw, 72px) !important;
+  padding-bottom: clamp(30px, 3.5vw, 48px) !important;
+}
+
+footer::before, .site-footer::before, .il-footer::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--il-brass), transparent);
+  opacity: .35;
+}
+
+footer a, .site-footer a, .il-footer a {
+  color: rgba(240, 238, 232, .6) !important;
+  font-size: 13px !important;
+  transition: color var(--il-fast) !important;
+}
+
+footer a:hover, .site-footer a:hover, .il-footer a:hover { color: var(--il-brass-bright) !important; }
+
+/* ───────────────────────────────────────────────────────────────────────────
+   16 · SCROLLBARS, SELECTION, MISC CHROME
+   ─────────────────────────────────────────────────────────────────────────── */
+
+* { scrollbar-width: thin; scrollbar-color: var(--il-surface-4) transparent; }
+
+::-webkit-scrollbar { width: 11px; height: 11px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--il-surface-4);
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--il-brass-deep); background-clip: content-box; }
+
+::selection { background: rgba(214, 172, 100, .3); color: var(--il-ink); }
+
+hr, .divider {
+  border: none !important;
+  height: 1px !important;
+  background: linear-gradient(90deg, transparent, var(--il-line-strong), transparent) !important;
+}
+
+/* Directional data colors stay meaningful */
+.up, .positive, .green, .pos { color: var(--il-green-bright) !important; }
+.down, .negative, .red, .neg { color: var(--il-red-bright) !important; }
+
+/* ───────────────────────────────────────────────────────────────────────────
+   17 · SCROLL REVEAL (progressive enhancement — see premium-motion.js)
+   ─────────────────────────────────────────────────────────────────────────── */
+
+html.il-motion [data-il-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity .7s var(--il-ease-out), transform .7s var(--il-ease-out);
+  transition-delay: var(--il-reveal-delay, 0s);
+  will-change: opacity, transform;
+}
+
+html.il-motion [data-il-reveal].il-revealed {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.il-motion [data-il-reveal] { opacity: 1 !important; transform: none !important; }
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    transition-duration: .001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   18 · RESPONSIVE
+   ─────────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 1024px) {
+  #landing-page .il-hero-mock { transform: none !important; }
+  #landing-page .il-landing-preview:hover .il-hero-mock { transform: translateY(-4px) !important; }
+}
+
+@media (max-width: 768px) {
+  :root { --il-section-gap: clamp(56px, 12vw, 84px); }
+
+  #landing-page .il-landing-copy h1 { font-size: clamp(34px, 9.5vw, 46px) !important; }
+
+  #landing-page .il-cap-head h2,
+  #landing-page .il-workflow-copy h2,
+  #landing-page .il-landing-band h2,
+  #landing-page .il-landing-pricing h2 { font-size: clamp(26px, 7.5vw, 36px) !important; }
+
+  #landing-page .il-landing-search {
+    max-width: none !important;
+    padding: 6px 6px 6px 16px !important;
+  }
+
+  #landing-page .il-landing-search button { padding: 12px 18px !important; }
+
+  #landing-page .il-landing-band,
+  #landing-page .il-landing-pricing { padding: 30px 22px !important; }
+
+  body::after { display: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   19 · STATIC / EDITORIAL PAGES
+   about · blog · privacy · terms · data-sources · research-process · calculator
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+body.il-static-page,
+body.il-auth-page,
+body.il-lens-page {
+  background: var(--il-bg) !important;
+  color: var(--il-ink-2) !important;
+}
+
+/* Hero block */
+body.il-static-page .hero {
+  position: relative;
+  padding: clamp(56px, 7vw, 104px) 24px clamp(34px, 4.5vw, 60px) !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+body.il-static-page .hero::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: -8%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(1000px, 110%);
+  height: 460px;
+  background: radial-gradient(closest-side, var(--il-brass-soft), transparent 72%);
+  filter: blur(20px);
+  pointer-events: none;
+}
+
+body.il-static-page .hero h1 {
+  font-family: var(--il-display) !important;
+  font-weight: 400 !important;
+  font-size: clamp(38px, 5vw, 70px) !important;
+  line-height: 1.03 !important;
+  letter-spacing: -.02em !important;
+  color: var(--il-ink) !important;
+  text-wrap: balance;
+}
+
+body.il-static-page .hero h1 em {
+  font-family: var(--il-display) !important;
+  font-style: italic !important;
+  color: var(--il-brass) !important;
+}
+
+body.il-static-page .hero-sub,
+body.il-static-page .hero p {
+  color: var(--il-muted) !important;
+  font-size: clamp(15px, 1.15vw, 17px) !important;
+  line-height: 1.68 !important;
+  max-width: 62ch;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* Eyebrow variants used across static pages */
+body.il-static-page .tagline,
+body.il-static-page .eyebrow,
+body.il-lens-page .eyebrow {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 9px;
+  font-size: 10.5px !important;
+  font-weight: 600 !important;
+  letter-spacing: .17em !important;
+  text-transform: uppercase !important;
+  color: var(--il-brass) !important;
+  padding: 6px 14px 6px 11px !important;
+  border: 1px solid var(--il-line-gold) !important;
+  border-radius: var(--il-radius-pill) !important;
+  background: var(--il-brass-softer) !important;
+  margin-bottom: 22px !important;
+}
+
+body.il-static-page .tagline::before,
+body.il-static-page .eyebrow::before {
+  content: "";
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--il-brass);
+  box-shadow: 0 0 0 3px var(--il-brass-soft), 0 0 10px 1px var(--il-brass);
+  flex: 0 0 auto;
+}
+
+body.il-static-page .cta-row {
+  display: flex !important;
+  gap: 12px !important;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 30px !important;
+}
+
+body.il-static-page .cta-row a {
+  padding: 14px 28px !important;
+  font-size: 14px !important;
+}
+
+/* Feature / source / step / guide cards */
+body.il-static-page .feat,
+body.il-static-page .source-card,
+body.il-static-page .step,
+body.il-static-page .guide,
+body.il-static-page .principle,
+body.il-static-page .panel,
+body.il-static-page .post,
+body.il-static-page .section {
+  border-radius: var(--il-radius-lg) !important;
+  border: 1px solid var(--il-line) !important;
+  background-color: var(--il-surface) !important;
+  background-image: var(--il-sheen) !important;
+  box-shadow: var(--il-edge), var(--il-shadow-sm) !important;
+  transition: transform var(--il-mid), border-color var(--il-mid), box-shadow var(--il-mid) !important;
+  padding: clamp(22px, 2.4vw, 30px) !important;
+}
+
+body.il-static-page .feat:hover,
+body.il-static-page .source-card:hover,
+body.il-static-page .guide:hover,
+body.il-static-page .post:hover {
+  transform: translateY(-3px) !important;
+  border-color: var(--il-line-gold) !important;
+  box-shadow: var(--il-edge-strong), var(--il-shadow-md) !important;
+}
+
+body.il-static-page .feat-icon,
+body.il-static-page .src-icon,
+body.il-static-page .num,
+body.il-static-page .guide-num {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 13px !important;
+  border: 1px solid var(--il-line-gold) !important;
+  background: linear-gradient(160deg, var(--il-brass-soft), transparent) !important;
+  color: var(--il-brass) !important;
+  font-family: var(--il-mono) !important;
+  font-size: 15px !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08) !important;
+  margin-bottom: 16px !important;
+}
+
+body.il-static-page .feat-title,
+body.il-static-page .src-name,
+body.il-static-page .step strong,
+body.il-static-page .guide strong {
+  font-size: 17px !important;
+  font-weight: 650 !important;
+  letter-spacing: -.015em !important;
+  color: var(--il-ink) !important;
+}
+
+body.il-static-page .feat-desc,
+body.il-static-page .src-desc,
+body.il-static-page .step p,
+body.il-static-page .guide p {
+  color: var(--il-muted) !important;
+  font-size: 14px !important;
+  line-height: 1.62 !important;
+}
+
+body.il-static-page .section h2,
+body.il-static-page h2 {
+  font-family: var(--il-display) !important;
+  font-weight: 400 !important;
+  font-size: clamp(26px, 3vw, 40px) !important;
+  line-height: 1.08 !important;
+  letter-spacing: -.018em !important;
+  color: var(--il-ink) !important;
+}
+
+body.il-static-page h3 {
+  font-family: var(--il-sans) !important;
+  font-size: 17px !important;
+  font-weight: 650 !important;
+  letter-spacing: -.015em !important;
+  color: var(--il-ink) !important;
+}
+
+body.il-static-page p,
+body.il-static-page li { color: var(--il-ink-2) !important; line-height: 1.72 !important; }
+
+body.il-static-page a:not(.btn-primary):not(.btn-ghost):not(.il-global-tab):not(.soc-btn) {
+  color: var(--il-brass) !important;
+  text-underline-offset: 3px;
+}
+
+body.il-static-page .soc-btn {
+  border-radius: var(--il-radius-pill) !important;
+  border: 1px solid var(--il-line-strong) !important;
+  background: var(--il-surface-2) !important;
+  color: var(--il-ink) !important;
+  padding: 11px 20px !important;
+  transition: all var(--il-fast) !important;
+}
+
+body.il-static-page .soc-btn:hover {
+  border-color: var(--il-line-gold) !important;
+  color: var(--il-brass-bright) !important;
+  transform: translateY(-1px) !important;
+}
+
+body.il-static-page .tag,
+body.il-static-page .src-tags span {
+  border-radius: var(--il-radius-pill) !important;
+  border: 1px solid var(--il-line) !important;
+  background: var(--il-surface-2) !important;
+  color: var(--il-muted) !important;
+  font-size: 11px !important;
+  padding: 5px 11px !important;
+}
+
+body.il-static-page .tag.gold {
+  border-color: var(--il-line-gold) !important;
+  background: var(--il-brass-soft) !important;
+  color: var(--il-brass-bright) !important;
+}
+
+body.il-static-page .note,
+body.il-static-page .sec-note {
+  border-radius: var(--il-radius) !important;
+  border: 1px solid var(--il-line) !important;
+  border-left: 3px solid var(--il-brass) !important;
+  background: var(--il-brass-softer) !important;
+  color: var(--il-muted) !important;
+  padding: 16px 20px !important;
+}
+
+/* Side rail on long static documents */
+body.il-static-page .static-rail a {
+  border-radius: var(--il-radius-sm) !important;
+  color: var(--il-faint) !important;
+  transition: all var(--il-fast) !important;
+}
+
+body.il-static-page .static-rail a:hover { color: var(--il-ink) !important; background: var(--il-surface-2) !important; }
+
+body.il-static-page .static-rail a.active {
+  color: var(--il-brass) !important;
+  background: var(--il-brass-soft) !important;
+  box-shadow: inset 2px 0 0 var(--il-brass) !important;
+}
+
+body.il-static-page .static-rail-label {
+  color: var(--il-faint) !important;
+  letter-spacing: .16em !important;
+  text-transform: uppercase !important;
+  font-size: 10px !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   20 · AUTH PAGES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+body.il-auth-page {
+  position: relative;
+  min-height: 100vh;
+}
+
+body.il-auth-page .field label,
+body.il-auth-page label {
+  color: var(--il-faint) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: .09em !important;
+  text-transform: uppercase !important;
+}
+
+body.il-auth-page input {
+  padding: 14px 16px !important;
+  font-size: 14.5px !important;
+}
+
+body.il-auth-page .il-auth-submit,
+body.il-auth-page button[type="submit"] {
+  width: 100% !important;
+  padding: 15px 24px !important;
+  font-size: 14.5px !important;
+  margin-top: 6px !important;
+}
+
+body.il-auth-page h1 {
+  font-family: var(--il-display) !important;
+  font-weight: 400 !important;
+  font-size: clamp(28px, 3vw, 38px) !important;
+  letter-spacing: -.02em !important;
+  line-height: 1.1 !important;
+  color: var(--il-ink) !important;
+}
+
+body.il-auth-page h1 em {
+  font-family: var(--il-display) !important;
+  font-style: italic !important;
+  color: var(--il-brass) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   21 · LENSSCORE LAB
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+body.il-lens-page h1 {
+  font-family: var(--il-display) !important;
+  font-weight: 400 !important;
+  letter-spacing: -.02em !important;
+  line-height: 1.04 !important;
+  font-size: clamp(34px, 4vw, 56px) !important;
+  color: var(--il-ink) !important;
+}
+
+body.il-lens-page h1 em {
+  font-family: var(--il-display) !important;
+  font-style: italic !important;
+  color: var(--il-brass) !important;
+}
+
+body.il-lens-page .card,
+body.il-lens-page .panel,
+body.il-lens-page section > div {
+  border-radius: var(--il-radius-lg) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   22 · LANDING CORRECTIONS
+   Higher-specificity fixes over the older landing layers.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+#landing-page .il-landing-hero .il-landing-copy {
+  max-width: 700px !important;
+}
+
+#landing-page .il-landing-hero .il-landing-copy h1 {
+  max-width: 15ch !important;
+  font-size: clamp(42px, 4.6vw, 66px) !important;
+}
+
+/* Hero CTA row — real buttons, not stray text links */
+#landing-page .il-landing-hero .il-landing-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin-top: 28px !important;
+  flex-wrap: wrap !important;
+}
+
+#landing-page .il-landing-actions .il-landing-primary,
+#landing-page .il-landing-actions .il-landing-secondary,
+#landing-page .il-landing-actions a,
+#landing-page .il-landing-actions button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 9px !important;
+  padding: 14px 26px !important;
+  font-size: 14px !important;
+  font-weight: 650 !important;
+  border-radius: var(--il-radius-pill) !important;
+  text-decoration: none !important;
+  white-space: nowrap;
+}
+
+#landing-page .il-landing-actions .il-landing-secondary,
+#landing-page .il-landing-actions a.il-landing-secondary {
+  border: 1px solid var(--il-line-strong) !important;
+  background: var(--il-surface-2) !important;
+  background-image: var(--il-sheen) !important;
+  color: var(--il-ink) !important;
+  box-shadow: var(--il-edge), var(--il-shadow-xs) !important;
+}
+
+#landing-page .il-landing-actions .il-landing-secondary:hover {
+  border-color: var(--il-line-gold) !important;
+  color: var(--il-brass-bright) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Ambient hero glow must not clip into a visible rectangle */
+#landing-page { overflow: visible !important; overflow-x: clip !important; }
+#landing-page .il-landing-hero { overflow: visible !important; }
+
+#landing-page .il-landing-hero::before {
+  width: min(1500px, 150%) !important;
+  height: 720px !important;
+  top: -22% !important;
+  filter: blur(60px) !important;
+  background: radial-gradient(closest-side, rgba(214, 172, 100, .14), rgba(214, 172, 100, .05) 48%, transparent 76%) !important;
+}
+
+/* Section heads centred where the layout is centred */
+#landing-page .il-cap-head {
+  text-align: center;
+  max-width: 760px;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+#landing-page .il-cap-head p { margin-left: auto; margin-right: auto; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   23 · LANDING LAYOUT REFINEMENT
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Product UI text stays sans even inside display-serif sections */
+#landing-page .il-cap-card strong,
+#landing-page .il-wf-head strong,
+#landing-page .il-cap-card span,
+#landing-page .il-wf-panel p,
+#landing-page .il-landing-proof span,
+#landing-page .il-preview-caption,
+#landing-page .il-hero-mock,
+#landing-page .il-hero-mock * {
+  font-family: var(--il-sans) !important;
+}
+
+#landing-page .il-hero-mock .ihm-vals b,
+#landing-page .il-hero-mock .ihm-pill {
+  font-family: var(--il-mono) !important;
+}
+
+/* Preview caption sits below the mock instead of on top of it */
+#landing-page .il-preview-caption {
+  position: static !important;
+  transform: none !important;
+  inset: auto !important;
+  margin-top: 22px !important;
+}
+
+/* Workflow section: give the panels room to breathe */
+@media (min-width: 981px) {
+  #landing-page .il-workflow-visual {
+    grid-template-columns: minmax(280px, 0.85fr) minmax(0, 1.6fr) !important;
+    gap: clamp(32px, 4vw, 64px) !important;
+    align-items: center !important;
+  }
+
+  #landing-page .il-workflow-panels {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 16px !important;
+  }
+}
+
+#landing-page .il-wf-panel { padding: 24px 22px !important; }
+
+#landing-page .il-wf-head {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin-bottom: 14px !important;
+}
+
+#landing-page .il-wf-head i {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px; height: 30px;
+  border-radius: 9px;
+  border: 1px solid var(--il-line-gold);
+  background: var(--il-brass-soft);
+  font-size: 15px !important;
+  flex: 0 0 auto;
+}
+
+#landing-page .il-wf-head strong { font-size: 14px !important; white-space: nowrap; }
+
+#landing-page .il-workflow-copy h2 { max-width: 14ch; }
+
+/* Tighten the vertical rhythm a little so sections feel composed, not adrift */
+#landing-page .il-capabilities { margin-bottom: clamp(60px, 7vw, 104px) !important; }
+#landing-page .il-workflow-visual { margin-bottom: clamp(60px, 7vw, 104px) !important; }
+#landing-page .il-landing-band { margin-bottom: clamp(24px, 3vw, 40px) !important; }
+
+#landing-page .il-landing-hero { padding-bottom: clamp(56px, 7vw, 100px) !important; }
+
+/* Market band: title and action on one balanced line */
+#landing-page .il-landing-band {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: clamp(24px, 3vw, 48px) !important;
+}
+
+#landing-page .il-landing-band h2 { margin-top: 16px !important; }
+#landing-page .il-landing-band p { margin-bottom: 0 !important; }
+
+#landing-page .il-landing-band button {
+  padding: 15px 28px !important;
+  font-size: 14px !important;
+  white-space: nowrap;
+}
+
+@media (max-width: 860px) {
+  #landing-page .il-landing-band { grid-template-columns: minmax(0, 1fr) !important; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   24 · SURFACE CORRECTIONS
+   Remove the opaque scrims that older layers paint over the page so the
+   ambient background reads as one continuous surface.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+html, body { overflow-x: hidden; }
+
+#view-home,
+#landing-page,
+.il-landing,
+#view-tool,
+.home-shell,
+.hs-main {
+  background: none !important;
+  background-color: transparent !important;
+}
+
+/* Full-bleed hero light, anchored to the section rather than a clipped child */
+#landing-page { position: relative; }
+
+#landing-page::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: -180px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(1500px, 128%);
+  height: 900px;
+  pointer-events: none;
+  background:
+    radial-gradient(closest-side, rgba(214, 172, 100, .13), rgba(214, 172, 100, .04) 46%, transparent 74%);
+  filter: blur(40px);
+}
+
+
+
+/* The old hero-scoped glow is superseded */
+#landing-page .il-landing-hero::before { display: none !important; }
+
+/* Nav — beat the older theme-scoped rules */
+html[data-theme="dark"] nav#main-nav,
+html[data-theme="dark"] nav.il-global-nav,
+html nav#main-nav,
+html nav.il-global-nav {
+  background: rgba(6, 7, 10, .72) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, .07) !important;
+  backdrop-filter: saturate(180%) blur(22px) !important;
+  -webkit-backdrop-filter: saturate(180%) blur(22px) !important;
+}
+
+html[data-theme="dark"] nav#main-nav.il-nav-scrolled,
+html[data-theme="dark"] nav.il-global-nav.il-nav-scrolled,
+html nav#main-nav.il-nav-scrolled,
+html nav.il-global-nav.il-nav-scrolled {
+  background: rgba(6, 7, 10, .93) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05), 0 20px 44px -22px rgba(0, 0, 0, 1) !important;
+}
+
+html:not([data-theme="dark"]) nav#main-nav,
+html:not([data-theme="dark"]) nav.il-global-nav {
+  background: rgba(10, 11, 14, .78) !important;
+}
+
+html:not([data-theme="dark"]) nav#main-nav.il-nav-scrolled,
+html:not([data-theme="dark"]) nav.il-global-nav.il-nav-scrolled {
+  background: rgba(10, 11, 14, .95) !important;
+}
+
+/* Workflow copy reads as body text, not a bold slab */
+#landing-page .il-workflow-copy h2 { max-width: 17ch !important; }
+
+#landing-page .il-workflow-copy p {
+  font-weight: 400 !important;
+  color: var(--il-muted) !important;
+  font-size: 15.5px !important;
+  max-width: 40ch !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   25 · BASE SURFACE OWNERSHIP
+   Older layers paint tinted gradients directly onto <body>. The ambient
+   treatment lives on body::before, so the element itself must be a flat base.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+html,
+html[data-theme="dark"],
+html:not([data-theme="dark"]) {
+  background-color: var(--il-bg) !important;
+  background-image: none !important;
+}
+
+html body,
+html[data-theme="dark"] body,
+html:not([data-theme="dark"]) body,
+body.il-product-page,
+body.il-static-page,
+body.il-auth-page,
+body.il-lens-page {
+  background-color: var(--il-bg) !important;
+  background-image: none !important;
+}
+
+/* Older hero "glass sheen" overlays paint a hard-edged lighter rectangle over
+   the section. The ambient treatment replaces them. */
+#landing-page .il-landing-hero::before,
+#landing-page .il-landing-hero::after,
+.il-landing .il-landing-hero::before,
+.il-landing .il-landing-hero::after {
+  content: none !important;
+  display: none !important;
+  background: none !important;
+  opacity: 0 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   26 · STATIC PAGE CORRECTIONS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Display serif applies to page titles wherever they live, not just .hero */
+body.il-static-page h1,
+body.il-lens-page h1,
+body.il-static-page .wrap > h1 {
+  font-family: var(--il-display) !important;
+  font-weight: 400 !important;
+  font-size: clamp(38px, 4.6vw, 62px) !important;
+  line-height: 1.04 !important;
+  letter-spacing: -.02em !important;
+  color: var(--il-ink) !important;
+}
+
+/* The feature tiles number themselves through .feat-icon::before; the emoji in
+   the markup is intentionally suppressed. Keep it that way. */
+body.il-static-page .feat-icon {
+  font-size: 0 !important;
+  gap: 0 !important;
+}
+
+body.il-static-page .feat-icon::before {
+  font-family: var(--il-mono) !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  letter-spacing: .06em !important;
+  color: var(--il-brass) !important;
+}
+
+/* Ghost / tertiary buttons need a readable resting state */
+.btn-ghost,
+body.il-static-page .btn-ghost,
+body.il-static-page a.btn-ghost {
+  border: 1px solid var(--il-line-strong) !important;
+  border-radius: var(--il-radius-pill) !important;
+  background: var(--il-surface-2) !important;
+  background-image: var(--il-sheen) !important;
+  color: var(--il-ink) !important;
+  font-weight: 600 !important;
+  box-shadow: var(--il-edge), var(--il-shadow-xs) !important;
+  transition: all var(--il-fast) !important;
+}
+
+.btn-ghost:hover,
+body.il-static-page .btn-ghost:hover {
+  border-color: var(--il-line-gold) !important;
+  color: var(--il-brass-bright) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Section blocks on documentation pages should not read as one giant card */
+body.il-static-page .wrap > h2 {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin-top: clamp(44px, 5vw, 72px) !important;
+  margin-bottom: 14px !important;
+}
+
+body.il-static-page .wrap > h2::after {
+  content: "";
+  display: block;
+  width: 56px;
+  height: 2px;
+  margin-top: 16px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--il-brass), transparent);
+}
+
+/* Sticky chrome must stay above page content regardless of layer order */
+nav#main-nav, nav.il-global-nav { z-index: 100 !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   27 · PRODUCT WORKSPACE — REAL COMPONENTS
+   Targets the actual class vocabulary of the application shell rather than
+   generic names, so every dense surface picks up the system.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Skip link stays out of the way until focused ──────────────────────────── */
+.skip-link, .il-skip-link {
+  top: auto !important;
+  bottom: calc(100% + 10px) !important;
+  border-radius: var(--il-radius-pill) !important;
+  background: linear-gradient(180deg, #F0CE8B, #C9A05A) !important;
+  color: #171004 !important;
+}
+
+.skip-link:focus, .il-skip-link:focus {
+  top: 12px !important;
+  bottom: auto !important;
+  transform: none !important;
+  box-shadow: 0 12px 32px -10px rgba(0, 0, 0, .8) !important;
+}
+
+/* ── Shell ─────────────────────────────────────────────────────────────────── */
+.app-shell, .app-main, .app-content-scroll, .dash-layout, .dash-main {
+  background: transparent !important;
+}
+
+.app-sidebar, .dash-sidebar {
+  background: color-mix(in srgb, var(--il-bg-elevated) 82%, transparent) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-right: 1px solid var(--il-line) !important;
+}
+
+.sb-group-label {
+  color: var(--il-faint) !important;
+  font-size: 9.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: .18em !important;
+  text-transform: uppercase !important;
+}
+
+.sb-item {
+  position: relative;
+  border-radius: var(--il-radius-sm) !important;
+  border: 1px solid transparent !important;
+  color: var(--il-muted) !important;
+  font-weight: 550 !important;
+  transition: color var(--il-fast), background var(--il-fast),
+              border-color var(--il-fast), transform var(--il-fast) !important;
+}
+
+.sb-item:hover {
+  color: var(--il-ink) !important;
+  background: var(--il-surface-2) !important;
+  border-color: var(--il-line) !important;
+}
+
+.sb-item.active, .sb-item.on, .sb-item[aria-current="page"] {
+  color: var(--il-brass-bright) !important;
+  background: linear-gradient(90deg, var(--il-brass-soft), transparent 88%) !important;
+  border-color: var(--il-line-gold) !important;
+}
+
+.sb-item.active::before, .sb-item.on::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 22%; bottom: 22%;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--il-brass);
+  box-shadow: 0 0 10px 1px var(--il-brass);
+}
+
+.sb-item-icon { color: inherit !important; opacity: .95; }
+
+.sb-pro-card {
+  border-radius: var(--il-radius) !important;
+  border: 1px solid var(--il-line-gold) !important;
+  background-image:
+    var(--il-sheen),
+    radial-gradient(130% 110% at 50% 0%, var(--il-brass-soft), transparent 64%) !important;
+  box-shadow: var(--il-edge), var(--il-shadow-sm) !important;
+}
+
+.sb-pro-title { color: var(--il-brass-bright) !important; font-weight: 700 !important; }
+.sb-pro-sub { color: var(--il-muted) !important; }
+
+/* ── Section chrome ────────────────────────────────────────────────────────── */
+.app-section-hdr {
+  background: color-mix(in srgb, var(--il-bg) 76%, transparent) !important;
+  backdrop-filter: saturate(160%) blur(18px) !important;
+  -webkit-backdrop-filter: saturate(160%) blur(18px) !important;
+  border-bottom: 1px solid var(--il-line) !important;
+}
+
+.sec-label, .app-section-hdr .sec-label {
+  color: var(--il-brass) !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: .18em !important;
+  text-transform: uppercase !important;
+}
+
+.sec-h2 {
+  font-family: var(--il-sans) !important;
+  font-weight: 650 !important;
+  letter-spacing: -.02em !important;
+  color: var(--il-ink) !important;
+}
+
+.sec-sub { color: var(--il-muted) !important; }
+
+/* ── Cards used across the product ─────────────────────────────────────────── */
+.hc,
+.panel-box,
+.sidebar-card,
+.edu-card,
+.mo-bv2-card,
+.hfs-item,
+.scenario-input-card,
+.cex-box,
+.pricing-card,
+.news-section,
+.screener-summary,
+.scr-table-wrap,
+.cmp-table-wrap,
+.dp-chart-wrap,
+.as-wrap,
+.tool-welcome {
+  border-radius: var(--il-radius-lg) !important;
+  border: 1px solid var(--il-line) !important;
+  background-color: var(--il-surface) !important;
+  background-image: var(--il-sheen) !important;
+  box-shadow: var(--il-edge), var(--il-shadow-sm) !important;
+  transition: transform var(--il-mid), border-color var(--il-mid), box-shadow var(--il-mid) !important;
+}
+
+.hc:hover, .mo-bv2-card:hover, .hfs-item:hover, .edu-card:hover {
+  border-color: var(--il-line-strong) !important;
+  box-shadow: var(--il-edge), var(--il-shadow-md) !important;
+}
+
+a.hc:hover, a.hfs-item:hover, a.mo-bv2-card:hover {
+  transform: translateY(-3px) !important;
+  border-color: var(--il-line-gold) !important;
+}
+
+.hc-hdr { border-bottom: 1px solid var(--il-line) !important; }
+
+.hc-title, .panel-box-title, .sidebar-card-title, .analyst-box-title, .edu-title, .chart-title {
+  font-family: var(--il-sans) !important;
+  font-weight: 650 !important;
+  letter-spacing: -.012em !important;
+  color: var(--il-ink) !important;
+}
+
+.hc-link { color: var(--il-brass) !important; transition: color var(--il-fast) !important; }
+.hc-link:hover { color: var(--il-brass-bright) !important; }
+
+.edu-body, .edu-term { color: var(--il-ink-2) !important; }
+
+.edu-formula {
+  font-family: var(--il-mono) !important;
+  border-radius: var(--il-radius-sm) !important;
+  border: 1px solid var(--il-line) !important;
+  background: rgba(0, 0, 0, .22) !important;
+  color: var(--il-brass-bright) !important;
+}
+
+html:not([data-theme="dark"]) .edu-formula { background: var(--il-surface-3) !important; }
+
+.edu-kicker {
+  color: var(--il-brass) !important;
+  letter-spacing: .16em !important;
+  text-transform: uppercase !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+}
+
+/* ── Price / result header ─────────────────────────────────────────────────── */
+.result-header {
+  border-radius: var(--il-radius-lg) !important;
+  border: 1px solid var(--il-line) !important;
+  background-color: var(--il-surface) !important;
+  background-image:
+    var(--il-sheen),
+    radial-gradient(120% 180% at 92% -40%, var(--il-brass-soft), transparent 56%) !important;
+  box-shadow: var(--il-edge), var(--il-shadow-md) !important;
+}
+
+.price-big {
+  font-family: var(--il-mono) !important;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.035em !important;
+  color: var(--il-ink) !important;
+}
+
+.price-chg, .ntb-chg, .ntb-price {
+  font-family: var(--il-mono) !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.price-time, .chart-data-note, .tool-disclaimer, .as-note, .il-data-source-line {
+  color: var(--il-faint) !important;
+  font-size: 11.5px !important;
+}
+
+.res-ticker-lbl {
+  font-family: var(--il-mono) !important;
+  letter-spacing: .02em !important;
+  color: var(--il-brass) !important;
+}
+
+.res-name { color: var(--il-ink) !important; font-weight: 650 !important; letter-spacing: -.015em !important; }
+
+.res-exchange {
+  border-radius: var(--il-radius-pill) !important;
+  border: 1px solid var(--il-line) !important;
+  background: var(--il-surface-2) !important;
+  color: var(--il-muted) !important;
+  font-size: 10.5px !important;
+  letter-spacing: .06em !important;
+}
+
+/* ── Stats footer ──────────────────────────────────────────────────────────── */
+.app-stats-footer {
+  border-top: 1px solid var(--il-line) !important;
+  background: color-mix(in srgb, var(--il-bg-elevated) 84%, transparent) !important;
+  backdrop-filter: blur(18px) !important;
+}
+
+.asf-item {
+  border-radius: var(--il-radius-sm) !important;
+  border: 1px solid transparent !important;
+  transition: background var(--il-fast), border-color var(--il-fast) !important;
+}
+
+.asf-item:hover { background: var(--il-surface-2) !important; border-color: var(--il-line) !important; }
+
+.asf-l {
+  color: var(--il-faint) !important;
+  font-size: 9.5px !important;
+  font-weight: 650 !important;
+  letter-spacing: .12em !important;
+  text-transform: uppercase !important;
+}
+
+.asf-v {
+  font-family: var(--il-mono) !important;
+  font-variant-numeric: tabular-nums;
+  color: var(--il-ink) !important;
+}
+
+/* ── Charts ────────────────────────────────────────────────────────────────── */
+.chart-wrap, .dp-chart-wrap, .hh-preview-chart {
+  border-radius: var(--il-radius) !important;
+  border: 1px solid var(--il-line) !important;
+  background: rgba(0, 0, 0, .2) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04) !important;
+}
+
+html:not([data-theme="dark"]) .chart-wrap,
+html:not([data-theme="dark"]) .dp-chart-wrap { background: var(--il-surface-2) !important; }
+
+.chart-header { border-bottom: 1px solid var(--il-line) !important; }
+
+.chart-key {
+  color: var(--il-muted) !important;
+  font-family: var(--il-mono) !important;
+  font-size: 11px !important;
+}
+
+.app-chart-toolbar, .cex-toolbar {
+  border-radius: var(--il-radius) !important;
+  border: 1px solid var(--il-line) !important;
+  background: color-mix(in srgb, var(--il-surface-2) 88%, transparent) !important;
+  backdrop-filter: blur(14px) !important;
+  box-shadow: var(--il-edge), var(--il-shadow-xs) !important;
+}
+
+.chart-exp-btn, .chart-zoom-btn, .chart-save-btn, .cex-icon-btn, .ash-btn, .act-btn {
+  border-radius: var(--il-radius-sm) !important;
+  border: 1px solid var(--il-line) !important;
+  background: var(--il-surface-2) !important;
+  color: var(--il-muted) !important;
+  transition: all var(--il-fast) !important;
+}
+
+.chart-exp-btn:hover, .chart-zoom-btn:hover, .chart-save-btn:hover,
+.cex-icon-btn:hover, .ash-btn:hover, .act-btn:hover {
+  border-color: var(--il-line-gold) !important;
+  color: var(--il-brass-bright) !important;
+  background: var(--il-brass-softer) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* ── Pills, toggles, filters ───────────────────────────────────────────────── */
+.tf-pill, .sa-pill, .rpill, .cex-type-btn, .cex-btn, .fin-tab-btn, .fin-subtab,
+.sec-filter-btn, .scr-sort-btn, .sa-sort-btn, .mo-tab, .mst-btn, .mbn-item, .mmenu-item {
+  border-radius: var(--il-radius-pill) !important;
+  border: 1px solid var(--il-line) !important;
+  background: var(--il-surface-2) !important;
+  color: var(--il-muted) !important;
+  font-weight: 550 !important;
+  transition: all var(--il-fast) !important;
+}
+
+.tf-pill:hover, .sa-pill:hover, .rpill:hover, .cex-type-btn:hover, .cex-btn:hover,
+.fin-tab-btn:hover, .fin-subtab:hover, .sec-filter-btn:hover, .scr-sort-btn:hover,
+.mo-tab:hover, .mst-btn:hover, .mmenu-item:hover {
+  border-color: var(--il-line-gold) !important;
+  color: var(--il-brass-bright) !important;
+  background: var(--il-brass-softer) !important;
+}
+
+.tf-pill.on, .tf-pill.active, .sa-pill.on, .sa-pill.active, .rpill.on, .rpill.active,
+.cex-type-btn.on, .cex-type-btn.active, .fin-tab-btn.active, .fin-subtab.active,
+.sec-filter-btn.active, .mo-tab.active, .mst-btn.active, .mmenu-item.active {
+  border-color: transparent !important;
+  background: linear-gradient(180deg, #EDCB84, #C9A05A) !important;
+  color: #17100A !important;
+  font-weight: 700 !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), 0 6px 16px -8px rgba(214, 172, 100, .8) !important;
+}
+
+.range-pills, .app-tf-strip, .tf-right, .cex-type-toggle {
+  border-radius: var(--il-radius-pill) !important;
+}
+
+/* ── Inputs in the tool ────────────────────────────────────────────────────── */
+.fc-input, .ticker-input, input.ticker-input, .scr-slider {
+  border-radius: var(--il-radius-sm) !important;
+  border: 1px solid var(--il-line-strong) !important;
+  background: rgba(0, 0, 0, .2) !important;
+  color: var(--il-ink) !important;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, .3) !important;
+  font-family: var(--il-mono) !important;
+  transition: border-color var(--il-fast), box-shadow var(--il-fast) !important;
+}
+
+html:not([data-theme="dark"]) .fc-input,
+html:not([data-theme="dark"]) .ticker-input {
+  background: #FFFFFF !important;
+  box-shadow: inset 0 1px 3px rgba(24, 22, 18, .07) !important;
+}
+
+.fc-input:focus, .ticker-input:focus {
+  border-color: var(--il-brass) !important;
+  box-shadow: var(--il-focus), inset 0 2px 6px rgba(0, 0, 0, .25) !important;
+}
+
+.fc-label, .fg-label {
+  color: var(--il-faint) !important;
+  font-size: 10px !important;
+  font-weight: 650 !important;
+  letter-spacing: .12em !important;
+  text-transform: uppercase !important;
+}
+
+/* ── Data tables ───────────────────────────────────────────────────────────── */
+.scr-table, .cmp-table, .wl-table {
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.scr-table th, .cmp-table th, .wl-table th {
+  background: var(--il-surface-2) !important;
+  color: var(--il-faint) !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: .12em !important;
+  text-transform: uppercase !important;
+  border-bottom: 1px solid var(--il-line-strong) !important;
+}
+
+.scr-table td, .cmp-table td, .wl-table td {
+  border-bottom: 1px solid var(--il-line) !important;
+  color: var(--il-ink-2) !important;
+  font-family: var(--il-mono) !important;
+  font-size: 12.5px !important;
+}
+
+.scr-table tbody tr, .cmp-table tbody tr, .wl-table tbody tr {
+  transition: background var(--il-fast) !important;
+}
+
+.scr-table tbody tr:hover, .cmp-table tbody tr:hover, .wl-table tbody tr:hover {
+  background: var(--il-brass-softer) !important;
+}
+
+/* ── Scenario inputs keep their directional identity ───────────────────────── */
+.scenario-input-bear { border-left: 3px solid var(--il-red) !important; }
+.scenario-input-base { border-left: 3px solid var(--il-brass) !important; }
+.scenario-input-bull { border-left: 3px solid var(--il-green) !important; }
+
+.scenario-input-card { border-radius: var(--il-radius) !important; }
+
+/* ── Onboarding / welcome ──────────────────────────────────────────────────── */
+.tool-welcome, .tw-welcome-copy {
+  border-radius: var(--il-radius-lg) !important;
+}
+
+.tw-kicker {
+  color: var(--il-brass) !important;
+  letter-spacing: .16em !important;
+  text-transform: uppercase !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+}
+
+.tw-title {
+  font-family: var(--il-sans) !important;
+  font-weight: 650 !important;
+  letter-spacing: -.02em !important;
+  color: var(--il-ink) !important;
+}
+
+.tw-sub { color: var(--il-muted) !important; }
+
+/* ── Toasts & spinners ─────────────────────────────────────────────────────── */
+.toast {
+  border-radius: var(--il-radius) !important;
+  border: 1px solid var(--il-line-strong) !important;
+  background: color-mix(in srgb, var(--il-surface-3) 94%, transparent) !important;
+  backdrop-filter: blur(18px) !important;
+  box-shadow: var(--il-edge), var(--il-shadow-lg) !important;
+  color: var(--il-ink) !important;
+}
+
+.spinner {
+  border-color: var(--il-line-strong) !important;
+  border-top-color: var(--il-brass) !important;
+}
+
+/* ── Directional data colors ───────────────────────────────────────────────── */
+.pos, .up, .yes { color: var(--il-green-bright) !important; }
+.neg, .down, .danger { color: var(--il-red-bright) !important; }
+.neu { color: var(--il-muted) !important; }
+.gold { color: var(--il-brass) !important; }
+
+/* ── Pricing ───────────────────────────────────────────────────────────────── */
+.pricing-card, .pricing-tier {
+  border-radius: var(--il-radius-xl) !important;
+  padding: clamp(26px, 3vw, 38px) !important;
+}
+
+.pricing-card.featured, .pricing-tier.featured, .pricing-pop {
+  border-color: var(--il-line-gold) !important;
+  background-image:
+    var(--il-sheen),
+    radial-gradient(120% 120% at 50% 0%, var(--il-brass-soft), transparent 60%) !important;
+  box-shadow: var(--il-edge-strong), var(--il-shadow-lg), 0 0 60px -30px rgba(214, 172, 100, .8) !important;
+}
+
+.p-amount, .pricing-num, .plan-opt-price {
+  font-family: var(--il-mono) !important;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.03em !important;
+  color: var(--il-ink) !important;
+}
+
+.plan-opt {
+  border-radius: var(--il-radius) !important;
+  border: 1px solid var(--il-line) !important;
+  background: var(--il-surface-2) !important;
+  transition: all var(--il-fast) !important;
+}
+
+.plan-opt:hover, .plan-opt.sel {
+  border-color: var(--il-line-gold) !important;
+  background: var(--il-brass-softer) !important;
+}
+
+/* ── Workflow / feature strips ─────────────────────────────────────────────── */
+.workflow-step {
+  border-radius: var(--il-radius) !important;
+  border: 1px solid var(--il-line) !important;
+  background: var(--il-surface-2) !important;
+  background-image: var(--il-sheen) !important;
+}
+
+.workflow-num {
+  font-family: var(--il-mono) !important;
+  color: var(--il-brass) !important;
+}
+
+.hfs-icon { color: var(--il-brass) !important; }
+.hfs-title { color: var(--il-ink) !important; font-weight: 650 !important; }
+.hfs-desc { color: var(--il-muted) !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   28 · FINAL CORRECTIONS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Auth submit inherits the primary treatment */
+body.il-auth-page button[type="submit"],
+body.il-auth-page .btn-primary,
+body.il-auth-page form button:not(.static-theme-toggle):not(.btn-ghost) {
+  position: relative !important;
+  border: 1px solid rgba(255, 255, 255, .16) !important;
+  border-radius: var(--il-radius-pill) !important;
+  background: linear-gradient(180deg, #F0CE8B 0%, #D6AC64 44%, #B78B40 100%) !important;
+  color: #1A1204 !important;
+  font-weight: 700 !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .55),
+    inset 0 -1px 0 rgba(0, 0, 0, .18),
+    0 1px 2px rgba(0, 0, 0, .3),
+    0 14px 32px -14px rgba(214, 172, 100, .7) !important;
+  overflow: hidden;
+}
+
+body.il-auth-page button[type="submit"]:hover {
+  transform: translateY(-1px) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .65),
+    0 2px 4px rgba(0, 0, 0, .3),
+    0 20px 44px -14px rgba(214, 172, 100, .85) !important;
+}
+
+/* Hero search must never overflow its container on narrow screens */
+#landing-page .il-landing-search {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  flex-wrap: nowrap !important;
+}
+
+#landing-page .il-landing-search input {
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+  width: auto !important;
+}
+
+#landing-page .il-landing-search button {
+  flex: 0 0 auto !important;
+  max-width: 45% !important;
+}
+
+@media (max-width: 560px) {
+  #landing-page .il-landing-search {
+    flex-wrap: wrap !important;
+    border-radius: var(--il-radius-lg) !important;
+    padding: 14px !important;
+    gap: 10px !important;
+  }
+
+  #landing-page .il-landing-search input {
+    flex: 1 1 100% !important;
+    padding: 6px 0 !important;
+  }
+
+  #landing-page .il-landing-search button {
+    flex: 1 1 100% !important;
+    max-width: none !important;
+  }
+
+  #landing-page .il-landing-actions a,
+  #landing-page .il-landing-actions button { width: 100% !important; }
+}
+
+/* Equal-height card grids */
+#landing-page .il-cap-grid,
+body.il-static-page .features { align-items: stretch !important; }
+
+#landing-page .il-cap-card,
+body.il-static-page .feat { height: 100% !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   29 · PRIMARY BUTTON CONTRAST
+   Several older layers set a light gold text colour on these controls, which
+   is unreadable once the fill itself is gold. Ink text is authoritative here.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+html body .btn-primary,
+html body .btn-plan-gold,
+html body .btn-modal-cta,
+html body .btn-run,
+html body .btn-search,
+html body .btn-save-analysis,
+html body .il-global-trial,
+html body .il-landing-primary,
+html body .guide-cta,
+html body .hh-search-btn,
+html body .lens-run-btn,
+html body .cta a,
+html body .cta-row .btn-primary,
+html body #landing-page .il-landing-search button,
+html body #landing-page .il-landing-band button,
+html body.il-auth-page button[type="submit"],
+html body.il-static-page .cta a,
+html body.il-static-page a.btn-primary {
+  border: 1px solid rgba(255, 255, 255, .18) !important;
+  border-radius: var(--il-radius-pill) !important;
+  background: linear-gradient(180deg, #F0CE8B 0%, #D6AC64 44%, #B78B40 100%) !important;
+  color: #17100A !important;
+  -webkit-text-fill-color: #17100A !important;
+  font-weight: 700 !important;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, .2) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .55),
+    inset 0 -1px 0 rgba(0, 0, 0, .18),
+    0 1px 2px rgba(0, 0, 0, .3),
+    0 14px 32px -14px rgba(214, 172, 100, .7) !important;
+}
+
+html body .btn-primary *,
+html body .il-global-trial *,
+html body .il-landing-primary *,
+html body .cta a *,
+html body .hh-search-btn *,
+html body #landing-page .il-landing-search button * {
+  color: inherit !important;
+  -webkit-text-fill-color: inherit !important;
+}
+
+html body .cta {
+  border-radius: var(--il-radius-lg) !important;
+  border: 1px solid var(--il-line) !important;
+  background-color: var(--il-surface) !important;
+  background-image: var(--il-sheen), radial-gradient(120% 150% at 90% -30%, var(--il-brass-soft), transparent 58%) !important;
+  box-shadow: var(--il-edge), var(--il-shadow-sm) !important;
+  padding: clamp(22px, 2.6vw, 32px) !important;
+}
+
+html body .cta a {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  padding: 13px 26px !important;
+  font-size: 14px !important;
+  text-decoration: none !important;
+}
+
+/* Panel titles inside cards stay in the UI sans; editorial serif is reserved
+   for page-level headings. */
+body.il-static-page .panel h2,
+body.il-static-page .feat h2,
+body.il-static-page .step h2,
+body.il-static-page .guide h2,
+body.il-static-page .source-card h2,
+body.il-static-page .cta h2,
+body.il-static-page aside h2 {
+  font-family: var(--il-sans) !important;
+  font-size: 18px !important;
+  font-weight: 650 !important;
+  letter-spacing: -.015em !important;
+}

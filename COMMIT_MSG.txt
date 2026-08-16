@@ -1,0 +1,33 @@
+Rebuild the interface around a premium dark-first design system
+
+The product read as flat outlined boxes on a pale surface: 3px radii, hairline
+borders, no elevation, and twelve stacked stylesheets pulling in different
+directions. This adds one authoritative layer that redefines the canonical
+--il-* tokens every older sheet already maps onto, so the whole surface moves
+together instead of component by component.
+
+- Dark is now the default surface; light is rebuilt as warm paper.
+- Cool ink surfaces layered by elevation, with warm gold as the sole accent.
+- Radii 3px -> 10-28px, gradient sheens, lit top edges, real shadows.
+- Instrument Serif for display type; DM Mono with tabular numerals for figures.
+- Glass navigation, brushed-gold primary controls, inset-depth inputs.
+- Ambient horizon light, fine grid, and grain so dark areas are not flat voids.
+- Restrained scroll reveal and pointer parallax, with a reveal failsafe and a
+  beforeprint handler so content can never stay hidden.
+
+Also fixes three defects found along the way:
+
+- Static pages bootstrapped the theme from an inline script, which the
+  production CSP (scriptSrc 'self') silently blocked, so dark mode never
+  applied on About, Blog, and the legal pages. They now load
+  theme-bootstrap.js externally, which also satisfies the no-inline-scripts
+  rule in the architecture doc.
+- Primary calls to action rendered light gold text on a gold fill and were
+  effectively unreadable, including the navigation trial button.
+- The skip link was partially visible in the top-left corner while unfocused.
+
+No feature, route, API, or markup logic was removed. Reverting is one <link>.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01TrAMqQsWuULsHzWHxgyrwg
+

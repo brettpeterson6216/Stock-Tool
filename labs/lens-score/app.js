@@ -103,8 +103,9 @@
   }
 
   function applySavedTheme() {
+    // Dark is the product default; light applies only when explicitly chosen.
     const saved = window.localStorage.getItem("il-theme");
-    document.documentElement.dataset.theme = saved === "dark" ? "dark" : "light";
+    document.documentElement.dataset.theme = saved === "light" ? "light" : "dark";
   }
 
   function toggleTheme() {
