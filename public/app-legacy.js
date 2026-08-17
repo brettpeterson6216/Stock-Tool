@@ -1377,7 +1377,7 @@ function updateLimitUI(remaining, limit, plan) {
       <div style="height:100%;width:${pct}%;background:${color};border-radius:2px;transition:width .3s;"></div>
     </div>
     ${isGuest
-      ? `<button onclick="startGuestSignup('analysis_limit_counter')" style="font-size:.63rem;padding:.22rem .61rem;background:var(--gold);color:var(--ink);border:none;border-radius:4px;cursor:pointer;font-weight:700;">Create free account for 5/day</button>`
+      ? `<button onclick="startGuestSignup('analysis_limit_counter')" style="font-size:.63rem;padding:.22rem .61rem;background:var(--gold);color:#17100A;border:none;border-radius:999px;cursor:pointer;font-weight:700;">Create free account for 5/day</button>`
       : remaining === 0 ? `<button onclick="showUpgradeModal()" style="font-size:.63rem;padding:.15rem .45rem;background:var(--gold);color:var(--ink);border:none;border-radius:4px;cursor:pointer;font-weight:700;">Upgrade</button>` : ''}
   `;
 }

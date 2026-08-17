@@ -76,6 +76,7 @@ const financialsRouter  = require("./routes/financials");
 const lensScoreRouter   = require("./routes/lens-score");
 const stockLandingRouter = require("./routes/stock-landing");
 const workspaceRouter     = require("./routes/workspace");
+const analysisRouter      = require("./routes/analysis");
 const providerHealth      = require("./lib/provider-health");
 const { productionReadiness } = require("./lib/readiness");
 const { buildSitemapXml } = require("./lib/acquisition-tickers");
@@ -212,6 +213,7 @@ app.use("/api",         financialsRouter);  // /api/financials/*, /api/earnings/
                                             // /api/institutional/*, /api/darkpool/*, /api/me/limit
 app.use("/api",         lensScoreRouter);    // /api/lens-score/*
 app.use("/api",         workspaceRouter);    // /api/workspace/*
+app.use("/api",         analysisRouter);     // /api/analysis/:ticker
 
 // ============================================================
 //  Static HTML pages

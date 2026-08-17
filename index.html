@@ -89,6 +89,9 @@
 <script defer src="/research-system.js?v=20260725-2"></script>
 <script defer src="/product-system.js?v=20260730-1"></script>
 <script defer src="/workspace-system.js?v=20260813-2"></script>
+<script defer src="/vendor/lightweight-charts.standalone.production.js?v=5.2.1"></script>
+<script defer src="/chart-engine.js?v=20260817-1"></script>
+<script defer src="/chart-analysis.js?v=20260817-1"></script>
 <script defer src="/tool-launch.js?v=20260722-1"></script>
 <link href="/legacy-app.css?v=20260730-4" rel="stylesheet">
 <link href="/premium.css?v=20260813-1" rel="stylesheet">
@@ -97,6 +100,7 @@
   <link href="/site-shell.css?v=20260813-2" rel="stylesheet">
 <link href="/landing-polish.css?v=20260813-1" rel="stylesheet">
 <link href="/beauty-system.css?v=20260813-1" rel="stylesheet">
+<link href="/chart-engine.css?v=20260817-1" rel="stylesheet">
 <link rel="stylesheet" href="/premium-revamp.css?v=20260815-1">
 <script defer src="/premium-motion.js?v=20260815-1"></script>
 </head>
@@ -737,9 +741,9 @@
         <button class="tf-pill" onclick="changeRange('5y',this)" aria-pressed="false">5Y</button>
         <button class="tf-pill" onclick="changeRange('max',this)" aria-pressed="false">Max</button>
         <div class="tf-right">
-          <button class="tf-tog" onclick="toggleToolbarOption(this)" aria-pressed="false">Log</button>
-          <button class="tf-tog" onclick="toggleToolbarOption(this)" aria-pressed="false">%</button>
-          <button class="tf-tog" onclick="toggleToolbarOption(this)" aria-pressed="false">Vol</button>
+          <button class="tf-tog" data-il-scale="log" onclick="ilSetScale('log',this)" title="Logarithmic price scale" aria-pressed="false">Log</button>
+          <button class="tf-tog" data-il-scale="percent" onclick="ilSetScale('percent',this)" title="Percent change from the start of the range" aria-pressed="false">%</button>
+          <button class="tf-tog" data-il-vol onclick="ilToggleVolume(this)" title="Volume pane" aria-pressed="true">Vol</button>
         </div>
       </div>
       <!-- Scrollable content area -->

@@ -1601,7 +1601,14 @@ body.il-static-page h3 {
 body.il-static-page p,
 body.il-static-page li { color: var(--il-ink-2) !important; line-height: 1.72 !important; }
 
-body.il-static-page a:not(.btn-primary):not(.btn-ghost):not(.il-global-tab):not(.soc-btn) {
+/* Prose links only. A blanket `a` rule here captures the navigation CTAs and
+   overrides their ink-on-gold label, so keep it inside real body copy. */
+body.il-static-page .wrap p a,
+body.il-static-page .wrap li a,
+body.il-static-page .section p a,
+body.il-static-page .hero p a,
+body.il-static-page .note a,
+body.il-static-page .src-url {
   color: var(--il-brass) !important;
   text-underline-offset: 3px;
 }
@@ -2751,4 +2758,507 @@ body.il-static-page aside h2 {
   font-size: 18px !important;
   font-weight: 650 !important;
   letter-spacing: -.015em !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   30 · TOKEN NORMALIZATION — REMOVE THE GREEN CAST
+   visual-refresh.css defines a full green-tinted palette on the legacy token
+   names (--card #0e1713, --panel #111d18, --glass rgba(14,23,19), --surface,
+   --cream, --border…). Anything still consuming those inherits a green wash.
+   This remaps the entire legacy vocabulary onto the neutral ink ramp.
+   Directional market colours stay saturated — they carry meaning.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+html[data-theme="dark"],
+html[data-theme="dark"]:root,
+html[data-theme="dark"] body {
+  /* Page + surfaces */
+  --cream: #07080B !important;
+  --cream2: #0B0D11 !important;
+  --cream3: #14181F !important;
+  --card: #101319 !important;
+  --panel: #14181F !important;
+  --surface: #101319 !important;
+  --surface-2: #14181F !important;
+  --surface-3: #1A1F27 !important;
+  --sp-bg: #07080B !important;
+  --sp-panel: #101319 !important;
+  --sp-panel-2: #14181F !important;
+
+  /* Glass */
+  --glass: rgba(16, 19, 25, .92) !important;
+  --glass-strong: rgba(20, 24, 31, .97) !important;
+  --glass-quiet: rgba(16, 19, 25, .88) !important;
+  --glass-line: rgba(255, 255, 255, .10) !important;
+  --glass-line-soft: rgba(255, 255, 255, .065) !important;
+  --glass-shadow: 0 2px 6px rgba(0, 0, 0, .4), 0 16px 40px -18px rgba(0, 0, 0, .85) !important;
+  --glass-shadow-lg: 0 8px 20px rgba(0, 0, 0, .5), 0 44px 96px -38px rgba(0, 0, 0, 1) !important;
+
+  /* Text */
+  --ink: #F2F0EB !important;
+  --ink2: #D2CFC8 !important;
+  --ink3: #B4B0A8 !important;
+  --ink4: #9A968D !important;
+  --ink5: #6E6B65 !important;
+  --on-glass: #F2F0EB !important;
+  --on-glass-2: #D2CFC8 !important;
+  --on-glass-3: #9A968D !important;
+  --sp-text: #F2F0EB !important;
+  --sp-text-2: #D2CFC8 !important;
+  --sp-muted: #9A968D !important;
+
+  /* Hairlines */
+  --border: rgba(255, 255, 255, .075) !important;
+  --border2: rgba(255, 255, 255, .10) !important;
+  --border3: rgba(255, 255, 255, .16) !important;
+  --sp-border: rgba(255, 255, 255, .12) !important;
+  --sp-border-soft: rgba(255, 255, 255, .07) !important;
+
+  /* Gold */
+  --gold: #D6AC64 !important;
+  --gold-d: #EDCB84 !important;
+  --gold-bright: #EDCB84 !important;
+  --gold-hi: #F5DFAE !important;
+  --gold-l: rgba(214, 172, 100, .3) !important;
+  --gold-l2: rgba(214, 172, 100, .09) !important;
+  --gold-amber: #B78B40 !important;
+  --gold-grad: linear-gradient(180deg, #F0CE8B 0%, #D6AC64 44%, #B78B40 100%) !important;
+  --gold-grad-soft: linear-gradient(160deg, rgba(214, 172, 100, .14), rgba(214, 172, 100, .03)) !important;
+  --gold-tint: rgba(214, 172, 100, .08) !important;
+  --gold-tint2: rgba(214, 172, 100, .14) !important;
+  --gold-ring: rgba(214, 172, 100, .3) !important;
+  --gold-glow: 0 12px 40px -12px rgba(214, 172, 100, .45) !important;
+  --sp-gold: #D6AC64 !important;
+  --sp-gold-bright: #EDCB84 !important;
+  --brand-gold: #D6AC64 !important;
+  --brand-gold-strong: #EDCB84 !important;
+  --brand-gold-soft: rgba(214, 172, 100, .10) !important;
+  --brand-gold-line: rgba(214, 172, 100, .3) !important;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, .5) !important;
+  --shadow: 0 2px 6px rgba(0, 0, 0, .4), 0 12px 28px -14px rgba(0, 0, 0, .8) !important;
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, .45), 0 28px 60px -28px rgba(0, 0, 0, .9) !important;
+  --sp-shadow: 0 4px 12px rgba(0, 0, 0, .45), 0 28px 60px -28px rgba(0, 0, 0, .9) !important;
+
+  /* Tool tokens */
+  --t-acc-border: rgba(255, 255, 255, .075) !important;
+  --t-acc-header-bg: rgba(255, 255, 255, .022) !important;
+  --t-acc-header-hover: rgba(255, 255, 255, .04) !important;
+  --t-acc-body-border: rgba(255, 255, 255, .06) !important;
+  --t-metric-bg: rgba(255, 255, 255, .035) !important;
+  --t-metric-border: rgba(255, 255, 255, .07) !important;
+  --t-metric-hover: rgba(255, 255, 255, .06) !important;
+  --t-mlbl: #9A968D !important;
+  --t-msub: #6E6B65 !important;
+  --t-chart-bg: rgba(0, 0, 0, .2) !important;
+  --t-chart-border: rgba(255, 255, 255, .07) !important;
+  --t-chart-title: #9A968D !important;
+  --t-ticker-bg: rgba(0, 0, 0, .22) !important;
+  --t-ticker-border: rgba(255, 255, 255, .14) !important;
+  --t-ticker-color: #F2F0EB !important;
+  --t-ticker-ph: #6E6B65 !important;
+  --t-rpill-border: rgba(255, 255, 255, .09) !important;
+  --t-rpill-color: #9A968D !important;
+  --t-panel-bg: rgba(255, 255, 255, .03) !important;
+  --t-panel-border: rgba(255, 255, 255, .07) !important;
+  --t-news-text: #B4B0A8 !important;
+  --t-news-border: rgba(255, 255, 255, .06) !important;
+  --t-loading-color: #9A968D !important;
+  --t-quick-btn-border: rgba(255, 255, 255, .09) !important;
+
+  --lens-black: #07080B !important;
+
+  /* Directional data — deliberately saturated, these carry meaning */
+  --market-up: #2FD98C !important;
+  --market-up-strong: #4EE3A2 !important;
+  --market-up-soft: rgba(47, 217, 140, .12) !important;
+  --market-down: #F05C6A !important;
+  --market-down-strong: #FF7480 !important;
+  --market-down-soft: rgba(240, 92, 106, .12) !important;
+  --chart-positive: #2FD98C !important;
+  --chart-negative: #F05C6A !important;
+  --green: #2FD98C !important;
+  --red: #F05C6A !important;
+}
+
+html:not([data-theme="dark"]),
+html:not([data-theme="dark"]) body {
+  --cream: #F6F4EF !important;
+  --cream2: #EFECE5 !important;
+  --cream3: #E7E3D9 !important;
+  --card: #FFFFFF !important;
+  --panel: #FAF8F4 !important;
+  --surface: #FFFFFF !important;
+  --surface-2: #FAF8F4 !important;
+  --surface-3: #F1EEE7 !important;
+  --sp-bg: #F6F4EF !important;
+  --sp-panel: #FFFFFF !important;
+  --sp-panel-2: #FAF8F4 !important;
+
+  --glass: rgba(255, 255, 255, .92) !important;
+  --glass-strong: rgba(255, 255, 255, .98) !important;
+  --glass-quiet: rgba(250, 248, 244, .9) !important;
+  --glass-line: rgba(24, 22, 18, .1) !important;
+  --glass-line-soft: rgba(24, 22, 18, .06) !important;
+
+  --ink: #14161A !important;
+  --ink2: #33373E !important;
+  --ink3: #4E535B !important;
+  --ink4: #6B6F78 !important;
+  --ink5: #93969E !important;
+  --on-glass: #14161A !important;
+  --on-glass-2: #33373E !important;
+  --on-glass-3: #6B6F78 !important;
+  --sp-text: #14161A !important;
+  --sp-text-2: #33373E !important;
+  --sp-muted: #6B6F78 !important;
+
+  --border: rgba(24, 22, 18, .075) !important;
+  --border2: rgba(24, 22, 18, .1) !important;
+  --border3: rgba(24, 22, 18, .17) !important;
+  --sp-border: rgba(24, 22, 18, .13) !important;
+  --sp-border-soft: rgba(24, 22, 18, .08) !important;
+
+  --gold: #966D2B !important;
+  --gold-d: #6D4E1B !important;
+  --gold-bright: #B8892F !important;
+  --gold-hi: #D0A45B !important;
+  --gold-tint: rgba(150, 109, 43, .075) !important;
+  --gold-tint2: rgba(150, 109, 43, .13) !important;
+  --gold-ring: rgba(150, 109, 43, .28) !important;
+  --sp-gold: #966D2B !important;
+  --brand-gold: #966D2B !important;
+
+  --market-up: #0B7A4C !important;
+  --market-up-strong: #0E9A60 !important;
+  --market-down: #BE3A4B !important;
+  --market-down-strong: #D9485A !important;
+}
+
+/* The base page fill is owned here, not by the older gradient stacks */
+html, html body,
+html[data-theme="dark"], html[data-theme="dark"] body {
+  background-color: var(--il-bg) !important;
+  background-image: none !important;
+}
+
+/* Two remaining hard-coded green literals from visual-refresh.css */
+.app-section-hdr,
+html[data-theme="dark"] .app-section-hdr,
+#view-tool .app-section-hdr {
+  background: rgba(9, 11, 15, .86) !important;
+}
+
+.mobile-sec-tabs,
+html[data-theme="dark"] .mobile-sec-tabs {
+  background: rgba(14, 17, 22, .94) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   31 · GEOMETRY + CHROME CORRECTIONS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* The sheen animation needs overflow:hidden, which zeroes an element's
+   automatic minimum size — inside a grid or flex track that collapses the
+   button to its padding and clips the label. Restore an explicit min size. */
+html body .btn-primary,
+html body .btn-plan-gold,
+html body .btn-modal-cta,
+html body .btn-run,
+html body .btn-search,
+html body .btn-save-analysis,
+html body .il-global-trial,
+html body .il-global-login,
+html body .il-landing-primary,
+html body .il-landing-secondary,
+html body .il-primary-action,
+html body .guide-cta,
+html body .hh-search-btn,
+html body .lens-run-btn,
+html body .cta a,
+html body #landing-page .il-landing-search button,
+html body #landing-page .il-landing-band button,
+html body.il-auth-page button[type="submit"],
+html body.il-static-page .btn-ghost,
+html body.il-static-page .cta a {
+  min-width: max-content !important;
+  white-space: nowrap !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  box-sizing: border-box !important;
+}
+
+/* Full-width variants must still be allowed to stretch */
+html body.il-auth-page button[type="submit"],
+html body #landing-page .il-landing-band button {
+  width: auto !important;
+}
+
+html body.il-auth-page button[type="submit"] { width: 100% !important; }
+
+/* Secondary action inside the projection gate */
+html body .il-primary-action {
+  border: 1px solid rgba(255, 255, 255, .18) !important;
+  border-radius: var(--il-radius-pill) !important;
+  background: linear-gradient(180deg, #F0CE8B 0%, #D6AC64 44%, #B78B40 100%) !important;
+  color: #17100A !important;
+  -webkit-text-fill-color: #17100A !important;
+  font-weight: 700 !important;
+  padding: 12px 24px !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .55),
+    0 1px 2px rgba(0, 0, 0, .3),
+    0 14px 32px -14px rgba(214, 172, 100, .7) !important;
+}
+
+/* ── Theme toggle: the track already owns the chrome. The outer button must
+      stay a bare hit target or it draws a second pill around it. ─────────── */
+#main-nav .theme-toggle,
+.theme-toggle,
+#theme-toggle,
+.il-theme-toggle {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: var(--il-radius-pill) !important;
+  padding: 0 !important;
+  line-height: 0 !important;
+}
+
+#main-nav .theme-toggle-thumb,
+#main-nav .static-theme-thumb,
+.il-global-nav .static-theme-thumb {
+  background: linear-gradient(180deg, #F0CE8B, #C9A05A) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .5), inset 0 1px 0 rgba(255, 255, 255, .5) !important;
+}
+
+#main-nav .theme-toggle-track {
+  border-color: rgba(255, 255, 255, .14) !important;
+  background: rgba(0, 0, 0, .38) !important;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, .55) !important;
+}
+
+/* ── Navigation active tab — match the specificity of the shell rules ────── */
+html #main-nav .nav-tab.active-tab,
+html #main-nav .nav-tab.active-tab:hover,
+html[data-theme="dark"] #main-nav .nav-tab.active-tab,
+html[data-theme="dark"] #main-nav .nav-tab.active-tab:hover,
+html .il-global-tab.active,
+html .il-global-tab.active:hover,
+html[data-theme="dark"] .il-global-tab.active {
+  color: #17100A !important;
+  background: linear-gradient(180deg, #EDCB84, #C9A05A) !important;
+  border-color: transparent !important;
+  border-radius: var(--il-radius-pill) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4), 0 6px 18px -8px rgba(214, 172, 100, .8) !important;
+  font-weight: 700 !important;
+}
+
+html #main-nav .nav-tab,
+html[data-theme="dark"] #main-nav .nav-tab,
+html .il-global-tab {
+  border-radius: var(--il-radius-pill) !important;
+}
+
+/* Nav search keeps the shell's fixed geometry; only the finish changes */
+#main-nav .nav-search,
+.il-global-search {
+  border-radius: var(--il-radius-pill) !important;
+  border-color: rgba(255, 255, 255, .1) !important;
+  background: rgba(255, 255, 255, .045) !important;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, .4) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   32 · LEGIBILITY
+   The recessive tone was tuned for looks, not for reading. Micro-labels and
+   captions use it heavily, so it needs to clear 4.5:1 on the darkest surface.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+html[data-theme="dark"],
+html[data-theme="dark"]:root {
+  --il-faint: #8E8A82 !important;
+  --ink5: #8E8A82 !important;
+  --text5: #8E8A82 !important;
+  --sp-muted: #A19D94 !important;
+}
+
+html:not([data-theme="dark"]) {
+  --il-faint: #6E727A !important;
+  --ink5: #6E727A !important;
+  --text5: #6E727A !important;
+}
+
+/* Form labels are functional, not decorative */
+body.il-auth-page .field label,
+body.il-auth-page label,
+.fc-label, .fg-label {
+  color: var(--il-muted) !important;
+}
+
+.il-preview-caption span,
+#landing-page .il-preview-caption span {
+  color: var(--il-muted) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   33 · PRIMARY BUTTON CONTRAST — ID-SCOPED
+   Several primary controls live under #main-nav / #view-tool, where the older
+   rules carry id-level specificity and win the colour declaration. Matching
+   that specificity is the only reliable fix short of editing those files.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+html body #main-nav a.btn-nav:not(.btn-nav-outline),
+html body #main-nav .il-global-trial,
+html body #main-nav #nav-signup,
+html body #main-nav #nav-upgrade,
+html body #view-tool button.btn-search,
+html body #view-tool .btn-search,
+html body #view-tool .btn-run,
+html body #view-tool .il-primary-action,
+html body #view-tool .btn-primary,
+html body #view-tool .btn-modal-cta,
+html body #view-tool .pgc-btn,
+html body #view-tool .btn-plan-gold,
+html body #view-tool .btn-save-analysis,
+html body #view-home .btn-primary,
+html body #view-home .btn-search,
+html body #view-home .hh-search-btn,
+html body #landing-page .il-landing-primary,
+html body #landing-page .il-landing-search button,
+html body #landing-page .il-landing-band button,
+html body #market-page .btn-primary,
+html body .il-primary-action,
+html body .pgc-btn,
+html body .btn-nav:not(.btn-nav-outline) {
+  border: 1px solid rgba(255, 255, 255, .18) !important;
+  border-radius: var(--il-radius-pill) !important;
+  background: linear-gradient(180deg, #F0CE8B 0%, #D6AC64 44%, #B78B40 100%) !important;
+  background-color: #D6AC64 !important;
+  color: #17100A !important;
+  -webkit-text-fill-color: #17100A !important;
+  font-weight: 700 !important;
+  text-shadow: none !important;
+  min-width: max-content !important;
+  white-space: nowrap !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .55),
+    inset 0 -1px 0 rgba(0, 0, 0, .18),
+    0 1px 2px rgba(0, 0, 0, .3),
+    0 14px 32px -14px rgba(214, 172, 100, .7) !important;
+}
+
+html body #main-nav a.btn-nav:not(.btn-nav-outline) *,
+html body #view-tool button.btn-search *,
+html body #view-tool .il-primary-action *,
+html body #view-tool .pgc-btn *,
+html body #landing-page .il-landing-search button *,
+html body .il-primary-action *,
+html body .pgc-btn * {
+  color: #17100A !important;
+  -webkit-text-fill-color: #17100A !important;
+}
+
+/* Outline variants stay quiet glass, never gold fill */
+html body #main-nav a.btn-nav-outline,
+html body .btn-nav-outline,
+html body #main-nav #nav-login {
+  background: var(--il-surface-2) !important;
+  background-image: var(--il-sheen) !important;
+  color: var(--il-ink) !important;
+  -webkit-text-fill-color: var(--il-ink) !important;
+  border: 1px solid var(--il-line-strong) !important;
+  border-radius: var(--il-radius-pill) !important;
+  box-shadow: var(--il-edge), var(--il-shadow-xs) !important;
+}
+
+/* Selected pills carry the same ink-on-gold treatment */
+html body .tf-pill.on, html body .tf-pill.active,
+html body .sa-pill.on, html body .sa-pill.active,
+html body .rpill.on, html body .rpill.active,
+html body .mst-btn.active, html body .mo-tab.active,
+html body .chip.on, html body .pill.on,
+html body #view-tool .tf-pill.on,
+html body #view-tool .mst-btn.active,
+html body #main-nav .nav-tab.active-tab {
+  color: #17100A !important;
+  -webkit-text-fill-color: #17100A !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   34 · CONTRAST CORRECTIONS FOUND IN AUDIT
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+body.il-prose a {
+  color: var(--il-brass) !important;
+  text-underline-offset: 3px;
+}
+
+html body .il-global-trial,
+html body .guide-cta,
+html body .cta a,
+html body body.il-static-page .cta a {
+  color: #17100A !important;
+  -webkit-text-fill-color: #17100A !important;
+}
+
+html body .il-global-login,
+html body .btn-nav-outline {
+  color: var(--il-ink) !important;
+  -webkit-text-fill-color: var(--il-ink) !important;
+}
+
+/* Hero mockup chrome — selected states were gold on gold */
+#landing-page .ihm-tabs .on,
+#landing-page .ihm-chart-chips .on,
+#landing-page .il-wf-btn {
+  background: linear-gradient(180deg, #EDCB84, #C9A05A) !important;
+  color: #17100A !important;
+  -webkit-text-fill-color: #17100A !important;
+  border-color: transparent !important;
+  font-weight: 700 !important;
+}
+
+#landing-page .ihm-pill {
+  color: var(--il-muted) !important;
+  border-color: var(--il-line-strong) !important;
+  background: rgba(255, 255, 255, .05) !important;
+}
+
+#landing-page .ihm-tabs span:not(.on),
+#landing-page .ihm-chart-chips span:not(.on) {
+  color: var(--il-muted) !important;
+}
+
+#landing-page .il-wf-input {
+  color: var(--il-ink-2) !important;
+  border-color: var(--il-line-strong) !important;
+  background: rgba(0, 0, 0, .25) !important;
+}
+
+/* Guest-limit CTA rendered by app-legacy.js */
+#view-tool button[onclick*="startGuestSignup"] {
+  color: #17100A !important;
+  -webkit-text-fill-color: #17100A !important;
+  background: linear-gradient(180deg, #EDCB84, #C9A05A) !important;
+  border-radius: var(--il-radius-pill) !important;
+}
+
+/* Final two green literals live behind id + attribute selectors */
+html[data-theme="dark"] #view-tool .app-section-hdr,
+html #view-tool .app-section-hdr {
+  background: rgba(9, 11, 15, .86) !important;
+  border-color: rgba(255, 255, 255, .075) !important;
+}
+
+html[data-theme="dark"] #view-tool .app-chart-toolbar,
+html[data-theme="dark"] #view-tool .app-tf-strip,
+html[data-theme="dark"] #view-tool .mobile-sec-tabs,
+html #view-tool .app-chart-toolbar,
+html #view-tool .app-tf-strip,
+html #view-tool .mobile-sec-tabs {
+  background: rgba(16, 19, 25, .92) !important;
 }

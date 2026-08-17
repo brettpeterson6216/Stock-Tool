@@ -3,7 +3,7 @@ Rebuild the interface around a premium dark-first design system
 The product read as flat outlined boxes on a pale surface: 3px radii, hairline
 borders, no elevation, and twelve stacked stylesheets pulling in different
 directions. This adds one authoritative layer that redefines the canonical
---il-* tokens every older sheet already maps onto, so the whole surface moves
+design tokens every older sheet already maps onto, so the whole surface moves
 together instead of component by component.
 
 - Dark is now the default surface; light is rebuilt as warm paper.
@@ -15,19 +15,38 @@ together instead of component by component.
 - Restrained scroll reveal and pointer parallax, with a reveal failsafe and a
   beforeprint handler so content can never stay hidden.
 
-Also fixes three defects found along the way:
+Removes the green cast from the product surface. visual-refresh.css defined a
+full green-tinted palette on the legacy token names (--card #0e1713, --panel
+#111d18, --glass, --surface, --cream, --border), so every component still
+reading those tokens inherited a green wash over an otherwise neutral page.
+The whole legacy vocabulary is now remapped onto the neutral ink ramp in both
+themes. Directional market colours stay saturated -- they carry meaning.
+
+Also fixes defects found while auditing:
 
 - Static pages bootstrapped the theme from an inline script, which the
   production CSP (scriptSrc 'self') silently blocked, so dark mode never
   applied on About, Blog, and the legal pages. They now load
   theme-bootstrap.js externally, which also satisfies the no-inline-scripts
   rule in the architecture doc.
-- Primary calls to action rendered light gold text on a gold fill and were
-  effectively unreadable, including the navigation trial button.
+- Primary calls to action rendered light text on a gold fill and were
+  effectively unreadable: the navigation trial button, Calculate Projection,
+  Analyze, Compare, Run scenarios, the guest-limit prompt, and the editorial
+  page CTAs.
+- The hero search button collapsed to a circle with a clipped label. The sheen
+  animation needs overflow:hidden, which zeroes an element's automatic minimum
+  size and let its grid track shrink to the padding box.
+- The theme toggle drew a second pill around its own track.
+- The active navigation tab kept an outline treatment instead of the gold fill.
+- Micro-labels and captions sat below 4.5:1 on the darkest surface.
 - The skip link was partially visible in the top-left corner while unfocused.
+
+Verified with an automated pass over 12 routes at 1440, 900, and 390 px:
+no clipped controls, no text below its WCAG AA threshold, no green-tinted
+surfaces. npm run check passes; 192/193 tests pass, with the one failure
+(review digest concurrency) reproducing identically on the parent commit.
 
 No feature, route, API, or markup logic was removed. Reverting is one <link>.
 
 Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
 Claude-Session: https://claude.ai/code/session_01TrAMqQsWuULsHzWHxgyrwg
-
