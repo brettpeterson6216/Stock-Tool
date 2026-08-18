@@ -3262,3 +3262,462 @@ html #view-tool .app-tf-strip,
 html #view-tool .mobile-sec-tabs {
   background: rgba(16, 19, 25, .92) !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   35 · TYPE SYSTEM v2
+   Space Grotesk reads mechanical and DM Sans reads generic; DM Mono is too
+   light to hold up at the 10–12px sizes this product uses for figures.
+   Replaced with Plus Jakarta Sans (warmer, higher x-height, legible small)
+   and JetBrains Mono (built for small-size legibility, true tabular figures).
+   Instrument Serif stays as the display voice.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --il-sans: "Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --il-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --il-display: "Instrument Serif", Georgia, serif;
+  --sans: var(--il-sans);
+  --mono: var(--il-mono);
+  --serif: var(--il-sans);   /* legacy alias meaning "display sans" */
+}
+
+/* Anything still naming the retired families directly */
+[style*="Space Grotesk"],
+[style*="DM Sans"],
+.nav-logo, .il-global-brand, .logo,
+.tw-title, .sec-h2, .hc-title, .chart-title,
+.panel-box-title, .sidebar-card-title, .analyst-box-title,
+.edu-title, .feat-title, .hh-title, .price-big, .metric-val {
+  font-family: var(--il-sans) !important;
+}
+
+.price-big, .metric-val, .asf-v, .fstock-price, .fstock-sym,
+.twm-val, .ticker-input, .fc-input, .edu-formula,
+.scr-table td, .cmp-table td, .wl-table td,
+.il-chart-readout .ilr-price, .il-chart-readout .ilr-ohlc b,
+.plan-opt-price, .p-amount, .pricing-num {
+  font-family: var(--il-mono) !important;
+  font-variant-numeric: tabular-nums;
+}
+
+body {
+  font-family: var(--il-sans) !important;
+  font-feature-settings: "kern" 1, "liga" 1;
+  letter-spacing: -.006em;
+}
+
+/* Micro-labels were set at 9.5px with heavy tracking — legible as texture,
+   not as words. Raise the floor and loosen the tracking a little. */
+.metric-lbl, .m-lbl, .metric-label, .asf-l, .fc-label, .fg-label,
+.sb-group-label, .sec-label, .il-analysis .ilan-sig-label,
+.hsb-label, .app-sidebar-label, .il-rail-label, .static-rail-label,
+.twm-lbl, .ilr-ohlc i, table thead th, .scr-table th, .cmp-table th {
+  font-size: 11px !important;
+  letter-spacing: .09em !important;
+  font-weight: 600 !important;
+}
+
+.il-landing-kicker, .il-eyebrow, .section-eyebrow,
+body.il-static-page .tagline, body.il-static-page .eyebrow,
+.tw-kicker, .edu-kicker, .il-analysis .ilan-eyebrow {
+  font-size: 11px !important;
+  letter-spacing: .13em !important;
+}
+
+/* Body copy sizes up slightly; 12–13px prose is a strain on dark surfaces */
+.hc-title, .sec-h2 { letter-spacing: -.018em !important; }
+.il-analysis .ilan-sig-detail { font-size: 12.5px !important; }
+.il-analysis .ilan-sig-value { font-size: 14px !important; }
+.tw-sub, .sec-sub { font-size: 14px !important; line-height: 1.65 !important; }
+
+/* Display face keeps its optical tuning against the new sans */
+#landing-page h1, #landing-page h2,
+body.il-static-page .hero h1, body.il-static-page h1, body.il-static-page h2,
+body.il-auth-page h1, body.il-lens-page h1, .il-page-hero h1 {
+  font-family: var(--il-display) !important;
+  font-weight: 400 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   36 · RESEARCH WORKSPACE — ALIGNMENT AND DENSITY
+   The welcome block was a centred 640–900px column whose text had been
+   force-left-aligned by a later layer, so the label and ticker strip stayed
+   centred while everything above them sat left. One column, one alignment,
+   one width — and a grid that wraps instead of clipping.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+#view-tool .app-content-scroll {
+  padding: clamp(14px, 1.6vw, 22px) clamp(18px, 2.4vw, 40px) 48px !important;
+}
+
+/* One shared measure for every child of the pre-search state */
+#view-tool .tool-welcome,
+#view-tool .search-row,
+#view-tool .tw-market,
+#view-tool .fg-label,
+#view-tool #featured-grid,
+#view-tool .tw-extra,
+#view-tool #limit-counter {
+  max-width: 1180px !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  text-align: left !important;
+}
+
+#view-tool .tool-welcome {
+  padding: clamp(18px, 2.2vw, 30px) 0 4px !important;
+}
+
+#view-tool .tw-title,
+#view-tool .tool-welcome h1 {
+  font-size: clamp(26px, 2.6vw, 38px) !important;
+  line-height: 1.12 !important;
+  letter-spacing: -.025em !important;
+  margin-bottom: 8px !important;
+}
+
+#view-tool .tw-sub {
+  margin: 0 !important;
+  max-width: 62ch !important;
+}
+
+/* Search bar: proportionate, not a full-width slab */
+#view-tool .search-row {
+  max-width: 560px !important;
+  margin-top: 20px !important;
+  margin-bottom: 18px !important;
+  border-radius: var(--il-radius-pill) !important;
+  padding: 5px 5px 5px 6px !important;
+  overflow: visible !important;
+}
+
+#view-tool .search-row .ticker-input {
+  padding: 12px 16px !important;
+  font-size: 15px !important;
+}
+
+#view-tool .search-row .btn-search {
+  border-radius: var(--il-radius-pill) !important;
+  padding: 12px 24px !important;
+}
+
+/* Index cards fill the measure instead of huddling on the left */
+#view-tool .tw-market {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)) !important;
+  gap: 12px !important;
+  margin: 0 0 22px !important;
+  max-width: 760px !important;
+}
+
+#view-tool .tw-market .twm-cell {
+  min-width: 0 !important;
+  border-radius: var(--il-radius) !important;
+  border-color: var(--il-line) !important;
+  padding: 13px 16px !important;
+}
+
+/* THE CLIPPED SPY FIX — wrap on a real grid instead of overflowing a
+   fixed-width flex row with a hidden scrollbar. */
+#view-tool #featured-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)) !important;
+  gap: 10px !important;
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  margin-bottom: 26px !important;
+}
+
+#view-tool #featured-grid .fstock-card {
+  min-width: 0 !important;
+  border: 1px solid var(--il-line) !important;
+  border-radius: var(--il-radius) !important;
+  background: var(--il-surface-2) !important;
+  background-image: var(--il-sheen) !important;
+  padding: 12px 14px !important;
+  transition: transform var(--il-fast), border-color var(--il-fast) !important;
+}
+
+#view-tool #featured-grid .fstock-card:hover {
+  transform: translateY(-2px) !important;
+  border-color: var(--il-line-gold) !important;
+  background: var(--il-brass-softer) !important;
+}
+
+#view-tool .fg-label { margin-bottom: 10px !important; }
+
+/* Section header and onboarding strip share the content measure so the page
+   stops looking like two different layouts stacked. */
+#view-tool .il-onboarding,
+#view-tool .tool-intro {
+  max-width: 1180px !important;
+  margin-left: 0 !important;
+}
+
+#view-tool .il-onboarding { margin-bottom: 22px !important; }
+
+/* Sidebar rhythm: 8 items should not need 400px of height */
+#view-tool .app-sidebar .sb-item,
+.app-sidebar .sb-item {
+  padding: 9px 12px !important;
+  margin-bottom: 2px !important;
+  min-height: 0 !important;
+}
+
+@media (min-width: 1500px) {
+  #view-tool .tool-welcome,
+  #view-tool .fg-label,
+  #view-tool #featured-grid,
+  #view-tool .tw-extra { max-width: 1320px !important; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   37 · MOBILE BOTTOM NAV — LIGHT-MODE REGRESSION
+
+   beauty-system.css hardcodes .mbn-item text as rgba(242,244,241,.58) with no
+   light-theme counterpart. That was survivable while the pill sat on a dark
+   fill; once the surface tokens flipped to paper in light mode it became white
+   text on a white pill — the blank capsules in the bug report. Section 27 also
+   swept .mbn-item into the pill-radius group, which turned a 74x64 nav cell
+   into a balloon. Both are corrected here.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.mobile-bottom-nav {
+  background: color-mix(in srgb, var(--il-bg-elevated) 92%, transparent) !important;
+  border-top: 1px solid var(--il-line) !important;
+  backdrop-filter: saturate(180%) blur(20px) !important;
+  -webkit-backdrop-filter: saturate(180%) blur(20px) !important;
+}
+
+.mobile-bottom-nav .mbn-item,
+.mbn-item {
+  border-radius: var(--il-radius-sm) !important;   /* not a capsule */
+  background: transparent !important;
+  background-image: none !important;
+  border: 1px solid transparent !important;
+  color: var(--il-muted) !important;
+  box-shadow: none !important;
+  font-weight: 600 !important;
+  gap: 3px !important;
+}
+
+.mobile-bottom-nav .mbn-item i,
+.mbn-item i { color: inherit !important; }
+
+.mobile-bottom-nav .mbn-item:hover,
+.mbn-item:hover {
+  color: var(--il-ink) !important;
+  background: var(--il-surface-2) !important;
+}
+
+.mobile-bottom-nav .mbn-item.active,
+.mbn-item.active {
+  color: var(--il-brass) !important;
+  background: var(--il-brass-soft) !important;
+  border-color: var(--il-line-gold) !important;
+}
+
+/* Same failure mode wherever a fixed light tone is used for text on a surface
+   that now flips. In light mode these must read as ink. */
+html:not([data-theme="dark"]) .mbn-item,
+html:not([data-theme="dark"]) .tw-tool strong,
+html:not([data-theme="dark"]) .tw-tool span,
+html:not([data-theme="dark"]) .sb-item-label,
+html:not([data-theme="dark"]) .twm-val,
+html:not([data-theme="dark"]) .fstock-sym,
+html:not([data-theme="dark"]) .fstock-price,
+html:not([data-theme="dark"]) .hc-title,
+html:not([data-theme="dark"]) .tw-title {
+  color: var(--il-ink) !important;
+}
+
+html:not([data-theme="dark"]) .mbn-item,
+html:not([data-theme="dark"]) .tw-tool span,
+html:not([data-theme="dark"]) .sb-item-label { color: var(--il-ink-2) !important; }
+
+html:not([data-theme="dark"]) .mbn-item.active { color: var(--il-brass) !important; }
+
+/* The quick-action squares under the search field lost their glyph colour for
+   the same reason. */
+html:not([data-theme="dark"]) .tw-launch a,
+html:not([data-theme="dark"]) .tw-launch i,
+html:not([data-theme="dark"]) .tw-continue i,
+html:not([data-theme="dark"]) .act-btn i,
+html:not([data-theme="dark"]) .chart-exp-btn i {
+  color: var(--il-brass) !important;
+}
+
+/* visual-refresh.css styles every nav via `nav:not(.top-bar)`, which outranks a
+   bare class selector — that is why the bottom bar stayed dark in light mode. */
+html nav.mobile-bottom-nav,
+html .mobile-bottom-nav,
+html[data-theme="dark"] nav.mobile-bottom-nav,
+html:not([data-theme="dark"]) nav.mobile-bottom-nav {
+  background: color-mix(in srgb, var(--il-bg-elevated) 94%, transparent) !important;
+  border-top: 1px solid var(--il-line) !important;
+  box-shadow: 0 -10px 30px -18px rgba(0, 0, 0, .6) !important;
+  backdrop-filter: saturate(180%) blur(20px) !important;
+  -webkit-backdrop-filter: saturate(180%) blur(20px) !important;
+}
+
+html:not([data-theme="dark"]) nav.mobile-bottom-nav .mbn-item,
+html:not([data-theme="dark"]) .mobile-bottom-nav .mbn-item {
+  color: var(--il-ink-2) !important;
+}
+
+html[data-theme="dark"] nav.mobile-bottom-nav .mbn-item,
+html[data-theme="dark"] .mobile-bottom-nav .mbn-item {
+  color: var(--il-muted) !important;
+}
+
+html nav.mobile-bottom-nav .mbn-item.active,
+html .mobile-bottom-nav .mbn-item.active {
+  color: var(--il-brass) !important;
+  background: var(--il-brass-soft) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   38 · LIGHT-MODE TEXT THAT NEVER FLIPPED
+   Each of these carries a fixed pale colour from a dark-only era. Harmless on
+   ink, invisible on paper. Found by an automated contrast sweep at 393px.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+html:not([data-theme="dark"]) {
+  --on-glass: var(--il-ink) !important;
+  --on-glass-2: var(--il-ink-2) !important;
+  --on-glass-3: var(--il-muted) !important;
+}
+
+/* Generic containers: give inherited text an ink default on paper */
+html:not([data-theme="dark"]) .hc,
+html:not([data-theme="dark"]) .panel-box,
+html:not([data-theme="dark"]) .sidebar-card,
+html:not([data-theme="dark"]) .scenario-input-card,
+html:not([data-theme="dark"]) .cex-box,
+html:not([data-theme="dark"]) .edu-card,
+html:not([data-theme="dark"]) .tool-welcome,
+html:not([data-theme="dark"]) .il-notice,
+html:not([data-theme="dark"]) .note,
+html:not([data-theme="dark"]) .sec-note,
+html:not([data-theme="dark"]) .screener-summary,
+html:not([data-theme="dark"]) .mo-bv2-card,
+html:not([data-theme="dark"]) .hfs-item,
+html:not([data-theme="dark"]) .step,
+html:not([data-theme="dark"]) .guide,
+html:not([data-theme="dark"]) .principle {
+  color: var(--il-ink-2) !important;
+}
+
+/* Quiet buttons and template chips */
+html:not([data-theme="dark"]) .cex-btn,
+html:not([data-theme="dark"]) .cex-type-btn,
+html:not([data-theme="dark"]) .mst-btn,
+html:not([data-theme="dark"]) .tf-pill,
+html:not([data-theme="dark"]) .sa-pill,
+html:not([data-theme="dark"]) .rpill,
+html:not([data-theme="dark"]) .act-btn,
+html:not([data-theme="dark"]) .ash-btn,
+html:not([data-theme="dark"]) .scr-sort-btn,
+html:not([data-theme="dark"]) .sec-filter-btn,
+html:not([data-theme="dark"]) .fin-tab-btn,
+html:not([data-theme="dark"]) .fin-subtab,
+html:not([data-theme="dark"]) .methodology-inline,
+html:not([data-theme="dark"]) .btn-secondary-compact {
+  color: var(--il-ink-2) !important;
+  -webkit-text-fill-color: var(--il-ink-2) !important;
+}
+
+/* Selected states keep ink-on-gold */
+html:not([data-theme="dark"]) .tf-pill.on,
+html:not([data-theme="dark"]) .tf-pill.active,
+html:not([data-theme="dark"]) .mst-btn.active,
+html:not([data-theme="dark"]) .rpill.active,
+html:not([data-theme="dark"]) .sa-pill.on,
+html:not([data-theme="dark"]) .fin-tab-btn.active,
+html:not([data-theme="dark"]) .sec-filter-btn.active {
+  color: #17100A !important;
+  -webkit-text-fill-color: #17100A !important;
+}
+
+/* Inline labels and micro-copy */
+html:not([data-theme="dark"]) .sec-label,
+html:not([data-theme="dark"]) .fg-label,
+html:not([data-theme="dark"]) .asf-l,
+html:not([data-theme="dark"]) .twm-lbl,
+html:not([data-theme="dark"]) .metric-lbl,
+html:not([data-theme="dark"]) .workflow-num,
+html:not([data-theme="dark"]) .edu-path-num {
+  color: var(--il-muted) !important;
+}
+
+html:not([data-theme="dark"]) #limit-counter span,
+html:not([data-theme="dark"]) .tool-disclaimer,
+html:not([data-theme="dark"]) .chart-data-note,
+html:not([data-theme="dark"]) .price-time,
+html:not([data-theme="dark"]) .il-data-source-line,
+html:not([data-theme="dark"]) .as-note {
+  color: var(--il-muted) !important;
+}
+
+html:not([data-theme="dark"]) .sec-note strong,
+html:not([data-theme="dark"]) .note strong,
+html:not([data-theme="dark"]) .il-notice strong { color: var(--il-ink) !important; }
+
+/* The static theme toggle glyphs */
+html:not([data-theme="dark"]) .theme-toggle-sun { color: #8A6420 !important; opacity: 1 !important; }
+html:not([data-theme="dark"]) .theme-toggle-moon { color: #55595F !important; opacity: .85 !important; }
+
+/* The hero mock keeps its dark chrome in both themes, so its copy stays pale */
+#landing-page .il-hero-mock .ihm-line { color: rgba(242, 240, 235, .82) !important; }
+#landing-page .il-hero-mock .ihm-sub { color: rgba(242, 240, 235, .55) !important; }
+
+/* Projection panel labels and template chips carry no class of their own, so
+   they inherit a pale tone from a dark-only ancestor rule. */
+html:not([data-theme="dark"]) .il-proj-head span,
+html:not([data-theme="dark"]) .il-proj-evidence span,
+html:not([data-theme="dark"]) .il-proj-review span,
+html:not([data-theme="dark"]) .il-projection-explain,
+html:not([data-theme="dark"]) .il-result-note {
+  color: var(--il-muted) !important;
+}
+
+html:not([data-theme="dark"]) .il-proj-head strong,
+html:not([data-theme="dark"]) .il-proj-evidence strong,
+html:not([data-theme="dark"]) .il-proj-review strong { color: var(--il-ink) !important; }
+
+html body [data-il-template] {
+  border: 1px solid var(--il-line-strong) !important;
+  border-radius: var(--il-radius-pill) !important;
+  background: var(--il-surface-2) !important;
+  color: var(--il-ink-2) !important;
+  -webkit-text-fill-color: var(--il-ink-2) !important;
+  padding: 8px 16px !important;
+  font-weight: 600 !important;
+  transition: all var(--il-fast) !important;
+}
+
+html body [data-il-template]:hover {
+  border-color: var(--il-line-gold) !important;
+  color: var(--il-brass-bright) !important;
+  -webkit-text-fill-color: var(--il-brass-bright) !important;
+}
+
+html #main-nav .theme-toggle-sun,
+html:not([data-theme="dark"]) #main-nav .theme-toggle-sun { color: #8A6420 !important; opacity: 1 !important; }
+html:not([data-theme="dark"]) #main-nav .theme-toggle-moon { color: #4E525A !important; opacity: .9 !important; }
+
+/* Remaining pale-on-paper text: LensScore workflow strip and the projection
+   templates caption. */
+html:not([data-theme="dark"]) .il-decision-path,
+html:not([data-theme="dark"]) .il-decision-path span,
+html:not([data-theme="dark"]) .il-proj-templates,
+html:not([data-theme="dark"]) .il-proj-templates > span,
+html:not([data-theme="dark"]) body.il-lens-page span:not([class]),
+html:not([data-theme="dark"]) .score-label,
+html:not([data-theme="dark"]) .lens-arrow {
+  color: var(--il-ink-2) !important;
+}
+
+html:not([data-theme="dark"]) .il-decision-path .step-num,
+html:not([data-theme="dark"]) .il-decision-path b { color: var(--il-brass) !important; }

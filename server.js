@@ -358,6 +358,12 @@ app.get(["/privacy", "/privacy.html"],         (_req, res) => res.sendFile(path.
 app.get(["/terms",   "/terms.html"],            (_req, res) => res.sendFile(path.join(__dirname, "public", "terms.html")));
 app.get(["/data-sources", "/data-sources.html"],(_req, res) => res.sendFile(path.join(__dirname, "public", "data-sources.html")));
 
+// Every other static page has an extension-less route; this one was missed, so
+// /admin-analytics fell through to the catch-all 404 handler.
+app.get(["/admin-analytics", "/admin-analytics.html"], (_req, res) =>
+  res.sendFile(path.join(__dirname, "public", "admin-analytics.html"))
+);
+
 // Ticker landing pages — server-rendered SEO pages for /stock/:ticker
 app.use("/", stockLandingRouter);
 

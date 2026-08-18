@@ -25,3 +25,7 @@ public/.lac.tmp
 *.tmp
 public/.lac4.tmp
 public/.lac5.tmp
+
+# Local scratch from assistant file transfers
+_to_delete/
+.claude/

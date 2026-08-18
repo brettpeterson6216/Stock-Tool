@@ -363,3 +363,106 @@ html:not([data-theme="dark"]) .chart-key.key-vwap { background: #127C6C !importa
   .il-analysis .ilan-grid { grid-template-columns: 1fr; }
   .il-analysis .ilan-headline { font-size: 10.5px; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Hero — a real chart, not an illustration of one
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+#landing-page .ihm-chart {
+  position: relative;
+  min-height: 232px;
+  padding: 0 !important;
+  display: block !important;
+}
+
+#landing-page .ihm-live {
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+#landing-page .ihm-quote {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 0 2px 9px;
+  flex-wrap: wrap;
+}
+
+#landing-page .ihm-quote-sym {
+  font-family: var(--il-mono, "JetBrains Mono", monospace);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  color: var(--il-brass, #D6AC64);
+}
+
+#landing-page .ihm-quote-price {
+  font-family: var(--il-mono, "JetBrains Mono", monospace);
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: -.03em;
+  color: var(--il-ink, #F2F0EB);
+  font-variant-numeric: tabular-nums;
+}
+
+#landing-page .ihm-quote-chg {
+  font-family: var(--il-mono, "JetBrains Mono", monospace);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+#landing-page .ihm-quote-chg.pos { color: var(--market-up-strong, #4EE3A2); }
+#landing-page .ihm-quote-chg.neg { color: var(--market-down-strong, #FF7480); }
+
+#landing-page .ihm-quote-meta {
+  margin-left: auto;
+  font-size: 10px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--il-faint, #8E8A82);
+}
+
+/* The chip row duplicated controls the real chart already shows */
+#landing-page .ihm-chart-chips { display: none !important; }
+
+#landing-page .ihm-pill {
+  font-family: var(--il-sans, sans-serif) !important;
+  font-size: 9.5px !important;
+  letter-spacing: .12em !important;
+  text-transform: uppercase;
+  color: var(--il-faint, #8E8A82) !important;
+}
+
+/* Side panels: tighter, less lorem-ipsum, aligned to the plot */
+#landing-page .ihm-side .ihm-card { padding: 11px 13px !important; }
+#landing-page .ihm-side .ihm-line { font-size: 11.5px !important; line-height: 1.5 !important; }
+#landing-page .ihm-side .ihm-sub { font-size: 10.5px !important; }
+
+/* The mock's main column is a row flex by default; the quote line must stack
+   above the plot rather than sit beside it. */
+#landing-page .ihm-body { align-items: stretch !important; }
+
+#landing-page .ihm-main {
+  display: flex !important;
+  flex-direction: column !important;
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+}
+
+#landing-page .ihm-quote { flex: 0 0 auto !important; width: 100% !important; }
+
+#landing-page .ihm-chart {
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+/* Attribution stays, but scaled to the mock rather than dominating it */
+#landing-page .ihm-live #tv-attr-logo,
+#landing-page .ihm-live a[href*="tradingview"] {
+  transform: scale(.62);
+  transform-origin: bottom left;
+  opacity: .28 !important;
+}
