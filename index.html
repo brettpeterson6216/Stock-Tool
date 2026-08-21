@@ -118,7 +118,7 @@
   <div class="nav-links" id="nav-links">
     <a href="/" id='nav-home' class="nav-tab active-tab" onclick="navGoTo('home');return false;">Home</a>
     <a href="/?view=tool&amp;section=analyze" id="nav-analyze" class="nav-tab" onclick="navGoTo('analyze');return false;">Research</a>
-    <a href="/lens-score" id="nav-lensscore-link" class="nav-tab">LensScore</a>
+    <a href="/lens-score" id="nav-lensscore-link" class="nav-tab" onclick="return navGoLensScore(this,event);">LensScore</a>
     <a href="/?view=tool&amp;section=projection" id="nav-project" class="nav-tab" onclick="navGoTo('projection');return false;">Scenarios</a>
     <a href="/?view=tool&amp;section=compare" id="nav-compare" class="nav-tab" onclick="navGoTo('compare');return false;">Compare</a>
     <a href="/?view=tool&amp;section=reports" class="nav-tab" id="nav-saved-link" onclick="navGoTo('reports');return false;">Saved</a>
@@ -1593,6 +1593,7 @@
   </div>
   <div class="mmenu-grid">
     <a href="#" class="mmenu-item" onclick="showMarketPage();_toggleMobileMenu();return false;"><i class="ti ti-chart-area"></i><span>Market</span></a>
+    <a href="/lens-score" class="mmenu-item" onclick="_toggleMobileMenu();return navGoLensScore(this,event);"><i class="ti ti-focus-2"></i><span>LensScore</span></a>
     <a href="#" class="mmenu-item" onclick="navGoTo('financials');_setMobileNav('financials');_toggleMobileMenu();return false;"><i class="ti ti-table"></i><span>Financials</span></a>
     <a href="#" class="mmenu-item" onclick="navGoTo('advmetrics');_setMobileNav('advmetrics');_toggleMobileMenu();return false;"><i class="ti ti-report-analytics"></i><span>Metrics</span></a>
     <a href="#" class="mmenu-item" onclick="navGoTo('earnings');_setMobileNav('earnings');_toggleMobileMenu();return false;"><i class="ti ti-trending-up"></i><span>Earnings</span></a>

@@ -3721,3 +3721,652 @@ html:not([data-theme="dark"]) .lens-arrow {
 
 html:not([data-theme="dark"]) .il-decision-path .step-num,
 html:not([data-theme="dark"]) .il-decision-path b { color: var(--il-brass) !important; }
+
+/* Highlight callout on the legal pages kept an ink fill on paper */
+html:not([data-theme="dark"]) .highlight,
+html:not([data-theme="dark"]) body.il-static-page .highlight {
+  background: rgba(150, 109, 43, .07) !important;
+  background-image: none !important;
+  border: 1px solid rgba(150, 109, 43, .22) !important;
+  border-left: 3px solid #966D2B !important;
+  color: var(--il-ink-2) !important;
+}
+
+html:not([data-theme="dark"]) .highlight strong,
+html:not([data-theme="dark"]) .highlight p { color: var(--il-ink-2) !important; }
+html:not([data-theme="dark"]) .highlight strong { color: #6D4E1B !important; }
+
+/* LensScore lab submit button and search glyph */
+html:not([data-theme="dark"]) body.il-lens-page form button[type="submit"],
+html:not([data-theme="dark"]) body.il-lens-page .lens-run-btn {
+  background: linear-gradient(180deg, #F0CE8B 0%, #D6AC64 44%, #B78B40 100%) !important;
+  color: #17100A !important;
+  -webkit-text-fill-color: #17100A !important;
+  border-radius: 999px !important;
+  font-weight: 700 !important;
+}
+
+html:not([data-theme="dark"]) body.il-lens-page [aria-hidden="true"],
+html:not([data-theme="dark"]) body.il-lens-page .search-glyph { color: var(--il-muted) !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   39 · ALWAYS-DARK CHROME
+   ═══════════════════════════════════════════════════════════════════════════
+   Some surfaces are deliberately dark in both themes — the hero product mock
+   (it is a picture of the app, and the app is dark), and the static-page nav
+   band. Their contents are written pale. On paper those elements were only
+   getting a low-alpha white wash, so pale text landed on cream and vanished.
+   Give each an explicit opaque dark fill in BOTH themes so the pale text has
+   something to sit on. Also drop the green tint those fills carried.
+   ═════════════════════════════════════════════════════════════════════════ */
+.il-hero-mock,
+html:not([data-theme="dark"]) .il-hero-mock {
+  background-color: #0E1116 !important;
+  background-image:
+    radial-gradient(720px 340px at 84% 6%, rgba(214, 172, 100, .10), transparent 62%),
+    linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .015)) !important;
+  border-color: rgba(255, 255, 255, .09) !important;
+  color-scheme: dark;
+}
+
+html:not([data-theme="dark"]) .il-hero-mock .ihm-card {
+  background: rgba(255, 255, 255, .045) !important;
+  border-color: rgba(255, 255, 255, .08) !important;
+}
+
+/* The static-page nav band stays dark, but neutral — (10,16,13) was green. */
+.il-global-nav,
+html:not([data-theme="dark"]) .il-global-nav,
+html:not([data-theme="dark"]) nav.il-global-nav.il-static-mast {
+  background-color: rgba(10, 12, 16, .94) !important;
+  border-bottom-color: rgba(255, 255, 255, .07) !important;
+}
+
+/* `color` and `-webkit-text-fill-color` disagreed on the nav CTAs: the fill
+   painted dark ink while `color` still said pale. Anything reading `color`
+   (focus rings, ::selection, forced-colors) got the wrong answer. */
+html:not([data-theme="dark"]) .il-global-nav .il-global-login,
+html:not([data-theme="dark"]) .il-global-nav .btn-nav-outline {
+  color: #14161A !important;
+  -webkit-text-fill-color: #14161A !important;
+}
+
+html:not([data-theme="dark"]) .il-global-nav .il-global-trial,
+html:not([data-theme="dark"]) .il-global-nav .btn-nav {
+  color: #17100A !important;
+  -webkit-text-fill-color: #17100A !important;
+}
+
+/* Theme-toggle glyphs: the inactive side was dimmed past legibility. */
+html[data-theme="dark"] .theme-toggle-sun,
+html[data-theme="dark"] #main-nav .theme-toggle-sun { color: #A9803D !important; }
+html[data-theme="dark"] .theme-toggle-moon { color: #F2F0EB !important; }
+/* Light-mode glyph colours are set in section 45 — the toggle lives on the
+   always-dark masthead, so ink here would be ink-on-ink. */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   40 · THE GOLD RAMP HAS A PAPER HALF
+   ═══════════════════════════════════════════════════════════════════════════
+   `--lens-gold`, `--tool-sample-gold` and `--brand-gold-*` were only ever
+   given dark-theme values, so every rule spending them painted #D9B35E — a
+   3:1 wash — onto white cards. #8A6420 clears 4.5:1 on white, on paper and on
+   the gold tint, which are the only three backdrops these tokens ever meet.
+   ═════════════════════════════════════════════════════════════════════════ */
+html:not([data-theme="dark"]),
+html:not([data-theme="dark"]) body {
+  --lens-gold: #8A6420 !important;
+  --lens-gold-soft: rgba(138, 100, 32, .10) !important;
+  --lens-gold-line: rgba(138, 100, 32, .28) !important;
+  --tool-sample-gold: #8A6420 !important;
+  --brand-gold-strong: #6D4E1B !important;
+  --brand-gold-soft: rgba(150, 109, 43, .09) !important;
+  --brand-gold-line: rgba(150, 109, 43, .28) !important;
+  --gold-bright: #8A6420 !important;
+  --sp-gold: #8A6420 !important;
+  --gold-l: rgba(150, 109, 43, .3) !important;
+  --gold-l2: rgba(150, 109, 43, .09) !important;
+  --gold-amber: #7A5A1E !important;
+}
+
+/* Eyebrow labels across the workspace shell. */
+html:not([data-theme="dark"]) .il-shell-top span,
+html:not([data-theme="dark"]) .il-shell-ticker span,
+html:not([data-theme="dark"]) .il-proj-head span,
+html:not([data-theme="dark"]) .il-template-row span,
+html:not([data-theme="dark"]) .il-result-summary span,
+html:not([data-theme="dark"]) .il-trust-field span,
+html:not([data-theme="dark"]) .il-learn-kicker,
+html:not([data-theme="dark"]) .tw-kicker,
+html:not([data-theme="dark"]) .tw-recent-tk { color: #8A6420 !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   41 · TWO-ID LITERALS IN THE TOOL WELCOME
+   ═══════════════════════════════════════════════════════════════════════════
+   `#view-tool #tool-welcome .il-onboarding-step *` hard-codes a pale green-
+   white, and the `strong` inside hard-codes #efc879. Two IDs is (0,2,1,1), so
+   nothing token-based was ever going to reach them. Match the specificity and
+   route the colours through the ink ramp instead.
+   ═════════════════════════════════════════════════════════════════════════ */
+html:not([data-theme="dark"]) #view-tool #tool-welcome .il-onboarding-step *,
+html:not([data-theme="dark"]) #view-tool .tool-welcome .il-onboarding-step * {
+  color: var(--il-ink-2) !important;
+}
+
+html:not([data-theme="dark"]) #view-tool #tool-welcome .il-onboarding-step strong,
+html:not([data-theme="dark"]) #view-tool .tool-welcome .il-onboarding-step strong {
+  color: #8A6420 !important;
+}
+
+html:not([data-theme="dark"]) #view-tool #tool-welcome .il-onboarding-step,
+html:not([data-theme="dark"]) #view-tool .tool-welcome .il-onboarding-step {
+  background: #FFFFFF !important;
+  border-color: var(--il-line) !important;
+}
+
+html:not([data-theme="dark"]) #view-tool #tool-welcome .il-onboarding-steps,
+html:not([data-theme="dark"]) #view-tool .tool-welcome .il-onboarding-steps {
+  background: var(--il-line) !important;
+}
+
+html:not([data-theme="dark"]) #view-tool #tool-welcome .il-onboarding,
+html:not([data-theme="dark"]) #view-tool .tool-welcome .il-onboarding {
+  background: var(--il-surface-2) !important;
+  border-color: var(--il-line) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   42 · GOLD BADGES AND PILLS ON PAPER
+   ═══════════════════════════════════════════════════════════════════════════ */
+html:not([data-theme="dark"]) .pill,
+html:not([data-theme="dark"]) body.il-static-page .pill,
+html:not([data-theme="dark"]) .tag.gold,
+html:not([data-theme="dark"]) body.il-static-page .tag.gold,
+html:not([data-theme="dark"]) .src-tags .tag.gold {
+  color: #7A5A1E !important;
+  -webkit-text-fill-color: #7A5A1E !important;
+  background: rgba(150, 109, 43, .085) !important;
+  background-image: none !important;
+  border: 1px solid rgba(150, 109, 43, .24) !important;
+}
+
+html:not([data-theme="dark"]) .tag {
+  color: var(--il-ink-2) !important;
+  background: var(--il-surface-2) !important;
+  border: 1px solid var(--il-line) !important;
+}
+
+/* Ghost buttons that spend the gold token for their label. */
+html:not([data-theme="dark"]) .next-move button,
+html:not([data-theme="dark"]) body.il-lens-page .next-move button {
+  color: #7A5A1E !important;
+  -webkit-text-fill-color: #7A5A1E !important;
+  border: 1px solid rgba(150, 109, 43, .3) !important;
+  background: rgba(150, 109, 43, .06) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   43 · THE SECURITY NOTE BOX ON THE AUTH PAGES
+   ═══════════════════════════════════════════════════════════════════════════
+   `.sec-note` keeps an always-dark fill, rgba(9,10,11,.78). An earlier pass
+   here flipped its text to dark ink for light mode without touching the fill,
+   which produced near-black on near-black — the worst defect in the sweep at
+   1.09:1. The box belongs to the white auth card, so the box goes light.
+   ═════════════════════════════════════════════════════════════════════════ */
+html:not([data-theme="dark"]) .sec-note,
+html:not([data-theme="dark"]) body.il-auth-page .sec-note {
+  background: var(--il-surface-2) !important;
+  background-image: none !important;
+  border: 1px solid var(--il-line) !important;
+  color: var(--il-ink-2) !important;
+}
+
+html:not([data-theme="dark"]) .sec-note strong,
+html:not([data-theme="dark"]) body.il-auth-page .sec-note strong { color: var(--il-ink) !important; }
+html:not([data-theme="dark"]) .sec-note i,
+html:not([data-theme="dark"]) .sec-note svg { color: #7A5A1E !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   44 · CHART ENGINE SURFACES
+   ═══════════════════════════════════════════════════════════════════════════
+   The readout strip and the full-screen control rail are new chrome; give them
+   real tokens in both themes rather than leaning on the fallbacks baked into
+   chart-engine.css.
+   ═════════════════════════════════════════════════════════════════════════ */
+html:not([data-theme="dark"]) .il-chart-readout {
+  background: var(--il-surface-2) !important;
+  border-color: var(--il-line) !important;
+  box-shadow: none !important;
+}
+
+html:not([data-theme="dark"]) .il-chart-readout .ilr-price { color: var(--il-ink) !important; }
+html:not([data-theme="dark"]) .il-chart-readout .ilr-ohlc i,
+html:not([data-theme="dark"]) .il-chart-readout .ilr-date { color: var(--il-muted) !important; }
+html:not([data-theme="dark"]) .il-chart-readout .ilr-ohlc b { color: var(--il-ink-2) !important; }
+
+html:not([data-theme="dark"]) .il-cex-controls {
+  background: var(--il-surface-2) !important;
+  border-bottom-color: var(--il-line) !important;
+}
+
+html:not([data-theme="dark"]) .il-cex-controls .ilcx-group {
+  background: #FFFFFF !important;
+  border-color: var(--il-line) !important;
+}
+
+html:not([data-theme="dark"]) .il-cex-controls .ilcx-chip { color: var(--il-ink-2) !important; }
+html:not([data-theme="dark"]) .il-cex-controls .ilcx-chip:hover { color: var(--il-ink) !important; }
+html:not([data-theme="dark"]) .il-cex-controls .ilcx-chip.on {
+  background: #8A6420 !important;
+  color: #FFF7E8 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   45 · ALWAYS-DARK CHROME, PART TWO — STOP PAINTING INK ON IT
+   ═══════════════════════════════════════════════════════════════════════════
+   Section 38 swept light mode for text that had never flipped and pushed it to
+   the ink ramp. That was right for content on paper and wrong for the handful
+   of surfaces that stay dark in BOTH themes: the static-page masthead and the
+   hero product mock. Inside those, ink-on-ink is the failure, so the pale ramp
+   is re-established here at the specificity the winning rules actually use.
+
+   The masthead fill is also retinted: it was rgba(10,16,13,.94), a green-black
+   that carried the same cast the rest of the palette had already dropped.
+   ═════════════════════════════════════════════════════════════════════════ */
+:root:not([data-theme="dark"]) nav#main-nav,
+:root:not([data-theme="dark"]) nav.il-global-nav,
+html:not([data-theme="dark"]) nav#main-nav,
+html:not([data-theme="dark"]) nav.il-global-nav,
+html[data-theme="dark"] nav#main-nav,
+html[data-theme="dark"] nav.il-global-nav {
+  background-color: rgba(10, 12, 16, .94) !important;
+  background-image: none !important;
+  border-bottom: 1px solid rgba(255, 255, 255, .07) !important;
+}
+
+/* Everything written directly on the masthead is pale, in both themes. */
+:root:not([data-theme="dark"]) #main-nav,
+:root:not([data-theme="dark"]) nav.il-global-nav { color: #EFEDE6 !important; }
+
+:root:not([data-theme="dark"]) #main-nav a:not(.btn-nav):not(.btn-nav-outline):not(.il-global-trial):not(.il-global-login),
+:root:not([data-theme="dark"]) nav.il-global-nav a:not(.btn-nav):not(.btn-nav-outline):not(.il-global-trial):not(.il-global-login),
+:root:not([data-theme="dark"]) #main-nav .nav-link,
+:root:not([data-theme="dark"]) nav.il-global-nav .nav-link {
+  color: rgba(239, 237, 230, .78) !important;
+  -webkit-text-fill-color: rgba(239, 237, 230, .78) !important;
+}
+
+/* Glyphs and unclassed spans inside the masthead — section 38 flipped these to
+   ink, which put near-black on near-black. */
+:root:not([data-theme="dark"]) #main-nav span:not([class]),
+:root:not([data-theme="dark"]) nav.il-global-nav span:not([class]),
+:root:not([data-theme="dark"]) #main-nav [aria-hidden="true"],
+:root:not([data-theme="dark"]) nav.il-global-nav [aria-hidden="true"],
+:root:not([data-theme="dark"]) #main-nav .il-global-search span,
+:root:not([data-theme="dark"]) nav.il-global-nav .il-global-search span {
+  color: rgba(244, 242, 235, .62) !important;
+  -webkit-text-fill-color: rgba(244, 242, 235, .62) !important;
+}
+
+:root:not([data-theme="dark"]) nav.il-global-nav .theme-toggle-sun,
+:root:not([data-theme="dark"]) #main-nav .theme-toggle-sun {
+  color: #F0DFB4 !important;
+  -webkit-text-fill-color: #F0DFB4 !important;
+}
+
+:root:not([data-theme="dark"]) nav.il-global-nav .theme-toggle-moon,
+:root:not([data-theme="dark"]) #main-nav .theme-toggle-moon {
+  color: #A9803D !important;
+  -webkit-text-fill-color: #A9803D !important;
+}
+
+/* The two CTAs keep light pills with dark ink. `color` and the text-fill had
+   drifted apart — the pill rendered from the fill while `color` still said
+   pale, so focus rings, ::selection and forced-colors all read the wrong one. */
+:root:not([data-theme="dark"]) #main-nav .btn-nav-outline,
+:root:not([data-theme="dark"]) #main-nav .il-global-login,
+:root:not([data-theme="dark"]) nav.il-global-nav .btn-nav-outline,
+:root:not([data-theme="dark"]) nav.il-global-nav .il-global-login {
+  color: #14161A !important;
+  -webkit-text-fill-color: #14161A !important;
+  background-color: #FAF8F4 !important;
+  border: 1px solid rgba(24, 22, 18, .16) !important;
+}
+
+:root:not([data-theme="dark"]) #main-nav .btn-nav,
+:root:not([data-theme="dark"]) #main-nav .il-global-trial,
+:root:not([data-theme="dark"]) nav.il-global-nav .btn-nav,
+:root:not([data-theme="dark"]) nav.il-global-nav .il-global-trial {
+  color: #17100A !important;
+  -webkit-text-fill-color: #17100A !important;
+}
+
+/* The hero mock is a picture of the app, so it stays dark on paper. It was
+   already painting a dark gradient; give it a matching opaque base so the
+   panel never shows cream through if a gradient layer fails to composite. */
+#landing-page .il-hero-mock,
+html:not([data-theme="dark"]) #landing-page .il-hero-mock,
+html[data-theme="dark"] #landing-page .il-hero-mock {
+  background-color: #0D1015 !important;
+  background-image:
+    linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, 0) 40%),
+    linear-gradient(165deg, #171B22 0%, #0D1015 60%, #0A0C10 100%) !important;
+  border: 1px solid rgba(255, 255, 255, .09) !important;
+}
+
+/* Callout emphasis on the editorial pages. `--sp-premium-text` is a cream that
+   was never given a paper value, so `.caveat strong` / `.note strong` /
+   `.disclaimer strong` painted #F5EBD7 onto a white card. */
+html:not([data-theme="dark"]),
+html:not([data-theme="dark"]) body { --sp-premium-text: #14161A !important; }
+
+html:not([data-theme="dark"]) .caveat strong,
+html:not([data-theme="dark"]) .note strong,
+html:not([data-theme="dark"]) .disclaimer strong,
+html:not([data-theme="dark"]) body.il-static-page .caveat strong,
+html:not([data-theme="dark"]) body.il-static-page .note strong,
+html:not([data-theme="dark"]) body.il-static-page .disclaimer strong { color: #14161A !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   46 · INSIDE THE ALWAYS-DARK SURFACES
+   ═══════════════════════════════════════════════════════════════════════════
+   With the contrast sweep now able to resolve a hex-gradient backdrop, the
+   inside of the hero mock and the masthead tab rail showed up properly for the
+   first time. Everything in there is written on near-black, so it takes the
+   pale ramp — several of these had been flipped to ink by section 38.
+   ═════════════════════════════════════════════════════════════════════════ */
+html:not([data-theme="dark"]) .il-hero-mock,
+html:not([data-theme="dark"]) .il-hero-mock * { color: rgba(242, 240, 235, .82) !important; }
+
+html:not([data-theme="dark"]) .il-hero-mock .ihm-quote-sym,
+html:not([data-theme="dark"]) .il-hero-mock .ihm-quote-price,
+html:not([data-theme="dark"]) .il-hero-mock strong,
+html[data-theme="dark"] .il-hero-mock .ihm-quote-sym,
+html[data-theme="dark"] .il-hero-mock .ihm-quote-price { color: #F7F5F0 !important; }
+
+.il-hero-mock .ihm-quote-chg.pos,
+html:not([data-theme="dark"]) .il-hero-mock .ihm-quote-chg.pos { color: #4EE3A2 !important; }
+.il-hero-mock .ihm-quote-chg.neg,
+html:not([data-theme="dark"]) .il-hero-mock .ihm-quote-chg.neg { color: #FF8A94 !important; }
+
+.il-hero-mock .ihm-lbl,
+html:not([data-theme="dark"]) .il-hero-mock .ihm-lbl,
+.il-hero-mock .ihm-brand em,
+html:not([data-theme="dark"]) .il-hero-mock .ihm-brand em { color: #E7C888 !important; }
+
+.il-hero-mock .ihm-pill,
+html:not([data-theme="dark"]) .il-hero-mock .ihm-pill,
+.il-hero-mock .ihm-quote-meta,
+html:not([data-theme="dark"]) .il-hero-mock .ihm-quote-meta,
+.il-hero-mock .ihm-sub,
+html:not([data-theme="dark"]) .il-hero-mock .ihm-sub { color: rgba(242, 240, 235, .74) !important; }
+
+.il-hero-mock .ihm-chart-chips span,
+html:not([data-theme="dark"]) .il-hero-mock .ihm-chart-chips span,
+.il-hero-mock .ihm-tabs span,
+html:not([data-theme="dark"]) .il-hero-mock .ihm-tabs span { color: rgba(242, 240, 235, .74) !important; }
+
+.il-hero-mock .ihm-chart-chips span.on,
+html:not([data-theme="dark"]) .il-hero-mock .ihm-chart-chips span.on,
+.il-hero-mock .ihm-tabs span.on,
+html:not([data-theme="dark"]) .il-hero-mock .ihm-tabs span.on {
+  color: #1A1206 !important;
+  background: #E7C888 !important;
+}
+
+/* Masthead tab rail: the active tab is a pale pill, the rest are pale text. */
+:root:not([data-theme="dark"]) #main-nav .il-global-tab,
+:root:not([data-theme="dark"]) nav.il-global-nav .il-global-tab,
+:root:not([data-theme="dark"]) #main-nav a.nav-tab,
+:root:not([data-theme="dark"]) nav.il-global-nav a.nav-tab {
+  color: rgba(239, 237, 230, .74) !important;
+  -webkit-text-fill-color: rgba(239, 237, 230, .74) !important;
+  background: transparent !important;
+}
+
+:root:not([data-theme="dark"]) #main-nav .il-global-tab.active,
+:root:not([data-theme="dark"]) #main-nav .il-global-tab.active-tab,
+:root:not([data-theme="dark"]) #main-nav a.nav-tab.active,
+:root:not([data-theme="dark"]) nav.il-global-nav .il-global-tab.active,
+:root:not([data-theme="dark"]) nav.il-global-nav .il-global-tab.active-tab,
+:root:not([data-theme="dark"]) nav.il-global-nav a.nav-tab.active {
+  color: #F7F5F0 !important;
+  -webkit-text-fill-color: #F7F5F0 !important;
+  background: rgba(255, 255, 255, .10) !important;
+}
+
+/* Theme toggle glyphs, independent of which nav wrapper they land in. */
+html:not([data-theme="dark"]) .theme-toggle-sun,
+:root:not([data-theme="dark"]) .theme-toggle-sun {
+  color: #F0DFB4 !important;
+  -webkit-text-fill-color: #F0DFB4 !important;
+}
+
+html:not([data-theme="dark"]) .theme-toggle-moon,
+:root:not([data-theme="dark"]) .theme-toggle-moon {
+  color: rgba(244, 242, 235, .52) !important;
+  -webkit-text-fill-color: rgba(244, 242, 235, .52) !important;
+}
+
+html[data-theme="dark"] .theme-toggle-sun {
+  color: rgba(244, 242, 235, .52) !important;
+  -webkit-text-fill-color: rgba(244, 242, 235, .52) !important;
+}
+
+html[data-theme="dark"] .theme-toggle-moon {
+  color: #F0DFB4 !important;
+  -webkit-text-fill-color: #F0DFB4 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   47 · THREE MISSES FROM THE PREVIOUS PASS
+   ═══════════════════════════════════════════════════════════════════════════
+   1. `#landing-page .il-hero-mock .ihm-lbl` and `#landing-page .ihm-tabs
+      span:not(.on)` route through `--il-brass` / `--il-muted`, which flip to
+      their paper values in light mode — but the mock they sit in is dark in
+      both themes. Match the ID specificity so the mock keeps one palette.
+   2. The theme toggle is NOT always-dark chrome: its track flips to #E9E4D8 on
+      paper. Sections 45 and 46 made its glyphs pale, which put pale-on-pale.
+      The glyphs follow the track, not the nav.
+   ═════════════════════════════════════════════════════════════════════════ */
+#landing-page .il-hero-mock .ihm-lbl,
+html:not([data-theme="dark"]) #landing-page .il-hero-mock .ihm-lbl,
+#landing-page .ihm-card .ihm-lbl,
+html:not([data-theme="dark"]) #landing-page .ihm-card .ihm-lbl,
+#landing-page .il-hero-mock .ihm-brand em,
+html:not([data-theme="dark"]) #landing-page .il-hero-mock .ihm-brand em { color: #E7C888 !important; }
+
+#landing-page .ihm-tabs span,
+#landing-page .ihm-tabs span:not(.on),
+html:not([data-theme="dark"]) #landing-page .ihm-tabs span:not(.on),
+#landing-page .il-hero-mock .ihm-chart-chips span:not(.on),
+html:not([data-theme="dark"]) #landing-page .il-hero-mock .ihm-chart-chips span:not(.on),
+#landing-page .il-hero-mock .ihm-pill,
+html:not([data-theme="dark"]) #landing-page .il-hero-mock .ihm-pill {
+  color: rgba(242, 240, 235, .78) !important;
+}
+
+#landing-page .ihm-tabs span.on,
+html:not([data-theme="dark"]) #landing-page .ihm-tabs span.on,
+#landing-page .il-hero-mock .ihm-chart-chips span.on,
+html:not([data-theme="dark"]) #landing-page .il-hero-mock .ihm-chart-chips span.on {
+  color: #1A1206 !important;
+  background: #E7C888 !important;
+}
+
+/* Theme toggle — the glyphs follow the track fill, which does flip. */
+html:not([data-theme="dark"]) .theme-toggle-track,
+:root:not([data-theme="dark"]) #main-nav .theme-toggle-track,
+:root:not([data-theme="dark"]) nav.il-global-nav .theme-toggle-track {
+  background: #E9E4D8 !important;
+  border: 1px solid rgba(24, 22, 18, .16) !important;
+}
+
+html:not([data-theme="dark"]) .theme-toggle-sun,
+:root:not([data-theme="dark"]) .theme-toggle-sun,
+:root:not([data-theme="dark"]) #main-nav .theme-toggle-sun,
+:root:not([data-theme="dark"]) nav.il-global-nav .theme-toggle-sun,
+html:not([data-theme="dark"]) body.il-lens-page .theme-toggle-sun,
+html:not([data-theme="dark"]) body.il-static-page .theme-toggle-sun {
+  color: #3A2E18 !important;
+  -webkit-text-fill-color: #3A2E18 !important;
+}
+
+html:not([data-theme="dark"]) .theme-toggle-moon,
+:root:not([data-theme="dark"]) .theme-toggle-moon,
+:root:not([data-theme="dark"]) #main-nav .theme-toggle-moon,
+:root:not([data-theme="dark"]) nav.il-global-nav .theme-toggle-moon,
+html:not([data-theme="dark"]) body.il-lens-page .theme-toggle-moon,
+html:not([data-theme="dark"]) body.il-static-page .theme-toggle-moon {
+  color: #5E564A !important;
+  -webkit-text-fill-color: #5E564A !important;
+}
+
+html[data-theme="dark"] .theme-toggle-track,
+html[data-theme="dark"] #main-nav .theme-toggle-track {
+  background: #171B22 !important;
+  border: 1px solid rgba(255, 255, 255, .09) !important;
+}
+
+html[data-theme="dark"] .theme-toggle-sun,
+html[data-theme="dark"] #main-nav .theme-toggle-sun,
+html[data-theme="dark"] nav.il-global-nav .theme-toggle-sun {
+  color: #A9803D !important;
+  -webkit-text-fill-color: #A9803D !important;
+}
+
+html[data-theme="dark"] .theme-toggle-moon,
+html[data-theme="dark"] #main-nav .theme-toggle-moon,
+html[data-theme="dark"] nav.il-global-nav .theme-toggle-moon {
+  color: #F0DFB4 !important;
+  -webkit-text-fill-color: #F0DFB4 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   48 · STATIC-PAGE SESSION STATE
+   ═══════════════════════════════════════════════════════════════════════════
+   The static pages resolve the session themselves. `static-auth.js` owns one
+   class on the nav and these rules are the only thing that acts on it.
+
+   The `[hidden]` guard in site-shell.css is (0,0,3,0) and lost to
+   `#main-nav .btn-nav-outline { display:inline-flex !important }` at (0,1,1,0)
+   in beauty-system.css — which is why a signed-in visitor saw "Log in" sitting
+   next to their own account chip on /lens-score and /about. These selectors run
+   (0,1,2,3), above anything else that touches display on these controls.
+   ═════════════════════════════════════════════════════════════════════════ */
+html body nav#main-nav.il-auth-in .il-global-login,
+html body nav#main-nav.il-auth-in .il-global-trial,
+html body nav.il-global-nav.il-auth-in .il-global-login,
+html body nav.il-global-nav.il-auth-in .il-global-trial {
+  display: none !important;
+}
+
+/* The account chip only exists once the session is known. */
+html body nav#main-nav .il-global-account,
+html body nav.il-global-nav .il-global-account {
+  display: inline-flex !important;
+  align-items: center !important;
+  min-height: 34px !important;
+  padding: 0 12px !important;
+  border-radius: 8px !important;
+  font: 650 12px/1 var(--il-sans, "DM Sans", Inter, sans-serif) !important;
+  white-space: nowrap !important;
+  text-decoration: none !important;
+  max-width: 190px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+html body nav#main-nav.il-auth-out .il-global-account,
+html body nav.il-global-nav.il-auth-out .il-global-account {
+  display: none !important;
+}
+
+/* Before the session resolves, hold the guest links back instead of flashing
+   "Log in" at someone who is signed in. `visibility` rather than `display`
+   keeps the nav from reflowing when they resolve. A watchdog in the script
+   clears this class after 1s, so a failed request still shows the links. */
+html body nav#main-nav.il-auth-pending .il-global-login,
+html body nav#main-nav.il-auth-pending .il-global-trial,
+html body nav.il-global-nav.il-auth-pending .il-global-login,
+html body nav.il-global-nav.il-auth-pending .il-global-trial {
+  visibility: hidden !important;
+}
+
+/* Dark and light treatments for the account chip. */
+html[data-theme="dark"] body nav#main-nav .il-global-account,
+html[data-theme="dark"] body nav.il-global-nav .il-global-account {
+  color: #F2F0EB !important;
+  -webkit-text-fill-color: #F2F0EB !important;
+  background: rgba(255, 255, 255, .06) !important;
+  border: 1px solid rgba(255, 255, 255, .14) !important;
+}
+
+html:not([data-theme="dark"]) body nav#main-nav .il-global-account,
+html:not([data-theme="dark"]) body nav.il-global-nav .il-global-account {
+  color: #14161A !important;
+  -webkit-text-fill-color: #14161A !important;
+  background: #FAF8F4 !important;
+  border: 1px solid rgba(24, 22, 18, .16) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   49 · THE LENSSCORE TAB
+   ═══════════════════════════════════════════════════════════════════════════
+   Every other nav tab is an in-app transition. LensScore is a separate
+   document, so the click had no feedback at all until the new page painted —
+   it read as a dead tab. Mark it pressed the moment it is clicked.
+   ═════════════════════════════════════════════════════════════════════════ */
+.nav-tab.il-nav-loading {
+  position: relative;
+  opacity: .82;
+}
+
+.nav-tab.il-nav-loading::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 4px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--il-gold, #D6AC64);
+  transform-origin: left center;
+  animation: il-nav-progress .9s cubic-bezier(.4, 0, .2, 1) infinite;
+}
+
+@keyframes il-nav-progress {
+  0%   { transform: scaleX(0); opacity: 1; }
+  70%  { transform: scaleX(1); opacity: 1; }
+  100% { transform: scaleX(1); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-tab.il-nav-loading::after { animation: none; transform: scaleX(1); }
+}
+
+/* First-paint session state. theme-bootstrap.js stamps one of these on <html>
+   from a blocking <head> script, so the correct nav is painted on frame one
+   rather than after the /api/auth/me round trip.
+
+     il-hint-in       last known: signed in    → hide the guest links now
+     il-hint-out      last known: signed out   → nothing to do, guest is default
+     il-hint-unknown  no usable hint           → static-auth.js holds them back
+
+   static-auth.js still does the authoritative check and overrides all of this
+   via .il-auth-in / .il-auth-out on the nav itself. */
+html.il-hint-in body nav#main-nav .il-global-login,
+html.il-hint-in body nav#main-nav .il-global-trial,
+html.il-hint-in body nav.il-global-nav .il-global-login,
+html.il-hint-in body nav.il-global-nav .il-global-trial {
+  display: none !important;
+}
+
+/* If the hint said "signed in" but the session check disagrees, the nav gets
+   .il-auth-out and the guest links must come back. */
+html.il-hint-in body nav#main-nav.il-auth-out .il-global-login,
+html.il-hint-in body nav#main-nav.il-auth-out .il-global-trial,
+html.il-hint-in body nav.il-global-nav.il-auth-out .il-global-login,
+html.il-hint-in body nav.il-global-nav.il-auth-out .il-global-trial {
+  display: inline-flex !important;
+  visibility: visible !important;
+}

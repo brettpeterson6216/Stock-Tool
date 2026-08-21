@@ -29,21 +29,21 @@ canvas.il-chart-mirror {
 }
 
 /* ── Scrub readout ─────────────────────────────────────────────────────── */
+/* A static strip above the plot rather than a floating card on top of it.
+   The overlay version permanently covered the top-left corner of the series. */
 .il-chart-readout {
-  position: absolute;
-  top: 10px;
-  left: 14px;
+  position: relative;
   z-index: 4;
   display: flex;
-  flex-direction: column;
-  gap: 3px;
-  padding: 10px 14px;
-  border-radius: var(--il-radius, 14px);
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin: 0 0 8px;
+  padding: 8px 14px;
+  border-radius: var(--il-radius-sm, 10px);
   border: 1px solid var(--il-line, rgba(255, 255, 255, .075));
-  background: color-mix(in srgb, var(--il-surface, #101319) 78%, transparent);
-  backdrop-filter: saturate(160%) blur(14px);
-  -webkit-backdrop-filter: saturate(160%) blur(14px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06), 0 12px 30px -16px rgba(0, 0, 0, .9);
+  background: color-mix(in srgb, var(--il-surface, #101319) 62%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04);
   pointer-events: none;
   transition: opacity .18s ease;
 }
@@ -52,11 +52,14 @@ canvas.il-chart-mirror {
   display: flex;
   align-items: baseline;
   gap: 10px;
+  margin-right: auto;
 }
+
+.il-chart-readout .ilr-date { margin-left: auto; }
 
 .il-chart-readout .ilr-price {
   font-family: var(--il-mono, "DM Mono", monospace);
-  font-size: 22px;
+  font-size: 19px;
   font-weight: 500;
   letter-spacing: -.03em;
   color: var(--il-ink, #F2F0EB);
@@ -75,9 +78,34 @@ canvas.il-chart-mirror {
 
 .il-chart-readout .ilr-ohlc {
   display: flex;
-  gap: 12px;
+  gap: 14px;
   flex-wrap: wrap;
-  margin-top: 2px;
+  margin-top: 0;
+}
+
+@media (max-width: 640px) {
+  /* Two tight rows, not four wrapped ones — the strip was eating 109px of a
+     460px chart. Row one is price + change, row two scrolls the OHLC. */
+  .il-chart-readout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2px;
+    margin-bottom: 6px;
+    padding: 6px 10px;
+  }
+  .il-chart-readout .ilr-main { margin: 0; gap: 8px; }
+  .il-chart-readout .ilr-price { font-size: 16px; }
+  .il-chart-readout .ilr-chg { font-size: 11px; }
+  .il-chart-readout .ilr-ohlc {
+    gap: 10px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .il-chart-readout .ilr-ohlc::-webkit-scrollbar { display: none; }
+  .il-chart-readout .ilr-ohlc span { flex: 0 0 auto; }
+  /* The date is already on the crosshair label; it does not need a third row. */
+  .il-chart-readout .ilr-date { display: none; }
 }
 
 .il-chart-readout .ilr-ohlc span {
@@ -465,4 +493,117 @@ html:not([data-theme="dark"]) .chart-key.key-vwap { background: #127C6C !importa
   transform: scale(.62);
   transform-origin: bottom left;
   opacity: .28 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FULL-SCREEN CHART — engine-owned modal
+   ═══════════════════════════════════════════════════════════════════════════
+   When the Lightweight-Charts engine owns the expanded chart, the legacy
+   Chart.js canvases and the markup toolbar that draws onto them are dead
+   weight: they still occupied layout inside .cex-workspace and pushed the real
+   host hundreds of pixels down, which is why full screen rendered blank.
+   ═════════════════════════════════════════════════════════════════════════ */
+#chart-expand-modal.il-lwc #chart-expanded,
+#chart-expand-modal.il-lwc #chart-markup,
+#chart-expand-modal.il-lwc .cex-toolbar { display: none !important; }
+
+#chart-expand-modal.il-lwc .cex-workspace {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+}
+
+#chart-expand-modal.il-lwc .cex-body {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.il-chart-host-expanded {
+  position: relative;
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 320px;
+}
+
+/* control strip -------------------------------------------------------- */
+.il-cex-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  padding: 9px 16px;
+  border-bottom: 1px solid var(--il-line, rgba(255, 255, 255, .08));
+  background: color-mix(in srgb, var(--il-surface, #101319) 55%, transparent);
+}
+
+.il-cex-controls .ilcx-group {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px;
+  border-radius: 999px;
+  border: 1px solid var(--il-line, rgba(255, 255, 255, .07));
+  background: color-mix(in srgb, var(--il-bg, #0B0D12) 45%, transparent);
+}
+
+.il-cex-controls .ilcx-chip {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 5px 11px;
+  font-family: var(--il-sans, ui-sans-serif, system-ui, sans-serif);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: .01em;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--il-ink-2, rgba(242, 240, 235, .62));
+  background: transparent;
+  transition: background .16s ease, color .16s ease;
+}
+
+.il-cex-controls .ilcx-chip:hover {
+  color: var(--il-ink, #F2F0EB);
+  background: color-mix(in srgb, var(--il-ink, #F2F0EB) 8%, transparent);
+}
+
+.il-cex-controls .ilcx-chip.on {
+  color: var(--il-bg, #0B0D12);
+  background: var(--il-gold, #D6AC64);
+}
+
+.il-cex-controls .ilcx-chip:focus-visible {
+  outline: 2px solid var(--il-gold, #D6AC64);
+  outline-offset: 2px;
+}
+
+@media (max-width: 760px) {
+  .il-cex-controls {
+    gap: 6px 8px;
+    padding: 8px 10px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+  }
+  .il-cex-controls::-webkit-scrollbar { display: none; }
+  .il-cex-controls .ilcx-group { flex: 0 0 auto; }
+  .il-cex-controls .ilcx-chip { padding: 5px 9px; font-size: 11px; }
+}
+
+/* the modal's own readout strip should not eat plot height */
+#chart-expand-modal.il-lwc .il-chart-readout {
+  margin: 10px 16px 6px;
+  flex: 0 0 auto;
+}
+
+/* Full-screen chart on a phone: the plot host was running edge to edge, past
+   the modal's own rounded box, and the readout strip did not line up with it. */
+@media (max-width: 760px) {
+  #chart-expand-modal.il-lwc .cex-body { padding: 0 10px 10px !important; }
+  #chart-expand-modal.il-lwc .il-chart-readout { margin: 8px 0 6px; }
+  .il-chart-host-expanded { min-height: 260px; }
 }

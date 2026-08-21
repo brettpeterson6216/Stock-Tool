@@ -111,6 +111,45 @@
     return false;
   }
   window.navSearchGo = navSearchGo;
+
+  /* ── LensScore tab ───────────────────────────────────────────────────────
+     LensScore is a separate document, not an in-app section, so this tab
+     cannot go through navGoTo. Two things made it feel broken next to the
+     others: the click had no feedback at all until the new page painted, and
+     it always landed on AAPL regardless of what you had loaded — so it read as
+     a hard reset rather than another view of the same company.
+
+     Carry the ticker across and show a progress underline on the tab while the
+     document loads. */
+  function navGoLensScore(el, ev) {
+    if (ev) ev.preventDefault();
+    try {
+      var tab = el || document.getElementById('nav-lensscore-link');
+      if (tab) {
+        document.querySelectorAll('.nav-tab').forEach(function (t) { t.classList.remove('active-tab', 'active'); });
+        tab.classList.add('active-tab', 'il-nav-loading');
+      }
+    } catch (e) {}
+
+    var sym = '';
+    try {
+      sym = (window.S && window.S.ticker) ||
+            (document.getElementById('main-ticker') || {}).value ||
+            (document.getElementById('nav-ticker-input') || {}).value || '';
+    } catch (e) {}
+    sym = String(sym).trim().toUpperCase().replace(/[^A-Z0-9.\-]/g, '').slice(0, 12);
+
+    window.location.href = '/lens-score' + (sym ? '?ticker=' + encodeURIComponent(sym) : '');
+    return false;
+  }
+  window.navGoLensScore = navGoLensScore;
+
+  /* The static pages cache the last known session so their nav paints correctly
+     on first frame. Signing out must invalidate that, or /lens-score and
+     /about would keep showing an account chip for a session that is gone. */
+  window.ilForgetAuthHint = function () {
+    try { localStorage.removeItem('il-auth-hint'); } catch (e) {}
+  };
   function navGoTo(id, attempt) {
     if (id === 'adveducation') id = 'education';
     if (id === 'home') { showLandingPage(); updateNavToolLink(true); return; }
@@ -420,6 +459,7 @@
       $acctLogout.addEventListener('click', async (e) => {
         e.preventDefault();
         await fetch('/api/auth/logout', { method:'POST', credentials:'same-origin', headers:{'X-CSRF-Token': S.csrfToken||''} });
+        if (typeof window.ilForgetAuthHint === 'function') window.ilForgetAuthHint();
         window.location.href = '/login';
       });
     }

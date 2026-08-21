@@ -660,6 +660,41 @@
       setupGuardrails.push("Extension guardrail: seller-side pressure makes the entry unattractive.");
     }
 
+    /* ── LensSetup calibration ────────────────────────────────────────────────
+       Two defects in the plain weighted mean above:
+
+         1. COMPRESSION. Seven components that each sit near 50 in ambiguous
+            conditions average to ~50 no matter how they got there, so a name
+            with every moving average against it still printed "Balanced"
+            because calm volatility and a nearby shelf propped it up. Expand
+            around the midpoint so the scale actually spends its range.
+
+         2. ONE-SIDED GATES. The guardrails above only ever cap. Nothing stops
+            a poor tape from being lifted by tidy secondary components, and
+            nothing lets a genuinely clean setup clear the pack. Gate on trend
+            regime in BOTH directions: trend sets a ceiling AND a floor, so
+            you can neither be well positioned against the trend nor badly
+            positioned with everything aligned behind you. */
+    setupScore = 50 + (setupScore - 50) * 1.28;
+
+    const trend10 = finite(trendRegime.trendScore) ? clamp(trendRegime.trendScore, 0, 10) : 5;
+    const trendCeiling = 32 + trend10 * 6.8;     // trend 0 → 32, trend 10 → 100
+    const trendFloor = trend10 * 3.4;            // trend 10 → 34, trend 0 → 0
+    if (setupScore > trendCeiling) {
+      setupScore = trendCeiling;
+      if (trend10 <= 4) {
+        setupGuardrails.push(
+          `Trend regime caps this setup at ${(trendCeiling / 10).toFixed(1)} — the secondary reads cannot outrank the tape.`
+        );
+      }
+    }
+    if (setupScore < trendFloor) {
+      setupScore = trendFloor;
+      if (trend10 >= 7) {
+        setupSignals.push("The prevailing trend puts a floor under an otherwise soft-looking setup.");
+      }
+    }
+
     return {
       status: "ok",
       bars,

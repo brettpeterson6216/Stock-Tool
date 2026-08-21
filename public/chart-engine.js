@@ -164,6 +164,11 @@
   function buildInstance(host, rows, opts) {
     opts = opts || {};
     var p = palette();
+    var type = (window.S && S.chartType) || "candle";
+    /* Candles need physical room or the bodies collapse into a smear. Lines can
+       run much tighter. These two numbers are what stop "squished candles". */
+    var seed = type === "candle" ? 8 : 4;
+    var floorSpacing = type === "candle" ? 3.5 : 1;
     var chart = LWC.createChart(host, {
       layout: {
         background: { type: "solid", color: "transparent" },
@@ -182,9 +187,11 @@
         borderColor: p.border,
         timeVisible: intraday(),
         secondsVisible: false,
-        rightOffset: 4,
-        barSpacing: 8,
-        minBarSpacing: 0.6
+        rightOffset: 6,
+        barSpacing: seed,
+        minBarSpacing: floorSpacing,
+        shiftVisibleRangeOnNewBar: true,
+        lockVisibleTimeRangeOnResize: true
       },
       crosshair: {
         mode: opts.magnet === false ? 0 : 1,
@@ -197,7 +204,6 @@
     });
 
     var series = {};
-    var type = (window.S && S.chartType) || "candle";
 
     /* price series */
     if (type === "candle") {
@@ -339,7 +345,9 @@
         var axis = 26;                        // time axis lives inside the last pane
         var usable = h - axis;
         var extra = panes.length - 1;
-        var small = Math.max(44, Math.min(96, Math.round(usable * 0.16)));
+        /* 44px was not enough for an oscillator: the 30/50/70 axis labels
+           collided with each other and with the pane separator. */
+        var small = Math.max(58, Math.min(104, Math.round(usable * 0.18)));
         for (var i = 1; i < panes.length; i++) panes[i].setHeight(small);
         panes[0].setHeight(Math.max(140, usable - small * extra));
       } catch (e) {}
@@ -352,13 +360,42 @@
       chart._ilResizeObserver = ro;
     }
 
-    chart.timeScale().fitContent();
-    return { chart: chart, series: series, rows: rows, host: host, sizePanes: sizePanes };
+    /* fitContent() crushes every bar in the series into the viewport, which is
+       exactly the "candles get squished" complaint: a 5y daily series is 1250
+       bars in 900px, i.e. 0.7px per candle. Instead pick a bar count that keeps
+       each candle legible at the current width and show the most recent slice
+       of the series. Panning left still reaches the whole history. */
+    function applyInitialView() {
+      var width = host.clientWidth || 900;
+      var target = type === "candle" ? 9 : 4.5;   // px per bar we want to see
+      var gutter = 64;                            // price axis + right offset
+      var visible = Math.max(24, Math.min(rows.length, Math.floor((width - gutter) / target)));
+      var ts = chart.timeScale();
+      try {
+        ts.applyOptions({ barSpacing: Math.max(floorSpacing, (width - gutter) / visible) });
+        ts.setVisibleLogicalRange({ from: rows.length - visible, to: rows.length + 3 });
+      } catch (e) { try { ts.fitContent(); } catch (e2) {} }
+    }
+    /* Run once now (so the first paint is right) and once after layout settles
+       (so autoSize has the real width). The second pass must stand down if the
+       caller has meanwhile restored a saved viewport, or flipping candle→line
+       would silently throw the user's zoom away. */
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { if (!chart._ilViewLocked) applyInitialView(); });
+    });
+    applyInitialView();
+
+    return {
+      chart: chart, series: series, rows: rows, host: host,
+      sizePanes: sizePanes, applyInitialView: applyInitialView,
+      barType: type, floorSpacing: floorSpacing
+    };
   }
 
   /* ── scrub readout ─────────────────────────────────────────────────────── */
   function buildReadout(wrap) {
-    var el = wrap.querySelector(".il-chart-readout");
+    var scope = wrap.parentElement || wrap;
+    var el = scope.querySelector(".il-chart-readout");
     if (el) return el;
     el = document.createElement("div");
     el.className = "il-chart-readout";
@@ -369,7 +406,15 @@
       '<span><i>L</i><b data-k="l">—</b></span><span><i>C</i><b data-k="c">—</b></span>' +
       '<span><i>Vol</i><b data-k="v">—</b></span></div>' +
       '<div class="ilr-date">—</div>';
-    wrap.appendChild(el);
+    /* Sit ABOVE the plot, not on top of it. As a floating overlay this box
+       covered the top-left of every chart — which is exactly where the last
+       few months of a rising series live. */
+    /* Sit ABOVE the plot, not on top of it. As a floating overlay this box
+       covered the top-left of every chart — which is exactly where the last
+       few months of a rising series live. `wrap` is the fixed-height plot
+       slot, so the strip goes in its parent, immediately before it. */
+    var parent = wrap.parentElement;
+    if (parent) parent.insertBefore(el, wrap); else wrap.appendChild(el);
     return el;
   }
 
@@ -577,6 +622,7 @@
     if (!rows.length) return;
 
     var keepRange = null;
+    var prevLength = inst ? inst._ilLength : null;
     if (inst && inst.chart) {
       try { keepRange = inst.chart.timeScale().getVisibleLogicalRange(); } catch (e) {}
       try { if (inst.chart._ilResizeObserver) inst.chart._ilResizeObserver.disconnect(); } catch (e) {}
@@ -589,12 +635,22 @@
     lastFrame = { rows: rows, result: result };
     wireReadout(inst, host.parentElement);
     applyMarkers(inst);
+    if (zonesOn) fetchZones(function () { if (inst) applyZones(inst); });
 
-    // restore the user's zoom when only the type/indicator changed
-    if (keepRange && inst._sameLength === rows.length) {
+    /* Restore the user's zoom ONLY when the underlying bar count is unchanged —
+       i.e. they flipped candle→line or toggled an indicator. Changing timeframe
+       changes the bar count, and reusing the old logical range there is what made
+       the candle size appear frozen across timeframes. */
+    if (keepRange && prevLength === rows.length) {
+      inst.chart._ilViewLocked = true;
       try { inst.chart.timeScale().setVisibleLogicalRange(keepRange); } catch (e) {}
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          try { inst.chart.timeScale().setVisibleLogicalRange(keepRange); } catch (e) {}
+        });
+      });
     }
-    inst._sameLength = rows.length;
+    inst._ilLength = rows.length;
     window.__ilChart = inst;   // debug + integration handle
 
     setTimeout(function () { mirrorToCanvas(inst); }, 260);
@@ -605,13 +661,20 @@
       S.charts["price-chart"] = {
         _il: true,
         destroy: function () { try { inst && inst.chart.remove(); } catch (e) {} inst = null; },
-        resetZoom: function () { try { inst.chart.timeScale().fitContent(); } catch (e) {} },
+        resetZoom: function () { try { inst.applyInitialView(); } catch (e) { try { inst.chart.timeScale().fitContent(); } catch (e2) {} } },
         zoom: function (f) {
           try {
             var ts = inst.chart.timeScale();
             var r = ts.getVisibleLogicalRange();
             if (!r) return;
-            var mid = (r.from + r.to) / 2, half = (r.to - r.from) / 2 / f;
+            var span = r.to - r.from;
+            var next = span / f;
+            /* Clamp both ends: never fewer than 12 bars (you lose all context)
+               and never so many that a candle drops under its legibility floor. */
+            var width = (inst.host.clientWidth || 900) - 64;
+            var maxBars = Math.max(40, Math.floor(width / inst.floorSpacing));
+            next = Math.max(12, Math.min(maxBars, next));
+            var mid = (r.from + r.to) / 2, half = next / 2;
             ts.setVisibleLogicalRange({ from: mid - half, to: mid + half });
           } catch (e) {}
         },
@@ -623,6 +686,202 @@
       };
     }
     document.dispatchEvent(new CustomEvent("il-chart-rendered", { detail: { rows: rows } }));
+  }
+
+  /* ── LensScore zones drawn onto the price pane ─────────────────────────── */
+  var zonesOn = false;
+  try { zonesOn = localStorage.getItem("il-chart-zones") === "1"; } catch (e) {}
+
+  function clearZones(instance) {
+    (instance._ilZoneLines || []).forEach(function (ln) {
+      try { instance.series.price.removePriceLine(ln); } catch (e) {}
+    });
+    instance._ilZoneLines = [];
+    if (instance._ilZoneMarkers) {
+      try { instance._ilZoneMarkers.setMarkers([]); } catch (e) {}
+      instance._ilZoneMarkers = null;
+    }
+  }
+
+  function applyZones(instance) {
+    if (!instance || !instance.series || !instance.series.price) return;
+    clearZones(instance);
+    if (!zonesOn) return;
+    var setup = window.__ilLensZones;
+    if (!setup || !setup.ok) return;
+    var p = palette();
+    var lines = [];
+
+    function add(price, color, title, style, width) {
+      if (price == null || !isFinite(Number(price))) return;
+      try {
+        lines.push(instance.series.price.createPriceLine({
+          price: Number(price), color: color, lineWidth: width || 1,
+          lineStyle: style == null ? 2 : style,
+          axisLabelVisible: true, title: title
+        }));
+      } catch (e) {}
+    }
+
+    var z = setup.zones || {};
+    (z.buyer || []).slice(0, 3).forEach(function (g, i) {
+      add(g.price, p.up, i === 0 ? "Buyers" : "Buyers " + (i + 1), 2, i === 0 ? 2 : 1);
+    });
+    (z.seller || []).slice(0, 3).forEach(function (g, i) {
+      add(g.price, p.down, i === 0 ? "Sellers" : "Sellers " + (i + 1), 2, i === 0 ? 2 : 1);
+    });
+
+    var fib = setup.retracement;
+    if (fib) {
+      add(fib.upper, p.band, "0.5", 3);
+      add(fib.lower, p.band, "0.618", 3);
+    }
+    instance._ilZoneLines = lines;
+
+    /* Divergence gets a marker on the swing that formed it, not a price line. */
+    var div = setup.divergence || {};
+    var rows = instance.rows || [];
+    var marks = [];
+    /* Server and client series can differ by a bar or two at the edges, but
+       both end on the same session — so anchor from the right. */
+    var srvBars = (setup.inputs && setup.inputs.bars) || rows.length;
+    function markAt(idx, kind) {
+      var fromEnd = srvBars - 1 - idx;
+      var row = rows[rows.length - 1 - fromEnd];
+      if (!row) return;
+      marks.push({
+        time: row.time,
+        position: kind === "bullish" ? "belowBar" : "aboveBar",
+        color: kind === "bullish" ? p.up : p.down,
+        shape: kind === "bullish" ? "arrowUp" : "arrowDown",
+        text: kind === "bullish" ? "Bull div" : "Bear div"
+      });
+    }
+    if (div.bullish) markAt(div.bullish.toIndex, "bullish");
+    if (div.bearish) markAt(div.bearish.toIndex, "bearish");
+    if (marks.length && window.LWC && LWC.createSeriesMarkers) {
+      try { instance._ilZoneMarkers = LWC.createSeriesMarkers(instance.series.price, marks); } catch (e) {}
+    }
+  }
+
+  var zoneCache = {};
+  function fetchZones(then) {
+    if (!window.S || !S.ticker) return;
+    var key = S.ticker + ":" + (S.range || "1y");
+    if (zoneCache[key]) { window.__ilLensZones = zoneCache[key]; then && then(); return; }
+    fetch("/api/analysis/" + encodeURIComponent(S.ticker) + "?range=" + encodeURIComponent(S.range || "1y"),
+          { credentials: "same-origin" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) {
+        var z = j && j.lensSetup && j.lensSetup.ok ? j.lensSetup : null;
+        if (!z) return;
+        zoneCache[key] = z;
+        window.__ilLensZones = z;
+        then && then();
+      })
+      .catch(function () {});
+  }
+
+  window.ilToggleZones = function (btn) {
+    zonesOn = !zonesOn;
+    try { localStorage.setItem("il-chart-zones", zonesOn ? "1" : "0"); } catch (e) {}
+    if (btn) { btn.classList.toggle("on", zonesOn); btn.setAttribute("aria-pressed", String(zonesOn)); }
+    document.querySelectorAll("[data-il-zones]").forEach(function (b) {
+      b.classList.toggle("on", zonesOn);
+      b.setAttribute("aria-pressed", String(zonesOn));
+    });
+    function paint() {
+      if (inst) applyZones(inst);
+      var modal = document.getElementById("chart-expand-modal");
+      if (modal && modal._ilExpanded) applyZones(modal._ilExpanded);
+    }
+    if (zonesOn && !window.__ilLensZones) fetchZones(paint); else paint();
+  };
+
+  /* ── full-screen control strip ─────────────────────────────────────────── */
+  var TF = [["1d","1D"],["5d","5D"],["1mo","1M"],["3mo","3M"],["6mo","6M"],
+            ["ytd","YTD"],["1y","1Y"],["2y","2Y"],["5y","5Y"],["max","Max"]];
+  var CT = [["candle","Candle"],["line","Line"],["area","Area"]];
+
+  function buildExpandedControls(modal, syncOnly) {
+    var strip = modal.querySelector(".il-cex-controls");
+    if (!strip) {
+      if (syncOnly) return;
+      strip = document.createElement("div");
+      strip.className = "il-cex-controls";
+      strip.innerHTML =
+        '<div class="ilcx-group" role="group" aria-label="Timeframe">' +
+          TF.map(function (t) {
+            return '<button type="button" class="ilcx-chip" data-il-range="' + t[0] + '">' + t[1] + "</button>";
+          }).join("") +
+        "</div>" +
+        '<div class="ilcx-group" role="group" aria-label="Chart type">' +
+          CT.map(function (t) {
+            return '<button type="button" class="ilcx-chip" data-il-ctype="' + t[0] + '">' + t[1] + "</button>";
+          }).join("") +
+        "</div>" +
+        '<div class="ilcx-group" role="group" aria-label="Price scale">' +
+          '<button type="button" class="ilcx-chip" data-il-scale="log" title="Logarithmic price scale">Log</button>' +
+          '<button type="button" class="ilcx-chip" data-il-scale="percent" title="Percent-change scale">%</button>' +
+        "</div>" +
+        '<div class="ilcx-group" role="group" aria-label="Studies">' +
+          '<button type="button" class="ilcx-chip" data-il-vol="1" title="Volume pane">Vol</button>' +
+          '<button type="button" class="ilcx-chip" data-il-osc="rsi" title="RSI pane">RSI</button>' +
+          '<button type="button" class="ilcx-chip" data-il-osc="macd" title="MACD pane">MACD</button>' +
+          '<button type="button" class="ilcx-chip" data-il-ov="ema21" title="21-period EMA">21 EMA</button>' +
+          '<button type="button" class="ilcx-chip" data-il-ov="vwap" title="Volume-weighted average price">VWAP</button>' +
+        "</div>" +
+        '<div class="ilcx-group" role="group" aria-label="Overlays">' +
+          '<button type="button" class="ilcx-chip" data-il-zones="1" title="LensScore supply and demand zones">Zones</button>' +
+          '<button type="button" class="ilcx-chip" data-il-pin="earnings" title="Earnings markers">Earnings</button>' +
+          '<button type="button" class="ilcx-chip" data-il-pin="news" title="News markers">News</button>' +
+        "</div>";
+
+      strip.addEventListener("click", function (ev) {
+        var b = ev.target.closest ? ev.target.closest(".ilcx-chip") : null;
+        if (!b) return;
+        var v;
+        if ((v = b.getAttribute("data-il-range")) && typeof window.changeRange === "function") return window.changeRange(v);
+        if ((v = b.getAttribute("data-il-ctype")) && typeof window.setChartType === "function") return window.setChartType(v);
+        if ((v = b.getAttribute("data-il-scale"))) return window.ilSetScale(v);
+        if (b.hasAttribute("data-il-vol")) return window.ilToggleVolume();
+        if ((v = b.getAttribute("data-il-osc"))) return window.ilSetOscillator(v);
+        if ((v = b.getAttribute("data-il-ov"))) return window.ilToggleOverlay(v);
+        if (b.hasAttribute("data-il-zones")) return window.ilToggleZones(b);
+        if ((v = b.getAttribute("data-il-pin"))) {
+          window.ilTogglePins(v, b);
+          var mm = document.getElementById("chart-expand-modal");
+          if (mm && mm._ilExpanded) applyMarkers(mm._ilExpanded);
+          return;
+        }
+      });
+
+      var head = modal.querySelector(".cex-header");
+      var box = modal.querySelector(".cex-box") || modal;
+      if (head && head.nextSibling) box.insertBefore(strip, head.nextSibling);
+      else box.appendChild(strip);
+    }
+
+    var range = (window.S && S.range) || "1y";
+    var ctype = (window.S && S.chartType) || "candle";
+    function set(sel, on) {
+      var b = strip.querySelector(sel);
+      if (!b) return;
+      b.classList.toggle("on", !!on);
+      b.setAttribute("aria-pressed", String(!!on));
+    }
+    TF.forEach(function (t) { set('[data-il-range="' + t[0] + '"]', t[0] === range); });
+    CT.forEach(function (t) { set('[data-il-ctype="' + t[0] + '"]', t[0] === ctype); });
+    set('[data-il-scale="log"]', view.scale === "log");
+    set('[data-il-scale="percent"]', view.scale === "percent");
+    set("[data-il-vol]", view.volume);
+    set('[data-il-osc="rsi"]', view.osc === "rsi");
+    set('[data-il-osc="macd"]', view.osc === "macd");
+    set('[data-il-ov="ema21"]', view.ema21);
+    set('[data-il-ov="vwap"]', view.vwap);
+    set("[data-il-zones]", zonesOn);
+    set('[data-il-pin="earnings"]', view.pins.earnings);
+    set('[data-il-pin="news"]', view.pins.news);
   }
 
   /* ── take over the global entry points ─────────────────────────────────── */
@@ -670,19 +929,57 @@
       if (!modal) return;
       modal.dataset.chartId = chartId;
       modal.dataset.chartTitle = title || "Price Chart";
-      modal.classList.add("open");
+      /* Flags the modal as owned by the Lightweight-Charts engine. The CSS then
+         hides the legacy Chart.js canvases and the markup toolbar that operates
+         on them — they were still occupying layout and pushing the real chart
+         host below the fold, which is why full screen came up blank. */
+      modal.classList.add("il-lwc", "open");
+      var t = document.getElementById("cex-title");
+      if (t) t.textContent = modal.dataset.chartTitle;
       document.body.style.overflow = "hidden";
+
+      buildExpandedControls(modal);
+      mountExpanded(modal);
+      document.dispatchEvent(new CustomEvent("il-chart-expanded"));
+    };
+
+    function mountExpanded(modal) {
       var slot = modal.querySelector(".cex-workspace") || modal.querySelector(".cex-body") || modal;
+      if (modal._ilExpanded) {
+        try { modal._ilExpanded.chart.remove(); } catch (e) {}
+        modal._ilExpanded = null;
+      }
       var old = slot.querySelector(".il-chart-host-expanded");
       if (old) old.remove();
       var host = document.createElement("div");
       host.className = "il-chart-host-expanded";
       slot.appendChild(host);
-      var ex = buildInstance(host, lastFrame.rows);
-      wireReadout(ex, host.parentElement);
-      modal._ilExpanded = ex;
-      document.dispatchEvent(new CustomEvent("il-chart-expanded"));
-    };
+
+      /* The modal is display:none until .open lands, so the host measures 0x0
+         on this frame. Building an LWC chart into a zero box produces a chart
+         that never draws. Wait two frames for layout to settle. */
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          if (!document.body.contains(host)) return;
+          var ex = buildInstance(host, lastFrame.rows);
+          wireReadout(ex, host);
+          applyMarkers(ex);
+          applyZones(ex);
+          modal._ilExpanded = ex;
+          try { ex.sizePanes(); ex.applyInitialView(); } catch (e) {}
+        });
+      });
+    }
+
+    /* Keep the expanded chart in step with the toolbar: any main-chart re-render
+       (new range, new type, indicator toggled) rebuilds it from the new frame. */
+    document.addEventListener("il-chart-rendered", function () {
+      var modal = document.getElementById("chart-expand-modal");
+      if (modal && modal.classList.contains("open") && modal.classList.contains("il-lwc")) {
+        buildExpandedControls(modal, true);
+        mountExpanded(modal);
+      }
+    });
 
     var prevClose = window.closeExpandModal;
     window.closeExpandModal = function () {
@@ -693,8 +990,34 @@
         var h = modal.querySelector(".il-chart-host-expanded");
         if (h) h.remove();
       }
+      if (modal) modal.classList.remove("il-lwc");
       if (typeof prevClose === "function") return prevClose.apply(this, arguments);
       if (modal) { modal.classList.remove("open"); document.body.style.overflow = ""; }
+    };
+
+    /* Zoom / reset inside the modal must drive the modal's own instance. */
+    var prevZoomEx = window.zoomExpandedChart;
+    window.zoomExpandedChart = function (f) {
+      var modal = document.getElementById("chart-expand-modal");
+      var ex = modal && modal._ilExpanded;
+      if (!ex) return typeof prevZoomEx === "function" ? prevZoomEx.apply(this, arguments) : undefined;
+      try {
+        var ts = ex.chart.timeScale();
+        var r = ts.getVisibleLogicalRange();
+        if (!r) return;
+        var next = (r.to - r.from) / f;
+        var width = (ex.host.clientWidth || 1200) - 64;
+        next = Math.max(12, Math.min(Math.max(40, Math.floor(width / ex.floorSpacing)), next));
+        var mid = (r.from + r.to) / 2;
+        ts.setVisibleLogicalRange({ from: mid - next / 2, to: mid + next / 2 });
+      } catch (e) {}
+    };
+    var prevResetEx = window.resetExpandZoom;
+    window.resetExpandZoom = function () {
+      var modal = document.getElementById("chart-expand-modal");
+      var ex = modal && modal._ilExpanded;
+      if (!ex) return typeof prevResetEx === "function" ? prevResetEx.apply(this, arguments) : undefined;
+      try { ex.applyInitialView(); } catch (e) {}
     };
 
     /* re-render on theme flip so colours follow the surface */
@@ -798,6 +1121,10 @@
     mk("MACD", { onclick: "ilSetOscillator('macd',this)", "data-il-osc": "macd",
                  "aria-pressed": String(view.osc === "macd"), title: "MACD pane" })
       .classList.toggle("on", view.osc === "macd");
+    mk("Zones", { onclick: "ilToggleZones(this)", "data-il-zones": "1", "data-mobile-label": "Zones",
+                  "aria-pressed": String(zonesOn),
+                  title: "LensScore supply and demand zones, retracement band and divergence" })
+      .classList.toggle("on", zonesOn);
 
     syncToggleStates();
   }

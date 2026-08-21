@@ -21,6 +21,7 @@ const loginJs = fs.readFileSync(path.join(__dirname, "..", "public", "login.js")
 const signupJs = fs.readFileSync(path.join(__dirname, "..", "public", "signup.js"), "utf8");
 const resetPasswordJs = fs.readFileSync(path.join(__dirname, "..", "public", "reset-password.js"), "utf8");
 const staticAuthJs = fs.readFileSync(path.join(__dirname, "..", "public", "static-auth.js"), "utf8");
+const premiumRevampCss = fs.readFileSync(path.join(__dirname, "..", "public", "premium-revamp.css"), "utf8");
 const productJs = fs.readFileSync(path.join(__dirname, "..", "public", "product-system.js"), "utf8");
 const workspaceJs = fs.readFileSync(path.join(__dirname, "..", "public", "workspace-system.js"), "utf8");
 const productCss = fs.readFileSync(path.join(__dirname, "..", "public", "product-system.css"), "utf8");
@@ -157,7 +158,32 @@ test("authenticated navigation cannot display contradictory login actions", () =
   assert.match(appNavigationJs, /else \{\s*setAuthEntryVisibility\(false\)/);
   assert.match(siteShellCss, /#main-nav #nav-login\[hidden\],[\s\S]*display: none !important/);
   assert.match(staticAuthJs, /querySelectorAll\("\.il-global-login, \.il-global-trial"\)/);
-  assert.match(staticAuthJs, /control\.hidden = true/);
+  assert.match(staticAuthJs, /el\.hidden = !!signedIn/);
+
+  /* The static pages are separate documents and re-resolve the session on load.
+     A signed-in visitor seeing "Log in" next to their own account chip is the
+     regression this guards, so assert the three things that prevent it rather
+     than any one line of the implementation. */
+
+  // 1. It must bind to the nav class every static page shares. Binding to
+  //    .il-static-main-nav only reached 2 of the 8 pages.
+  assert.match(staticAuthJs, /querySelector\("\.il-global-nav"\)/);
+
+  // 2. Visibility is driven by an authoritative class, not by `hidden` alone —
+  //    `#main-nav .btn-nav-outline { display:inline-flex !important }` at
+  //    (0,1,1,0) outranks the [hidden] guard at (0,0,3,0).
+  assert.match(staticAuthJs, /classList\.toggle\("il-auth-in"/);
+  assert.match(staticAuthJs, /classList\.toggle\("il-auth-out"/);
+  assert.match(premiumRevampCss, /nav#main-nav\.il-auth-in \.il-global-login[\s\S]{0,400}?display: none !important/);
+
+  // 3. The pre-paint hint stops the guest links flashing at a signed-in user.
+  assert.match(themeBootstrapJs, /il-auth-hint/);
+  assert.match(themeBootstrapJs, /il-hint-in/);
+  assert.match(premiumRevampCss, /html\.il-hint-in body nav#main-nav \.il-global-login/);
+
+  // 4. Whatever else happens, the guest CTA must be recoverable — a stale hint
+  //    that says "signed in" cannot be allowed to hide the signup path.
+  assert.match(premiumRevampCss, /html\.il-hint-in body nav#main-nav\.il-auth-out \.il-global-login[\s\S]{0,400}?display: inline-flex !important/);
 });
 
 test("auth forms execute under the production content security policy", () => {
@@ -245,7 +271,7 @@ test("primary navigation avoids duplicate tool destinations", () => {
   assert.match(html, /Research any company with a process you can repeat\./);
   assert.match(html, /Search a company to begin, or start with a popular name below\./);
   assert.match(html, /Popular starting points/);
-  assert.match(html, /id="nav-lensscore-link" class="nav-tab">LensScore/);
+  assert.match(html, /id="nav-lensscore-link"[^>]*class="nav-tab"[^>]*>LensScore/);
 });
 
 test("About and LensScore use one global product navigation", () => {
@@ -592,7 +618,7 @@ test("landing visuals are honest CSS-built illustrations, not fake screenshots",
   assert.match(landingPolishCss, /grid-template-columns: minmax\(360px, \.82fr\) minmax\(520px, 1\.18fr\)/);
   assert.doesNotMatch(html, /class="tw-score-preview"/);
   assert.doesNotMatch(html, /class="il-lensscore-launch"/);
-  assert.match(html, /id="nav-lensscore-link" class="nav-tab">LensScore/);
+  assert.match(html, /id="nav-lensscore-link"[^>]*class="nav-tab"[^>]*>LensScore/);
   assert.match(landingPolishCss, /#view-tool \.tool-welcome::after \{[\s\S]*content: none !important/);
   assert.match(legacyCss, /\.il-hero-mock\{/);
   assert.match(legacyCss, /\.il-workflow-panels\{/);

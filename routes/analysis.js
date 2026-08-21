@@ -15,6 +15,7 @@
 const express = require("express");
 const router = express.Router();
 const { analyze } = require("../lib/technical-analysis");
+const { lensSetup } = require("../lib/lens-setup-engine");
 
 const CACHE = new Map();
 const TTL_MS = 5 * 60 * 1000;
@@ -204,6 +205,14 @@ router.get("/analysis/:ticker", async (req, res) => {
       name: series.meta.longName || series.meta.shortName || ticker,
       ...analysis
     };
+
+    /* LensSetup — the technical half of LensScore. Deterministic; never asks
+       the model for anything. Failure here must not take the read down. */
+    try {
+      body.lensSetup = lensSetup(series, { range, interval });
+    } catch (e) {
+      console.error("[analysis] lensSetup", e.message);
+    }
 
     if (wantsProse) {
       const n = await narrate(analysis, ticker);
