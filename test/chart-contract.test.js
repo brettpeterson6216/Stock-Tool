@@ -481,9 +481,10 @@ test("expanded charts look premium and support seamless annotation", () => {
   assert.match(html, /ctx2\.shadowColor='rgba\(0,0,0,\.22\)'/);
   assert.match(html, /ctx2\.lineWidth=item\.type==='freehand'\?2\.5:3/);
   assert.match(legacyCss, /#chart-expand-modal\{[\s\S]*backdrop-filter:blur\(10px\)/);
-  assert.match(legacyCss, /\.cex-box\{[\s\S]*border-radius:22px/);
+  // Radii come from the 4/8/999 scale now, not hand-picked per component.
+  assert.match(legacyCss, /\.cex-box\{[\s\S]*border-radius: ?8px/);
   assert.match(legacyCss, /\.cex-body\{[\s\S]*radial-gradient\(900px 420px at 78% -10%,rgba\(217,179,94,\.12\),transparent 70%\)/);
-  assert.match(legacyCss, /\.cex-tool\{[\s\S]*border-radius:10px/);
+  assert.match(legacyCss, /\.cex-tool\{[\s\S]*border-radius: ?8px/);
   assert.match(legacyCss, /\.cex-color\{[\s\S]*width:24px/);
 });
 
@@ -551,7 +552,7 @@ test("premium visual system is applied across app and static pages", () => {
   assert.match(legacyCss, /html\[data-theme="dark"\] \.app-section,[\s\S]*html\[data-theme="dark"\] \.il-learn-preview>div\{[\s\S]*linear-gradient\(180deg,rgba\(31,34,38,.96\),rgba\(14,16,18,.98\)\)!important/);
   assert.match(staticCss, /Static theme harmonization/);
   assert.match(legacyCss, /#market-page \.home-grid,[\s\S]*#market-page \.home-lower\{[\s\S]*gap:16px!important/);
-  assert.match(legacyCss, /#market-page \.hc,[\s\S]*#market-page \.hl-report\{[\s\S]*border-radius:16px!important/);
+  assert.match(legacyCss, /#market-page \.hc,[\s\S]*#market-page \.hl-report\{[\s\S]*border-radius: ?8px ?!important/);
   assert.match(legacyCss, /#market-page \.hc,[\s\S]*#market-page \.hg-market \.mo-bv2-card\{[\s\S]*rgba\(255,250,239,.94\)/);
   assert.match(legacyCss, /html\[data-theme="dark"\] #market-page \.hc,[\s\S]*html\[data-theme="dark"\] #market-page \.hg-market \.mo-bv2-card\{[\s\S]*rgba\(34,37,41,.96\)/);
   assert.match(legacyCss, /#market-page \.mo-tab\.on,[\s\S]*#market-page \.movers-tab\.active\{[\s\S]*linear-gradient\(180deg,var\(--lens-gold-2\),var\(--lens-gold\)\)/);
@@ -626,13 +627,17 @@ test("landing visuals are honest CSS-built illustrations, not fake screenshots",
 
 test("tool containers use premium rounded surfaces instead of sharp rectangles", () => {
   assert.match(legacyCss, /Premium tool surface polish/);
-  assert.match(legacyCss, /--tool-radius-xl:22px/);
+  // The three tool radius tokens collapsed onto the shared scale; they used to
+  // be 13/16/22px and 14/18/22px in two competing definitions of the same names.
+  assert.match(legacyCss, /--tool-radius-xl: ?8px/);
+  assert.match(legacyCss, /--tool-radius-lg: ?8px/);
+  assert.match(legacyCss, /--tool-radius-md: ?8px/);
   assert.match(legacyCss, /#view-tool \.acc-body,[\s\S]*#view-tool \.chart-wrap,[\s\S]*#view-tool \.metric-card,[\s\S]*#view-tool \.panel-box/);
   assert.match(legacyCss, /#view-tool \.il-tool-shell,[\s\S]*#view-tool \.il-proj-evidence,[\s\S]*#view-tool \.il-learn-workshop/);
   assert.match(legacyCss, /border-radius:var\(--tool-radius-lg\)!important/);
   assert.match(legacyCss, /box-shadow:var\(--tool-shadow-light\)!important/);
   assert.match(legacyCss, /html\[data-theme="dark"\] #view-tool \.acc-body,[\s\S]*box-shadow:var\(--tool-shadow-dark\)!important/);
-  assert.match(legacyCss, /#view-tool \.ticker-input,[\s\S]*#view-tool \.il-learn-nav button\{[\s\S]*border-radius:12px!important/);
+  assert.match(legacyCss, /#view-tool \.ticker-input,[\s\S]*#view-tool \.il-learn-nav button\{[\s\S]*border-radius: ?8px ?!important/);
   assert.match(legacyCss, /#view-tool \.app-section \.acc-body\{[\s\S]*background:transparent!important/);
   assert.match(legacyCss, /Live tool workspace match to the generated sample/);
   assert.match(legacyCss, /--tool-sample-charcoal:#151310/);

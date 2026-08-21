@@ -129,11 +129,11 @@ html[data-theme="light"] {
 
 :root {
   /* Radii — the single biggest fix for "blocky". */
-  --il-radius-xs: 7px;
-  --il-radius-sm: 10px;
-  --il-radius: 14px;
-  --il-radius-lg: 20px;
-  --il-radius-xl: 28px;
+  --il-radius-xs: 4px;
+  --il-radius-sm: 4px;
+  --il-radius: 8px;
+  --il-radius-lg: 8px;
+  --il-radius-xl: 8px;
   --il-radius-pill: 999px;
 
   --r: 8px;
@@ -232,7 +232,7 @@ h1.hero-h1 em {
   align-items: center;
   gap: 9px;
   font-family: var(--il-sans) !important;
-  font-size: 10.5px !important;
+  font-size: 10px !important;
   font-weight: 600 !important;
   letter-spacing: .17em !important;
   text-transform: uppercase !important;
@@ -560,7 +560,7 @@ input:focus, select:focus, textarea:focus {
 :focus-visible {
   outline: 2px solid var(--il-brass) !important;
   outline-offset: 2px;
-  border-radius: 6px;
+  border-radius: 4px;
 }
 
 /* ───────────────────────────────────────────────────────────────────────────
@@ -610,8 +610,8 @@ a.nav-tab, .il-global-tab {
   position: relative;
   border-radius: var(--il-radius-pill) !important;
   border: 1px solid transparent !important;
-  font-weight: 550 !important;
-  font-size: 12.5px !important;
+  font-weight: 500 !important;
+  font-size: 12px !important;
   letter-spacing: -.005em !important;
   color: rgba(240, 238, 232, .58) !important;
   transition: color var(--il-fast), background var(--il-fast) !important;
@@ -748,7 +748,7 @@ a.nav-tab + a.nav-tab::before,
   box-shadow: var(--il-edge-strong), var(--il-shadow-md), 0 0 0 4px rgba(214, 172, 100, .14) !important;
 }
 
-#landing-page .il-landing-search i { color: var(--il-brass) !important; font-size: 17px !important; }
+#landing-page .il-landing-search i { color: var(--il-brass) !important; font-size: 18px !important; }
 
 #landing-page .il-landing-search input {
   border: none !important;
@@ -764,7 +764,7 @@ a.nav-tab + a.nav-tab::before,
 
 #landing-page .il-landing-search button {
   padding: 12px 26px !important;
-  font-size: 13.5px !important;
+  font-size: 13px !important;
   flex: 0 0 auto !important;
 }
 
@@ -784,7 +784,7 @@ a.nav-tab + a.nav-tab::before,
   border: 1px solid var(--il-line) !important;
   background: var(--il-surface-2) !important;
   color: var(--il-ink-2) !important;
-  font-size: 12.5px !important;
+  font-size: 12px !important;
   font-weight: 500 !important;
   box-shadow: var(--il-edge) !important;
   transition: border-color var(--il-fast), transform var(--il-fast) !important;
@@ -870,7 +870,7 @@ a.nav-tab + a.nav-tab::before,
 }
 
 #landing-page .il-hero-mock .ihm-card {
-  border-radius: 12px !important;
+  border-radius: 8px !important;
   border: 1px solid rgba(255, 255, 255, .07) !important;
   background: rgba(255, 255, 255, .035) !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05) !important;
@@ -879,7 +879,7 @@ a.nav-tab + a.nav-tab::before,
 #landing-page .il-hero-mock .ihm-lbl {
   color: var(--il-brass) !important;
   letter-spacing: .14em !important;
-  font-size: 9px !important;
+  font-size: 10px !important;
   font-weight: 700 !important;
 }
 
@@ -947,7 +947,7 @@ a.nav-tab + a.nav-tab::before,
 #landing-page .il-workflow-copy p,
 #landing-page .il-landing-band p,
 #landing-page .il-landing-pricing p {
-  font-size: 16px !important;
+  font-size: 15px !important;
   line-height: 1.66 !important;
   color: var(--il-muted) !important;
   max-width: 62ch;
@@ -969,11 +969,11 @@ a.nav-tab + a.nav-tab::before,
   width: 44px !important;
   height: 44px !important;
   margin-bottom: 8px !important;
-  border-radius: 13px !important;
+  border-radius: 8px !important;
   border: 1px solid var(--il-line-gold) !important;
   background: linear-gradient(160deg, var(--il-brass-soft), transparent) !important;
   color: var(--il-brass) !important;
-  font-size: 20px !important;
+  font-size: 18px !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08) !important;
   transition: transform var(--il-mid), box-shadow var(--il-mid), color var(--il-mid) !important;
 }
@@ -985,14 +985,14 @@ a.nav-tab + a.nav-tab::before,
 }
 
 #landing-page .il-cap-card strong {
-  font-size: 17px !important;
-  font-weight: 650 !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
   letter-spacing: -.015em !important;
   color: var(--il-ink) !important;
 }
 
 #landing-page .il-cap-card span {
-  font-size: 14px !important;
+  font-size: 13px !important;
   line-height: 1.62 !important;
   color: var(--il-muted) !important;
 }
@@ -1013,7 +1013,7 @@ a.nav-tab + a.nav-tab::before,
 
 #landing-page .il-wf-head strong {
   color: var(--il-ink) !important;
-  font-weight: 650 !important;
+  font-weight: 600 !important;
   letter-spacing: -.01em !important;
 }
 
@@ -1045,7 +1045,7 @@ a.nav-tab + a.nav-tab::before,
 #landing-page .il-landing-primary,
 #landing-page .il-landing-secondary {
   padding: 14px 28px !important;
-  font-size: 14px !important;
+  font-size: 13px !important;
 }
 
 /* Left rail */
@@ -1093,7 +1093,7 @@ a.nav-tab + a.nav-tab::before,
 .app-sidebar a, .hsb-item, .il-rail-item {
   border-radius: var(--il-radius-sm) !important;
   color: var(--il-muted) !important;
-  font-weight: 550 !important;
+  font-weight: 500 !important;
   transition: all var(--il-fast) !important;
   border: 1px solid transparent !important;
 }
@@ -1116,7 +1116,7 @@ a.nav-tab + a.nav-tab::before,
   color: var(--il-faint) !important;
   letter-spacing: .16em !important;
   text-transform: uppercase !important;
-  font-size: 9.5px !important;
+  font-size: 10px !important;
   font-weight: 700 !important;
 }
 
@@ -1161,8 +1161,8 @@ a.nav-tab + a.nav-tab::before,
   color: var(--il-faint) !important;
   letter-spacing: .1em !important;
   text-transform: uppercase !important;
-  font-size: 9.5px !important;
-  font-weight: 650 !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
 }
 
 /* Price / result header */
@@ -1281,14 +1281,14 @@ html:not([data-theme="dark"]) .canvas-wrap {
 /* Prose in legal / editorial pages */
 .il-prose, .legal-body, .static-body {
   color: var(--il-ink-2) !important;
-  font-size: 15.5px !important;
+  font-size: 15px !important;
   line-height: 1.75 !important;
 }
 
 .il-prose h2, .legal-body h2, .static-body h2 {
   font-family: var(--il-sans) !important;
-  font-size: 19px !important;
-  font-weight: 650 !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
   letter-spacing: -.015em !important;
   color: var(--il-ink) !important;
   margin-top: 42px !important;
@@ -1480,7 +1480,7 @@ body.il-lens-page .eyebrow {
   display: inline-flex !important;
   align-items: center;
   gap: 9px;
-  font-size: 10.5px !important;
+  font-size: 10px !important;
   font-weight: 600 !important;
   letter-spacing: .17em !important;
   text-transform: uppercase !important;
@@ -1512,7 +1512,7 @@ body.il-static-page .cta-row {
 
 body.il-static-page .cta-row a {
   padding: 14px 28px !important;
-  font-size: 14px !important;
+  font-size: 13px !important;
 }
 
 /* Feature / source / step / guide cards */
@@ -1551,7 +1551,7 @@ body.il-static-page .guide-num {
   justify-content: center;
   width: 44px !important;
   height: 44px !important;
-  border-radius: 13px !important;
+  border-radius: 8px !important;
   border: 1px solid var(--il-line-gold) !important;
   background: linear-gradient(160deg, var(--il-brass-soft), transparent) !important;
   color: var(--il-brass) !important;
@@ -1565,8 +1565,8 @@ body.il-static-page .feat-title,
 body.il-static-page .src-name,
 body.il-static-page .step strong,
 body.il-static-page .guide strong {
-  font-size: 17px !important;
-  font-weight: 650 !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
   letter-spacing: -.015em !important;
   color: var(--il-ink) !important;
 }
@@ -1576,7 +1576,7 @@ body.il-static-page .src-desc,
 body.il-static-page .step p,
 body.il-static-page .guide p {
   color: var(--il-muted) !important;
-  font-size: 14px !important;
+  font-size: 13px !important;
   line-height: 1.62 !important;
 }
 
@@ -1592,8 +1592,8 @@ body.il-static-page h2 {
 
 body.il-static-page h3 {
   font-family: var(--il-sans) !important;
-  font-size: 17px !important;
-  font-weight: 650 !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
   letter-spacing: -.015em !important;
   color: var(--il-ink) !important;
 }
@@ -1696,14 +1696,14 @@ body.il-auth-page label {
 
 body.il-auth-page input {
   padding: 14px 16px !important;
-  font-size: 14.5px !important;
+  font-size: 15px !important;
 }
 
 body.il-auth-page .il-auth-submit,
 body.il-auth-page button[type="submit"] {
   width: 100% !important;
   padding: 15px 24px !important;
-  font-size: 14.5px !important;
+  font-size: 15px !important;
   margin-top: 6px !important;
 }
 
@@ -1779,8 +1779,8 @@ body.il-lens-page section > div {
   justify-content: center !important;
   gap: 9px !important;
   padding: 14px 26px !important;
-  font-size: 14px !important;
-  font-weight: 650 !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
   border-radius: var(--il-radius-pill) !important;
   text-decoration: none !important;
   white-space: nowrap;
@@ -1880,14 +1880,14 @@ body.il-lens-page section > div {
   align-items: center;
   justify-content: center;
   width: 30px; height: 30px;
-  border-radius: 9px;
+  border-radius: 8px;
   border: 1px solid var(--il-line-gold);
   background: var(--il-brass-soft);
   font-size: 15px !important;
   flex: 0 0 auto;
 }
 
-#landing-page .il-wf-head strong { font-size: 14px !important; white-space: nowrap; }
+#landing-page .il-wf-head strong { font-size: 13px !important; white-space: nowrap; }
 
 #landing-page .il-workflow-copy h2 { max-width: 14ch; }
 
@@ -1911,7 +1911,7 @@ body.il-lens-page section > div {
 
 #landing-page .il-landing-band button {
   padding: 15px 28px !important;
-  font-size: 14px !important;
+  font-size: 13px !important;
   white-space: nowrap;
 }
 
@@ -1995,7 +1995,7 @@ html:not([data-theme="dark"]) nav.il-global-nav.il-nav-scrolled {
 #landing-page .il-workflow-copy p {
   font-weight: 400 !important;
   color: var(--il-muted) !important;
-  font-size: 15.5px !important;
+  font-size: 15px !important;
   max-width: 40ch !important;
 }
 
@@ -2103,7 +2103,7 @@ body.il-static-page .wrap > h2::after {
   width: 56px;
   height: 2px;
   margin-top: 16px;
-  border-radius: 2px;
+  border-radius: 4px;
   background: linear-gradient(90deg, var(--il-brass), transparent);
 }
 
@@ -2146,7 +2146,7 @@ nav#main-nav, nav.il-global-nav { z-index: 100 !important; }
 
 .sb-group-label {
   color: var(--il-faint) !important;
-  font-size: 9.5px !important;
+  font-size: 10px !important;
   font-weight: 700 !important;
   letter-spacing: .18em !important;
   text-transform: uppercase !important;
@@ -2157,7 +2157,7 @@ nav#main-nav, nav.il-global-nav { z-index: 100 !important; }
   border-radius: var(--il-radius-sm) !important;
   border: 1px solid transparent !important;
   color: var(--il-muted) !important;
-  font-weight: 550 !important;
+  font-weight: 500 !important;
   transition: color var(--il-fast), background var(--il-fast),
               border-color var(--il-fast), transform var(--il-fast) !important;
 }
@@ -2179,7 +2179,7 @@ nav#main-nav, nav.il-global-nav { z-index: 100 !important; }
   position: absolute;
   left: 0; top: 22%; bottom: 22%;
   width: 2px;
-  border-radius: 2px;
+  border-radius: 4px;
   background: var(--il-brass);
   box-shadow: 0 0 10px 1px var(--il-brass);
 }
@@ -2216,7 +2216,7 @@ nav#main-nav, nav.il-global-nav { z-index: 100 !important; }
 
 .sec-h2 {
   font-family: var(--il-sans) !important;
-  font-weight: 650 !important;
+  font-weight: 600 !important;
   letter-spacing: -.02em !important;
   color: var(--il-ink) !important;
 }
@@ -2262,7 +2262,7 @@ a.hc:hover, a.hfs-item:hover, a.mo-bv2-card:hover {
 
 .hc-title, .panel-box-title, .sidebar-card-title, .analyst-box-title, .edu-title, .chart-title {
   font-family: var(--il-sans) !important;
-  font-weight: 650 !important;
+  font-weight: 600 !important;
   letter-spacing: -.012em !important;
   color: var(--il-ink) !important;
 }
@@ -2315,7 +2315,7 @@ html:not([data-theme="dark"]) .edu-formula { background: var(--il-surface-3) !im
 
 .price-time, .chart-data-note, .tool-disclaimer, .as-note, .il-data-source-line {
   color: var(--il-faint) !important;
-  font-size: 11.5px !important;
+  font-size: 11px !important;
 }
 
 .res-ticker-lbl {
@@ -2324,14 +2324,14 @@ html:not([data-theme="dark"]) .edu-formula { background: var(--il-surface-3) !im
   color: var(--il-brass) !important;
 }
 
-.res-name { color: var(--il-ink) !important; font-weight: 650 !important; letter-spacing: -.015em !important; }
+.res-name { color: var(--il-ink) !important; font-weight: 600 !important; letter-spacing: -.015em !important; }
 
 .res-exchange {
   border-radius: var(--il-radius-pill) !important;
   border: 1px solid var(--il-line) !important;
   background: var(--il-surface-2) !important;
   color: var(--il-muted) !important;
-  font-size: 10.5px !important;
+  font-size: 10px !important;
   letter-spacing: .06em !important;
 }
 
@@ -2352,8 +2352,8 @@ html:not([data-theme="dark"]) .edu-formula { background: var(--il-surface-3) !im
 
 .asf-l {
   color: var(--il-faint) !important;
-  font-size: 9.5px !important;
-  font-weight: 650 !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
   letter-spacing: .12em !important;
   text-transform: uppercase !important;
 }
@@ -2414,7 +2414,7 @@ html:not([data-theme="dark"]) .dp-chart-wrap { background: var(--il-surface-2) !
   border: 1px solid var(--il-line) !important;
   background: var(--il-surface-2) !important;
   color: var(--il-muted) !important;
-  font-weight: 550 !important;
+  font-weight: 500 !important;
   transition: all var(--il-fast) !important;
 }
 
@@ -2465,7 +2465,7 @@ html:not([data-theme="dark"]) .ticker-input {
 .fc-label, .fg-label {
   color: var(--il-faint) !important;
   font-size: 10px !important;
-  font-weight: 650 !important;
+  font-weight: 600 !important;
   letter-spacing: .12em !important;
   text-transform: uppercase !important;
 }
@@ -2491,7 +2491,7 @@ html:not([data-theme="dark"]) .ticker-input {
   border-bottom: 1px solid var(--il-line) !important;
   color: var(--il-ink-2) !important;
   font-family: var(--il-mono) !important;
-  font-size: 12.5px !important;
+  font-size: 12px !important;
 }
 
 .scr-table tbody tr, .cmp-table tbody tr, .wl-table tbody tr {
@@ -2524,7 +2524,7 @@ html:not([data-theme="dark"]) .ticker-input {
 
 .tw-title {
   font-family: var(--il-sans) !important;
-  font-weight: 650 !important;
+  font-weight: 600 !important;
   letter-spacing: -.02em !important;
   color: var(--il-ink) !important;
 }
@@ -2599,7 +2599,7 @@ html:not([data-theme="dark"]) .ticker-input {
 }
 
 .hfs-icon { color: var(--il-brass) !important; }
-.hfs-title { color: var(--il-ink) !important; font-weight: 650 !important; }
+.hfs-title { color: var(--il-ink) !important; font-weight: 600 !important; }
 .hfs-desc { color: var(--il-muted) !important; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -2741,7 +2741,7 @@ html body .cta a {
   align-items: center;
   justify-content: center;
   padding: 13px 26px !important;
-  font-size: 14px !important;
+  font-size: 13px !important;
   text-decoration: none !important;
 }
 
@@ -2756,7 +2756,7 @@ body.il-static-page .cta h2,
 body.il-static-page aside h2 {
   font-family: var(--il-sans) !important;
   font-size: 18px !important;
-  font-weight: 650 !important;
+  font-weight: 600 !important;
   letter-spacing: -.015em !important;
 }
 
@@ -3326,9 +3326,9 @@ body.il-static-page .tagline, body.il-static-page .eyebrow,
 
 /* Body copy sizes up slightly; 12–13px prose is a strain on dark surfaces */
 .hc-title, .sec-h2 { letter-spacing: -.018em !important; }
-.il-analysis .ilan-sig-detail { font-size: 12.5px !important; }
-.il-analysis .ilan-sig-value { font-size: 14px !important; }
-.tw-sub, .sec-sub { font-size: 14px !important; line-height: 1.65 !important; }
+.il-analysis .ilan-sig-detail { font-size: 12px !important; }
+.il-analysis .ilan-sig-value { font-size: 13px !important; }
+.tw-sub, .sec-sub { font-size: 13px !important; line-height: 1.65 !important; }
 
 /* Display face keeps its optical tuning against the new sans */
 #landing-page h1, #landing-page h2,
@@ -4268,7 +4268,7 @@ html body nav.il-global-nav .il-global-account {
   min-height: 34px !important;
   padding: 0 12px !important;
   border-radius: 8px !important;
-  font: 650 12px/1 var(--il-sans, "DM Sans", Inter, sans-serif) !important;
+  font: 600 12px/1 var(--il-sans, "DM Sans", Inter, sans-serif) !important;
   white-space: nowrap !important;
   text-decoration: none !important;
   max-width: 190px !important;
@@ -4328,7 +4328,7 @@ html:not([data-theme="dark"]) body nav.il-global-nav .il-global-account {
   right: 10px;
   bottom: 4px;
   height: 2px;
-  border-radius: 2px;
+  border-radius: 4px;
   background: var(--il-gold, #D6AC64);
   transform-origin: left center;
   animation: il-nav-progress .9s cubic-bezier(.4, 0, .2, 1) infinite;

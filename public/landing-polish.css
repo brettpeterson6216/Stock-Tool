@@ -74,7 +74,7 @@
   transform: none !important;
   background: transparent !important;
   border: 0 !important;
-  border-radius: 22px !important;
+  border-radius: 8px !important;
   box-shadow: none !important;
   isolation: isolate;
 }
@@ -84,7 +84,7 @@
   position: absolute !important;
   z-index: -1 !important;
   inset: 10% 4% -4% !important;
-  border-radius: 34px !important;
+  border-radius: 8px !important;
   background: radial-gradient(circle at 50% 20%, rgba(239, 200, 121, .18), transparent 67%) !important;
   box-shadow: 0 34px 74px rgba(16, 35, 25, .18) !important;
 }
@@ -92,7 +92,7 @@
 #landing-page .il-hero-mock {
   aspect-ratio: 16 / 10 !important;
   min-height: 0 !important;
-  border-radius: 22px !important;
+  border-radius: 8px !important;
 }
 
 #landing-page .ihm-brand img {

@@ -59,7 +59,7 @@ canvas.il-chart-mirror {
 
 .il-chart-readout .ilr-price {
   font-family: var(--il-mono, "DM Mono", monospace);
-  font-size: 19px;
+  font-size: 18px;
   font-weight: 500;
   letter-spacing: -.03em;
   color: var(--il-ink, #F2F0EB);
@@ -94,7 +94,7 @@ canvas.il-chart-mirror {
     padding: 6px 10px;
   }
   .il-chart-readout .ilr-main { margin: 0; gap: 8px; }
-  .il-chart-readout .ilr-price { font-size: 16px; }
+  .il-chart-readout .ilr-price { font-size: 15px; }
   .il-chart-readout .ilr-chg { font-size: 11px; }
   .il-chart-readout .ilr-ohlc {
     gap: 10px;
@@ -116,7 +116,7 @@ canvas.il-chart-mirror {
 
 .il-chart-readout .ilr-ohlc i {
   font-style: normal;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: .1em;
   text-transform: uppercase;
@@ -183,7 +183,7 @@ html:not([data-theme="dark"]) .chart-key.key-vwap { background: #127C6C !importa
   .il-chart-readout .ilr-price { font-size: 18px; }
   .il-chart-readout .ilr-ohlc { gap: 9px; }
   .il-chart-readout .ilr-ohlc b { font-size: 10px; }
-  .il-chart-readout .ilr-date { font-size: 9px; }
+  .il-chart-readout .ilr-date { font-size: 10px; }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -215,7 +215,7 @@ html:not([data-theme="dark"]) .chart-key.key-vwap { background: #127C6C !importa
 
 .il-analysis .ilan-eyebrow {
   flex: 0 0 auto;
-  font-size: 9.5px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: .16em;
   text-transform: uppercase;
@@ -226,7 +226,7 @@ html:not([data-theme="dark"]) .chart-key.key-vwap { background: #127C6C !importa
   flex: 1 1 auto;
   min-width: 0;
   font-family: var(--il-mono, "DM Mono", monospace);
-  font-size: 11.5px;
+  font-size: 11px;
   letter-spacing: -.01em;
   white-space: nowrap;
   overflow: hidden;
@@ -293,7 +293,7 @@ html:not([data-theme="dark"]) .chart-key.key-vwap { background: #127C6C !importa
 }
 
 .il-analysis .ilan-sig-label {
-  font-size: 9.5px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: .14em;
   text-transform: uppercase;
@@ -301,7 +301,7 @@ html:not([data-theme="dark"]) .chart-key.key-vwap { background: #127C6C !importa
 }
 
 .il-analysis .ilan-sig-state {
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 600;
   letter-spacing: .02em;
   color: var(--il-brass, #D6AC64);
@@ -317,7 +317,7 @@ html:not([data-theme="dark"]) .chart-key.key-vwap { background: #127C6C !importa
 }
 
 .il-analysis .ilan-sig-detail {
-  font-size: 11.5px;
+  font-size: 11px;
   line-height: 1.55;
   color: var(--il-muted, #9A968D);
 }
@@ -333,7 +333,7 @@ html:not([data-theme="dark"]) .chart-key.key-vwap { background: #127C6C !importa
 
 .il-analysis .ilan-inv-label {
   display: block;
-  font-size: 9.5px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: .14em;
   text-transform: uppercase;
@@ -343,21 +343,21 @@ html:not([data-theme="dark"]) .chart-key.key-vwap { background: #127C6C !importa
 
 .il-analysis .ilan-invalidation p {
   margin: 0;
-  font-size: 12.5px;
+  font-size: 12px;
   line-height: 1.6;
   color: var(--il-ink-2, #D2CFC8);
 }
 
 .il-analysis .ilan-summary p {
   margin: 0 0 10px;
-  font-size: 13.5px;
+  font-size: 13px;
   line-height: 1.72;
   color: var(--il-ink-2, #D2CFC8);
 }
 
 .il-analysis .ilan-source,
 .il-analysis .ilan-foot {
-  font-size: 10.5px;
+  font-size: 10px;
   line-height: 1.55;
   color: var(--il-faint, #8E8A82);
 }
@@ -371,7 +371,7 @@ html:not([data-theme="dark"]) .chart-key.key-vwap { background: #127C6C !importa
 .il-analysis .ilan-loading,
 .il-analysis .ilan-empty {
   padding: 18px 2px;
-  font-size: 12.5px;
+  font-size: 12px;
   color: var(--il-muted, #9A968D);
 }
 
@@ -389,7 +389,7 @@ html:not([data-theme="dark"]) .chart-key.key-vwap { background: #127C6C !importa
 
 @media (max-width: 640px) {
   .il-analysis .ilan-grid { grid-template-columns: 1fr; }
-  .il-analysis .ilan-headline { font-size: 10.5px; }
+  .il-analysis .ilan-headline { font-size: 10px; }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -406,7 +406,7 @@ html:not([data-theme="dark"]) .chart-key.key-vwap { background: #127C6C !importa
 #landing-page .ihm-live {
   position: absolute;
   inset: 0;
-  border-radius: 10px;
+  border-radius: 8px;
   overflow: hidden;
 }
 
@@ -428,7 +428,7 @@ html:not([data-theme="dark"]) .chart-key.key-vwap { background: #127C6C !importa
 
 #landing-page .ihm-quote-price {
   font-family: var(--il-mono, "JetBrains Mono", monospace);
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 500;
   letter-spacing: -.03em;
   color: var(--il-ink, #F2F0EB);
@@ -457,7 +457,7 @@ html:not([data-theme="dark"]) .chart-key.key-vwap { background: #127C6C !importa
 
 #landing-page .ihm-pill {
   font-family: var(--il-sans, sans-serif) !important;
-  font-size: 9.5px !important;
+  font-size: 10px !important;
   letter-spacing: .12em !important;
   text-transform: uppercase;
   color: var(--il-faint, #8E8A82) !important;
@@ -465,8 +465,8 @@ html:not([data-theme="dark"]) .chart-key.key-vwap { background: #127C6C !importa
 
 /* Side panels: tighter, less lorem-ipsum, aligned to the plot */
 #landing-page .ihm-side .ihm-card { padding: 11px 13px !important; }
-#landing-page .ihm-side .ihm-line { font-size: 11.5px !important; line-height: 1.5 !important; }
-#landing-page .ihm-side .ihm-sub { font-size: 10.5px !important; }
+#landing-page .ihm-side .ihm-line { font-size: 11px !important; line-height: 1.5 !important; }
+#landing-page .ihm-side .ihm-sub { font-size: 10px !important; }
 
 /* The mock's main column is a row flex by default; the quote line must stack
    above the plot rather than sit beside it. */
@@ -556,7 +556,7 @@ html:not([data-theme="dark"]) .chart-key.key-vwap { background: #127C6C !importa
   border-radius: 999px;
   padding: 5px 11px;
   font-family: var(--il-sans, ui-sans-serif, system-ui, sans-serif);
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 600;
   letter-spacing: .01em;
   line-height: 1;

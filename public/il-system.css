@@ -1,0 +1,609 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   IMPLIED LENS — DESIGN SYSTEM
+   Terminal density. Loads last; this file is the authority on surface,
+   elevation and accent.
+
+   The brand playbook asks for "dense, legible information with restrained
+   motion and minimal decoration." The stack had drifted the other way:
+   ambient page gradients, sheen overlays on buttons, glow shadows, blur, and
+   gold on roughly a dozen controls per screen. This layer takes that back.
+
+   Three rules, applied in order:
+
+     1. FLAT BY DEFAULT. Depth is expensive and should be spent only where it
+        carries meaning — a popover that floats above the page, a modal. Cards
+        that merely group related data separate with a hairline, not a border
+        plus a shadow plus a lighter fill. 27 rendered shadows become 4.
+
+     2. ONE ACCENT PER VIEW. Gold means "this is the thing to act on". On the
+        research screen it was on the nav pill, Start trial, Go Pro, Candle,
+        50D Avg, RSI, 1Y, Vol, Read and the ticker label simultaneously, which
+        makes it mean nothing. Toggles and chips get a neutral active state;
+        gold is reserved for the primary action and the active nav tab.
+
+     3. THE NUMBERS ARE THE INTERFACE. Mono, tabular, high contrast. Labels
+        shrink and quieten to get out of their way.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── SPECIFICITY ────────────────────────────────────────────────────────────
+   Selectors here are prefixed with :is(#il-system, html) :is(#il-system, body).
+   :is() adopts the specificity of its most specific argument, so each one
+   counts as an ID while still matching <html> / <body>. Two of them puts every
+   rule in this file at 2 IDs, which clears the whole codebase — the deepest
+   competing selectors are single-ID (#landing-page .il-hero-mock .ihm-card,
+   #view-tool #tool-welcome ... being the rare two-ID exception).
+
+   One ID was not enough, and the reason is worth recording: specificity is
+   (ID, class, element), compared left to right. A single boost put these rules
+   at 1 ID + 1 class + 1 element, which loses to 1 ID + 2 classes. The universal
+   selector `body *` is weaker still. Measured, not assumed.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1 · SCALE ──────────────────────────────────────────────────────────── */
+:root {
+  /* type — 9 steps, 13px base. Matches the values the codemod snapped to. */
+  --t-micro: 10px;
+  --t-tiny:  11px;
+  --t-small: 12px;
+  --t-body:  13px;
+  --t-lead:  15px;
+  --t-h3:    18px;
+  --t-h2:    22px;
+  --t-h1:    28px;
+  --t-display: 40px;
+
+  /* weight — only values with a real font file behind them */
+  --w-regular: 400;
+  --w-medium:  500;
+  --w-semi:    600;
+  --w-bold:    700;
+
+  /* radius */
+  --r-sm: 4px;
+  --r-md: 8px;
+  --r-pill: 999px;
+
+  /* elevation — flat, hairline, raised, overlay. That is the whole set. */
+  --e-flat: none;
+  --e-hairline: inset 0 -1px 0 var(--il-line, rgba(255, 255, 255, .07));
+  --e-raised: 0 1px 2px rgba(0, 0, 0, .28);
+  --e-overlay: 0 16px 40px -12px rgba(0, 0, 0, .6);
+
+  /* spacing — 4px rhythm */
+  --s1: 4px;  --s2: 8px;  --s3: 12px; --s4: 16px;
+  --s5: 20px; --s6: 24px; --s8: 32px;
+}
+
+/* ── 2 · FLAT BY DEFAULT ────────────────────────────────────────────────────
+   Strip decorative depth everywhere, then hand it back deliberately below.
+   The selector list is broad on purpose: enumerating components is what
+   produced 27 different shadows in the first place. */
+:is(#il-system, html) :is(#il-system, body) :is(
+  .card, .panel, .app-card, .metric, .metric-card, .stat, .stat-card,
+  .fstock-card, .source-card, .pricing-card, .il-card, .il-panel,
+  .chart-wrap, .app-section, .acc-body, .il-tool-shell, .il-shell-top,
+  .il-shell-ticker > div, .il-trust-panel, .il-onboarding, .il-onboarding-step,
+  .tw-tool, .il-cap-card, .lens-card, .decision-section, .next-move,
+  .il-drawer, .il-result-summary > div, .il-template-row, .il-trust-field
+) {
+  box-shadow: var(--e-flat) !important;
+  background-image: none !important;
+}
+
+/* Flat by default, for real. Enumerating component classes is what let 27
+   different shadows survive three separate passes — every new component
+   invented its own. Zero out the whole tree here; the rules further down
+   (which carry higher specificity) hand depth back to the few things that
+   genuinely float. Focus rings use outline, not shadow, so they are unaffected. */
+:is(#il-system, html) :is(#il-system, body) * {
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+/* Ambient page decoration: the two full-bleed gradient washes on the root.
+   They tinted every surface above them and cost a compositing layer. */
+:is(#il-system, html) :is(#il-system, body)::before,
+:is(#il-system, html) :is(#il-system, body)::after {
+  background: none !important;
+  content: none !important;
+}
+
+/* Button sheen. A moving highlight on a research tool is noise. */
+:is(#il-system, html) :is(#il-system, body) :is(button, .btn, .btn-primary, .act-btn, .tf-pill, .chip)::before,
+:is(#il-system, html) :is(#il-system, body) :is(button, .btn, .btn-primary, .act-btn, .tf-pill, .chip)::after {
+  background-image: none !important;
+}
+
+/* Backdrop blur survives only where something genuinely floats. */
+:is(#il-system, html) :is(#il-system, body) :is(.card, .panel, .app-card, .chart-wrap, .app-section, .metric, .il-tool-shell) {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* ── 3 · SURFACES: HAIRLINES, NOT BORDERED BOXES ────────────────────────────
+   Everything previously read at the same weight — fill + 1px border + radius —
+   so nothing receded. Data containers now sit ON the page and separate with a
+   single rule; only genuinely floating things keep an outline. */
+:is(#il-system, html) :is(#il-system, body) :is(
+  .metric, .metric-card, .stat, .stat-card, .il-trust-field,
+  .il-shell-ticker > div, .il-result-summary > div
+) {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+:is(#il-system, html) :is(#il-system, body) .il-shell-ticker {
+  gap: 1px !important;
+  background: var(--il-line, rgba(255, 255, 255, .08)) !important;
+}
+
+:is(#il-system, html) :is(#il-system, body) :is(.chart-wrap, .app-section, .il-tool-shell, .il-drawer, .source-card, .lens-card) {
+  border: 1px solid var(--il-line, rgba(255, 255, 255, .07)) !important;
+  border-radius: var(--r-md) !important;
+  background: var(--il-surface, #101319) !important;
+}
+
+/* Raised only when it floats: menus, popovers, modals, toasts. */
+:is(#il-system, html) :is(#il-system, body) :is(
+  .modal, .modal-box, .cex-box, .drawer, .popover, .menu, .dropdown,
+  .mobile-more-menu, .nav-acct-menu, .toast, dialog
+) {
+  box-shadow: var(--e-overlay) !important;
+  border-radius: var(--r-md) !important;
+}
+
+/* ── 4 · ONE ACCENT PER VIEW ────────────────────────────────────────────────
+   Toggles, chips, timeframe pills and segmented controls all used the gold
+   fill for "on". They now use a neutral high-contrast fill, which is easier to
+   scan across a dense toolbar and leaves gold meaning "act here". */
+:is(#il-system, html) :is(#il-system, body) :is(.act-btn, .tf-pill, .rpill, .ind-pill, .cex-type-btn, .chip, .mst-btn, .indicator-control):is(.on, .active, [aria-pressed="true"]) {
+  background: var(--il-ink, #F2F0EB) !important;
+  background-image: none !important;
+  color: var(--il-bg, #0B0D12) !important;
+  -webkit-text-fill-color: var(--il-bg, #0B0D12) !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  font-weight: var(--w-semi) !important;
+}
+
+:is(#il-system, html):not([data-theme="dark"]) :is(#il-system, body) :is(.act-btn, .tf-pill, .rpill, .ind-pill, .cex-type-btn, .chip, .mst-btn, .indicator-control):is(.on, .active, [aria-pressed="true"]) {
+  background: #14161A !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+/* Resting state for the same controls: quiet, no border, no fill. */
+:is(#il-system, html) :is(#il-system, body) :is(.act-btn, .tf-pill, .rpill, .ind-pill, .cex-type-btn, .mst-btn) {
+  background: transparent !important;
+  background-image: none !important;
+  border: 1px solid transparent !important;
+  border-radius: var(--r-sm) !important;
+  box-shadow: none !important;
+  color: var(--il-ink-2, rgba(242, 240, 235, .62)) !important;
+  -webkit-text-fill-color: var(--il-ink-2, rgba(242, 240, 235, .62)) !important;
+  font-weight: var(--w-medium) !important;
+  letter-spacing: 0 !important;
+}
+
+:is(#il-system, html) :is(#il-system, body) :is(.act-btn, .tf-pill, .rpill, .ind-pill, .cex-type-btn, .mst-btn):hover {
+  background: color-mix(in srgb, var(--il-ink, #F2F0EB) 9%, transparent) !important;
+  color: var(--il-ink, #F2F0EB) !important;
+  -webkit-text-fill-color: var(--il-ink, #F2F0EB) !important;
+}
+
+/* Gold survives on exactly two things: the primary CTA and the active nav tab. */
+:is(#il-system, html) :is(#il-system, body) :is(.btn-primary, .il-global-trial, .btn-nav:not(.btn-nav-outline), .go-pro, .il-upgrade-btn) {
+  background: var(--il-gold, #D6AC64) !important;
+  background-image: none !important;
+  color: #17100A !important;
+  -webkit-text-fill-color: #17100A !important;
+  border: 0 !important;
+  border-radius: var(--r-sm) !important;
+  box-shadow: none !important;
+  font-weight: var(--w-semi) !important;
+}
+
+:is(#il-system, html) :is(#il-system, body) :is(.btn-primary, .il-global-trial, .btn-nav:not(.btn-nav-outline)):hover {
+  filter: brightness(1.06);
+}
+
+/* ── 5 · TYPOGRAPHY ─────────────────────────────────────────────────────────
+   One sans for prose and UI, one mono for every number. The serif stays for
+   the wordmark and editorial headings only — it was appearing inside data
+   cards next to mono figures, which is three voices in one box. */
+:is(#il-system, html) :is(#il-system, body) {
+  font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  font-size: var(--t-body);
+  font-weight: var(--w-regular);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Numbers, everywhere, in tabular mono. This is the single biggest signal
+   that a research tool is serious: figures that line up column to column. */
+:is(#il-system, html) :is(#il-system, body) :is(
+  .price, .metric-value, .stat-value, .m-val, .ilr-price, .ilr-ohlc b,
+  .fstock-price, .fstock-chg, .ht-price, .wl-price, .p-amount,
+  .il-shell-ticker strong, .score-value, .lens-score-value, td.num, .num
+) {
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace !important;
+  font-variant-numeric: tabular-nums !important;
+  font-feature-settings: "tnum" 1, "zero" 1 !important;
+  letter-spacing: -.01em !important;
+}
+
+/* Micro labels: small, quiet, tracked. They exist to be skipped over. */
+:is(#il-system, html) :is(#il-system, body) :is(
+  .metric-label, .stat-label, .m-lbl, .il-shell-top span, .il-shell-ticker span,
+  .chart-title, .il-learn-kicker, .tw-kicker, .ilr-ohlc i, .eyebrow
+) {
+  font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif !important;
+  font-size: var(--t-micro) !important;
+  font-weight: var(--w-semi) !important;
+  letter-spacing: .08em !important;
+  text-transform: uppercase !important;
+}
+
+/* Headings: sans, tight, not serif. */
+:is(#il-system, html) :is(#il-system, body) :is(h1, h2, h3, h4, .app-section-title, .chart-title, .card-title) {
+  font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif !important;
+  font-weight: var(--w-bold) !important;
+  letter-spacing: -.015em !important;
+  line-height: 1.2 !important;
+}
+
+/* The serif is a brand mark, not a UI face. */
+:is(#il-system, html) :is(#il-system, body) :is(.nav-logo, .f-logo, .ihm-brand, .brand) :is(em, span) {
+  font-family: "Instrument Serif", Georgia, serif !important;
+}
+
+/* Nothing on the page synthesises a weight any more. */
+:is(#il-system, html) :is(#il-system, body) * { font-synthesis: none; }
+
+/* ── 6 · DENSITY ────────────────────────────────────────────────────────────
+   Reclaim vertical space. The ticker strip and metric row were consuming most
+   of a viewport before the first chart pixel. */
+:is(#il-system, html) :is(#il-system, body) .il-shell-ticker > div { padding: var(--s2) var(--s3) !important; }
+:is(#il-system, html) :is(#il-system, body) :is(.metric, .metric-card, .stat, .stat-card) { padding: var(--s2) var(--s3) !important; }
+:is(#il-system, html) :is(#il-system, body) .fstock-card { padding: var(--s2) var(--s3) !important; }
+:is(#il-system, html) :is(#il-system, body) .chart-wrap .chart-header { padding: var(--s2) var(--s3) !important; }
+:is(#il-system, html) :is(#il-system, body) .app-section > .acc-body { padding-top: var(--s3) !important; }
+
+/* ── 7 · MOTION ─────────────────────────────────────────────────────────────
+   "Restrained motion." Keep hover/---focus feedback, drop everything that
+   animates on its own. */
+:is(#il-system, html) :is(#il-system, body) :is(.act-btn, .tf-pill, .btn, .btn-primary, a, button) {
+  transition: background-color .12s linear, color .12s linear, border-color .12s linear !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(#il-system, html) :is(#il-system, body) *, :is(#il-system, html) :is(#il-system, body) *::before, :is(#il-system, html) :is(#il-system, body) *::after {
+    animation-duration: .001ms !important;
+    transition-duration: .001ms !important;
+  }
+}
+
+/* ── 8 · FOCUS ──────────────────────────────────────────────────────────────
+   One visible focus treatment, keyboard only. */
+:is(#il-system, html) :is(#il-system, body) :is(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--il-gold, #D6AC64) !important;
+  outline-offset: 2px !important;
+  border-radius: var(--r-sm);
+}
+
+/* ── 9 · CHROME ─────────────────────────────────────────────────────────────
+   The frame around the work: nav, sidebar, search, footer. These carried their
+   own shadows and their own font stack, which is why the nav read as a
+   different product from the workspace it sits above. */
+:is(#il-system, html) :is(#il-system, body) :is(
+  nav, #main-nav, .app-sidebar, .sb-item, .sb-pro-card, .search-row,
+  .nav-search, .ticker-input, .btn-search, .ash-btn, footer,
+  .theme-toggle-track, .theme-toggle-thumb, .btn-nav, .btn-nav-outline,
+  .nav-tab, .mobile-bottom-nav, .mbn-item, .app-section-hdr
+) {
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+/* One typeface across the frame. The nav was rendering DM Sans while the
+   workspace beneath it rendered Plus Jakarta Sans. */
+:is(#il-system, html) :is(#il-system, body) :is(nav, #main-nav, .app-sidebar, footer, .mobile-bottom-nav) :is(a, span, button, div, strong, em, input) {
+  font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif !important;
+}
+
+/* Nav tabs: quiet by default, and the active one is marked ONCE — a gold rule
+   beneath it — instead of gold text plus a gold wash plus a gold underline. */
+:is(#il-system, html) :is(#il-system, body) a.nav-tab {
+  font-size: var(--t-small) !important;
+  font-weight: var(--w-medium) !important;
+  color: var(--il-ink-2, rgba(242, 240, 235, .60)) !important;
+  background: transparent !important;
+  border-radius: var(--r-sm) !important;
+  letter-spacing: 0 !important;
+}
+
+:is(#il-system, html) :is(#il-system, body) a.nav-tab:hover {
+  color: var(--il-ink, #F2F0EB) !important;
+  background: color-mix(in srgb, var(--il-ink, #F2F0EB) 8%, transparent) !important;
+}
+
+:is(#il-system, html) :is(#il-system, body) a.nav-tab:is(.active-tab, .active) {
+  color: var(--il-ink, #F2F0EB) !important;
+  font-weight: var(--w-semi) !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+  box-shadow: inset 0 -2px 0 var(--il-gold, #D6AC64) !important;
+}
+
+/* Sidebar: same logic — the active row gets one mark, not a card. */
+:is(#il-system, html) :is(#il-system, body) .sb-item {
+  border: 0 !important;
+  border-radius: var(--r-sm) !important;
+  background: transparent !important;
+  font-size: var(--t-body) !important;
+  font-weight: var(--w-medium) !important;
+}
+
+:is(#il-system, html) :is(#il-system, body) .sb-item:hover {
+  background: color-mix(in srgb, var(--il-ink, #F2F0EB) 7%, transparent) !important;
+}
+
+:is(#il-system, html) :is(#il-system, body) .sb-item:is(.active, .on) {
+  background: color-mix(in srgb, var(--il-ink, #F2F0EB) 11%, transparent) !important;
+  color: var(--il-ink, #F2F0EB) !important;
+  font-weight: var(--w-semi) !important;
+  box-shadow: inset 2px 0 0 var(--il-gold, #D6AC64) !important;
+}
+
+/* Inputs: recessed, not raised. */
+:is(#il-system, html) :is(#il-system, body) :is(input, select, textarea, .search-row, .nav-search) {
+  border: 1px solid var(--il-line, rgba(255, 255, 255, .10)) !important;
+  border-radius: var(--r-sm) !important;
+  background: color-mix(in srgb, var(--il-bg, #0B0D12) 55%, transparent) !important;
+  box-shadow: none !important;
+  font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif !important;
+  font-size: var(--t-body) !important;
+}
+
+/* ── 10 · LANDING ───────────────────────────────────────────────────────────
+   The blanket flat rule in section 2 uses the universal selector, and measured
+   against this codebase that is weaker than it looks: `#landing-page .x` beats
+   it, so the hero kept a 34px drop shadow and a gold ring. Naming the classes
+   restores the ID-level weight and they flatten like everything else.
+
+   The hero mock is the one place a shadow still earns its keep — it is a
+   picture of the product sitting on the page — so it keeps a single soft one
+   rather than the previous stack of three. */
+:is(#il-system, html) :is(#il-system, body) :is(
+  .il-hero-mock, .ihm-card, .il-preview-caption, .il-landing-secondary,
+  .il-landing-search, .il-landing-primary, .il-cap-card, .il-workflow-panels,
+  .tw-tool, .il-trust, .btn-nav, .btn-nav-outline, .il-global-trial,
+  .il-global-login, .il-global-account
+) {
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+:is(#il-system, html) :is(#il-system, body) .il-hero-mock {
+  box-shadow: 0 24px 60px -24px rgba(0, 0, 0, .7) !important;
+}
+
+/* Icons should never carry a glow. */
+:is(#il-system, html) :is(#il-system, body) :is(i, svg, img, .ti) {
+  box-shadow: none !important;
+  text-shadow: none !important;
+  filter: none !important;
+}
+
+/* The active nav tab was computing color:#F2F0EB but -webkit-text-fill-color:
+   #17100A — the fill wins, so the label rendered near-black on a dark bar and
+   the tab looked empty. Both properties are set together here; anywhere the
+   two can disagree is a latent bug. */
+:is(#il-system, html) :is(#il-system, body) a.nav-tab:is(.active-tab, .active),
+:is(#il-system, html) :is(#il-system, body) #main-nav a.nav-tab:is(.active-tab, .active) {
+  color: var(--il-ink, #F2F0EB) !important;
+  -webkit-text-fill-color: var(--il-ink, #F2F0EB) !important;
+  background: transparent !important;
+  box-shadow: inset 0 -2px 0 var(--il-gold, #D6AC64) !important;
+  border-radius: 0 !important;
+}
+
+/* Metric tiles carried two affordance icons per label (help + glossary), which
+   is 16 pieces of chrome on a row of 8 figures. They stay reachable, but they
+   only surface on hover or keyboard focus so the numbers read cleanly. */
+:is(#il-system, html) :is(#il-system, body) :is(.metric, .metric-card, .stat, .stat-card) :is(.m-help, .m-gloss, .metric-help, .metric-gloss, [data-help], [data-gloss]) {
+  opacity: 0;
+  transition: opacity .12s linear;
+}
+
+:is(#il-system, html) :is(#il-system, body) :is(.metric, .metric-card, .stat, .stat-card):is(:hover, :focus-within) :is(.m-help, .m-gloss, .metric-help, .metric-gloss, [data-help], [data-gloss]) {
+  opacity: .75;
+}
+
+/* Sidebar active row: marked with a gold edge, not filled — so its label must
+   stay light. It was inheriting the dark text-fill that pairs with the filled
+   toggle treatment, giving near-black on a dark row. */
+:is(#il-system, html) :is(#il-system, body) .sb-item:is(.active, .on),
+:is(#il-system, html) :is(#il-system, body) #view-tool .sb-item:is(.active, .on),
+:is(#il-system, html) :is(#il-system, body) .sb-item:is(.active, .on) :is(.sb-item-label, .sb-item-icon, span, i) {
+  color: var(--il-ink, #F2F0EB) !important;
+  -webkit-text-fill-color: var(--il-ink, #F2F0EB) !important;
+}
+
+/* Anything given the filled "on" treatment needs BOTH colour properties, or
+   whichever one a competing rule sets will win silently. This is the third
+   place in this codebase where the two had drifted apart. */
+:is(#il-system, html) :is(#il-system, body) :is(.act-btn, .tf-pill, .rpill, .ind-pill, .cex-type-btn, .mst-btn, .indicator-control):is(.on, .active, [aria-pressed="true"]) :is(span, i, b, em) {
+  color: inherit !important;
+  -webkit-text-fill-color: inherit !important;
+}
+
+/* ── 11 · ALWAYS-DARK CHROME ────────────────────────────────────────────────
+   The static masthead stays dark in BOTH themes. Any rule that colours its
+   contents with a theme token (--il-ink and friends) therefore inverts under
+   it: in light mode --il-ink resolves to #14161A and the nav paints near-black
+   on near-black. That has now caused the same defect three separate times in
+   this codebase, so the fix here is structural rather than another patch —
+   the region gets its own token scope that does not flip, and everything
+   inside spends those instead.
+
+   If you add anything to the masthead later, colour it with --chrome-* and it
+   cannot go wrong in one theme while looking fine in the other. */
+:is(#il-system, html) :is(#il-system, body) :is(nav#main-nav, nav.il-global-nav),
+:is(#il-system, html):not([data-theme="dark"]) :is(#il-system, body) :is(nav#main-nav, nav.il-global-nav) {
+  --chrome-bg: rgba(10, 12, 16, .94);
+  --chrome-ink: #F2F0EB;
+  --chrome-ink-2: rgba(239, 237, 230, .70);
+  --chrome-ink-3: rgba(239, 237, 230, .48);
+  --chrome-line: rgba(255, 255, 255, .09);
+
+  background-color: var(--chrome-bg) !important;
+  background-image: none !important;
+  border-bottom: 1px solid var(--chrome-line) !important;
+  color: var(--chrome-ink) !important;
+}
+
+/* Tabs, idle and active — both colour properties, both themes, one source. */
+:is(#il-system, html) :is(#il-system, body) :is(nav#main-nav, nav.il-global-nav) a.nav-tab {
+  color: var(--chrome-ink-2) !important;
+  -webkit-text-fill-color: var(--chrome-ink-2) !important;
+}
+
+:is(#il-system, html) :is(#il-system, body) :is(nav#main-nav, nav.il-global-nav) a.nav-tab:hover {
+  color: var(--chrome-ink) !important;
+  -webkit-text-fill-color: var(--chrome-ink) !important;
+  background: rgba(255, 255, 255, .07) !important;
+}
+
+:is(#il-system, html) :is(#il-system, body) :is(nav#main-nav, nav.il-global-nav) a.nav-tab:is(.active-tab, .active) {
+  color: var(--chrome-ink) !important;
+  -webkit-text-fill-color: var(--chrome-ink) !important;
+  background: transparent !important;
+  box-shadow: inset 0 -2px 0 var(--il-gold, #D6AC64) !important;
+  border-radius: 0 !important;
+}
+
+/* Everything else written directly on the bar. */
+:is(#il-system, html) :is(#il-system, body) :is(nav#main-nav, nav.il-global-nav) :is(span:not([class]), .nav-live, .il-global-search span, [aria-hidden="true"]) {
+  color: var(--chrome-ink-3) !important;
+  -webkit-text-fill-color: var(--chrome-ink-3) !important;
+}
+
+:is(#il-system, html) :is(#il-system, body) :is(nav#main-nav, nav.il-global-nav) :is(input, .nav-search, .il-global-search) {
+  background: rgba(255, 255, 255, .06) !important;
+  border: 1px solid var(--chrome-line) !important;
+  color: var(--chrome-ink) !important;
+  -webkit-text-fill-color: var(--chrome-ink) !important;
+}
+
+:is(#il-system, html) :is(#il-system, body) :is(nav#main-nav, nav.il-global-nav) input::placeholder {
+  color: var(--chrome-ink-3) !important;
+  -webkit-text-fill-color: var(--chrome-ink-3) !important;
+  opacity: 1 !important;
+}
+
+/* ── 12 · THE 16px INPUT FLOOR ──────────────────────────────────────────────
+   Mobile Safari zooms the viewport whenever a focused input renders below
+   16px, and the zoom does not undo itself. Section 5 sets inputs to the 13px
+   body size, which is right on a desktop and wrong on a phone. This is a
+   functional constraint, not a stylistic one — it does not get snapped to the
+   type scale. */
+@media (max-width: 820px) {
+  :is(#il-system, html) :is(#il-system, body) :is(input, select, textarea) {
+    font-size: 16px !important;
+  }
+}
+
+/* ── 13 · SMALL-TEXT CONTRAST ───────────────────────────────────────────────
+   The muted ink on paper was #93969E, which is 2.96:1 on white — fine for a
+   28px heading, not for the 11px hints, meter labels and footnotes that
+   actually use it. #63666E clears 5.7:1 on white and 5.2:1 on the cream
+   surface, with headroom for the smallest type in the system. */
+:is(#il-system, html):not([data-theme="dark"]),
+:is(#il-system, html):not([data-theme="dark"]) body {
+  --il-muted: #63666E;
+  --ink5: #63666E;
+  --sp-muted: #63666E;
+  --text5: #63666E;
+}
+
+:is(#il-system, html):not([data-theme="dark"]) :is(#il-system, body) :is(
+  .field-hint, .meter-label, .pgc-note, .hint, .form-hint, .footnote, .caption
+) {
+  color: #63666E !important;
+  -webkit-text-fill-color: #63666E !important;
+}
+
+/* A gold badge takes dark ink. White on #D6AC64 is 2.11:1 — gold is a light
+   colour, so it behaves like a light surface no matter how "brand" it feels. */
+:is(#il-system, html) :is(#il-system, body) :is(.pgc-badge, .badge-gold, .tag.gold-fill) {
+  color: #17100A !important;
+  -webkit-text-fill-color: #17100A !important;
+}
+
+/* Gold labels sitting on white cards. */
+:is(#il-system, html):not([data-theme="dark"]) :is(#il-system, body) :is(
+  .sb-pro-title, .tw-kicker, .il-learn-kicker, .eyebrow-gold
+) {
+  color: #7A5A1E !important;
+  -webkit-text-fill-color: #7A5A1E !important;
+}
+
+/* Dark-theme counterpart to section 13. The muted ink on the dark surface was
+   #6E6B65 — 3.77:1 on the page background, which fails at the 11px these hints
+   render at. #918E89 clears 6.1:1 on the page and 5.7:1 on a raised panel. */
+:is(#il-system, html)[data-theme="dark"],
+:is(#il-system, html)[data-theme="dark"] body {
+  --il-muted: #918E89;
+  --ink5: #918E89;
+  --sp-muted: #918E89;
+  --text5: #918E89;
+}
+
+:is(#il-system, html)[data-theme="dark"] :is(#il-system, body) :is(
+  .field-hint, .meter-label, .pgc-note, .hint, .form-hint, .footnote, .caption
+) {
+  color: #918E89 !important;
+  -webkit-text-fill-color: #918E89 !important;
+}
+
+/* Weights above 700 come from a handful of inline styles and `font:` shorthands
+   the normalisation pass could not reach. font-synthesis:none means the browser
+   picks the nearest real face rather than faking one, so these were not
+   rendering as faux bold — but four weights in the system means four, so they
+   clamp here. */
+:is(#il-system, html) :is(#il-system, body) [style*="font-weight: 7"],
+:is(#il-system, html) :is(#il-system, body) [style*="font-weight:7"],
+:is(#il-system, html) :is(#il-system, body) [style*="font-weight: 8"],
+:is(#il-system, html) :is(#il-system, body) [style*="font-weight:8"],
+:is(#il-system, html) :is(#il-system, body) [style*="font-weight: 9"],
+:is(#il-system, html) :is(#il-system, body) [style*="font-weight:9"] {
+  font-weight: var(--w-bold) !important;
+}
+
+/* Decorative radial washes on workspace panels. These are corner glows that
+   tint the panel without carrying information — "minimal decoration" in the
+   brand playbook rules them out, and they also defeat any honest contrast
+   measurement, since a tool cannot know the text does not sit under the glow. */
+:is(#il-system, html) :is(#il-system, body) :is(
+  .tool-welcome, #tool-welcome, .il-onboarding, .app-section, .acc-body,
+  .cex-body, .il-tool-shell, .tw-welcome-copy, .il-drawer
+) {
+  background-image: none !important;
+}
+
+/* The tool-welcome panel used to be an always-dark gradient card, so its
+   heading and subtitle were hard-coded near-white. With the decorative wash
+   removed the panel inherits the themed surface beneath it, and that text has
+   to follow the theme too — otherwise it is white on white on paper. */
+:is(#il-system, html) :is(#il-system, body) :is(.tw-title, .tool-welcome h1, .tool-welcome h2) {
+  color: var(--il-ink, #F2F0EB) !important;
+  -webkit-text-fill-color: var(--il-ink, #F2F0EB) !important;
+}
+
+:is(#il-system, html) :is(#il-system, body) :is(.tw-sub, .tw-welcome-copy p, .tool-welcome p) {
+  color: var(--il-ink-2, rgba(242, 240, 235, .70)) !important;
+  -webkit-text-fill-color: var(--il-ink-2, rgba(242, 240, 235, .70)) !important;
+}

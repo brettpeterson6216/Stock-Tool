@@ -27,9 +27,9 @@
   --il-shadow-xs: 0 1px 2px rgba(13, 24, 18, .035);
   --il-shadow-sm: 0 8px 24px rgba(13, 24, 18, .055);
   --il-shadow-md: 0 18px 48px rgba(13, 24, 18, .085);
-  --il-radius-sm: 8px;
-  --il-radius: 12px;
-  --il-radius-lg: 18px;
+  --il-radius-sm: 4px;
+  --il-radius: 8px;
+  --il-radius-lg: 8px;
   --il-header: #0b100e;
   --il-header-line: rgba(255, 255, 255, .09);
   --il-focus: 0 0 0 3px rgba(201, 149, 72, .2);
@@ -182,8 +182,8 @@ nav#main-nav.il-static-main-nav {
   margin: 0 !important;
   padding-right: 14px !important;
   color: #f4f4ef !important;
-  font-size: 19px !important;
-  font-weight: 650 !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
   letter-spacing: -.035em !important;
 }
 #main-nav .nav-logo img,
@@ -230,7 +230,7 @@ nav#main-nav.il-static-main-nav {
 #main-nav .il-global-search {
   height: 34px !important;
   border: 1px solid rgba(255, 255, 255, .1) !important;
-  border-radius: 9px !important;
+  border-radius: 8px !important;
   background: rgba(255, 255, 255, .045) !important;
   box-shadow: none !important;
 }
@@ -243,7 +243,7 @@ nav#main-nav.il-static-main-nav {
   min-height: 26px !important;
   padding: 0 8px !important;
   border-color: rgba(32, 217, 130, .2) !important;
-  border-radius: 6px !important;
+  border-radius: 4px !important;
   background: rgba(32, 217, 130, .065) !important;
   color: #68e8ad !important;
   box-shadow: none !important;
@@ -304,14 +304,14 @@ nav#main-nav.il-static-main-nav {
   margin-bottom: 20px !important;
   color: var(--il-ink) !important;
   font-size: clamp(46px, 4.6vw, 70px) !important;
-  font-weight: 650 !important;
+  font-weight: 600 !important;
   line-height: .99 !important;
   letter-spacing: -.055em !important;
 }
 #landing-page .il-landing-copy > p {
   max-width: 570px !important;
   color: var(--il-muted) !important;
-  font-size: 17px !important;
+  font-size: 18px !important;
   line-height: 1.68 !important;
 }
 #landing-page .il-landing-search {
@@ -322,7 +322,7 @@ nav#main-nav.il-static-main-nav {
   margin-top: 28px !important;
   padding: 6px 6px 6px 15px !important;
   border: 1px solid var(--il-line-strong) !important;
-  border-radius: 12px !important;
+  border-radius: 8px !important;
   background: var(--il-surface) !important;
   box-shadow: var(--il-shadow-sm) !important;
 }
@@ -338,11 +338,11 @@ nav#main-nav.il-static-main-nav {
 #landing-page .il-landing-primary {
   min-height: 44px !important;
   border: 0 !important;
-  border-radius: 9px !important;
+  border-radius: 8px !important;
   background: #c99a53 !important;
   color: #17120b !important;
   box-shadow: none !important;
-  font-weight: 750 !important;
+  font-weight: 700 !important;
 }
 #landing-page .il-landing-actions { margin-top: 14px !important; }
 #landing-page .il-landing-actions #il-hero-primary { display: none !important; }
@@ -369,7 +369,7 @@ nav#main-nav.il-static-main-nav {
 #landing-page .il-hero-mock {
   overflow: hidden !important;
   border: 1px solid rgba(255, 255, 255, .1) !important;
-  border-radius: 16px !important;
+  border-radius: 8px !important;
   background: #101513 !important;
   box-shadow: 0 34px 80px rgba(8, 15, 11, .22), 0 0 0 1px rgba(17, 24, 21, .08) !important;
   transform: perspective(1200px) rotateY(-2deg) rotateX(1deg);
@@ -379,7 +379,7 @@ nav#main-nav.il-static-main-nav {
   bottom: 16px !important;
   left: auto !important;
   border: 1px solid rgba(255, 255, 255, .1) !important;
-  border-radius: 9px !important;
+  border-radius: 8px !important;
   background: rgba(8, 12, 10, .8) !important;
   box-shadow: none !important;
   backdrop-filter: blur(12px);
@@ -414,7 +414,7 @@ nav#main-nav.il-static-main-nav {
 #landing-page .il-cap-card,
 #landing-page .il-wf-panel {
   border: 1px solid var(--il-line) !important;
-  border-radius: 14px !important;
+  border-radius: 8px !important;
   background: var(--il-surface) !important;
   background-image: none !important;
   box-shadow: var(--il-shadow-xs) !important;
@@ -436,7 +436,7 @@ nav#main-nav.il-static-main-nav {
   margin-bottom: 64px !important;
   padding: 42px !important;
   border: 1px solid var(--il-line) !important;
-  border-radius: 18px !important;
+  border-radius: 8px !important;
   background: var(--il-surface) !important;
   background-image: none !important;
   box-shadow: var(--il-shadow-sm) !important;
@@ -514,7 +514,7 @@ html[data-theme="dark"] .il-product-page .app-section-hdr { background: rgba(9, 
 .il-product-page .app-tf-strip,
 .il-product-page .mobile-sec-tabs {
   border: 1px solid var(--il-line) !important;
-  border-radius: 10px !important;
+  border-radius: 8px !important;
   background: var(--il-surface) !important;
   box-shadow: none !important;
 }
@@ -524,7 +524,7 @@ html[data-theme="dark"] .il-product-page .app-section-hdr { background: rgba(9, 
 .il-product-page .ind-pill {
   min-height: 34px !important;
   border-color: transparent !important;
-  border-radius: 7px !important;
+  border-radius: 8px !important;
   background: transparent !important;
   color: var(--il-muted) !important;
   box-shadow: none !important;
@@ -554,7 +554,7 @@ html[data-theme="dark"] .il-product-page .app-section-hdr { background: rgba(9, 
 .il-lens-page select,
 .il-lens-page textarea {
   border: 1px solid var(--il-line-strong) !important;
-  border-radius: 9px !important;
+  border-radius: 8px !important;
   background: var(--il-surface) !important;
   color: var(--il-ink) !important;
   box-shadow: none !important;
@@ -569,7 +569,7 @@ html[data-theme="dark"] .il-product-page .app-section-hdr { background: rgba(9, 
 .il-lens-page table {
   overflow: hidden;
   border: 1px solid var(--il-line) !important;
-  border-radius: 10px !important;
+  border-radius: 8px !important;
   background: var(--il-surface) !important;
   box-shadow: none !important;
 }
@@ -622,13 +622,13 @@ html[data-theme="dark"] .il-product-page .app-section-hdr { background: rgba(9, 
 .il-lens-page .ticker-control button,
 .il-lens-page .primary-action {
   border: 0 !important;
-  border-radius: 9px !important;
+  border-radius: 8px !important;
   background: #c99a53 !important;
   color: #17120b !important;
   box-shadow: none !important;
 }
 .il-lens-page .company-nav { padding: 5px !important; }
-.il-lens-page .company-nav button { border: 0 !important; border-radius: 7px !important; background: transparent !important; color: var(--il-muted) !important; }
+.il-lens-page .company-nav button { border: 0 !important; border-radius: 8px !important; background: transparent !important; color: var(--il-muted) !important; }
 .il-lens-page .company-nav button.active { background: var(--il-brass-soft) !important; color: var(--il-brass) !important; box-shadow: none !important; }
 .il-lens-page .score-ring { box-shadow: none !important; filter: saturate(.9); }
 .il-lens-page .lens-card,
@@ -636,7 +636,7 @@ html[data-theme="dark"] .il-product-page .app-section-hdr { background: rgba(9, 
 .il-lens-page .zone-group,
 .il-lens-page .invalidation-box {
   border-color: var(--il-line) !important;
-  border-radius: 10px !important;
+  border-radius: 8px !important;
   background: var(--il-surface-2) !important;
   background-image: none !important;
   box-shadow: none !important;
@@ -681,24 +681,24 @@ html[data-theme="dark"] .il-product-page .app-section-hdr { background: rgba(9, 
   width: min(100%, 460px) !important;
   padding: 38px !important;
   border: 1px solid var(--il-line) !important;
-  border-radius: 16px !important;
+  border-radius: 8px !important;
   background: var(--il-surface) !important;
   background-image: none !important;
   box-shadow: var(--il-shadow-md) !important;
 }
 .il-auth-page .auth-card::before { content: none !important; }
-.il-auth-page .auth-title { color: var(--il-ink) !important; font-size: 34px !important; line-height: 1.05 !important; }
+.il-auth-page .auth-title { color: var(--il-ink) !important; font-size: 28px !important; line-height: 1.05 !important; }
 .il-auth-page .auth-title em { color: var(--il-brass) !important; }
 .il-auth-page .auth-sub,
 .il-auth-page .sec-note { color: var(--il-muted) !important; }
 .il-auth-page .btn-primary {
   min-height: 46px !important;
   border: 0 !important;
-  border-radius: 9px !important;
+  border-radius: 8px !important;
   background: #c99a53 !important;
   color: #17120b !important;
   box-shadow: none !important;
-  font-weight: 750 !important;
+  font-weight: 700 !important;
 }
 .il-auth-page > nav {
   min-height: 60px !important;
@@ -713,7 +713,7 @@ html[data-theme="dark"] .il-product-page .app-section-hdr { background: rgba(9, 
 .il-auth-page > nav .nav-logo {
   color: #f4f4ef !important;
   font-family: "Space Grotesk", "DM Sans", sans-serif !important;
-  font-weight: 650 !important;
+  font-weight: 600 !important;
   letter-spacing: -.035em !important;
 }
 .il-auth-page > nav .nav-logo img { width: 30px !important; height: 30px !important; filter: none !important; }
@@ -739,7 +739,7 @@ html[data-theme="dark"] .il-product-page .app-section-hdr { background: rgba(9, 
 .il-admin-page .chart-wrap,
 .il-admin-page .tbl-wrap {
   border: 1px solid var(--il-line) !important;
-  border-radius: 12px !important;
+  border-radius: 8px !important;
   background: var(--il-surface) !important;
   box-shadow: none !important;
 }
@@ -807,14 +807,14 @@ html[data-theme="dark"] .il-product-page .app-section-hdr { background: rgba(9, 
     line-height: 1.01 !important;
     text-align: left !important;
   }
-  #landing-page .il-landing-copy > p { font-size: 15.5px !important; line-height: 1.62 !important; text-align: left !important; }
+  #landing-page .il-landing-copy > p { font-size: 15px !important; line-height: 1.62 !important; text-align: left !important; }
   #landing-page .il-landing-search { margin-top: 24px !important; }
-  #landing-page .il-landing-search input { min-width: 0 !important; font-size: 14px !important; }
+  #landing-page .il-landing-search input { min-width: 0 !important; font-size: 13px !important; }
   #landing-page .il-landing-search button { min-width: 86px !important; padding-inline: 14px !important; }
   #landing-page .il-landing-actions { justify-content: flex-start !important; }
   #landing-page .il-landing-proof { display: grid !important; grid-template-columns: 1fr !important; gap: 7px !important; }
   #landing-page .il-landing-preview { width: 100% !important; }
-  #landing-page .il-hero-mock { min-height: 275px !important; border-radius: 13px !important; transform: none !important; }
+  #landing-page .il-hero-mock { min-height: 275px !important; border-radius: 8px !important; transform: none !important; }
   #landing-page .ihm-top { padding-inline: 12px !important; }
   #landing-page .ihm-tabs { display: none !important; }
   #landing-page .il-preview-caption { display: none !important; }
@@ -829,7 +829,7 @@ html[data-theme="dark"] .il-product-page .app-section-hdr { background: rgba(9, 
     width: calc(100% - 40px) !important;
     margin-bottom: 36px !important;
     padding: 28px 22px !important;
-    border-radius: 14px !important;
+    border-radius: 8px !important;
   }
 
   .il-product-page .app-content-scroll { padding: 14px 12px calc(92px + env(safe-area-inset-bottom, 0px)) !important; }
@@ -837,7 +837,7 @@ html[data-theme="dark"] .il-product-page .app-section-hdr { background: rgba(9, 
   .il-product-page .chart-wrap,
   .il-product-page .panel-box,
   .il-product-page .il-research-panel,
-  .il-product-page .il-workspace-card { border-radius: 10px !important; }
+  .il-product-page .il-workspace-card { border-radius: 8px !important; }
   .il-product-page .mobile-sec-tabs {
     margin: 0 -12px 14px !important;
     padding: 6px 12px !important;
@@ -857,24 +857,24 @@ html[data-theme="dark"] .il-product-page .app-section-hdr { background: rgba(9, 
   .mobile-bottom-nav .mbn-item.active { color: #e1bd7a !important; background: transparent !important; }
 
   .il-lens-page main { width: 100% !important; padding: 24px 14px 88px !important; }
-  .il-lens-page .search-shell { padding: 24px 18px !important; border-radius: 11px !important; }
-  .il-lens-page .search-shell h1 { font-size: 36px !important; }
+  .il-lens-page .search-shell { padding: 24px 18px !important; border-radius: 8px !important; }
+  .il-lens-page .search-shell h1 { font-size: 40px !important; }
   .il-lens-page .score-grid,
   .il-lens-page .snapshot-lower,
   .il-lens-page .chart-layout,
   .il-lens-page .drivers-layout,
   .il-lens-page .scenario-layout { gap: 12px !important; }
-  .il-lens-page .panel { border-radius: 10px !important; }
+  .il-lens-page .panel { border-radius: 8px !important; }
 
   .il-static-page .hero,
   .il-static-page main#public-main,
   .il-static-page .wrap { width: 100% !important; padding-inline: 20px !important; }
   .il-static-page .hero { padding-top: 54px !important; }
   .il-static-page .hero h1,
-  .il-static-page main h1 { font-size: 39px !important; }
+  .il-static-page main h1 { font-size: 40px !important; }
   .il-auth-page main { padding: 42px 14px 34px !important; }
-  .il-auth-page .auth-card { padding: 28px 22px !important; border-radius: 13px !important; }
-  .il-auth-page .auth-title { font-size: 30px !important; }
+  .il-auth-page .auth-card { padding: 28px 22px !important; border-radius: 8px !important; }
+  .il-auth-page .auth-title { font-size: 28px !important; }
 }
 
 @media (prefers-reduced-motion: reduce) {

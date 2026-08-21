@@ -111,8 +111,8 @@ html:has(#main-nav[data-view="market"]) body::before{
   background:transparent!important;
   border:1px solid transparent!important;
   color:var(--t-text-2)!important;
-  font:600 .74rem var(--sans)!important;
-  border-radius:8px!important;
+  font:600 12px var(--sans)!important;
+  border-radius: 8px !important;
   box-shadow:none!important;
   text-shadow:none!important;
   transition:background .13s, color .13s, border-color .13s!important;
@@ -188,11 +188,11 @@ html[data-theme="dark"] #view-tool .app-section .acc-body,
   color:var(--t-text)!important;
 }
 #view-tool .chart-title,#view-tool .panel-box-title{
-  font:700 .8rem var(--sans)!important; letter-spacing:.01em!important;
+  font:700 13px var(--sans)!important; letter-spacing:.01em!important;
 }
 #view-tool .m-lbl,#view-tool .sb-group-label,#view-tool .asf-lbl{
   color:var(--t-text-3)!important;
-  font:700 .63rem var(--mono)!important;
+  font:700 10px var(--mono)!important;
   letter-spacing:.1em!important; text-transform:uppercase!important;
 }
 #view-tool .m-val,#view-tool .asf-val,#view-tool strong{ color:var(--t-text)!important; }
@@ -212,7 +212,7 @@ html[data-theme="dark"] #view-tool .app-section .acc-body,
 #view-tool .scr-table thead th,#view-tool .wl-table thead th{
   background:var(--t-surface-3)!important;
   color:var(--t-gold)!important;
-  font:800 .6rem var(--mono)!important;
+  font:700 10px var(--mono)!important;
   letter-spacing:.09em!important; text-transform:uppercase!important;
   padding:11px 14px!important;
   border-bottom:1px solid var(--t-line)!important;
@@ -221,11 +221,11 @@ html[data-theme="dark"] #view-tool .app-section .acc-body,
 #view-tool .cmp-table td,#view-tool .scr-table td,#view-tool .wl-table td{
   padding:10px 14px!important;
   border-bottom:1px solid var(--t-line)!important;
-  color:var(--t-text-2)!important; font-size:.78rem!important;
+  color:var(--t-text-2)!important; font-size: 12px !important;
 }
 #view-tool tbody tr:nth-child(even) td{ background:color-mix(in srgb,var(--t-gold) 3%,transparent)!important; }
 #view-tool tbody tr:hover td{ background:var(--t-gold-soft)!important; }
-#view-tool tbody td:first-child{ color:var(--t-text)!important; font-weight:700!important; }
+#view-tool tbody td:first-child{ color:var(--t-text)!important; font-weight: 700 !important; }
 
 /* ── 7. Inputs ───────────────────────────────────────────────────────────────── */
 #view-tool input[type=text],#view-tool input[type=number],
@@ -239,7 +239,7 @@ html[data-theme="dark"] #view-tool .app-section .acc-body,
 
 /* ── 8. Scrollbars ───────────────────────────────────────────────────────────── */
 #view-tool .app-content-scroll::-webkit-scrollbar{ width:9px; height:9px; }
-#view-tool .app-content-scroll::-webkit-scrollbar-thumb{ background:var(--t-line-2); border-radius:8px; }
+#view-tool .app-content-scroll::-webkit-scrollbar-thumb{ background:var(--t-line-2); border-radius: 8px; }
 #view-tool .app-content-scroll::-webkit-scrollbar-thumb:hover{ background:var(--t-gold-line); }
 
 /* ════════════════════════════════════════════════════════════════════════════
@@ -274,13 +274,13 @@ html[data-theme="dark"] #view-tool .app-section .acc-body,
 /* Kicker labels ("ANALYZE", "Ticker workspace") quieter/smaller */
 #view-tool .il-shell-kicker,
 #view-tool .ash-kicker{
-  font:700 .62rem var(--mono)!important;
+  font:700 10px var(--mono)!important;
   letter-spacing:.12em!important; text-transform:uppercase!important;
   color:var(--t-text-3)!important;
 }
 /* Stats footer: tighten into a compact data ribbon */
 #view-tool #app-stats-footer{
-  border-radius:0!important;
+  border-radius: 0 !important;
   border-left:0!important; border-right:0!important; border-bottom:0!important;
   box-shadow:none!important;
   background:var(--t-surface)!important;
@@ -300,7 +300,7 @@ html[data-theme="dark"] #view-tool .app-section .acc-body,
   background:transparent!important;
   border:0!important;
   color:var(--t-text)!important;
-  font:800 .72rem var(--mono)!important;
+  font:700 12px var(--mono)!important;
   letter-spacing:.12em!important; text-transform:uppercase!important;
   padding:var(--t-s3) 0!important;
 }

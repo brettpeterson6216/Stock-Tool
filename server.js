@@ -105,11 +105,12 @@ app.use(helmet({
       // Helmet defaults this directive to 'none', which would block the legacy
       // onclick= / onchange= handlers that remain in the current UI.
       scriptSrcAttr:  ["'unsafe-inline'"],
+      // Fonts are self-hosted from /vendor/fonts (see il-fonts.css), so the
+      // Google font hosts are no longer reachable from any page and are not
+      // allowlisted. Keeping them here would be surface with no consumer.
       styleSrc:       ["'self'", "'unsafe-inline'",
-                       "https://fonts.googleapis.com",
                        "https://cdn.jsdelivr.net"],
-      fontSrc:        ["'self'", "https://fonts.gstatic.com",
-                       "https://cdn.jsdelivr.net"],
+      fontSrc:        ["'self'", "https://cdn.jsdelivr.net"],
       imgSrc:         ["'self'", "data:", "https:"],
       // All API calls route through our own origin. cdn.jsdelivr.net is required
       // for the globe's world-atlas JSON fetch. cdnjs.cloudflare.com is required
