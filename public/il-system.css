@@ -716,12 +716,19 @@
    at every width. At 393px that is 880px of fixed track in a 393px box, which
    is why the copy measured 380px regardless of padding and the hero mock sat at
    x=434, entirely off-canvas and saved only by overflow-x:hidden. */
-@media (max-width: 760px) {
+/* Collapse at 960px, not 760px. The desktop rhythm in section 19 starts at
+   961px, so a 760px breakpoint left the whole tablet band on the untouched
+   desktop grid: 880px of fixed track (380px + 500px) inside a 768-960px box,
+   with the headline crammed to 362px and breaking onto six lines. */
+@media (max-width: 960px) {
   :is(#il-system, html) :is(#il-system, body) :is(.il-landing-hero, .il-landing-inner, .il-landing-grid) {
     display: block !important;
     grid-template-columns: 1fr !important;
     width: 100% !important;
     max-width: 100% !important;
+    padding-left: 28px !important;
+    padding-right: 28px !important;
+    box-sizing: border-box !important;
   }
   :is(#il-system, html) :is(#il-system, body) :is(.il-landing-copy, .il-landing-inner > *) {
     width: 100% !important;
@@ -730,6 +737,21 @@
     margin-left: 0 !important;
     margin-right: 0 !important;
   }
+  :is(#il-system, html) :is(#il-system, body) :is(.il-landing-hero h1, .il-landing-copy h1) {
+    font-size: clamp(34px, 5.4vw, 48px) !important;
+    line-height: 1.07 !important;
+    letter-spacing: -.022em !important;
+    text-align: left !important;
+    max-width: 22ch !important;
+  }
+  /* On a tablet the mock stacks under the copy; it only disappears on phones. */
+  :is(#il-system, html) :is(#il-system, body) :is(.il-landing-preview, .il-hero-mock) {
+    margin-top: 40px !important;
+    max-width: 100% !important;
+  }
+}
+
+@media (max-width: 760px) {
   /* A 500px product illustration has no place on a 393px screen. */
   :is(#il-system, html) :is(#il-system, body) :is(.il-landing-preview, .il-hero-mock) {
     display: none !important;
@@ -788,8 +810,8 @@
   :is(#il-system, html) :is(#il-system, body) a:not(.btn):not(.btn-primary):not(.mbn-item):not(.nav-tab):not(.act-btn):not(.sb-item) {
     position: relative;
   }
-  :is(#il-system, html) :is(#il-system, body) :is(footer, .f-links, .auth-alt, .legal-links) a::after,
-  :is(#il-system, html) :is(#il-system, body) :is(.guide-cta, .il-feedback-link)::after {
+  :is(#il-system, html) :is(#il-system, body) :is(footer, .f-links, .auth-alt, .legal-links, .static-footer, .sf-links, .page-footer, .wrap > p, .auth-switch, .auth-links) a::after,
+  :is(#il-system, html) :is(#il-system, body) :is(.guide-cta, .il-feedback-link, .nav-logo, .il-global-brand)::after {
     content: "";
     position: absolute;
     left: 0;
@@ -804,10 +826,100 @@
     line-height: 2.6 !important;
   }
   /* Checkboxes were 13x13. */
+  /* WCAG 2.2 AA sets 24x24 as the floor for a pointer target. */
   :is(#il-system, html) :is(#il-system, body) :is(input[type="checkbox"], input[type="radio"]) {
-    width: 20px !important;
-    height: 20px !important;
-    min-width: 20px !important;
-    min-height: 20px !important;
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px !important;
+    min-height: 24px !important;
+    accent-color: #D6AC64;
+  }
+
+  /* The brand mark in the auth pages' nav was 30px tall. */
+  :is(#il-system, html) :is(#il-system, body) :is(.nav-logo, .il-global-brand) {
+    min-height: 44px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+  }
+}
+
+/* ── 19 · LANDING RHYTHM ────────────────────────────────────────────────────
+   Three things made the landing read as unfinished at desktop widths:
+
+     · The hero ran a 66px display headline inside a 489px column, so it broke
+       onto SIX lines while 1320px of hero sat around it. A display size needs
+       a measure to match or it stops reading as a headline and starts reading
+       as a narrow paragraph.
+     · The hero was 1320px wide while every section under it was 1180px, so
+       nothing lined up down the left edge.
+     · Section padding plus section margin stacked to ~180px of empty space
+       between blocks, which reads as missing content rather than as air.
+   ═════════════════════════════════════════════════════════════════════════ */
+@media (min-width: 961px) {
+  /* One measure for the whole page. */
+  :is(#il-system, html) :is(#il-system, body) :is(
+    .il-landing-hero, .il-capabilities, .il-workflow-visual,
+    .il-landing-band, .il-landing-pricing
+  ) {
+    max-width: 1180px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    padding-left: 32px !important;
+    padding-right: 32px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Give the copy the larger share: the headline is the thing being read. */
+  :is(#il-system, html) :is(#il-system, body) .il-landing-hero {
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr) !important;
+    gap: 56px !important;
+    align-items: center !important;
+    padding-top: 72px !important;
+    padding-bottom: 88px !important;
+  }
+
+  /* 56px over ~600px lands the headline on three lines instead of six. */
+  :is(#il-system, html) :is(#il-system, body) :is(.il-landing-hero h1, .il-landing-copy h1) {
+    font-size: clamp(40px, 3.9vw, 56px) !important;
+    line-height: 1.06 !important;
+    letter-spacing: -.025em !important;
+    max-width: none !important;   /* the grid column is the measure now */
+    margin: 0 0 20px !important;
+    /* The headline was centre-aligned inside a left-aligned column, so each of
+       its lines started at a different x while the kicker, paragraph and
+       buttons all lined up at 162px. It read as a mistake rather than a choice. */
+    text-align: left !important;
+  }
+
+  :is(#il-system, html) :is(#il-system, body) .il-landing-copy {
+    max-width: none !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  :is(#il-system, html) :is(#il-system, body) .il-landing-copy > p {
+    max-width: 52ch !important;
+    font-size: 15px !important;
+    line-height: 1.62 !important;
+  }
+
+  /* Vertical rhythm: one source of spacing, not padding plus margin. */
+  :is(#il-system, html) :is(#il-system, body) :is(.il-capabilities, .il-workflow-visual) {
+    padding-top: 88px !important;
+    padding-bottom: 88px !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  :is(#il-system, html) :is(#il-system, body) :is(.il-landing-band, .il-landing-pricing) {
+    margin-top: 0 !important;
+    margin-bottom: 88px !important;
+  }
+
+  /* Section headings sized against the new hero so the page has a real scale. */
+  :is(#il-system, html) :is(#il-system, body) :is(.il-capabilities h2, .il-workflow-visual h2, .il-landing-band h2, .il-landing-pricing h2) {
+    font-size: clamp(26px, 2.5vw, 34px) !important;
+    line-height: 1.14 !important;
+    letter-spacing: -.02em !important;
   }
 }
