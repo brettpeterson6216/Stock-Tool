@@ -810,8 +810,11 @@
   :is(#il-system, html) :is(#il-system, body) a:not(.btn):not(.btn-primary):not(.mbn-item):not(.nav-tab):not(.act-btn):not(.sb-item) {
     position: relative;
   }
-  :is(#il-system, html) :is(#il-system, body) :is(footer, .f-links, .auth-alt, .legal-links, .static-footer, .sf-links, .page-footer, .wrap > p, .auth-switch, .auth-links) a::after,
-  :is(#il-system, html) :is(#il-system, body) :is(.guide-cta, .il-feedback-link, .nav-logo, .il-global-brand)::after {
+  /* Structural, not a list of class names. Guessing container classes left the
+     static pages and auth links untouched; this covers every inline link that
+     is not already a button-shaped control, which is exactly the set that
+     renders 13-19px tall. */
+  :is(#il-system, html) :is(#il-system, body) a:not(.btn):not(.btn-primary):not(.mbn-item):not(.nav-tab):not(.act-btn):not(.sb-item):not(.tf-pill):not(.il-global-trial):not(.il-global-login):not(.mmenu-item)::after {
     content: "";
     position: absolute;
     left: 0;
