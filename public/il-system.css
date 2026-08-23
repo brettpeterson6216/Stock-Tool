@@ -760,3 +760,54 @@
     padding-bottom: calc(78px + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
+
+/* ── 17 · SCREEN-READER ONLY ────────────────────────────────────────────────
+   Visually hidden but still announced and still indexed. Not display:none,
+   which removes it from the accessibility tree entirely. */
+.il-sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* ── 18 · TOUCH TARGETS ─────────────────────────────────────────────────────
+   Inline text links — footers, auth links, legal links — were rendering 13-21px
+   tall on a phone. WCAG asks for 24px minimum and every platform guideline says
+   44px; these are the links people miss and tap twice. Padding would break the
+   inline flow, so the hit area is grown with a pseudo-element that does not
+   affect layout. */
+@media (pointer: coarse), (max-width: 640px) {
+  :is(#il-system, html) :is(#il-system, body) :is(footer, .f-links, .auth-alt, .legal-links, .guide-cta, .sec-note) a,
+  :is(#il-system, html) :is(#il-system, body) a:not(.btn):not(.btn-primary):not(.mbn-item):not(.nav-tab):not(.act-btn):not(.sb-item) {
+    position: relative;
+  }
+  :is(#il-system, html) :is(#il-system, body) :is(footer, .f-links, .auth-alt, .legal-links) a::after,
+  :is(#il-system, html) :is(#il-system, body) :is(.guide-cta, .il-feedback-link)::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 44px;
+    transform: translateY(-50%);
+    pointer-events: auto;
+  }
+  /* Give the rows enough room that the enlarged targets do not overlap. */
+  :is(#il-system, html) :is(#il-system, body) :is(footer, .f-links, .legal-links) {
+    line-height: 2.6 !important;
+  }
+  /* Checkboxes were 13x13. */
+  :is(#il-system, html) :is(#il-system, body) :is(input[type="checkbox"], input[type="radio"]) {
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important;
+    min-height: 20px !important;
+  }
+}

@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Implied Lens — Stock Research and Valuation Workspace</title>
-<meta name="description" content="Implied Lens is a source-aware stock research workspace with market charts, valuation models, earnings-call research, SEC filings, financial statements, projections, and a reviewable investment process.">
+<meta name="description" content="Research any stock with a repeatable process: live charts, SEC-sourced financials, editable valuation scenarios, and a transparent 0-10 LensScore.">
 <meta name="keywords" content="stock analysis, stock screener, intrinsic value, earnings history, SEC filings, analyst price targets, FINRA OTC data, institutional holdings, stock comparison, financial statements, implied lens">
 <meta name="author" content="Implied Lens">
 <meta name="robots" content="index, follow">
@@ -78,7 +78,8 @@
 <link href="/product-system.css?v=20260823-1" rel="stylesheet">
 <link href="/workspace-system.css?v=20260823-1" rel="stylesheet">
 <link href="/research-system.css?v=20260823-1" rel="stylesheet">
-<script src="/vendor/chart.umd.min.js?v=4.4.1"></script>
+<!-- defer: this was the only render-blocking script on the page, 201KB before first paint -->
+<script defer src="/vendor/chart.umd.min.js?v=4.4.1"></script>
 <script defer src="/vendor/hammer.min.js?v=2.0.8"></script>
 <script defer src="/vendor/chartjs-plugin-zoom.min.js?v=2.2.0"></script>
 <script defer src="/model-math.js?v=20260823-1"></script>
@@ -164,7 +165,7 @@
       </div>
     </div>
   </div>
-  <script src="/app-navigation.js?v=20260823-1"></script>
+  <script defer src="/app-navigation.js?v=20260823-1"></script>
 </nav>
 
 <span id="main-content" tabindex="-1"></span>
@@ -233,7 +234,7 @@
       </div>
       <div class="il-landing-search" role="search">
         <i class="ti ti-search" aria-hidden="true"></i>
-        <input type="text" id="landing-search" placeholder="Enter a ticker like NVDA, AAPL, or TSLA" autocomplete="off" spellcheck="false" onkeydown="if(event.key==='Enter'){landingSearch()}">
+        <input type="text" id="landing-search" aria-label="Enter a ticker symbol to analyze" placeholder="Enter a ticker like NVDA, AAPL, or TSLA" autocomplete="off" spellcheck="false" onkeydown="if(event.key==='Enter'){landingSearch()}">
         <button type="button" onclick="landingSearch()">Analyze</button>
       </div>
       <div class="il-landing-proof" aria-label="Platform highlights">
@@ -664,6 +665,11 @@
 </div><!-- /view-home -->
 
 <div id="view-tool" role="main" data-active-section="analyze" style="display:none;">
+  <!-- The workspace had no h1 in any state: the landing h1 is hidden with the
+       landing, and the welcome heading disappears once a ticker loads. Screen
+       readers and search engines both need exactly one. Kept off-screen because
+       the workspace already shows its section name visually. -->
+  <h1 class="il-sr-only" id="il-tool-heading">Research workspace</h1>
   <div class="app-shell">
     <!-- ── Left sidebar ── -->
     <div class="app-sidebar">
@@ -1561,7 +1567,7 @@
   <button onclick="document.getElementById('verif-banner').style.display='none';document.body.classList.remove('has-verif-banner')" style="background:none;border:none;color:rgba(237,232,224,.35);cursor:pointer;font-size:1rem;line-height:1;padding:0 .25rem;">✕</button>
 </div>
 
-<script src="/app-legacy.js?v=20260823-1"></script>
+<script defer src="/app-legacy.js?v=20260823-1"></script>
 
 <!-- ── Mobile Bottom Navigation ── -->
 <nav class="mobile-bottom-nav" id="mobile-bottom-nav" aria-label="Mobile navigation">
