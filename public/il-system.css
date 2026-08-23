@@ -607,3 +607,156 @@
   color: var(--il-ink-2, rgba(242, 240, 235, .70)) !important;
   -webkit-text-fill-color: var(--il-ink-2, rgba(242, 240, 235, .70)) !important;
 }
+
+/* ── 14 · MOBILE BOTTOM NAV ─────────────────────────────────────────────────
+   This component broke twice, both times by the same mechanism: it depended on
+   one rule out-ordering another, so any stylesheet loading stale — from a
+   browser cache or a partial deploy — turned a 74x64 nav cell into a filled
+   capsule with invisible labels.
+
+   .mbn-item is now out of the pill group entirely, and everything below is a
+   literal. No var() that can fail to resolve, no color-mix() (Safari shipped it
+   only in 16.2, and a dropped declaration there leaves the bar with no
+   background at all), no dependency on which stylesheet wins.
+   ═════════════════════════════════════════════════════════════════════════ */
+:is(#il-system, html) :is(#il-system, body) .mobile-bottom-nav {
+  background: #0B0D12 !important;
+  border-top: 1px solid rgba(255, 255, 255, .09) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  padding: 0 8px !important;
+  padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+}
+
+:is(#il-system, html):not([data-theme="dark"]) :is(#il-system, body) .mobile-bottom-nav {
+  background: #FFFFFF !important;
+  border-top: 1px solid rgba(24, 22, 18, .12) !important;
+}
+
+:is(#il-system, html) :is(#il-system, body) .mobile-bottom-nav .mbn-item,
+:is(#il-system, html) :is(#il-system, body) .mbn-item {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 3px !important;
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  padding: 6px 2px !important;
+  border: 0 !important;
+  border-radius: 4px !important;
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  line-height: 1.2 !important;
+  text-decoration: none !important;
+  color: rgba(239, 237, 230, .62) !important;
+  -webkit-text-fill-color: rgba(239, 237, 230, .62) !important;
+}
+
+:is(#il-system, html):not([data-theme="dark"]) :is(#il-system, body) .mobile-bottom-nav .mbn-item,
+:is(#il-system, html):not([data-theme="dark"]) :is(#il-system, body) .mbn-item {
+  color: #5C6069 !important;
+  -webkit-text-fill-color: #5C6069 !important;
+}
+
+:is(#il-system, html) :is(#il-system, body) .mbn-item :is(i, span, svg) {
+  color: inherit !important;
+  -webkit-text-fill-color: inherit !important;
+  background: transparent !important;
+}
+
+:is(#il-system, html) :is(#il-system, body) .mbn-item i { font-size: 19px !important; }
+
+:is(#il-system, html) :is(#il-system, body) .mbn-item:is(.mbn-active, .active) {
+  color: #D6AC64 !important;
+  -webkit-text-fill-color: #D6AC64 !important;
+  background: transparent !important;
+}
+
+:is(#il-system, html):not([data-theme="dark"]) :is(#il-system, body) .mbn-item:is(.mbn-active, .active) {
+  color: #7A5A1E !important;
+  -webkit-text-fill-color: #7A5A1E !important;
+}
+
+/* ── 15 · THEME TOGGLE GLYPHS ───────────────────────────────────────────────
+   The toggle used literal ☀ (U+2600) and ☾ (U+263E). Section 9 forces Plus
+   Jakarta Sans across the chrome and PJS has neither glyph, so both rendered as
+   the missing-glyph box. A symbol-font fallback only moves the problem — which
+   font supplies U+2600 varies by OS. Draw the shapes instead: no glyph, no font
+   dependency, identical everywhere. The moon is a circle with an offset inset
+   shadow, the cheapest way to cut a crescent without a second element. */
+:is(#il-system, html) :is(#il-system, body) :is(.theme-toggle-sun, .theme-toggle-moon) {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 14px !important;
+  height: 14px !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+}
+
+:is(#il-system, html) :is(#il-system, body) .theme-toggle-sun::before {
+  content: "" !important; display: block !important;
+  width: 10px !important; height: 10px !important;
+  border-radius: 50% !important; background: currentColor !important;
+}
+
+:is(#il-system, html) :is(#il-system, body) .theme-toggle-moon::before {
+  content: "" !important; display: block !important;
+  width: 11px !important; height: 11px !important;
+  border-radius: 50% !important; background: transparent !important;
+  box-shadow: inset -3.5px -1.5px 0 0 currentColor !important;
+}
+
+/* ── 16 · PHONE LAYOUT ──────────────────────────────────────────────────────
+   .il-landing-hero kept its desktop grid — grid-template-columns: 380px 500px —
+   at every width. At 393px that is 880px of fixed track in a 393px box, which
+   is why the copy measured 380px regardless of padding and the hero mock sat at
+   x=434, entirely off-canvas and saved only by overflow-x:hidden. */
+@media (max-width: 760px) {
+  :is(#il-system, html) :is(#il-system, body) :is(.il-landing-hero, .il-landing-inner, .il-landing-grid) {
+    display: block !important;
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  :is(#il-system, html) :is(#il-system, body) :is(.il-landing-copy, .il-landing-inner > *) {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  /* A 500px product illustration has no place on a 393px screen. */
+  :is(#il-system, html) :is(#il-system, body) :is(.il-landing-preview, .il-hero-mock) {
+    display: none !important;
+  }
+}
+
+@media (max-width: 640px) {
+  :is(#il-system, html), :is(#il-system, body) { max-width: 100% !important; overflow-x: hidden !important; }
+
+  :is(#il-system, html) :is(#il-system, body) :is(
+    .il-landing-copy, .il-landing-hero, .il-landing-inner, .il-landing-band,
+    .hero-inner, .wrap, .il-landing-actions, .il-landing-search
+  ) {
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+    box-sizing: border-box !important;
+  }
+
+  :is(#il-system, html) :is(#il-system, body) :is(.il-landing-hero h1, .il-landing-copy h1, .hero-title) {
+    font-size: clamp(30px, 8.4vw, 40px) !important;
+    line-height: 1.08 !important;
+    letter-spacing: -.02em !important;
+    overflow-wrap: break-word !important;
+  }
+
+  /* The bottom nav is fixed; the last section needs clearance under it. */
+  :is(#il-system, html) :is(#il-system, body) :is(#view-home, .il-landing, footer) {
+    padding-bottom: calc(78px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}

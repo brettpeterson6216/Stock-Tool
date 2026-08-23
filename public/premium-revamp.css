@@ -2409,7 +2409,7 @@ html:not([data-theme="dark"]) .dp-chart-wrap { background: var(--il-surface-2) !
 
 /* ── Pills, toggles, filters ───────────────────────────────────────────────── */
 .tf-pill, .sa-pill, .rpill, .cex-type-btn, .cex-btn, .fin-tab-btn, .fin-subtab,
-.sec-filter-btn, .scr-sort-btn, .sa-sort-btn, .mo-tab, .mst-btn, .mbn-item, .mmenu-item {
+.sec-filter-btn, .scr-sort-btn, .sa-sort-btn, .mo-tab, .mst-btn, .mmenu-item {
   border-radius: var(--il-radius-pill) !important;
   border: 1px solid var(--il-line) !important;
   background: var(--il-surface-2) !important;
