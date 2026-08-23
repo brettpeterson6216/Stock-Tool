@@ -807,14 +807,14 @@
    affect layout. */
 @media (pointer: coarse), (max-width: 640px) {
   :is(#il-system, html) :is(#il-system, body) :is(footer, .f-links, .auth-alt, .legal-links, .guide-cta, .sec-note) a,
-  :is(#il-system, html) :is(#il-system, body) a:not(.btn):not(.btn-primary):not(.mbn-item):not(.nav-tab):not(.act-btn):not(.sb-item) {
+  :is(#il-system, html) :is(#il-system, body) a:not(.btn):not(.btn-primary):not(.mbn-item):not(.nav-tab):not(.act-btn):not(.sb-item):not(.skip-link):not(.il-skip-link) {
     position: relative;
   }
   /* Structural, not a list of class names. Guessing container classes left the
      static pages and auth links untouched; this covers every inline link that
      is not already a button-shaped control, which is exactly the set that
      renders 13-19px tall. */
-  :is(#il-system, html) :is(#il-system, body) a:not(.btn):not(.btn-primary):not(.mbn-item):not(.nav-tab):not(.act-btn):not(.sb-item):not(.tf-pill):not(.il-global-trial):not(.il-global-login):not(.mmenu-item)::after {
+  :is(#il-system, html) :is(#il-system, body) a:not(.btn):not(.btn-primary):not(.mbn-item):not(.nav-tab):not(.act-btn):not(.sb-item):not(.tf-pill):not(.il-global-trial):not(.il-global-login):not(.mmenu-item):not(.skip-link):not(.il-skip-link)::after {
     content: "";
     position: absolute;
     left: 0;
@@ -925,4 +925,39 @@
     line-height: 1.14 !important;
     letter-spacing: -.02em !important;
   }
+}
+
+
+/* ── 20 · SKIP LINK ─────────────────────────────────────────────────────────
+   The tap-target rule in section 18 sets position:relative on inline links,
+   which overrode the skip link's position:fixed on phones — so "Skip to
+   content" sat visibly over the brand mark instead of waiting for focus. It is
+   pinned off-screen here and only travels into view when focused, in both
+   themes and at every width. */
+:is(#il-system, html) :is(#il-system, body) :is(.skip-link, .il-skip-link) {
+  position: fixed !important;
+  top: 0 !important;
+  left: 12px !important;
+  z-index: 10000 !important;
+  transform: translateY(-140%) !important;
+  transition: transform .14s ease !important;
+  /* A skip link is a keyboard affordance, but when it IS on screen it should
+     still be a real target rather than a 20px sliver. */
+  min-height: 44px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 0 18px !important;
+  border-radius: 0 0 6px 6px !important;
+  background: #D6AC64 !important;
+  color: #17100A !important;
+  -webkit-text-fill-color: #17100A !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+}
+
+:is(#il-system, html) :is(#il-system, body) :is(.skip-link, .il-skip-link):focus,
+:is(#il-system, html) :is(#il-system, body) :is(.skip-link, .il-skip-link):focus-visible {
+  transform: translateY(0) !important;
+  outline: 2px solid #17100A !important;
+  outline-offset: -4px !important;
 }
