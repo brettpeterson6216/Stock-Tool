@@ -213,7 +213,7 @@
    the wordmark and editorial headings only — it was appearing inside data
    cards next to mono figures, which is three voices in one box. */
 :is(#il-system, html) :is(#il-system, body) {
-  font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  font-family: "Plus Jakarta Sans", "PJS Fallback", ui-sans-serif, system-ui, sans-serif;
   font-size: var(--t-body);
   font-weight: var(--w-regular);
   -webkit-font-smoothing: antialiased;
@@ -239,7 +239,7 @@
   .metric-label, .stat-label, .m-lbl, .il-shell-top span, .il-shell-ticker span,
   .chart-title, .il-learn-kicker, .tw-kicker, .ilr-ohlc i, .eyebrow
 ) {
-  font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif !important;
+  font-family: "Plus Jakarta Sans", "PJS Fallback", ui-sans-serif, system-ui, sans-serif !important;
   font-size: var(--t-micro) !important;
   font-weight: var(--w-semi) !important;
   letter-spacing: .08em !important;
@@ -248,7 +248,7 @@
 
 /* Headings: sans, tight, not serif. */
 :is(#il-system, html) :is(#il-system, body) :is(h1, h2, h3, h4, .app-section-title, .chart-title, .card-title) {
-  font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif !important;
+  font-family: "Plus Jakarta Sans", "PJS Fallback", ui-sans-serif, system-ui, sans-serif !important;
   font-weight: var(--w-bold) !important;
   letter-spacing: -.015em !important;
   line-height: 1.2 !important;
@@ -310,7 +310,7 @@
 /* One typeface across the frame. The nav was rendering DM Sans while the
    workspace beneath it rendered Plus Jakarta Sans. */
 :is(#il-system, html) :is(#il-system, body) :is(nav, #main-nav, .app-sidebar, footer, .mobile-bottom-nav) :is(a, span, button, div, strong, em, input) {
-  font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif !important;
+  font-family: "Plus Jakarta Sans", "PJS Fallback", ui-sans-serif, system-ui, sans-serif !important;
 }
 
 /* Nav tabs: quiet by default, and the active one is marked ONCE — a gold rule
@@ -363,7 +363,7 @@
   border-radius: var(--r-sm) !important;
   background: color-mix(in srgb, var(--il-bg, #0B0D12) 55%, transparent) !important;
   box-shadow: none !important;
-  font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif !important;
+  font-family: "Plus Jakarta Sans", "PJS Fallback", ui-sans-serif, system-ui, sans-serif !important;
   font-size: var(--t-body) !important;
 }
 
@@ -960,4 +960,30 @@
   transform: translateY(0) !important;
   outline: 2px solid #17100A !important;
   outline-offset: -4px !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   21. FALLBACK FONT METRICS — kill the first-paint reflow.
+
+   Measured, not guessed: with webfonts blocked, the landing h1 rendered at
+   356px / 6 lines; with Plus Jakarta Sans loaded it renders 237px / 4 lines.
+   That 119px collapse was the entire CLS of 0.153 — every element below the
+   headline jumped up when the font swapped in.
+
+   The old stack fell back to `ui-sans-serif, system-ui`, whose metrics vary by
+   platform and are nowhere near Plus Jakarta's. Declaring an explicit fallback
+   built on Arial/Liberation Sans — present on effectively every platform — and
+   overriding its metrics makes the pre-swap layout occupy the same space, so
+   nothing moves when the real font arrives.
+
+   size-adjust was solved empirically by sweeping values until the fallback h1
+   matched 237px; the match plateau was 96-108%, so 100% sits in its middle.
+   ═══════════════════════════════════════════════════════════════════════════ */
+@font-face {
+  font-family: 'PJS Fallback';
+  src: local('Arial'), local('Liberation Sans'), local('Helvetica Neue'), local('Helvetica');
+  size-adjust: 100%;
+  ascent-override: 105%;
+  descent-override: 26%;
+  line-gap-override: 0%;
 }
