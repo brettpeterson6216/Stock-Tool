@@ -987,3 +987,134 @@
   descent-override: 26%;
   line-gap-override: 0%;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   22. LANDING — DISPLAY TYPE AND FEATURE RAIL
+
+   Direction taken from the reference: a high-contrast display serif against
+   the sans body, a letterspaced wordmark, and a dense hairline-separated
+   feature rail instead of loose pill chips.
+
+   Instrument Serif was already self-hosted, so the serif costs no new bytes.
+   It only runs at display sizes - body copy, data and UI stay on Plus Jakarta
+   and JetBrains Mono, because a serif at 15px in a data table is a legibility
+   loss, not a premium signal.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Metric-matched fallback for the display serif, same technique as §21 —
+   Georgia is the nearest ubiquitous serif and is what the stack falls back to
+   anyway; overriding its metrics keeps the headline from reflowing. The
+   size-adjust value is solved empirically, see the harness note in §21. */
+@font-face {
+  font-family: 'IS Fallback';
+  src: local('Georgia'), local('Times New Roman'), local('Liberation Serif');
+  size-adjust: 100%;
+  ascent-override: 96%;
+  descent-override: 24%;
+  line-gap-override: 0%;
+}
+
+/* ── wordmark ─────────────────────────────────────────────────────────────── */
+:is(#il-system, html) :is(#il-system, body) #main-nav .nav-logo > span {
+  font-family: "Plus Jakarta Sans", "PJS Fallback", ui-sans-serif, sans-serif !important;
+  text-transform: uppercase !important;
+  letter-spacing: .17em !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  line-height: 1 !important;
+}
+:is(#il-system, html) :is(#il-system, body) #main-nav .nav-logo > span em {
+  font-style: normal !important;
+  margin-left: .17em !important;
+}
+:is(#il-system, html) :is(#il-system, body) #main-nav .nav-logo img {
+  box-shadow: 0 0 0 1px rgba(216,154,55,.42) !important;
+}
+
+/* ── display headline ─────────────────────────────────────────────────────── */
+:is(#il-system, html) :is(#il-system, body) h1.il-display {
+  font-family: "Instrument Serif", "IS Fallback", Georgia, serif !important;
+  font-weight: 400 !important;
+  font-size: clamp(38px, 4.4vw, 62px) !important;
+  line-height: 1.06 !important;
+  letter-spacing: -0.5px !important;
+  text-wrap: balance;
+  margin: 0 0 18px !important;
+}
+:is(#il-system, html) :is(#il-system, body) h1.il-display .il-d1 { display: block; }
+:is(#il-system, html) :is(#il-system, body) h1.il-display .il-d2 {
+  display: block;
+  color: var(--gold-d, #D89A37) !important;
+  -webkit-text-fill-color: var(--gold-d, #D89A37) !important;
+  font-style: italic !important;
+}
+
+/* ── feature rail ─────────────────────────────────────────────────────────── */
+:is(#il-system, html) :is(#il-system, body) .il-rail {
+  /* Spans the whole hero, not just the copy column — the rail is a summary of
+     the product, so it reads across the full measure like the reference. */
+  grid-column: 1 / -1 !important;
+  /* Auto-placement drops a full-width item into the first row that can hold
+     it, which put the rail above the headline. order pins it last. */
+  order: 99 !important;
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  gap: 0 !important;
+  margin: 44px 0 0 !important;
+  padding-top: 0 !important;
+  border-top: 1px solid var(--border, rgba(255,255,255,.075)) !important;
+}
+@media (min-width: 961px) {
+  :is(#il-system, html) :is(#il-system, body) .il-landing-hero { row-gap: 0 !important; }
+}
+:is(#il-system, html) :is(#il-system, body) .il-rail-item {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 5px !important;
+  padding: 20px 22px 4px 0 !important;
+  border-right: 1px solid var(--border, rgba(255,255,255,.075)) !important;
+}
+:is(#il-system, html) :is(#il-system, body) .il-rail-item:last-child { border-right: 0 !important; }
+:is(#il-system, html) :is(#il-system, body) .il-rail-item > i {
+  font-size: 17px !important;
+  color: var(--gold-d, #D89A37) !important;
+  margin-bottom: 3px !important;
+}
+:is(#il-system, html) :is(#il-system, body) .il-rail-item > b {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  letter-spacing: .01em !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  flex-wrap: wrap !important;
+}
+:is(#il-system, html) :is(#il-system, body) .il-rail-item > span {
+  font-size: 12px !important;
+  line-height: 1.45 !important;
+  color: var(--ink3, #B4B0A8) !important;
+}
+/* A slot with no data behind it says so, rather than showing invented numbers. */
+:is(#il-system, html) :is(#il-system, body) .il-rail-item > b em {
+  font-style: normal !important;
+  font-family: "JetBrains Mono", ui-monospace, monospace !important;
+  font-size: 9px !important;
+  letter-spacing: .09em !important;
+  text-transform: uppercase !important;
+  padding: 2px 6px !important;
+  border-radius: 999px !important;
+  border: 1px solid var(--border, rgba(255,255,255,.14)) !important;
+  color: var(--ink3, #B4B0A8) !important;
+}
+:is(#il-system, html) :is(#il-system, body) .il-rail-item.is-soon > i { opacity: .5 !important; }
+
+@media (max-width: 760px) {
+  :is(#il-system, html) :is(#il-system, body) .il-rail {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  :is(#il-system, html) :is(#il-system, body) .il-rail-item {
+    padding: 14px 14px 14px 0 !important;
+    border-bottom: 1px solid var(--border, rgba(255,255,255,.075)) !important;
+  }
+  :is(#il-system, html) :is(#il-system, body) .il-rail-item:nth-child(2n) { border-right: 0 !important; }
+}

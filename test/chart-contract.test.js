@@ -491,7 +491,11 @@ test("expanded charts look premium and support seamless annotation", () => {
 test("homepage defaults to a beginner-friendly landing page before market tools", () => {
   assert.match(html, /id="landing-page"/);
   assert.match(html, /<div class="home-shell" id="market-page" style="display:none;">/);
-  assert.match(html, /See what a stock&rsquo;s price assumes\. Test whether the business can deliver/);
+  // The headline is split across two spans so the second sentence can carry the
+  // display accent, so assert the sentences rather than one contiguous string.
+  assert.match(html, /<h1[^>]*class="[^"]*il-display/);
+  assert.match(html, /See what a stock&rsquo;s price assumes\./);
+  assert.match(html, /Test whether the business can deliver\./);
   assert.match(html, /Start with a 7-day free trial/);
   assert.match(html, /Start 7-day free trial/);
   assert.match(html, /class="il-hero-mock" role="img"/);
