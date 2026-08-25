@@ -495,7 +495,11 @@ test("homepage defaults to a beginner-friendly landing page before market tools"
   // display accent, so assert the sentences rather than one contiguous string.
   assert.match(html, /<h1[^>]*class="[^"]*il-display/);
   assert.match(html, /See what a stock&rsquo;s price assumes\./);
-  assert.match(html, /Test whether the business can deliver\./);
+  // The closing phrase is wrapped in <em> so it can carry the gold accent.
+  assert.match(html, /Test whether the <em>business can deliver\.<\/em>/);
+  // The live market strip renders /api/market/movers, so the hook must exist.
+  assert.match(html, /id="il-movers"/);
+  assert.match(html, /landing-market\.js/);
   assert.match(html, /Start with a 7-day free trial/);
   assert.match(html, /Start 7-day free trial/);
   assert.match(html, /class="il-hero-mock" role="img"/);

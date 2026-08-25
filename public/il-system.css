@@ -1044,9 +1044,17 @@
 :is(#il-system, html) :is(#il-system, body) h1.il-display .il-d1 { display: block; }
 :is(#il-system, html) :is(#il-system, body) h1.il-display .il-d2 {
   display: block;
+  /* Upright, in the body ink — the reference accents only the closing phrase,
+     not the whole sentence. A full italic gold sentence reads as decoration;
+     a short gold phrase reads as emphasis. */
+  color: var(--ink, #F2F0EB) !important;
+  -webkit-text-fill-color: var(--ink, #F2F0EB) !important;
+  font-style: normal !important;
+}
+:is(#il-system, html) :is(#il-system, body) h1.il-display .il-d2 em {
+  font-style: normal !important;
   color: var(--gold-d, #D89A37) !important;
   -webkit-text-fill-color: var(--gold-d, #D89A37) !important;
-  font-style: italic !important;
 }
 
 /* ── feature rail ─────────────────────────────────────────────────────────── */
@@ -1117,4 +1125,195 @@
     border-bottom: 1px solid var(--border, rgba(255,255,255,.075)) !important;
   }
   :is(#il-system, html) :is(#il-system, body) .il-rail-item:nth-child(2n) { border-right: 0 !important; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   23. HERO CTA PAIR + LIVE MARKET STRIP
+
+   Matches the reference's two-button hero (solid accent + ghost) and the
+   data strip beneath it. The strip is real: it renders /api/market/movers,
+   the free unmetered endpoint. The options card next to it is explicitly
+   labelled "coming soon" because no options provider is wired up — an empty
+   card that says so beats a full one showing invented sweeps.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── CTA pair ─────────────────────────────────────────────────────────────── */
+:is(#il-system, html) :is(#il-system, body) .il-cta-pair {
+  display: flex !important;
+  gap: 12px !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+}
+:is(#il-system, html) :is(#il-system, body) a.il-cta-solid {
+  background: linear-gradient(180deg, #E3B25A, #C9922F) !important;
+  color: #17130B !important;
+  -webkit-text-fill-color: #17130B !important;
+  border: 0 !important;
+  border-radius: 8px !important;
+  padding: 13px 22px !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  letter-spacing: .01em !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 9px !important;
+  text-decoration: none !important;
+  box-shadow: 0 1px 0 rgba(255,255,255,.28) inset, 0 8px 22px -12px rgba(201,146,47,.85) !important;
+}
+:is(#il-system, html) :is(#il-system, body) button.il-cta-ghost {
+  background: transparent !important;
+  color: var(--ink, #F2F0EB) !important;
+  -webkit-text-fill-color: var(--ink, #F2F0EB) !important;
+  border: 1px solid var(--border, rgba(255,255,255,.16)) !important;
+  border-radius: 8px !important;
+  padding: 13px 20px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 9px !important;
+}
+:is(#il-system, html) :is(#il-system, body) button.il-cta-ghost > i { color: var(--gold-d, #D89A37) !important; }
+
+/* ── market strip ─────────────────────────────────────────────────────────── */
+:is(#il-system, html) :is(#il-system, body) .il-market-strip {
+  padding: 0 24px 8px !important;
+}
+:is(#il-system, html) :is(#il-system, body) .il-ms-inner {
+  max-width: 1180px !important;
+  margin: 0 auto !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr) !important;
+  gap: 14px !important;
+}
+:is(#il-system, html) :is(#il-system, body) .ilm-card {
+  border: 1px solid var(--border, rgba(255,255,255,.09)) !important;
+  border-radius: 8px !important;
+  padding: 16px 18px 12px !important;
+  background: var(--surface, rgba(255,255,255,.015)) !important;
+}
+:is(#il-system, html) :is(#il-system, body) .ilm-head {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  margin-bottom: 12px !important;
+}
+:is(#il-system, html) :is(#il-system, body) .ilm-title {
+  font-family: "JetBrains Mono", ui-monospace, monospace !important;
+  font-size: 10px !important;
+  letter-spacing: .13em !important;
+  text-transform: uppercase !important;
+  color: var(--ink3, #B4B0A8) !important;
+}
+:is(#il-system, html) :is(#il-system, body) .ilm-tabs { display: flex !important; gap: 2px !important; }
+:is(#il-system, html) :is(#il-system, body) .ilm-tab {
+  background: transparent !important;
+  border: 0 !important;
+  padding: 5px 10px !important;
+  border-radius: 6px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  color: var(--ink3, #B4B0A8) !important;
+  -webkit-text-fill-color: var(--ink3, #B4B0A8) !important;
+  cursor: pointer !important;
+  min-height: 28px !important;
+}
+:is(#il-system, html) :is(#il-system, body) .ilm-tab.on {
+  background: var(--border, rgba(255,255,255,.07)) !important;
+  color: var(--ink, #F2F0EB) !important;
+  -webkit-text-fill-color: var(--ink, #F2F0EB) !important;
+}
+:is(#il-system, html) :is(#il-system, body) .ilm-row {
+  display: grid !important;
+  grid-template-columns: 62px minmax(0,1fr) 72px 74px !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 9px 0 !important;
+  border-top: 1px solid var(--border, rgba(255,255,255,.055)) !important;
+  text-decoration: none !important;
+  min-height: 40px !important;
+}
+:is(#il-system, html) :is(#il-system, body) .ilm-row:first-child { border-top: 0 !important; }
+:is(#il-system, html) :is(#il-system, body) .ilm-sym {
+  font-family: "JetBrains Mono", ui-monospace, monospace !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  color: var(--ink, #F2F0EB) !important;
+  -webkit-text-fill-color: var(--ink, #F2F0EB) !important;
+}
+:is(#il-system, html) :is(#il-system, body) .ilm-name {
+  font-size: 12px !important;
+  color: var(--ink3, #B4B0A8) !important;
+  -webkit-text-fill-color: var(--ink3, #B4B0A8) !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+:is(#il-system, html) :is(#il-system, body) .ilm-price,
+:is(#il-system, html) :is(#il-system, body) .ilm-chg {
+  font-family: "JetBrains Mono", ui-monospace, monospace !important;
+  font-size: 12px !important;
+  text-align: right !important;
+}
+:is(#il-system, html) :is(#il-system, body) .ilm-price {
+  color: var(--ink2, #D2CFC8) !important;
+  -webkit-text-fill-color: var(--ink2, #D2CFC8) !important;
+}
+/* Financial semantics, muted rather than neon — these sit next to gold. */
+:is(#il-system, html) :is(#il-system, body) .ilm-chg.is-up {
+  color: #4BA97A !important; -webkit-text-fill-color: #4BA97A !important;
+}
+:is(#il-system, html) :is(#il-system, body) .ilm-chg.is-dn {
+  color: #C4614F !important; -webkit-text-fill-color: #C4614F !important;
+}
+html[data-theme="light"] :is(#il-system, body) .ilm-chg.is-up { color:#1F7A4D !important; -webkit-text-fill-color:#1F7A4D !important; }
+html[data-theme="light"] :is(#il-system, body) .ilm-chg.is-dn { color:#A3352A !important; -webkit-text-fill-color:#A3352A !important; }
+
+/* Loading rows keep the strip's height stable so nothing shifts on arrival. */
+:is(#il-system, html) :is(#il-system, body) .ilm-row.is-load > span {
+  height: 9px !important;
+  border-radius: 3px !important;
+  background: var(--border, rgba(255,255,255,.07)) !important;
+  animation: ilmPulse 1.5s ease-in-out infinite !important;
+}
+@keyframes ilmPulse { 0%,100% { opacity: .45 } 50% { opacity: .8 } }
+@media (prefers-reduced-motion: reduce) {
+  :is(#il-system, html) :is(#il-system, body) .ilm-row.is-load > span { animation: none !important; }
+}
+
+:is(#il-system, html) :is(#il-system, body) .ilm-more,
+:is(#il-system, html) :is(#il-system, body) .ilm-empty {
+  display: block !important;
+  margin-top: 12px !important;
+  padding-top: 10px !important;
+  border-top: 1px solid var(--border, rgba(255,255,255,.055)) !important;
+  font-size: 12px !important;
+  color: var(--ink3, #B4B0A8) !important;
+  -webkit-text-fill-color: var(--ink3, #B4B0A8) !important;
+  text-decoration: none !important;
+}
+:is(#il-system, html) :is(#il-system, body) .ilm-badge {
+  font-family: "JetBrains Mono", ui-monospace, monospace !important;
+  font-size: 9px !important;
+  letter-spacing: .09em !important;
+  text-transform: uppercase !important;
+  padding: 3px 7px !important;
+  border-radius: 999px !important;
+  border: 1px solid var(--border, rgba(255,255,255,.14)) !important;
+  color: var(--ink3, #B4B0A8) !important;
+  -webkit-text-fill-color: var(--ink3, #B4B0A8) !important;
+}
+:is(#il-system, html) :is(#il-system, body) .ilm-soon-copy {
+  font-size: 12px !important;
+  line-height: 1.55 !important;
+  color: var(--ink3, #B4B0A8) !important;
+  -webkit-text-fill-color: var(--ink3, #B4B0A8) !important;
+  margin: 0 !important;
+}
+
+@media (max-width: 900px) {
+  :is(#il-system, html) :is(#il-system, body) .il-ms-inner { grid-template-columns: 1fr !important; }
+  :is(#il-system, html) :is(#il-system, body) .ilm-row { grid-template-columns: 56px minmax(0,1fr) 68px !important; }
+  :is(#il-system, html) :is(#il-system, body) .ilm-price { display: none !important; }
 }
