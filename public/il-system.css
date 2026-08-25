@@ -1317,3 +1317,138 @@ html[data-theme="light"] :is(#il-system, body) .ilm-chg.is-dn { color:#A3352A !i
   :is(#il-system, html) :is(#il-system, body) .ilm-row { grid-template-columns: 56px minmax(0,1fr) 68px !important; }
   :is(#il-system, html) :is(#il-system, body) .ilm-price { display: none !important; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   24. HERO ILLUSTRATION — MAGNIFIER OVER THE TAPE
+
+   The signature image from the reference: a rising candle field with a gold
+   lens over it, magnifying the section underneath, plus a floating readout
+   and a quote panel.
+
+   The magnification is real geometry, not a picture of one — the same candle
+   group is drawn twice and the second copy is scaled about the lens centre
+   and clipped to the glass. Move the circle and the magnified region follows.
+
+   Everything here is an ILLUSTRATION and is labelled as such: the panel ends
+   in "Sample data" and the caption beneath already reads "Illustrative
+   workspace". No live number is implied.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:is(#il-system, html) :is(#il-system, body) .ihx-wrap {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 196px !important;
+  gap: 0 !important;
+  align-items: stretch !important;
+  border: 1px solid var(--border, rgba(255,255,255,.09)) !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  background: #0A0907 !important;
+  box-shadow: 0 30px 70px -40px rgba(0,0,0,.9) !important;
+}
+:is(#il-system, html) :is(#il-system, body) .ihx-stage {
+  position: relative !important;
+  min-height: 412px !important;
+  overflow: hidden !important;
+}
+:is(#il-system, html) :is(#il-system, body) .ihx-scene {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  position: absolute !important;
+  inset: 0 !important;
+}
+/* Candles are amber, not green/red. The reference keeps the whole tape in the
+   brand's gold family — a two-colour financial palette here would fight the
+   ring for attention and make the image read as a chart rather than an image.
+   Direction is carried by brightness instead: up candles sit lighter. */
+:is(#il-system, html) :is(#il-system, body) .ihx-candles .cd.up { fill: #CF9C41 !important; }
+:is(#il-system, html) :is(#il-system, body) .ihx-candles .cd.dn { fill: #8B6527 !important; }
+:is(#il-system, html) :is(#il-system, body) .ihx-candles .wk { stroke: rgba(216,175,110,.42) !important; stroke-width: 1.1 !important; }
+/* Inside the glass everything reads brighter — that is what magnifying does. */
+:is(#il-system, html) :is(#il-system, body) .ihx-mag .cd.up { fill: #F0CA77 !important; }
+:is(#il-system, html) :is(#il-system, body) .ihx-mag .cd.dn { fill: #97702E !important; }
+:is(#il-system, html) :is(#il-system, body) .ihx-mag .wk { stroke: rgba(245,220,170,.62) !important; stroke-width: .85 !important; }
+
+/* floating readout */
+:is(#il-system, html) :is(#il-system, body) .ihx-float {
+  position: absolute !important;
+  left: 18px !important; top: 92px !important;
+  width: 150px !important;
+  padding: 11px 13px 9px !important;
+  border-radius: 9px !important;
+  background: rgba(16,15,13,.90) !important;
+  border: 1px solid rgba(255,225,170,.20) !important;
+  box-shadow: 0 18px 40px -22px rgba(0,0,0,.95) !important;
+  display: grid !important;
+  gap: 2px !important;
+}
+:is(#il-system, html) :is(#il-system, body) .ihx-f-lbl {
+  font-family: "JetBrains Mono", ui-monospace, monospace !important;
+  font-size: 8.5px !important; letter-spacing: .11em !important; text-transform: uppercase !important;
+  color: rgba(232,226,214,.60) !important; -webkit-text-fill-color: rgba(232,226,214,.60) !important;
+}
+:is(#il-system, html) :is(#il-system, body) .ihx-f-val {
+  font-size: 25px !important; font-weight: 700 !important; line-height: 1.05 !important;
+  color: #F4F1EA !important; -webkit-text-fill-color: #F4F1EA !important;
+}
+:is(#il-system, html) :is(#il-system, body) .ihx-f-tag {
+  font-size: 10.5px !important; font-weight: 600 !important;
+  color: #6FBE95 !important; -webkit-text-fill-color: #6FBE95 !important;
+}
+:is(#il-system, html) :is(#il-system, body) .ihx-f-spark { width: 100% !important; height: 24px !important; margin-top: 3px !important; }
+:is(#il-system, html) :is(#il-system, body) .ihx-f-spark path { stroke: #D89A37 !important; stroke-width: 1.7 !important; }
+
+/* quote panel */
+:is(#il-system, html) :is(#il-system, body) .ihx-rail {
+  border-left: 1px solid rgba(255,255,255,.08) !important;
+  padding: 14px 14px 11px !important;
+  background: rgba(255,255,255,.018) !important;
+  display: flex !important; flex-direction: column !important; gap: 0 !important;
+}
+:is(#il-system, html) :is(#il-system, body) .ihx-r-top { display: flex !important; align-items: baseline !important; gap: 7px !important; }
+:is(#il-system, html) :is(#il-system, body) .ihx-r-sym {
+  font-family: "JetBrains Mono", ui-monospace, monospace !important;
+  font-size: 13px !important; font-weight: 700 !important;
+  color: #F4F1EA !important; -webkit-text-fill-color: #F4F1EA !important;
+}
+:is(#il-system, html) :is(#il-system, body) .ihx-r-name {
+  font-size: 9.5px !important; color: rgba(232,226,214,.52) !important; -webkit-text-fill-color: rgba(232,226,214,.52) !important;
+  overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important;
+}
+:is(#il-system, html) :is(#il-system, body) .ihx-r-price {
+  font-size: 27px !important; font-weight: 700 !important; line-height: 1.15 !important; margin-top: 6px !important;
+  color: #F4F1EA !important; -webkit-text-fill-color: #F4F1EA !important;
+}
+:is(#il-system, html) :is(#il-system, body) .ihx-r-chg {
+  font-family: "JetBrains Mono", ui-monospace, monospace !important;
+  font-size: 10.5px !important; margin-bottom: 10px !important;
+  color: #6FBE95 !important; -webkit-text-fill-color: #6FBE95 !important;
+}
+:is(#il-system, html) :is(#il-system, body) .ihx-r-row {
+  display: flex !important; flex-direction: column !important; gap: 1px !important;
+  padding: 8px 0 !important;
+  border-top: 1px solid rgba(255,255,255,.07) !important;
+}
+:is(#il-system, html) :is(#il-system, body) .ihx-r-row > span {
+  font-family: "JetBrains Mono", ui-monospace, monospace !important;
+  font-size: 8px !important; letter-spacing: .11em !important; text-transform: uppercase !important;
+  color: rgba(232,226,214,.50) !important; -webkit-text-fill-color: rgba(232,226,214,.50) !important;
+}
+:is(#il-system, html) :is(#il-system, body) .ihx-r-row > b {
+  font-size: 12px !important; font-weight: 600 !important;
+  color: #EDCB84 !important; -webkit-text-fill-color: #EDCB84 !important;
+}
+:is(#il-system, html) :is(#il-system, body) .ihx-r-foot {
+  margin-top: auto !important; padding-top: 9px !important;
+  font-family: "JetBrains Mono", ui-monospace, monospace !important;
+  font-size: 8px !important; letter-spacing: .12em !important; text-transform: uppercase !important;
+  color: rgba(232,226,214,.40) !important; -webkit-text-fill-color: rgba(232,226,214,.40) !important;
+}
+
+@media (max-width: 900px) {
+  :is(#il-system, html) :is(#il-system, body) .ihx-wrap { grid-template-columns: 1fr !important; }
+  :is(#il-system, html) :is(#il-system, body) .ihx-rail {
+    border-left: 0 !important; border-top: 1px solid rgba(255,255,255,.08) !important;
+  }
+  :is(#il-system, html) :is(#il-system, body) .ihx-stage { min-height: 260px !important; }
+  :is(#il-system, html) :is(#il-system, body) .ihx-float { left: 12px !important; top: 60px !important; width: 132px !important; }
+}

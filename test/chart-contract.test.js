@@ -502,7 +502,7 @@ test("homepage defaults to a beginner-friendly landing page before market tools"
   assert.match(html, /landing-market\.js/);
   assert.match(html, /Start with a 7-day free trial/);
   assert.match(html, /Start 7-day free trial/);
-  assert.match(html, /class="il-hero-mock" role="img"/);
+  assert.match(html, /class="il-hero-mock[^"]*" role="img"/);
   assert.match(html, /Illustrative workspace/);
   assert.match(html, /Discount codes accepted/);
   assert.doesNotMatch(html, /id="landingChartFill"/);
@@ -619,8 +619,13 @@ test("landing visuals are honest CSS-built illustrations, not fake screenshots",
   assert.doesNotMatch(html, /landing-workflow-strip/);
   assert.doesNotMatch(html, /hero-process\.png/);
   assert.doesNotMatch(html, /has-hero-banner/);
-  assert.match(html, /class="il-hero-mock" role="img"/);
-  assert.match(html, /Illustration of the Implied Lens research workspace/);
+  assert.match(html, /class="il-hero-mock[^"]*" role="img"/);
+  // The hero is still a built illustration, not a screenshot, and still says so.
+  assert.match(html, /aria-label="Illustration: a rising price chart under a magnifying lens/);
+  // Strengthened: the illustrative quote panel must be labelled as sample data,
+  // and the hero must not smuggle in a raster screenshot.
+  assert.match(html, /class="ihx-r-foot">Sample data</);
+  assert.doesNotMatch(html, /<img[^>]+class="[^"]*ihx/);
   assert.match(html, /class="il-workflow-panels"/);
   assert.match(html, /\/landing-polish\.css\?v=/);
   assert.match(landingPolishCss, /#landing-page\.il-landing \{[\s\S]*padding: 0 !important/);
