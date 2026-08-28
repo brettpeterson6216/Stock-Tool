@@ -56,6 +56,7 @@
     if (tool) tool.style.display = 'none';
     if (home) home.style.display = 'block';
     const nav = document.getElementById('main-nav'); if(nav) nav.setAttribute('data-view','home');
+    document.body.classList.remove('il-tool-active');
     setHomeMode('landing');
     history.replaceState(null, '', '/');
   }
@@ -66,6 +67,7 @@
     if (tool) tool.style.display = 'none';
     if (home) home.style.display = 'block';
     const nav = document.getElementById('main-nav'); if(nav) nav.setAttribute('data-view','home');
+    document.body.classList.remove('il-tool-active');
     setHomeMode('market');
     history.replaceState(null, '', '/?view=home&market=1');
     if (typeof initializeHomeDashboard === 'function') initializeHomeDashboard();
@@ -80,6 +82,7 @@
       const activeSection = new URLSearchParams(window.location.search).get('section');
       history.replaceState(null, '', '/?view=tool' + (activeSection ? '&section=' + encodeURIComponent(activeSection) : ''));
       const nav = document.getElementById('main-nav'); if(nav) nav.setAttribute('data-view','tool');
+      document.body.classList.add('il-tool-active');
       document.querySelectorAll('.nav-tab').forEach(a => a.classList.remove('active-tab'));
       var _sec = activeSection || document.getElementById('view-tool')?.getAttribute('data-active-section') || 'analyze';
       var _grp = (typeof navGroupOf==='function') ? navGroupOf(_sec) : 'research';

@@ -106,6 +106,7 @@
 <link href="/chart-engine.css?v=20260825-4" rel="stylesheet">
 <link rel="stylesheet" href="/premium-revamp.css?v=20260825-4">
 <link rel="stylesheet" href="/il-system.css?v=20260827-4">
+<link rel="stylesheet" href="/lens-prime-v2.css?v=20260828-6">
 <script defer src="/premium-motion.js?v=20260825-4"></script>
 </head>
 <body class="il-product-page">
@@ -119,7 +120,7 @@
     <span>Implied<em style="font-style:italic;color:var(--gold-d);">Lens</em></span>
   </a>
   <div class="nav-links" id="nav-links">
-    <a href="/" id='nav-home' class="nav-tab active-tab" onclick="navGoTo('home');return false;">Home</a>
+    <a href="/" id='nav-home' class="nav-tab active-tab" onclick="navGoTo('home');return false;">Dashboard</a>
     <a href="/?view=tool&amp;section=analyze" id="nav-analyze" class="nav-tab" onclick="navGoTo('analyze');return false;">Research</a>
     <a href="/lens-score" id="nav-lensscore-link" class="nav-tab" onclick="return navGoLensScore(this,event);">LensScore</a>
     <a href="/?view=tool&amp;section=projection" id="nav-project" class="nav-tab" onclick="navGoTo('projection');return false;">Scenarios</a>
@@ -168,7 +169,7 @@
       </div>
     </div>
   </div>
-  <script defer src="/app-navigation.js?v=20260825-4"></script>
+  <script defer src="/app-navigation.js?v=20260828-1"></script>
 <script defer src="/landing-market.js?v=20260825-4"></script>
 </nav>
 
@@ -394,9 +395,9 @@
       <div class="il-preview-caption"><span>Illustrative workspace</span><strong>Open any real ticker free</strong></div>
     </div>
     <div class="il-landing-copy">
-      <span class="il-landing-kicker">Try it on a real ticker — no account needed</span>
-      <h1 class="il-display"><span class="il-d1">See what a stock&rsquo;s price assumes.</span> <span class="il-d2">Test whether the <em>business can deliver.</em></span></h1>
-      <p>Implied Lens connects company fundamentals, market expectations, editable scenarios, and valuation in one explainable research workflow. Understand the business first, then test what could make the stock outperform or disappoint.</p>
+      <span class="il-landing-kicker">Research the expectation, not just the ticker</span>
+      <h1 class="il-display"><span class="il-d1">Find the edge.</span> <span class="il-d2">See the <em>bigger picture.</em></span></h1>
+      <p>Implied Lens brings price action, business quality, priced-in expectations, scenarios, and valuation into one focused research terminal&mdash;so you can see what the market expects before you decide what you believe.</p>
       <div class="il-landing-actions il-cta-pair">
         <a class="il-landing-secondary il-cta-solid" id="il-hero-secondary" href="/signup">Start free trial <i class="ti ti-arrow-right" aria-hidden="true"></i></a>
         <button type="button" id="il-hero-primary" class="il-landing-primary il-cta-ghost" onclick="heroLoadTicker('AAPL')"><i class="ti ti-player-play" aria-hidden="true"></i> See how it works</button>
@@ -407,9 +408,10 @@
         <button type="button" onclick="landingSearch()">Analyze</button>
       </div>
       <div class="il-trust" aria-label="Data sources and terms">
-        <span><i class="ti ti-file-certificate"></i>SEC EDGAR filings</span>
+        <span class="il-trust-lead">Built on visible sources</span>
+        <span><i class="ti ti-file-certificate"></i>SEC EDGAR</span>
         <span class="il-trust-dot" aria-hidden="true">·</span>
-        <span><i class="ti ti-broadcast"></i>Latest available market data</span>
+        <span><i class="ti ti-broadcast"></i>Market providers</span>
         <span class="il-trust-dot" id="il-trust-nocard-dot" aria-hidden="true">·</span>
         <span id="il-trust-nocard"><i class="ti ti-credit-card-off"></i>No credit card to start</span>
       </div>
@@ -465,6 +467,15 @@
       <div class="ilm-card ilm-soon" aria-label="Options flow, not yet available">
         <div class="ilm-head"><span class="ilm-title">Options flow</span><span class="ilm-badge">Coming soon</span></div>
         <p class="ilm-soon-copy">Unusual activity, implied move and IV rank will appear here once an options data provider is wired up. Nothing is shown until the numbers are real.</p>
+      </div>
+      <div class="ilm-card ilm-prime-method" aria-label="Implied Lens research workflow">
+        <div class="ilm-head"><span class="ilm-title">The Lens workflow</span><span class="ilm-badge live">Explainable</span></div>
+        <div class="ilm-method-list">
+          <span><i class="ti ti-building-bank"></i><b>Business</b><em>What is happening?</em></span>
+          <span><i class="ti ti-focus-2"></i><b>Expectations</b><em>What is priced in?</em></span>
+          <span><i class="ti ti-adjustments"></i><b>Scenarios</b><em>What could change?</em></span>
+          <span><i class="ti ti-target-arrow"></i><b>Valuation</b><em>What could it be worth?</em></span>
+        </div>
       </div>
     </div>
   </section>
@@ -887,6 +898,18 @@
   <div class="app-shell">
     <!-- ── Left sidebar ── -->
     <div class="app-sidebar">
+      <a class="prime-sidebar-brand" href="/" onclick="navGoTo('home');return false;" aria-label="Implied Lens dashboard">
+        <img src="/logo.svg?v=3" alt="">
+        <span>IMPLIED LENS</span>
+      </a>
+      <nav class="prime-side-global" aria-label="Primary workspace navigation">
+        <a href="/" onclick="navGoTo('home');return false;"><i class="ti ti-layout-dashboard"></i><span>Dashboard</span></a>
+        <a class="active" href="/?view=tool&amp;section=analyze" onclick="navGoTo('analyze');return false;"><i class="ti ti-chart-candle"></i><span>Research</span></a>
+        <a href="/lens-score"><i class="ti ti-focus-2"></i><span>LensScore</span></a>
+        <a href="/?view=tool&amp;section=projection" onclick="navGoTo('projection');return false;"><i class="ti ti-chart-dots-3"></i><span>Scenarios</span></a>
+        <a href="/?view=tool&amp;section=workspace" onclick="navGoTo('workspace');return false;"><i class="ti ti-bookmark"></i><span>Watchlists</span></a>
+      </nav>
+      <div class="prime-side-section">Research tools</div>
       <!-- One panel per top-level tab: items are shown/hidden by renderSidebarGroup()
            so the left panel never navigates across top-level tabs. -->
       <div class="sb-group-pad">

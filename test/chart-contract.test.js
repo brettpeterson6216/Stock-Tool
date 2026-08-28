@@ -514,12 +514,12 @@ test("expanded charts look premium and support seamless annotation", () => {
 test("homepage defaults to a beginner-friendly landing page before market tools", () => {
   assert.match(html, /id="landing-page"/);
   assert.match(html, /<div class="home-shell" id="market-page" style="display:none;">/);
-  // The headline is split across two spans so the second sentence can carry the
-  // display accent, so assert the sentences rather than one contiguous string.
+  // The Lens Prime headline is split across two spans so the second line can
+  // carry the gold editorial accent.
   assert.match(html, /<h1[^>]*class="[^"]*il-display/);
-  assert.match(html, /See what a stock&rsquo;s price assumes\./);
-  // The closing phrase is wrapped in <em> so it can carry the gold accent.
-  assert.match(html, /Test whether the <em>business can deliver\.<\/em>/);
+  assert.match(html, /Find the edge\./);
+  assert.match(html, /See the <em>bigger picture\.<\/em>/);
+  assert.match(html, /lens-prime-v2\.css/);
   // The live market strip renders /api/market/movers, so the hook must exist.
   assert.match(html, /id="il-movers"/);
   assert.match(html, /landing-market\.js/);
