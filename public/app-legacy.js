@@ -4780,7 +4780,8 @@ document.addEventListener('DOMContentLoaded', function(){ setTimeout(syncMobileA
 document.addEventListener('click', function(e) {
   const menu = document.getElementById('mobile-more-menu');
   const btn  = document.getElementById('mbn-more');
-  if (menu && menu.classList.contains('open') && !menu.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+  const primeMenuButton = e.target.closest && e.target.closest('.prime-nav-menu,.prime-mobile-appbar button');
+  if (menu && menu.classList.contains('open') && !menu.contains(e.target) && e.target !== btn && !btn.contains(e.target) && !primeMenuButton) {
     menu.classList.remove('open');
   }
   // Pro gate upgrade CTAs (dynamically injected .js-pgc-upgrade buttons)

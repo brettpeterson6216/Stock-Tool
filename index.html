@@ -108,6 +108,7 @@
 <link rel="stylesheet" href="/il-system.css?v=20260827-4">
 <link rel="stylesheet" href="/lens-prime-v2.css?v=20260828-6">
 <link rel="stylesheet" href="/lens-prime-exact.css?v=20260828-1">
+<link rel="stylesheet" href="/lens-prime-shared.css?v=20260828-3">
 <script defer src="/premium-motion.js?v=20260825-4"></script>
 </head>
 <body class="il-product-page">
@@ -146,6 +147,7 @@
         <span class="theme-toggle-thumb"></span>
       </span>
     </button>
+    <button class="prime-nav-menu" type="button" aria-label="Open navigation" onclick="_toggleMobileMenu()"><span aria-hidden="true">☰</span></button>
     <button class="nav-acct-mobile" id="nav-acct-mobile" type="button" aria-label="Account" title="Account" onclick="navAccountTap()"><i class="ti ti-user-circle"></i></button>
     <span class="nav-live" title="ImpliedLens is live">Live</span>
     <a class="btn-nav-outline" id="nav-login" href="/login">Log in</a>
@@ -933,6 +935,10 @@
        the workspace already shows its section name visually. -->
   <h1 class="il-sr-only" id="il-tool-heading">Research workspace</h1>
   <div class="app-shell">
+    <div class="prime-mobile-appbar">
+      <a href="/" onclick="navGoTo('home');return false;"><img src="/logo.svg?v=3" alt=""><span>IMPLIED LENS</span></a>
+      <button type="button" aria-label="Open research navigation" onclick="_toggleMobileMenu()"><span aria-hidden="true">☰</span></button>
+    </div>
     <!-- ── Left sidebar ── -->
     <div class="app-sidebar">
       <a class="prime-sidebar-brand" href="/" onclick="navGoTo('home');return false;" aria-label="Implied Lens dashboard">
@@ -1880,7 +1886,7 @@
   <button onclick="document.getElementById('verif-banner').style.display='none';document.body.classList.remove('has-verif-banner')" style="background:none;border:none;color:rgba(237,232,224,.35);cursor:pointer;font-size:1rem;line-height:1;padding:0 .25rem;">✕</button>
 </div>
 
-<script defer src="/app-legacy.js?v=20260827-1"></script>
+<script defer src="/app-legacy.js?v=20260828-2"></script>
 
 <!-- ── Mobile Bottom Navigation ── -->
 <nav class="mobile-bottom-nav" id="mobile-bottom-nav" aria-label="Mobile navigation">
