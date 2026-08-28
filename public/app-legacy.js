@@ -2014,6 +2014,8 @@ async function fetchAndRender() {
   document.getElementById('analyze-loading').style.display='flex';
   document.getElementById('analyze-error').style.display='none';
   document.getElementById('stock-result').style.display='none';
+  document.getElementById('body-analyze')?.classList.remove('has-stock');
+  document.getElementById('view-tool')?.classList.remove('has-stock');
   track('analyze_started', { ticker });
   try {
     const result=await yahooFetch(ticker,S.range);
@@ -2239,6 +2241,8 @@ function renderStock(result, ticker) {
   })();
 
   // Chart.js must measure a visible container; reveal results before creating canvases.
+  document.getElementById('body-analyze')?.classList.add('has-stock');
+  document.getElementById('view-tool')?.classList.add('has-stock');
   document.getElementById('stock-result').style.display='block';
   buildPriceChart(aligned.result,c,ts);
   buildRSIChart(rsiVals,ts);

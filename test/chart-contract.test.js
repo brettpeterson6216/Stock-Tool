@@ -9,6 +9,8 @@ const indexHtml = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf
 const themeBootstrapJs = fs.readFileSync(path.join(__dirname, "..", "public", "theme-bootstrap.js"), "utf8");
 const appNavigationJs = fs.readFileSync(path.join(__dirname, "..", "public", "app-navigation.js"), "utf8");
 const appLegacyJs = fs.readFileSync(path.join(__dirname, "..", "public", "app-legacy.js"), "utf8");
+const shareStudioJs = fs.readFileSync(path.join(__dirname, "..", "public", "share-studio.js"), "utf8");
+const ilSystemCss = fs.readFileSync(path.join(__dirname, "..", "public", "il-system.css"), "utf8");
 // Contract tests historically inspected index.html when the application code
 // was inline. Preserve that coverage across the external-module boundary.
 const html = `${indexHtml}\n${themeBootstrapJs}\n${appNavigationJs}\n${appLegacyJs}`;
@@ -51,6 +53,27 @@ const publicShellPages = [
 ].map(file => [file, fs.readFileSync(path.join(__dirname, "..", "public", file), "utf8")]);
 const stockLandingRoute = fs.readFileSync(path.join(__dirname, "..", "routes", "stock-landing.js"), "utf8");
 const htmlAndLegacyCss = `${html}\n${legacyCss}`;
+
+test("Share Studio exports an honest, branded social research frame", () => {
+  assert.match(indexHtml, /share-studio\.js\?v=20260827-2/);
+  assert.match(indexHtml, /id="share-studio-canvas" width="1600" height="900"/);
+  assert.match(indexHtml, /onclick="openShareStudio\(\)"/);
+  assert.match(shareStudioJs, /window\.__ilChart\?\.chart/);
+  assert.match(shareStudioJs, /chart\.takeScreenshot\(\)/);
+  assert.match(shareStudioJs, /canvas\.toDataURL\("image\/png"/);
+  assert.match(shareStudioJs, /Educational research · Not investment advice/);
+  assert.match(shareStudioJs, /quote-source/);
+  assert.match(ilSystemCss, /Share Studio — a native publishing surface/);
+});
+
+test("research terminal switches cleanly between discovery and loaded-company layouts", () => {
+  assert.match(appLegacyJs, /classList\.remove\('has-stock'\)/);
+  assert.match(appLegacyJs, /classList\.add\('has-stock'\)/);
+  assert.match(ilSystemCss, /#view-tool:not\(\.has-stock\) \.app-chart-toolbar/);
+  assert.match(ilSystemCss, /#body-analyze:not\(\.has-stock\) > \.tool-welcome \{[\s\S]*grid-row: 1 \/ span 2/);
+  assert.match(ilSystemCss, /#body-analyze\.has-stock > #tool-welcome/);
+  assert.match(ilSystemCss, /#body-analyze:not\(\.has-stock\) > \.tool-welcome > \.il-onboarding \{[\s\S]*display: none/);
+});
 
 test("chart rebuilds keep prices and timestamps on one aligned series", () => {
   assert.match(html, /function rebuildPriceChart\(\)/);
@@ -268,8 +291,8 @@ test("primary navigation avoids duplicate tool destinations", () => {
   assert.match(html, /id="nav-analyze" class="nav-tab"[^>]*>Research</);
   assert.match(html, /<div class="sb-group-label">Research<\/div>/);
   assert.match(html, /<span class="sb-item-label">Chart<\/span>/);
-  assert.match(html, /Research any company with a process you can repeat\./);
-  assert.match(html, /Search a company to begin, or start with a popular name below\./);
+  assert.match(html, /Find what the price already assumes\./);
+  assert.match(html, /Start with a company, then move from reported fundamentals/);
   assert.match(html, /Popular starting points/);
   assert.match(html, /id="nav-lensscore-link"[^>]*class="nav-tab"[^>]*>LensScore/);
 });

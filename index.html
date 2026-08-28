@@ -95,6 +95,7 @@
 <script defer src="/chart-analysis.js?v=20260825-4"></script>
 <script defer src="/hero-chart.js?v=20260825-4"></script>
 <script defer src="/tool-launch.js?v=20260825-4"></script>
+<script defer src="/share-studio.js?v=20260827-2"></script>
 <link href="/legacy-app.css?v=20260825-4" rel="stylesheet">
 <link href="/premium.css?v=20260825-4" rel="stylesheet">
 <link href="/release-polish.css?v=20260825-4" rel="stylesheet">
@@ -104,7 +105,7 @@
 <link href="/beauty-system.css?v=20260825-4" rel="stylesheet">
 <link href="/chart-engine.css?v=20260825-4" rel="stylesheet">
 <link rel="stylesheet" href="/premium-revamp.css?v=20260825-4">
-<link rel="stylesheet" href="/il-system.css?v=20260825-4">
+<link rel="stylesheet" href="/il-system.css?v=20260827-4">
 <script defer src="/premium-motion.js?v=20260825-4"></script>
 </head>
 <body class="il-product-page">
@@ -926,7 +927,8 @@
         <div class="ash-actions">
           <button class="ash-btn" title="Add to watchlist" aria-label="Add to watchlist" onclick="if(S.ticker&amp;&amp;window.openWorkspaceWatchlist)openWorkspaceWatchlist()"><i class="ti ti-star"></i>Watch</button>
           <button class="ash-btn" title="Save analysis" aria-label="Save analysis" onclick="if(S.ticker)saveAnalysis('price')"><i class="ti ti-bookmark"></i>Save</button>
-          <button class="ash-btn" title="Export analysis" aria-label="Export analysis" onclick="window.print()"><i class="ti ti-download"></i>Export</button>
+          <button class="ash-btn ash-studio" title="Create a branded chart image" aria-label="Open Share Studio" onclick="openShareStudio()"><i class="ti ti-camera"></i>Studio</button>
+          <button class="ash-btn" title="Export full research report" aria-label="Export analysis" onclick="window.print()"><i class="ti ti-file-export"></i>Report</button>
         </div>
       </div>
       <!-- Chart toolbar (analyze section only) -->
@@ -984,9 +986,9 @@
           <div class="app-section open" id="sec-analyze"><div class="acc-body" id="body-analyze">
 <div class="tool-welcome" id="tool-welcome">
             <div class="tw-welcome-copy">
-              <div class="tw-kicker">Research workspace</div>
-              <div class="tw-title">Research any company with a process you can repeat.</div>
-              <div class="tw-sub">Live charts, SEC-sourced financials, valuation and projection models, and a decision workspace — for any ticker. Search a company to begin, or start with a popular name below.</div>
+              <div class="tw-kicker">Implied Lens terminal</div>
+              <div class="tw-title">Find what the price already assumes.</div>
+              <div class="tw-sub">Start with a company, then move from reported fundamentals to priced-in expectations, technical setup, scenarios, valuation, and a saved decision.</div>
               <div class="search-row">
                 <input class="ticker-input" id="main-ticker" type="text" aria-label="Company ticker" placeholder="Try AAPL, TSLA, NVDA, SPY…" value="">
                 <button class="btn-search" id="search-btn" onclick="fetchAndRender()">Analyze →</button>
@@ -995,7 +997,7 @@
             </div>
             </div>
             <!-- Featured stocks grid (shown before search) -->
-            <div class="fg-label" id="fg-label">Popular starting points</div>
+            <div class="fg-label" id="fg-label"><span>Live watchboard</span><small>Popular starting points</small></div>
             <div id="featured-grid"></div>
             <div class="tw-extra" id="tw-extra">
               <div class="tw-launch" id="tw-launch"></div>
@@ -1596,6 +1598,7 @@
         <button class="cex-btn cex-icon-btn" onclick="zoomExpandedChart(.8)" title="Zoom out or load older history" aria-label="Zoom expanded chart out or load older history"><i class="ti ti-zoom-out"></i></button>
         <button class="cex-btn cex-icon-btn" onclick="zoomExpandedChart(1.25)" title="Zoom in" aria-label="Zoom expanded chart in"><i class="ti ti-zoom-in"></i></button>
         <button class="cex-btn" onclick="resetExpandZoom()" title="Reset zoom"><i class="ti ti-focus-2"></i> <span>Reset zoom</span></button>
+        <button class="cex-btn cex-share" onclick="openShareStudio()" title="Build a branded 16:9 chart image"><i class="ti ti-camera"></i> <span>Share studio</span></button>
         <button class="cex-btn gold" onclick="closeExpandModal()" title="Close expanded chart"><i class="ti ti-x"></i> <span>Close</span></button>
       </div>
     </div>
@@ -1627,6 +1630,45 @@
   </div>
 </div>
 
+<!-- ══ SHARE STUDIO ══ -->
+<div id="share-studio" class="share-studio" role="dialog" aria-modal="true" aria-labelledby="share-studio-title" hidden>
+  <div class="share-studio-shell">
+    <header class="share-studio-head">
+      <div>
+        <span class="share-studio-kicker">Implied Lens Studio</span>
+        <h2 id="share-studio-title">Turn the chart into a publishable idea.</h2>
+      </div>
+      <button type="button" class="share-studio-close" onclick="closeShareStudio()" aria-label="Close Share Studio"><i class="ti ti-x"></i></button>
+    </header>
+    <div class="share-studio-body">
+      <aside class="share-studio-controls">
+        <label for="share-studio-caption">Chart headline</label>
+        <input id="share-studio-caption" type="text" maxlength="82" value="Price, trend, and expectations in one view" oninput="renderShareStudio()">
+        <span class="share-control-note">Keep it educational and specific. The source and as-of line are added automatically.</span>
+        <fieldset>
+          <legend>Accent</legend>
+          <div class="share-accent-row" id="share-accent-row">
+            <button type="button" class="share-accent active" data-accent="gold" onclick="setShareAccent('gold',this)" aria-label="Gold accent"></button>
+            <button type="button" class="share-accent" data-accent="emerald" onclick="setShareAccent('emerald',this)" aria-label="Emerald accent"></button>
+            <button type="button" class="share-accent" data-accent="cobalt" onclick="setShareAccent('cobalt',this)" aria-label="Cobalt accent"></button>
+            <button type="button" class="share-accent" data-accent="violet" onclick="setShareAccent('violet',this)" aria-label="Violet accent"></button>
+          </div>
+        </fieldset>
+        <div class="share-studio-spec">
+          <span>Output</span><strong>1600 × 900 PNG</strong>
+          <span>Best for</span><strong>X / education posts</strong>
+          <span>Data</span><strong>Current loaded research</strong>
+        </div>
+        <button type="button" class="share-download" onclick="downloadShareStudio()"><i class="ti ti-download"></i> Download PNG</button>
+        <button type="button" class="share-refresh" onclick="renderShareStudio()"><i class="ti ti-refresh"></i> Refresh preview</button>
+      </aside>
+      <div class="share-studio-preview">
+        <canvas id="share-studio-canvas" width="1600" height="900" aria-label="Preview of the branded chart image"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- FOOTER (home view) -->
   <footer>
     <div class="footer-inner">
@@ -1643,8 +1685,6 @@
       <div class="f-copy">© 2026 Implied Lens. Not financial advice.</div>
     </div>
   </footer>
-
-</div><!-- /page-home -->
 
 <!-- ══════════ UPGRADE MODAL ══════════ -->
 <!-- Legacy modal (kept for openModal() calls) -->
@@ -1780,7 +1820,7 @@
   <button onclick="document.getElementById('verif-banner').style.display='none';document.body.classList.remove('has-verif-banner')" style="background:none;border:none;color:rgba(237,232,224,.35);cursor:pointer;font-size:1rem;line-height:1;padding:0 .25rem;">✕</button>
 </div>
 
-<script defer src="/app-legacy.js?v=20260825-4"></script>
+<script defer src="/app-legacy.js?v=20260827-1"></script>
 
 <!-- ── Mobile Bottom Navigation ── -->
 <nav class="mobile-bottom-nav" id="mobile-bottom-nav" aria-label="Mobile navigation">
@@ -1829,4 +1869,5 @@
     <a href="#" class="mmenu-item" id="mmenu-logout" style="display:none;" onclick="var b=document.getElementById('nav-acct-logout');if(b){b.click();}_toggleMobileMenu();return false;"><i class="ti ti-logout-2"></i><span>Log out</span></a>
   </div>
 </div>
-</div
+</body>
+</html>
