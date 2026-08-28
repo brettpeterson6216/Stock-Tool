@@ -248,6 +248,16 @@
       const csrfData = await csrfRes.json().catch(() => ({}));
       if (typeof S !== 'undefined' && csrfData.token) S.csrfToken = csrfData.token;
       if (user) {
+        document.body.classList.add('il-authenticated');
+        const primeGreeting = document.getElementById('prime-user-greeting');
+        if (primeGreeting) {
+          const accountLabel = String(user.username || user.email || '').split('@')[0].trim();
+          const firstName = accountLabel ? accountLabel.split(/[._\-\s]+/)[0] : '';
+          const displayName = firstName ? firstName.charAt(0).toUpperCase() + firstName.slice(1) : '';
+          const hour = new Date().getHours();
+          const salutation = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+          primeGreeting.textContent = displayName ? `${salutation}, ${displayName}.` : `${salutation}.`;
+        }
         // Hide login / signup buttons
         setAuthEntryVisibility(true);
         if ($guide) $guide.style.display = '';
@@ -300,9 +310,12 @@
         // Sync saved analyses from DB
         if (typeof syncSavesFromDB === 'function') syncSavesFromDB();
 
-        // Logged-in users go straight to tool view unless they explicitly came home
-        if (_initialParams.get('view') !== 'home') {
+        // Signed-in members land on the market dashboard. Explicit tool links
+        // still open the requested research surface directly.
+        if (_initialParams.get('view') === 'tool' || _initialParams.get('section')) {
           showView('tool');
+        } else {
+          showMarketPage();
         }
 
         // Hide PRO feature badges for paying/trial members
@@ -401,6 +414,7 @@
         }
       } else {
         setAuthEntryVisibility(false);
+        document.body.classList.remove('il-authenticated');
       }
     } catch (_) {
       // Authentication could not be resolved, so preserve a route back in.

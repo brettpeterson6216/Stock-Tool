@@ -1,0 +1,338 @@
+/* Implied Lens Prime — exact visual pass derived from the approved concept. */
+
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page){
+  --prime-bg:#070b0e;--prime-panel:#0a1115;--prime-panel-2:#0c1418;
+  --prime-line:rgba(180,155,104,.18);--prime-line-strong:rgba(210,166,77,.38);
+  --prime-gold:#d9a43f;--prime-gold-2:#f0c66f;--prime-green:#55bd74;
+  --prime-red:#d95b50;--prime-text:#f2eee5;--prime-muted:#9aa3a3;
+  background:#05080a!important;color:var(--prime-text)!important;
+  background-image:radial-gradient(circle at 65% 8%,rgba(38,65,66,.12),transparent 31%),linear-gradient(180deg,#080d10,#05080a 62%)!important;
+}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page)::after{
+  content:""!important;position:fixed!important;inset:7px!important;z-index:9998!important;
+  border:1px solid rgba(205,182,133,.3)!important;border-radius:25px!important;pointer-events:none!important;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.015)!important;
+}
+
+/* ── Public top bar ───────────────────────────────────────────── */
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #main-nav[data-view="home"]{
+  height:63px!important;min-height:63px!important;padding:0 38px!important;gap:22px!important;
+  background:rgba(7,12,15,.94)!important;border-bottom:1px solid rgba(182,151,90,.18)!important;
+  box-shadow:none!important;backdrop-filter:blur(20px)!important;
+}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #main-nav[data-view="home"] .nav-logo{
+  min-width:214px!important;gap:9px!important;font-family:Georgia,'Times New Roman',serif!important;
+  letter-spacing:.045em!important;font-size:18px!important;color:#f6f0e5!important;
+}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #main-nav[data-view="home"] .nav-logo img{width:27px!important;height:27px!important;filter:sepia(.2) saturate(1.35)!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #main-nav[data-view="home"] .nav-logo>span{font:inherit!important;text-transform:uppercase!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #main-nav[data-view="home"] .nav-logo em{font-style:normal!important;color:inherit!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #main-nav[data-view="home"] .nav-links{gap:8px!important;align-self:stretch!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #main-nav[data-view="home"] .nav-tab{
+  min-width:auto!important;height:100%!important;padding:0 12px!important;border:0!important;border-radius:0!important;
+  background:none!important;color:#aeb5b5!important;font-size:11px!important;font-weight:600!important;letter-spacing:.01em!important;
+}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #main-nav[data-view="home"] .nav-tab.active-tab{
+  color:var(--prime-gold-2)!important;box-shadow:inset 0 -2px var(--prime-gold)!important;
+}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #main-nav[data-view="home"] .nav-search{
+  margin-left:auto!important;width:min(330px,24vw)!important;height:34px!important;background:#080e11!important;border:1px solid rgba(140,155,155,.16)!important;border-radius:6px!important;
+}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #main-nav[data-view="home"] .theme-toggle,
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #main-nav[data-view="home"] .btn-nav,
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #main-nav[data-view="home"] .btn-nav-outline{height:34px!important;border-radius:6px!important}
+
+/* ── Exact landing composition ───────────────────────────────── */
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #view-home{padding-top:63px!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page{background:transparent!important;min-height:calc(100vh - 63px)!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-landing-rail{display:none!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-landing-hero{
+  width:calc(100% - 46px)!important;max-width:none!important;margin:0 auto!important;padding:22px 18px 0!important;
+  display:grid!important;grid-template-columns:minmax(350px,.82fr) minmax(560px,1.62fr)!important;
+  grid-template-areas:"copy preview" "features features"!important;column-gap:30px!important;row-gap:12px!important;
+  min-height:500px!important;align-items:center!important;
+}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-landing-copy{
+  grid-area:copy!important;position:relative!important;z-index:2!important;display:block!important;align-self:center!important;
+  max-width:440px!important;padding:0 0 8px 18px!important;text-align:left!important;
+}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-landing-kicker{display:none!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page h1.il-display{
+  margin:0!important;max-width:430px!important;font-family:Georgia,'Times New Roman',serif!important;font-size:50px!important;
+  line-height:1.02!important;letter-spacing:-.035em!important;font-weight:400!important;color:#f6f0e7!important;text-wrap:balance!important;
+}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page h1.il-display .il-d1,
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page h1.il-display .il-d2{display:block!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page h1.il-display em{font-style:normal!important;color:#d9a43f!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-landing-copy>p{
+  margin:17px 0 0!important;max-width:440px!important;color:#aeb5b3!important;font-size:12.5px!important;line-height:1.65!important;letter-spacing:0!important;
+}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-landing-actions{
+  margin:18px 0 0!important;display:flex!important;justify-content:flex-start!important;gap:11px!important;
+}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-landing-actions>*{
+  height:40px!important;min-width:145px!important;padding:0 19px!important;border-radius:5px!important;font-size:10px!important;
+  letter-spacing:.055em!important;text-transform:uppercase!important;font-weight:800!important;
+}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-cta-solid{
+  background:linear-gradient(135deg,#efcb7b,#c88d2d)!important;color:#17110a!important;border:1px solid #e6ba62!important;box-shadow:0 8px 25px rgba(194,130,35,.16)!important;
+}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-cta-ghost{background:#090e11!important;color:#dedbd4!important;border:1px solid rgba(196,181,150,.22)!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-landing-search{display:none!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-trust{
+  display:flex!important;margin-top:28px!important;gap:19px!important;align-items:center!important;color:#7f8889!important;font-size:9px!important;text-transform:none!important;
+}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-trust-lead{width:100%!important;color:#677071!important;font-size:8px!important;letter-spacing:.08em!important;text-transform:uppercase!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-trust-dot,
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page #il-trust-nocard,
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page #il-trust-nocard-dot{display:none!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-offer-card{display:none!important}
+
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-landing-preview{
+  grid-area:preview!important;position:relative!important;display:block!important;align-self:stretch!important;min-width:0!important;padding:0!important;
+}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .ihx-wrap{
+  display:grid!important;grid-template-columns:minmax(0,1fr) 184px!important;height:392px!important;min-height:392px!important;
+  overflow:visible!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;
+}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .ihx-stage{
+  position:relative!important;min-height:392px!important;border:0!important;border-radius:0!important;overflow:hidden!important;
+  background-image:linear-gradient(90deg,rgba(6,10,12,.48) 0%,rgba(6,10,12,.03) 26%,transparent 75%),url('/assets/lens-prime-hero-v3.png')!important;
+  background-size:cover!important;background-position:center 49%!important;filter:saturate(.92) contrast(1.05)!important;
+  mask-image:linear-gradient(90deg,transparent 0,#000 9%,#000 92%,transparent 100%)!important;
+}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .ihx-scene{display:none!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .ihx-float{
+  top:103px!important;left:7%!important;width:145px!important;padding:13px!important;background:rgba(7,12,14,.89)!important;
+  border:1px solid rgba(195,164,104,.22)!important;border-radius:6px!important;box-shadow:0 15px 35px rgba(0,0,0,.4)!important;backdrop-filter:blur(12px)!important;
+}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .ihx-f-lbl{font-size:8px!important;text-transform:uppercase!important;color:#a6aeac!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .ihx-f-val{font-family:Georgia,serif!important;font-size:24px!important;color:#eee9df!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .ihx-f-tag{color:var(--prime-green)!important;font-size:10px!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .ihx-rail{
+  display:block!important;align-self:center!important;height:314px!important;margin-left:-10px!important;padding:18px 16px!important;
+  border:1px solid rgba(185,161,110,.22)!important;border-radius:7px!important;background:rgba(7,13,16,.88)!important;box-shadow:0 18px 45px rgba(0,0,0,.36)!important;backdrop-filter:blur(16px)!important;
+}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .ihx-r-sym{font-family:Georgia,serif!important;font-size:17px!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .ihx-r-price{font-family:Georgia,serif!important;font-size:24px!important;margin-top:16px!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .ihx-r-chg{font-size:10px!important;color:var(--prime-green)!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .ihx-r-row{padding:11px 0!important;border-color:rgba(182,160,113,.12)!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .ihx-r-row span{font-size:8px!important;text-transform:uppercase!important;color:#7f8989!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .ihx-r-row b{font-size:11px!important;font-weight:500!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-preview-caption{display:none!important}
+
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-rail{
+  grid-area:features!important;display:grid!important;grid-template-columns:repeat(5,1fr)!important;width:100%!important;margin:0!important;
+  min-height:108px!important;padding:0!important;border:1px solid rgba(170,155,124,.19)!important;border-radius:8px!important;background:rgba(8,14,17,.8)!important;overflow:hidden!important;
+}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-rail-item{
+  min-height:106px!important;padding:15px 20px!important;display:grid!important;grid-template-columns:24px 1fr!important;grid-template-rows:auto 1fr!important;
+  column-gap:10px!important;border:0!important;border-right:1px solid rgba(170,155,124,.16)!important;border-radius:0!important;background:transparent!important;
+}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-rail-item>i{grid-row:1 / 3!important;font-size:21px!important;color:var(--prime-gold)!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-rail-item>b{font-size:11px!important;color:#eee9df!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-rail-item>span{font-size:8.5px!important;line-height:1.55!important;color:#90999a!important}
+
+/* Secondary terminal row in the first desktop viewport. */
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-market-strip{width:calc(100% - 46px)!important;max-width:none!important;margin:12px auto 0!important;padding:0 18px 18px!important;background:transparent!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-ms-inner{display:grid!important;grid-template-columns:1fr 1fr .72fr!important;gap:0!important;border:1px solid rgba(170,155,124,.18)!important;border-radius:8px!important;background:rgba(8,14,17,.75)!important;overflow:hidden!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .ilm-card{min-height:135px!important;padding:14px 19px!important;border:0!important;border-right:1px solid rgba(170,155,124,.15)!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .ilm-title{font-size:9px!important;text-transform:uppercase!important;letter-spacing:.08em!important}
+
+/* ── Signed-in terminal dashboard ─────────────────────────────── */
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page).il-authenticated #main-nav{display:none!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page).il-authenticated #view-home{padding:0!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page.home-shell{
+  min-height:100vh!important;background:#060a0c!important;overflow:hidden!important;
+}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .hs-sidebar{
+  width:226px!important;min-width:226px!important;height:100vh!important;padding:0 17px 18px!important;position:sticky!important;top:0!important;
+  display:flex!important;flex-direction:column!important;background:#081014!important;border-right:1px solid rgba(164,151,120,.15)!important;
+}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-dash-brand{
+  height:71px!important;display:flex!important;align-items:center!important;gap:10px!important;border-bottom:1px solid rgba(174,153,109,.13)!important;
+  color:#f1ece2!important;font-family:Georgia,'Times New Roman',serif!important;font-size:17px!important;letter-spacing:.04em!important;text-decoration:none!important;
+}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-dash-brand img{width:28px!important;height:28px!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page nav.prime-dash-nav{
+  position:static!important;inset:auto!important;transform:none!important;display:grid!important;gap:4px!important;width:100%!important;
+  padding:17px 0!important;margin:0!important;background:none!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important;
+}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-dash-nav a{
+  height:38px!important;padding:0 12px!important;display:flex!important;align-items:center!important;gap:12px!important;border:0!important;border-radius:6px!important;
+  color:#b2b7b5!important;background:transparent!important;font-size:11px!important;font-weight:600!important;text-decoration:none!important;
+}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-dash-nav a i{font-size:17px!important;color:#899393!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-dash-nav a.active{background:linear-gradient(90deg,rgba(180,124,35,.28),rgba(150,101,30,.14))!important;color:#f0eadf!important;box-shadow:inset 2px 0 var(--prime-gold)!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-dash-nav a.active i{color:var(--prime-gold-2)!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .hsb-section{display:none!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .hsb-upgrade{margin-top:auto!important;border-radius:7px!important;background:#11191b!important;border-color:rgba(190,162,107,.2)!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .hs-main{
+  flex:1!important;height:100vh!important;overflow:auto!important;padding:0 18px 24px!important;background:radial-gradient(circle at 80% 0,rgba(40,66,66,.1),transparent 33%),#070b0e!important;
+}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-dashboard-head{
+  min-height:82px!important;display:grid!important;grid-template-columns:minmax(280px,1fr) 115px 146px auto 38px!important;gap:10px!important;align-items:center!important;
+  padding:13px 4px!important;border-bottom:1px solid rgba(160,148,122,.13)!important;
+}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-mobile-brand{display:none!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-dashboard-greeting h1{margin:0!important;font-family:Georgia,serif!important;font-size:24px!important;font-weight:400!important;letter-spacing:-.02em!important;color:#f3eee4!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-dashboard-greeting p{margin:5px 0 0!important;font-size:10px!important;color:#8d9696!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-dashboard-status,
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-dashboard-index{height:48px!important;padding:8px 11px!important;border:1px solid rgba(160,148,122,.15)!important;border-radius:6px!important;background:#0b1215!important;display:grid!important;grid-template-columns:1fr auto!important;align-content:center!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-dashboard-status span,
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-dashboard-index span{grid-column:1/-1!important;font-size:7px!important;text-transform:uppercase!important;letter-spacing:.09em!important;color:#758080!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-dashboard-status strong{font-size:11px!important;color:var(--prime-green)!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-dashboard-status strong i{display:inline-block!important;width:6px!important;height:6px!important;margin-right:5px!important;border-radius:50%!important;background:var(--prime-green)!important;box-shadow:0 0 9px rgba(85,189,116,.6)!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-dashboard-index strong{font-family:Georgia,serif!important;font-size:16px!important;font-weight:400!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-dashboard-index em{font-size:9px!important;color:var(--prime-green)!important;font-style:normal!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-add-widget,
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-more-button{height:38px!important;border-radius:6px!important;border:1px solid rgba(199,151,62,.45)!important;background:#0a1013!important;color:#ddd8ce!important;font-size:10px!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-add-widget{padding:0 14px!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-more-button{width:38px!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-mobile-summary{display:none!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .home-hero,
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .home-ticker-strip{display:none!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .home-grid{
+  display:grid!important;grid-template-columns:1.28fr .92fr .78fr!important;grid-template-areas:"market watch signals" "market insights movers"!important;
+  gap:10px!important;margin-top:12px!important;align-items:stretch!important;
+}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .hg-market{grid-area:market!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .hg-watch{grid-area:watch!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .hg-signals{grid-area:signals!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .hg-insights{grid-area:insights!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .hg-movers{grid-area:movers!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .hc{
+  min-width:0!important;border:1px solid rgba(159,148,122,.16)!important;border-radius:7px!important;background:linear-gradient(160deg,rgba(12,20,24,.97),rgba(7,13,16,.97))!important;
+  box-shadow:none!important;overflow:hidden!important;
+}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .hg-watch,
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .hg-signals,
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .hg-insights,
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .hg-movers{min-height:240px!important;max-height:285px!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .hg-market{min-height:490px!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .mo-header{padding:14px 15px 8px!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .mo-icon-custom{display:none!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .mo-title{font-size:10px!important;text-transform:uppercase!important;letter-spacing:.08em!important;color:#ddd8cd!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .mo-subtitle{font-size:8px!important;color:#7f8989!important}
+
+/* ── Responsive concepts ─────────────────────────────────────── */
+@media(max-width:900px){
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page)::after{display:none!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #main-nav[data-view="home"]{height:64px!important;min-height:64px!important;padding:0 16px!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #main-nav[data-view="home"] .nav-logo{min-width:0!important;font-size:16px!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #main-nav[data-view="home"] .nav-links,
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #main-nav[data-view="home"] .nav-search{display:none!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #view-home{padding-top:64px!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-landing-hero{
+    width:100%!important;padding:26px 16px 0!important;display:flex!important;flex-direction:column!important;gap:24px!important;min-height:0!important;
+  }
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-landing-copy{order:1!important;width:100%!important;max-width:none!important;padding:0!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-landing-kicker{display:block!important;margin:0 0 15px!important;color:#bd8d37!important;font-size:9px!important;letter-spacing:.11em!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page h1.il-display{font-size:39px!important;line-height:1.04!important;max-width:360px!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-landing-copy>p{font-size:12px!important;line-height:1.55!important;margin-top:14px!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-landing-actions{margin-top:18px!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-landing-actions>*{min-width:0!important;flex:1!important;height:43px!important;padding:0 9px!important;font-size:9px!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-trust{display:none!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-landing-preview{order:2!important;width:100%!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .ihx-wrap{height:335px!important;min-height:335px!important;display:block!important;border:1px solid rgba(183,157,103,.22)!important;border-radius:8px!important;overflow:hidden!important;background:#091013!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .ihx-stage{height:335px!important;min-height:335px!important;mask-image:none!important;background-position:55% center!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .ihx-float{top:18px!important;left:16px!important;width:128px!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .ihx-rail{position:absolute!important;right:12px!important;bottom:12px!important;width:145px!important;height:auto!important;margin:0!important;padding:12px!important;background:rgba(5,11,13,.86)!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .ihx-r-row:nth-of-type(n+3){display:none!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-rail{order:3!important;width:100%!important;display:grid!important;grid-template-columns:1fr!important;min-height:0!important;border-radius:8px!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-rail-item{min-height:64px!important;padding:12px 15px!important;border-right:0!important;border-bottom:1px solid rgba(170,155,124,.13)!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-market-strip{width:100%!important;padding:0 16px 18px!important;margin-top:12px!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-ms-inner{grid-template-columns:1fr!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .ilm-card{border-right:0!important;border-bottom:1px solid rgba(170,155,124,.13)!important}
+
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page).il-authenticated #view-home{padding:0!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page.home-shell{display:block!important;min-height:100vh!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .hs-sidebar{display:none!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .hs-main{height:auto!important;min-height:100vh!important;padding:0 13px 84px!important;overflow:visible!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-dashboard-head{display:block!important;min-height:0!important;padding:22px 2px 12px!important;border:0!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-mobile-brand{height:43px!important;margin:-10px 0 25px!important;display:flex!important;align-items:center!important;gap:8px!important;border-bottom:1px solid rgba(174,153,109,.13)!important;color:#f2ede3!important;font-family:Georgia,serif!important;font-size:15px!important;letter-spacing:.04em!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-mobile-brand img{width:25px!important;height:25px!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-mobile-brand button{margin-left:auto!important;width:36px!important;height:36px!important;border:0!important;background:transparent!important;color:#ddd8cf!important;font-size:20px!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-dashboard-greeting h1{font-size:25px!important;line-height:1.05!important;max-width:270px!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-dashboard-greeting p{font-size:11px!important;max-width:245px!important;line-height:1.45!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-dashboard-status,
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-dashboard-index,
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-add-widget,
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-more-button{display:none!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-mobile-summary{display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important;margin-top:18px!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-mobile-summary>div{padding:12px!important;border:1px solid rgba(170,155,124,.17)!important;border-radius:7px!important;background:#0a1215!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-mobile-market{grid-column:1/-1!important;min-height:92px!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-mobile-summary span{display:block!important;color:#7d8788!important;font-size:8px!important;text-transform:uppercase!important;letter-spacing:.08em!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-mobile-summary strong{display:block!important;margin-top:7px!important;font-family:Georgia,serif!important;font-size:22px!important;font-weight:400!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-mobile-summary em{display:block!important;margin-top:4px!important;color:var(--prime-green)!important;font-size:9px!important;font-style:normal!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .home-grid{display:flex!important;flex-direction:column!important;gap:8px!important;margin-top:4px!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .hg-watch{order:1!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .hg-market{order:2!important;min-height:420px!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .hg-signals{order:3!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .hg-insights{order:4!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .hg-movers{order:5!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .hg-watch,
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .hg-signals,
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .hg-insights,
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .hg-movers{min-height:210px!important;max-height:none!important}
+}
+
+@media(min-width:901px) and (max-width:1180px){
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-landing-hero{grid-template-columns:340px 1fr!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page h1.il-display{font-size:43px!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .ihx-wrap{grid-template-columns:1fr 155px!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .hs-sidebar{width:205px!important;min-width:205px!important}
+}
+
+@media(max-height:760px) and (min-width:901px){
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-landing-hero{padding-top:10px!important;min-height:455px!important}
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .ihx-wrap,
+  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .ihx-stage{height:355px!important;min-height:355px!important}
+}
+
+/* The approved Prime concept is intentionally dark in either user theme. The
+   app's light-mode tokens must not turn this branded surface into a white page. */
+:is(#lens-prime-exact,html:not([data-theme="dark"])) :is(#lens-prime-exact,body.il-product-page) #view-home,
+:is(#lens-prime-exact,html:not([data-theme="dark"])) :is(#lens-prime-exact,body.il-product-page) #landing-page{
+  background:#070b0e!important;color:#f2eee5!important;
+}
+:is(#lens-prime-exact,html:not([data-theme="dark"])) :is(#lens-prime-exact,body.il-product-page) #main-nav[data-view="home"]{
+  background:rgba(7,12,15,.96)!important;color:#f2eee5!important;border-color:rgba(182,151,90,.18)!important;
+}
+:is(#lens-prime-exact,html:not([data-theme="dark"])) :is(#lens-prime-exact,body.il-product-page) #main-nav[data-view="home"] .nav-tab{color:#aeb5b5!important}
+:is(#lens-prime-exact,html:not([data-theme="dark"])) :is(#lens-prime-exact,body.il-product-page) #main-nav[data-view="home"] .nav-tab.active-tab{color:#f0c66f!important}
+:is(#lens-prime-exact,html:not([data-theme="dark"])) :is(#lens-prime-exact,body.il-product-page) #landing-page h1.il-display{color:#f6f0e7!important}
+:is(#lens-prime-exact,html:not([data-theme="dark"])) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-landing-copy>p{color:#aeb5b3!important}
+:is(#lens-prime-exact,html:not([data-theme="dark"])) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-cta-ghost{background:#090e11!important;color:#dedbd4!important;border-color:rgba(196,181,150,.22)!important}
+:is(#lens-prime-exact,html:not([data-theme="dark"])) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-rail,
+:is(#lens-prime-exact,html:not([data-theme="dark"])) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-ms-inner{background:rgba(8,14,17,.86)!important;border-color:rgba(170,155,124,.19)!important}
+:is(#lens-prime-exact,html:not([data-theme="dark"])) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-rail-item,
+:is(#lens-prime-exact,html:not([data-theme="dark"])) :is(#lens-prime-exact,body.il-product-page) #landing-page .ilm-card{background:transparent!important;color:#f2eee5!important}
+:is(#lens-prime-exact,html:not([data-theme="dark"])) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-rail-item>b,
+:is(#lens-prime-exact,html:not([data-theme="dark"])) :is(#lens-prime-exact,body.il-product-page) #landing-page .ilm-title{color:#eee9df!important}
+:is(#lens-prime-exact,html:not([data-theme="dark"])) :is(#lens-prime-exact,body.il-product-page) #landing-page .il-rail-item>span,
+:is(#lens-prime-exact,html:not([data-theme="dark"])) :is(#lens-prime-exact,body.il-product-page) #landing-page .ilm-soon-copy{color:#90999a!important}
+
+/* Legacy styles intentionally use phantom IDs for cascade isolation. This
+   higher-isolation guard keeps the Prime canvas dark when no theme attribute
+   has been persisted yet, without disabling the rest of the theme system. */
+html:not(#prime-a):not(#prime-b) body.il-product-page:not(#prime-c) #view-home,
+html:not(#prime-a):not(#prime-b) body.il-product-page:not(#prime-c) #landing-page{background:#070b0e!important;color:#f2eee5!important}
+html:not(#prime-a):not(#prime-b) body.il-product-page:not(#prime-c) #landing-page h1.il-display{color:#f6f0e7!important}
+html:not(#prime-a):not(#prime-b) body.il-product-page:not(#prime-c) #landing-page h1.il-display .il-d1,
+html:not(#prime-a):not(#prime-b) body.il-product-page:not(#prime-c) #landing-page h1.il-display .il-d2{color:#f6f0e7!important}
+html:not(#prime-a):not(#prime-b) body.il-product-page:not(#prime-c) #landing-page h1.il-display em{color:#d9a43f!important}
+html:not(#prime-a):not(#prime-b) body.il-product-page:not(#prime-c) #landing-page .il-landing-copy>p{color:#aeb5b3!important}
+html:not(#prime-a):not(#prime-b) body.il-product-page:not(#prime-c) #landing-page .il-trust,
+html:not(#prime-a):not(#prime-b) body.il-product-page:not(#prime-c) #landing-page .il-trust span,
+html:not(#prime-a):not(#prime-b) body.il-product-page:not(#prime-c) #landing-page .il-trust i{color:#8d9696!important}
+html:not(#prime-a):not(#prime-b) body.il-product-page:not(#prime-c) #landing-page .il-cta-ghost{background:#090e11!important;color:#dedbd4!important;border-color:rgba(196,181,150,.22)!important}
+html:not(#prime-a):not(#prime-b) body.il-product-page:not(#prime-c) #landing-page .il-cta-ghost *{color:#dedbd4!important}
+html:not(#prime-a):not(#prime-b) body.il-product-page:not(#prime-c) #landing-page .il-rail,
+html:not(#prime-a):not(#prime-b) body.il-product-page:not(#prime-c) #landing-page .il-ms-inner{background:rgba(8,14,17,.9)!important;color:#f2eee5!important}
+html:not(#prime-a):not(#prime-b) body.il-product-page:not(#prime-c) #landing-page .il-rail-item,
+html:not(#prime-a):not(#prime-b) body.il-product-page:not(#prime-c) #landing-page .ilm-card{background:transparent!important;color:#f2eee5!important}
+html:not(#prime-a):not(#prime-b) body.il-product-page:not(#prime-c) #landing-page .il-rail-item>b,
+html:not(#prime-a):not(#prime-b) body.il-product-page:not(#prime-c) #landing-page .ilm-title{color:#eee9df!important}
+html:not(#prime-a):not(#prime-b) body.il-product-page:not(#prime-c) #landing-page .il-rail-item>span,
+html:not(#prime-a):not(#prime-b) body.il-product-page:not(#prime-c) #landing-page .ilm-soon-copy{color:#90999a!important}

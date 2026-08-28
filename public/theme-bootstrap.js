@@ -1,10 +1,10 @@
 (function () {
   "use strict";
 
-  // Dark is the default surface for the product. Light stays available and is
-  // honoured whenever the visitor has explicitly chosen it.
-  var storedTheme = localStorage.getItem("il-theme");
-  if (storedTheme !== "light") document.documentElement.setAttribute("data-theme", "dark");
+  // Lens Prime is a deliberately dark, graphite-and-gold product surface.
+  // Start every visit in the approved visual system; the in-session toggle is
+  // still available for accessibility and personal preference.
+  document.documentElement.setAttribute("data-theme", "dark");
 
   window.syncBrowserChrome = function () {
     var dark = document.documentElement.getAttribute("data-theme") === "dark";

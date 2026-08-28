@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-<script src="/theme-bootstrap.js?v=20260825-4"></script>
+<script src="/theme-bootstrap.js?v=20260828-1"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Implied Lens — Stock Research and Valuation Workspace</title>
@@ -107,6 +107,7 @@
 <link rel="stylesheet" href="/premium-revamp.css?v=20260825-4">
 <link rel="stylesheet" href="/il-system.css?v=20260827-4">
 <link rel="stylesheet" href="/lens-prime-v2.css?v=20260828-6">
+<link rel="stylesheet" href="/lens-prime-exact.css?v=20260828-1">
 <script defer src="/premium-motion.js?v=20260825-4"></script>
 </head>
 <body class="il-product-page">
@@ -175,7 +176,7 @@
 
 <span id="main-content" tabindex="-1"></span>
 <!-- ══════════ VIEW: HOME ══════════ -->
-<div id="view-home" role="main">
+<div id="view-home" role="main" style="background:#070b0e !important;color:#f2eee5 !important;">
 <section class="il-landing" id="landing-page" aria-label="Implied Lens landing page">
   <aside class="il-landing-rail" aria-label="Home page sections">
     <div class="il-rail-label">Home</div>
@@ -546,6 +547,18 @@
 
   <!-- ── Left sidebar — Market-only options (never switches the top tab) ── -->
   <aside class="hs-sidebar">
+    <a class="prime-dash-brand" href="/" onclick="showMarketPage();return false;" aria-label="Implied Lens dashboard">
+      <img src="/logo.svg?v=3" alt="">
+      <span>IMPLIED LENS</span>
+    </a>
+    <nav class="prime-dash-nav" aria-label="Dashboard navigation">
+      <a class="active" href="/?view=home&amp;market=1" onclick="showMarketPage();return false;"><i class="ti ti-layout-dashboard"></i><span>Dashboard</span></a>
+      <a href="/?view=tool&amp;section=screener" onclick="navGoTo('screener');return false;"><i class="ti ti-scan"></i><span>Scanners</span></a>
+      <a href="/?view=tool&amp;section=analyze" onclick="navGoTo('analyze');return false;"><i class="ti ti-chart-candle"></i><span>Analysis</span></a>
+      <a href="/?view=tool&amp;section=workspace" onclick="navGoTo('workspace');return false;"><i class="ti ti-bookmark"></i><span>Watchlists</span></a>
+      <a href="/?view=tool&amp;section=calls" onclick="navGoTo('calls');return false;"><i class="ti ti-news"></i><span>News &amp; Calls</span></a>
+      <a href="/?view=tool&amp;section=education" onclick="navGoTo('education');return false;"><i class="ti ti-calendar-event"></i><span>Calendar &amp; Learn</span></a>
+    </nav>
     <div class="hsb-section">
       <div class="hsb-label">Market</div>
       <a class="hsb-item active" data-mk="top" href="#" onclick="marketScrollTo('top');return false;"><i class="ti ti-globe"></i><span>Overview</span></a>
@@ -564,6 +577,30 @@
 
   <!-- ── Main content ── -->
   <div class="hs-main">
+
+    <header class="prime-dashboard-head">
+      <div class="prime-mobile-brand"><img src="/logo.svg?v=3" alt=""><span>IMPLIED LENS</span><button type="button" aria-label="Open research navigation" onclick="navGoTo('analyze')"><i class="ti ti-menu-2"></i></button></div>
+      <div class="prime-dashboard-greeting">
+        <h1 id="prime-user-greeting">Good evening.</h1>
+        <p>Here&rsquo;s what the market is telling us today.</p>
+      </div>
+      <div class="prime-dashboard-status" aria-label="Market status">
+        <span class="prime-status-label">Market status</span>
+        <strong><i></i> Open</strong>
+      </div>
+      <div class="prime-dashboard-index" aria-label="S&amp;P 500 quote">
+        <span>S&amp;P 500</span>
+        <strong id="prime-sp-value">Loading&hellip;</strong>
+        <em id="prime-sp-change">Live</em>
+      </div>
+      <button class="prime-add-widget" type="button" onclick="navGoTo('workspace')"><i class="ti ti-plus"></i> Add widget</button>
+      <button class="prime-more-button" type="button" aria-label="More dashboard options"><i class="ti ti-dots-vertical"></i></button>
+      <div class="prime-mobile-summary" aria-label="Mobile market summary">
+        <div class="prime-mobile-market"><span>S&amp;P 500</span><strong id="prime-mobile-sp-value">Loading&hellip;</strong><em id="prime-mobile-sp-change">Live market</em></div>
+        <div class="prime-mobile-kpi"><span>Market breadth</span><strong id="prime-mobile-breadth">Live</strong><em>Current session</em></div>
+        <div class="prime-mobile-kpi"><span>Research flow</span><strong>Ready</strong><em>Start with a ticker</em></div>
+      </div>
+    </header>
 
     <!-- Hero -->
     <section class="home-hero">

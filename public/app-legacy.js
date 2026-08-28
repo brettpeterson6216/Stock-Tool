@@ -2703,6 +2703,12 @@ async function loadMarketOverview(range,btn){
       const vEl=document.getElementById(idx.vi),cEl=document.getElementById(idx.vc);
       if(vEl)vEl.textContent=price>=1000?price.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):price.toFixed(2);
       if(cEl){cEl.textContent=`${up?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%`;cEl.className='mo-idx-chg '+(up?'up':'dn');}
+      if(i===0){
+        const primeValue=price>=1000?price.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):price.toFixed(2);
+        const primeChange=`${up?'+':'-'}${Math.abs(pct).toFixed(2)}%`;
+        ['prime-sp-value','prime-mobile-sp-value'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=primeValue;});
+        ['prime-sp-change','prime-mobile-sp-change'].forEach(id=>{const el=document.getElementById(id);if(el){el.textContent=primeChange;el.className=up?'up':'dn';}});
+      }
     }
     return{
       label:idx.label, data:norm,
