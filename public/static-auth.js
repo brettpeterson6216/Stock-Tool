@@ -172,3 +172,76 @@
   /* The lab resolves its ticker asynchronously; re-run once it has settled. */
   setTimeout(decorate, 1500);
 })();
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Shared mobile navigation for every separate document.
+
+   The application shell already has a real mobile drawer. Static pages used
+   to collapse their desktop links without providing the same way back into
+   the product, which made LensScore, About and the auth pages feel like
+   different sites. Build the same compact navigation once, beside the shared
+   header, instead of duplicating markup across every document.
+   ═══════════════════════════════════════════════════════════════════════════ */
+(function () {
+  "use strict";
+
+  var nav = document.querySelector(".il-global-nav") || document.getElementById("main-nav");
+  if (!nav || nav.querySelector(".lp-static-menu-toggle")) return;
+
+  var actions = nav.querySelector(".il-global-actions") || nav;
+  var toggle = document.createElement("button");
+  toggle.type = "button";
+  toggle.className = "lp-static-menu-toggle";
+  toggle.setAttribute("aria-label", "Open navigation");
+  toggle.setAttribute("aria-expanded", "false");
+  toggle.innerHTML = '<span aria-hidden="true">☰</span>';
+  actions.appendChild(toggle);
+
+  var drawer = document.createElement("div");
+  drawer.className = "lp-static-drawer";
+  drawer.setAttribute("aria-hidden", "true");
+  drawer.innerHTML =
+    '<div class="lp-static-drawer-panel">' +
+      '<form class="lp-static-drawer-search" action="/" method="get" role="search">' +
+        '<input type="hidden" name="view" value="tool">' +
+        '<input type="hidden" name="section" value="analyze">' +
+        '<input name="symbol" type="text" maxlength="12" placeholder="SEARCH A TICKER" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Search for a ticker">' +
+        '<button type="submit">GO</button>' +
+      '</form>' +
+      '<nav aria-label="Mobile product navigation">' +
+        '<a href="/"><span aria-hidden="true">⌂</span>Dashboard</a>' +
+        '<a href="/?view=tool&amp;section=analyze"><span aria-hidden="true">⌁</span>Research</a>' +
+        '<a href="/lens-score"><span aria-hidden="true">◎</span>LensScore</a>' +
+        '<a href="/?view=tool&amp;section=projection"><span aria-hidden="true">↗</span>Scenarios</a>' +
+        '<a href="/?view=tool&amp;section=compare"><span aria-hidden="true">⇄</span>Compare</a>' +
+        '<a href="/?view=tool&amp;section=reports"><span aria-hidden="true">◇</span>Saved</a>' +
+        '<a href="/about"><span aria-hidden="true">ⓘ</span>About</a>' +
+        '<a class="lp-guest-link" href="/login"><span aria-hidden="true">→</span>Log in</a>' +
+        '<a class="lp-guest-link" href="/signup"><span aria-hidden="true">＋</span>Start trial</a>' +
+        '<a class="lp-account-link" href="/?view=tool&amp;section=reports"><span aria-hidden="true">◉</span>Account</a>' +
+      '</nav>' +
+    '</div>';
+  nav.insertAdjacentElement("afterend", drawer);
+
+  function setOpen(open) {
+    drawer.classList.toggle("open", open);
+    drawer.setAttribute("aria-hidden", open ? "false" : "true");
+    toggle.setAttribute("aria-expanded", open ? "true" : "false");
+    toggle.setAttribute("aria-label", open ? "Close navigation" : "Open navigation");
+    document.documentElement.classList.toggle("lp-static-menu-open", open);
+  }
+
+  toggle.addEventListener("click", function () { setOpen(!drawer.classList.contains("open")); });
+  drawer.addEventListener("click", function (event) {
+    if (event.target === drawer || event.target.closest("a")) setOpen(false);
+  });
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape" && drawer.classList.contains("open")) {
+      setOpen(false);
+      toggle.focus();
+    }
+  });
+  window.addEventListener("resize", function () {
+    if (window.innerWidth > 900 && drawer.classList.contains("open")) setOpen(false);
+  });
+})();

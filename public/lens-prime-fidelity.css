@@ -1,0 +1,887 @@
+/*
+ * LENS PRIME — fidelity layer
+ *
+ * This is the final, deliberately small visual contract.  The application
+ * still carries older component styles for functionality, but every public
+ * surface resolves to the same typography, graphite canvas, gold accent,
+ * border language and responsive navigation here.
+ */
+
+:root {
+  --lpf-bg: #060a0c;
+  --lpf-bg-deep: #040709;
+  --lpf-sidebar: #081014;
+  --lpf-panel: #0a1216;
+  --lpf-panel-raised: #0d171b;
+  --lpf-line: rgba(187, 168, 126, .17);
+  --lpf-line-soft: rgba(187, 168, 126, .095);
+  --lpf-line-gold: rgba(222, 171, 70, .46);
+  --lpf-gold: #d7a33f;
+  --lpf-gold-bright: #efc66d;
+  --lpf-gold-pale: #f1d493;
+  --lpf-ink: #f2eee6;
+  --lpf-copy: #b3bab8;
+  --lpf-muted: #778180;
+  --lpf-green: #4fc879;
+  --lpf-red: #ed636d;
+  --lpf-serif: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+  --lpf-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --lpf-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --lpf-radius: 7px;
+}
+
+html { background: var(--lpf-bg-deep); }
+body { font-family: var(--lpf-sans) !important; }
+button, input, select, textarea { font-family: inherit; }
+
+body.il-product-page,
+body.il-static-page,
+body.il-lens-page,
+body.il-auth-page,
+body.il-admin-page {
+  background:
+    radial-gradient(circle at 68% -8%, rgba(45, 74, 72, .13), transparent 34%),
+    linear-gradient(180deg, #080d10 0, var(--lpf-bg) 44%, var(--lpf-bg-deep) 100%) !important;
+  color: var(--lpf-ink) !important;
+}
+
+/* A quiet technical grid gives empty terminal areas depth without noise. */
+body.il-product-page::before,
+body.il-static-page::after,
+body.il-lens-page::after,
+body.il-auth-page::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: .18;
+  background-image:
+    linear-gradient(rgba(118, 139, 136, .055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(118, 139, 136, .055) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(to bottom, #000, transparent 72%);
+}
+
+/* ── One navigation bar everywhere ───────────────────────────── */
+body .il-global-nav {
+  height: 60px !important;
+  min-height: 60px !important;
+  padding: 0 36px !important;
+  gap: 18px !important;
+  background: rgba(6, 11, 14, .94) !important;
+  border-bottom: 1px solid var(--lpf-line) !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(20px) saturate(1.1) !important;
+}
+body .il-global-brand,
+body .prime-sidebar-brand,
+body .prime-dash-brand,
+body .prime-mobile-appbar a {
+  font-family: var(--lpf-serif) !important;
+  font-weight: 400 !important;
+  letter-spacing: .045em !important;
+}
+body .il-global-brand { min-width: 206px !important; gap: 9px !important; }
+body .il-global-brand img { width: 27px !important; height: 27px !important; }
+body .il-global-brand > span {
+  color: var(--lpf-ink) !important;
+  font: 400 18px/1 var(--lpf-serif) !important;
+  text-transform: uppercase !important;
+  white-space: nowrap;
+}
+body .il-global-brand em { color: inherit !important; font-style: normal !important; }
+:is(#lpf-brand-a, html) :is(#lpf-brand-b, body.il-static-page) .il-global-brand > span,
+:is(#lpf-brand-a, html) :is(#lpf-brand-b, body.il-lens-page) .il-global-brand > span {
+  display: block !important;
+  color: var(--lpf-ink) !important;
+  font: 400 18px/1 var(--lpf-serif) !important;
+  letter-spacing: .045em !important;
+  opacity: 1 !important;
+  text-transform: uppercase !important;
+}
+body .il-global-links { align-self: stretch !important; height: auto !important; gap: 3px !important; }
+body .il-global-tab {
+  height: 100% !important;
+  padding: 0 11px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: #a7afad !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  letter-spacing: .005em !important;
+}
+body .il-global-tab:hover { color: var(--lpf-ink) !important; }
+body .il-global-tab.active,
+body .il-global-tab.active-tab {
+  color: var(--lpf-gold-bright) !important;
+  box-shadow: inset 0 -2px var(--lpf-gold) !important;
+}
+body .il-global-search {
+  width: min(300px, 22vw) !important;
+  height: 33px !important;
+  margin-left: auto !important;
+  border: 1px solid rgba(153, 170, 167, .14) !important;
+  border-radius: 5px !important;
+  background: #070d10 !important;
+}
+body .il-global-search:focus-within { border-color: var(--lpf-line-gold) !important; }
+body .il-global-search input { color: #d9ddda !important; font-size: 10px !important; }
+body .il-global-actions { gap: 8px !important; }
+body .il-global-actions .btn-nav,
+body .il-global-actions .btn-nav-outline {
+  height: 33px !important;
+  padding: 0 13px !important;
+  border-radius: 5px !important;
+  font-size: 9.5px !important;
+}
+body .il-global-actions .btn-nav {
+  border-color: #dfad4e !important;
+  background: linear-gradient(135deg, #efcd80, #ca902f) !important;
+  color: #171108 !important;
+}
+body .il-global-live {
+  color: var(--lpf-green) !important;
+  font: 600 8px/1 var(--lpf-mono) !important;
+  letter-spacing: .1em !important;
+  text-transform: uppercase !important;
+}
+
+/* ── Landing: match the approved Lens Prime composition ──────── */
+body.il-product-page #main-nav[data-view='home'] { height: 60px !important; min-height: 60px !important; }
+body.il-product-page #view-home { padding-top: 60px !important; }
+body.il-product-page #landing-page { min-height: calc(100vh - 60px) !important; }
+body.il-product-page #landing-page .il-landing-hero {
+  width: calc(100% - 48px) !important;
+  max-width: 1500px !important;
+  min-height: 482px !important;
+  margin: 0 auto !important;
+  padding: 18px 17px 0 !important;
+  grid-template-columns: minmax(350px, .83fr) minmax(560px, 1.65fr) !important;
+  column-gap: 28px !important;
+  row-gap: 11px !important;
+}
+body.il-product-page #landing-page .il-landing-copy { max-width: 445px !important; padding: 0 0 7px 17px !important; }
+body.il-product-page #landing-page h1.il-display {
+  max-width: 440px !important;
+  font-family: var(--lpf-serif) !important;
+  font-size: clamp(46px, 3.45vw, 55px) !important;
+  font-weight: 400 !important;
+  line-height: .98 !important;
+  letter-spacing: -.026em !important;
+  text-wrap: balance !important;
+}
+body.il-product-page #landing-page h1.il-display em { color: var(--lpf-gold) !important; }
+body.il-product-page #landing-page .il-landing-copy > p {
+  max-width: 430px !important;
+  margin-top: 18px !important;
+  color: var(--lpf-copy) !important;
+  font-size: 12px !important;
+  line-height: 1.68 !important;
+}
+body.il-product-page #landing-page .il-landing-actions { gap: 10px !important; margin-top: 19px !important; }
+body.il-product-page #landing-page .il-landing-actions > * {
+  height: 40px !important;
+  min-width: 146px !important;
+  border-radius: 5px !important;
+  font-size: 9px !important;
+  letter-spacing: .055em !important;
+}
+body.il-product-page #landing-page .il-cta-solid {
+  background: linear-gradient(135deg, #f0ce80, #cb9030) !important;
+  border-color: #e3b357 !important;
+  box-shadow: 0 12px 34px rgba(195, 132, 36, .12) !important;
+}
+body.il-product-page #landing-page .il-cta-ghost { background: rgba(7, 13, 16, .86) !important; }
+body.il-product-page #landing-page .il-trust { margin-top: 27px !important; gap: 18px !important; }
+body.il-product-page #landing-page .il-trust-lead {
+  font: 500 7.5px/1 var(--lpf-mono) !important;
+  color: #697372 !important;
+  letter-spacing: .12em !important;
+}
+body.il-product-page #landing-page .il-trust span:not(.il-trust-lead) { color: #858f8e !important; font-size: 9px !important; }
+body.il-product-page #landing-page .ihx-wrap { height: 376px !important; min-height: 376px !important; grid-template-columns: minmax(0, 1fr) 180px !important; }
+body.il-product-page #landing-page .ihx-stage { min-height: 376px !important; }
+body.il-product-page #landing-page .ihx-float { top: 98px !important; }
+body.il-product-page #landing-page .ihx-rail { height: 306px !important; }
+body.il-product-page #landing-page .il-rail {
+  min-height: 106px !important;
+  border-color: var(--lpf-line) !important;
+  border-radius: var(--lpf-radius) !important;
+  background: rgba(8, 14, 17, .78) !important;
+}
+body.il-product-page #landing-page .il-rail-item {
+  min-height: 104px !important;
+  padding: 15px 19px !important;
+  border-right-color: var(--lpf-line-soft) !important;
+}
+body.il-product-page #landing-page .il-rail-item > i { color: var(--lpf-gold) !important; }
+body.il-product-page #landing-page .il-rail-item > b { color: var(--lpf-ink) !important; font-size: 10.5px !important; }
+body.il-product-page #landing-page .il-rail-item > span { color: #8f9998 !important; font-size: 8px !important; line-height: 1.58 !important; }
+body.il-product-page #landing-page .il-market-strip {
+  width: calc(100% - 48px) !important;
+  max-width: 1500px !important;
+  padding: 0 17px 18px !important;
+  margin-top: 11px !important;
+}
+body.il-product-page #landing-page .il-ms-inner { width: 100% !important; max-width: none !important; border-color: var(--lpf-line) !important; }
+body.il-product-page #landing-page .ilm-card { min-height: 130px !important; border-right-color: var(--lpf-line-soft) !important; }
+
+/* The legacy landing stylesheet used phantom-ID selectors for this strip.
+   Match that isolation once so it cannot silently pull back to 1180px or grow
+   to a full report table in the first, intentionally editorial viewport. */
+:is(#lpf-strip-a, html) :is(#lpf-strip-b, body.il-product-page) #landing-page .il-ms-inner {
+  width: 100% !important;
+  max-width: none !important;
+  height: 164px !important;
+  max-height: 164px !important;
+  overflow: hidden !important;
+}
+:is(#lpf-strip-a, html) :is(#lpf-strip-b, body.il-product-page) #landing-page .ilm-card {
+  height: 162px !important;
+  min-height: 162px !important;
+  overflow: hidden !important;
+}
+
+/* ── Dashboard and research terminal refinement ───────────────── */
+body.il-product-page #market-page .prime-dashboard-greeting h1,
+body.il-product-page #view-tool .ash-title,
+body.il-product-page #body-analyze:not(.has-stock) .tw-title,
+body.il-product-page #market-page .prime-dashboard-index strong {
+  font-family: var(--lpf-serif) !important;
+  font-weight: 400 !important;
+}
+body.il-product-page #market-page .hs-sidebar,
+body.il-product-page #view-tool .app-sidebar { background: var(--lpf-sidebar) !important; border-color: var(--lpf-line) !important; }
+body.il-product-page #market-page .hc,
+body.il-product-page #view-tool .tw-prime-hero,
+body.il-product-page #view-tool .tw-live-board,
+body.il-product-page #view-tool .tool-launch-card,
+body.il-product-page #view-tool .panel-box,
+body.il-product-page #view-tool .metric-card,
+body.il-product-page #view-tool .chart-wrap,
+body.il-product-page #view-tool .sidebar-card {
+  background: linear-gradient(155deg, rgba(13, 23, 27, .97), rgba(7, 13, 16, .98)) !important;
+  border: 1px solid var(--lpf-line) !important;
+  border-radius: var(--lpf-radius) !important;
+  box-shadow: none !important;
+}
+body.il-product-page #view-tool .app-section-hdr { border-color: var(--lpf-line) !important; }
+body.il-product-page #view-tool .ash-title { font-size: 20px !important; letter-spacing: -.01em !important; }
+body.il-product-page #body-analyze:not(.has-stock) .tw-title { font-size: clamp(39px, 3.4vw, 52px) !important; line-height: .98 !important; letter-spacing: -.025em !important; }
+body.il-product-page #body-analyze:not(.has-stock) .tw-sub { color: var(--lpf-copy) !important; }
+body.il-product-page #body-analyze:not(.has-stock) .tw-live-card { border-color: var(--lpf-line-soft) !important; background: rgba(8, 15, 18, .74) !important; }
+body.il-product-page #body-analyze:not(.has-stock) .tw-live-card:hover { border-color: var(--lpf-line-gold) !important; background: #0d181c !important; }
+body.il-product-page #view-tool .tool-launch-card { min-height: 120px !important; }
+body.il-product-page #view-tool .tool-launch-card strong { color: var(--lpf-ink) !important; }
+body.il-product-page #view-tool .tool-launch-card > i { color: var(--lpf-gold-bright) !important; }
+body.il-product-page #view-tool .positive,
+body.il-product-page #view-tool .up { color: var(--lpf-green) !important; }
+body.il-product-page #view-tool .negative,
+body.il-product-page #view-tool .down { color: var(--lpf-red) !important; }
+
+/* The approved dashboard is a dense two-row terminal.  The previous market
+   card spanned both rows and left the right side full of empty wells. */
+:is(#lpf-dash-a, html) :is(#lpf-dash-b, body.il-product-page) #market-page .home-grid {
+  display: grid !important;
+  grid-template-columns: 1.22fr .88fr .74fr !important;
+  grid-template-areas:
+    'market watch signals'
+    'insights insights movers' !important;
+  grid-template-rows: 340px 250px !important;
+  gap: 10px !important;
+  min-height: 0 !important;
+  height: auto !important;
+  margin-top: 12px !important;
+}
+:is(#lpf-dash-a, html) :is(#lpf-dash-b, body.il-product-page) #market-page .hg-market { grid-area: market !important; min-height: 0 !important; max-height: none !important; overflow: hidden !important; }
+:is(#lpf-dash-a, html) :is(#lpf-dash-b, body.il-product-page) #market-page .hg-watch { grid-area: watch !important; min-height: 0 !important; max-height: none !important; }
+:is(#lpf-dash-a, html) :is(#lpf-dash-b, body.il-product-page) #market-page .hg-signals { grid-area: signals !important; min-height: 0 !important; max-height: none !important; }
+:is(#lpf-dash-a, html) :is(#lpf-dash-b, body.il-product-page) #market-page .hg-insights { grid-area: insights !important; min-height: 0 !important; max-height: none !important; }
+:is(#lpf-dash-a, html) :is(#lpf-dash-b, body.il-product-page) #market-page .hg-movers { grid-area: movers !important; min-height: 0 !important; max-height: none !important; }
+:is(#lpf-dash-a, html) :is(#lpf-dash-b, body.il-product-page) #market-page .hc {
+  border-color: var(--lpf-line) !important;
+  background: linear-gradient(155deg, rgba(13, 23, 27, .97), rgba(7, 13, 16, .98)) !important;
+}
+:is(#lpf-dash-a, html) :is(#lpf-dash-b, body.il-product-page) #market-page .hg-market .mo-body {
+  max-height: 282px !important;
+  overflow: hidden !important;
+}
+:is(#lpf-dash-a, html) :is(#lpf-dash-b, body.il-product-page) #market-page .mo-tab.active,
+:is(#lpf-dash-a, html) :is(#lpf-dash-b, body.il-product-page) #market-page .mo-tab.on {
+  border-color: #e3b65a !important;
+  background: linear-gradient(135deg, #f0cf81, #ca902f) !important;
+  color: #171108 !important;
+}
+:is(#lpf-dash-a, html) :is(#lpf-dash-b, body.il-product-page) #market-page .mo-idx-price {
+  font: 400 22px/1.05 var(--lpf-serif) !important;
+  letter-spacing: -.01em !important;
+}
+
+/* Charts should read like a terminal, not a generic card library. */
+body.il-product-page canvas { image-rendering: auto; }
+body.il-product-page .chart-wrap,
+body.il-product-page .chart-card,
+body.il-product-page .chart-shell { overflow: hidden !important; }
+body.il-product-page .chart-toolbar button,
+body.il-product-page .chart-controls button,
+body.il-product-page .range-btn {
+  min-height: 34px !important;
+  border-radius: 5px !important;
+}
+:is(#lpf-controls-a, html) :is(#lpf-controls-b, body.il-product-page) #view-tool .app-chart-toolbar .act-btn,
+:is(#lpf-controls-a, html) :is(#lpf-controls-b, body.il-product-page) #view-tool .app-tf-strip .tf-pill,
+:is(#lpf-controls-a, html) :is(#lpf-controls-b, body.il-product-page) #view-tool .mobile-sec-tabs .mst-btn {
+  border-color: transparent !important;
+  border-radius: 5px !important;
+  background: transparent !important;
+  color: #aab2b0 !important;
+  box-shadow: none !important;
+}
+:is(#lpf-controls-a, html) :is(#lpf-controls-b, body.il-product-page) #view-tool .app-chart-toolbar .act-btn.on,
+:is(#lpf-controls-a, html) :is(#lpf-controls-b, body.il-product-page) #view-tool .app-tf-strip .tf-pill.on,
+:is(#lpf-controls-a, html) :is(#lpf-controls-b, body.il-product-page) #view-tool .mobile-sec-tabs .mst-btn.active {
+  border-color: #e4b85d !important;
+  background: linear-gradient(135deg, #f0cf82, #ca902f) !important;
+  color: #171108 !important;
+  box-shadow: 0 7px 22px rgba(195, 132, 36, .12) !important;
+}
+
+/* ── LensScore: same product, same hierarchy ─────────────────── */
+body.il-lens-page #lab-main { max-width: 1240px !important; padding-top: 88px !important; }
+body.il-lens-page .search-shell {
+  padding: 32px !important;
+  gap: 32px !important;
+  border: 1px solid var(--lpf-line) !important;
+  border-radius: var(--lpf-radius) !important;
+  background: linear-gradient(145deg, #0d181b, #071014) !important;
+}
+body.il-lens-page .search-shell h1,
+body.il-lens-page h2,
+body.il-lens-page .score-number,
+body.il-static-page h1,
+body.il-static-page h2,
+body.il-auth-page h1 {
+  font-family: var(--lpf-serif) !important;
+  font-weight: 400 !important;
+}
+body.il-lens-page .search-shell h1 { font-size: 49px !important; line-height: .99 !important; letter-spacing: -.025em !important; }
+:is(#lpf-lens-heading-a, html) :is(#lpf-lens-heading-b, body.il-lens-page) .search-shell h1 {
+  font-family: var(--lpf-serif) !important;
+  font-weight: 400 !important;
+  line-height: .98 !important;
+  letter-spacing: -.022em !important;
+}
+body.il-lens-page .search-shell h1 em { color: var(--lpf-gold) !important; font-style: normal !important; }
+body.il-lens-page .ticker-form,
+body.il-lens-page .notice,
+body.il-lens-page .diligence-rail,
+body.il-lens-page .company-nav,
+body.il-lens-page .panel,
+body.il-lens-page article {
+  border-color: var(--lpf-line) !important;
+  border-radius: var(--lpf-radius) !important;
+  background: rgba(9, 17, 21, .94) !important;
+  box-shadow: none !important;
+}
+body.il-lens-page .ticker-control button,
+body.il-lens-page .primary-action {
+  background: linear-gradient(135deg, #f0cd7d, #ca902f) !important;
+  color: #171108 !important;
+}
+body.il-lens-page .company-nav { padding: 4px !important; }
+body.il-lens-page .company-nav button { border-radius: 4px !important; }
+
+/* ── Static and auth documents ───────────────────────────────── */
+body.il-static-page .hero {
+  max-width: 1180px !important;
+  padding: 126px 34px 66px !important;
+  background: radial-gradient(circle at 77% 45%, rgba(204, 147, 49, .10), transparent 35%) !important;
+}
+body.il-static-page .hero h1 { font-size: clamp(50px, 5vw, 70px) !important; line-height: .94 !important; letter-spacing: -.026em !important; }
+body.il-static-page .hero h1 em { color: var(--lpf-gold) !important; font-style: normal !important; }
+body.il-static-page .hero-sub { color: var(--lpf-copy) !important; }
+body.il-static-page .feat,
+body.il-static-page .card,
+body.il-static-page .section {
+  background: linear-gradient(155deg, rgba(13, 23, 27, .96), rgba(7, 13, 16, .98)) !important;
+  border: 1px solid var(--lpf-line) !important;
+  border-radius: var(--lpf-radius) !important;
+  box-shadow: none !important;
+}
+body.il-static-page .feat-icon { color: var(--lpf-gold) !important; filter: grayscale(1) sepia(1) saturate(1.3) !important; }
+body.il-auth-page .auth-card,
+body.il-auth-page .login-card,
+body.il-auth-page .signup-card,
+body.il-auth-page form {
+  border: 1px solid var(--lpf-line) !important;
+  border-radius: var(--lpf-radius) !important;
+  background: rgba(8, 15, 18, .96) !important;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, .45) !important;
+}
+:is(#lpf-auth-a, html) :is(#lpf-auth-b, body.il-auth-page) .auth-title,
+:is(#lpf-auth-a, html) :is(#lpf-auth-b, body.il-auth-page) h1 {
+  font-family: var(--lpf-serif) !important;
+  font-weight: 400 !important;
+  letter-spacing: -.012em !important;
+}
+:is(#lpf-auth-a, html) :is(#lpf-auth-b, body.il-auth-page) nav .nav-logo,
+:is(#lpf-auth-a, html) :is(#lpf-auth-b, body.il-auth-page) nav .nav-logo span {
+  font-family: var(--lpf-serif) !important;
+  font-weight: 400 !important;
+}
+
+/* ── Shared static-page mobile drawer ─────────────────────────── */
+.lp-static-menu-toggle {
+  display: none;
+  width: 38px;
+  height: 38px;
+  margin-left: 2px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: transparent;
+  color: #dedbd3;
+  font-size: 20px;
+  cursor: pointer;
+}
+.lp-static-menu-toggle[aria-expanded='true'] { border-color: var(--lpf-line-gold); color: var(--lpf-gold-bright); }
+.lp-static-drawer { display: none; }
+
+@media (max-width: 1080px) {
+  body .il-global-nav { padding: 0 22px !important; }
+  body .il-global-brand { min-width: 174px !important; }
+  body .il-global-tab { padding: 0 8px !important; }
+  body .il-global-search { width: min(230px, 20vw) !important; }
+  body.il-product-page #landing-page .il-landing-hero { grid-template-columns: minmax(320px, .76fr) minmax(510px, 1.46fr) !important; }
+}
+
+@media (max-width: 900px) {
+  body.il-product-page::after,
+  body.il-static-page::before,
+  body.il-lens-page::before,
+  body.il-auth-page::before { display: none !important; }
+
+  body .il-global-nav {
+    height: 58px !important;
+    min-height: 58px !important;
+    padding: 0 15px !important;
+    gap: 10px !important;
+  }
+  body .il-global-brand { min-width: 0 !important; margin-right: auto !important; }
+  body .il-global-brand > span { font-size: 16px !important; }
+  body .il-global-brand img { width: 27px !important; height: 27px !important; }
+  body .il-global-links,
+  body .il-global-search,
+  body .il-global-live,
+  body .il-global-actions .btn-nav,
+  body .il-global-actions .btn-nav-outline,
+  body .il-global-actions .il-static-account,
+  body .il-global-actions .theme-toggle { display: none !important; }
+  body.il-product-page #main-nav .theme-toggle,
+  body.il-product-page #main-nav .nav-acct-mobile { display: none !important; }
+  :is(#lpf-lens-nav-a, html) :is(#lpf-lens-nav-b, body.il-lens-page) .il-global-actions .theme-toggle,
+  :is(#lpf-lens-nav-a, html) :is(#lpf-lens-nav-b, body.il-lens-page) .il-global-actions .il-static-account,
+  :is(#lpf-static-nav-a, html) :is(#lpf-static-nav-b, body.il-static-page) .il-global-actions .theme-toggle,
+  :is(#lpf-static-nav-a, html) :is(#lpf-static-nav-b, body.il-static-page) .il-global-actions .il-static-account { display: none !important; }
+  body.il-product-page .prime-nav-menu,
+  .lp-static-menu-toggle { display: inline-flex !important; }
+  body.il-product-page #main-nav .prime-nav-menu { margin-left: 0 !important; }
+
+  /* Old bottom navigation was the largest visual mismatch with the concept. */
+  body.il-product-page #mobile-bottom-nav { display: none !important; }
+  body.il-product-page #view-home { padding-top: 58px !important; padding-bottom: 0 !important; }
+  body.il-product-page #landing-page .il-landing-hero {
+    width: 100% !important;
+    min-height: 0 !important;
+    padding: 24px 15px 34px !important;
+    gap: 28px !important;
+  }
+  :is(#lpf-dash-mobile-a, html) :is(#lpf-dash-mobile-b, body.il-product-page) #market-page .home-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    grid-template-areas: 'market' 'watch' 'signals' 'insights' 'movers' !important;
+    grid-template-rows: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+  :is(#lpf-dash-mobile-a, html) :is(#lpf-dash-mobile-b, body.il-product-page) #market-page .home-grid > * {
+    min-height: 250px !important;
+    max-height: none !important;
+  }
+  body.il-product-page #landing-page .il-landing-copy { padding: 0 !important; }
+  body.il-product-page #landing-page .il-landing-kicker {
+    display: inline-flex !important;
+    width: auto !important;
+    margin: 0 0 14px !important;
+    padding: 7px 10px !important;
+    border: 1px solid var(--lpf-line) !important;
+    border-radius: 999px !important;
+    color: var(--lpf-gold-bright) !important;
+    background: rgba(11, 19, 22, .8) !important;
+    font: 500 7px/1 var(--lpf-mono) !important;
+    letter-spacing: .13em !important;
+  }
+  body.il-product-page #landing-page h1.il-display {
+    max-width: 360px !important;
+    font-size: clamp(39px, 11.3vw, 46px) !important;
+    line-height: .98 !important;
+  }
+  body.il-product-page #landing-page .il-landing-copy > p { margin-top: 16px !important; font-size: 12px !important; line-height: 1.6 !important; }
+  body.il-product-page #landing-page .il-landing-actions { display: grid !important; grid-template-columns: 1fr 1fr !important; }
+  body.il-product-page #landing-page .il-landing-actions > * { width: 100% !important; min-width: 0 !important; height: 42px !important; }
+  body.il-product-page #landing-page .il-trust { display: none !important; }
+  body.il-product-page #landing-page .il-landing-preview { order: 2 !important; width: 100% !important; }
+  body.il-product-page #landing-page .ihx-wrap {
+    height: 315px !important;
+    min-height: 315px !important;
+    grid-template-columns: 1fr !important;
+    overflow: hidden !important;
+    border: 1px solid var(--lpf-line) !important;
+    border-radius: var(--lpf-radius) !important;
+    background: #071014 !important;
+  }
+  body.il-product-page #landing-page .ihx-stage {
+    min-height: 315px !important;
+    background-size: cover !important;
+    background-position: 54% center !important;
+    mask-image: none !important;
+  }
+  body.il-product-page #landing-page .ihx-float { top: 16px !important; left: 16px !important; width: 124px !important; padding: 11px !important; }
+  body.il-product-page #landing-page .ihx-rail {
+    position: absolute !important;
+    right: 12px !important;
+    bottom: 12px !important;
+    z-index: 4 !important;
+    display: block !important;
+    width: 142px !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 12px !important;
+  }
+  body.il-product-page #landing-page .ihx-r-row:nth-of-type(n+3),
+  body.il-product-page #landing-page .ihx-r-foot { display: none !important; }
+  body.il-product-page #landing-page .ihx-r-price { margin-top: 8px !important; font-size: 22px !important; }
+  body.il-product-page #landing-page .ihx-r-row { padding: 7px 0 !important; }
+  body.il-product-page #landing-page .il-rail,
+  body.il-product-page #landing-page .il-market-strip { display: none !important; }
+
+  /* The SPA hamburger uses its existing menu; make it a top drawer, not a
+     bottom-sheet left over from the original mobile app. */
+  body.il-product-page .mobile-more-menu {
+    position: fixed !important;
+    top: 58px !important;
+    right: 10px !important;
+    bottom: auto !important;
+    left: auto !important;
+    z-index: 9000 !important;
+    width: min(370px, calc(100vw - 20px)) !important;
+    max-height: calc(100dvh - 70px) !important;
+    overflow: auto !important;
+    padding: 14px !important;
+    border: 1px solid var(--lpf-line-gold) !important;
+    border-radius: var(--lpf-radius) !important;
+    background: rgba(7, 14, 17, .985) !important;
+    box-shadow: 0 28px 80px rgba(0, 0, 0, .6) !important;
+    transform: translateY(-10px) scale(.985) !important;
+    transform-origin: top right !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+  body.il-product-page .mobile-more-menu.open {
+    transform: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  body.il-product-page .mmenu-close { display: none !important; }
+  body.il-product-page .mmenu-grid { gap: 6px !important; grid-template-columns: repeat(3, 1fr) !important; }
+  body.il-product-page .mmenu-item { min-height: 68px !important; border: 1px solid var(--lpf-line-soft) !important; border-radius: 6px !important; }
+  body.il-product-page .mmenu-item i { color: var(--lpf-gold) !important; }
+
+  :is(#lpf-tabs-a, html) :is(#lpf-tabs-b, body.il-product-page) #view-tool .mobile-sec-tabs {
+    gap: 6px !important;
+    padding: 10px 12px !important;
+    border-bottom: 1px solid var(--lpf-line) !important;
+    background: rgba(7, 13, 16, .94) !important;
+    scrollbar-width: none !important;
+  }
+  :is(#lpf-tabs-a, html) :is(#lpf-tabs-b, body.il-product-page) #view-tool .mobile-sec-tabs::-webkit-scrollbar { display: none !important; }
+  :is(#lpf-tabs-a, html) :is(#lpf-tabs-b, body.il-product-page) #view-tool .mobile-sec-tabs .mst-btn {
+    width: 84px !important;
+    min-width: 84px !important;
+    height: 42px !important;
+    padding: 0 8px !important;
+    font-size: 10px !important;
+  }
+  :is(#lpf-chartbar-a, html) :is(#lpf-chartbar-b, body.il-product-page) #view-tool .app-chart-toolbar {
+    gap: 5px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    scrollbar-width: none !important;
+  }
+  :is(#lpf-chartbar-a, html) :is(#lpf-chartbar-b, body.il-product-page) #view-tool .app-chart-toolbar::-webkit-scrollbar { display: none !important; }
+  :is(#lpf-chartbar-a, html) :is(#lpf-chartbar-b, body.il-product-page) #view-tool .app-chart-toolbar .indicator-control::after {
+    content: none !important;
+  }
+
+  /* Static drawer */
+  .lp-static-drawer {
+    position: fixed;
+    inset: 58px 0 0;
+    z-index: 9000;
+    display: block;
+    pointer-events: none;
+    visibility: hidden;
+  }
+  .lp-static-drawer::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, .56);
+    opacity: 0;
+    transition: opacity .18s ease;
+  }
+  .lp-static-drawer-panel {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: min(350px, calc(100vw - 20px));
+    padding: 12px;
+    border: 1px solid var(--lpf-line-gold);
+    border-radius: var(--lpf-radius);
+    background: rgba(7, 14, 17, .99);
+    box-shadow: 0 30px 90px rgba(0, 0, 0, .64);
+    transform: translateY(-10px) scale(.985);
+    transform-origin: top right;
+    opacity: 0;
+    transition: opacity .18s ease, transform .18s ease;
+  }
+  .lp-static-drawer.open { pointer-events: auto; visibility: visible; }
+  .lp-static-drawer.open::before { opacity: 1; }
+  .lp-static-drawer.open .lp-static-drawer-panel { transform: none; opacity: 1; }
+  .lp-static-drawer-search {
+    display: flex;
+    height: 42px;
+    margin-bottom: 10px;
+    border: 1px solid var(--lpf-line);
+    border-radius: 5px;
+    overflow: hidden;
+    background: #050a0d;
+  }
+  .lp-static-drawer-search input { min-width: 0; flex: 1; border: 0; padding: 0 12px; outline: 0; background: transparent; color: var(--lpf-ink); font-size: 11px; text-transform: uppercase; }
+  .lp-static-drawer-search button { width: 58px; border: 0; background: linear-gradient(135deg, #efcd7d, #ca902f); color: #171108; font-size: 10px; font-weight: 800; }
+  .lp-static-drawer nav { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .lp-static-drawer a {
+    display: flex;
+    min-height: 48px;
+    align-items: center;
+    gap: 9px;
+    padding: 0 12px;
+    border: 1px solid var(--lpf-line-soft);
+    border-radius: 5px;
+    color: #c0c6c3;
+    text-decoration: none;
+    font-size: 10px;
+    font-weight: 600;
+  }
+  .lp-static-drawer a:hover { border-color: var(--lpf-line-gold); color: var(--lpf-ink); background: #0d181c; }
+  .lp-static-drawer a span { color: var(--lpf-gold); font-size: 15px; }
+  .lp-static-drawer .lp-account-link { display: none; }
+  .il-global-nav.il-auth-in + .lp-static-drawer .lp-guest-link { display: none; }
+  .il-global-nav.il-auth-in + .lp-static-drawer .lp-account-link { display: flex; }
+
+  body.il-lens-page #lab-main { padding: 82px 13px 70px !important; }
+  body.il-lens-page .search-shell { padding: 20px !important; gap: 22px !important; }
+  body.il-lens-page .search-shell h1 { font-size: 43px !important; }
+  :is(#lpf-lens-type-a, html) :is(#lpf-lens-type-b, body.il-lens-page) .search-shell h1 {
+    font-family: var(--lpf-serif) !important;
+    font-weight: 400 !important;
+    font-size: 43px !important;
+    line-height: .98 !important;
+    letter-spacing: -.02em !important;
+  }
+  body.il-lens-page .ticker-form { padding: 16px !important; }
+  body.il-lens-page .ticker-control { grid-template-columns: minmax(0, 1fr) 92px !important; }
+  body.il-lens-page .quick-tickers { grid-template-columns: repeat(4, 1fr) !important; }
+  body.il-lens-page .quick-tickers button { min-width: 0 !important; padding: 0 !important; }
+
+  body.il-static-page .hero { padding: 92px 18px 50px !important; }
+  body.il-static-page .hero h1 { font-size: clamp(45px, 13vw, 58px) !important; line-height: .94 !important; }
+  body.il-static-page .hero-sub { font-size: 12px !important; line-height: 1.65 !important; }
+  body.il-static-page .features { padding: 0 15px !important; gap: 8px !important; }
+  body.il-static-page .feat { min-height: 0 !important; padding: 20px !important; }
+}
+
+@media (max-width: 520px) {
+  /* The approved phone composition goes directly from proposition to the
+     lens/quote card. Conversion actions remain in the hamburger drawer. */
+  :is(#lpf-mobile-a, html) :is(#lpf-mobile-b, body.il-product-page) #landing-page .il-landing-actions { display: none !important; }
+  body.il-product-page #landing-page .ihx-wrap,
+  body.il-product-page #landing-page .ihx-stage { height: 300px !important; min-height: 300px !important; }
+  body.il-product-page #view-tool .app-section-hdr { min-height: 54px !important; height: 54px !important; }
+  body.il-product-page #view-tool .ash-sub { display: none !important; }
+}
+
+/* ── Accessible light presentation ─────────────────────────────
+   Dark remains the brand default and the approved marketing concept. The
+   visible theme control must still produce a complete, intentional state. */
+html:not([data-theme='dark']) {
+  --lpf-bg: #f3f0e8;
+  --lpf-bg-deep: #e9e4d9;
+  --lpf-sidebar: #ece7dc;
+  --lpf-panel: #fbfaf6;
+  --lpf-panel-raised: #ffffff;
+  --lpf-line: rgba(62, 54, 39, .17);
+  --lpf-line-soft: rgba(62, 54, 39, .09);
+  --lpf-line-gold: rgba(151, 103, 22, .5);
+  --lpf-gold: #9a681c;
+  --lpf-gold-bright: #805413;
+  --lpf-ink: #171a1a;
+  --lpf-copy: #4e5957;
+  --lpf-muted: #737d7b;
+  --lpf-green: #158348;
+  --lpf-red: #c13f4d;
+  background: var(--lpf-bg-deep) !important;
+}
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-product-page),
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-static-page),
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-lens-page),
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-auth-page) {
+  background:
+    radial-gradient(circle at 70% -8%, rgba(174, 132, 57, .10), transparent 35%),
+    linear-gradient(180deg, #f8f6f0, #eeeadf) !important;
+  color: var(--lpf-ink) !important;
+}
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body) .il-global-nav,
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-product-page) #main-nav,
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-product-page) .prime-mobile-appbar {
+  background: rgba(247, 244, 236, .96) !important;
+  border-color: var(--lpf-line) !important;
+}
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body) .il-global-brand > span,
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-product-page) #main-nav .nav-logo,
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-product-page) #main-nav .nav-logo > span,
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-product-page) #landing-page h1.il-display,
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-static-page) h1,
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-lens-page) h1,
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-lens-page) h2,
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-auth-page) h1 {
+  color: var(--lpf-ink) !important;
+}
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-product-page) #landing-page .il-landing-copy > p,
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-static-page) p,
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-lens-page) p,
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-auth-page) p { color: var(--lpf-copy) !important; }
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-product-page) #landing-page .il-rail,
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-product-page) #landing-page .il-ms-inner,
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-product-page) #market-page .hc,
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-product-page) #view-tool .tw-prime-hero,
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-product-page) #view-tool .tw-live-board,
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-product-page) #view-tool .tool-launch-card,
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-product-page) #view-tool .panel-box,
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-product-page) #view-tool .metric-card,
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-static-page) .feat,
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-static-page) .card,
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-static-page) .section,
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-lens-page) .search-shell,
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-lens-page) .ticker-form,
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-lens-page) .notice,
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-lens-page) .panel,
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-lens-page) article,
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-auth-page) .auth-card,
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-auth-page) form {
+  background: rgba(252, 250, 245, .96) !important;
+  border-color: var(--lpf-line) !important;
+  color: var(--lpf-ink) !important;
+}
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-product-page) #market-page .hs-sidebar,
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-product-page) #view-tool .app-sidebar {
+  background: #ebe6da !important;
+  border-color: var(--lpf-line) !important;
+}
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-product-page) #market-page .hs-main,
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-product-page) #view-tool .app-main { background: #f3f0e8 !important; }
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-product-page) #view-tool .app-sidebar a,
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-product-page) #view-tool .sb-item,
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-product-page) #market-page .prime-dash-nav a { color: #47514f !important; }
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-lens-page) input,
+:is(#lpf-light-a, html:not([data-theme='dark'])) :is(#lpf-light-b, body.il-auth-page) input {
+  background: #fffdf8 !important;
+  border-color: var(--lpf-line) !important;
+  color: var(--lpf-ink) !important;
+}
+
+/* The oldest theme layer used intentionally inflated specificity. Keep this
+   final state authoritative so the theme control never produces a half-dark,
+   half-light interface. */
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme='dark']) body.il-product-page,
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme='dark']) body.il-static-page,
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme='dark']) body.il-lens-page,
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme='dark']) body.il-auth-page,
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme='dark']) body.il-product-page #view-home {
+  background: linear-gradient(180deg, #f8f6f0, #ede8dc) !important;
+  color: #171a1a !important;
+}
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme='dark']) body #main-nav,
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme='dark']) body .il-global-nav {
+  background: rgba(248, 246, 239, .96) !important;
+  border-color: rgba(62, 54, 39, .16) !important;
+}
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme='dark']) body.il-product-page #landing-page h1.il-display,
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme='dark']) body.il-product-page #main-nav .nav-logo,
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme='dark']) body.il-product-page #main-nav .nav-logo > span,
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme='dark']) body .il-global-brand > span {
+  color: #171a1a !important;
+}
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme='dark']) body.il-product-page #landing-page .il-landing-copy > p { color: #4e5957 !important; }
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme='dark']) body.il-product-page #landing-page,
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme='dark']) body.il-product-page #landing-page .il-landing-copy {
+  background: transparent !important;
+  color: #171a1a !important;
+}
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme='dark']) body.il-product-page #landing-page h1.il-display {
+  background: none !important;
+  -webkit-text-fill-color: currentColor !important;
+  color: #171a1a !important;
+}
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme='dark']) body.il-product-page #landing-page h1.il-display .il-d1,
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme='dark']) body.il-product-page #landing-page h1.il-display .il-d2 {
+  background: none !important;
+  -webkit-text-fill-color: currentColor !important;
+  color: #171a1a !important;
+}
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme='dark']) body.il-product-page #landing-page .il-cta-ghost {
+  background: transparent !important;
+  border-color: rgba(62, 54, 39, .28) !important;
+  color: #252b2a !important;
+}
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme='dark']) body.il-product-page #main-nav .nav-tab { color: #4e5755 !important; }
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme='dark']) body.il-product-page #main-nav .nav-tab.active-tab { color: #805413 !important; }
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme='dark']) body.il-product-page #landing-page .il-rail-item > b,
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme='dark']) body.il-product-page #landing-page .ilm-title { color: #252b2a !important; }
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme='dark']) body.il-product-page #landing-page .il-rail-item > span { color: #626d6a !important; }
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme='dark']) body.il-product-page #landing-page .il-rail,
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme='dark']) body.il-product-page #landing-page .il-ms-inner,
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme='dark']) body.il-product-page #market-page .hc,
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme='dark']) body.il-product-page #view-tool .tw-prime-hero,
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme='dark']) body.il-product-page #view-tool .tw-live-board,
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme='dark']) body.il-product-page #view-tool .tool-launch-card,
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme='dark']) body.il-static-page .feat,
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme='dark']) body.il-static-page .section,
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme='dark']) body.il-lens-page .search-shell,
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme='dark']) body.il-lens-page .ticker-form,
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme='dark']) body.il-lens-page .panel,
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme='dark']) body.il-auth-page .auth-card,
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme='dark']) body.il-auth-page form {
+  background: rgba(252, 250, 245, .96) !important;
+  border-color: rgba(62, 54, 39, .16) !important;
+  color: #171a1a !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lp-static-drawer::before,
+  .lp-static-drawer-panel { transition: none !important; }
+}
