@@ -288,21 +288,26 @@ test("product spine presents one reviewable decision workflow", () => {
 test("primary navigation avoids duplicate tool destinations", () => {
   assert.doesNotMatch(html, /class="nav-tab"[^>]*>Chart</);
   assert.doesNotMatch(html, /Scenario Builder/);
-  assert.match(html, /id="nav-analyze" class="nav-tab"[^>]*>Research</);
+  assert.match(html, /id="nav-analyze" class="nav-tab"[^>]*>Scanners</);
+  assert.match(html, /id="nav-lensscore-link"[^>]*class="nav-tab"[^>]*>Analysis/);
+  assert.match(html, /id="nav-saved-link"[^>]*>Watchlists/);
+  assert.match(html, /id="nav-news-link"[^>]*>News/);
+  assert.match(html, /id="nav-pricing-link"[^>]*>Pricing/);
   assert.match(html, /<div class="sb-group-label">Research<\/div>/);
   assert.match(html, /<span class="sb-item-label">Chart<\/span>/);
   assert.match(html, /Find what the price already assumes\./);
   assert.match(html, /Start with a company, then move from reported fundamentals/);
   assert.match(html, /Popular starting points/);
-  assert.match(html, /id="nav-lensscore-link"[^>]*class="nav-tab"[^>]*>LensScore/);
+  assert.match(html, /href="\/lens-score" id="nav-lensscore-link"/);
 });
 
 test("About and LensScore use one global product navigation", () => {
   for (const page of [aboutHtml, lensHtml]) {
     assert.match(page, /class="[^"]*\bil-global-nav\b[^"]*"/);
-    assert.match(page, /class="[^"]*\bil-global-tab\b[^"]*" href="\/\?view=tool&amp;section=reports">Saved/);
-    assert.match(page, /class="[^"]*\bil-global-tab\b[^"]*" href="\/lens-score"/);
-    assert.match(page, /class="[^"]*\bil-global-tab\b[^"]*" href="\/about"/);
+    assert.match(page, /class="[^"]*\bil-global-tab\b[^"]*" href="\/\?view=tool&amp;section=reports">Watchlists/);
+    assert.match(page, /class="[^"]*\bil-global-tab\b[^"]*" href="\/lens-score"[^>]*>Analysis/);
+    assert.match(page, /class="[^"]*\bil-global-tab\b[^"]*" href="\/blog"[^>]*>News/);
+    assert.match(page, /class="[^"]*\bil-global-tab\b[^"]*" href="\/signup"[^>]*>Pricing/);
     assert.match(page, /\/site-shell\.css\?v=/);
   }
   assert.match(lensHtml, /<header class="topbar" hidden>/);
@@ -655,7 +660,7 @@ test("landing visuals are honest CSS-built illustrations, not fake screenshots",
   assert.match(landingPolishCss, /grid-template-columns: minmax\(360px, \.82fr\) minmax\(520px, 1\.18fr\)/);
   assert.doesNotMatch(html, /class="tw-score-preview"/);
   assert.doesNotMatch(html, /class="il-lensscore-launch"/);
-  assert.match(html, /id="nav-lensscore-link"[^>]*class="nav-tab"[^>]*>LensScore/);
+  assert.match(html, /id="nav-lensscore-link"[^>]*class="nav-tab"[^>]*>Analysis/);
   assert.match(landingPolishCss, /#view-tool \.tool-welcome::after \{[\s\S]*content: none !important/);
   assert.match(legacyCss, /\.il-hero-mock\{/);
   assert.match(legacyCss, /\.il-workflow-panels\{/);

@@ -885,3 +885,69 @@ html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme='dark']
   .lp-static-drawer::before,
   .lp-static-drawer-panel { transition: none !important; }
 }
+/* Light-mode counterpart for the shared Lens Prime static-page header. */
+html:not([data-theme="dark"]) body.il-static-page .il-global-nav,
+html:not([data-theme="dark"]) body.il-lens-page .il-global-nav {
+  background: rgba(252, 250, 245, .98) !important;
+  border-bottom-color: rgba(62, 54, 39, .14) !important;
+}
+html:not([data-theme="dark"]) body.il-static-page .il-global-brand,
+html:not([data-theme="dark"]) body.il-static-page .il-global-brand span,
+html:not([data-theme="dark"]) body.il-lens-page .il-global-brand,
+html:not([data-theme="dark"]) body.il-lens-page .il-global-brand span {
+  color: #171a1a !important;
+}
+html:not([data-theme="dark"]) body.il-static-page .il-global-tab,
+html:not([data-theme="dark"]) body.il-lens-page .il-global-tab {
+  color: #414642 !important;
+}
+html:not([data-theme="dark"]) body.il-static-page .il-global-tab:hover,
+html:not([data-theme="dark"]) body.il-static-page .il-global-tab.active,
+html:not([data-theme="dark"]) body.il-static-page .il-global-tab.active-tab,
+html:not([data-theme="dark"]) body.il-lens-page .il-global-tab:hover,
+html:not([data-theme="dark"]) body.il-lens-page .il-global-tab.active,
+html:not([data-theme="dark"]) body.il-lens-page .il-global-tab.active-tab {
+  color: #171a1a !important;
+}
+
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme="dark"]) body.il-static-page .il-global-nav .il-global-brand > span,
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme="dark"]) body.il-lens-page .il-global-nav .il-global-brand > span {
+  color: #171a1a !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme="dark"]) body.il-static-page .il-global-nav .il-global-tab,
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme="dark"]) body.il-lens-page .il-global-nav .il-global-tab {
+  color: #414642 !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme="dark"]) body.il-static-page .il-global-nav .il-global-tab.active,
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme="dark"]) body.il-static-page .il-global-nav .il-global-tab.active-tab,
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme="dark"]) body.il-lens-page .il-global-nav .il-global-tab.active,
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme="dark"]) body.il-lens-page .il-global-nav .il-global-tab.active-tab {
+  color: #171a1a !important;
+}
+
+@media (min-width: 901px) {
+  html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4) body.il-static-page .il-global-nav .il-global-tab,
+  html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4) body.il-lens-page .il-global-nav .il-global-tab {
+    padding-inline: 8px !important;
+    font-size: clamp(8.5px, .82vw, 10px) !important;
+  }
+}
+
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme="dark"]) body.il-static-page .il-global-search,
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme="dark"]) body.il-lens-page .il-global-search {
+  background: #071014 !important;
+  border-color: rgba(187, 168, 126, .18) !important;
+}
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme="dark"]) body.il-static-page .il-global-search input,
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme="dark"]) body.il-lens-page .il-global-search input {
+  background: transparent !important;
+  color: #f2eee6 !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme="dark"]) body.il-static-page .il-global-search input::placeholder,
+html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme="dark"]) body.il-lens-page .il-global-search input::placeholder {
+  color: #778180 !important;
+  opacity: 1 !important;
+}

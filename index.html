@@ -109,8 +109,8 @@
 <link rel="stylesheet" href="/lens-prime-v2.css?v=20260828-6">
 <link rel="stylesheet" href="/lens-prime-exact.css?v=20260828-1">
 <link rel="stylesheet" href="/lens-prime-shared.css?v=20260830-1">
-<link rel="stylesheet" href="/lens-prime-fidelity.css?v=20260830-9">
-<link rel="stylesheet" href="/lens-prime-match.css?v=20260830-12">
+<link rel="stylesheet" href="/lens-prime-fidelity.css?v=20260831-14">
+<link rel="stylesheet" href="/lens-prime-match.css?v=20260831-7">
 <script defer src="/premium-motion.js?v=20260825-4"></script>
 </head>
 <body class="il-product-page">
@@ -125,12 +125,11 @@
   </a>
   <div class="nav-links" id="nav-links">
     <a href="/" id='nav-home' class="nav-tab active-tab" onclick="navGoTo('home');return false;">Dashboard</a>
-    <a href="/?view=tool&amp;section=analyze" id="nav-analyze" class="nav-tab" onclick="navGoTo('analyze');return false;">Research</a>
-    <a href="/lens-score" id="nav-lensscore-link" class="nav-tab" onclick="return navGoLensScore(this,event);">LensScore</a>
-    <a href="/?view=tool&amp;section=projection" id="nav-project" class="nav-tab" onclick="navGoTo('projection');return false;">Scenarios</a>
-    <a href="/?view=tool&amp;section=compare" id="nav-compare" class="nav-tab" onclick="navGoTo('compare');return false;">Compare</a>
-    <a href="/?view=tool&amp;section=reports" class="nav-tab" id="nav-saved-link" onclick="navGoTo('reports');return false;">Saved</a>
-    <a href='/about' class="nav-tab" id="nav-about-link">About</a>
+    <a href="/?view=tool&amp;section=screener" id="nav-analyze" class="nav-tab" onclick="navGoTo('screener');return false;">Scanners</a>
+    <a href="/lens-score" id="nav-lensscore-link" class="nav-tab" onclick="return navGoLensScore(this,event);">Analysis</a>
+    <a href="/?view=tool&amp;section=reports" class="nav-tab" id="nav-saved-link" onclick="navGoTo('reports');return false;">Watchlists</a>
+    <a href="/blog" class="nav-tab" id="nav-news-link">News</a>
+    <a href="/signup" class="nav-tab" id="nav-pricing-link">Pricing</a>
   </div>
   <form class="nav-search" id="nav-search" role="search" onsubmit="return navSearchGo(event)">
     <i class="ti ti-search" aria-hidden="true"></i>
@@ -174,8 +173,8 @@
       </div>
     </div>
   </div>
-  <script defer src="/app-navigation.js?v=20260828-1"></script>
-<script defer src="/landing-market.js?v=20260825-4"></script>
+  <script defer src="/app-navigation.js?v=20260831-1"></script>
+<script defer src="/landing-market.js?v=20260831-2"></script>
 </nav>
 
 <span id="main-content" tabindex="-1"></span>
@@ -413,7 +412,7 @@
     <div class="il-landing-copy">
       <span class="il-landing-kicker">Research the expectation, not just the ticker</span>
       <h1 class="il-display"><span class="il-d1">Find the edge.</span> <span class="il-d2">See the <em>bigger picture.</em></span></h1>
-      <p>Implied Lens brings price action, business quality, priced-in expectations, scenarios, and valuation into one focused research terminal&mdash;so you can see what the market expects before you decide what you believe.</p>
+      <p>Implied Lens combines price action, fundamentals, and market expectations to surface high-conviction opportunities&mdash;before the crowd.</p>
       <div class="il-landing-actions il-cta-pair">
         <a class="il-landing-secondary il-cta-solid" id="il-hero-secondary" href="/signup">Start free trial <i class="ti ti-arrow-right" aria-hidden="true"></i></a>
         <button type="button" id="il-hero-primary" class="il-landing-primary il-cta-ghost" onclick="heroLoadTicker('AAPL')"><i class="ti ti-player-play" aria-hidden="true"></i> See how it works</button>
@@ -424,10 +423,11 @@
         <button type="button" onclick="landingSearch()">Analyze</button>
       </div>
       <div class="il-trust" aria-label="Data sources and terms">
-        <span class="il-trust-lead">Built on visible sources</span>
+        <span class="il-trust-lead">Built on verified sources</span>
         <span><i class="ti ti-file-certificate"></i>SEC EDGAR</span>
-        <span class="il-trust-dot" aria-hidden="true">·</span>
-        <span><i class="ti ti-broadcast"></i>Market providers</span>
+        <span><i class="ti ti-chart-line"></i>Yahoo Finance</span>
+        <span><i class="ti ti-broadcast"></i>Finnhub</span>
+        <span><i class="ti ti-building-bank"></i>FRED</span>
         <span class="il-trust-dot" id="il-trust-nocard-dot" aria-hidden="true">·</span>
         <span id="il-trust-nocard"><i class="ti ti-credit-card-off"></i>No credit card to start</span>
       </div>
@@ -468,36 +468,27 @@
   <!-- Live market strip. Every value comes from /api/market/movers. -->
   <section class="il-market-strip" aria-label="Live market movers">
     <div class="il-ms-inner">
-      <div class="ilm-card" id="il-movers">
-        <div class="ilm-head">
-          <span class="ilm-title">Top movers</span>
-          <div class="ilm-tabs" role="tablist" aria-label="Mover category">
-            <button type="button" class="ilm-tab on" role="tab" aria-selected="true" data-type="gainers">Gainers</button>
-            <button type="button" class="ilm-tab" role="tab" aria-selected="false" data-type="losers">Losers</button>
-            <button type="button" class="ilm-tab" role="tab" aria-selected="false" data-type="active">Active</button>
-          </div>
-        </div>
-        <div class="ilm-list" aria-live="polite" aria-busy="true"></div>
-        <a class="ilm-more" href="/?view=tool&amp;section=analyze">Open the research workspace <i class="ti ti-arrow-right" aria-hidden="true"></i></a>
+      <div class="ilm-card ilm-overview-card" id="il-movers">
+        <div class="ilm-head"><span class="ilm-title">Market overview</span><span class="ilm-status" id="ilm-market-status">Live</span></div>
+        <div class="ilm-overview-label">S&amp;P 500</div>
+        <div class="ilm-overview-quote"><strong id="ilm-index-price">—</strong><span id="ilm-index-change">—</span></div>
+        <svg class="ilm-market-spark" viewBox="0 0 260 62" preserveAspectRatio="none" aria-label="S&amp;P 500 one-month price trend"><path class="ilm-market-fill" d=""/><path class="ilm-market-line" d=""/></svg>
+        <div class="ilm-list" aria-live="polite" aria-busy="true" hidden></div>
       </div>
-      <div class="ilm-card ilm-soon" aria-label="Options flow, not yet available">
-        <div class="ilm-head"><span class="ilm-title">Options flow</span><span class="ilm-badge">Coming soon</span></div>
-        <p class="ilm-soon-copy">Unusual activity, implied move and IV rank will appear here once an options data provider is wired up. Nothing is shown until the numbers are real.</p>
+      <div class="ilm-card ilm-sector-card" aria-label="Live sector ETF performance">
+        <div class="ilm-head"><span class="ilm-title">Sector performance</span><span class="ilm-badge live">1D</span></div>
+        <div class="ilm-sector-list" id="ilm-sector-list" aria-live="polite"><span class="ilm-loading-line"></span><span class="ilm-loading-line"></span><span class="ilm-loading-line"></span><span class="ilm-loading-line"></span><span class="ilm-loading-line"></span></div>
       </div>
-      <div class="ilm-card ilm-prime-method" aria-label="Implied Lens research workflow">
-        <div class="ilm-head"><span class="ilm-title">The Lens workflow</span><span class="ilm-badge live">Explainable</span></div>
-        <div class="ilm-method-list">
-          <span><i class="ti ti-building-bank"></i><b>Business</b><em>What is happening?</em></span>
-          <span><i class="ti ti-focus-2"></i><b>Expectations</b><em>What is priced in?</em></span>
-          <span><i class="ti ti-adjustments"></i><b>Scenarios</b><em>What could change?</em></span>
-          <span><i class="ti ti-target-arrow"></i><b>Valuation</b><em>What could it be worth?</em></span>
+      <div class="ilm-card ilm-sentiment-card" aria-label="Live sector breadth sentiment">
+        <div class="ilm-head"><span class="ilm-title">Market sentiment</span><span class="ilm-badge live">Sector breadth</span></div>
+        <div class="ilm-gauge-wrap">
+          <div class="ilm-gauge" id="ilm-gauge"><div><strong id="ilm-breadth-score">—</strong><span id="ilm-breadth-label">Loading</span></div></div>
+          <div class="ilm-breadth-copy"><strong id="ilm-breadth-count">—</strong><span>sectors advancing</span></div>
         </div>
       </div>
-      <div class="ilm-card ilm-reference-links" aria-label="Recent Implied Lens research">
-        <div class="ilm-head"><span class="ilm-title">Recent research</span><a class="ilm-more" href="/blog">View all <i class="ti ti-arrow-right"></i></a></div>
-        <a href="/research-process"><strong>Build a repeatable stock thesis</strong><span>Research process</span></a>
-        <a href="/data-sources"><strong>See where every number comes from</strong><span>Data sources</span></a>
-        <a href="/lens-score"><strong>Read quality, value, and setup together</strong><span>LensScore</span></a>
+      <div class="ilm-card ilm-news-card" aria-label="Recent market news">
+        <div class="ilm-head"><span class="ilm-title">Recent news</span><span class="ilm-badge live" id="ilm-source-label">Verified feed</span></div>
+        <div class="ilm-news-list" id="ilm-news-list" aria-live="polite"><span class="ilm-loading-line"></span><span class="ilm-loading-line"></span><span class="ilm-loading-line"></span></div>
       </div>
     </div>
   </section>

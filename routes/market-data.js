@@ -585,4 +585,85 @@ router.get("/market/movers", async (req, res) => {
   }
 });
 
+// ============================================================
+//  Public landing summary — live index, sectors, breadth, news
+// ============================================================
+// This endpoint exists so the reference-matched landing terminal can remain
+// honest. Every displayed number is returned by a provider and the entire
+// response is cached, rather than fabricating a polished marketing preview.
+router.get("/market/landing-summary", async (_req, res) => {
+  const cacheKey = "market:landing-summary";
+  const cached = getCached(cacheKey, 5 * 60 * 1000);
+  if (cached) return res.json(cached);
+
+  const YH = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36",
+    Accept: "application/json, text/plain, */*",
+  };
+  const symbols = [
+    ["^GSPC", "S&P 500"],
+    ["XLK", "Technology"],
+    ["XLC", "Comm. Services"],
+    ["XLI", "Industrials"],
+    ["XLF", "Financials"],
+    ["XLE", "Energy"],
+    ["XLRE", "Real Estate"],
+  ];
+
+  async function loadChart(symbol, name) {
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1mo&includePrePost=false`;
+    const response = await fetchWithTimeout(url, { headers: YH }, 5000);
+    if (!response.ok) throw new Error(`${symbol} returned ${response.status}`);
+    const payload = await response.json();
+    const result = payload?.chart?.result?.[0];
+    const meta = result?.meta || {};
+    const closes = (result?.indicators?.quote?.[0]?.close || []).filter(Number.isFinite);
+    const price = Number(meta.regularMarketPrice ?? closes.at(-1));
+    const previousClose = Number(meta.previousClose ?? meta.chartPreviousClose ?? closes.at(-2));
+    if (!(price > 0)) throw new Error(`${symbol} did not return a price`);
+    const changePct = previousClose > 0 ? ((price - previousClose) / previousClose) * 100 : null;
+    return { symbol, name, price, changePct, closes: closes.slice(-22) };
+  }
+
+  const started = Date.now();
+  const settled = await Promise.allSettled(symbols.map(([symbol, name]) => loadChart(symbol, name)));
+  const quotes = settled.filter(item => item.status === "fulfilled").map(item => item.value);
+  const overview = quotes.find(item => item.symbol === "^GSPC") || null;
+  const sectors = quotes.filter(item => item.symbol !== "^GSPC");
+  const measured = sectors.filter(item => Number.isFinite(item.changePct));
+  const advancing = measured.filter(item => item.changePct >= 0).length;
+  const breadth = measured.length ? Math.round((advancing / measured.length) * 100) : null;
+
+  let news = [];
+  if (FINNHUB_KEY) {
+    try {
+      const newsResponse = await fetchWithTimeout(`https://finnhub.io/api/v1/news?category=general&token=${FINNHUB_KEY}`, {}, 4500);
+      if (newsResponse.ok) {
+        const payload = await newsResponse.json();
+        news = (Array.isArray(payload) ? payload : []).slice(0, 3).map(item => ({
+          headline: String(item?.headline || "").trim(),
+          source: String(item?.source || "Market news").trim(),
+          url: /^https?:\/\//i.test(String(item?.url || "")) ? item.url : null,
+          datetime: Number(item?.datetime) || null,
+        })).filter(item => item.headline);
+      }
+    } catch (_) {}
+  }
+
+  const result = {
+    overview,
+    sectors,
+    breadth,
+    advancing,
+    measured: measured.length,
+    news,
+    asOf: new Date().toISOString(),
+    source: "Yahoo Finance charts" + (news.length ? " + Finnhub general news" : ""),
+    synthetic: false,
+  };
+  setCached(cacheKey, result);
+  recordProvider("Yahoo Finance", Boolean(overview), Date.now() - started, `${quotes.length}/${symbols.length} landing symbols`);
+  return res.json(result);
+});
+
 module.exports = router;

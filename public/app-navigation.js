@@ -9,7 +9,14 @@
     learn:       ['education'],
     saved:       ['reports','workspace'],
   };
-  const NAV_GROUP_TAB   = { research:'nav-analyze', projections:'nav-project', comparison:'nav-compare', planner:'nav-planner', learn:'nav-education-link', saved:'nav-saved-link' };
+  const NAV_GROUP_TAB   = {
+    research: 'nav-analyze',
+    projections: 'nav-lensscore-link',
+    comparison: 'nav-lensscore-link',
+    planner: 'nav-lensscore-link',
+    learn: 'nav-lensscore-link',
+    saved: 'nav-saved-link',
+  };
   const NAV_GROUP_LABEL = { research:'Research', projections:'Scenarios', comparison:'Compare', planner:'Planner', learn:'Learn', saved:'Saved' };
   function navGroupOf(sec) {
     for (const g in NAV_GROUPS) if (NAV_GROUPS[g].includes(sec)) return g;
