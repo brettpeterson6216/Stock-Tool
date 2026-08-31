@@ -1,0 +1,599 @@
+/*
+ * Lens Prime reference match
+ * Final composition layer measured against the approved 1536x1024 concept.
+ * The desktop concept panel is 1018x568; every major region below is sized
+ * from that frame and scales upward without losing the terminal density.
+ */
+
+:root {
+  --lpm-bg: #060b0e;
+  --lpm-panel: #091115;
+  --lpm-panel-2: #0b1519;
+  --lpm-line: rgba(165, 151, 118, .19);
+  --lpm-line-gold: rgba(213, 163, 66, .46);
+  --lpm-gold: #d9a33e;
+  --lpm-gold-2: #efc66f;
+  --lpm-cream: #f3eee5;
+  --lpm-muted: #9ca4a3;
+  --lpm-green: #55bd72;
+  --lpm-red: #df5c50;
+}
+
+body.il-product-page {
+  background: var(--lpm-bg) !important;
+  background-image:
+    radial-gradient(circle at 65% 5%, rgba(38, 64, 66, .13), transparent 31%),
+    linear-gradient(180deg, #081014 0, #05090b 70%) !important;
+}
+
+/* The reference uses a restrained 8px frame, not a floating glass card. */
+body.il-product-page::after {
+  inset: 7px !important;
+  border-radius: 22px !important;
+  border-color: rgba(208, 186, 136, .28) !important;
+}
+
+/* ── Public header ─────────────────────────────────────────── */
+body.il-product-page #main-nav[data-view="home"] {
+  height: 62px !important;
+  min-height: 62px !important;
+  padding: 0 clamp(26px, 3.1vw, 48px) !important;
+  gap: clamp(10px, 1.4vw, 22px) !important;
+  border-bottom-color: rgba(172, 153, 111, .15) !important;
+}
+body.il-product-page #main-nav[data-view="home"] .nav-logo {
+  min-width: clamp(160px, 17.5vw, 214px) !important;
+  font-family: var(--lpf-serif), Georgia, serif !important;
+  font-size: clamp(14px, 1.25vw, 18px) !important;
+  letter-spacing: .035em !important;
+}
+body.il-product-page #main-nav[data-view="home"] .nav-logo img {
+  width: clamp(23px, 2.15vw, 28px) !important;
+  height: clamp(23px, 2.15vw, 28px) !important;
+}
+body.il-product-page #main-nav[data-view="home"] .nav-links {
+  flex: 0 1 auto !important;
+  min-width: 0 !important;
+  gap: 0 !important;
+}
+body.il-product-page #main-nav[data-view="home"] .nav-tab {
+  padding: 0 clamp(7px, .85vw, 12px) !important;
+  font-size: clamp(8px, .75vw, 10px) !important;
+  white-space: nowrap !important;
+}
+body.il-product-page #main-nav[data-view="home"] .nav-search {
+  width: clamp(180px, 27vw, 330px) !important;
+  min-width: 150px !important;
+  height: 33px !important;
+}
+body.il-product-page #main-nav[data-view="home"] .nav-right { gap: 9px !important; }
+body.il-product-page #main-nav[data-view="home"] .nav-live,
+body.il-product-page #main-nav[data-view="home"] #nav-signup { display: none !important; }
+body.il-product-page #main-nav[data-view="home"] #nav-login {
+  width: 34px !important;
+  min-width: 34px !important;
+  height: 34px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border-radius: 50% !important;
+  font-size: 0 !important;
+  color: #171108 !important;
+  background: #9d7b49 !important;
+  border: 0 !important;
+}
+body.il-product-page #main-nav[data-view="home"] #nav-login::after {
+  content: "IL";
+  font: 700 9px/34px var(--lpf-sans) !important;
+}
+body.il-product-page #main-nav[data-view="home"] .theme-toggle {
+  width: 34px !important;
+  height: 34px !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+/* ── Landing: exact panel geometry ─────────────────────────── */
+body.il-product-page #view-home { padding-top: 62px !important; }
+body.il-product-page #landing-page .il-landing-hero {
+  width: calc(100% - clamp(38px, 4.2vw, 64px)) !important;
+  padding: clamp(10px, 1.55vw, 24px) 10px 0 !important;
+  grid-template-columns: minmax(280px, 31%) minmax(0, 69%) !important;
+  grid-template-areas: "copy preview" "features features" !important;
+  column-gap: clamp(12px, 2vw, 30px) !important;
+  row-gap: clamp(7px, 1vw, 12px) !important;
+  min-height: 0 !important;
+  align-items: center !important;
+}
+body.il-product-page #landing-page .il-landing-copy {
+  max-width: 410px !important;
+  padding: 0 0 2px 0 !important;
+}
+body.il-product-page #landing-page h1.il-display {
+  max-width: 410px !important;
+  font-family: var(--lpf-serif), Georgia, serif !important;
+  font-size: clamp(31px, 3.45vw, 50px) !important;
+  line-height: .99 !important;
+  letter-spacing: -.03em !important;
+  text-wrap: nowrap !important;
+}
+body.il-product-page #landing-page h1.il-display .il-d1,
+body.il-product-page #landing-page h1.il-display .il-d2 { display: block !important; }
+body.il-product-page #landing-page .il-landing-copy > p {
+  max-width: 390px !important;
+  margin-top: clamp(10px, 1.1vw, 17px) !important;
+  font-size: clamp(9px, .82vw, 12px) !important;
+  line-height: 1.55 !important;
+}
+body.il-product-page #landing-page .il-landing-actions {
+  margin-top: clamp(11px, 1.35vw, 18px) !important;
+  gap: 9px !important;
+}
+body.il-product-page #landing-page .il-landing-actions > * {
+  height: clamp(30px, 3.1vw, 40px) !important;
+  min-width: clamp(116px, 13.4vw, 150px) !important;
+  padding: 0 14px !important;
+  font-size: clamp(7px, .67vw, 10px) !important;
+  border-radius: 4px !important;
+}
+body.il-product-page #landing-page .il-trust {
+  margin-top: clamp(17px, 2vw, 28px) !important;
+  gap: 14px !important;
+  font-size: clamp(7px, .63vw, 9px) !important;
+}
+body.il-product-page #landing-page .il-trust-lead {
+  font-size: clamp(6px, .55vw, 8px) !important;
+}
+
+body.il-product-page #landing-page .il-landing-preview {
+  min-height: clamp(260px, 27.5vw, 400px) !important;
+}
+body.il-product-page #landing-page .ihx-wrap {
+  grid-template-columns: minmax(0, 1fr) clamp(126px, 13vw, 184px) !important;
+  height: clamp(260px, 27.5vw, 400px) !important;
+  min-height: clamp(260px, 27.5vw, 400px) !important;
+}
+body.il-product-page #landing-page .ihx-stage {
+  min-height: clamp(260px, 27.5vw, 400px) !important;
+  background-position: center 49% !important;
+}
+body.il-product-page #landing-page .ihx-float {
+  top: 27% !important;
+  left: 6% !important;
+  width: clamp(106px, 11.2vw, 145px) !important;
+  padding: clamp(9px, 1vw, 13px) !important;
+}
+body.il-product-page #landing-page .ihx-f-val { font-size: clamp(18px, 1.8vw, 24px) !important; }
+body.il-product-page #landing-page .ihx-rail {
+  height: 78% !important;
+  min-height: 210px !important;
+  padding: clamp(12px, 1.35vw, 18px) clamp(10px, 1.2vw, 16px) !important;
+}
+body.il-product-page #landing-page .ihx-r-price { margin-top: clamp(8px, 1vw, 16px) !important; font-size: clamp(18px, 1.8vw, 24px) !important; }
+body.il-product-page #landing-page .ihx-r-row { padding: clamp(6px, .78vw, 11px) 0 !important; }
+
+body.il-product-page #landing-page .il-rail {
+  min-height: clamp(96px, 10.6vw, 118px) !important;
+  border-radius: 7px !important;
+}
+body.il-product-page #landing-page .il-rail-item {
+  min-height: clamp(94px, 10.4vw, 116px) !important;
+  padding: clamp(11px, 1.25vw, 17px) clamp(12px, 1.45vw, 20px) !important;
+  grid-template-columns: clamp(18px, 2vw, 24px) 1fr !important;
+  column-gap: clamp(6px, .85vw, 10px) !important;
+}
+body.il-product-page #landing-page .il-rail-item > i { font-size: clamp(17px, 1.8vw, 22px) !important; }
+body.il-product-page #landing-page .il-rail-item > b { font-size: clamp(8px, .78vw, 11px) !important; }
+body.il-product-page #landing-page .il-rail-item > span { font-size: clamp(6.8px, .63vw, 8.5px) !important; line-height: 1.5 !important; }
+
+body.il-product-page #landing-page .il-market-strip {
+  width: calc(100% - clamp(38px, 4.2vw, 64px)) !important;
+  margin-top: clamp(7px, .8vw, 12px) !important;
+  padding: 0 10px 14px !important;
+}
+body.il-product-page #landing-page .ilm-card {
+  min-height: clamp(100px, 11.5vw, 150px) !important;
+  padding: clamp(10px, 1.15vw, 15px) clamp(12px, 1.45vw, 20px) !important;
+}
+body.il-product-page #landing-page .ilm-title { font-size: clamp(7px, .62vw, 9px) !important; }
+body.il-product-page #landing-page .ilm-row { min-height: 20px !important; font-size: clamp(7px, .62vw, 9px) !important; }
+body.il-product-page #landing-page .ilm-soon-copy { font-size: clamp(7px, .66vw, 9px) !important; line-height: 1.5 !important; }
+body.il-product-page #landing-page .ilm-reference-links > a {
+  display:grid;grid-template-columns:1fr auto;gap:2px 8px;padding:7px 0;border-top:1px solid rgba(170,155,124,.1);text-decoration:none;
+}
+body.il-product-page #landing-page .ilm-reference-links > a strong { color:#dcd9d1;font-size:8px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+body.il-product-page #landing-page .ilm-reference-links > a span { grid-column:2;color:#7f8989;font-size:7px; }
+body.il-product-page #landing-page .ilm-reference-links .ilm-more { margin:0;padding:0;border:0;color:var(--lpm-gold);font-size:7px; }
+
+/* Keep the remainder below the first-frame product proof, as in the concept. */
+body.il-product-page #landing-page .il-capabilities { margin-top: clamp(36px, 6vw, 90px) !important; }
+body.il-product-page #landing-page .prime-mobile-hero-card { display: none; }
+
+/* The dashboard is a full terminal in the approved concept, including for a
+   signed-out preview. Do not stack the marketing header above its sidebar. */
+body.il-product-page:has(#market-page[style*="display: flex"]) #main-nav,
+body.il-product-page:has(#market-page[style*="display:flex"]) #main-nav { display: none !important; }
+body.il-product-page:has(#market-page[style*="display: flex"]) #view-home,
+body.il-product-page:has(#market-page[style*="display:flex"]) #view-home { padding-top: 0 !important; }
+html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d):has(#market-page[style*="display: flex"]) #view-home,
+html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d):has(#market-page[style*="display:flex"]) #view-home { padding-top: 0 !important; }
+
+/* ── Dashboard: concept-two density ─────────────────────────── */
+body.il-product-page #market-page .hs-sidebar {
+  width: clamp(164px, 16vw, 226px) !important;
+  min-width: clamp(164px, 16vw, 226px) !important;
+  padding-left: clamp(12px, 1.2vw, 17px) !important;
+  padding-right: clamp(12px, 1.2vw, 17px) !important;
+}
+body.il-product-page #market-page .prime-dash-brand {
+  height: clamp(59px, 6.3vw, 71px) !important;
+  font-size: clamp(13px, 1.25vw, 17px) !important;
+}
+body.il-product-page #market-page .prime-dash-nav { padding: clamp(10px, 1.3vw, 17px) 0 !important; }
+body.il-product-page #market-page .prime-dash-nav a {
+  height: clamp(31px, 3.2vw, 38px) !important;
+  padding: 0 clamp(8px, .9vw, 12px) !important;
+  gap: clamp(7px, .85vw, 12px) !important;
+  font-size: clamp(8px, .76vw, 11px) !important;
+}
+body.il-product-page #market-page .prime-dash-nav a i { font-size: clamp(13px, 1.3vw, 17px) !important; }
+body.il-product-page #market-page .hs-main { padding: 0 clamp(12px, 1.3vw, 18px) 18px !important; }
+body.il-product-page #market-page .prime-dashboard-head {
+  min-height: clamp(68px, 7.3vw, 82px) !important;
+  grid-template-columns: minmax(210px,1fr) 92px 118px auto 34px !important;
+  gap: 8px !important;
+}
+body.il-product-page #market-page .prime-dashboard-greeting h1 { font-size: clamp(19px, 1.9vw, 25px) !important; }
+body.il-product-page #market-page .prime-dashboard-greeting p { font-size: clamp(8px, .72vw, 10px) !important; }
+body.il-product-page #market-page .prime-dashboard-status,
+body.il-product-page #market-page .prime-dashboard-index { height: 42px !important; padding: 6px 9px !important; }
+body.il-product-page #market-page .home-grid {
+  grid-template-columns: 1.24fr .95fr .79fr !important;
+  grid-template-areas: "market watch signals" "insights insights movers" !important;
+  grid-template-rows: clamp(172px, 18vw, 260px) clamp(172px, 18vw, 250px) !important;
+  gap: 9px !important;
+  margin-top: 10px !important;
+}
+body.il-product-page #market-page .hc { border-radius: 6px !important; }
+body.il-product-page #market-page .hg-market .mo-body { max-height: calc(100% - 42px) !important; }
+body.il-product-page #market-page .mo-header { padding: 10px 12px 5px !important; }
+body.il-product-page #market-page .mo-title,
+body.il-product-page #market-page .hc-title { font-size: clamp(7px, .68vw, 9px) !important; }
+body.il-product-page #market-page .mo-idx-price { font-size: clamp(17px, 1.65vw, 22px) !important; }
+body.il-product-page #market-page .home-lower,
+body.il-product-page #market-page .home-feat-strip,
+body.il-product-page #market-page .home-proof,
+body.il-product-page #market-page .home-guide-showcase { display: none !important; }
+
+/* ── Reference mobile concepts ─────────────────────────────── */
+@media (max-width: 900px) {
+  body.il-product-page #main-nav[data-view="home"] {
+    height: 63px !important;
+    min-height: 63px !important;
+    padding: 0 17px !important;
+  }
+  body.il-product-page #main-nav[data-view="home"] .nav-logo { font-size: 16px !important; }
+  body.il-product-page #main-nav[data-view="home"] .nav-right > :not(.prime-nav-menu) { display: none !important; }
+  body.il-product-page #main-nav[data-view="home"] .prime-nav-menu { display: inline-grid !important; }
+  body.il-product-page #view-home { padding-top: 63px !important; }
+  body.il-product-page #landing-page .il-landing-hero {
+    width: 100% !important;
+    padding: 21px 14px 0 !important;
+    gap: 12px !important;
+  }
+  body.il-product-page #landing-page .il-landing-copy { padding: 0 !important; }
+  body.il-product-page #landing-page .il-landing-kicker,
+  body.il-product-page #landing-page .il-landing-copy > p,
+  body.il-product-page #landing-page .il-landing-actions,
+  body.il-product-page #landing-page .il-trust { display: none !important; }
+  body.il-product-page #landing-page h1.il-display {
+    max-width: 350px !important;
+    font-size: clamp(31px, 9.4vw, 38px) !important;
+    line-height: 1 !important;
+    text-wrap: balance !important;
+  }
+  body.il-product-page #landing-page .il-landing-preview { min-height: 255px !important; }
+  body.il-product-page #landing-page .ihx-wrap,
+  body.il-product-page #landing-page .ihx-stage {
+    height: 255px !important;
+    min-height: 255px !important;
+  }
+  body.il-product-page #landing-page .ihx-wrap {
+    display: block !important;
+    border-radius: 6px !important;
+  }
+  body.il-product-page #landing-page .ihx-stage { background-position: 54% center !important; }
+  body.il-product-page #landing-page .ihx-float { display: none !important; }
+  body.il-product-page #landing-page .ihx-rail {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    position: absolute !important;
+    left: 8px !important;
+    right: 8px !important;
+    bottom: 8px !important;
+    width: auto !important;
+    height: 78px !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 9px 11px !important;
+    background: rgba(5, 11, 13, .86) !important;
+  }
+  body.il-product-page #landing-page .ihx-r-top,
+  body.il-product-page #landing-page .ihx-r-price,
+  body.il-product-page #landing-page .ihx-r-chg { margin: 0 !important; }
+  body.il-product-page #landing-page .ihx-r-row,
+  body.il-product-page #landing-page .ihx-r-foot { display: none !important; }
+  body.il-product-page #landing-page .il-rail {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    border-radius: 6px !important;
+  }
+  body.il-product-page #landing-page .il-rail-item {
+    min-height: 57px !important;
+    padding: 10px 13px !important;
+    border-right: 0 !important;
+    border-bottom: 1px solid var(--lpm-line) !important;
+  }
+  body.il-product-page #landing-page .il-market-strip { display: none !important; }
+  body.il-product-page #landing-page .il-capabilities { margin-top: 42px !important; }
+
+  body.il-product-page #market-page .home-grid { grid-template-rows: none !important; }
+}
+
+@media (min-width: 901px) and (max-width: 1120px) {
+  body.il-product-page #main-nav[data-view="home"] #nav-about-link { display: none !important; }
+  body.il-product-page #market-page .hsb-upgrade { padding: 10px !important; }
+  body.il-product-page #market-page .hsb-upgrade p { display: none !important; }
+}
+
+@media (max-width: 900px) {
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .il-landing-hero {
+    width: 100% !important; padding: 19px 15px 0 !important; display: flex !important;
+    flex-direction: column !important; gap: 13px !important;
+  }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .il-landing-copy {
+    order: 1 !important; width: 100% !important; padding: 0 !important;
+  }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .il-landing-kicker,
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .il-landing-copy > p,
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .il-landing-actions,
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .il-trust { display: none !important; }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page h1.il-display {
+    max-width: 350px !important; font-size: clamp(32px, 9.1vw, 38px) !important;
+    line-height: 1 !important; text-wrap: balance !important; color: var(--lpm-cream) !important;
+  }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .il-landing-preview { display: none !important; }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .prime-mobile-hero-card {
+    order: 2 !important; width: 100% !important; min-height: 225px !important; padding: 13px 13px 9px !important;
+    display: block !important; overflow: hidden !important; border: 1px solid var(--lpm-line) !important;
+    border-radius: 7px !important; background: linear-gradient(155deg,rgba(13,23,27,.98),rgba(7,13,16,.98)) !important;
+  }
+  .prime-mobile-hero-card .pmhc-quote { display:flex;align-items:center;justify-content:space-between; }
+  .prime-mobile-hero-card .pmhc-quote div { display:flex;align-items:baseline;gap:7px; }
+  .prime-mobile-hero-card .pmhc-quote strong { font:400 14px/1 var(--lpf-serif);color:var(--lpm-cream); }
+  .prime-mobile-hero-card .pmhc-quote span { font-size:7px;color:#9da5a4; }
+  .prime-mobile-hero-card .pmhc-quote i { color:#7f8888;font-size:11px; }
+  .prime-mobile-hero-card .pmhc-price { display:flex;align-items:baseline;gap:7px;margin-top:7px; }
+  .prime-mobile-hero-card .pmhc-price strong { font:400 23px/1 var(--lpf-serif);color:var(--lpm-cream); }
+  .prime-mobile-hero-card .pmhc-price span { color:var(--lpm-green);font-size:8px; }
+  .prime-mobile-hero-card .pmhc-stats { display:grid;grid-template-columns:1fr 1fr;margin-top:10px; }
+  .prime-mobile-hero-card .pmhc-stats>div { border-top:1px solid rgba(170,155,124,.12);padding-top:7px; }
+  .prime-mobile-hero-card .pmhc-stats span { display:block;color:#747e7f;font-size:6px;text-transform:uppercase;letter-spacing:.06em; }
+  .prime-mobile-hero-card .pmhc-stats strong { display:block;margin-top:3px;color:var(--lpm-cream);font:400 11px/1.1 var(--lpf-serif); }
+  .prime-mobile-hero-card .pmhc-stats>div:last-child strong { color:var(--lpm-green); }
+  .prime-mobile-hero-card .pmhc-chart { display:block;width:100%;height:86px;margin-top:2px; }
+  .prime-mobile-hero-card .pmhc-range { display:grid;grid-template-columns:repeat(6,1fr);align-items:center;color:#737d7e;font-size:6px;text-transform:uppercase;text-align:center; }
+  .prime-mobile-hero-card .pmhc-range strong { color:var(--lpm-cream);padding-bottom:4px;border-bottom:1px solid var(--lpm-gold); }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .il-rail {
+    order: 3 !important; display:grid !important; grid-template-columns:1fr !important; width:100% !important; min-height:0 !important;
+  }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .il-rail-item {
+    min-height:58px !important;padding:10px 12px !important;display:grid !important;grid-template-columns:23px 1fr !important;
+    grid-template-rows:auto auto !important;column-gap:8px !important;row-gap:2px !important;border-right:0 !important;border-bottom:1px solid var(--lpm-line) !important;
+  }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .il-rail-item>i { grid-row:1/3 !important;font-size:17px !important; }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .il-rail-item>b { font-size:9px !important; }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .il-rail-item>span { font-size:7px !important;line-height:1.45 !important; }
+}
+
+/*
+ * The legacy application still carries several ID-weighted theme layers.
+ * This final measured block deliberately outranks them so the reference
+ * geometry is deterministic at desktop sizes.
+ */
+@media (min-width: 901px) {
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #main-nav[data-view="home"] .nav-logo {
+    min-width: clamp(145px, 15vw, 200px) !important;
+    font-size: clamp(14px, 1.05vw, 17px) !important;
+    color: var(--lpm-cream) !important;
+    flex: 0 0 clamp(145px, 15vw, 200px) !important;
+  }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #main-nav[data-view="home"] .nav-logo img {
+    width: clamp(23px, 1.9vw, 27px) !important;
+    height: clamp(23px, 1.9vw, 27px) !important;
+  }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #main-nav[data-view="home"] .nav-search {
+    display: flex !important;
+    width: clamp(230px, 26vw, 330px) !important;
+    min-width: 170px !important;
+  }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #main-nav[data-view="home"] .nav-links { gap:0 !important; }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #main-nav[data-view="home"] .theme-toggle,
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #main-nav[data-view="home"] .theme-toggle-track { width:34px !important;min-width:34px !important; }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #main-nav[data-view="home"] #nav-login {
+    width: 34px !important;
+    min-width: 34px !important;
+    height: 34px !important;
+    padding: 0 !important;
+    font-size: 0 !important;
+    line-height: 34px !important;
+    border-radius: 50% !important;
+    color: transparent !important;
+    text-indent: -999px !important;
+  }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #main-nav[data-view="home"] #nav-login::after {
+    content: "BP" !important;
+    display: block !important;
+    color: #171108 !important;
+    text-indent: 0 !important;
+    font: 700 9px/34px var(--lpf-sans) !important;
+  }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #main-nav[data-view="home"] #nav-signup,
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #main-nav[data-view="home"] .nav-live { display: none !important; }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .il-landing-hero {
+    width: calc(100% - clamp(28px, 2.8vw, 44px)) !important;
+    padding: 0 clamp(4px, .4vw, 7px) 0 clamp(28px, 2.85vw, 42px) !important;
+    display: grid !important;
+    grid-template-columns: clamp(275px, 27vw, 390px) minmax(0, 1fr) !important;
+    grid-template-areas: "copy preview" "features features" !important;
+    grid-template-rows: clamp(270px, 26.5vw, 390px) auto !important;
+    column-gap: clamp(8px, 1.2vw, 18px) !important;
+    row-gap: 0 !important;
+    min-height: 0 !important;
+    align-items: center !important;
+    justify-items: stretch !important;
+  }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .il-landing-copy {
+    grid-area: copy !important;
+    order: 0 !important;
+    align-self: center !important;
+    width: auto !important;
+    max-width: 390px !important;
+    height: auto !important;
+    padding: 3px 0 0 4px !important;
+    color: var(--lpm-cream) !important;
+  }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page h1.il-display {
+    max-width: 390px !important;
+    font-size: clamp(31px, 3.25vw, 48px) !important;
+    line-height: 1 !important;
+    text-wrap: nowrap !important;
+    color: var(--lpm-cream) !important;
+  }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page h1.il-display .il-d1,
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page h1.il-display .il-d2 { color: var(--lpm-cream) !important; }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page h1.il-display em { color: var(--lpm-gold) !important; }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .il-landing-copy > p {
+    max-width: 330px !important;
+    margin-top: clamp(9px, 1vw, 15px) !important;
+    font-size: clamp(8.5px, .82vw, 12px) !important;
+    line-height: 1.52 !important;
+    color: var(--lpm-muted) !important;
+  }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .il-landing-actions {
+    margin-top: clamp(10px, 1.15vw, 17px) !important;
+  }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .il-landing-actions > * {
+    height: clamp(30px, 3vw, 40px) !important;
+    min-width: clamp(112px, 12.5vw, 150px) !important;
+    font-size: clamp(7px, .67vw, 10px) !important;
+  }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .il-trust {
+    margin-top: clamp(14px, 1.65vw, 24px) !important;
+    font-size: clamp(6.5px, .62vw, 9px) !important;
+    color: #7d8788 !important;
+  }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .il-landing-preview {
+    grid-area: preview !important;
+    order: 0 !important;
+    align-self: stretch !important;
+    width: auto !important;
+    height: clamp(270px, 26.5vw, 390px) !important;
+    min-height: clamp(270px, 26.5vw, 390px) !important;
+    padding: 0 !important;
+  }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .ihx-wrap {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) clamp(120px, 12.2vw, 176px) !important;
+    height: clamp(270px, 26.5vw, 390px) !important;
+    min-height: clamp(270px, 26.5vw, 390px) !important;
+  }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .ihx-stage {
+    height: clamp(270px, 26.5vw, 390px) !important;
+    min-height: clamp(270px, 26.5vw, 390px) !important;
+    background-position: 44% 49% !important;
+  }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .ihx-float {
+    top: 23% !important;
+    left: 11.5% !important;
+    width: clamp(112px, 11.4vw, 150px) !important;
+    padding: clamp(8px, .9vw, 13px) !important;
+  }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .ihx-rail {
+    height: clamp(258px, 28vw, 314px) !important;
+    min-height: 0 !important;
+    padding: clamp(10px, 1.2vw, 18px) !important;
+    align-self: start !important;
+    margin: 8px 0 0 0 !important;
+  }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .ihx-r-row {
+    padding: clamp(5px, .72vw, 11px) 0 !important;
+  }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .il-rail {
+    grid-area: features !important;
+    order: 0 !important;
+    width: 100% !important;
+    min-height: clamp(106px, 10.8vw, 124px) !important;
+    margin: 0 !important;
+  }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .il-rail-item {
+    min-height: clamp(104px, 10.6vw, 122px) !important;
+    padding: clamp(10px, 1.2vw, 17px) clamp(11px, 1.35vw, 20px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    gap: clamp(3px, .45vw, 7px) !important;
+  }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .il-rail-item > i { flex: 0 0 auto !important; }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .il-market-strip {
+    width: calc(100% - clamp(28px, 2.8vw, 44px)) !important;
+    margin-top: clamp(7px, .85vw, 12px) !important;
+    padding: 0 clamp(4px, .4vw, 7px) 14px clamp(28px, 2.85vw, 42px) !important;
+    margin-top: 13px !important;
+  }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .ilm-card {
+    min-height: clamp(101px, 11vw, 150px) !important;
+  }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .il-ms-inner {
+    grid-template-columns: 1.15fr 1.05fr .78fr .9fr !important;
+  }
+
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #market-page .hs-sidebar {
+    width: clamp(164px, 16vw, 226px) !important;
+    min-width: clamp(164px, 16vw, 226px) !important;
+  }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #market-page .prime-dash-brand {
+    height: clamp(58px, 6vw, 68px) !important;
+    gap: 7px !important;
+    font-size: clamp(13px, 1.05vw, 16px) !important;
+    white-space: nowrap !important;
+  }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #market-page .prime-dash-brand img {
+    width: clamp(23px, 2vw, 28px) !important;
+    height: clamp(23px, 2vw, 28px) !important;
+  }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #market-page nav.prime-dash-nav {
+    padding: 4px 0 !important;
+    gap: 3px !important;
+  }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #market-page .prime-dash-nav a {
+    height: clamp(31px, 3.1vw, 37px) !important;
+  }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #market-page .prime-dashboard-head {
+    min-height: clamp(64px, 6.7vw, 78px) !important;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+  }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #market-page .home-grid {
+    grid-template-columns: 1.24fr .95fr .79fr !important;
+    grid-template-areas: "market watch signals" "insights insights movers" !important;
+    grid-template-rows: clamp(165px, 16.5vw, 240px) clamp(165px, 16.5vw, 230px) !important;
+    gap: 9px !important;
+    margin-top: 10px !important;
+  }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #market-page .hg-market { grid-area: market !important; min-height: 0 !important; }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #market-page .hg-watch { grid-area: watch !important; min-height: 0 !important; }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #market-page .hg-signals { grid-area: signals !important; min-height: 0 !important; }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #market-page .hg-insights { grid-area: insights !important; min-height: 0 !important; }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #market-page .hg-movers { grid-area: movers !important; min-height: 0 !important; }
+}
