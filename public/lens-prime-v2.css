@@ -80,7 +80,7 @@
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #main-nav[data-view="home"] .nav-search {
   height: 37px !important;
   max-width: 360px !important;
-  border-radius: 6px !important;
+  border-radius: 4px !important;
   background: rgba(255,255,255,.018) !important;
 }
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #main-nav[data-view="home"] .nav-search input {
@@ -93,7 +93,7 @@
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #main-nav[data-view="home"] .btn-nav-outline {
   min-height: 36px !important;
   padding-inline: 15px !important;
-  border-radius: 6px !important;
+  border-radius: 4px !important;
   font-size: 10.5px !important;
 }
 
@@ -176,7 +176,7 @@
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #landing-page .il-landing-actions > button {
   min-height: 42px !important;
   padding: 0 20px !important;
-  border-radius: 5px !important;
+  border-radius: 4px !important;
   font-size: 10px !important;
   letter-spacing: .02em !important;
   box-shadow: none !important;
@@ -210,7 +210,7 @@
   height: 382px !important;
   grid-template-columns: minmax(0,1fr) 190px !important;
   border: 1px solid rgba(219,166,63,.22) !important;
-  border-radius: 9px !important;
+  border-radius: 8px !important;
   background: #070c0e !important;
   box-shadow: 0 28px 72px -42px rgba(219,166,63,.5) !important;
   transform: perspective(1200px) rotateY(-1.2deg) !important;
@@ -321,7 +321,7 @@
   margin-top: 12px;
   background: var(--prime-line);
   border: 1px solid var(--prime-line);
-  border-radius: 6px;
+  border-radius: 4px;
   overflow: hidden;
 }
 .ilm-method-list > span {
@@ -411,7 +411,7 @@
     gap: 11px;
     padding: 0 11px;
     border: 1px solid transparent;
-    border-radius: 6px;
+    border-radius: 4px;
     color: #89938f !important;
     text-decoration: none !important;
     font-size: 10.5px;
@@ -453,7 +453,7 @@
     min-height: 78px !important;
     padding: 14px !important;
     border: 1px solid rgba(219,166,63,.18) !important;
-    border-radius: 7px !important;
+    border-radius: 8px !important;
     background: linear-gradient(145deg,rgba(219,166,63,.12),rgba(219,166,63,.025)) !important;
   }
   :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page).il-tool-active #view-tool .app-main {
@@ -475,7 +475,7 @@
     display:grid !important;
     place-items:center !important;
     border:1px solid rgba(219,166,63,.18) !important;
-    border-radius:6px !important;
+    border-radius:4px !important;
     color:var(--prime-gold) !important;
     background:rgba(219,166,63,.06) !important;
   }
@@ -494,7 +494,7 @@
   :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page).il-tool-active #view-tool .ash-btn {
     min-height:34px !important;
     padding:0 11px !important;
-    border-radius:6px !important;
+    border-radius:4px !important;
   }
   :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page).il-tool-active #view-tool .app-chart-toolbar,
   :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page).il-tool-active #view-tool .app-tf-strip {
@@ -510,7 +510,7 @@
   :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page).il-tool-active #view-tool .tf-pill,
   :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page).il-tool-active #view-tool .tf-tog {
     min-height:30px !important;
-    border-radius:5px !important;
+    border-radius:4px !important;
     font-size:9.5px !important;
   }
   :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page).il-tool-active #view-tool .app-content-scroll {
@@ -524,7 +524,7 @@
   min-height: 404px !important;
   max-height: 404px !important;
   padding: 38px 38px !important;
-  border-radius: 7px !important;
+  border-radius: 8px !important;
   background:
     linear-gradient(rgba(219,166,63,.024) 1px,transparent 1px),
     linear-gradient(90deg,rgba(219,166,63,.024) 1px,transparent 1px),
@@ -548,11 +548,11 @@
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #body-analyze:not(.has-stock) .search-row {
   max-width:650px !important;
   margin-top:24px !important;
-  border-radius:6px !important;
+  border-radius:4px !important;
 }
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #body-analyze:not(.has-stock) > .fg-label,
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #body-analyze:not(.has-stock) > #featured-grid {
-  border-radius:7px 7px 0 0 !important;
+  border-radius:8px 7px 0 0 !important;
 }
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #body-analyze:not(.has-stock) > #featured-grid {
   min-height:349px !important;
@@ -564,7 +564,7 @@
 
 /* Loaded research reads like one professional canvas. */
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #stock-result {
-  border-radius:7px !important;
+  border-radius:8px !important;
 }
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #stock-result .result-header {
   min-height:92px !important;
@@ -584,7 +584,7 @@
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #stock-result .chart-wrap,
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #stock-result .sidebar-card,
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #stock-result .panel-box {
-  border-radius:6px !important;
+  border-radius:4px !important;
 }
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #stock-result .il-chart-slot {
   min-height:380px !important;
@@ -658,7 +658,7 @@
     gap:6px !important;
     margin-top:13px !important;
     padding:4px !important;
-    border-radius:6px !important;
+    border-radius:4px !important;
   }
   :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #landing-page .il-landing-search > i {
     flex:0 0 26px !important;
@@ -682,7 +682,7 @@
     min-height:42px !important;
     height:42px !important;
     margin:0 !important;
-    border-radius:5px !important;
+    border-radius:4px !important;
     font-size:10px !important;
   }
   :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #landing-page .il-trust {
@@ -716,7 +716,7 @@
   :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #landing-page .il-rail {
     grid-template-columns:1fr 1fr !important;
     margin-top:18px !important;
-    border-radius:7px !important;
+    border-radius:8px !important;
   }
   :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #landing-page .il-rail-item {
     min-height:112px !important;
@@ -732,7 +732,7 @@
   }
   :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #landing-page .il-ms-inner {
     grid-template-columns:1fr !important;
-    border-radius:7px !important;
+    border-radius:8px !important;
   }
   :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #landing-page .ilm-card {
     min-height:170px !important;

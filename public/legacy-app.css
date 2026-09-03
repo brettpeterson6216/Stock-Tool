@@ -23,9 +23,9 @@
   --shadow:0 2px 12px rgba(0,0,0,.07),0 1px 4px rgba(0,0,0,.04);
   --shadow-lg:0 8px 32px rgba(0,0,0,.10),0 2px 8px rgba(0,0,0,.05);
   --r:3px; --r2:6px; --r3:10px;
-  --serif: 'Space Grotesk', 'DM Sans', Arial, sans-serif;
-  --sans: 'DM Sans', Arial, sans-serif;
-  --mono: 'DM Sans', 'Space Grotesk', Arial, sans-serif;
+  --serif: 'Plus Jakarta Sans', 'Plus Jakarta Sans', Arial, sans-serif;
+  --sans: 'Plus Jakarta Sans', Arial, sans-serif;
+  --mono: 'Plus Jakarta Sans', 'Plus Jakarta Sans', Arial, sans-serif;
 
   /* ── Theme-switchable tool tokens (light defaults) ── */
   --t-acc-border:rgba(10,12,14,.08);
@@ -7426,7 +7426,7 @@ body.il-dashboard-on #body-analyze .il-widget-bar{
   margin:-6px -6px 10px; padding:6px 8px;
   border-bottom:1px solid var(--glass-line-soft);
   background:color-mix(in srgb, var(--brand-gold) 4%, transparent);
-  border-radius:10px 10px 0 0;
+  border-radius:8px 10px 0 0;
 }
 .il-widget-bar .il-drag-handle,
 .il-widget-bar .il-widget-min{
@@ -8022,15 +8022,15 @@ html:not([data-theme="dark"]) .tw-sub{ color:rgba(245,235,215,.66)!important; }
 .tw-market{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:18px auto 2px;max-width:640px}
 .tw-market .twm-cell{flex:1 1 150px;min-width:140px;display:flex;flex-direction:column;gap:2px;padding:11px 14px;border-radius: 8px;
   background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.012));border:1px solid rgba(217,179,94,.16)}
-.tw-market .twm-lbl{font:600 11px/1 var(--sans,'DM Sans');letter-spacing:.06em;text-transform:uppercase;color:rgba(245,235,215,.5)}
-.tw-market .twm-val{font:700 18px/1.15 var(--sans,'DM Sans');color:#f5ebd7}
-.tw-market .twm-chg{font:600 12px/1 var(--sans,'DM Sans')}
+.tw-market .twm-lbl{font:600 11px/1 var(--sans,'Plus Jakarta Sans');letter-spacing:.06em;text-transform:uppercase;color:rgba(245,235,215,.5)}
+.tw-market .twm-val{font:700 18px/1.15 var(--sans,'Plus Jakarta Sans');color:#f5ebd7}
+.tw-market .twm-chg{font:600 12px/1 var(--sans,'Plus Jakarta Sans')}
 .tw-market .twm-chg.up{color:#3fbf7f}
 .tw-market .twm-chg.dn{color:#e0665c}
 
 /* --- Tool empty state: launchpad + continue wrapper --- */
 .tw-extra{max-width:900px;margin:26px auto 0}
-.tw-sec-lbl{font:600 12px/1 var(--sans,'DM Sans');letter-spacing:.08em;text-transform:uppercase;color:rgba(245,235,215,.55);
+.tw-sec-lbl{font:600 12px/1 var(--sans,'Plus Jakarta Sans');letter-spacing:.08em;text-transform:uppercase;color:rgba(245,235,215,.55);
   margin:0 0 12px;text-align:left}
 
 /* Launchpad cards */
@@ -8040,8 +8040,8 @@ html:not([data-theme="dark"]) .tw-sub{ color:rgba(245,235,215,.66)!important; }
   border:1px solid rgba(217,179,94,.16);transition:border-color .16s,transform .16s,box-shadow .16s}
 .tw-tool:hover{border-color:rgba(217,179,94,.44);transform:translateY(-2px);box-shadow:0 14px 34px rgba(0,0,0,.28)}
 .tw-tool i{font-size: 22px;color:var(--brand-gold,#d9b35e);margin-bottom:2px}
-.tw-tool strong{font:700 15px/1.2 var(--sans,'DM Sans');color:#f5ebd7}
-.tw-tool span{font:400 12px/1.45 var(--sans,'DM Sans');color:rgba(245,235,215,.6)}
+.tw-tool strong{font:700 15px/1.2 var(--sans,'Plus Jakarta Sans');color:#f5ebd7}
+.tw-tool span{font:400 12px/1.45 var(--sans,'Plus Jakarta Sans');color:rgba(245,235,215,.6)}
 
 /* Continue where you left off */
 .tw-continue{margin-top:26px}
@@ -8050,8 +8050,8 @@ html:not([data-theme="dark"]) .tw-sub{ color:rgba(245,235,215,.66)!important; }
   background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.012));
   border:1px solid rgba(255,255,255,.08);transition:border-color .16s,transform .16s}
 .tw-recent-card:hover{border-color:rgba(217,179,94,.4);transform:translateY(-2px)}
-.tw-recent-tk{font:700 15px/1 var(--sans,'DM Sans');color:var(--brand-gold,#d9b35e);letter-spacing:.02em}
-.tw-recent-ttl{font:400 12px/1.4 var(--sans,'DM Sans');color:rgba(245,235,215,.62)}
+.tw-recent-tk{font:700 15px/1 var(--sans,'Plus Jakarta Sans');color:var(--brand-gold,#d9b35e);letter-spacing:.02em}
+.tw-recent-ttl{font:400 12px/1.4 var(--sans,'Plus Jakarta Sans');color:rgba(245,235,215,.62)}
 
 @media(max-width:640px){
   .tw-market .twm-cell{flex:1 1 44%;min-width:0}
@@ -8060,9 +8060,9 @@ html:not([data-theme="dark"]) .tw-sub{ color:rgba(245,235,215,.66)!important; }
 
 /* --- Home sign-up: visible banner lede --- */
 .il-banner-lede{display:flex;flex-direction:column;gap:8px;align-items:center;text-align:center;max-width:600px;margin:2px auto 4px}
-.il-banner-lede h2{margin:0;font:700 clamp(1.5rem,3.2vw,2.15rem)/1.15 var(--serif,'Space Grotesk','DM Sans');
+.il-banner-lede h2{margin:0;font:700 clamp(1.5rem,3.2vw,2.15rem)/1.15 var(--serif,'Plus Jakarta Sans','Plus Jakarta Sans');
   color:var(--lens-text,#171b23);letter-spacing:-.01em}
-.il-banner-lede p{margin:0;font:400 clamp(15px,1.6vw,18px)/1.55 var(--sans,'DM Sans');color:var(--text4,rgba(23,18,11,.7))}
+.il-banner-lede p{margin:0;font:400 clamp(15px,1.6vw,18px)/1.55 var(--sans,'Plus Jakarta Sans');color:var(--text4,rgba(23,18,11,.7))}
 html[data-theme="dark"] .il-banner-lede h2{color:#f5ebd7}
 html[data-theme="dark"] .il-banner-lede p{color:rgba(245,235,215,.72)}
 /* only the lede is shown in banner mode (h1/kicker/top-p stay sr-only) */
@@ -8071,7 +8071,7 @@ html[data-theme="dark"] .il-banner-lede p{color:rgba(245,235,215,.72)}
 
 /* --- Home sign-up: trust signals --- */
 .il-trust{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px 10px;margin:4px auto 2px}
-.il-trust span{display:inline-flex;align-items:center;gap:6px;font:600 12px/1 var(--sans,'DM Sans');
+.il-trust span{display:inline-flex;align-items:center;gap:6px;font:600 12px/1 var(--sans,'Plus Jakarta Sans');
   letter-spacing:.02em;color:var(--text4,rgba(23,18,11,.66))}
 .il-trust span i{font-size: 15px;color:var(--brand-gold,#d9b35e)}
 .il-trust .il-trust-dot{color:rgba(0,0,0,.25);font-weight: 400}
@@ -8108,12 +8108,12 @@ footer .il-build{color:rgba(245,235,215,.6)!important}
 /* (3) Lab empty state — inline ticker search so users can model without
    opening Research first. Tool surface is dark in both themes. */
 .lab-empty{padding:1.75rem 0 1rem;max-width:560px}
-.lab-empty-title{font:700 clamp(1.15rem,2.2vw,1.5rem)/1.2 var(--sans,'DM Sans');color:#f5ebd7;margin-bottom:6px}
-.lab-empty-sub{font:400 13px/1.55 var(--sans,'DM Sans');color:rgba(245,235,215,.62);margin-bottom:16px}
+.lab-empty-title{font:700 clamp(1.15rem,2.2vw,1.5rem)/1.2 var(--sans,'Plus Jakarta Sans');color:#f5ebd7;margin-bottom:6px}
+.lab-empty-sub{font:400 13px/1.55 var(--sans,'Plus Jakarta Sans');color:rgba(245,235,215,.62);margin-bottom:16px}
 .lab-empty-search{display:flex;gap:10px;flex-wrap:wrap}
 .lab-empty-search input{
   flex:1 1 240px;min-width:0;padding:12px 15px;border-radius: 8px;
-  font:600 15px var(--sans,'DM Sans');letter-spacing:.02em;
+  font:600 15px var(--sans,'Plus Jakarta Sans');letter-spacing:.02em;
   background:rgba(255,255,255,.05)!important;color:#f5ebd7!important;
   border:1px solid rgba(217,179,94,.28)!important;outline:0;
 }
@@ -8121,7 +8121,7 @@ footer .il-build{color:rgba(245,235,215,.6)!important}
 .lab-empty-search input:focus{border-color:var(--brand-gold,#d9b35e)!important;box-shadow:0 0 0 3px rgba(217,179,94,.16)!important}
 .lab-empty-search button{
   flex:0 0 auto;padding:12px 20px;border-radius: 8px;cursor:pointer;border:0;
-  font:700 13px var(--sans,'DM Sans');color:#1a1408;
+  font:700 13px var(--sans,'Plus Jakarta Sans');color:#1a1408;
   background:linear-gradient(180deg,#e6c877,#d9b35e);transition:filter .16s,transform .16s;
 }
 .lab-empty-search button:hover{filter:brightness(1.06);transform:translateY(-1px)}
@@ -8168,7 +8168,7 @@ body > footer{ position:relative!important; z-index:2!important; isolation:isola
 
 /* v20260716-5 — expanded-chart type toggle (line/area/candle) */
 .cex-type-toggle{display:inline-flex;gap:2px;margin-left:14px;padding:3px;border-radius: 8px;background:rgba(255,255,255,.05);border:1px solid rgba(217,179,94,.18);vertical-align:middle}
-.cex-type-btn{padding:5px 12px;border:0;border-radius: 4px;background:transparent;color:rgba(245,235,215,.62);font:600 12px var(--sans,'DM Sans');cursor:pointer;transition:background .14s,color .14s}
+.cex-type-btn{padding:5px 12px;border:0;border-radius: 4px;background:transparent;color:rgba(245,235,215,.62);font:600 12px var(--sans,'Plus Jakarta Sans');cursor:pointer;transition:background .14s,color .14s}
 .cex-type-btn:hover{color:#f5ebd7}
 .cex-type-btn.on{background:linear-gradient(180deg,#e6c877,#d9b35e);color:#1a1408}
 @media(max-width:640px){ .cex-type-toggle{margin-left:0;margin-top:6px} }

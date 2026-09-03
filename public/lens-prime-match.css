@@ -189,7 +189,7 @@ body.il-product-page #landing-page .ihx-r-row { padding: clamp(6px, .78vw, 11px)
 
 body.il-product-page #landing-page .il-rail {
   min-height: clamp(96px, 10.6vw, 118px) !important;
-  border-radius: 7px !important;
+  border-radius: 8px !important;
 }
 body.il-product-page #landing-page .il-rail-item {
   min-height: clamp(94px, 10.4vw, 116px) !important;
@@ -324,7 +324,7 @@ body.il-product-page #market-page .home-grid {
   gap: 9px !important;
   margin-top: 10px !important;
 }
-body.il-product-page #market-page .hc { border-radius: 6px !important; }
+body.il-product-page #market-page .hc { border-radius: 4px !important; }
 body.il-product-page #market-page .hg-market .mo-body { max-height: calc(100% - 42px) !important; }
 body.il-product-page #market-page .mo-header { padding: 10px 12px 5px !important; }
 body.il-product-page #market-page .mo-title,
@@ -370,7 +370,7 @@ body.il-product-page #market-page .home-guide-showcase { display: none !importan
   }
   body.il-product-page #landing-page .ihx-wrap {
     display: block !important;
-    border-radius: 6px !important;
+    border-radius: 4px !important;
   }
   body.il-product-page #landing-page .ihx-stage { background-position: 54% center !important; }
   body.il-product-page #landing-page .ihx-float { display: none !important; }
@@ -396,7 +396,7 @@ body.il-product-page #market-page .home-guide-showcase { display: none !importan
   body.il-product-page #landing-page .il-rail {
     display: grid !important;
     grid-template-columns: 1fr !important;
-    border-radius: 6px !important;
+    border-radius: 4px !important;
   }
   body.il-product-page #landing-page .il-rail-item {
     min-height: 57px !important;
@@ -436,7 +436,7 @@ body.il-product-page #market-page .home-guide-showcase { display: none !importan
   html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .prime-mobile-hero-card {
     order: 2 !important; width: 100% !important; min-height: 225px !important; padding: 13px 13px 9px !important;
     display: block !important; overflow: hidden !important; border: 1px solid var(--lpm-line) !important;
-    border-radius: 7px !important; background: linear-gradient(155deg,rgba(13,23,27,.98),rgba(7,13,16,.98)) !important;
+    border-radius: 8px !important; background: linear-gradient(155deg,rgba(13,23,27,.98),rgba(7,13,16,.98)) !important;
   }
   .prime-mobile-hero-card .pmhc-quote { display:flex;align-items:center;justify-content:space-between; }
   .prime-mobile-hero-card .pmhc-quote div { display:flex;align-items:baseline;gap:7px; }

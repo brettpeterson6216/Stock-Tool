@@ -58,7 +58,7 @@ canvas.il-chart-mirror {
 .il-chart-readout .ilr-date { margin-left: auto; }
 
 .il-chart-readout .ilr-price {
-  font-family: var(--il-mono, "DM Mono", monospace);
+  font-family: var(--il-mono, "JetBrains Mono", monospace);
   font-size: 18px;
   font-weight: 500;
   letter-spacing: -.03em;
@@ -67,7 +67,7 @@ canvas.il-chart-mirror {
 }
 
 .il-chart-readout .ilr-chg {
-  font-family: var(--il-mono, "DM Mono", monospace);
+  font-family: var(--il-mono, "JetBrains Mono", monospace);
   font-size: 12px;
   font-variant-numeric: tabular-nums;
   letter-spacing: -.01em;
@@ -124,7 +124,7 @@ canvas.il-chart-mirror {
 }
 
 .il-chart-readout .ilr-ohlc b {
-  font-family: var(--il-mono, "DM Mono", monospace);
+  font-family: var(--il-mono, "JetBrains Mono", monospace);
   font-size: 11px;
   font-weight: 400;
   color: var(--il-ink-2, #D2CFC8);
@@ -225,7 +225,7 @@ html:not([data-theme="dark"]) .chart-key.key-vwap { background: #127C6C !importa
 .il-analysis .ilan-headline {
   flex: 1 1 auto;
   min-width: 0;
-  font-family: var(--il-mono, "DM Mono", monospace);
+  font-family: var(--il-mono, "JetBrains Mono", monospace);
   font-size: 11px;
   letter-spacing: -.01em;
   white-space: nowrap;
@@ -309,7 +309,7 @@ html:not([data-theme="dark"]) .chart-key.key-vwap { background: #127C6C !importa
 }
 
 .il-analysis .ilan-sig-value {
-  font-family: var(--il-mono, "DM Mono", monospace);
+  font-family: var(--il-mono, "JetBrains Mono", monospace);
   font-size: 13px;
   color: var(--il-ink, #F2F0EB);
   margin-bottom: 5px;

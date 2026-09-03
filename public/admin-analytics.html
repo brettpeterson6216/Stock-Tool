@@ -6,71 +6,71 @@
   <title>Analytics — ImpliedLens Admin</title>
   <link rel="preload" as="font" type="font/woff2" crossorigin href="/vendor/fonts/plus-jakarta-sans-files/plus-jakarta-sans-latin-400-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/vendor/fonts/plus-jakarta-sans-files/plus-jakarta-sans-latin-700-normal.woff2">
-<link rel="stylesheet" href="/vendor/fonts/il-fonts.css?v=20260825-4">
+<link rel="stylesheet" href="/vendor/fonts/il-fonts.css?v=20260825-6">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'DM Sans',system-ui,sans-serif;background:#08090D;color:rgba(220,225,232,.9);min-height:100vh}
+    body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:#08090D;color:rgba(220,225,232,.9);min-height:100vh}
     a{color:#B98A3D;text-decoration:none}
 
     /* ── Auth gate ── */
     #auth-gate{display:flex;align-items:center;justify-content:center;min-height:100vh}
     .auth-box{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:2.5rem;width:100%;max-width:380px;text-align:center}
-    .auth-box h2{font-size:1.3rem;color:#fff;margin-bottom:.4rem}
-    .auth-box p{font-size:.82rem;color:rgba(220,225,232,.4);margin-bottom:1.5rem}
-    .auth-input{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:.7rem 1rem;color:#fff;font-size:.9rem;margin-bottom:.75rem;outline:none}
+    .auth-box h2{font-size:21px;color:#fff;margin-bottom:.4rem}
+    .auth-box p{font-size:13px;color:rgba(220,225,232,.4);margin-bottom:1.5rem}
+    .auth-input{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:.7rem 1rem;color:#fff;font-size:14px;margin-bottom:.75rem;outline:none}
     .auth-input:focus{border-color:#B98A3D}
-    .auth-btn{width:100%;background:#B98A3D;color:#08090D;border:none;border-radius:8px;padding:.75rem;font-size:.9rem;font-weight:700;cursor:pointer}
+    .auth-btn{width:100%;background:#B98A3D;color:#08090D;border:none;border-radius:8px;padding:.75rem;font-size:14px;font-weight:700;cursor:pointer}
     .auth-btn:hover{opacity:.85}
-    #auth-err{font-size:.78rem;color:#e05a5a;margin-top:.5rem;display:none}
+    #auth-err{font-size:12px;color:#e05a5a;margin-top:.5rem;display:none}
 
     /* ── Dashboard ── */
     #dashboard{display:none;padding:0 0 4rem}
     .top-bar{background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.07);padding:.8rem 2rem;display:flex;align-items:center;justify-content:space-between}
-    .logo{font-size:1.1rem;color:#fff;font-weight:600}
+    .logo{font-size:18px;color:#fff;font-weight:600}
     .logo em{color:#B98A3D;font-style:italic}
     .top-actions{display:flex;gap:.75rem;align-items:center}
-    .refresh-btn{background:rgba(185,138,61,.1);border:1px solid rgba(185,138,61,.3);color:#B98A3D;padding:.4rem .9rem;border-radius:7px;font-size:.78rem;cursor:pointer;transition:all .15s}
+    .refresh-btn{background:rgba(185,138,61,.1);border:1px solid rgba(185,138,61,.3);color:#B98A3D;padding:.4rem .9rem;border-radius:7px;font-size:12px;cursor:pointer;transition:all .15s}
     .refresh-btn:hover{background:rgba(185,138,61,.2)}
-    .last-updated{font-size:.72rem;color:rgba(220,225,232,.3)}
+    .last-updated{font-size:12px;color:rgba(220,225,232,.3)}
 
     .content{max-width:1100px;margin:0 auto;padding:2rem}
 
     /* ── Stat cards ── */
     .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:2rem}
     .stat-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:1.1rem 1.25rem}
-    .stat-label{font-size:.7rem;color:rgba(220,225,232,.4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.35rem}
-    .stat-val{font-size:1.8rem;font-weight:700;color:#fff;line-height:1}
-    .stat-sub{font-size:.72rem;color:rgba(220,225,232,.4);margin-top:.25rem}
+    .stat-label{font-size:11px;color:rgba(220,225,232,.4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.35rem}
+    .stat-val{font-size:29px;font-weight:700;color:#fff;line-height:1}
+    .stat-sub{font-size:12px;color:rgba(220,225,232,.4);margin-top:.25rem}
     .stat-card.gold .stat-val{color:#B98A3D}
     .stat-card.green .stat-val{color:#46b184}
 
     /* ── Section headers ── */
-    h2{font-size:.88rem;font-weight:600;color:rgba(220,225,232,.5);text-transform:uppercase;letter-spacing:.08em;margin:2rem 0 .85rem;padding-bottom:.5rem;border-bottom:1px solid rgba(255,255,255,.06)}
+    h2{font-size:14px;font-weight:600;color:rgba(220,225,232,.5);text-transform:uppercase;letter-spacing:.08em;margin:2rem 0 .85rem;padding-bottom:.5rem;border-bottom:1px solid rgba(255,255,255,.06)}
 
     /* ── Funnel ── */
     .funnel{display:flex;gap:0;margin-bottom:2rem;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:11px;overflow:hidden}
     .funnel-step{flex:1;padding:1.1rem 1rem;text-align:center;border-right:1px solid rgba(255,255,255,.06)}
     .funnel-step:last-child{border-right:none}
-    .funnel-name{font-size:.72rem;color:rgba(220,225,232,.45);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.4rem}
-    .funnel-val{font-size:1.5rem;font-weight:700;color:#fff}
-    .funnel-rate{font-size:.72rem;margin-top:.25rem}
+    .funnel-name{font-size:12px;color:rgba(220,225,232,.45);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.4rem}
+    .funnel-val{font-size:24px;font-weight:700;color:#fff}
+    .funnel-rate{font-size:12px;margin-top:.25rem}
     .funnel-rate.good{color:#46b184}
     .funnel-rate.warn{color:#B98A3D}
     .funnel-rate.bad{color:#e05a5a}
 
     /* ── Chart ── */
     .chart-wrap{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:1.25rem;margin-bottom:2rem}
-    .chart-title{font-size:.82rem;color:rgba(220,225,232,.6);font-weight:600;margin-bottom:1rem}
+    .chart-title{font-size:13px;color:rgba(220,225,232,.6);font-weight:600;margin-bottom:1rem}
 
     /* ── Tables ── */
     .tbl-wrap{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:11px;overflow:hidden;margin-bottom:2rem}
     table{width:100%;border-collapse:collapse}
-    th{font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:rgba(220,225,232,.4);padding:.65rem 1rem;text-align:left;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02)}
-    td{font-size:.82rem;padding:.6rem 1rem;border-bottom:1px solid rgba(255,255,255,.04);color:rgba(220,225,232,.75)}
+    th{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:rgba(220,225,232,.4);padding:.65rem 1rem;text-align:left;border-bottom:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02)}
+    td{font-size:13px;padding:.6rem 1rem;border-bottom:1px solid rgba(255,255,255,.04);color:rgba(220,225,232,.75)}
     tr:last-child td{border-bottom:none}
     tr:hover td{background:rgba(255,255,255,.02)}
-    .badge{display:inline-block;padding:.15rem .55rem;border-radius:100px;font-size:.68rem;font-weight:600;background:rgba(185,138,61,.12);color:#B98A3D}
+    .badge{display:inline-block;padding:.15rem .55rem;border-radius:100px;font-size:11px;font-weight:600;background:rgba(185,138,61,.12);color:#B98A3D}
     .badge.blue{background:rgba(80,130,255,.1);color:#6aa3ff}
     .badge.green{background:rgba(82,209,138,.1);color:#46b184}
 
@@ -78,12 +78,12 @@
     .two-col{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:2rem}
     @media(max-width:700px){.two-col{grid-template-columns:1fr}.funnel{flex-direction:column}.funnel-step{border-right:none;border-bottom:1px solid rgba(255,255,255,.06)}.funnel-step:last-child{border-bottom:none}}
   </style>
-  <link rel="stylesheet" href="/beauty-system.css?v=20260825-4">
-<link rel="stylesheet" href="/premium-revamp.css?v=20260825-4">
+  <link rel="stylesheet" href="/beauty-system.css?v=20260825-6">
+<link rel="stylesheet" href="/premium-revamp.css?v=20260825-6">
 <link rel="stylesheet" href="/il-system.css?v=20260827-4">
 <link rel="stylesheet" href="/lens-prime-shared.css?v=20260830-1">
-<link rel="stylesheet" href="/lens-prime-fidelity.css?v=20260831-14">
-<script defer src="/premium-motion.js?v=20260825-4"></script>
+<link rel="stylesheet" href="/lens-prime-fidelity.css?v=20260831-17">
+<script defer src="/premium-motion.js?v=20260825-6"></script>
 </head>
 <body class="il-admin-page">
 
@@ -101,11 +101,11 @@
 <!-- Dashboard -->
 <div id="dashboard">
   <div class="top-bar">
-    <div class="logo">Implied<em>Lens</em> <span style="font-size:.75rem;color:rgba(220,225,232,.3);font-weight:400;margin-left:.5rem">Analytics</span></div>
+    <div class="logo">Implied<em>Lens</em> <span style="font-size:12px;color:rgba(220,225,232,.3);font-weight:400;margin-left:.5rem">Analytics</span></div>
     <div class="top-actions">
       <span class="last-updated" id="last-updated"></span>
       <button class="refresh-btn" onclick="loadData()">↻ Refresh</button>
-      <a href="/" style="font-size:.78rem;color:rgba(220,225,232,.35)">← Platform</a>
+      <a href="/" style="font-size:12px;color:rgba(220,225,232,.35)">← Platform</a>
     </div>
   </div>
 
@@ -409,7 +409,7 @@ function render(data) {
       <td style="color:rgba(220,225,232,.4);white-space:nowrap">${ts}</td>
       <td><span class="badge ${cls}">${esc(r.event)}</span></td>
       <td style="color:rgba(220,225,232,.4)">${r.user_id ? '#'+r.user_id : '—'}</td>
-      <td style="color:rgba(220,225,232,.4);font-size:.75rem;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(props)}</td>
+      <td style="color:rgba(220,225,232,.4);font-size:12px;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(props)}</td>
     </tr>`;
   }).join('');
 }

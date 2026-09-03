@@ -28,25 +28,25 @@
   <meta name="twitter:image:alt" content="ImpliedLens stock research workspace preview">
   <link rel="preload" as="font" type="font/woff2" crossorigin href="/vendor/fonts/plus-jakarta-sans-files/plus-jakarta-sans-latin-400-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/vendor/fonts/plus-jakarta-sans-files/plus-jakarta-sans-latin-700-normal.woff2">
-<link rel="stylesheet" href="/vendor/fonts/il-fonts.css?v=20260825-4">
+<link rel="stylesheet" href="/vendor/fonts/il-fonts.css?v=20260825-6">
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'DM Sans',sans-serif;background:#08090D;color:rgba(237,232,224,.9);min-height:100vh}
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:#08090D;color:rgba(237,232,224,.9);min-height:100vh}
     a{color:#B98A3D;text-decoration:none}
     a:hover{text-decoration:underline}
     .top-bar{background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.06);padding:.85rem 2rem;display:flex;align-items:center;gap:1rem}
-    .logo{font-family:'Space Grotesk',serif;font-size:1.3rem;color:#fff;text-decoration:none}
+    .logo{font-family:'Plus Jakarta Sans',serif;font-size:21px;color:#fff;text-decoration:none}
     .logo em{color:#B98A3D;font-style:italic}
-    .top-bar a.back{font-size:.8rem;color:rgba(237,232,224,.4);margin-left:auto}
+    .top-bar a.back{font-size:13px;color:rgba(237,232,224,.4);margin-left:auto}
     .top-bar a.back:hover{color:#B98A3D}
     .wrap{max-width:980px;margin:0 auto;padding:3.5rem 2rem 5rem}
-    .pill{display:inline-block;padding:.25rem .85rem;border-radius:100px;background:rgba(185,138,61,.1);color:#B98A3D;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:1.5rem}
-    h1{font-family:'Space Grotesk',serif;font-size:2.2rem;color:#fff;margin-bottom:1rem;line-height:1.25}
-    p{font-size:.95rem;color:rgba(237,232,224,.55);line-height:1.8;margin-bottom:1.25rem}
+    .pill{display:inline-block;padding:.25rem .85rem;border-radius:100px;background:rgba(185,138,61,.1);color:#B98A3D;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:1.5rem}
+    h1{font-family:'Plus Jakarta Sans',serif;font-size:35px;color:#fff;margin-bottom:1rem;line-height:1.25}
+    p{font-size:15px;color:rgba(237,232,224,.55);line-height:1.8;margin-bottom:1.25rem}
     .socials{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;margin:2rem 0}
-    .soc-btn{display:inline-flex;align-items:center;gap:8px;padding:.6rem 1.3rem;border-radius:8px;border:1px solid rgba(185,138,61,.3);color:#B98A3D;font-size:.82rem;font-weight:500;transition:all .18s}
+    .soc-btn{display:inline-flex;align-items:center;gap:8px;padding:.6rem 1.3rem;border-radius:8px;border:1px solid rgba(185,138,61,.3);color:#B98A3D;font-size:13px;font-weight:500;transition:all .18s}
     .soc-btn:hover{background:rgba(185,138,61,.08);border-color:#B98A3D;text-decoration:none}
-    footer{margin-top:3rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,.07);display:flex;gap:1.25rem;flex-wrap:wrap;justify-content:center;font-size:.78rem}
+    footer{margin-top:3rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,.07);display:flex;gap:1.25rem;flex-wrap:wrap;justify-content:center;font-size:12px}
     footer a{color:rgba(237,232,224,.3)}
     footer a:hover{color:#B98A3D}
     .intro{max-width:680px;margin:0 auto 2.5rem;text-align:center}
@@ -54,25 +54,25 @@
     .guide{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:1.35rem;transition:border-color .15s,transform .15s}
     .guide:hover{border-color:rgba(185,138,61,.45);transform:translateY(-2px)}
     .guide-num{font:600 .65rem monospace;color:#B98A3D;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.7rem}
-    .guide h2{font-family:'Space Grotesk',serif;font-size:1.15rem;color:#fff;margin-bottom:.61rem}
-    .guide p{font-size:.79rem;line-height:1.65;margin:0 0 .8rem}
+    .guide h2{font-family:'Plus Jakarta Sans',serif;font-size:18px;color:#fff;margin-bottom:.61rem}
+    .guide p{font-size:13px;line-height:1.65;margin:0 0 .8rem}
     .guide ul{list-style:none;display:grid;gap:.45rem}
-    .guide li{font-size:.73rem;color:rgba(237,232,224,.6);padding-left:1rem;position:relative}
+    .guide li{font-size:12px;color:rgba(237,232,224,.6);padding-left:1rem;position:relative}
     .guide li::before{content:'·';position:absolute;left:.2rem;color:#B98A3D}
-    .guide-cta{margin-top:1rem;display:inline-block;font-size:.75rem;font-weight:600}
-    .note{margin:2rem auto 0;max-width:760px;padding:1rem 1.2rem;border-left:2px solid #B98A3D;background:rgba(185,138,61,.06);font-size:.78rem;color:rgba(237,232,224,.58);line-height:1.65}
+    .guide-cta{margin-top:1rem;display:inline-block;font-size:12px;font-weight:600}
+    .note{margin:2rem auto 0;max-width:760px;padding:1rem 1.2rem;border-left:2px solid #B98A3D;background:rgba(185,138,61,.06);font-size:12px;color:rgba(237,232,224,.58);line-height:1.65}
     @media(max-width:760px){.guide-grid{grid-template-columns:1fr}.wrap{padding:2.5rem 1rem 4rem}.top-bar{padding:.75rem 1rem}}
   </style>
-<link rel="stylesheet" href="/static-polish.css?v=20260825-4">
-<link rel="stylesheet" href="/visual-refresh.css?v=20260825-4">
-<link rel="stylesheet" href="/site-shell.css?v=20260825-4">
-<link rel="stylesheet" href="/beauty-system.css?v=20260825-4">
+<link rel="stylesheet" href="/static-polish.css?v=20260825-6">
+<link rel="stylesheet" href="/visual-refresh.css?v=20260825-6">
+<link rel="stylesheet" href="/site-shell.css?v=20260825-6">
+<link rel="stylesheet" href="/beauty-system.css?v=20260825-6">
 <script defer src="/static-auth.js?v=20260830-1"></script>
-<link rel="stylesheet" href="/premium-revamp.css?v=20260825-4">
+<link rel="stylesheet" href="/premium-revamp.css?v=20260825-6">
 <link rel="stylesheet" href="/il-system.css?v=20260827-4">
 <link rel="stylesheet" href="/lens-prime-shared.css?v=20260830-1">
-<link rel="stylesheet" href="/lens-prime-fidelity.css?v=20260831-14">
-<script defer src="/premium-motion.js?v=20260825-4"></script>
+<link rel="stylesheet" href="/lens-prime-fidelity.css?v=20260831-17">
+<script defer src="/premium-motion.js?v=20260825-6"></script>
 </head>
 <body class="il-static-page">
 <a class="il-skip-link" href="#public-main">Skip to content</a>
@@ -149,6 +149,6 @@
       <a href="/">ImpliedLens</a>
     </footer>
   </div>
-<script src="/static-theme.js?v=20260825-4"></script>
+<script src="/static-theme.js?v=20260825-6"></script>
 </body>
 </html>

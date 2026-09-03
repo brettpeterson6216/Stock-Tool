@@ -18,7 +18,7 @@
 
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/vendor/fonts/plus-jakarta-sans-files/plus-jakarta-sans-latin-400-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/vendor/fonts/plus-jakarta-sans-files/plus-jakarta-sans-latin-700-normal.woff2">
-<link rel="stylesheet" href="/vendor/fonts/il-fonts.css?v=20260825-4">
+<link rel="stylesheet" href="/vendor/fonts/il-fonts.css?v=20260825-6">
 <style>
 :root{
   --cream:#F7F4EE; --cream2:#F0EDE5; --cream3:#E8E4DA;
@@ -29,7 +29,7 @@
   --card:#FFFEFB; --panel:#FDFAF4;
   --shadow:0 2px 16px rgba(0,0,0,0.07); --shadow-lg:0 8px 40px rgba(0,0,0,0.09);
   --r:4px; --r2:8px; --r3:12px;
-  --serif:'Space Grotesk', serif; --sans:'DM Sans', sans-serif; --mono:'DM Mono', monospace;
+  --serif:'Plus Jakarta Sans', serif; --sans:'Plus Jakarta Sans', sans-serif; --mono:'JetBrains Mono', monospace;
 }
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
 html,body{height:100%;}
@@ -44,12 +44,12 @@ nav{
   background:rgba(247,244,238,0.94); backdrop-filter:blur(16px);
 }
 .nav-logo{
-  font-family:var(--serif); font-size:1.3rem; letter-spacing:-0.01em;
+  font-family:var(--serif); font-size:21px; letter-spacing:-0.01em;
   color:var(--ink); text-decoration:none;
   display:flex; align-items:center; gap:10px;
 }
 .logo-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);}
-.nav-right{font-size:.85rem;color:var(--ink4);}
+.nav-right{font-size:14px;color:var(--ink4);}
 .nav-right a{color:var(--ink); text-decoration:none; font-weight:500; margin-left:.4rem;}
 .nav-right a:hover{color:var(--gold-d);}
 
@@ -69,24 +69,24 @@ main{
   box-shadow:var(--shadow-lg);
 }
 .auth-eyebrow{
-  font-family:var(--mono); font-size:.7rem; color:var(--gold-d);
+  font-family:var(--mono); font-size:11px; color:var(--gold-d);
   text-transform:uppercase; letter-spacing:0.18em; margin-bottom:.7rem;
 }
 .auth-title{
-  font-family:var(--serif); font-size:2rem; line-height:1.15;
+  font-family:var(--serif); font-size:32px; line-height:1.15;
   letter-spacing:-0.015em; margin-bottom:.4rem;
 }
 .auth-title em{font-style:italic; color:var(--gold-d);}
-.auth-sub{font-size:.92rem; color:var(--ink4); margin-bottom:1.75rem;}
+.auth-sub{font-size:15px; color:var(--ink4); margin-bottom:1.75rem;}
 
 .field{margin-bottom:1rem;}
 .field label{
-  display:block; font-size:.78rem; font-weight:500; color:var(--ink3);
+  display:block; font-size:12px; font-weight:500; color:var(--ink3);
   margin-bottom:.4rem;
 }
 .field input{
   width:100%; padding:.75rem .9rem;
-  font-family:var(--sans); font-size:.95rem; color:var(--ink);
+  font-family:var(--sans); font-size:15px; color:var(--ink);
   background:var(--panel); border:1px solid var(--border2);
   border-radius:var(--r2); transition:border-color .18s, background .18s;
 }
@@ -95,7 +95,7 @@ main{
   background:var(--card);
   box-shadow:0 0 0 3px rgba(200,155,60,0.12);
 }
-.field-hint{font-size:.72rem; color:var(--ink5); margin-top:.35rem;}
+.field-hint{font-size:12px; color:var(--ink5); margin-top:.35rem;}
 
 /* password strength meter */
 .meter{
@@ -107,7 +107,7 @@ main{
   transition:width .25s, background .25s;
 }
 .meter-label{
-  font-size:.7rem; color:var(--ink5); margin-top:.3rem;
+  font-size:11px; color:var(--ink5); margin-top:.3rem;
   font-family:var(--mono); letter-spacing:.05em; text-transform:uppercase;
 }
 
@@ -115,7 +115,7 @@ main{
   width:100%; padding:.85rem 1rem;
   background:var(--ink); color:var(--cream);
   border:none; border-radius:var(--r2);
-  font-family:var(--sans); font-size:.95rem; font-weight:500;
+  font-family:var(--sans); font-size:15px; font-weight:500;
   cursor:pointer; transition:background .18s; margin-top:.5rem;
 }
 .btn-primary:hover{background:var(--ink2);}
@@ -123,13 +123,13 @@ main{
 
 .divider{
   display:flex; align-items:center; gap:.75rem;
-  margin:1.5rem 0; color:var(--ink5); font-size:.72rem;
+  margin:1.5rem 0; color:var(--ink5); font-size:12px;
   text-transform:uppercase; letter-spacing:0.12em;
 }
 .divider::before,.divider::after{
   content:""; flex:1; height:1px; background:var(--border2);
 }
-.alt-line{text-align:center; font-size:.88rem; color:var(--ink4);}
+.alt-line{text-align:center; font-size:14px; color:var(--ink4);}
 .alt-line a{
   color:var(--ink); text-decoration:none; font-weight:500;
   border-bottom:1px solid var(--gold);
@@ -138,7 +138,7 @@ main{
 
 .alert{
   display:none; padding:.7rem .85rem; border-radius:var(--r2);
-  font-size:.85rem; margin-bottom:1rem; line-height:1.4;
+  font-size:14px; margin-bottom:1rem; line-height:1.4;
 }
 .alert.show{display:block;}
 .alert-error{background:rgba(184,48,48,0.08); color:var(--red); border:1px solid rgba(184,48,48,0.2);}
@@ -148,31 +148,31 @@ main{
   margin-top:1.5rem; padding:.75rem .9rem;
   background:var(--cream2); border-left:3px solid var(--gold);
   border-radius:var(--r);
-  font-size:.75rem; color:var(--ink4); line-height:1.5;
+  font-size:12px; color:var(--ink4); line-height:1.5;
 }
 .sec-note strong{color:var(--ink2); font-weight:500;}
 
 footer{
   padding:1.5rem 3.5rem; border-top:1px solid var(--border);
-  font-size:.75rem; color:var(--ink5);
+  font-size:12px; color:var(--ink5);
   display:flex; justify-content:space-between; align-items:center;
 }
 
 @media (max-width:560px){
   nav,footer{padding-left:1.25rem; padding-right:1.25rem;}
   .auth-card{padding:2rem 1.5rem;}
-  .auth-title{font-size:1.7rem;}
+  .auth-title{font-size:27px;}
 }
 </style>
-<link rel="stylesheet" href="/static-polish.css?v=20260825-4">
-<link rel="stylesheet" href="/visual-refresh.css?v=20260825-4">
-<link rel="stylesheet" href="/beauty-system.css?v=20260825-4">
+<link rel="stylesheet" href="/static-polish.css?v=20260825-6">
+<link rel="stylesheet" href="/visual-refresh.css?v=20260825-6">
+<link rel="stylesheet" href="/beauty-system.css?v=20260825-6">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='16' fill='%23C89B3C'/><circle cx='16' cy='16' r='8' fill='%23F7F4EE'/></svg>">
-<link rel="stylesheet" href="/premium-revamp.css?v=20260825-4">
+<link rel="stylesheet" href="/premium-revamp.css?v=20260825-6">
 <link rel="stylesheet" href="/il-system.css?v=20260827-4">
 <link rel="stylesheet" href="/lens-prime-shared.css?v=20260830-1">
-<link rel="stylesheet" href="/lens-prime-fidelity.css?v=20260831-14">
-<script defer src="/premium-motion.js?v=20260825-4"></script>
+<link rel="stylesheet" href="/lens-prime-fidelity.css?v=20260831-17">
+<script defer src="/premium-motion.js?v=20260825-6"></script>
 </head>
 <body class="il-auth-page">
 
@@ -237,9 +237,9 @@ footer{
   <span>© <span id="year"></span> Implied Lens</span>
   <span style="font-family:var(--mono); letter-spacing:.05em;">IMPLIED LENS · SECURE SIGNUP</span>
 </footer>
-<script src="/static-theme.js?v=20260825-4"></script>
+<script src="/static-theme.js?v=20260825-6"></script>
 
-<script src="/signup.js?v=20260825-4"></script>
+<script src="/signup.js?v=20260825-6"></script>
 
 </body>
 </html>

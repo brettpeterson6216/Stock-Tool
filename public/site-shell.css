@@ -21,7 +21,7 @@
   border-radius: 8px;
   background: #f2cb7d;
   color: #111712 !important;
-  font: 700 13px/1 "DM Sans", Inter, sans-serif;
+  font: 700 13px/1 "Plus Jakarta Sans", Inter, sans-serif;
   text-decoration: none !important;
   box-shadow: 0 10px 28px rgba(0, 0, 0, .24);
 }
@@ -49,7 +49,7 @@ nav.il-global-nav {
   align-items: center;
   gap: 9px;
   color: #f5f2e9 !important;
-  font-family: "Space Grotesk", Inter, sans-serif;
+  font-family: "Plus Jakarta Sans", Inter, sans-serif;
   font-size: 18px;
   font-weight: 700;
   letter-spacing: -.04em;
@@ -92,7 +92,7 @@ nav.il-global-nav {
   border: 1px solid transparent;
   border-radius: 8px;
   color: rgba(240, 244, 240, .62) !important;
-  font-family: "DM Sans", Inter, sans-serif;
+  font-family: "Plus Jakarta Sans", Inter, sans-serif;
   font-size: 12px;
   font-weight: 600;
   text-decoration: none !important;
@@ -129,7 +129,7 @@ nav.il-global-nav {
   border-radius: 8px;
   background: rgba(255, 255, 255, .035);
   color: rgba(244, 242, 235, .72) !important;
-  font: 600 12px/1 Inter, "DM Sans", sans-serif;
+  font: 600 12px/1 Inter, "Plus Jakarta Sans", sans-serif;
   text-decoration: none !important;
   cursor: pointer;
 }
@@ -200,7 +200,7 @@ html[data-theme="dark"] .il-global-nav .static-theme-thumb { transform: translat
   outline: 0;
   background: transparent;
   color: rgba(244, 242, 235, .9);
-  font: 600 12px/1 "DM Sans", Inter, sans-serif;
+  font: 600 12px/1 "Plus Jakarta Sans", Inter, sans-serif;
   text-transform: uppercase;
 }
 .il-global-search input::placeholder {
@@ -217,7 +217,7 @@ html[data-theme="dark"] .il-global-nav .static-theme-thumb { transform: translat
   border-radius: 4px;
   background: rgba(32, 220, 122, .07);
   color: #52e596;
-  font: 700 10px/1 "DM Sans", Inter, sans-serif;
+  font: 700 10px/1 "Plus Jakarta Sans", Inter, sans-serif;
   letter-spacing: .07em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -236,7 +236,7 @@ html[data-theme="dark"] .il-global-nav .static-theme-thumb { transform: translat
   align-items: center;
   padding: 0 12px;
   border-radius: 4px;
-  font: 600 12px/1 "DM Sans", Inter, sans-serif;
+  font: 600 12px/1 "Plus Jakarta Sans", Inter, sans-serif;
   text-decoration: none !important;
   white-space: nowrap;
 }
@@ -292,7 +292,7 @@ html[data-theme="dark"] .il-global-nav .static-theme-thumb { transform: translat
   border: 1px solid transparent !important;
   border-radius: 8px !important;
   font-size: 12px !important;
-  font-family: "DM Sans", Inter, sans-serif !important;
+  font-family: "Plus Jakarta Sans", Inter, sans-serif !important;
   font-weight: 600 !important;
   line-height: 1 !important;
 }
@@ -505,7 +505,7 @@ nav.il-global-nav {
   border-bottom: 1px solid rgba(239, 200, 121, .12) !important;
   box-shadow: 0 10px 30px rgba(0, 0, 0, .13) !important;
   color: #f0f5f1 !important;
-  font-family: "DM Sans", Arial, sans-serif !important;
+  font-family: "Plus Jakarta Sans", Arial, sans-serif !important;
   backdrop-filter: blur(24px) saturate(1.2) !important;
 }
 
@@ -601,7 +601,7 @@ nav.il-global-nav {
   color: rgba(239, 244, 240, .70) !important;
   background: transparent !important;
   box-shadow: none !important;
-  font-family: "DM Sans", Inter, sans-serif !important;
+  font-family: "Plus Jakarta Sans", Inter, sans-serif !important;
   font-size: 12px !important;
   font-weight: 600 !important;
   letter-spacing: .01em !important;
@@ -657,7 +657,7 @@ html[data-theme="dark"] #main-nav .nav-tab {
   outline: 0 !important;
   background: transparent !important;
   color: #f2f6f3 !important;
-  font: 600 12px/1 "DM Sans", Inter, sans-serif !important;
+  font: 600 12px/1 "Plus Jakarta Sans", Inter, sans-serif !important;
 }
 
 #main-nav .nav-search input::placeholder,
@@ -772,7 +772,7 @@ html:not([data-theme="dark"]) #main-nav .theme-toggle-thumb::before {
   border-radius: 4px !important;
   background: rgba(32, 220, 122, .07) !important;
   color: #52e596 !important;
-  font: 700 10px/1 "DM Sans", Inter, sans-serif !important;
+  font: 700 10px/1 "Plus Jakarta Sans", Inter, sans-serif !important;
   letter-spacing: .07em !important;
   text-transform: uppercase !important;
 }
@@ -789,7 +789,7 @@ html:not([data-theme="dark"]) #main-nav .theme-toggle-thumb::before {
   border-radius: 8px !important;
   background: rgba(255, 255, 255, .043) !important;
   color: rgba(245, 235, 215, .9) !important;
-  font: 600 13px/1.6 "DM Sans", Arial, sans-serif !important;
+  font: 600 13px/1.6 "Plus Jakarta Sans", Arial, sans-serif !important;
   text-decoration: none !important;
   white-space: nowrap !important;
 }
@@ -805,7 +805,7 @@ html:not([data-theme="dark"]) #main-nav .theme-toggle-thumb::before {
   background: linear-gradient(180deg, #eccb84, #c9973e) !important;
   color: #17120b !important;
   box-shadow: 0 10px 28px rgba(129, 84, 12, .22), inset 0 1px 0 rgba(255, 255, 255, .38) !important;
-  font: 500 13px/1.6 "DM Sans", Arial, sans-serif !important;
+  font: 500 13px/1.6 "Plus Jakarta Sans", Arial, sans-serif !important;
   text-decoration: none !important;
   white-space: nowrap !important;
 }

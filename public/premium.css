@@ -947,7 +947,7 @@ html[data-theme="dark"] #view-tool .scr-table{
   #view-tool .chart-wrap:hover::after{ opacity:1!important; }
 
   /* 7. Bottom quote strip sits inside the same frame */
-  #app-stats-footer{ width:100%!important; max-width:1280px!important; margin:0 auto!important; border-radius:10px 10px 0 0!important; }
+  #app-stats-footer{ width:100%!important; max-width:1280px!important; margin:0 auto!important; border-radius:8px 10px 0 0!important; }
 }
 @media(min-width:961px) and (max-width:1279px){
   #view-tool .metrics-grid{ grid-template-columns:repeat(4,1fr)!important; }

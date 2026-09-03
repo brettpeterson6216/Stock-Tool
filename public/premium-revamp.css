@@ -148,9 +148,9 @@ html[data-theme="light"] {
   --il-slow: .55s var(--il-ease-out);
 
   /* Type stacks */
-  --il-display: "Instrument Serif", "Space Grotesk", Georgia, serif;
-  --il-sans: "DM Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --il-mono: "DM Mono", "SF Mono", ui-monospace, Menlo, monospace;
+  --il-display: "Instrument Serif", "Plus Jakarta Sans", Georgia, serif;
+  --il-sans: "Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --il-mono: "JetBrains Mono", "SF Mono", ui-monospace, Menlo, monospace;
 
   /* NOTE: legacy --serif means "display sans" throughout the older layers and
      is used for card titles and labels. It must stay a sans, or product UI
@@ -3282,8 +3282,8 @@ html #view-tool .mobile-sec-tabs {
 }
 
 /* Anything still naming the retired families directly */
-[style*="Space Grotesk"],
-[style*="DM Sans"],
+[style*="Plus Jakarta Sans"],
+[style*="Plus Jakarta Sans"],
 .nav-logo, .il-global-brand, .logo,
 .tw-title, .sec-h2, .hc-title, .chart-title,
 .panel-box-title, .sidebar-card-title, .analyst-box-title,
@@ -4268,7 +4268,7 @@ html body nav.il-global-nav .il-global-account {
   min-height: 34px !important;
   padding: 0 12px !important;
   border-radius: 8px !important;
-  font: 600 12px/1 var(--il-sans, "DM Sans", Inter, sans-serif) !important;
+  font: 600 12px/1 var(--il-sans, "Plus Jakarta Sans", Inter, sans-serif) !important;
   white-space: nowrap !important;
   text-decoration: none !important;
   max-width: 190px !important;

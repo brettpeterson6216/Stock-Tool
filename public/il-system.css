@@ -1211,7 +1211,7 @@
   background: transparent !important;
   border: 0 !important;
   padding: 5px 10px !important;
-  border-radius: 6px !important;
+  border-radius: 4px !important;
   font-size: 11px !important;
   font-weight: 600 !important;
   color: var(--ink3, #B4B0A8) !important;
@@ -1374,7 +1374,7 @@ html[data-theme="light"] :is(#il-system, body) .ilm-chg.is-dn { color:#A3352A !i
   left: 18px !important; top: 92px !important;
   width: 150px !important;
   padding: 11px 13px 9px !important;
-  border-radius: 9px !important;
+  border-radius: 8px !important;
   background: rgba(16,15,13,.90) !important;
   border: 1px solid rgba(255,225,170,.20) !important;
   box-shadow: 0 18px 40px -22px rgba(0,0,0,.95) !important;
@@ -1567,7 +1567,7 @@ body.il-product-page #main-nav .nav-live {
 body.il-product-page #main-nav .btn-nav,
 body.il-product-page #main-nav .btn-nav-outline {
   min-height: 36px !important;
-  border-radius: 7px !important;
+  border-radius: 8px !important;
   box-shadow: none !important;
 }
 
@@ -1594,7 +1594,7 @@ body.il-product-page #landing-page .il-landing-copy > p {
 body.il-product-page #landing-page .il-landing-search {
   max-width: 530px !important;
   min-height: 54px !important;
-  border-radius: 10px !important;
+  border-radius: 8px !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.035) !important;
 }
 body.il-product-page #landing-page .il-landing-preview {
@@ -1631,7 +1631,7 @@ body.il-product-page #view-tool .sb-item {
   min-height: 38px !important;
   margin: 2px 0 !important;
   padding: 0 12px !important;
-  border-radius: 7px !important;
+  border-radius: 8px !important;
   font-size: 11px !important;
 }
 body.il-product-page #view-tool .sb-item.active {
@@ -1656,7 +1656,7 @@ body.il-product-page #view-tool .ash-btn {
   min-height: 34px !important;
   padding: 0 10px !important;
   border: 1px solid var(--il-line) !important;
-  border-radius: 7px !important;
+  border-radius: 8px !important;
   background: rgba(255,255,255,.018) !important;
   box-shadow: none !important;
   font-size: 10px !important;
@@ -1705,7 +1705,7 @@ body.il-product-page #body-analyze:not(.has-stock) > .tool-welcome {
   margin: 0 !important;
   padding: 44px 42px !important;
   border: 1px solid var(--il-line) !important;
-  border-radius: 10px !important;
+  border-radius: 8px !important;
   background:
     radial-gradient(circle at 84% 18%, rgba(214,163,74,.11), transparent 18rem),
     var(--il-surface) !important;
@@ -1732,12 +1732,12 @@ body.il-product-page #body-analyze:not(.has-stock) .search-row {
   margin: 28px 0 0 !important;
   padding: 5px !important;
   border: 1px solid var(--il-line-strong) !important;
-  border-radius: 9px !important;
+  border-radius: 8px !important;
   background: #080C0E !important;
 }
 body.il-product-page #body-analyze:not(.has-stock) .btn-search {
   min-width: 124px !important;
-  border-radius: 7px !important;
+  border-radius: 8px !important;
 }
 body.il-product-page #body-analyze:not(.has-stock) .tw-market {
   grid-template-columns: repeat(3,minmax(0,1fr)) !important;
@@ -1752,7 +1752,7 @@ body.il-product-page #body-analyze:not(.has-stock) > .fg-label {
   padding: 15px 16px 9px !important;
   border: 1px solid var(--il-line) !important;
   border-bottom: 0 !important;
-  border-radius: 10px 10px 0 0 !important;
+  border-radius: 8px 10px 0 0 !important;
   background: var(--il-surface) !important;
 }
 body.il-product-page #body-analyze:not(.has-stock) > .fg-label span {
@@ -1797,7 +1797,7 @@ body.il-product-page #body-analyze.has-stock > #fg-label,
 body.il-product-page #body-analyze.has-stock > #tw-extra { display: none !important; }
 body.il-product-page #stock-result {
   border: 1px solid var(--il-line) !important;
-  border-radius: 10px !important;
+  border-radius: 8px !important;
   overflow: hidden !important;
   background: var(--il-surface) !important;
 }
@@ -1900,7 +1900,7 @@ body.il-product-page #view-tool .tf-tog {
   min-height: 32px !important;
   padding: 0 9px !important;
   border: 0 !important;
-  border-radius: 6px !important;
+  border-radius: 4px !important;
   background: transparent !important;
   box-shadow: none !important;
   font-size: 10px !important;
@@ -2038,7 +2038,7 @@ body.share-studio-open { overflow: hidden !important; }
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border-radius: 7px;
+  border-radius: 8px;
   font-weight: 650;
 }
 .share-download { border:0; background:#D6A34A; color:#17120A; }

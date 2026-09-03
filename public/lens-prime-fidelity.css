@@ -27,7 +27,7 @@
   --lpf-serif: 'Instrument Serif', Georgia, 'Times New Roman', serif;
   --lpf-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   --lpf-mono: 'JetBrains Mono', ui-monospace, monospace;
-  --lpf-radius: 7px;
+  --lpf-radius: 8px;
 }
 
 html { background: var(--lpf-bg-deep); }
@@ -123,7 +123,7 @@ body .il-global-search {
   height: 33px !important;
   margin-left: auto !important;
   border: 1px solid rgba(153, 170, 167, .14) !important;
-  border-radius: 5px !important;
+  border-radius: 4px !important;
   background: #070d10 !important;
 }
 body .il-global-search:focus-within { border-color: var(--lpf-line-gold) !important; }
@@ -133,7 +133,7 @@ body .il-global-actions .btn-nav,
 body .il-global-actions .btn-nav-outline {
   height: 33px !important;
   padding: 0 13px !important;
-  border-radius: 5px !important;
+  border-radius: 4px !important;
   font-size: 9.5px !important;
 }
 body .il-global-actions .btn-nav {
@@ -184,7 +184,7 @@ body.il-product-page #landing-page .il-landing-actions { gap: 10px !important; m
 body.il-product-page #landing-page .il-landing-actions > * {
   height: 40px !important;
   min-width: 146px !important;
-  border-radius: 5px !important;
+  border-radius: 4px !important;
   font-size: 9px !important;
   letter-spacing: .055em !important;
 }
@@ -328,13 +328,13 @@ body.il-product-page .chart-toolbar button,
 body.il-product-page .chart-controls button,
 body.il-product-page .range-btn {
   min-height: 34px !important;
-  border-radius: 5px !important;
+  border-radius: 4px !important;
 }
 :is(#lpf-controls-a, html) :is(#lpf-controls-b, body.il-product-page) #view-tool .app-chart-toolbar .act-btn,
 :is(#lpf-controls-a, html) :is(#lpf-controls-b, body.il-product-page) #view-tool .app-tf-strip .tf-pill,
 :is(#lpf-controls-a, html) :is(#lpf-controls-b, body.il-product-page) #view-tool .mobile-sec-tabs .mst-btn {
   border-color: transparent !important;
-  border-radius: 5px !important;
+  border-radius: 4px !important;
   background: transparent !important;
   color: #aab2b0 !important;
   box-shadow: none !important;
@@ -441,7 +441,7 @@ body.il-auth-page form {
   align-items: center;
   justify-content: center;
   border: 1px solid transparent;
-  border-radius: 5px;
+  border-radius: 4px;
   background: transparent;
   color: #dedbd3;
   font-size: 20px;
@@ -597,7 +597,7 @@ body.il-auth-page form {
   }
   body.il-product-page .mmenu-close { display: none !important; }
   body.il-product-page .mmenu-grid { gap: 6px !important; grid-template-columns: repeat(3, 1fr) !important; }
-  body.il-product-page .mmenu-item { min-height: 68px !important; border: 1px solid var(--lpf-line-soft) !important; border-radius: 6px !important; }
+  body.il-product-page .mmenu-item { min-height: 68px !important; border: 1px solid var(--lpf-line-soft) !important; border-radius: 4px !important; }
   body.il-product-page .mmenu-item i { color: var(--lpf-gold) !important; }
 
   :is(#lpf-tabs-a, html) :is(#lpf-tabs-b, body.il-product-page) #view-tool .mobile-sec-tabs {
@@ -667,7 +667,7 @@ body.il-auth-page form {
     height: 42px;
     margin-bottom: 10px;
     border: 1px solid var(--lpf-line);
-    border-radius: 5px;
+    border-radius: 4px;
     overflow: hidden;
     background: #050a0d;
   }
@@ -681,7 +681,7 @@ body.il-auth-page form {
     gap: 9px;
     padding: 0 12px;
     border: 1px solid var(--lpf-line-soft);
-    border-radius: 5px;
+    border-radius: 4px;
     color: #c0c6c3;
     text-decoration: none;
     font-size: 10px;
@@ -950,4 +950,40 @@ html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme="dark"]
 html:not(#lpfl-1):not(#lpfl-2):not(#lpfl-3):not(#lpfl-4):not([data-theme="dark"]) body.il-lens-page .il-global-search input::placeholder {
   color: #778180 !important;
   opacity: 1 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   INTEGRITY LABELS
+
+   The desktop hero rail already ends in "Sample data"; the phone card carried
+   only an aria-label, so a sighted visitor saw AAPL 191.62 with an implied
+   move and a sentiment read and no indication any of it was illustrative.
+   There is no options endpoint in routes/ - no implied move, IV rank or
+   options sentiment can be real - so the label is not optional on a finance
+   page. Same reason the capability row now marks Options Intelligence.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.pmhc-foot {
+  margin-top: 10px;
+  padding-top: 9px;
+  border-top: 1px solid var(--lpf-line-soft, rgba(187,168,126,.095));
+  font-family: var(--lpf-mono, ui-monospace, monospace);
+  font-size: 9px;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--lpf-muted, #778180);
+}
+
+.il-rail-item > b > em {
+  font-style: normal;
+  font-family: var(--lpf-mono, ui-monospace, monospace);
+  font-size: 8.5px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  margin-left: 8px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--lpf-line, rgba(187,168,126,.17));
+  color: var(--lpf-muted, #778180);
+  white-space: nowrap;
+  vertical-align: middle;
 }
