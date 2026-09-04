@@ -647,13 +647,35 @@ router.get("/market/landing-summary", async (_req, res) => {
     const rawStamps = result?.timestamp || [];
     // Keep the timestamp with its close: a gap has to stay a gap, or the
     // series silently shifts and every point after it is on the wrong date.
+    //
+    // The null check has to happen BEFORE the Number(): Number(null) is 0, and
+    // 0 passes Number.isFinite. Yahoo returns null closes for bars that have
+    // not printed - the current hour, a halt, a thin session - so every one of
+    // them used to survive this filter as a price of zero, normalise to
+    // -100%, and pull the whole chart flat against the floor with a cliff at
+    // the front. It is intermittent because it depends on what Yahoo happens
+    // to be missing at the moment of the request.
     const points = [];
     for (let i = 0; i < rawCloses.length; i += 1) {
+      if (rawCloses[i] == null || rawStamps[i] == null) continue;
       const close = Number(rawCloses[i]);
       const at = Number(rawStamps[i]);
-      if (Number.isFinite(close) && Number.isFinite(at)) points.push([at, close]);
+      if (!Number.isFinite(close) || close <= 0) continue;
+      if (!Number.isFinite(at)) continue;
+      points.push([at, close]);
     }
     return { meta: result.meta || {}, points };
+  }
+
+  // The last close that belongs to an earlier session than the final bar.
+  function priorSessionClose(points) {
+    if (!Array.isArray(points) || points.length < 2) return null;
+    const dayOf = at => new Date(at * 1000).toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+    const lastDay = dayOf(points[points.length - 1][0]);
+    for (let i = points.length - 2; i >= 0; i -= 1) {
+      if (dayOf(points[i][0]) !== lastDay) return points[i][1];
+    }
+    return null;
   }
 
   async function loadChart(symbol, name, wantSeries) {
@@ -671,8 +693,24 @@ router.get("/market/landing-summary", async (_req, res) => {
     const meta = best.meta;
     const closes = best.points.map(p => p[1]);
     const price = Number(meta.regularMarketPrice ?? closes.at(-1));
-    const previousClose = Number(meta.previousClose ?? meta.chartPreviousClose ?? closes.at(-2));
     if (!(price > 0)) throw new Error(`${symbol} did not return a price`);
+
+    /* chartPreviousClose is the close before the chart's RANGE, not before
+       today. Over a one-month range it is the price a month ago, so using it
+       as "previous close" turned every sector chip into a monthly figure
+       sitting under a heading that said "today": production was reporting
+       Industrials -6.08% and Energy +9.44% on a day when Yahoo's own meta had
+       XLI at +0.30% and XLE at -0.85%. It is only correct when the range is a
+       single day, which is never the case here, so it is not used at all.
+
+       meta.previousClose is the right number when Yahoo sends it. When it
+       does not, the series itself has the answer: the last close belonging to
+       an earlier calendar day in the exchange's own timezone. Dividing epoch
+       seconds by 86400 would put the boundary at UTC midnight, which is
+       mid-session in New York. */
+    const previousClose = Number.isFinite(Number(meta.previousClose)) && Number(meta.previousClose) > 0
+      ? Number(meta.previousClose)
+      : priorSessionClose(best.points);
     const changePct = previousClose > 0 ? ((price - previousClose) / previousClose) * 100 : null;
 
     // Cap the payload: beyond a few hundred points a line chart this size is

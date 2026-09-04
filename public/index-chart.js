@@ -40,29 +40,53 @@
   }
 
   /* Series arrive on their own timestamps - a holiday or a halt in one index
-     is not a gap in another - so they are placed on a shared axis by time
-     rather than by array position. Lining them up by index would slide one
-     series against the others by however many bars they differ. */
-  function buildFrames(series) {
-    var lo = Infinity, hi = -Infinity;
+     is not a gap in another - so they share one axis built from the union of
+     every timestamp any series reported, sorted. Each series is then drawn
+     against that axis by position in it.
+
+     Two things fall out of that. Series stay aligned: lining them up by array
+     index instead would slide one against the others by however many bars
+     they differ. And the axis is ordinal rather than real time, so the
+     sixty-five closed hours of a weekend take up no width - the same reason a
+     trading chart does not leave two-thirds of itself blank. Mapping x to
+     real seconds looked correct and drew a month of markets as a row of thin
+     stripes separated by voids. */
+  function buildSlots(series) {
+    var seen = Object.create(null);
     series.forEach(function (s) {
-      if (!s.stamps || !s.stamps.length) return;
-      lo = Math.min(lo, s.stamps[0]);
-      hi = Math.max(hi, s.stamps[s.stamps.length - 1]);
+      (s.stamps || []).forEach(function (at) {
+        if (Number.isFinite(at)) seen[at] = true;
+      });
     });
-    if (!Number.isFinite(lo) || !Number.isFinite(hi) || hi <= lo) return null;
-    return { lo: lo, hi: hi, span: hi - lo };
+    var slots = Object.keys(seen).map(Number).sort(function (a, b) { return a - b; });
+    if (slots.length < 2) return null;
+    var index = Object.create(null);
+    for (var i = 0; i < slots.length; i += 1) index[slots[i]] = i;
+    return { slots: slots, index: index, last: slots.length - 1 };
   }
 
-  function normalise(s) {
-    var base = null;
-    for (var i = 0; i < s.closes.length; i += 1) {
-      if (Number.isFinite(s.closes[i]) && s.closes[i] !== 0) { base = s.closes[i]; break; }
+  /* A close of zero is not a price, it is a bar that has not printed. Plotting
+     it gives -100% and drags the axis to the floor, which is what put a cliff
+     at the front of the chart and flattened every real move into the bottom
+     edge. Holes are dropped; the line joins across them, which is honest for
+     a missing bar and invisible for a missing session. */
+  function normalise(s, frame) {
+    var base = null, i;
+    for (i = 0; i < s.closes.length; i += 1) {
+      var c0 = Number(s.closes[i]);
+      if (Number.isFinite(c0) && c0 > 0) { base = c0; break; }
     }
     if (base == null) return [];
-    return s.closes.map(function (c, i) {
-      return { at: s.stamps[i], pct: ((c - base) / base) * 100, raw: c };
-    });
+    var out = [];
+    for (i = 0; i < s.closes.length; i += 1) {
+      var c = Number(s.closes[i]);
+      var at = Number(s.stamps[i]);
+      if (!Number.isFinite(c) || c <= 0 || !Number.isFinite(at)) continue;
+      var slot = frame.index[at];
+      if (slot == null) continue;
+      out.push({ at: at, slot: slot, pct: ((c - base) / base) * 100, raw: c });
+    }
+    return out;
   }
 
   window.ilRenderIndexChart = function (host, indexes) {
@@ -81,12 +105,12 @@
       return null;
     }
 
-    var frame = buildFrames(usable);
+    var frame = buildSlots(usable);
     if (!frame) return null;
 
     var series = usable.map(function (s, i) {
       return { symbol: s.symbol, name: s.name || s.symbol, colour: COLORS[i % COLORS.length],
-               points: normalise(s), on: true, interval: s.interval };
+               points: normalise(s, frame), on: true, interval: s.interval };
     }).filter(function (s) { return s.points.length > 1; });
     if (!series.length) return null;
 
@@ -107,7 +131,7 @@
     var padY = (hi - lo) * 0.12;
     lo -= padY; hi += padY;
 
-    var x = function (at) { return PAD_L + ((at - frame.lo) / frame.span) * plotW; };
+    var x = function (slot) { return PAD_L + (slot / frame.last) * plotW; };
     var y = function (pct) { return PAD_T + (1 - (pct - lo) / (hi - lo)) * plotH; };
 
     var svg = el("svg", {
@@ -146,7 +170,7 @@
 
     series.forEach(function (s) {
       var d = s.points.map(function (p, i) {
-        return (i ? "L" : "M") + x(p.at).toFixed(2) + " " + y(p.pct).toFixed(2);
+        return (i ? "L" : "M") + x(p.slot).toFixed(2) + " " + y(p.pct).toFixed(2);
       }).join(" ");
       s.path = el("path", { class: "ilx-line", d: d, style: "stroke:" + s.colour });
       svg.appendChild(s.path);
@@ -217,11 +241,12 @@
       cross.setAttribute("opacity", 0);
     }
 
-    function nearest(points, at) {
+    function nearest(points, slot) {
       var best = null, bestD = Infinity;
       for (var i = 0; i < points.length; i += 1) {
-        var d = Math.abs(points[i].at - at);
+        var d = Math.abs(points[i].slot - slot);
         if (d < bestD) { bestD = d; best = points[i]; }
+        if (d === 0) break;
       }
       return best;
     }
@@ -230,8 +255,8 @@
       var box = svg.getBoundingClientRect();
       if (!box.width) return;
       var ratio = Math.min(1, Math.max(0, (clientX - box.left) / box.width));
-      var viewX = ratio * W;
-      var at = frame.lo + ((viewX - PAD_L) / plotW) * frame.span;
+      var slot = Math.round(Math.min(1, Math.max(0, (ratio * W - PAD_L) / plotW)) * frame.last);
+      var viewX = x(slot);
 
       cross.setAttribute("x1", viewX);
       cross.setAttribute("x2", viewX);
@@ -240,10 +265,10 @@
       var stamp = null;
       series.forEach(function (s) {
         if (!s.on) { s.dot.setAttribute("opacity", 0); s.key.querySelector(".ilx-key-val").textContent = "—"; return; }
-        var p = nearest(s.points, at);
+        var p = nearest(s.points, slot);
         if (!p) return;
         if (stamp == null) stamp = p.at;
-        placeDot(s, x(p.at), y(p.pct));
+        placeDot(s, x(p.slot), y(p.pct));
         s.dot.setAttribute("opacity", 1);
         s.key.querySelector(".ilx-key-val").textContent = fmtPct(p.pct);
       });

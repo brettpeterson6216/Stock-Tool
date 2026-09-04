@@ -77,9 +77,9 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/vendor/fonts/plus-jakarta-sans-files/plus-jakarta-sans-latin-700-normal.woff2">
 <link rel="stylesheet" href="/vendor/fonts/il-fonts.css?v=20260825-6">
 <link rel="stylesheet" href="/vendor/tabler-icons.min.css?v=3.46.0-1">
-<link href="/product-system.css?v=20260907-3" rel="stylesheet">
-<link href="/workspace-system.css?v=20260907-3" rel="stylesheet">
-<link href="/research-system.css?v=20260907-3" rel="stylesheet">
+<link href="/product-system.css?v=20260907-4" rel="stylesheet">
+<link href="/workspace-system.css?v=20260907-4" rel="stylesheet">
+<link href="/research-system.css?v=20260907-4" rel="stylesheet">
 <!-- defer: this was the only render-blocking script on the page, 201KB before first paint -->
 <script defer src="/vendor/chart.umd.min.js?v=4.4.1"></script>
 <script defer src="/vendor/hammer.min.js?v=2.0.8"></script>
@@ -96,22 +96,22 @@
 <script defer src="/hero-chart.js?v=20260825-6"></script>
 <script defer src="/tool-launch.js?v=20260904-1"></script>
 <script defer src="/share-studio.js?v=20260827-2"></script>
-<link href="/legacy-app.css?v=20260907-3" rel="stylesheet">
-<link href="/premium.css?v=20260907-3" rel="stylesheet">
-<link href="/release-polish.css?v=20260907-3" rel="stylesheet">
-<link href="/visual-refresh.css?v=20260907-3" rel="stylesheet">
-  <link href="/site-shell.css?v=20260907-3" rel="stylesheet">
-<link href="/landing-polish.css?v=20260907-3" rel="stylesheet">
-<link href="/beauty-system.css?v=20260907-3" rel="stylesheet">
-<link href="/chart-engine.css?v=20260907-3" rel="stylesheet">
-<link rel="stylesheet" href="/premium-revamp.css?v=20260907-3">
-<link rel="stylesheet" href="/il-system.css?v=20260907-3">
-<link rel="stylesheet" href="/lens-prime-v2.css?v=20260907-3">
-<link rel="stylesheet" href="/lens-prime-exact.css?v=20260907-3">
-<link rel="stylesheet" href="/lens-prime-shared.css?v=20260907-3">
-<link rel="stylesheet" href="/lens-prime-fidelity.css?v=20260907-3">
-<link rel="stylesheet" href="/lens-prime-match.css?v=20260907-3">
-<link href="/clean-pass.css?v=20260907-3" rel="stylesheet">
+<link href="/legacy-app.css?v=20260907-4" rel="stylesheet">
+<link href="/premium.css?v=20260907-4" rel="stylesheet">
+<link href="/release-polish.css?v=20260907-4" rel="stylesheet">
+<link href="/visual-refresh.css?v=20260907-4" rel="stylesheet">
+  <link href="/site-shell.css?v=20260907-4" rel="stylesheet">
+<link href="/landing-polish.css?v=20260907-4" rel="stylesheet">
+<link href="/beauty-system.css?v=20260907-4" rel="stylesheet">
+<link href="/chart-engine.css?v=20260907-4" rel="stylesheet">
+<link rel="stylesheet" href="/premium-revamp.css?v=20260907-4">
+<link rel="stylesheet" href="/il-system.css?v=20260907-4">
+<link rel="stylesheet" href="/lens-prime-v2.css?v=20260907-4">
+<link rel="stylesheet" href="/lens-prime-exact.css?v=20260907-4">
+<link rel="stylesheet" href="/lens-prime-shared.css?v=20260907-4">
+<link rel="stylesheet" href="/lens-prime-fidelity.css?v=20260907-4">
+<link rel="stylesheet" href="/lens-prime-match.css?v=20260907-4">
+<link href="/clean-pass.css?v=20260907-4" rel="stylesheet">
 <script defer src="/premium-motion.js?v=20260825-6"></script>
 </head>
 <body class="il-product-page">
@@ -196,33 +196,54 @@
     <a class="ihm-head-link" href="/?view=tool&amp;section=workspace">Open workspace</a>
   </div>
 
-  <form class="ihm-search" id="ihm-search" role="search" action="/" method="get">
-    <input type="hidden" name="view" value="tool">
-    <input type="hidden" name="section" value="analyze">
-    <label class="ihm-search-label" for="ihm-ticker">Research a company</label>
-    <div class="ihm-search-row">
-      <input type="text" id="ihm-ticker" name="symbol" placeholder="Ticker or company name"
-             autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Ticker or company name">
-      <button type="submit" class="ihm-go">Analyze</button>
-    </div>
-  </form>
+  <!-- Three columns, and the search sits inside the middle one rather than
+       spanning the page: a ticker box a metre wide on a wide monitor is not
+       easier to use, it just pushes everything else down. The right rail
+       starts at the top of the grid so favourites run alongside the search
+       and the chart, not only alongside the chart.
 
-  <div class="ihm-tiles" id="ihm-tiles" aria-label="Your saved work"></div>
-
-  <!-- Shown instead of the tiles when there is nothing saved yet, which is
-       what a brand-new account sees. -->
-  <ol class="ihm-start" id="ihm-start" hidden>
-    <li><span class="ihm-step-n">1</span><div><b>Analyze a company</b><span>Search a ticker above to see price, fundamentals and the LensScore in one place.</span></div></li>
-    <li><span class="ihm-step-n">2</span><div><b>Write the thesis</b><span>Say what has to be true before you buy, so you can check it later.</span></div></li>
-    <li><span class="ihm-step-n">3</span><div><b>Set a review date</b><span>Come back on a schedule instead of when the price moves.</span></div></li>
-  </ol>
-
-  <!-- The working half of the dashboard: the market on the left, the things
-       this person actually follows on the right. Everything is drawn from
-       /api/market/landing-summary, /api/quote and /api/workspace/watchlist -
-       no placeholder rows, and each panel states its own failure. -->
+       Everything here is drawn from /api/market/landing-summary, /api/quote,
+       /api/workspace/* - no placeholder rows, and each panel states its own
+       failure rather than rendering a dash that reads like a value. -->
   <div class="ihm-grid">
+
+    <aside class="ihm-col-tools" aria-label="Your work and tools">
+      <section class="ihm-panel ihm-work-panel">
+        <div class="ihm-panel-head"><span class="ihm-panel-title">Your work</span></div>
+        <div class="ihm-stats" id="ihm-tiles"></div>
+      </section>
+
+      <section class="ihm-panel" aria-label="Tools">
+        <div class="ihm-panel-head"><span class="ihm-panel-title">Jump into a tool</span></div>
+        <div class="ihm-tools">
+          <a class="ihm-tool" href="/?view=tool&amp;section=projection">
+            <i class="ti ti-timeline" aria-hidden="true"></i>
+            <b>Projection Lab</b><span>Year-by-year revenue-to-price model.</span></a>
+          <a class="ihm-tool" href="/?view=tool&amp;section=dcf">
+            <i class="ti ti-calculator" aria-hidden="true"></i>
+            <b>Valuation Lab</b><span>DCF, exit P/E and EV/EBITDA with scenarios.</span></a>
+          <a class="ihm-tool" href="/?view=tool&amp;section=compare">
+            <i class="ti ti-adjustments-horizontal" aria-hidden="true"></i>
+            <b>Compare</b><span>Four stocks side by side, normalised.</span></a>
+          <a class="ihm-tool" href="/?view=tool&amp;section=screener">
+            <i class="ti ti-filter" aria-hidden="true"></i>
+            <b>Screener</b><span>Filter the market by value, size and momentum.</span></a>
+        </div>
+      </section>
+    </aside>
+
     <div class="ihm-col-main">
+      <form class="ihm-panel ihm-search" id="ihm-search" role="search" action="/" method="get">
+        <input type="hidden" name="view" value="tool">
+        <input type="hidden" name="section" value="analyze">
+        <label class="ihm-search-label" for="ihm-ticker">Research a company</label>
+        <div class="ihm-search-row">
+          <input type="text" id="ihm-ticker" name="symbol" placeholder="Ticker or company name"
+                 autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Ticker or company name">
+          <button type="submit" class="ihm-go">Analyze</button>
+        </div>
+      </form>
+
       <section class="ihm-panel ihm-market-panel" aria-label="Broader market">
         <div class="ihm-panel-head">
           <div class="ihm-panel-id">
@@ -238,19 +259,20 @@
         <div class="ihm-indexes" id="ihm-indexes" aria-label="Major indexes"></div>
       </section>
 
+      <section class="ihm-panel" aria-label="Popular companies">
+        <div class="ihm-panel-head">
+          <span class="ihm-panel-title">Popular starting points</span>
+          <span class="ihm-panel-note">one day</span>
+        </div>
+        <div class="ihm-populars" id="ihm-populars"></div>
+      </section>
+
       <section class="ihm-panel" aria-label="Sector performance today">
         <div class="ihm-panel-head">
           <span class="ihm-panel-title">Sectors today</span>
           <span class="ihm-panel-note" id="ihm-breadth">&mdash;</span>
         </div>
         <div class="ihm-sectors" id="ihm-sectors"></div>
-      </section>
-
-      <section class="ihm-panel" aria-label="Popular companies">
-        <div class="ihm-panel-head">
-          <span class="ihm-panel-title">Popular starting points</span>
-        </div>
-        <div class="ihm-populars" id="ihm-populars"></div>
       </section>
     </div>
 
@@ -266,14 +288,6 @@
         </p>
       </section>
 
-      <section class="ihm-panel" aria-label="Market news">
-        <div class="ihm-panel-head"><span class="ihm-panel-title">Market news</span></div>
-        <div class="ihm-news" id="ihm-news"></div>
-      </section>
-
-      <!-- Moved out of the full-width row below: the left column runs much
-           taller than the right, and this fills the gap instead of leaving
-           half the side of the page empty. -->
       <section class="ihm-panel ihm-recent" id="ihm-recent" hidden aria-label="Recent analyses">
         <div class="ihm-panel-head">
           <span class="ihm-panel-title">Recent analyses</span>
@@ -281,11 +295,13 @@
         </div>
         <div class="ihm-recent-list" id="ihm-recent-list"></div>
       </section>
+
+      <section class="ihm-panel" aria-label="Market news">
+        <div class="ihm-panel-head"><span class="ihm-panel-title">Market news</span></div>
+        <div class="ihm-news" id="ihm-news"></div>
+      </section>
     </aside>
   </div>
-
-
-
 </section>
 
 <section class="il-landing" id="landing-page" aria-label="Implied Lens landing page">
@@ -1924,7 +1940,7 @@
     <a href="#" class="mmenu-item" id="mmenu-logout" style="display:none;" onclick="var b=document.getElementById('nav-acct-logout');if(b){b.click();}_toggleMobileMenu();return false;"><i class="ti ti-logout-2"></i><span>Log out</span></a>
   </div>
 </div>
-  <script defer src="/index-chart.js?v=20260907-3"></script>
+  <script defer src="/index-chart.js?v=20260907-4"></script>
   <script defer src="/home-member.js?v=20260907-1"></script>
   <script defer src="/site-nav.js?v=20260905-2"></script>
 </body>

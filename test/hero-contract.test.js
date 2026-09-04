@@ -123,16 +123,36 @@ test("member counts are read, never invented", () => {
   assert.match(memberJs, /workspace\/summary/, "counts must come from the workspace summary");
   assert.match(memberJs, /\/api\/saves/, "recent analyses must come from the saves endpoint");
   assert.match(memberJs, /Number\.isFinite\(n\)/, "a missing count must not render as a number");
-  assert.match(memberJs, /"unavailable"/, "a failed count must say so rather than show zero");
+  assert.match(memberJs, /counts are unavailable right now/, "a failed count must say so rather than show zero");
 });
 
-test("a brand-new account gets direction instead of a row of zeroes", () => {
-  assert.match(memberJs, /total === 0/, "the empty case must be detected");
+test("the dashboard offers places to go, not a lecture on how to use it", () => {
   assert.match(homeCss, /#il-home-member \[hidden\][\s\S]{0,140}display: none !important/,
     "[hidden] must win against the component's own display rule");
   const html = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
-  assert.match(html, /id="ihm-start"/, "the starter steps are gone");
+
+  // The three numbered steps told someone who had already signed up and
+  // logged in to search for a ticker, next to the box that already invited
+  // them to. Four named tools are what replaced them.
+  assert.doesNotMatch(html, /id="ihm-start"/, "the numbered how-to steps are back");
+  assert.doesNotMatch(html, /ihm-step-n/, "the numbered how-to steps are back");
+  for (const tool of ["Projection Lab", "Valuation Lab", "Compare", "Screener"]) {
+    assert.ok(html.includes(">" + tool + "<"), `the ${tool} link is missing from the tool rail`);
+  }
   assert.match(html, /class="il-startpaths"/, "the visitor page needs its three ways in");
+});
+
+test("the search, the tools and the favourites each get their own column", () => {
+  const html = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
+  // Favourites had to sit beside the search as well as beside the chart, so
+  // the search moved inside the middle column and the rail starts at the top.
+  const grid = html.slice(html.indexOf('class="ihm-grid"'), html.indexOf('</section>\n\n<section class="il-landing"'));
+  for (const cls of ["ihm-col-tools", "ihm-col-main", "ihm-col-side"]) {
+    assert.ok(grid.includes(cls), `${cls} is not inside the grid`);
+  }
+  assert.ok(grid.indexOf('id="ihm-search"') > 0, "the search is outside the grid again, so it spans the page");
+  assert.match(homeCss, /grid-template-columns: 236px minmax\(0, 1fr\) 320px/, "the three-column grid is gone");
+  assert.match(homeCss, /max-width: 620px !important/, "the ticker field is unbounded again");
 });
 
 // ── The dashboard has to fill the screen ──────────────────────────────────

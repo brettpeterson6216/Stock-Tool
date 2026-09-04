@@ -40,34 +40,24 @@
     return name ? part + ", " + name + "." : part + ".";
   }
 
+  /* Four wide tiles across the top pushed everything else below the fold and
+     said very little; they are a short list in the left rail now. The three
+     numbered "how to use this site" steps that replaced them on an empty
+     account are gone entirely - they told someone who had already signed up
+     and logged in to search for a ticker, which is the one thing the box
+     directly beside them already invited them to do. */
   function renderTiles(counts, failed) {
     var wrap = document.getElementById("ihm-tiles");
     if (!wrap) return;
-    var total = TILES.reduce(function (sum, t) {
-      return sum + (Number.isFinite(counts[t.key]) ? counts[t.key] : 0);
-    }, 0);
-
-    // Nothing saved yet is the new-account case, and a list of zeroes is a
-    // worse answer for that person than being told what to do first.
-    var start = document.getElementById("ihm-start");
-    if (!failed && total === 0) {
-      wrap.hidden = true;
-      if (start) start.hidden = false;
-      return;
-    }
-    if (start) start.hidden = true;
     wrap.hidden = false;
-
     wrap.innerHTML = TILES.map(function (t) {
       var n = counts[t.key];
       var has = Number.isFinite(n);
-      var value = has ? String(n) : "&mdash;";
-      var sub = has ? plural(n, t.unit, t.plural) : "unavailable";
-      return '<a class="ihm-tile' + (has && n > 0 && t.key === "dueReviews" ? " is-due" : "") + '" href="' + t.href + '">' +
-        '<span class="ihm-tile-n">' + value + "</span>" +
-        '<span class="ihm-tile-l">' + esc(t.label) + "</span>" +
-        '<span class="ihm-tile-s">' + esc(sub) + "</span></a>";
-    }).join("");
+      return '<a class="ihm-stat' + (has && n > 0 && t.key === "dueReviews" ? " is-due" : "") +
+        (has && n === 0 ? " is-zero" : "") + '" href="' + t.href + '">' +
+        '<span class="ihm-stat-l">' + esc(t.label) + "</span>" +
+        '<span class="ihm-stat-n">' + (has ? String(n) : "&mdash;") + "</span></a>";
+    }).join("") + (failed ? '<span class="ihm-none">Your counts are unavailable right now.</span>' : "");
   }
 
   function renderRecent(saves) {
@@ -135,6 +125,17 @@
     }).join(" ");
   }
 
+  /* A sparkline is a shape, not a number: no axis, no labels, nothing that a
+     horizontal stretch could distort. The stroke is pinned to screen pixels
+     so it stays one weight whatever width the card ends up. Fewer than two
+     real closes draws nothing rather than a straight line implying calm. */
+  function spark(closes, up) {
+    var d = linePath(closes, 100, 30);
+    if (!d) return "";
+    return '<svg class="ihm-spark' + (up ? " is-up" : " is-dn") + '" viewBox="0 0 100 30" ' +
+      'preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="' + d + '"/></svg>';
+  }
+
   /* One quote call per symbol, on the preview path so it costs no analysis
      quota. Anything that does not answer is left out rather than guessed at. */
   function quote(symbol) {
@@ -145,7 +146,19 @@
         var price = Number(meta.regularMarketPrice != null ? meta.regularMarketPrice : meta.chartPreviousClose);
         var prev = Number(meta.chartPreviousClose || meta.previousClose || price);
         if (!Number.isFinite(price)) return null;
-        return { symbol: symbol, price: price, changePct: prev > 0 ? ((price - prev) / prev) * 100 : NaN };
+        // A close of null is a bar that has not printed. Number(null) is 0 and
+        // 0 is finite, so the null has to be rejected before the conversion or
+        // it becomes a price of zero and the sparkline falls off its own floor.
+        var raw = d.chart.result[0].indicators && d.chart.result[0].indicators.quote &&
+                  d.chart.result[0].indicators.quote[0] && d.chart.result[0].indicators.quote[0].close;
+        var closes = [];
+        (Array.isArray(raw) ? raw : []).forEach(function (v) {
+          if (v == null) return;
+          var n = Number(v);
+          if (Number.isFinite(n) && n > 0) closes.push(n);
+        });
+        return { symbol: symbol, price: price, closes: closes,
+                 changePct: prev > 0 ? ((price - prev) / prev) * 100 : NaN };
       })
       .catch(function () { return null; });
   }
@@ -228,8 +241,10 @@
     wrap.innerHTML = have.length
       ? have.map(function (r) {
           var label = (INDEXES.filter(function (i) { return i.t === r.symbol; })[0] || {}).label || r.symbol;
-          return '<div class="ihm-index' + dirClass(r.changePct) + '"><span>' + esc(label) +
-            "</span><b>" + num(r.price, 2) + "</b><i>" + pct(r.changePct) + "</i></div>";
+          return '<div class="ihm-index' + dirClass(r.changePct) + '">' +
+            '<div class="ihm-index-txt"><span>' + esc(label) + "</span><b>" + num(r.price, 2) +
+            "</b><i>" + pct(r.changePct) + "</i></div>" +
+            spark(r.closes, Number(r.changePct) >= 0) + "</div>";
         }).join("")
       : '<span class="ihm-none">Index data unavailable.</span>';
   }
@@ -241,8 +256,9 @@
     wrap.innerHTML = have.length
       ? have.map(function (r) {
           return '<a class="ihm-pop' + dirClass(r.changePct) + '" href="/?view=tool&section=analyze&symbol=' +
-            encodeURIComponent(r.symbol) + '"><b>' + esc(r.symbol) + "</b><span>" + num(r.price, 2) +
-            "</span><i>" + pct(r.changePct) + "</i></a>";
+            encodeURIComponent(r.symbol) + '">' + spark(r.closes, Number(r.changePct) >= 0) +
+            '<div class="ihm-pop-txt"><b>' + esc(r.symbol) + "</b><span>" + num(r.price, 2) +
+            "</span><i>" + pct(r.changePct) + "</i></div></a>";
         }).join("")
       : '<span class="ihm-none">Quotes unavailable right now.</span>';
   }

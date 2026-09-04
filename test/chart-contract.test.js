@@ -70,11 +70,45 @@ test("series are compared as percent change, not raw levels", () => {
 
 test("series are aligned by timestamp, not by array position", () => {
   // A holiday or a halt in one index is not a gap in another; lining them up
-  // by index slides one series against the others by however many bars they
-  // differ.
-  assert.match(chart, /at:\s*s\.stamps\[i\]/, "points no longer carry their own timestamp");
-  assert.match(chart, /frame\.lo \+ \(\(viewX - PAD_L\) \/ plotW\) \* frame\.span/,
-    "the crosshair no longer maps x back to a time");
+  // by array index slides one series against the others by however many bars
+  // they differ. The shared axis is the union of every timestamp reported.
+  assert.match(chart, /function buildSlots\(series\)/, "the shared timestamp axis is gone");
+  assert.match(chart, /slot:\s*slot/, "points no longer carry their position on the shared axis");
+
+  // Ordinal, not real seconds: mapping x to elapsed time gives the weekend
+  // two thirds of the width and draws a month of markets as thin stripes.
+  assert.match(chart, /var x = function \(slot\) \{ return PAD_L \+ \(slot \/ frame\.last\) \* plotW/,
+    "the x axis is back on real time, which reintroduces the weekend voids");
+
+  // The crosshair has to look points up by the same measure the axis uses.
+  // It once passed a variable the refactor had deleted, which silently made
+  // every lookup NaN and every readout blank.
+  assert.match(chart, /nearest\(s\.points, slot\)/, "the crosshair is not looking up by slot");
+  assert.doesNotMatch(chart, /nearest\(s\.points, at\)/, "the crosshair is reading a deleted variable");
+});
+
+test("a bar that never printed is not treated as a price of zero", () => {
+  // Number(null) is 0 and 0 is finite, so a null close survives a naive
+  // isFinite filter as a price of zero, normalises to -100%, and pulls the
+  // whole chart flat against the floor.
+  assert.match(api, /rawCloses\[i\] == null \|\| rawStamps\[i\] == null/,
+    "the server converts the null before it checks for one");
+  assert.match(api, /close <= 0/, "a close of zero is still accepted as a price");
+  assert.match(chart, /c <= 0/, "the chart still plots a zero close");
+  assert.match(read("public/home-member.js"), /if \(v == null\) return;/,
+    "the sparkline data still turns nulls into zeroes");
+});
+
+test("today's change is not measured from the edge of the chart range", () => {
+  // chartPreviousClose is the close before the RANGE. Over a one-month range
+  // it made every sector chip a monthly figure under a heading saying today:
+  // Industrials read -6.08% on a day Yahoo had XLI at +0.30%.
+  // Scoped to the landing-summary handler: /api/quote legitimately synthesises
+  // a chartPreviousClose of its own for a one-day range, where it is correct.
+  const summary = api.slice(api.indexOf("SERIES_LADDER"));
+  assert.doesNotMatch(summary, /meta\.chartPreviousClose/, "chartPreviousClose is being used as a previous close again");
+  assert.match(summary, /function priorSessionClose\(points\)/, "there is no fallback for a missing previousClose");
+  assert.match(summary, /America\/New_York/, "the session boundary is being taken at UTC midnight, which is mid-session");
 });
 
 test("nothing is drawn inside the stretched SVG that a stretch would ruin", () => {
