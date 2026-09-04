@@ -1,9 +1,62 @@
 /* LENS PRIME — one shared product shell for application and static surfaces. */
+/* ════════════════════════════════════════════════════════════════════════════
+   THEME TOKENS
+
+   Every surface in the research terminal used to be a literal dark hex with
+   !important on a three-id selector, in a file that loads near the end of an
+   eighteen-stylesheet cascade. premium-revamp.css alone defines 279 light-mode
+   rules, legacy-app.css 131, visual-refresh.css 18 - and this file silently
+   overrode all of them.
+
+   The result was measurable, not cosmetic. In light mode the terminal painted
+   light text onto pinned dark panels and dark text onto pinned dark panels in
+   the same viewport: the header actions (Watch / Save / Studio / Report) came
+   out at 1.59:1, and #ticker-input rendered a 55%-opaque white slab over a
+   near-black shell, which is the grey block that swallowed the placeholder.
+
+   The surfaces are tokens now, so the terminal follows the theme instead of
+   fighting it. The light values mirror the landing page's --lpf-* palette so
+   the two halves of the product agree.
+   ════════════════════════════════════════════════════════════════════════════ */
 :root{
   --lp-bg:#070b0e;--lp-sidebar:#081014;--lp-panel:#0a1115;--lp-panel-2:#0d1519;
   --lp-border:rgba(176,160,126,.16);--lp-border-gold:rgba(216,164,63,.34);
   --lp-gold:#d8a23d;--lp-gold-hi:#edc46d;--lp-text:#f2eee5;--lp-muted:#929c9c;
   --lp-green:#4ec879;--lp-red:#ef626d;--lp-radius:7px;
+
+  --lp-elev:linear-gradient(155deg,#0d1519,#091013);
+  --lp-elev-lg:linear-gradient(150deg,#0c1518,#081013);
+  --lp-hdr:rgba(7,12,15,.91);
+  --lp-input-shell:#070d10;
+  --lp-hover:#10191d;
+  --lp-brand-line:rgba(174,153,109,.13);
+  --lp-nav-ink:#aab1b0;
+  --lp-nav-ink-active:#f0e9dc;
+  --lp-nav-active-bg:linear-gradient(90deg,rgba(185,127,33,.27),rgba(131,88,28,.1));
+  --lp-label:#818b8a;
+  --lp-btn-ink:#b7bebc;
+}
+
+/* Light. Scoped to the product terminal - the static pages are a separate
+   decision and are deliberately left dark for now. */
+html[data-theme="light"] body.il-product-page,
+html:not([data-theme="dark"]) body.il-product-page{
+  --lp-bg:#f3f0e8;--lp-sidebar:#fbfaf6;--lp-panel:#fbfaf6;--lp-panel-2:#ffffff;
+  --lp-border:rgba(62,54,39,.17);--lp-border-gold:rgba(176,128,40,.38);
+  --lp-gold:#a8781f;--lp-gold-hi:#8a6216;--lp-text:#171a1a;--lp-muted:#5c6664;
+  --lp-green:#1d7a45;--lp-red:#b3323d;
+
+  --lp-elev:linear-gradient(155deg,#ffffff,#faf8f3);
+  --lp-elev-lg:linear-gradient(150deg,#ffffff,#f8f6f0);
+  --lp-hdr:rgba(251,250,246,.94);
+  --lp-input-shell:#ffffff;
+  --lp-hover:#f1eee6;
+  --lp-brand-line:rgba(62,54,39,.14);
+  --lp-nav-ink:#4e5957;
+  --lp-nav-ink-active:#171a1a;
+  --lp-nav-active-bg:linear-gradient(90deg,rgba(168,120,31,.16),rgba(168,120,31,.05));
+  --lp-label:#5c6563;
+  --lp-btn-ink:#3a4442;
 }
 html[data-theme="dark"] body{background:var(--lp-bg)!important;color:var(--lp-text)!important}
 
@@ -76,28 +129,159 @@ html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #main-
 html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool{padding:0!important;background:var(--lp-bg)!important}
 html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .app-shell{min-height:100vh!important;display:flex!important;background:var(--lp-bg)!important}
 html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .app-sidebar{width:218px!important;min-width:218px!important;height:100vh!important;position:sticky!important;top:0!important;padding:0 12px 14px!important;background:var(--lp-sidebar)!important;border-right:1px solid var(--lp-border)!important;box-shadow:none!important}
-html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .prime-sidebar-brand{height:68px!important;margin:0 0 10px!important;padding:0 7px!important;display:flex!important;align-items:center!important;gap:10px!important;border-bottom:1px solid rgba(174,153,109,.13)!important;color:var(--lp-text)!important;font:16px/1 Georgia,'Times New Roman',serif!important;letter-spacing:.04em!important;text-transform:uppercase!important}
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .prime-sidebar-brand{height:68px!important;margin:0 0 10px!important;padding:0 7px!important;display:flex!important;align-items:center!important;gap:10px!important;border-bottom:1px solid var(--lp-brand-line)!important;color:var(--lp-text)!important;font:16px/1 Georgia,'Times New Roman',serif!important;letter-spacing:.04em!important;text-transform:uppercase!important}
 html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .prime-sidebar-brand img{width:27px!important;height:27px!important}
 html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool nav.prime-side-global{position:static!important;inset:auto!important;transform:none!important;display:grid!important;gap:3px!important;width:100%!important;padding:0!important;margin:0 0 12px!important;background:none!important;border:0!important;box-shadow:none!important;backdrop-filter:none!important}
-html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .prime-side-global a,html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .sb-item{height:36px!important;min-height:36px!important;padding:0 11px!important;border:0!important;border-radius:4px!important;background:transparent!important;color:#aab1b0!important;font-size:10.5px!important;font-weight:600!important;box-shadow:none!important}
-html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .prime-side-global a.active,html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .sb-item.active{background:linear-gradient(90deg,rgba(185,127,33,.27),rgba(131,88,28,.1))!important;color:#f0e9dc!important;box-shadow:inset 2px 0 var(--lp-gold)!important}
-html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .sb-section-label{padding:12px 9px 7px!important;color:#687373!important;font-size:7.5px!important;letter-spacing:.13em!important}
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .prime-side-global a,html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .sb-item{height:36px!important;min-height:36px!important;padding:0 11px!important;border:0!important;border-radius:4px!important;background:transparent!important;color:var(--lp-nav-ink)!important;font-size:13px!important;font-weight:500!important;box-shadow:none!important}
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .prime-side-global a.active,html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .sb-item.active{background:var(--lp-nav-active-bg)!important;color:var(--lp-nav-ink-active)!important;box-shadow:inset 2px 0 var(--lp-gold)!important}
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .sb-section-label{padding:16px 9px 7px!important;color:var(--lp-label)!important;font-size:11px!important;font-weight:600!important;letter-spacing:.02em!important;text-transform:none!important}
 html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .app-main{flex:1!important;min-width:0!important;background:radial-gradient(circle at 80% 0,rgba(39,66,65,.09),transparent 32%),var(--lp-bg)!important}
-html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .app-section-hdr{height:68px!important;min-height:68px!important;padding:0 18px!important;background:rgba(7,12,15,.91)!important;border-bottom:1px solid var(--lp-border)!important;box-shadow:none!important}
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .app-section-hdr{height:68px!important;min-height:68px!important;padding:0 18px!important;background:var(--lp-hdr)!important;border-bottom:1px solid var(--lp-border)!important;box-shadow:none!important}
 html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .ash-title{font:400 18px/1 Georgia,'Times New Roman',serif!important;color:var(--lp-text)!important}
-html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .ash-sub{font-size:8px!important;color:#707b7b!important}
-html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .ash-btn{height:34px!important;border-radius:4px!important;background:#0a1115!important;border-color:var(--lp-border)!important;color:#b7bebc!important;font-size:9px!important}
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .ash-sub{font-size:12px!important;color:var(--lp-muted)!important}
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .ash-btn{height:34px!important;padding:0 12px!important;border-radius:6px!important;background:var(--lp-panel)!important;border-color:var(--lp-border)!important;color:var(--lp-btn-ink)!important;font-size:12px!important}
 html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .app-content-scroll{padding:14px 18px 34px!important;background:transparent!important}
 html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #body-analyze:not(.has-stock)>.tool-welcome{min-height:0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important}
 html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #body-analyze:not(.has-stock) .tw-prime-grid{gap:10px!important}
-html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #body-analyze:not(.has-stock) .tw-prime-hero,html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #body-analyze:not(.has-stock) .tw-live-board{background:linear-gradient(150deg,#0c1518,#081013)!important;border:1px solid var(--lp-border)!important;border-radius:8px!important;box-shadow:none!important}
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #body-analyze:not(.has-stock) .tw-prime-hero,html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #body-analyze:not(.has-stock) .tw-live-board{background:var(--lp-elev-lg)!important;border:1px solid var(--lp-border)!important;border-radius:8px!important;box-shadow:none!important}
 html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #body-analyze:not(.has-stock) .tw-prime-hero{padding:34px!important;min-height:335px!important}
 html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #body-analyze:not(.has-stock) .tw-title{max-width:620px!important;font:400 44px/1.03 Georgia,'Times New Roman',serif!important;letter-spacing:-.035em!important;color:var(--lp-text)!important}
-html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #body-analyze:not(.has-stock) .tw-sub{max-width:650px!important;font-size:11.5px!important;line-height:1.6!important;color:var(--lp-muted)!important}
-html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #body-analyze:not(.has-stock) .search-row{height:58px!important;padding:8px!important;margin-top:24px!important;border:1px solid var(--lp-border)!important;border-radius:4px!important;background:#070d10!important}
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #body-analyze:not(.has-stock) .tw-sub{max-width:650px!important;font-size:13px!important;line-height:1.65!important;color:var(--lp-muted)!important}
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #body-analyze:not(.has-stock) .search-row{height:58px!important;padding:8px!important;margin-top:24px!important;border:1px solid var(--lp-border)!important;border-radius:6px!important;background:var(--lp-input-shell)!important}
 html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #body-analyze:not(.has-stock) .search-row button{height:42px!important;border-radius:4px!important;background:linear-gradient(135deg,#edca79,#c98d2c)!important;color:#161008!important}
-html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .tool-launch-card,html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .saved-resume-card,html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .panel-box,html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .metric-card,html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .chart-wrap,html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .sidebar-card{background:linear-gradient(155deg,#0d1519,#091013)!important;border:1px solid var(--lp-border)!important;border-radius:8px!important;box-shadow:none!important}
-html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .tool-launch-card:hover{border-color:var(--lp-border-gold)!important;transform:translateY(-2px)!important;background:#10191d!important}
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .tool-launch-card,html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .saved-resume-card,html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .panel-box,html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .metric-card,html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .chart-wrap,html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .sidebar-card{background:var(--lp-elev)!important;border:1px solid var(--lp-border)!important;border-radius:8px!important;box-shadow:none!important}
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .tool-launch-card:hover{border-color:var(--lp-border-gold)!important;transform:translateY(-2px)!important;background:var(--lp-hover)!important}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   WATCHBOARD DENSITY AND THE SEARCH FIELD
+
+   Measured: each .fstock-card is 87px tall around 40px of content, and
+   #featured-grid carries min-height:406px. Eight cards of mostly air made the
+   right column ~100px taller than the left, and because they sit in the same
+   grid row the left column stretched to match - which is the empty band under
+   the index tiles, not a spacing bug in the left column at all. Dropping the
+   two min-heights lets the board size to its content and closes the band from
+   the side that caused it. Cards still grow on their own once real quotes
+   arrive.
+
+   The search field rendered a 55%-opaque white fill (premium-revamp.css) over
+   a near-black shell, then painted near-white placeholder text on it. The
+   field is transparent now and the shell owns the surface, the same way the
+   top nav search works.
+   ════════════════════════════════════════════════════════════════════════════ */
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #featured-grid{ min-height:0!important; }
+/* #tool-welcome spans both rows of the two-column grid, so it stretched to the
+   full 404px of rows 1+2 and then centred its 314px of copy inside that -
+   45px of air above and below. lens-prime-v2.css also pins height:404px and
+   min-height:404px on it - a literal pixel height on a container whose only
+   job is to hold copy, so any edit to that copy either overflows or leaves a
+   gap. Sized to content and top-aligned instead. */
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #tool-welcome{
+  height:auto!important;min-height:0!important;
+  align-self:start!important;align-items:start!important;align-content:start!important;
+}
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #tw-extra{ margin-top:10px!important; }
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) .fstock-card{ min-height:0!important;padding:14px!important; }
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) .fg-label{ padding:14px 16px!important; }
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) .fstock-empty{
+  grid-column:1 / -1!important;
+  display:flex!important;flex-direction:column!important;gap:6px!important;
+  align-items:center!important;justify-content:center!important;text-align:center!important;
+  padding:38px 24px!important;min-height:180px!important;
+}
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) .fstock-empty-title{ font-size:13px!important;font-weight:600!important;color:var(--lp-text)!important; }
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) .fstock-empty-sub{ font-size:12px!important;line-height:1.5!important;max-width:330px!important;color:var(--lp-muted)!important; }
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) .fstock-chg--na,
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) .twm-cell--unavailable .twm-val{
+  font-size:12px!important;font-weight:500!important;color:var(--lp-muted)!important;
+}
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) .twm-cell--loading .twm-val{ color:var(--lp-label)!important; }
+
+/* -webkit-text-fill-color paints over `color`. The Analyze button already sets
+   color:#161008 for its gold fill, but in light mode something repainted the
+   fill near-white: measured off the rendered pixels, "Analyze" was 2.14:1 on
+   its own gold. Making every control in the terminal take its fill from
+   `color` fixes the whole class rather than this one button. */
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool button,
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .btn-search,
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .search-row button{ -webkit-text-fill-color:currentColor!important; }
+
+/* The quota row is written with inline font-size:.68rem / .63rem, which lands
+   at 10.2px and 9.4px against the product's 15px root. */
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #limit-counter span,
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #limit-counter button{ font-size:12px!important; }
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #limit-counter button{ padding:5px 12px!important; }
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) .fg-label span{
+  font-family:inherit!important;font-size:12px!important;font-weight:600!important;
+  letter-spacing:.01em!important;text-transform:none!important;color:var(--lp-text)!important;
+}
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) .search-row input,
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #ticker-input{
+  background:transparent!important;background-image:none!important;
+  border:0!important;box-shadow:none!important;
+  color:var(--lp-text)!important;-webkit-text-fill-color:var(--lp-text)!important;
+  font-size:14px!important;
+}
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) .search-row input::placeholder,
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #ticker-input::placeholder{
+  color:var(--lp-muted)!important;-webkit-text-fill-color:var(--lp-muted)!important;opacity:1!important;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   TERMINAL TYPE SCALE AND CASE
+
+   Measured on the rendered dashboard: 19 elements below 11px, the smallest at
+   7.5px (the sidebar group label) and 8px (the section subtitle and the hero
+   kicker). At those sizes the letterspacing that came with them stops helping
+   and starts separating a word into characters.
+
+   The copy in the HTML is already sentence case - "Live watchboard", "Jump
+   into a tool", "Research tools". text-transform was doing the shouting, so
+   removing it restores what the markup already says. Tickers and S&P 500 stay
+   as authored, because those are genuinely uppercase.
+
+   Floor is 11px. Nothing here changes a word of copy.
+   ════════════════════════════════════════════════════════════════════════════ */
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) .tw-kicker{
+  font-size:11px!important;font-weight:600!important;
+  letter-spacing:.01em!important;text-transform:none!important;
+  color:var(--lp-gold)!important;margin-bottom:14px!important;
+}
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) .prime-side-section{
+  font-size:11px!important;font-weight:600!important;
+  letter-spacing:.02em!important;text-transform:none!important;
+  color:var(--lp-label)!important;padding:16px 9px 7px!important;
+}
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) .tw-sec-lbl{
+  font-size:12px!important;font-weight:600!important;
+  letter-spacing:.01em!important;text-transform:none!important;
+  color:var(--lp-muted)!important;
+}
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) .fg-label{
+  font-size:12px!important;font-weight:600!important;
+  letter-spacing:.01em!important;text-transform:none!important;
+  color:var(--lp-text)!important;
+}
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) .fg-label small{
+  font-size:11px!important;font-weight:500!important;
+  letter-spacing:.01em!important;text-transform:none!important;
+  color:var(--lp-muted)!important;
+}
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) .twm-lbl{
+  font-size:11px!important;font-weight:600!important;
+  letter-spacing:.01em!important;text-transform:none!important;
+  color:var(--lp-muted)!important;
+}
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) .sb-pro-sub{ font-size:12px!important;color:var(--lp-muted)!important; }
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) .sb-pro-title,html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) .sb-pro{ color:var(--lp-text)!important; }
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) .il-build{ font-size:11px!important;color:var(--lp-label)!important; }
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .quota-row span,
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool [class*="quota"] span{ font-size:12px!important; }
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .quota-row button,
+html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool [class*="quota"] button{ font-size:12px!important;padding:4px 11px!important; }
+
+
+
 
 @media(max-width:900px){
   body.il-static-page::before,body.il-lens-page::before,body.il-auth-page::before{display:none!important}
@@ -114,10 +298,10 @@ html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-
   body.il-lens-page .search-shell h1{font-size:38px!important}
   html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .app-sidebar{display:none!important}
   html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .app-shell{display:block!important}
-  html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .prime-mobile-appbar{height:62px!important;padding:0 15px!important;position:sticky!important;top:0!important;z-index:70!important;display:flex!important;align-items:center!important;border-bottom:1px solid var(--lp-border)!important;background:rgba(7,12,15,.97)!important;backdrop-filter:blur(16px)!important}
+  html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .prime-mobile-appbar{height:62px!important;padding:0 15px!important;position:sticky!important;top:0!important;z-index:70!important;display:flex!important;align-items:center!important;border-bottom:1px solid var(--lp-border)!important;background:var(--lp-hdr)!important;backdrop-filter:blur(16px)!important}
   html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .prime-mobile-appbar a{display:flex!important;align-items:center!important;gap:8px!important;color:var(--lp-text)!important;text-decoration:none!important;font:15px/1 Georgia,'Times New Roman',serif!important;letter-spacing:.045em!important}
   html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .prime-mobile-appbar img{width:26px!important;height:26px!important}
-  html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .prime-mobile-appbar button{margin-left:auto!important;width:40px!important;height:40px!important;border:0!important;background:transparent!important;color:#ddd8cf!important;font-size:21px!important}
+  html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .prime-mobile-appbar button{margin-left:auto!important;width:40px!important;height:40px!important;border:0!important;background:transparent!important;color:var(--lp-text)!important;font-size:21px!important}
   html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #mobile-bottom-nav{display:none!important}
   html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .app-section-hdr{height:58px!important;min-height:58px!important;padding:0 13px!important}
   html:not(#lp-a):not(#lp-b) body.il-product-page.il-tool-active:not(#lp-c) #view-tool .app-content-scroll{padding:10px 12px 88px!important}

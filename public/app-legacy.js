@@ -2939,13 +2939,28 @@ async function loadFeaturedGrid() {
     )
   );
   const FG_LOGOS={AAPL:'https://www.google.com/s2/favicons?sz=32&domain=apple.com',NVDA:'https://www.google.com/s2/favicons?sz=32&domain=nvidia.com',MSFT:'https://www.google.com/s2/favicons?sz=32&domain=microsoft.com',TSLA:'https://www.google.com/s2/favicons?sz=32&domain=tesla.com',AMZN:'https://www.google.com/s2/favicons?sz=32&domain=amazon.com',META:'https://www.google.com/s2/favicons?sz=32&domain=meta.com',GOOGL:'https://www.google.com/s2/favicons?sz=32&domain=google.com',SPY:'https://www.google.com/s2/favicons?sz=32&domain=ssga.com'};
+  // An em dash is what this used to render when the quote service could not be
+  // reached, which is indistinguishable from a real value of nothing. Under a
+  // heading that reads "Live watchboard", eight of them look like the product
+  // is broken rather than like the data is missing, so say which it is.
+  const reachable = results.filter((res, i) => {
+    const d = res.status === 'fulfilled' ? res.value : null;
+    return !!d?.chart?.result?.[0]?.meta;
+  }).length;
+  if (reachable === 0) {
+    el.innerHTML = `<div class="fstock-empty" role="status">
+      <div class="fstock-empty-title">Live quotes are unavailable right now</div>
+      <div class="fstock-empty-sub">The market data service did not respond. Search a ticker above to try a single company.</div>
+    </div>`;
+    return;
+  }
   el.innerHTML = results.map((res, i) => {
     const t = FEATURED_TICKERS[i];
     const data = res.status === 'fulfilled' ? res.value : null;
     const meta = data?.chart?.result?.[0]?.meta;
     const closes = data?.chart?.result?.[0]?.indicators?.quote?.[0]?.close?.filter(x=>x!=null)||[];
     if (!meta) {
-      return `<div class="fstock-card" onclick="loadTicker('${t}')"><div class="fstock-top"><span class="fstock-sym">${t}</span></div><div class="fstock-price">—</div></div>`;
+      return `<div class="fstock-card fstock-card--na" onclick="loadTicker('${t}')"><div class="fstock-top"><span class="fstock-sym">${t}</span></div><div class="fstock-price">—</div><div class="fstock-chg fstock-chg--na">Unavailable</div></div>`;
     }
     const price = meta.regularMarketPrice ?? meta.chartPreviousClose;
     const prev  = meta.chartPreviousClose || price;

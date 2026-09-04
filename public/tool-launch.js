@@ -9,27 +9,31 @@
     { t: "^DJI", label: "Dow Jones" },
   ];
   function metaOf(j) { try { return j.chart.result[0].meta; } catch (e) { return null; } }
-  function cell(label, valHtml, chgHtml) {
-    return '<div class="twm-cell"><span class="twm-lbl">' + label + '</span><span class="twm-val">' + valHtml + '</span>' + (chgHtml || "") + "</div>";
+  function cell(label, valHtml, chgHtml, state) {
+    // state: "loading" | "unavailable" | undefined (a real quote)
+    var cls = state ? ' twm-cell--' + state : "";
+    return '<div class="twm-cell' + cls + '"><span class="twm-lbl">' + label + '</span><span class="twm-val">' + valHtml + '</span>' + (chgHtml || "") + "</div>";
   }
   async function loadMarketStrip() {
     var el = document.getElementById("tw-market");
     if (!el) return;
-    el.innerHTML = IDX.map(function (i) { return cell(i.label, "—", ""); }).join("");
+    el.innerHTML = IDX.map(function (i) { return cell(i.label, "—", "", "loading"); }).join("");
     try {
       var res = await Promise.allSettled(IDX.map(function (i) {
         return fetch("/api/quote/" + encodeURIComponent(i.t) + "?range=1d&preview=1", { credentials: "same-origin" }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
       }));
       el.innerHTML = res.map(function (r, i) {
         var meta = r.status === "fulfilled" ? metaOf(r.value) : null;
-        if (!meta) return cell(IDX[i].label, "—", "");
+        if (!meta) return cell(IDX[i].label, "Unavailable", "", "unavailable");
         var p = meta.regularMarketPrice != null ? meta.regularMarketPrice : meta.chartPreviousClose;
         var prev = meta.chartPreviousClose || p, chg = p - prev, pct = prev ? (chg / prev) * 100 : 0, up = chg >= 0;
         var val = Number(p).toLocaleString("en-US", { maximumFractionDigits: p >= 1000 ? 0 : 2 });
         var chgHtml = '<span class="twm-chg ' + (up ? "up" : "dn") + '">' + (up ? "▲" : "▼") + " " + Math.abs(pct).toFixed(2) + "%</span>";
         return cell(IDX[i].label, val, chgHtml);
       }).join("");
-    } catch (e) { /* leave placeholders */ }
+    } catch (e) {
+      el.innerHTML = IDX.map(function (i) { return cell(i.label, "Unavailable", "", "unavailable"); }).join("");
+    }
   }
   function renderLaunch() {
     var el = document.getElementById("tw-launch");
