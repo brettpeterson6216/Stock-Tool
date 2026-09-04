@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <script src="/theme-bootstrap.js?v=20260828-1"></script>
+  <script src="/theme-bootstrap.js?v=20260905-1"></script>
   <title>Research Process — ImpliedLens</title>
   <meta name="description" content="The ImpliedLens stock research process: source the evidence, write the thesis, model a range, define risk, and review what changed.">
   <link rel="canonical" href="https://impliedlens.com/research-process">
@@ -28,6 +28,7 @@
   <link rel="manifest" href="/site.webmanifest">
   <link rel="preload" as="font" type="font/woff2" crossorigin href="/vendor/fonts/plus-jakarta-sans-files/plus-jakarta-sans-latin-400-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/vendor/fonts/plus-jakarta-sans-files/plus-jakarta-sans-latin-700-normal.woff2">
+<link rel="stylesheet" href="/vendor/tabler-icons.min.css?v=3.46.0-1">
 <link rel="stylesheet" href="/vendor/fonts/il-fonts.css?v=20260825-6">
   <style>
     *{box-sizing:border-box}body{margin:0;font-family:'Plus Jakarta Sans',sans-serif;background:#f7f6f2;color:#151719}.top-bar{padding:.85rem 2rem;display:flex;gap:1rem;align-items:center;border-bottom:1px solid rgba(21,23,25,.1)}.logo{font-family:'Plus Jakarta Sans',serif;font-size:21px;color:#151719;text-decoration:none}.logo em{color:#76521d}.back{margin-left:auto;font-size:13px}.hero{max-width:920px;margin:0 auto;padding:5rem 2rem 3rem}.eyebrow{font:700 .68rem 'JetBrains Mono',monospace;color:#76521d;text-transform:uppercase}.hero h1{max-width:720px;margin:.8rem 0 1rem;font:400 3rem/1.05 'Plus Jakarta Sans',serif}.hero p{max-width:650px;color:#4a5057;line-height:1.7}.cta{display:flex;gap:.7rem;flex-wrap:wrap;margin-top:1.5rem}.btn{display:inline-flex;padding:.7rem 1rem;border:1px solid rgba(21,23,25,.18);border-radius:6px;color:#292d31;text-decoration:none;font-size:13px;font-weight:600}.btn.primary{background:#76521d;border-color:#76521d;color:#fff}.process{border-top:1px solid rgba(21,23,25,.1);border-bottom:1px solid rgba(21,23,25,.1)}.step{display:grid;grid-template-columns:110px minmax(0,1fr) minmax(240px,.7fr);gap:2rem;max-width:1120px;margin:0 auto;padding:2rem;border-bottom:1px solid rgba(21,23,25,.1)}.step:last-child{border-bottom:0}.num{font:500 .72rem 'JetBrains Mono',monospace;color:#76521d}.step h2{margin:0 0 .5rem;font:400 1.61rem 'Plus Jakarta Sans',serif}.step p,.proof{margin:0;color:#4a5057;font-size:14px;line-height:1.65}.proof{padding-left:1rem;border-left:2px solid #76521d}.principles{max-width:1120px;margin:0 auto;padding:3rem 2rem 4rem;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(21,23,25,.1)}.principle{background:#fcfbf8;padding:1.25rem}.principle strong{display:block;margin-bottom:.35rem;font-size:14px}.principle span{color:#66717b;font-size:12px;line-height:1.55}.foot{max-width:1120px;margin:0 auto;padding:1.5rem 2rem 3rem;display:flex;gap:1rem;flex-wrap:wrap;font-size:12px}.foot a{color:#76521d;text-decoration:none}@media(max-width:760px){.top-bar{padding:.75rem 1rem}.hero{padding:3rem 1rem 2rem}.hero h1{font-size:36px}.step{grid-template-columns:1fr;gap:.65rem;padding:1.4rem 1rem}.principles{grid-template-columns:1fr;padding:2rem 1rem}.foot{padding-inline:1rem}}
@@ -36,32 +37,70 @@
 <link rel="stylesheet" href="/visual-refresh.css?v=20260825-6">
 <link rel="stylesheet" href="/site-shell.css?v=20260825-7">
 <link rel="stylesheet" href="/beauty-system.css?v=20260825-6">
-<script defer src="/static-auth.js?v=20260830-1"></script>
+<script defer src="/static-auth.js?v=20260905-1"></script>
 <link rel="stylesheet" href="/premium-revamp.css?v=20260825-6">
 <link rel="stylesheet" href="/il-system.css?v=20260827-4">
-<link rel="stylesheet" href="/lens-prime-shared.css?v=20260904-8">
+<link rel="stylesheet" href="/lens-prime-shared.css?v=20260905-1">
 <link rel="stylesheet" href="/lens-prime-fidelity.css?v=20260831-17">
-<link href="/clean-pass.css?v=20260904-19" rel="stylesheet">
+<link href="/clean-pass.css?v=20260905-3" rel="stylesheet">
 <script defer src="/premium-motion.js?v=20260825-6"></script>
 </head>
 <body class="il-static-page">
 <a class="il-skip-link" href="#public-main">Skip to content</a>
-<nav class="il-global-nav" aria-label="Primary navigation">
-  <a class="il-global-brand" href="/"><img src="/logo.svg" alt=""><span class="il-wordmark">Implied<span class="il-wordmark-b">Lens</span></span></a>
-  <div class="il-global-links">
-    <a class="il-global-tab" href="/">Dashboard</a>
-    <a class="il-global-tab" href="/?view=tool&amp;section=screener">Scanners</a>
-    <a class="il-global-tab active" href="/lens-score">Analysis</a>
-    <a class="il-global-tab" href="/?view=tool&amp;section=reports">Watchlists</a>
-    <a class="il-global-tab" href="/blog">News</a>
-    <a class="il-global-tab" href="/signup">Pricing</a>
+<nav id="main-nav" class="il-global-nav" data-view="home" aria-label="Primary navigation">
+  <a class="nav-logo il-global-brand" href="/" data-nav="home">
+    <img src="/logo.svg?v=4" alt="Implied Lens" width="28" height="28">
+    <span class="il-wordmark">Implied<span class="il-wordmark-b">Lens</span></span>
+  </a>
+  <div class="nav-links il-global-links" id="nav-links">
+    <a href="/" id="nav-home" class="nav-tab il-global-tab" data-nav="home">Dashboard</a>
+    <a href="/?view=tool&amp;section=screener" id="nav-analyze" class="nav-tab il-global-tab" data-nav="screener">Scanners</a>
+    <a href="/lens-score" id="nav-lensscore-link" class="nav-tab il-global-tab" data-nav="lens-score">Analysis</a>
+    <a href="/?view=tool&amp;section=reports" id="nav-saved-link" class="nav-tab il-global-tab" data-nav="reports">Watchlists</a>
+    <a href="/blog" id="nav-news-link" class="nav-tab il-global-tab" data-nav="blog">News</a>
+    <a href="/signup" id="nav-pricing-link" class="nav-tab il-global-tab" data-nav="pricing">Pricing</a>
   </div>
-  <form class="il-global-search" action="/" method="get" role="search"><input type="hidden" name="view" value="tool"><input type="hidden" name="section" value="analyze"><span aria-hidden="true">⌕</span><input name="symbol" type="text" placeholder="Search ticker…" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Search for a ticker"></form>
-  <div class="il-global-actions">
-    <button class="static-theme-toggle" type="button" aria-label="Switch theme"><span class="static-theme-thumb"></span></button>
-    <span class="il-global-live" title="ImpliedLens is live">Live</span>
-    <a class="il-global-login" href="/login">Log in</a>
-    <a class="il-global-trial" href="/signup">Start trial</a>
+  <form class="nav-search il-global-search" id="nav-search" role="search" action="/" method="get">
+    <input type="hidden" name="view" value="tool">
+    <input type="hidden" name="section" value="analyze">
+    <i class="ti ti-search" aria-hidden="true"></i>
+    <input type="text" id="nav-ticker-input" name="symbol" placeholder="Search ticker&hellip;" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Search for a ticker">
+  </form>
+  <div id="nav-ticker-bar">
+    <span class="ntb-sym" id="ntb-sym"></span>
+    <span class="ntb-price" id="ntb-price"></span>
+    <span class="ntb-chg" id="ntb-chg"></span>
+  </div>
+  <div class="nav-right il-global-actions" id="nav-right">
+    <button class="theme-toggle" id="theme-toggle-btn" type="button" aria-label="Switch theme" aria-pressed="false">
+      <span class="theme-toggle-track" aria-hidden="true">
+        <i class="ti ti-sun theme-toggle-sun"></i>
+        <i class="ti ti-moon theme-toggle-moon"></i>
+        <span class="theme-toggle-thumb"></span>
+      </span>
+    </button>
+    <button class="prime-nav-menu" type="button" aria-label="Open navigation" onclick="_toggleMobileMenu()"><span aria-hidden="true">&#9776;</span></button>
+    <button class="nav-acct-mobile" id="nav-acct-mobile" type="button" aria-label="Account" onclick="navAccountTap()"><i class="ti ti-user-circle"></i></button>
+    <a class="btn-nav-outline il-global-login" id="nav-login" href="/login">Log in</a>
+    <a class="btn-nav il-global-trial" id="nav-signup" href="/signup">Start trial</a>
+    <a class="btn-nav" id="nav-upgrade" href="/signup" hidden>Upgrade to Pro</a>
+    <div class="nav-acct-wrap" id="nav-acct-wrap" style="display:none;">
+      <button class="nav-acct-btn" id="nav-acct-btn">
+        <span id="nav-acct-name">Account</span>
+        <span class="nav-acct-badge" id="nav-acct-badge" style="display:none;"></span>
+        <span class="nav-acct-chevron">&#9662;</span>
+      </button>
+      <div class="nav-acct-menu" id="nav-acct-menu">
+        <div class="nav-acct-header">
+          <div class="nav-acct-header-name" id="nav-acct-header-name"></div>
+          <div class="nav-acct-header-plan" id="nav-acct-header-plan"></div>
+        </div>
+        <a href="#" class="nav-acct-item" id="nav-acct-settings">Account settings</a>
+        <a href="#" class="nav-acct-item" id="nav-acct-billing">Subscription</a>
+        <div class="nav-acct-divider"></div>
+        <a href="#" class="nav-acct-item danger" id="nav-acct-logout">Log out</a>
+      </div>
+    </div>
   </div>
 </nav>
 <aside class="static-rail" aria-label="About Implied Lens">
@@ -74,8 +113,7 @@
   <a href="/terms">Terms</a>
 </aside>
 
-  <div class="top-bar" hidden><a href="/" class="logo">Implied<em>Lens</em></a><a href="/" class="back">Back to the platform</a><button class="static-theme-toggle" type="button" aria-label="Switch theme"><span class="static-theme-thumb"></span></button></div>
-  <main id="public-main">
+   <main id="public-main">
     <section class="hero"><div class="eyebrow">The ImpliedLens method</div><h1>Research the business. Test the thesis. Revisit the decision.</h1><p>ImpliedLens is built around a simple belief: investing improves when the evidence, assumptions, downside, and next review are written down before price movement changes the story.</p><div class="cta"><a class="btn primary" href="/?view=tool&amp;section=workspace">Open decision workspace</a><a class="btn" href="/?view=tool&amp;section=education">Open Academy</a></div></section>
     <section class="process">
       <article class="step"><div class="num">01 / SOURCE</div><div><h2>Start with evidence.</h2><p>Load current market context, reported financials, official SEC filings, earnings history, and provider-labeled estimates.</p></div><div class="proof">Use direct filing links and the data methodology page to verify the figures that matter most.</div></article>
@@ -87,6 +125,6 @@
     <section class="principles"><div class="principle"><strong>Transparent sources</strong><span>Provider labels and direct SEC links make verification part of the workflow.</span></div><div class="principle"><strong>User-controlled assumptions</strong><span>Models show their inputs and do not pretend uncertainty disappears.</span></div><div class="principle"><strong>Reviewable decisions</strong><span>Theses, risks, positions, watchlists, and call notes stay connected.</span></div></section>
   </main>
   <footer class="foot"><a href="/data-sources">Data Sources</a><a href="/compound-calculator">Compound Calculator</a><a href="/about">About</a><a href="/terms">Terms</a><a href="/">ImpliedLens</a></footer>
-  <script src="/static-theme.js?v=20260825-6"></script>
+  <script defer src="/site-nav.js?v=20260905-2"></script>
 </body>
 </html>

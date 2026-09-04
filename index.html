@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-<script src="/theme-bootstrap.js?v=20260828-1"></script>
+<script src="/theme-bootstrap.js?v=20260905-1"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Implied Lens — Stock Research and Valuation Workspace</title>
@@ -108,10 +108,10 @@
 <link rel="stylesheet" href="/il-system.css?v=20260827-4">
 <link rel="stylesheet" href="/lens-prime-v2.css?v=20260828-6">
 <link rel="stylesheet" href="/lens-prime-exact.css?v=20260828-3">
-<link rel="stylesheet" href="/lens-prime-shared.css?v=20260904-8">
+<link rel="stylesheet" href="/lens-prime-shared.css?v=20260905-1">
 <link rel="stylesheet" href="/lens-prime-fidelity.css?v=20260831-17">
 <link rel="stylesheet" href="/lens-prime-match.css?v=20260904-9">
-<link href="/clean-pass.css?v=20260904-19" rel="stylesheet">
+<link href="/clean-pass.css?v=20260905-3" rel="stylesheet">
 <script defer src="/premium-motion.js?v=20260825-6"></script>
 </head>
 <body class="il-product-page">
@@ -119,65 +119,64 @@
 <div id="auth-veil"></div>
 
 <!-- ══════════ NAV ══════════ -->
-<nav id="main-nav" data-view="home">
-  <a class="nav-logo" href="/" onclick="navGoTo('home');return false;" style="display:flex;align-items:center;gap:9px;text-decoration:none;">
-    <img src="/logo.svg?v=4" alt="Implied Lens" style="width:28px;height:28px;border-radius:50%;flex-shrink:0;">
+<nav id="main-nav" class="il-global-nav" data-view="home" aria-label="Primary navigation">
+  <a class="nav-logo il-global-brand" href="/" data-nav="home">
+    <img src="/logo.svg?v=4" alt="Implied Lens" width="28" height="28">
     <span class="il-wordmark">Implied<span class="il-wordmark-b">Lens</span></span>
   </a>
-  <div class="nav-links" id="nav-links">
-    <a href="/" id='nav-home' class="nav-tab active-tab" onclick="navGoTo('home');return false;">Dashboard</a>
-    <a href="/?view=tool&amp;section=screener" id="nav-analyze" class="nav-tab" onclick="navGoTo('screener');return false;">Scanners</a>
-    <a href="/lens-score" id="nav-lensscore-link" class="nav-tab" onclick="return navGoLensScore(this,event);">Analysis</a>
-    <a href="/?view=tool&amp;section=reports" class="nav-tab" id="nav-saved-link" onclick="navGoTo('reports');return false;">Watchlists</a>
-    <a href="/blog" class="nav-tab" id="nav-news-link">News</a>
-    <a href="/signup" class="nav-tab" id="nav-pricing-link">Pricing</a>
+  <div class="nav-links il-global-links" id="nav-links">
+    <a href="/" id="nav-home" class="nav-tab il-global-tab" data-nav="home">Dashboard</a>
+    <a href="/?view=tool&amp;section=screener" id="nav-analyze" class="nav-tab il-global-tab" data-nav="screener">Scanners</a>
+    <a href="/lens-score" id="nav-lensscore-link" class="nav-tab il-global-tab" data-nav="lens-score">Analysis</a>
+    <a href="/?view=tool&amp;section=reports" id="nav-saved-link" class="nav-tab il-global-tab" data-nav="reports">Watchlists</a>
+    <a href="/blog" id="nav-news-link" class="nav-tab il-global-tab" data-nav="blog">News</a>
+    <a href="/signup" id="nav-pricing-link" class="nav-tab il-global-tab" data-nav="pricing">Pricing</a>
   </div>
-  <form class="nav-search" id="nav-search" role="search" onsubmit="return navSearchGo(event)">
+  <form class="nav-search il-global-search" id="nav-search" role="search" action="/" method="get">
+    <input type="hidden" name="view" value="tool">
+    <input type="hidden" name="section" value="analyze">
     <i class="ti ti-search" aria-hidden="true"></i>
-    <input type="text" id="nav-ticker-input" placeholder="Search ticker…" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Search for a ticker">
+    <input type="text" id="nav-ticker-input" name="symbol" placeholder="Search ticker&hellip;" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Search for a ticker">
   </form>
   <div id="nav-ticker-bar">
     <span class="ntb-sym" id="ntb-sym"></span>
     <span class="ntb-price" id="ntb-price"></span>
     <span class="ntb-chg" id="ntb-chg"></span>
   </div>
-  <div class="nav-right" id="nav-right">
-    <button class="theme-toggle" id="theme-toggle-btn" type="button" title="Switch to dark mode" aria-label="Switch to dark mode" aria-pressed="false">
+  <div class="nav-right il-global-actions" id="nav-right">
+    <button class="theme-toggle" id="theme-toggle-btn" type="button" aria-label="Switch theme" aria-pressed="false">
       <span class="theme-toggle-track" aria-hidden="true">
         <i class="ti ti-sun theme-toggle-sun"></i>
         <i class="ti ti-moon theme-toggle-moon"></i>
         <span class="theme-toggle-thumb"></span>
       </span>
     </button>
-    <button class="prime-nav-menu" type="button" aria-label="Open navigation" onclick="_toggleMobileMenu()"><span aria-hidden="true">☰</span></button>
-    <button class="nav-acct-mobile" id="nav-acct-mobile" type="button" aria-label="Account" title="Account" onclick="navAccountTap()"><i class="ti ti-user-circle"></i></button>
-    <span class="nav-live" title="ImpliedLens is live">Live</span>
-    <a class="btn-nav-outline" id="nav-login" href="/login">Log in</a>
-    <a class="btn-nav" id="nav-signup" href="/signup">Start trial</a>
-    <a class="btn-nav" id="nav-upgrade" href="/signup" style="display:none; background:var(--gold-d); font-size:12px; padding:.35rem .9rem;">Upgrade to Pro</a>
-    <!-- Account dropdown (shown when logged in) -->
+    <button class="prime-nav-menu" type="button" aria-label="Open navigation" onclick="_toggleMobileMenu()"><span aria-hidden="true">&#9776;</span></button>
+    <button class="nav-acct-mobile" id="nav-acct-mobile" type="button" aria-label="Account" onclick="navAccountTap()"><i class="ti ti-user-circle"></i></button>
+    <a class="btn-nav-outline il-global-login" id="nav-login" href="/login">Log in</a>
+    <a class="btn-nav il-global-trial" id="nav-signup" href="/signup">Start trial</a>
+    <a class="btn-nav" id="nav-upgrade" href="/signup" hidden>Upgrade to Pro</a>
     <div class="nav-acct-wrap" id="nav-acct-wrap" style="display:none;">
       <button class="nav-acct-btn" id="nav-acct-btn">
         <span id="nav-acct-name">Account</span>
         <span class="nav-acct-badge" id="nav-acct-badge" style="display:none;"></span>
-        <span class="nav-acct-chevron">▾</span>
+        <span class="nav-acct-chevron">&#9662;</span>
       </button>
       <div class="nav-acct-menu" id="nav-acct-menu">
         <div class="nav-acct-header">
           <div class="nav-acct-header-name" id="nav-acct-header-name"></div>
           <div class="nav-acct-header-plan" id="nav-acct-header-plan"></div>
         </div>
-        <a href="#" class="nav-acct-item" id="nav-acct-settings">⚙️ Account Settings</a>
-        <a href="#" class="nav-acct-item" onclick="openBillingPortal();return false;">💳 Subscription</a>
+        <a href="#" class="nav-acct-item" id="nav-acct-settings">Account settings</a>
+        <a href="#" class="nav-acct-item" id="nav-acct-billing">Subscription</a>
         <div class="nav-acct-divider"></div>
-        <a href="#" class="nav-acct-item danger" id="nav-acct-logout">↩ Log out</a>
+        <a href="#" class="nav-acct-item danger" id="nav-acct-logout">Log out</a>
       </div>
     </div>
   </div>
-  <script defer src="/app-navigation.js?v=20260831-1"></script>
-<script defer src="/landing-market.js?v=20260831-2"></script>
 </nav>
-
+<script defer src="/app-navigation.js?v=20260831-1"></script>
+<script defer src="/landing-market.js?v=20260831-2"></script>
 <span id="main-content" tabindex="-1"></span>
 <!-- ══════════ VIEW: HOME ══════════ -->
 <div id="view-home" role="main">
@@ -1947,5 +1946,6 @@
     <a href="#" class="mmenu-item" id="mmenu-logout" style="display:none;" onclick="var b=document.getElementById('nav-acct-logout');if(b){b.click();}_toggleMobileMenu();return false;"><i class="ti ti-logout-2"></i><span>Log out</span></a>
   </div>
 </div>
+  <script defer src="/site-nav.js?v=20260905-2"></script>
 </body>
 </html>

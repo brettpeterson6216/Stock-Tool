@@ -1,10 +1,25 @@
 (function () {
   "use strict";
 
-  // Lens Prime is a deliberately dark, graphite-and-gold product surface.
-  // Start every visit in the approved visual system; the in-session toggle is
-  // still available for accessibility and personal preference.
-  document.documentElement.setAttribute("data-theme", "dark");
+  /* Lens Prime is a deliberately dark, graphite-and-gold product surface, so
+     dark is the default for a first visit. It was also the ONLY outcome: this
+     line used to set data-theme="dark" unconditionally on every page load and
+     never read the preference that toggleTheme() and static-theme.js both
+     write to localStorage under "il-theme". Choosing light and then clicking
+     any tab put you straight back into dark, on every page, forever - which
+     made the toggle look broken rather than ignored.
+
+     Read the stored choice here, in the blocking <head> script, so the first
+     frame is already correct and there is no flash of the wrong theme. Light
+     is expressed by removing the attribute, which is the convention
+     toggleTheme() already uses. */
+  try {
+    var savedTheme = localStorage.getItem("il-theme");
+    if (savedTheme === "light") document.documentElement.removeAttribute("data-theme");
+    else document.documentElement.setAttribute("data-theme", "dark");
+  } catch (e) {
+    document.documentElement.setAttribute("data-theme", "dark");
+  }
 
   window.syncBrowserChrome = function () {
     var dark = document.documentElement.getAttribute("data-theme") === "dark";

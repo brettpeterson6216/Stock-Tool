@@ -44,10 +44,13 @@ test("the terminal paints its surfaces from tokens, not literal colours", () => 
 // A theme-aware terminal needs both halves of the palette present.
 test("both halves of the terminal palette are defined", () => {
   assert.match(shared, /--lp-elev\s*:/, "dark palette missing --lp-elev");
+  // The light palette started scoped to body.il-product-page. It now applies to
+  // every surface the site has, because the theme toggle sits in a header that
+  // is on every page and a control that does nothing is worse than no control.
   assert.match(
     shared,
-    /html:not\(\[data-theme="dark"\]\) body\.il-product-page\s*\{[^}]*--lp-bg\s*:/,
-    "light palette missing for the product terminal"
+    /html:not\(\[data-theme="dark"\]\) body\s*\{[^}]*--lp-bg\s*:/,
+    "light palette missing"
   );
 });
 

@@ -288,8 +288,11 @@ test("product spine presents one reviewable decision workflow", () => {
 test("primary navigation avoids duplicate tool destinations", () => {
   assert.doesNotMatch(html, /class="nav-tab"[^>]*>Chart</);
   assert.doesNotMatch(html, /Scenario Builder/);
-  assert.match(html, /id="nav-analyze" class="nav-tab"[^>]*>Scanners</);
-  assert.match(html, /id="nav-lensscore-link"[^>]*class="nav-tab"[^>]*>Analysis/);
+  // The header markup is now shared byte-for-byte across all thirteen pages
+  // (see test/header-contract.test.js), so these match by identity and
+  // destination rather than by attribute order or exact class list.
+  assert.match(html, /id="nav-analyze"[^>]*class="[^"]*\bnav-tab\b[^"]*"[^>]*>Scanners</);
+  assert.match(html, /id="nav-lensscore-link"[^>]*class="[^"]*\bnav-tab\b[^"]*"[^>]*>Analysis/);
   assert.match(html, /id="nav-saved-link"[^>]*>Watchlists/);
   assert.match(html, /id="nav-news-link"[^>]*>News/);
   assert.match(html, /id="nav-pricing-link"[^>]*>Pricing/);
@@ -304,10 +307,10 @@ test("primary navigation avoids duplicate tool destinations", () => {
 test("About and LensScore use one global product navigation", () => {
   for (const page of [aboutHtml, lensHtml]) {
     assert.match(page, /class="[^"]*\bil-global-nav\b[^"]*"/);
-    assert.match(page, /class="[^"]*\bil-global-tab\b[^"]*" href="\/\?view=tool&amp;section=reports">Watchlists/);
-    assert.match(page, /class="[^"]*\bil-global-tab\b[^"]*" href="\/lens-score"[^>]*>Analysis/);
-    assert.match(page, /class="[^"]*\bil-global-tab\b[^"]*" href="\/blog"[^>]*>News/);
-    assert.match(page, /class="[^"]*\bil-global-tab\b[^"]*" href="\/signup"[^>]*>Pricing/);
+    assert.match(page, /href="\/\?view=tool&amp;section=reports"[^>]*class="[^"]*\bil-global-tab\b[^"]*"[^>]*>Watchlists/);
+    assert.match(page, /href="\/lens-score"[^>]*class="[^"]*\bil-global-tab\b[^"]*"[^>]*>Analysis/);
+    assert.match(page, /href="\/blog"[^>]*class="[^"]*\bil-global-tab\b[^"]*"[^>]*>News/);
+    assert.match(page, /href="\/signup"[^>]*class="[^"]*\bil-global-tab\b[^"]*"[^>]*>Pricing/);
     assert.match(page, /\/site-shell\.css\?v=/);
   }
   assert.match(lensHtml, /<header class="topbar" hidden>/);
@@ -435,10 +438,13 @@ test("every public product region uses the shared navigation and skip link", () 
     assert.match(page, /viewport-fit=cover/, `${file} should expose device safe areas`);
     assert.match(page, /site-shell\.css\?v=\d{8}-\d+/, `${file} should load the shared shell`);
     assert.match(page, /class="il-skip-link"/, `${file} should provide keyboard bypass navigation`);
-    assert.match(page, /<nav[^>]+class="[^"]*\bil-global-nav\b[^"]*"[^>]+aria-label="Primary navigation">/, `${file} should expose the product navigation`);
-    assert.match(page, /class="top-bar" hidden/, `${file} should retire its legacy back-to-platform header`);
+    assert.match(page, /<nav id="main-nav"[^>]*class="[^"]*\bil-global-nav\b[^"]*"[^>]*aria-label="Primary navigation">/, `${file} should expose the product navigation`);
+    // The legacy back-to-platform bar used to be kept in the markup with a
+    // `hidden` attribute - a second header one CSS change away from returning.
+    // It is deleted now, and there must be exactly one <nav> at the top.
+    assert.doesNotMatch(page, /class="top-bar"/, `${file} still carries the legacy header markup`);
+    assert.equal((page.match(/<nav id="main-nav"/g) || []).length, 1, `${file} should have exactly one site header`);
     assert.match(page, /class="[^"]*\bil-global-search\b[^"]*"/, `${file} should preserve the global ticker search`);
-    assert.match(page, /class="[^"]*\bil-global-live\b[^"]*"/, `${file} should preserve the live status`);
     assert.match(page, /class="[^"]*\bil-global-login\b[^"]*"/, `${file} should preserve account entry`);
     assert.match(page, /class="[^"]*\bil-global-trial\b[^"]*"/, `${file} should preserve the trial action`);
   }
@@ -581,7 +587,7 @@ test("premium visual system is applied across app and static pages", () => {
   assert.match(html, /legacy-app\.css\?v=\d{8}(-\d+)?/);
   assert.match(html, /product-system\.css\?v=\d{8}(-\d+)?/);
   assert.match(signupHtml, /static-polish\.css\?v=\d{8}(-\d+)?/);
-  assert.match(html, /<a class="btn-nav" id="nav-signup" href="\/signup">Start trial<\/a>/);
+  assert.match(html, /id="nav-signup"[^>]*href="\/signup"[^>]*>Start trial<\/a>/);
   assert.match(legacyCss, /Site-wide premium polish/);
   assert.match(legacyCss, /Gold theme harmonization/);
   assert.match(legacyCss, /\.il-landing-preview\{[\s\S]*linear-gradient\(180deg,#F6E3B7,#E9C986\)!important/);
@@ -660,7 +666,7 @@ test("landing visuals are honest CSS-built illustrations, not fake screenshots",
   assert.match(landingPolishCss, /grid-template-columns: minmax\(360px, \.82fr\) minmax\(520px, 1\.18fr\)/);
   assert.doesNotMatch(html, /class="tw-score-preview"/);
   assert.doesNotMatch(html, /class="il-lensscore-launch"/);
-  assert.match(html, /id="nav-lensscore-link"[^>]*class="nav-tab"[^>]*>Analysis/);
+  assert.match(html, /id="nav-lensscore-link"[^>]*class="[^"]*\bnav-tab\b[^"]*"[^>]*>Analysis/);
   assert.match(landingPolishCss, /#view-tool \.tool-welcome::after \{[\s\S]*content: none !important/);
   assert.match(legacyCss, /\.il-hero-mock\{/);
   assert.match(legacyCss, /\.il-workflow-panels\{/);

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <script src="/theme-bootstrap.js?v=20260828-1"></script>
+  <script src="/theme-bootstrap.js?v=20260905-1"></script>
   <title>Blog — ImpliedLens</title>
   <meta name="description" content="The ImpliedLens blog — analysis walkthroughs, platform updates, and investing frameworks.">
   <link rel="canonical" href="https://impliedlens.com/blog">
@@ -28,6 +28,7 @@
   <meta name="twitter:image:alt" content="ImpliedLens stock research workspace preview">
   <link rel="preload" as="font" type="font/woff2" crossorigin href="/vendor/fonts/plus-jakarta-sans-files/plus-jakarta-sans-latin-400-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/vendor/fonts/plus-jakarta-sans-files/plus-jakarta-sans-latin-700-normal.woff2">
+<link rel="stylesheet" href="/vendor/tabler-icons.min.css?v=3.46.0-1">
 <link rel="stylesheet" href="/vendor/fonts/il-fonts.css?v=20260825-6">
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
@@ -67,32 +68,70 @@
 <link rel="stylesheet" href="/visual-refresh.css?v=20260825-6">
 <link rel="stylesheet" href="/site-shell.css?v=20260825-7">
 <link rel="stylesheet" href="/beauty-system.css?v=20260825-6">
-<script defer src="/static-auth.js?v=20260830-1"></script>
+<script defer src="/static-auth.js?v=20260905-1"></script>
 <link rel="stylesheet" href="/premium-revamp.css?v=20260825-6">
 <link rel="stylesheet" href="/il-system.css?v=20260827-4">
-<link rel="stylesheet" href="/lens-prime-shared.css?v=20260904-8">
+<link rel="stylesheet" href="/lens-prime-shared.css?v=20260905-1">
 <link rel="stylesheet" href="/lens-prime-fidelity.css?v=20260831-17">
-<link href="/clean-pass.css?v=20260904-19" rel="stylesheet">
+<link href="/clean-pass.css?v=20260905-3" rel="stylesheet">
 <script defer src="/premium-motion.js?v=20260825-6"></script>
 </head>
 <body class="il-static-page">
 <a class="il-skip-link" href="#public-main">Skip to content</a>
-<nav class="il-global-nav" aria-label="Primary navigation">
-  <a class="il-global-brand" href="/"><img src="/logo.svg" alt=""><span class="il-wordmark">Implied<span class="il-wordmark-b">Lens</span></span></a>
-  <div class="il-global-links">
-    <a class="il-global-tab" href="/">Dashboard</a>
-    <a class="il-global-tab" href="/?view=tool&amp;section=screener">Scanners</a>
-    <a class="il-global-tab" href="/lens-score">Analysis</a>
-    <a class="il-global-tab" href="/?view=tool&amp;section=reports">Watchlists</a>
-    <a class="il-global-tab active" href="/blog" aria-current="page">News</a>
-    <a class="il-global-tab" href="/signup">Pricing</a>
+<nav id="main-nav" class="il-global-nav" data-view="home" aria-label="Primary navigation">
+  <a class="nav-logo il-global-brand" href="/" data-nav="home">
+    <img src="/logo.svg?v=4" alt="Implied Lens" width="28" height="28">
+    <span class="il-wordmark">Implied<span class="il-wordmark-b">Lens</span></span>
+  </a>
+  <div class="nav-links il-global-links" id="nav-links">
+    <a href="/" id="nav-home" class="nav-tab il-global-tab" data-nav="home">Dashboard</a>
+    <a href="/?view=tool&amp;section=screener" id="nav-analyze" class="nav-tab il-global-tab" data-nav="screener">Scanners</a>
+    <a href="/lens-score" id="nav-lensscore-link" class="nav-tab il-global-tab" data-nav="lens-score">Analysis</a>
+    <a href="/?view=tool&amp;section=reports" id="nav-saved-link" class="nav-tab il-global-tab" data-nav="reports">Watchlists</a>
+    <a href="/blog" id="nav-news-link" class="nav-tab il-global-tab" data-nav="blog">News</a>
+    <a href="/signup" id="nav-pricing-link" class="nav-tab il-global-tab" data-nav="pricing">Pricing</a>
   </div>
-  <form class="il-global-search" action="/" method="get" role="search"><input type="hidden" name="view" value="tool"><input type="hidden" name="section" value="analyze"><span aria-hidden="true">⌕</span><input name="symbol" type="text" placeholder="Search ticker…" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Search for a ticker"></form>
-  <div class="il-global-actions">
-    <button class="static-theme-toggle" type="button" aria-label="Switch theme"><span class="static-theme-thumb"></span></button>
-    <span class="il-global-live" title="ImpliedLens is live">Live</span>
-    <a class="il-global-login" href="/login">Log in</a>
-    <a class="il-global-trial" href="/signup">Start trial</a>
+  <form class="nav-search il-global-search" id="nav-search" role="search" action="/" method="get">
+    <input type="hidden" name="view" value="tool">
+    <input type="hidden" name="section" value="analyze">
+    <i class="ti ti-search" aria-hidden="true"></i>
+    <input type="text" id="nav-ticker-input" name="symbol" placeholder="Search ticker&hellip;" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Search for a ticker">
+  </form>
+  <div id="nav-ticker-bar">
+    <span class="ntb-sym" id="ntb-sym"></span>
+    <span class="ntb-price" id="ntb-price"></span>
+    <span class="ntb-chg" id="ntb-chg"></span>
+  </div>
+  <div class="nav-right il-global-actions" id="nav-right">
+    <button class="theme-toggle" id="theme-toggle-btn" type="button" aria-label="Switch theme" aria-pressed="false">
+      <span class="theme-toggle-track" aria-hidden="true">
+        <i class="ti ti-sun theme-toggle-sun"></i>
+        <i class="ti ti-moon theme-toggle-moon"></i>
+        <span class="theme-toggle-thumb"></span>
+      </span>
+    </button>
+    <button class="prime-nav-menu" type="button" aria-label="Open navigation" onclick="_toggleMobileMenu()"><span aria-hidden="true">&#9776;</span></button>
+    <button class="nav-acct-mobile" id="nav-acct-mobile" type="button" aria-label="Account" onclick="navAccountTap()"><i class="ti ti-user-circle"></i></button>
+    <a class="btn-nav-outline il-global-login" id="nav-login" href="/login">Log in</a>
+    <a class="btn-nav il-global-trial" id="nav-signup" href="/signup">Start trial</a>
+    <a class="btn-nav" id="nav-upgrade" href="/signup" hidden>Upgrade to Pro</a>
+    <div class="nav-acct-wrap" id="nav-acct-wrap" style="display:none;">
+      <button class="nav-acct-btn" id="nav-acct-btn">
+        <span id="nav-acct-name">Account</span>
+        <span class="nav-acct-badge" id="nav-acct-badge" style="display:none;"></span>
+        <span class="nav-acct-chevron">&#9662;</span>
+      </button>
+      <div class="nav-acct-menu" id="nav-acct-menu">
+        <div class="nav-acct-header">
+          <div class="nav-acct-header-name" id="nav-acct-header-name"></div>
+          <div class="nav-acct-header-plan" id="nav-acct-header-plan"></div>
+        </div>
+        <a href="#" class="nav-acct-item" id="nav-acct-settings">Account settings</a>
+        <a href="#" class="nav-acct-item" id="nav-acct-billing">Subscription</a>
+        <div class="nav-acct-divider"></div>
+        <a href="#" class="nav-acct-item danger" id="nav-acct-logout">Log out</a>
+      </div>
+    </div>
   </div>
 </nav>
 <aside class="static-rail" aria-label="About Implied Lens">
@@ -105,12 +144,7 @@
   <a href="/terms">Terms</a>
 </aside>
 
-  <div class="top-bar" hidden>
-    <a href="/" class="logo">Implied<em>Lens</em></a>
-    <a href="/" class="back">← Back to ImpliedLens</a>
-    <button class="static-theme-toggle" type="button" aria-label="Switch theme"><span class="static-theme-thumb"></span></button>
-  </div>
-  <div class="wrap" id="public-main" role="main">
+   <div class="wrap" id="public-main" role="main">
     <div class="intro">
       <span class="pill">Research Playbooks</span>
       <h1>A cleaner way to think about stocks.</h1>
@@ -150,6 +184,6 @@
       <a href="/">ImpliedLens</a>
     </footer>
   </div>
-<script src="/static-theme.js?v=20260825-6"></script>
+  <script defer src="/site-nav.js?v=20260905-2"></script>
 </body>
 </html>

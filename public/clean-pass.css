@@ -339,3 +339,149 @@ html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav 
 @media (prefers-reduced-motion: reduce) {
   html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .theme-toggle-track > i { transition: none !important; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ONE HEADER, PINNED.
+
+   Measured across the thirteen routes before this block existed:
+
+     /                    #main-nav          63px   fixed
+     /?view-tool          (none - hidden entirely, sidebar only)
+     /about, /lens-score  #main-nav          60px   sticky
+     six static pages     .il-global-nav     60px   sticky
+     /login /signup       bare <nav>         60px   static, no tabs,
+     /reset-password                                no search, no account
+
+   So the bar changed height between routes, changed positioning mode, lost
+   half its controls on the auth pages, and disappeared on the one screen
+   people spend their time in. The markup is identical everywhere now; this
+   fixes the geometry so it cannot drift again.
+
+   63px, fixed to the top, full width, above everything. The body offset is
+   set here too, because a fixed bar that nothing accounts for is exactly how
+   content ends up underneath it.
+   ═══════════════════════════════════════════════════════════════════════════ */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav {
+  position: fixed !important;
+  top: 0 !important; left: 0 !important; right: 0 !important;
+  width: 100% !important;
+  height: 63px !important;
+  min-height: 63px !important;
+  max-height: 63px !important;
+  margin: 0 !important;
+  transform: none !important;
+  z-index: 2147482000 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 20px !important;
+  padding: 0 clamp(16px, 2.4vw, 36px) !important;
+  box-sizing: border-box !important;
+  background: var(--lpf-panel, #0a1216) !important;
+  border-bottom: 1px solid var(--lpf-line, rgba(187,168,126,.17)) !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(18px) !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) {
+  padding-top: 63px !important;
+}
+/* The bar is fixed, so the page's own scroll container - not the window -
+   has to carry the offset in the terminal. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body.il-tool-active:not(#cp6) #view-tool .app-sidebar,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body.il-tool-active:not(#cp6) #view-tool .app-shell {
+  height: calc(100vh - 63px) !important;
+  min-height: calc(100vh - 63px) !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body.il-tool-active:not(#cp6) #view-tool .app-sidebar {
+  top: 63px !important;
+}
+/* The terminal used to hide the bar outright. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body.il-tool-active:not(#cp6) #main-nav {
+  display: flex !important;
+}
+/* Layout inside the bar: brand, tabs, then search and actions to the right. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .nav-logo {
+  display: flex !important; align-items: center !important; gap: 9px !important;
+  text-decoration: none !important; flex: 0 0 auto !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .nav-logo img {
+  width: 28px !important; height: 28px !important; border-radius: 50% !important; flex-shrink: 0 !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .nav-links {
+  display: flex !important; align-items: stretch !important; gap: 0 !important;
+  height: 100% !important; min-height: 0 !important; max-height: none !important;
+  flex: 0 0 auto !important; background: none !important; border: 0 !important;
+  border-radius: 0 !important; padding: 0 !important; overflow: visible !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .nav-search {
+  flex: 0 1 360px !important; margin-left: auto !important; min-width: 0 !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .nav-right {
+  display: flex !important; align-items: center !important; gap: 10px !important;
+  flex: 0 0 auto !important; margin-left: 0 !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .nav-live,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav #nav-ticker-bar,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .prime-nav-menu,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .nav-acct-mobile {
+  display: none !important;
+}
+/* The account chip static-auth.js appends, styled like the Log in button so
+   the corner does not change shape when a session resolves. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .il-global-account {
+  display: inline-flex !important; align-items: center !important;
+  height: 34px !important; padding: 0 14px !important;
+  border-radius: 8px !important; font-size: 13px !important; font-weight: 500 !important;
+  max-width: 190px !important; overflow: hidden !important; text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  color: var(--lpf-ink, #f2eee6) !important; -webkit-text-fill-color: currentColor !important;
+  border: 1px solid transparent !important;
+  background:
+    linear-gradient(var(--lpf-panel, #0a1216), var(--lpf-panel, #0a1216)) padding-box,
+    linear-gradient(120deg, rgba(216,163,63,.40), rgba(216,163,63,.10) 45%, rgba(216,163,63,.28)) border-box !important;
+}
+/* Below 900px the tabs and the ticker field do not fit next to the brand and
+   the actions. The bar keeps its height and position; only its contents move
+   into the menu. */
+/* The media query needs the SAME id weight as the desktop rules above it, not
+   less. Written with four :not(#id) instead of five it carried one id fewer,
+   so display:flex on .nav-links won and the six tabs stayed in a 390px bar,
+   overflowing the brand. Id count is compared before anything else, and
+   !important does not rescue a lighter selector. */
+@media (max-width: 900px) {
+  html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .nav-links,
+  html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .nav-search,
+  html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav #nav-signup {
+    display: none !important;
+  }
+  html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .nav-right {
+    margin-left: auto !important;
+  }
+  html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .prime-nav-menu {
+    display: inline-flex !important;
+    align-items: center !important; justify-content: center !important;
+    width: 38px !important; height: 34px !important;
+    border: 0 !important; background: transparent !important;
+    color: var(--lpf-ink, #f2eee6) !important; font-size: 19px !important;
+    -webkit-text-fill-color: currentColor !important;
+  }
+  html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav {
+    gap: 10px !important;
+  }
+}
+
+/* Header links must not inherit a page's link styling. The auth pages
+   underline every <a> in their content scope, which put an underline under all
+   six tabs on /login while the same tabs were clean on /lens-score - the
+   markup was identical, the surrounding stylesheet was not. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav a {
+  text-decoration: none !important;
+  text-underline-offset: unset !important;
+}
+/* The terminal sidebar repeated the wordmark directly beneath the one in the
+   bar. One is enough. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body.il-tool-active:not(#cp6) #view-tool .prime-sidebar-brand {
+  display: none !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body.il-tool-active:not(#cp6) #view-tool nav.prime-side-global {
+  margin-top: 14px !important;
+}

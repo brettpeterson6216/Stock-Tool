@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <script src="/theme-bootstrap.js?v=20260828-1"></script>
+  <script src="/theme-bootstrap.js?v=20260905-1"></script>
   <title>Compound Interest Scenario Calculator — ImpliedLens</title>
   <meta name="description" content="Model low, base, and high compound-growth scenarios, monthly contributions, and inflation-adjusted purchasing power.">
   <link rel="canonical" href="https://impliedlens.com/compound-calculator">
@@ -28,6 +28,7 @@
   <link rel="manifest" href="/site.webmanifest">
   <link rel="preload" as="font" type="font/woff2" crossorigin href="/vendor/fonts/plus-jakarta-sans-files/plus-jakarta-sans-latin-400-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/vendor/fonts/plus-jakarta-sans-files/plus-jakarta-sans-latin-700-normal.woff2">
+<link rel="stylesheet" href="/vendor/tabler-icons.min.css?v=3.46.0-1">
 <link rel="stylesheet" href="/vendor/fonts/il-fonts.css?v=20260825-6">
   <style>
     *{box-sizing:border-box}body{margin:0;font-family:'Plus Jakarta Sans',sans-serif;background:#f7f6f2;color:#151719}.top-bar{padding:.85rem 2rem;display:flex;gap:1rem;align-items:center;border-bottom:1px solid rgba(21,23,25,.1)}.logo{font-family:'Plus Jakarta Sans',serif;font-size:21px;color:#151719;text-decoration:none}.logo em{color:#76521d}.back{margin-left:auto;font-size:13px}.wrap{max-width:1120px;margin:0 auto;padding:3.5rem 2rem 5rem}.eyebrow{font:700 .68rem 'JetBrains Mono',monospace;color:#76521d;text-transform:uppercase}.intro h1{max-width:760px;margin:.7rem 0 .8rem;font:400 2.7rem/1.08 'Plus Jakarta Sans',serif}.intro p{max-width:680px;color:#4a5057;line-height:1.7}.tool{display:grid;grid-template-columns:330px minmax(0,1fr);gap:1rem;margin-top:2rem}.panel{padding:1.25rem;border:1px solid rgba(21,23,25,.12);border-radius:7px;background:#fcfbf8}.panel h2{margin:0 0 .25rem;font-size:16px}.panel>p{margin:.2rem 0 1rem;color:#66717b;font-size:12px;line-height:1.5}.inputs{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}.field label{display:block;margin-bottom:.3rem;font:600 .62rem 'JetBrains Mono',monospace;color:#66717b;text-transform:uppercase}.field input{width:100%;height:38px;padding:0 .6rem;border:1px solid rgba(21,23,25,.18);border-radius:5px;background:#f2f1ec;color:#151719;font:600 .76rem 'JetBrains Mono',monospace}.btn{display:inline-flex;margin-top:1rem;padding:.7rem 1rem;border:0;border-radius:5px;background:#76521d;color:#fff;font-weight:700;cursor:pointer}.results{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(21,23,25,.12);border:1px solid rgba(21,23,25,.12)}.result{padding:1rem;background:#f2f1ec}.result span,.result strong{display:block}.result span{font:600 .6rem 'JetBrains Mono',monospace;color:#66717b;text-transform:uppercase}.result strong{margin-top:.5rem;font:600 .95rem 'JetBrains Mono',monospace}.chart{height:350px;margin-top:1rem}.note{margin-top:1rem;padding:.8rem;border-left:2px solid #76521d;background:rgba(118,82,29,.07);color:#66717b;font-size:11px;line-height:1.55}.cta{margin-top:2rem;padding:1.4rem 0;border-top:1px solid rgba(21,23,25,.1);display:flex;align-items:center;justify-content:space-between;gap:1rem}.cta p{margin:0;color:#4a5057;font-size:13px}.cta a{padding:.7rem 1rem;border-radius:5px;background:#76521d;color:#fff;text-decoration:none;font-size:13px;font-weight:700}@media(max-width:850px){.tool{grid-template-columns:1fr}.results{grid-template-columns:1fr 1fr}}@media(max-width:600px){.top-bar{padding:.75rem 1rem}.wrap{padding:2.5rem 1rem 4rem}.intro h1{font-size:34px}.inputs{grid-template-columns:1fr 1fr}.results{grid-template-columns:1fr 1fr}.chart{height:280px}.cta{display:block}.cta a{display:inline-block;margin-top:1rem}}
@@ -36,38 +37,75 @@
 <link rel="stylesheet" href="/visual-refresh.css?v=20260825-6">
 <link rel="stylesheet" href="/site-shell.css?v=20260825-7">
 <link rel="stylesheet" href="/beauty-system.css?v=20260825-6">
-<script defer src="/static-auth.js?v=20260830-1"></script>
+<script defer src="/static-auth.js?v=20260905-1"></script>
   <script defer src="/vendor/chart.umd.min.js?v=4.4.1"></script>
   <script defer src="/model-math.js?v=20260825-6"></script>
 <link rel="stylesheet" href="/premium-revamp.css?v=20260825-6">
 <link rel="stylesheet" href="/il-system.css?v=20260827-4">
-<link rel="stylesheet" href="/lens-prime-shared.css?v=20260904-8">
+<link rel="stylesheet" href="/lens-prime-shared.css?v=20260905-1">
 <link rel="stylesheet" href="/lens-prime-fidelity.css?v=20260831-17">
-<link href="/clean-pass.css?v=20260904-19" rel="stylesheet">
+<link href="/clean-pass.css?v=20260905-3" rel="stylesheet">
 <script defer src="/premium-motion.js?v=20260825-6"></script>
 </head>
 <body class="il-static-page">
   <a class="il-skip-link" href="#public-main">Skip to content</a>
-  <nav class="il-global-nav" aria-label="Primary navigation">
-    <a class="il-global-brand" href="/"><img src="/logo.svg" alt=""><span class="il-wordmark">Implied<span class="il-wordmark-b">Lens</span></span></a>
-    <div class="il-global-links">
-      <a class="il-global-tab" href="/">Dashboard</a>
-      <a class="il-global-tab" href="/?view=tool&amp;section=screener">Scanners</a>
-      <a class="il-global-tab active" href="/lens-score">Analysis</a>
-      <a class="il-global-tab" href="/?view=tool&amp;section=reports">Watchlists</a>
-      <a class="il-global-tab" href="/blog">News</a>
-      <a class="il-global-tab" href="/signup">Pricing</a>
+<nav id="main-nav" class="il-global-nav" data-view="home" aria-label="Primary navigation">
+  <a class="nav-logo il-global-brand" href="/" data-nav="home">
+    <img src="/logo.svg?v=4" alt="Implied Lens" width="28" height="28">
+    <span class="il-wordmark">Implied<span class="il-wordmark-b">Lens</span></span>
+  </a>
+  <div class="nav-links il-global-links" id="nav-links">
+    <a href="/" id="nav-home" class="nav-tab il-global-tab" data-nav="home">Dashboard</a>
+    <a href="/?view=tool&amp;section=screener" id="nav-analyze" class="nav-tab il-global-tab" data-nav="screener">Scanners</a>
+    <a href="/lens-score" id="nav-lensscore-link" class="nav-tab il-global-tab" data-nav="lens-score">Analysis</a>
+    <a href="/?view=tool&amp;section=reports" id="nav-saved-link" class="nav-tab il-global-tab" data-nav="reports">Watchlists</a>
+    <a href="/blog" id="nav-news-link" class="nav-tab il-global-tab" data-nav="blog">News</a>
+    <a href="/signup" id="nav-pricing-link" class="nav-tab il-global-tab" data-nav="pricing">Pricing</a>
+  </div>
+  <form class="nav-search il-global-search" id="nav-search" role="search" action="/" method="get">
+    <input type="hidden" name="view" value="tool">
+    <input type="hidden" name="section" value="analyze">
+    <i class="ti ti-search" aria-hidden="true"></i>
+    <input type="text" id="nav-ticker-input" name="symbol" placeholder="Search ticker&hellip;" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Search for a ticker">
+  </form>
+  <div id="nav-ticker-bar">
+    <span class="ntb-sym" id="ntb-sym"></span>
+    <span class="ntb-price" id="ntb-price"></span>
+    <span class="ntb-chg" id="ntb-chg"></span>
+  </div>
+  <div class="nav-right il-global-actions" id="nav-right">
+    <button class="theme-toggle" id="theme-toggle-btn" type="button" aria-label="Switch theme" aria-pressed="false">
+      <span class="theme-toggle-track" aria-hidden="true">
+        <i class="ti ti-sun theme-toggle-sun"></i>
+        <i class="ti ti-moon theme-toggle-moon"></i>
+        <span class="theme-toggle-thumb"></span>
+      </span>
+    </button>
+    <button class="prime-nav-menu" type="button" aria-label="Open navigation" onclick="_toggleMobileMenu()"><span aria-hidden="true">&#9776;</span></button>
+    <button class="nav-acct-mobile" id="nav-acct-mobile" type="button" aria-label="Account" onclick="navAccountTap()"><i class="ti ti-user-circle"></i></button>
+    <a class="btn-nav-outline il-global-login" id="nav-login" href="/login">Log in</a>
+    <a class="btn-nav il-global-trial" id="nav-signup" href="/signup">Start trial</a>
+    <a class="btn-nav" id="nav-upgrade" href="/signup" hidden>Upgrade to Pro</a>
+    <div class="nav-acct-wrap" id="nav-acct-wrap" style="display:none;">
+      <button class="nav-acct-btn" id="nav-acct-btn">
+        <span id="nav-acct-name">Account</span>
+        <span class="nav-acct-badge" id="nav-acct-badge" style="display:none;"></span>
+        <span class="nav-acct-chevron">&#9662;</span>
+      </button>
+      <div class="nav-acct-menu" id="nav-acct-menu">
+        <div class="nav-acct-header">
+          <div class="nav-acct-header-name" id="nav-acct-header-name"></div>
+          <div class="nav-acct-header-plan" id="nav-acct-header-plan"></div>
+        </div>
+        <a href="#" class="nav-acct-item" id="nav-acct-settings">Account settings</a>
+        <a href="#" class="nav-acct-item" id="nav-acct-billing">Subscription</a>
+        <div class="nav-acct-divider"></div>
+        <a href="#" class="nav-acct-item danger" id="nav-acct-logout">Log out</a>
+      </div>
     </div>
-    <form class="il-global-search" action="/" method="get" role="search"><input type="hidden" name="view" value="tool"><input type="hidden" name="section" value="analyze"><span aria-hidden="true">⌕</span><input name="symbol" type="text" placeholder="Search ticker…" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Search for a ticker"></form>
-    <div class="il-global-actions">
-      <button class="static-theme-toggle" type="button" aria-label="Switch theme"><span class="static-theme-thumb"></span></button>
-      <span class="il-global-live" title="ImpliedLens is live">Live</span>
-      <a class="il-global-login" href="/login">Log in</a>
-      <a class="il-global-trial" href="/signup">Start trial</a>
-    </div>
-  </nav>
-  <div class="top-bar" hidden><a href="/" class="logo">Implied<em>Lens</em></a><a href="/" class="back">Back to the platform</a><button class="static-theme-toggle" type="button" aria-label="Switch theme"><span class="static-theme-thumb"></span></button></div>
-  <main class="wrap" id="public-main">
+  </div>
+</nav>
+   <main class="wrap" id="public-main">
     <section class="intro"><div class="eyebrow">Free scenario calculator</div><h1>See what contributions, returns, and time each actually do.</h1><p>Compare a range of compound-growth outcomes instead of relying on one optimistic number. The calculator separates your contributions from investment growth and shows the base scenario in today's purchasing power.</p></section>
     <section class="tool">
       <div class="panel"><h2>Assumptions</h2><p>Use a range that reflects uncertainty. Returns are hypothetical.</p><div class="inputs">
@@ -79,7 +117,7 @@
     </section>
     <section class="cta"><p>Move from a wealth scenario to company research, valuation models, and a reviewable investment thesis.</p><a href="/?view=tool&amp;section=wealth">Open the full Wealth Planner</a></section>
   </main>
-  <script defer src="/static-theme.js?v=20260825-6"></script>
   <script defer src="/compound-calculator.js?v=20260825-6"></script>
+  <script defer src="/site-nav.js?v=20260905-2"></script>
 </body>
 </html>
