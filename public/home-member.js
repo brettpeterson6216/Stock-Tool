@@ -153,30 +153,44 @@
   function renderMarket(data) {
     var overview = data && data.overview;
     var host = document.getElementById("il-home-member");
-    var empty = document.getElementById("ihm-chart-empty");
+    var chartHost = document.getElementById("ihm-chart");
+
     if (!overview || !Number.isFinite(Number(overview.price))) {
-      if (empty) empty.hidden = false;
+      if (chartHost) chartHost.innerHTML = '<p class="ilx-empty">Market data is unavailable right now.</p>';
       if (host) host.classList.add("mkt-empty");
-      return;
+    } else {
+      if (host) {
+        host.classList.remove("mkt-empty");
+        host.classList.toggle("is-up", Number(overview.changePct) >= 0);
+        host.classList.toggle("is-dn", Number(overview.changePct) < 0);
+      }
+      var priceEl = document.getElementById("ihm-mkt-price");
+      var chgEl = document.getElementById("ihm-mkt-change");
+      if (priceEl) priceEl.textContent = num(overview.price, 2);
+      if (chgEl) {
+        chgEl.textContent = pct(overview.changePct);
+        chgEl.className = dirClass(overview.changePct).trim();
+      }
+
+      /* Three indexes overlaid and normalised, drawn by index-chart.js. The
+         note under the title reports the interval the server actually got, so
+         the resolution of the line is stated rather than assumed. */
+      var indexes = Array.isArray(data.indexes) ? data.indexes : [];
+      if (chartHost && typeof window.ilRenderIndexChart === "function") {
+        var drawn = window.ilRenderIndexChart(chartHost, indexes);
+        var note = document.getElementById("ihm-mkt-note");
+        if (note) {
+          var lead = indexes[0] || {};
+          var span = lead.range === "3mo" ? "3 months" : "30 days";
+          var res = lead.interval === "1d" ? "daily" : "intraday";
+          note.textContent = Number.isFinite(Number(lead.points))
+            ? "percent change \u00b7 " + span + " \u00b7 " + lead.points + " " + res + " points"
+            : "percent change";
+        }
+      } else if (chartHost) {
+        chartHost.innerHTML = '<p class="ilx-empty">Index history is unavailable right now.</p>';
+      }
     }
-    if (empty) empty.hidden = true;
-    if (host) {
-      host.classList.remove("mkt-empty");
-      host.classList.toggle("is-up", Number(overview.changePct) >= 0);
-      host.classList.toggle("is-dn", Number(overview.changePct) < 0);
-    }
-    var priceEl = document.getElementById("ihm-mkt-price");
-    var chgEl = document.getElementById("ihm-mkt-change");
-    if (priceEl) priceEl.textContent = num(overview.price, 2);
-    if (chgEl) {
-      chgEl.textContent = pct(overview.changePct);
-      chgEl.className = dirClass(overview.changePct).trim();
-    }
-    var line = document.getElementById("ihm-line");
-    var area = document.getElementById("ihm-area");
-    var d = linePath(overview.closes, 640, 168);
-    if (line) line.setAttribute("d", d);
-    if (area) area.setAttribute("d", d ? d + " L640 168 L0 168 Z" : "");
 
     var sectors = Array.isArray(data.sectors) ? data.sectors : [];
     var wrap = document.getElementById("ihm-sectors");

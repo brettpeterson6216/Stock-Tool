@@ -139,7 +139,7 @@ test("a brand-new account gets direction instead of a row of zeroes", () => {
 test("the member dashboard has a working half, not just a greeting", () => {
   const html = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
   for (const [id, what] of [
-    ["ihm-line", "the market chart"],
+    ["ihm-chart", "the overlaid index chart"],
     ["ihm-indexes", "the index row"],
     ["ihm-sectors", "the sector strip"],
     ["ihm-populars", "the popular companies"],

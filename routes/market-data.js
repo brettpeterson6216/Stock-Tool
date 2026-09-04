@@ -600,8 +600,16 @@ router.get("/market/landing-summary", async (_req, res) => {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36",
     Accept: "application/json, text/plain, */*",
   };
-  const symbols = [
+  // The three indexes are drawn as overlaid lines on one chart, so they need
+  // their own point series, not just a headline number. The sector ETFs only
+  // need today's move, which is what a single daily bar already carries.
+  const INDEX_SYMBOLS = [
     ["^GSPC", "S&P 500"],
+    ["^IXIC", "Nasdaq"],
+    ["^DJI", "Dow Jones"],
+  ];
+  const symbols = [
+    ...INDEX_SYMBOLS,
     ["XLK", "Technology"],
     ["XLC", "Comm. Services"],
     ["XLI", "Industrials"],
@@ -610,26 +618,89 @@ router.get("/market/landing-summary", async (_req, res) => {
     ["XLRE", "Real Estate"],
   ];
 
-  async function loadChart(symbol, name) {
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1mo&includePrePost=false`;
-    const response = await fetchWithTimeout(url, { headers: YH }, 5000);
+  /* A month of daily bars is at most 22 points, and after nulls are dropped it
+     was drawing about fifteen - which is why the line read as a low-resolution
+     sketch rather than a chart. Hourly bars over the same month give roughly
+     ten times that.
+
+     Yahoo does not guarantee every interval for every symbol, so this walks a
+     ladder and takes the first response with enough points to be worth
+     drawing, rather than assuming. Whatever it settles on is reported back in
+     the payload as `interval` and `points`, so which rung answered is visible
+     from the response instead of being a guess. */
+  const SERIES_LADDER = [
+    { interval: "1h", range: "1mo", min: 60 },
+    { interval: "90m", range: "1mo", min: 40 },
+    { interval: "1d", range: "3mo", min: 40 },
+    { interval: "1d", range: "1mo", min: 2 },
+  ];
+
+  async function fetchSeries(symbol, interval, range) {
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}` +
+      `?interval=${interval}&range=${range}&includePrePost=false`;
+    const response = await fetchWithTimeout(url, { headers: YH }, 6000);
     if (!response.ok) throw new Error(`${symbol} returned ${response.status}`);
     const payload = await response.json();
     const result = payload?.chart?.result?.[0];
-    const meta = result?.meta || {};
-    const closes = (result?.indicators?.quote?.[0]?.close || []).filter(Number.isFinite);
+    if (!result) throw new Error(`${symbol} returned no result`);
+    const rawCloses = result?.indicators?.quote?.[0]?.close || [];
+    const rawStamps = result?.timestamp || [];
+    // Keep the timestamp with its close: a gap has to stay a gap, or the
+    // series silently shifts and every point after it is on the wrong date.
+    const points = [];
+    for (let i = 0; i < rawCloses.length; i += 1) {
+      const close = Number(rawCloses[i]);
+      const at = Number(rawStamps[i]);
+      if (Number.isFinite(close) && Number.isFinite(at)) points.push([at, close]);
+    }
+    return { meta: result.meta || {}, points };
+  }
+
+  async function loadChart(symbol, name, wantSeries) {
+    let best = null;
+    let used = null;
+    for (const rung of (wantSeries ? SERIES_LADDER : SERIES_LADDER.slice(-1))) {
+      try {
+        const attempt = await fetchSeries(symbol, rung.interval, rung.range);
+        if (!best || attempt.points.length > best.points.length) { best = attempt; used = rung; }
+        if (attempt.points.length >= rung.min) { best = attempt; used = rung; break; }
+      } catch (_) { /* try the next rung */ }
+    }
+    if (!best) throw new Error(`${symbol} returned no usable series`);
+
+    const meta = best.meta;
+    const closes = best.points.map(p => p[1]);
     const price = Number(meta.regularMarketPrice ?? closes.at(-1));
     const previousClose = Number(meta.previousClose ?? meta.chartPreviousClose ?? closes.at(-2));
     if (!(price > 0)) throw new Error(`${symbol} did not return a price`);
     const changePct = previousClose > 0 ? ((price - previousClose) / previousClose) * 100 : null;
-    return { symbol, name, price, changePct, closes: closes.slice(-22) };
+
+    // Cap the payload: beyond a few hundred points a line chart this size is
+    // drawing several samples per pixel.
+    const MAX = 260;
+    const series = best.points.length > MAX
+      ? best.points.filter((_, i) => i % Math.ceil(best.points.length / MAX) === 0)
+      : best.points;
+
+    return {
+      symbol, name, price, changePct,
+      closes: series.map(p => p[1]),
+      stamps: wantSeries ? series.map(p => p[0]) : undefined,
+      interval: used ? used.interval : null,
+      range: used ? used.range : null,
+      points: series.length,
+    };
   }
 
   const started = Date.now();
-  const settled = await Promise.allSettled(symbols.map(([symbol, name]) => loadChart(symbol, name)));
+  const indexSet = new Set(INDEX_SYMBOLS.map(([symbol]) => symbol));
+  const settled = await Promise.allSettled(
+    symbols.map(([symbol, name]) => loadChart(symbol, name, indexSet.has(symbol)))
+  );
   const quotes = settled.filter(item => item.status === "fulfilled").map(item => item.value);
   const overview = quotes.find(item => item.symbol === "^GSPC") || null;
-  const sectors = quotes.filter(item => item.symbol !== "^GSPC");
+  const indexes = quotes.filter(item => indexSet.has(item.symbol));
+  const sectors = quotes.filter(item => !indexSet.has(item.symbol));
   const measured = sectors.filter(item => Number.isFinite(item.changePct));
   const advancing = measured.filter(item => item.changePct >= 0).length;
   const breadth = measured.length ? Math.round((advancing / measured.length) * 100) : null;
@@ -652,6 +723,7 @@ router.get("/market/landing-summary", async (_req, res) => {
 
   const result = {
     overview,
+    indexes,
     sectors,
     breadth,
     advancing,
