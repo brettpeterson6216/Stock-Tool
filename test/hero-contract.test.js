@@ -74,11 +74,63 @@ test("the empty state hides when data arrives", () => {
 // The block it replaced hardcoded background:#091013, which is why it sat in
 // the light page as a dark slab.
 test("the hero paints from theme tokens", () => {
-  const block = css.slice(css.indexOf("LIVE MARKET HERO"));
-  assert.ok(block.length > 0, "the hero styles are gone");
+  // Bound the slice to the hero's own block. Reading to the end of the file
+  // swept in later sections and failed on the gold CTA gradient in the member
+  // home, which is deliberate and identical in both themes.
+  const start = css.indexOf("LIVE MARKET HERO");
+  assert.ok(start !== -1, "the hero styles are gone");
+  const next = css.indexOf("═══\n   ", start + 200);
+  const block = css.slice(start, next === -1 ? css.length : next);
   const literals = [...block.matchAll(/(?:background|border-color)\s*:\s*([^;!}]+)/g)]
     .map(m => m[1].trim())
     .filter(v => !/var\(--/.test(v) && !/^(transparent|none|inherit|initial|unset)$/i.test(v))
+    // The gold accent is intentionally the same in both themes.
+    .filter(v => !/#edca79|#c98d2c|#e3b25a|#c08f3a/i.test(v))
     .filter(v => /#[0-9a-f]{3,8}|rgba?\(/i.test(v));
   assert.deepEqual(literals, [], "the hero must not hardcode a surface colour");
+});
+
+// ── The home page serves two audiences from one URL ────────────────────────
+const homeCss = fs.readFileSync(path.join(ROOT, "public", "clean-pass.css"), "utf8");
+const memberJs = fs.readFileSync(path.join(ROOT, "public", "home-member.js"), "utf8");
+
+test("the signed-in and signed-out homes cannot both be hidden", () => {
+  // Written with one :not(#id) fewer, the signed-in rule lost to the base hide
+  // and neither page rendered. Id count is compared before class count, so the
+  // two rules have to carry the same id weight for the class to break the tie.
+  const ids = sel => (sel.match(/:not\(#|#[A-Za-z]/g) || []).length;
+  const hide = homeCss.match(/^(html:not\(#cp1\)[^{,]*#il-home-member) \{ display: none/m);
+  const show = homeCss.match(/^(html\.il-hint-in:not\(#cp1\)[^{,]*#il-home-member) \{ display: flex/m);
+  assert.ok(hide && show, "the two-audience rules are gone");
+  assert.equal(ids(show[1]), ids(hide[1]),
+    `show carries ${ids(show[1])} ids against hide's ${ids(hide[1])}`);
+});
+
+test("the visitor page is what an unresolved session falls back to", () => {
+  // Showing a stranger an empty workspace is the worse failure of the two.
+  const catchIdx = memberJs.lastIndexOf(".catch(");
+  assert.ok(catchIdx !== -1, "the session check has no failure path");
+  assert.match(memberJs.slice(catchIdx, catchIdx + 400), /il-hint-out/,
+    "a failed session check must fall back to the visitor page");
+  assert.doesNotMatch(
+    homeCss,
+    /html\.il-hint-unknown[^{]*#il-home-member \{ display: flex/,
+    "an unknown session must not render the member home"
+  );
+});
+
+test("member counts are read, never invented", () => {
+  assert.match(memberJs, /workspace\/summary/, "counts must come from the workspace summary");
+  assert.match(memberJs, /\/api\/saves/, "recent analyses must come from the saves endpoint");
+  assert.match(memberJs, /Number\.isFinite\(n\)/, "a missing count must not render as a number");
+  assert.match(memberJs, /"unavailable"/, "a failed count must say so rather than show zero");
+});
+
+test("a brand-new account gets direction instead of a row of zeroes", () => {
+  assert.match(memberJs, /total === 0/, "the empty case must be detected");
+  assert.match(homeCss, /#il-home-member \[hidden\][\s\S]{0,140}display: none !important/,
+    "[hidden] must win against the component's own display rule");
+  const html = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
+  assert.match(html, /id="ihm-start"/, "the starter steps are gone");
+  assert.match(html, /class="il-startpaths"/, "the visitor page needs its three ways in");
 });

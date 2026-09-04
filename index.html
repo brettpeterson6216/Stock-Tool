@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-<script src="/theme-bootstrap.js?v=20260906-1"></script>
+<script src="/theme-bootstrap.js?v=20260906-4"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Implied Lens — Stock Research and Valuation Workspace</title>
@@ -77,9 +77,9 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/vendor/fonts/plus-jakarta-sans-files/plus-jakarta-sans-latin-700-normal.woff2">
 <link rel="stylesheet" href="/vendor/fonts/il-fonts.css?v=20260825-6">
 <link rel="stylesheet" href="/vendor/tabler-icons.min.css?v=3.46.0-1">
-<link href="/product-system.css?v=20260906-3" rel="stylesheet">
-<link href="/workspace-system.css?v=20260906-3" rel="stylesheet">
-<link href="/research-system.css?v=20260906-3" rel="stylesheet">
+<link href="/product-system.css?v=20260906-7" rel="stylesheet">
+<link href="/workspace-system.css?v=20260906-7" rel="stylesheet">
+<link href="/research-system.css?v=20260906-7" rel="stylesheet">
 <!-- defer: this was the only render-blocking script on the page, 201KB before first paint -->
 <script defer src="/vendor/chart.umd.min.js?v=4.4.1"></script>
 <script defer src="/vendor/hammer.min.js?v=2.0.8"></script>
@@ -96,22 +96,22 @@
 <script defer src="/hero-chart.js?v=20260825-6"></script>
 <script defer src="/tool-launch.js?v=20260904-1"></script>
 <script defer src="/share-studio.js?v=20260827-2"></script>
-<link href="/legacy-app.css?v=20260906-3" rel="stylesheet">
-<link href="/premium.css?v=20260906-3" rel="stylesheet">
-<link href="/release-polish.css?v=20260906-3" rel="stylesheet">
-<link href="/visual-refresh.css?v=20260906-3" rel="stylesheet">
-  <link href="/site-shell.css?v=20260906-3" rel="stylesheet">
-<link href="/landing-polish.css?v=20260906-3" rel="stylesheet">
-<link href="/beauty-system.css?v=20260906-3" rel="stylesheet">
-<link href="/chart-engine.css?v=20260906-3" rel="stylesheet">
-<link rel="stylesheet" href="/premium-revamp.css?v=20260906-3">
-<link rel="stylesheet" href="/il-system.css?v=20260906-3">
-<link rel="stylesheet" href="/lens-prime-v2.css?v=20260906-3">
-<link rel="stylesheet" href="/lens-prime-exact.css?v=20260906-3">
-<link rel="stylesheet" href="/lens-prime-shared.css?v=20260906-3">
-<link rel="stylesheet" href="/lens-prime-fidelity.css?v=20260906-3">
-<link rel="stylesheet" href="/lens-prime-match.css?v=20260906-3">
-<link href="/clean-pass.css?v=20260906-3" rel="stylesheet">
+<link href="/legacy-app.css?v=20260906-7" rel="stylesheet">
+<link href="/premium.css?v=20260906-7" rel="stylesheet">
+<link href="/release-polish.css?v=20260906-7" rel="stylesheet">
+<link href="/visual-refresh.css?v=20260906-7" rel="stylesheet">
+  <link href="/site-shell.css?v=20260906-7" rel="stylesheet">
+<link href="/landing-polish.css?v=20260906-7" rel="stylesheet">
+<link href="/beauty-system.css?v=20260906-7" rel="stylesheet">
+<link href="/chart-engine.css?v=20260906-7" rel="stylesheet">
+<link rel="stylesheet" href="/premium-revamp.css?v=20260906-7">
+<link rel="stylesheet" href="/il-system.css?v=20260906-7">
+<link rel="stylesheet" href="/lens-prime-v2.css?v=20260906-7">
+<link rel="stylesheet" href="/lens-prime-exact.css?v=20260906-7">
+<link rel="stylesheet" href="/lens-prime-shared.css?v=20260906-7">
+<link rel="stylesheet" href="/lens-prime-fidelity.css?v=20260906-7">
+<link rel="stylesheet" href="/lens-prime-match.css?v=20260906-7">
+<link href="/clean-pass.css?v=20260906-7" rel="stylesheet">
 <script defer src="/premium-motion.js?v=20260825-6"></script>
 </head>
 <body class="il-product-page">
@@ -175,11 +175,55 @@
     </div>
   </div>
 </nav>
-<script defer src="/app-navigation.js?v=20260906-1"></script>
+<script defer src="/app-navigation.js?v=20260906-4"></script>
 <script defer src="/landing-market.js?v=20260905-15"></script>
 <span id="main-content" tabindex="-1"></span>
 <!-- ══════════ VIEW: HOME ══════════ -->
 <div id="view-home" role="main">
+
+<!-- The home page has two audiences and one URL. theme-bootstrap.js already
+     resolves the cached session hint before first paint (il-hint-in /
+     il-hint-out / il-hint-unknown on <html>), so which of these two renders is
+     decided before anything is drawn - a signed-in member never sees the
+     pitch, and a first-time visitor never sees an empty workspace.
+     static-auth.js corrects the class afterwards if the hint was stale. -->
+<section class="il-home-member" id="il-home-member" aria-label="Your workspace">
+  <div class="ihm-head">
+    <div>
+      <h1 class="ihm-greeting" id="ihm-greeting">Welcome back.</h1>
+      <p class="ihm-sub" id="ihm-sub">Pick up where you left off, or start a new company.</p>
+    </div>
+    <a class="ihm-head-link" href="/?view=tool&amp;section=workspace">Open workspace</a>
+  </div>
+
+  <form class="ihm-search" id="ihm-search" role="search" action="/" method="get">
+    <input type="hidden" name="view" value="tool">
+    <input type="hidden" name="section" value="analyze">
+    <label class="ihm-search-label" for="ihm-ticker">Research a company</label>
+    <div class="ihm-search-row">
+      <input type="text" id="ihm-ticker" name="symbol" placeholder="Ticker or company name"
+             autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Ticker or company name">
+      <button type="submit" class="ihm-go">Analyze</button>
+    </div>
+  </form>
+
+  <div class="ihm-tiles" id="ihm-tiles" aria-label="Your saved work"></div>
+
+  <!-- Shown instead of the tiles when there is nothing saved yet, which is
+       what a brand-new account sees. -->
+  <ol class="ihm-start" id="ihm-start" hidden>
+    <li><span class="ihm-step-n">1</span><div><b>Analyze a company</b><span>Search a ticker above to see price, fundamentals and the LensScore in one place.</span></div></li>
+    <li><span class="ihm-step-n">2</span><div><b>Write the thesis</b><span>Say what has to be true before you buy, so you can check it later.</span></div></li>
+    <li><span class="ihm-step-n">3</span><div><b>Set a review date</b><span>Come back on a schedule instead of when the price moves.</span></div></li>
+  </ol>
+
+  <div class="ihm-recent" id="ihm-recent" hidden>
+    <div class="ihm-recent-head"><span>Recent analyses</span><a href="/?view=tool&amp;section=reports">See all</a></div>
+    <div class="ihm-recent-list" id="ihm-recent-list"></div>
+  </div>
+
+</section>
+
 <section class="il-landing" id="landing-page" aria-label="Implied Lens landing page">
   <aside class="il-landing-rail" aria-label="Home page sections">
     <div class="il-rail-label">Home</div>
@@ -309,6 +353,33 @@
         </div>
       </div>
     </div>
+  <!-- Three ways in, stated plainly. A first-time visitor arriving at a
+       research tool needs to be told where to start; the feature strip above
+       says what exists, not what to do first. -->
+  <section class="il-startpaths" aria-label="Ways to start">
+    <h2 class="il-startpaths-title">Three ways to start</h2>
+    <div class="il-startpaths-grid">
+      <a class="il-startpath" href="/?view=tool&amp;section=analyze">
+        <span class="isp-n">01</span>
+        <b>Look up a company</b>
+        <span class="isp-d">Price, fundamentals, filings and a 0&ndash;10 LensScore for any ticker. Two free analyses a day, no account.</span>
+        <span class="isp-go">Analyze a ticker &rarr;</span>
+      </a>
+      <a class="il-startpath" href="/?view=tool&amp;section=screener">
+        <span class="isp-n">02</span>
+        <b>Scan the market</b>
+        <span class="isp-d">Filter by value, size and momentum to find candidates worth the work, instead of starting from a headline.</span>
+        <span class="isp-go">Open the screener &rarr;</span>
+      </a>
+      <a class="il-startpath" href="/lens-score">
+        <span class="isp-n">03</span>
+        <b>See the method first</b>
+        <span class="isp-d">Watch one company scored end to end, and decide whether the process is one you would actually follow.</span>
+        <span class="isp-go">See a worked example &rarr;</span>
+      </a>
+    </div>
+  </section>
+
   <!-- Live market strip. Every value comes from /api/market/movers. -->
   <section class="il-market-strip" aria-label="Live market movers">
     <div class="il-ms-inner">
@@ -1789,6 +1860,7 @@
     <a href="#" class="mmenu-item" id="mmenu-logout" style="display:none;" onclick="var b=document.getElementById('nav-acct-logout');if(b){b.click();}_toggleMobileMenu();return false;"><i class="ti ti-logout-2"></i><span>Log out</span></a>
   </div>
 </div>
+  <script defer src="/home-member.js?v=20260906-4"></script>
   <script defer src="/site-nav.js?v=20260905-2"></script>
 </body>
 </html>

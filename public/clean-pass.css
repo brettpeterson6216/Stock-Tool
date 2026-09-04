@@ -905,3 +905,231 @@ html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav 
     grid-column: 2 !important; width: auto !important; min-width: 0 !important; max-width: none !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ONE HOME, TWO AUDIENCES
+
+   impliedlens.com is the front door for a first-time visitor and for someone
+   who has used this for years, and those two need opposite things: one needs
+   to be told what this is and where to start, the other needs their own work
+   and a ticker box. Serving both the same page means overloading one and
+   under-serving the other.
+
+   theme-bootstrap.js already resolves the cached session hint before first
+   paint, so the switch happens with no flash of the wrong page. The unknown
+   case - no hint, or an expired one - shows the visitor page, because showing
+   a stranger an empty workspace is the worse failure.
+   ═══════════════════════════════════════════════════════════════════════════ */
+/* Both rules carry the SAME id weight - five :not(#id) plus #cp6 plus the
+   element id - so the extra .il-hint-in class is what breaks the tie. Written
+   with four :not() the signed-in rule had one id fewer and lost outright,
+   which showed neither page. Id count is compared before class count. */
+/* Same trap as the hero's empty state: [hidden] is only display:none at
+   user-agent weight, so an !important display rule paints over it. The
+   three-step starter list appeared next to a full set of tiles because of it. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #il-home-member [hidden],
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #il-home-member[hidden] {
+  display: none !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #il-home-member { display: none !important; }
+html.il-hint-in:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #il-home-member { display: flex !important; }
+html.il-hint-in:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page,
+html.il-hint-in:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page { display: none !important; }
+
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #il-home-member {
+  flex-direction: column !important;
+  gap: 22px !important;
+  max-width: 1120px !important;
+  margin: 0 auto !important;
+  padding: 40px clamp(16px, 2.4vw, 36px) 72px !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-head {
+  display: flex !important; align-items: flex-end !important; justify-content: space-between !important;
+  gap: 16px !important; flex-wrap: wrap !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-greeting {
+  margin: 0 !important;
+  font-family: var(--lpf-serif, Georgia, 'Times New Roman', serif) !important;
+  font-size: clamp(28px, 3vw, 38px) !important; font-weight: 400 !important;
+  letter-spacing: -.02em !important; line-height: 1.1 !important;
+  color: var(--lp-text, #f2eee5) !important; -webkit-text-fill-color: currentColor !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-sub {
+  margin: 8px 0 0 !important; font-size: 14px !important;
+  color: var(--lp-muted, #929c9c) !important; -webkit-text-fill-color: currentColor !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-head-link {
+  font-size: 13px !important; white-space: nowrap !important;
+  color: var(--il-gold-ink) !important; -webkit-text-fill-color: currentColor !important;
+}
+
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-search {
+  display: flex !important; flex-direction: column !important; gap: 8px !important;
+  padding: 20px !important; border-radius: 10px !important;
+  border: 1px solid var(--lp-border, rgba(176,160,126,.16)) !important;
+  background: var(--lp-elev, linear-gradient(155deg,#0d1519,#091013)) !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-search-label {
+  font-size: 12px !important; font-weight: 600 !important;
+  color: var(--lp-muted, #929c9c) !important; -webkit-text-fill-color: currentColor !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-search-row {
+  display: flex !important; gap: 10px !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #ihm-ticker {
+  flex: 1 1 auto !important; min-width: 0 !important; height: 46px !important;
+  padding: 0 14px !important; border-radius: 8px !important;
+  border: 1px solid var(--lp-border, rgba(176,160,126,.16)) !important;
+  background: var(--lp-input-shell, #070d10) !important;
+  color: var(--lp-text, #f2eee5) !important; -webkit-text-fill-color: currentColor !important;
+  font-size: 15px !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-go {
+  flex: 0 0 auto !important; height: 46px !important; padding: 0 22px !important;
+  border: 0 !important; border-radius: 8px !important; cursor: pointer !important;
+  background: linear-gradient(135deg,#edca79,#c98d2c) !important;
+  color: #161008 !important; -webkit-text-fill-color: currentColor !important;
+  font-size: 14px !important; font-weight: 600 !important;
+}
+
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-tiles {
+  display: grid !important; grid-template-columns: repeat(4, minmax(0,1fr)) !important; gap: 12px !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-tile {
+  display: flex !important; flex-direction: column !important; gap: 3px !important;
+  padding: 16px !important; border-radius: 10px !important; text-decoration: none !important;
+  border: 1px solid var(--lp-border, rgba(176,160,126,.16)) !important;
+  background: var(--lp-panel, #0a1115) !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-tile:hover {
+  border-color: var(--lp-border-gold, rgba(216,164,63,.34)) !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-tile-n {
+  font-family: var(--lpf-serif, Georgia, serif) !important; font-size: 28px !important; line-height: 1 !important;
+  color: var(--lp-text, #f2eee5) !important; -webkit-text-fill-color: currentColor !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-tile.is-due .ihm-tile-n { color: var(--il-gold-ink) !important; }
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-tile-l {
+  font-size: 13px !important; font-weight: 600 !important;
+  color: var(--lp-text, #f2eee5) !important; -webkit-text-fill-color: currentColor !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-tile-s {
+  font-size: 12px !important; color: var(--lp-muted, #929c9c) !important; -webkit-text-fill-color: currentColor !important;
+}
+
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-start {
+  list-style: none !important; margin: 0 !important; padding: 0 !important;
+  display: grid !important; grid-template-columns: repeat(3, minmax(0,1fr)) !important; gap: 12px !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-start li {
+  display: flex !important; gap: 12px !important; padding: 16px !important; border-radius: 10px !important;
+  border: 1px solid var(--lp-border, rgba(176,160,126,.16)) !important;
+  background: var(--lp-panel, #0a1115) !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-step-n {
+  flex: 0 0 auto !important; width: 24px !important; height: 24px !important;
+  display: grid !important; place-items: center !important; border-radius: 50% !important;
+  font-size: 12px !important; font-weight: 600 !important;
+  background: var(--lp-hover, #10191d) !important;
+  color: var(--il-gold-ink) !important; -webkit-text-fill-color: currentColor !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-start b {
+  display: block !important; font-size: 13px !important;
+  color: var(--lp-text, #f2eee5) !important; -webkit-text-fill-color: currentColor !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-start span:not(.ihm-step-n) {
+  display: block !important; margin-top: 4px !important; font-size: 12px !important; line-height: 1.5 !important;
+  color: var(--lp-muted, #929c9c) !important; -webkit-text-fill-color: currentColor !important;
+}
+
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-recent {
+  border: 1px solid var(--lp-border, rgba(176,160,126,.16)) !important;
+  border-radius: 10px !important; background: var(--lp-panel, #0a1115) !important;
+  padding: 6px 16px 12px !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-recent-head {
+  display: flex !important; align-items: center !important; justify-content: space-between !important;
+  padding: 12px 0 8px !important; font-size: 13px !important; font-weight: 600 !important;
+  color: var(--lp-text, #f2eee5) !important; -webkit-text-fill-color: currentColor !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-recent-head a {
+  font-size: 12px !important; font-weight: 500 !important;
+  color: var(--il-gold-ink) !important; -webkit-text-fill-color: currentColor !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-recent-row {
+  display: grid !important; grid-template-columns: 72px minmax(0,1fr) max-content !important;
+  gap: 12px !important; align-items: baseline !important;
+  padding: 9px 0 !important; text-decoration: none !important;
+  border-top: 1px solid var(--lp-border, rgba(176,160,126,.16)) !important;
+  font-size: 13px !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-recent-row b {
+  color: var(--lp-text, #f2eee5) !important; -webkit-text-fill-color: currentColor !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-recent-label,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-recent-when {
+  color: var(--lp-muted, #929c9c) !important; -webkit-text-fill-color: currentColor !important;
+  overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important;
+}
+
+/* ── Three ways to start, for the visitor half ─────────────────────────── */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-startpaths {
+  max-width: 1170px !important; margin: 0 auto !important; padding: 34px clamp(16px, 2.4vw, 36px) 6px !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-startpaths-title {
+  margin: 0 0 14px !important;
+  font-family: var(--lpf-serif, Georgia, serif) !important;
+  font-size: clamp(22px, 2.2vw, 28px) !important; font-weight: 400 !important; letter-spacing: -.02em !important;
+  color: var(--lp-text, #f2eee5) !important; -webkit-text-fill-color: currentColor !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-startpaths-grid {
+  display: grid !important; grid-template-columns: repeat(3, minmax(0,1fr)) !important; gap: 12px !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-startpath {
+  display: flex !important; flex-direction: column !important; gap: 7px !important;
+  padding: 20px !important; border-radius: 10px !important; text-decoration: none !important;
+  border: 1px solid var(--lp-border, rgba(176,160,126,.16)) !important;
+  background: var(--lp-elev, linear-gradient(155deg,#0d1519,#091013)) !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-startpath:hover {
+  border-color: var(--lp-border-gold, rgba(216,164,63,.34)) !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .isp-n {
+  font-family: var(--lpf-mono, 'JetBrains Mono', monospace) !important; font-size: 11px !important;
+  color: var(--il-gold-ink) !important; -webkit-text-fill-color: currentColor !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-startpath b {
+  font-size: 16px !important; font-weight: 600 !important;
+  color: var(--lp-text, #f2eee5) !important; -webkit-text-fill-color: currentColor !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .isp-d {
+  font-size: 13px !important; line-height: 1.55 !important;
+  color: var(--lp-muted, #929c9c) !important; -webkit-text-fill-color: currentColor !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .isp-go {
+  margin-top: 4px !important; font-size: 13px !important; font-weight: 600 !important;
+  color: var(--il-gold-ink) !important; -webkit-text-fill-color: currentColor !important;
+}
+@media (max-width: 900px) {
+  html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-tiles,
+  html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-start,
+  html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-startpaths-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* The actions track is a fixed 236px with overflow hidden, which is what stops
+   the corner moving the tabs when a session resolves. A long username would
+   therefore be cut off mid-word rather than shortened, so truncate it
+   deliberately: measured, "brettpeterson" ends exactly on the container edge. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .nav-acct-wrap {
+  min-width: 0 !important; max-width: 174px !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .nav-acct-btn {
+  min-width: 0 !important; max-width: 174px !important;
+  display: inline-flex !important; align-items: center !important; gap: 6px !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav #nav-acct-name {
+  min-width: 0 !important; max-width: 120px !important;
+  overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important;
+}
