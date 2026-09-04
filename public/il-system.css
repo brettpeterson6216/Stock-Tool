@@ -42,7 +42,7 @@
 /* ── 1 · SCALE ──────────────────────────────────────────────────────────── */
 :root {
   /* type — 9 steps, 13px base. Matches the values the codemod snapped to. */
-  --t-micro: 10px;
+  --t-micro: 11.5px;
   --t-tiny:  11px;
   --t-small: 12px;
   --t-body:  13px;
@@ -242,8 +242,8 @@
   font-family: "Plus Jakarta Sans", "PJS Fallback", ui-sans-serif, system-ui, sans-serif !important;
   font-size: var(--t-micro) !important;
   font-weight: var(--w-semi) !important;
-  letter-spacing: .08em !important;
-  text-transform: uppercase !important;
+  letter-spacing: .02em !important;
+  text-transform:none;
 }
 
 /* Headings: sans, tight, not serif. */
@@ -648,7 +648,7 @@
   background: transparent !important;
   background-image: none !important;
   box-shadow: none !important;
-  font-size: 10px !important;
+  font-size: 11px !important;
   font-weight: 600 !important;
   line-height: 1.2 !important;
   text-decoration: none !important;
@@ -1100,9 +1100,9 @@
 :is(#il-system, html) :is(#il-system, body) .il-rail-item > b em {
   font-style: normal !important;
   font-family: "JetBrains Mono", ui-monospace, monospace !important;
-  font-size: 9px !important;
-  letter-spacing: .09em !important;
-  text-transform: uppercase !important;
+  font-size: 11.5px !important;
+  letter-spacing: .02em !important;
+  text-transform:none;
   padding: 2px 6px !important;
   border-radius: 999px !important;
   border: 1px solid var(--border, rgba(255,255,255,.14)) !important;
@@ -1195,9 +1195,9 @@
 }
 :is(#il-system, html) :is(#il-system, body) .ilm-title {
   font-family: "JetBrains Mono", ui-monospace, monospace !important;
-  font-size: 10px !important;
-  letter-spacing: .13em !important;
-  text-transform: uppercase !important;
+  font-size: 11px !important;
+  letter-spacing: .02em !important;
+  text-transform:none;
   color: var(--ink3, #B4B0A8) !important;
 }
 :is(#il-system, html) :is(#il-system, body) .ilm-tabs { display: flex !important; gap: 2px !important; }
@@ -1289,9 +1289,9 @@ html[data-theme="light"] :is(#il-system, body) .ilm-chg.is-dn { color:#A3352A !i
 }
 :is(#il-system, html) :is(#il-system, body) .ilm-badge {
   font-family: "JetBrains Mono", ui-monospace, monospace !important;
-  font-size: 9px !important;
-  letter-spacing: .09em !important;
-  text-transform: uppercase !important;
+  font-size: 11.5px !important;
+  letter-spacing: .02em !important;
+  text-transform:none;
   padding: 3px 7px !important;
   border-radius: 999px !important;
   border: 1px solid var(--border, rgba(255,255,255,.14)) !important;
@@ -1377,7 +1377,7 @@ html[data-theme="light"] :is(#il-system, body) .ilm-chg.is-dn { color:#A3352A !i
 }
 :is(#il-system, html) :is(#il-system, body) .ihx-f-lbl {
   font-family: "JetBrains Mono", ui-monospace, monospace !important;
-  font-size: 8.5px !important; letter-spacing: .11em !important; text-transform: uppercase !important;
+  font-size: 11px !important; letter-spacing: .02em !important; text-transform:none;
   color: rgba(232,226,214,.60) !important; -webkit-text-fill-color: rgba(232,226,214,.60) !important;
 }
 :is(#il-system, html) :is(#il-system, body) .ihx-f-val {
@@ -1385,7 +1385,7 @@ html[data-theme="light"] :is(#il-system, body) .ilm-chg.is-dn { color:#A3352A !i
   color: #F4F1EA !important; -webkit-text-fill-color: #F4F1EA !important;
 }
 :is(#il-system, html) :is(#il-system, body) .ihx-f-tag {
-  font-size: 10.5px !important; font-weight: 600 !important;
+  font-size: 11px !important; font-weight: 600 !important;
   color: #6FBE95 !important; -webkit-text-fill-color: #6FBE95 !important;
 }
 :is(#il-system, html) :is(#il-system, body) .ihx-f-spark { width: 100% !important; height: 24px !important; margin-top: 3px !important; }
@@ -1405,7 +1405,7 @@ html[data-theme="light"] :is(#il-system, body) .ilm-chg.is-dn { color:#A3352A !i
   color: #F4F1EA !important; -webkit-text-fill-color: #F4F1EA !important;
 }
 :is(#il-system, html) :is(#il-system, body) .ihx-r-name {
-  font-size: 9.5px !important; color: rgba(232,226,214,.52) !important; -webkit-text-fill-color: rgba(232,226,214,.52) !important;
+  font-size: 11.5px !important; color: rgba(232,226,214,.52) !important; -webkit-text-fill-color: rgba(232,226,214,.52) !important;
   overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important;
 }
 :is(#il-system, html) :is(#il-system, body) .ihx-r-price {
@@ -1414,7 +1414,7 @@ html[data-theme="light"] :is(#il-system, body) .ilm-chg.is-dn { color:#A3352A !i
 }
 :is(#il-system, html) :is(#il-system, body) .ihx-r-chg {
   font-family: "JetBrains Mono", ui-monospace, monospace !important;
-  font-size: 10.5px !important; margin-bottom: 10px !important;
+  font-size: 11px !important; margin-bottom: 10px !important;
   color: #6FBE95 !important; -webkit-text-fill-color: #6FBE95 !important;
 }
 :is(#il-system, html) :is(#il-system, body) .ihx-r-row {
@@ -1424,7 +1424,7 @@ html[data-theme="light"] :is(#il-system, body) .ilm-chg.is-dn { color:#A3352A !i
 }
 :is(#il-system, html) :is(#il-system, body) .ihx-r-row > span {
   font-family: "JetBrains Mono", ui-monospace, monospace !important;
-  font-size: 8px !important; letter-spacing: .11em !important; text-transform: uppercase !important;
+  font-size: 11px !important; letter-spacing: .02em !important; text-transform:none;
   color: rgba(232,226,214,.50) !important; -webkit-text-fill-color: rgba(232,226,214,.50) !important;
 }
 :is(#il-system, html) :is(#il-system, body) .ihx-r-row > b {
@@ -1434,7 +1434,7 @@ html[data-theme="light"] :is(#il-system, body) .ilm-chg.is-dn { color:#A3352A !i
 :is(#il-system, html) :is(#il-system, body) .ihx-r-foot {
   margin-top: auto !important; padding-top: 9px !important;
   font-family: "JetBrains Mono", ui-monospace, monospace !important;
-  font-size: 8px !important; letter-spacing: .12em !important; text-transform: uppercase !important;
+  font-size: 11px !important; letter-spacing: .02em !important; text-transform:none;
   color: rgba(232,226,214,.40) !important; -webkit-text-fill-color: rgba(232,226,214,.40) !important;
 }
 
@@ -1618,7 +1618,7 @@ body.il-product-page #view-tool .app-sidebar {
 }
 body.il-product-page #view-tool .sb-group-label {
   padding: 7px 12px !important;
-  font-size: 9px !important;
+  font-size: 11.5px !important;
   letter-spacing: .18em !important;
 }
 body.il-product-page #view-tool .sb-item {
@@ -1642,9 +1642,9 @@ body.il-product-page #view-tool .app-section-hdr {
 }
 body.il-product-page #view-tool .ash-title {
   font-family: "JetBrains Mono", ui-monospace, monospace !important;
-  font-size: 10px !important;
-  letter-spacing: .11em !important;
-  text-transform: uppercase !important;
+  font-size: 11px !important;
+  letter-spacing: .02em !important;
+  text-transform:none;
 }
 body.il-product-page #view-tool .ash-btn {
   min-height: 34px !important;
@@ -1653,7 +1653,7 @@ body.il-product-page #view-tool .ash-btn {
   border-radius: 8px !important;
   background: rgba(255,255,255,.018) !important;
   box-shadow: none !important;
-  font-size: 10px !important;
+  font-size: 11px !important;
 }
 body.il-product-page #view-tool .ash-studio {
   border-color: rgba(214,163,74,.32) !important;
@@ -1751,9 +1751,9 @@ body.il-product-page #body-analyze:not(.has-stock) > .fg-label {
 }
 body.il-product-page #body-analyze:not(.has-stock) > .fg-label span {
   font-family: "JetBrains Mono", ui-monospace, monospace !important;
-  font-size: 10px !important;
-  letter-spacing: .12em !important;
-  text-transform: uppercase !important;
+  font-size: 11px !important;
+  letter-spacing: .02em !important;
+  text-transform:none;
 }
 body.il-product-page #body-analyze:not(.has-stock) > .fg-label small { color: var(--il-faint) !important; }
 body.il-product-page #body-analyze:not(.has-stock) > #featured-grid {
@@ -1897,7 +1897,7 @@ body.il-product-page #view-tool .tf-tog {
   border-radius: 4px !important;
   background: transparent !important;
   box-shadow: none !important;
-  font-size: 10px !important;
+  font-size: 11px !important;
 }
 body.il-product-page #view-tool .act-btn.on,
 body.il-product-page #view-tool .tf-pill.on,
@@ -1942,9 +1942,9 @@ body.share-studio-open { overflow: hidden !important; }
 }
 .share-studio-kicker {
   color: #D6A34A;
-  font: 600 10px/1.3 "JetBrains Mono",ui-monospace,monospace;
-  letter-spacing: .14em;
-  text-transform: uppercase;
+  font: 600 12px/1.3 "JetBrains Mono",ui-monospace,monospace;
+  letter-spacing: .02em;
+  text-transform:none;
 }
 .share-studio-head h2 {
   margin: 5px 0 0;
@@ -1974,9 +1974,9 @@ body.share-studio-open { overflow: hidden !important; }
   display: block;
   margin-bottom: 8px;
   color: #8A9490;
-  font: 600 9px/1.2 "JetBrains Mono",ui-monospace,monospace;
-  letter-spacing: .12em;
-  text-transform: uppercase;
+  font: 600 11.5px/1.2 "JetBrains Mono",ui-monospace,monospace;
+  letter-spacing: .02em;
+  text-transform:none;
 }
 .share-studio-controls input {
   width: 100%;
@@ -1992,7 +1992,7 @@ body.share-studio-open { overflow: hidden !important; }
   display: block;
   margin-top: 8px;
   color: #68726E;
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1.55;
 }
 .share-studio-controls fieldset {
@@ -2020,7 +2020,7 @@ body.share-studio-open { overflow: hidden !important; }
   margin: 0 0 22px;
   padding: 14px 0;
   border-block: 1px solid rgba(224,231,226,.08);
-  font-size: 10px;
+  font-size: 11px;
 }
 .share-studio-spec span { color:#68726E; }
 .share-studio-spec strong { color:#B9C0BC; font-weight:550; text-align:right; }

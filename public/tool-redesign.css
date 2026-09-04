@@ -193,7 +193,7 @@ html[data-theme="dark"] #view-tool .app-section .acc-body,
 #view-tool .m-lbl,#view-tool .sb-group-label,#view-tool .asf-lbl{
   color:var(--t-text-3)!important;
   font:700 10px var(--mono)!important;
-  letter-spacing:.1em!important; text-transform:uppercase!important;
+  letter-spacing:.02em!important; text-transform:none;
 }
 #view-tool .m-val,#view-tool .asf-val,#view-tool strong{ color:var(--t-text)!important; }
 #view-tool .pos,#view-tool [class*="positive"]{ color:var(--t-pos)!important; }
@@ -213,7 +213,7 @@ html[data-theme="dark"] #view-tool .app-section .acc-body,
   background:var(--t-surface-3)!important;
   color:var(--t-gold)!important;
   font:700 10px var(--mono)!important;
-  letter-spacing:.09em!important; text-transform:uppercase!important;
+  letter-spacing:.02em!important; text-transform:none;
   padding:11px 14px!important;
   border-bottom:1px solid var(--t-line)!important;
 }
@@ -275,7 +275,7 @@ html[data-theme="dark"] #view-tool .app-section .acc-body,
 #view-tool .il-shell-kicker,
 #view-tool .ash-kicker{
   font:700 10px var(--mono)!important;
-  letter-spacing:.12em!important; text-transform:uppercase!important;
+  letter-spacing:.02em!important; text-transform:none;
   color:var(--t-text-3)!important;
 }
 /* Stats footer: tighten into a compact data ribbon */
@@ -301,6 +301,6 @@ html[data-theme="dark"] #view-tool .app-section .acc-body,
   border:0!important;
   color:var(--t-text)!important;
   font:700 12px var(--mono)!important;
-  letter-spacing:.12em!important; text-transform:uppercase!important;
+  letter-spacing:.02em!important; text-transform:none;
   padding:var(--t-s3) 0!important;
 }

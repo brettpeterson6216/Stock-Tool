@@ -295,8 +295,8 @@ nav#main-nav.il-static-main-nav {
 .il-auth-page .auth-eyebrow {
   color: var(--il-brass) !important;
   font: 700 11px/1.4 "Plus Jakarta Sans", sans-serif !important;
-  letter-spacing: .12em !important;
-  text-transform: uppercase;
+  letter-spacing: .02em !important;
+  text-transform:none;
 }
 #landing-page .il-landing-kicker::before { background: var(--il-green-bright) !important; box-shadow: 0 0 0 5px rgba(0, 169, 98, .1) !important; }
 #landing-page .il-landing-copy h1 {

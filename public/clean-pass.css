@@ -485,3 +485,187 @@ html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body.il-tool-active:not(#
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body.il-tool-active:not(#cp6) #view-tool nav.prime-side-global {
   margin-top: 14px !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LIGHT-MODE INK, MEASURED.
+
+   The sweep across thirteen routes found the same shape everywhere: zero
+   contrast failures in dark, several on every page in light. The cause is one
+   pattern repeated - a literal colour with !important and no light variant,
+   written when dark was the only theme that existed.
+
+   Verified off rendered pixels, not computed style:
+
+     footer a          1.02:1  rgba(240,238,232,.6) on cream (premium-revamp)
+     .ilm-overview-label 1.33:1  literal rgb(156,164,163) (lens-prime-match)
+     .eyebrow          3.26:1  var(--lp-gold) resolves too light to read
+     body links        4.08:1  gold on cream
+     .quick-tickers    3.97:1
+     .il-wordmark-b    4.06:1  --lpf-muted is too light on a light panel
+     .horizon-pill     4.41:1
+     .auth-eyebrow     4.45:1
+
+   Two readings that came back under 4.5 were NOT real and were left alone:
+   "Holding it back" measured 17.51:1 and the breadth label 18.26:1 once
+   cropped properly. Computed style had lied about both.
+
+   The values below were solved for, not guessed: #8a6216 and #5f6866 both
+   clear 4.5:1 against every light ground the site uses - #f3f0e8, #fbfaf6,
+   #ffffff and #efeae0 - with the worst case at 4.56 and 4.79.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root { --il-gold-ink: #d8a23d; --il-muted-ink: #929c9c; }
+html[data-theme="light"] body,
+html:not([data-theme="dark"]) body { --il-gold-ink: #8a6216; --il-muted-ink: #5f6866; }
+
+/* Footer: the link colour was a near-white literal, and static-polish.css
+   pinned the band itself to #08090a, so on the auth pages the footer stayed a
+   dark slab inside a light page. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) footer,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .footer-links {
+  background: var(--lp-bg, #070b0e) !important;
+  color: var(--il-muted-ink) !important;
+  -webkit-text-fill-color: currentColor !important;
+  border-top: 1px solid var(--lp-border, rgba(176,160,126,.16)) !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) footer a,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .footer-links a,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .site-footer a,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-footer a {
+  color: var(--il-muted-ink) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) footer a:hover {
+  color: var(--il-gold-ink) !important;
+}
+
+/* Eyebrows and kickers: gold on cream at the old value was 3.26:1. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .eyebrow,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .tagline,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .auth-eyebrow,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-landing-kicker,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .pill {
+  color: var(--il-gold-ink) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+/* Body copy links. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .content a,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .section a,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .wrap p a,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) main p a,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .hero-sub a {
+  color: var(--il-gold-ink) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+/* Muted labels that sat just under the line. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-wordmark-b,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilm-overview-label,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .quick-tickers button,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .horizon-pill,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-build {
+  color: var(--il-muted-ink) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+/* The landing market cards kept a dark panel in light mode, which is why the
+   breadth score read as dark ink on a dark ground at 1.02:1. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilm-card,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilm-gauge {
+  background: var(--lp-panel, #0a1115) !important;
+  border-color: var(--lp-border, rgba(176,160,126,.16)) !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilm-gauge strong,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilm-gauge span {
+  color: var(--lp-text, #f2eee5) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+/* The landing footer is a different component from the static-page footer and
+   kept its own literals. legacy-app.css has
+     html footer .f-logo, html[data-theme="dark"] footer .f-logo { #efe6d1 }
+   - the first half of that selector has no theme condition at all, so the
+     cream applied in light mode too and the mark rendered at 1.09:1 on cream. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .f-logo,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .f-logo em {
+  color: var(--lp-text, #f2eee5) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .f-copy,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-feedback-link,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .f-links a,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .f-col a {
+  color: var(--il-muted-ink) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+/* <small> inherits an 0.8 factor from the UA sheet, so an 11.5px parent still
+   produced 9.17px children after the floor was raised. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) small {
+  font-size: 11px !important;
+}
+
+/* Gold set as an <em> inside headings, and the second half of the wordmark,
+   both landed just under the line on light grounds. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) h1 em,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) h2 em,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .auth-card em,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .f-logo em {
+  color: var(--il-gold-ink) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .il-wordmark-b,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-wordmark-b {
+  color: var(--il-muted-ink) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+/* The build stamp is appended into .f-copy by product-system.js, so the only
+   rule that sized it was scoped to the terminal. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-build {
+  font-size: 11px !important;
+  color: var(--il-muted-ink) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+/* LensScore section headings: the supporting / holding-back pair were set in a
+   pale green and a pale gold that work on the dark canvas and disappear on the
+   light one. Measured against the rendered pixels once the right element was
+   isolated - a bare `h3` selector had been matching a wrapper, not the text. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .decision-section.caution h3 {
+  color: var(--il-gold-ink) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+/* Raising the micro tier off 10px made two tight rows wrap.
+
+   The market-sentiment card gives its head 233px of content width; "Market
+   sentiment" and the "Sector breadth" badge now measure ~105px and ~109px, so
+   at a 12px gap they fit with 10px to spare - but only if neither is allowed
+   to wrap and the badge is not squeezed. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilm-head {
+  gap: 6px !important;
+  min-width: 0 !important;
+  flex-wrap: nowrap !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilm-title {
+  white-space: nowrap !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilm-badge,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilm-status {
+  white-space: nowrap !important;
+  flex: 0 0 auto !important;
+  padding: 3px 7px !important;
+  font-size: 11px !important;
+}
+
+/* The calculator's two input columns fell out of alignment once a label needed
+   two lines. Reserve the second line for all of them instead. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .field label {
+  display: block !important;
+  min-height: 2.2em !important;
+  line-height: 1.1 !important;
+}

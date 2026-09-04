@@ -74,7 +74,7 @@ body.il-product-page #main-nav[data-view="home"] .nav-links {
 }
 body.il-product-page #main-nav[data-view="home"] .nav-tab {
   padding: 0 clamp(7px, .85vw, 12px) !important;
-  font-size: clamp(8px, .75vw, 10px) !important;
+  font-size: clamp(11px, .75vw, 11px) !important;
   white-space: nowrap !important;
 }
 body.il-product-page #main-nav[data-view="home"] .nav-search {
@@ -120,7 +120,7 @@ body.il-product-page #landing-page h1.il-display .il-d2 { display: block !import
 body.il-product-page #landing-page .il-landing-copy > p {
   max-width: 390px !important;
   margin-top: clamp(10px, 1.1vw, 17px) !important;
-  font-size: clamp(9px, .82vw, 12px) !important;
+  font-size: clamp(11px, .82vw, 12px) !important;
   line-height: 1.55 !important;
 }
 body.il-product-page #landing-page .il-landing-actions {
@@ -131,16 +131,16 @@ body.il-product-page #landing-page .il-landing-actions > * {
   height: clamp(30px, 3.1vw, 40px) !important;
   min-width: clamp(116px, 13.4vw, 150px) !important;
   padding: 0 14px !important;
-  font-size: clamp(7px, .67vw, 10px) !important;
+  font-size: clamp(11px, .67vw, 11px) !important;
   border-radius: 4px !important;
 }
 body.il-product-page #landing-page .il-trust {
   margin-top: clamp(17px, 2vw, 28px) !important;
   gap: 14px !important;
-  font-size: clamp(7px, .63vw, 9px) !important;
+  font-size: clamp(11px, .63vw, 11px) !important;
 }
 body.il-product-page #landing-page .il-trust-lead {
-  font-size: clamp(6px, .55vw, 8px) !important;
+  font-size: clamp(11px, .55vw, 11px) !important;
 }
 
 body.il-product-page #landing-page .il-landing-preview {
@@ -181,8 +181,8 @@ body.il-product-page #landing-page .il-rail-item {
   column-gap: clamp(6px, .85vw, 10px) !important;
 }
 body.il-product-page #landing-page .il-rail-item > i { font-size: clamp(17px, 1.8vw, 22px) !important; }
-body.il-product-page #landing-page .il-rail-item > b { font-size: clamp(8px, .78vw, 11px) !important; }
-body.il-product-page #landing-page .il-rail-item > span { font-size: clamp(6.8px, .63vw, 8.5px) !important; line-height: 1.5 !important; }
+body.il-product-page #landing-page .il-rail-item > b { font-size: clamp(11px, .78vw, 11px) !important; }
+body.il-product-page #landing-page .il-rail-item > span { font-size: clamp(11px, .63vw, 11px) !important; line-height: 1.5 !important; }
 
 body.il-product-page #landing-page .il-market-strip {
   width: calc(100% - clamp(38px, 4.2vw, 64px)) !important;
@@ -193,31 +193,31 @@ body.il-product-page #landing-page .ilm-card {
   min-height: clamp(100px, 11.5vw, 150px) !important;
   padding: clamp(10px, 1.15vw, 15px) clamp(12px, 1.45vw, 20px) !important;
 }
-body.il-product-page #landing-page .ilm-title { font-size: clamp(7px, .62vw, 9px) !important; }
-body.il-product-page #landing-page .ilm-row { min-height: 20px !important; font-size: clamp(7px, .62vw, 9px) !important; }
-body.il-product-page #landing-page .ilm-soon-copy { font-size: clamp(7px, .66vw, 9px) !important; line-height: 1.5 !important; }
+body.il-product-page #landing-page .ilm-title { font-size: clamp(11px, .62vw, 11px) !important; }
+body.il-product-page #landing-page .ilm-row { min-height: 20px !important; font-size: clamp(11px, .62vw, 11px) !important; }
+body.il-product-page #landing-page .ilm-soon-copy { font-size: clamp(11px, .66vw, 11px) !important; line-height: 1.5 !important; }
 body.il-product-page #landing-page .ilm-reference-links > a {
   display:grid;grid-template-columns:1fr auto;gap:2px 8px;padding:7px 0;border-top:1px solid rgba(170,155,124,.1);text-decoration:none;
 }
-body.il-product-page #landing-page .ilm-reference-links > a strong { color:#dcd9d1;font-size:8px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
-body.il-product-page #landing-page .ilm-reference-links > a span { grid-column:2;color:#7f8989;font-size:7px; }
-body.il-product-page #landing-page .ilm-reference-links .ilm-more { margin:0;padding:0;border:0;color:var(--lpm-gold);font-size:7px; }
+body.il-product-page #landing-page .ilm-reference-links > a strong { color:#dcd9d1;font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+body.il-product-page #landing-page .ilm-reference-links > a span { grid-column:2;color:#7f8989;font-size:11px; }
+body.il-product-page #landing-page .ilm-reference-links .ilm-more { margin:0;padding:0;border:0;color:var(--lpm-gold);font-size:11px; }
 
 /* Live landing terminal: the four panels mirror the approved reference while
    rendering provider observations instead of polished placeholder numbers. */
 body.il-product-page #landing-page .ilm-head { min-height: 16px; align-items:center; }
 body.il-product-page #landing-page .ilm-status,
 body.il-product-page #landing-page .ilm-badge.live {
-  color:#7f8989;font-size:6px;line-height:1;text-transform:uppercase;letter-spacing:.08em;
+  color:#7f8989;font-size:11px;line-height:1;text-transform:none;letter-spacing:.02em;
 }
 body.il-product-page #landing-page .ilm-overview-label {
-  margin-top:5px;color:#9ca4a3;font-size:7px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;
+  margin-top:5px;color:#9ca4a3;font-size:11px;font-weight:600;text-transform:none;letter-spacing:.02em;
 }
 body.il-product-page #landing-page .ilm-overview-quote { display:flex;align-items:baseline;gap:8px;margin-top:4px; }
 body.il-product-page #landing-page .ilm-overview-quote strong {
   color:var(--lpm-cream);font:400 clamp(17px,1.65vw,23px)/1 var(--lpf-serif);letter-spacing:-.02em;
 }
-body.il-product-page #landing-page .ilm-overview-quote span { font-size:8px;font-weight:700; }
+body.il-product-page #landing-page .ilm-overview-quote span { font-size:11px;font-weight:700; }
 body.il-product-page #landing-page .ilm-market-spark { display:block;width:100%;height:48px;margin-top:3px;overflow:visible; }
 body.il-product-page #landing-page .ilm-market-line { fill:none;stroke:var(--lpm-gold);stroke-width:1.5;vector-effect:non-scaling-stroke; }
 body.il-product-page #landing-page .ilm-market-fill { fill:rgba(217,163,62,.08);stroke:none; }
@@ -226,12 +226,12 @@ body.il-product-page #landing-page .is-dn { color:var(--lpm-red)!important; }
 
 body.il-product-page #landing-page .ilm-sector-list { display:grid;gap:4px;margin-top:5px; }
 body.il-product-page #landing-page .ilm-sector-row { display:grid;grid-template-columns:78px 1fr 42px;gap:7px;align-items:center;min-height:8px; }
-body.il-product-page #landing-page .ilm-sector-row>span { color:#b6bcba;font-size:6.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+body.il-product-page #landing-page .ilm-sector-row>span { color:#b6bcba;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
 body.il-product-page #landing-page .ilm-sector-row>i { display:block;height:4px;background:rgba(140,151,148,.1);overflow:hidden; }
 body.il-product-page #landing-page .ilm-sector-row>i>b { display:block;height:100%;min-width:5px; }
 body.il-product-page #landing-page .ilm-sector-row>i>b.is-up { background:var(--lpm-green); }
 body.il-product-page #landing-page .ilm-sector-row>i>b.is-dn { background:var(--lpm-red); }
-body.il-product-page #landing-page .ilm-sector-row>em { font-size:6.5px;font-style:normal;text-align:right; }
+body.il-product-page #landing-page .ilm-sector-row>em { font-size:11px;font-style:normal;text-align:right; }
 
 body.il-product-page #landing-page .ilm-gauge-wrap { display:flex;align-items:center;justify-content:center;gap:13px;height:82px; }
 body.il-product-page #landing-page .ilm-gauge {
@@ -243,19 +243,19 @@ body.il-product-page #landing-page .ilm-gauge>div {
   width:52px;height:52px;border-radius:50%;display:grid;place-content:center;text-align:center;background:#091115;transform:rotate(45deg);
 }
 body.il-product-page #landing-page .ilm-gauge strong { color:var(--lpm-cream);font:400 17px/1 var(--lpf-serif); }
-body.il-product-page #landing-page .ilm-gauge span { margin-top:2px;color:#8c9695;font-size:6px;text-transform:uppercase; }
+body.il-product-page #landing-page .ilm-gauge span { margin-top:2px;color:#8c9695;font-size:11px;text-transform:none; }
 body.il-product-page #landing-page .ilm-breadth-copy { display:grid;gap:2px; }
 body.il-product-page #landing-page .ilm-breadth-copy strong { color:var(--lpm-green);font-size:11px; }
-body.il-product-page #landing-page .ilm-breadth-copy span { max-width:56px;color:#87908f;font-size:6.5px;line-height:1.35; }
+body.il-product-page #landing-page .ilm-breadth-copy span { max-width:56px;color:#87908f;font-size:11px;line-height:1.35; }
 
 body.il-product-page #landing-page .ilm-news-list { display:grid;margin-top:4px; }
 body.il-product-page #landing-page .ilm-news-list>a {
   display:grid;grid-template-columns:1fr auto;gap:3px 7px;min-height:25px;padding:5px 0;border-top:1px solid rgba(170,155,124,.1);text-decoration:none;
 }
-body.il-product-page #landing-page .ilm-news-list>a strong { color:#d4d3cd;font-size:6.7px;font-weight:500;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
-body.il-product-page #landing-page .ilm-news-list>a span { color:#778080;font-size:6px;white-space:nowrap; }
+body.il-product-page #landing-page .ilm-news-list>a strong { color:#d4d3cd;font-size:11px;font-weight:500;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+body.il-product-page #landing-page .ilm-news-list>a span { color:#778080;font-size:11px;white-space:nowrap; }
 body.il-product-page #landing-page .ilm-loading-line { display:block;height:8px;margin:7px 0;border-radius:2px;background:linear-gradient(90deg,rgba(130,139,137,.07),rgba(170,178,174,.14),rgba(130,139,137,.07));background-size:200% 100%;animation:lpmLoad 1.4s linear infinite; }
-body.il-product-page #landing-page .ilm-unavailable { margin:18px 0;color:#788181;font-size:7px; }
+body.il-product-page #landing-page .ilm-unavailable { margin:18px 0;color:#788181;font-size:11px; }
 @keyframes lpmLoad { to { background-position:-200% 0; } }
 
 /* Keep the remainder below the first-frame product proof, as in the concept. */
@@ -287,7 +287,7 @@ body.il-product-page #market-page .prime-dash-nav a {
   height: clamp(31px, 3.2vw, 38px) !important;
   padding: 0 clamp(8px, .9vw, 12px) !important;
   gap: clamp(7px, .85vw, 12px) !important;
-  font-size: clamp(8px, .76vw, 11px) !important;
+  font-size: clamp(11px, .76vw, 11px) !important;
 }
 body.il-product-page #market-page .prime-dash-nav a i { font-size: clamp(13px, 1.3vw, 17px) !important; }
 body.il-product-page #market-page .hs-main { padding: 0 clamp(12px, 1.3vw, 18px) 18px !important; }
@@ -297,7 +297,7 @@ body.il-product-page #market-page .prime-dashboard-head {
   gap: 8px !important;
 }
 body.il-product-page #market-page .prime-dashboard-greeting h1 { font-size: clamp(19px, 1.9vw, 25px) !important; }
-body.il-product-page #market-page .prime-dashboard-greeting p { font-size: clamp(8px, .72vw, 10px) !important; }
+body.il-product-page #market-page .prime-dashboard-greeting p { font-size: clamp(11px, .72vw, 11px) !important; }
 body.il-product-page #market-page .prime-dashboard-status,
 body.il-product-page #market-page .prime-dashboard-index { height: 42px !important; padding: 6px 9px !important; }
 body.il-product-page #market-page .home-grid {
@@ -311,7 +311,7 @@ body.il-product-page #market-page .hc { border-radius: 4px !important; }
 body.il-product-page #market-page .hg-market .mo-body { max-height: calc(100% - 42px) !important; }
 body.il-product-page #market-page .mo-header { padding: 10px 12px 5px !important; }
 body.il-product-page #market-page .mo-title,
-body.il-product-page #market-page .hc-title { font-size: clamp(7px, .68vw, 9px) !important; }
+body.il-product-page #market-page .hc-title { font-size: clamp(11px, .68vw, 11px) !important; }
 body.il-product-page #market-page .mo-idx-price { font-size: clamp(17px, 1.65vw, 22px) !important; }
 body.il-product-page #market-page .home-lower,
 body.il-product-page #market-page .home-feat-strip,
@@ -424,18 +424,18 @@ body.il-product-page #market-page .home-guide-showcase { display: none !importan
   .prime-mobile-hero-card .pmhc-quote { display:flex;align-items:center;justify-content:space-between; }
   .prime-mobile-hero-card .pmhc-quote div { display:flex;align-items:baseline;gap:7px; }
   .prime-mobile-hero-card .pmhc-quote strong { font:400 14px/1 var(--lpf-serif);color:var(--lpm-cream); }
-  .prime-mobile-hero-card .pmhc-quote span { font-size:7px;color:#9da5a4; }
+  .prime-mobile-hero-card .pmhc-quote span { font-size:11px;color:#9da5a4; }
   .prime-mobile-hero-card .pmhc-quote i { color:#7f8888;font-size:11px; }
   .prime-mobile-hero-card .pmhc-price { display:flex;align-items:baseline;gap:7px;margin-top:7px; }
   .prime-mobile-hero-card .pmhc-price strong { font:400 23px/1 var(--lpf-serif);color:var(--lpm-cream); }
-  .prime-mobile-hero-card .pmhc-price span { color:var(--lpm-green);font-size:8px; }
+  .prime-mobile-hero-card .pmhc-price span { color:var(--lpm-green);font-size:11px; }
   .prime-mobile-hero-card .pmhc-stats { display:grid;grid-template-columns:1fr 1fr;margin-top:10px; }
   .prime-mobile-hero-card .pmhc-stats>div { border-top:1px solid rgba(170,155,124,.12);padding-top:7px; }
-  .prime-mobile-hero-card .pmhc-stats span { display:block;color:#747e7f;font-size:6px;text-transform:uppercase;letter-spacing:.06em; }
+  .prime-mobile-hero-card .pmhc-stats span { display:block;color:#747e7f;font-size:11px;text-transform:none;letter-spacing:.02em; }
   .prime-mobile-hero-card .pmhc-stats strong { display:block;margin-top:3px;color:var(--lpm-cream);font:400 11px/1.1 var(--lpf-serif); }
   .prime-mobile-hero-card .pmhc-stats>div:last-child strong { color:var(--lpm-green); }
   .prime-mobile-hero-card .pmhc-chart { display:block;width:100%;height:86px;margin-top:2px; }
-  .prime-mobile-hero-card .pmhc-range { display:grid;grid-template-columns:repeat(6,1fr);align-items:center;color:#737d7e;font-size:6px;text-transform:uppercase;text-align:center; }
+  .prime-mobile-hero-card .pmhc-range { display:grid;grid-template-columns:repeat(6,1fr);align-items:center;color:#737d7e;font-size:11px;text-transform:none;text-align:center; }
   .prime-mobile-hero-card .pmhc-range strong { color:var(--lpm-cream);padding-bottom:4px;border-bottom:1px solid var(--lpm-gold); }
   html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .il-rail {
     order: 3 !important; display:grid !important; grid-template-columns:1fr !important; width:100% !important; min-height:0 !important;
@@ -445,8 +445,8 @@ body.il-product-page #market-page .home-guide-showcase { display: none !importan
     grid-template-rows:auto auto !important;column-gap:8px !important;row-gap:2px !important;border-right:0 !important;border-bottom:1px solid var(--lpm-line) !important;
   }
   html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .il-rail-item>i { grid-row:1/3 !important;font-size:17px !important; }
-  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .il-rail-item>b { font-size:9px !important; }
-  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .il-rail-item>span { font-size:7px !important;line-height:1.45 !important; }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .il-rail-item>b { font-size:11.5px !important; }
+  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .il-rail-item>span { font-size:11px !important;line-height:1.45 !important; }
 }
 
 /*
@@ -483,7 +483,7 @@ body.il-product-page #market-page .home-guide-showcase { display: none !importan
   }
   html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #main-nav[data-view="home"] .nav-tab {
     padding-inline: 8px !important;
-    font-size: clamp(8.5px, .82vw, 10px) !important;
+    font-size: clamp(11px, .82vw, 11px) !important;
   }
   html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #main-nav[data-view="home"] .theme-toggle,
   html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #main-nav[data-view="home"] .theme-toggle-track { width:34px !important;min-width:34px !important; }
@@ -524,7 +524,7 @@ body.il-product-page #market-page .home-guide-showcase { display: none !importan
   html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .il-landing-copy > p {
     max-width: 330px !important;
     margin-top: clamp(15px, 1.15vw, 17px) !important;
-    font-size: clamp(9.5px, .82vw, 12px) !important;
+    font-size: clamp(11px, .82vw, 12px) !important;
     line-height: 1.55 !important;
     color: var(--lpm-muted) !important;
   }
@@ -535,14 +535,14 @@ body.il-product-page #market-page .home-guide-showcase { display: none !importan
     height: clamp(30px, 3vw, 40px) !important;
     min-height: clamp(30px, 3vw, 40px) !important;
     min-width: clamp(112px, 12.5vw, 150px) !important;
-    font-size: clamp(7px, .67vw, 10px) !important;
+    font-size: clamp(11px, .67vw, 11px) !important;
   }
   html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .il-trust {
     width: clamp(340px, 33vw, 430px) !important;
     max-width: clamp(340px, 33vw, 430px) !important;
     margin-top: clamp(20px, 1.75vw, 26px) !important;
     gap: clamp(9px, 1vw, 14px) !important;
-    font-size: clamp(6.5px, .62vw, 9px) !important;
+    font-size: clamp(11px, .62vw, 11px) !important;
     color: #7d8788 !important;
   }
   html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .il-trust-lead {

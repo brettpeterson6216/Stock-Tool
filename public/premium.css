@@ -825,9 +825,9 @@ html[data-theme="dark"] body::after{
   /* ── Stat chips: slim data strip, not a card wall ────────────────────────── */
   #view-tool .metrics-grid{ gap:8px!important; }
   #view-tool .metric-card{ padding:8px 12px!important; border-radius: 8px !important; }
-  #view-tool .m-lbl{ font-size: 10px !important; margin-bottom:3px!important; }
+  #view-tool .m-lbl{ font-size: 11px !important; margin-bottom:3px!important; }
   #view-tool .m-val{ font-size: 15px !important; }
-  #view-tool .m-sub{ font-size: 10px !important; }
+  #view-tool .m-sub{ font-size: 11px !important; }
 
   /* ── Calm hover: no lift-off on every panel (denser = quieter) ───────────── */
   #view-tool .panel-box:hover,
@@ -837,20 +837,20 @@ html[data-theme="dark"] body::after{
 
   /* ── Bottom quote strip: slim ────────────────────────────────────────────── */
   #app-stats-footer{ padding:1px 0!important; }
-  #app-stats-footer .asf-lbl{ font-size: 10px !important; }
+  #app-stats-footer .asf-lbl{ font-size: 11px !important; }
   #app-stats-footer .asf-val{ font-size: 11px !important; }
 
   /* ── Tables: pro density across every tab ────────────────────────────────── */
   #view-tool .fin-table th,#view-tool .earn-table th,#view-tool .inst-table th,
-  #view-tool .cmp-table th{ padding:5px 10px!important; font-size: 10px !important; }
+  #view-tool .cmp-table th{ padding:5px 10px!important; font-size: 11px !important; }
   #view-tool .fin-table td,#view-tool .earn-table td,#view-tool .inst-table td,
   #view-tool .cmp-table td{ padding:5px 10px!important; font-size: 12px !important; }
-  #view-tool .scr-table th{ padding:5px 9px!important; font-size: 10px !important; }
+  #view-tool .scr-table th{ padding:5px 9px!important; font-size: 11px !important; }
   #view-tool .scr-table td{ padding:5px 9px!important; font-size: 12px !important; }
 
   /* ── Model inputs: compact form grid ─────────────────────────────────────── */
   #view-tool .fc-input,#view-tool .fc-select{ padding:7px 9px!important; font-size: 12px !important; }
-  #view-tool .fc-label{ font-size: 10px !important; margin-bottom:3px!important; }
+  #view-tool .fc-label{ font-size: 11px !important; margin-bottom:3px!important; }
   #view-tool .btn-run{ padding:9px 16px!important; font-size: 13px !important; }
 
   /* ── Empty state: invitation, not a billboard ────────────────────────────── */
@@ -859,7 +859,7 @@ html[data-theme="dark"] body::after{
   #view-tool .tw-sub{ font-size: 13px !important; }
 
   /* ── Sidebar cards match main density ────────────────────────────────────── */
-  #view-tool .dash-sidebar .panel-box-title{ font-size: 10px !important; margin-bottom:.5rem!important; }
+  #view-tool .dash-sidebar .panel-box-title{ font-size: 11px !important; margin-bottom:.5rem!important; }
 }
 
 /* Wide screens: use the room — wider sidebar, taller primary chart */
@@ -1332,7 +1332,7 @@ html[data-theme="dark"] .il-quick-search{ background:rgba(22,26,31,.8); }
 .il-quick-search i{ color:var(--brand-gold); font-size: 13px; }
 .il-quick-search input{
   width:110px; border:0; outline:none; background:transparent;
-  color:var(--fp-text); font:700 12px var(--mono); text-transform:uppercase; letter-spacing:.04em;
+  color:var(--fp-text); font:700 12px var(--mono); text-transform:none; letter-spacing:.02em;
 }
 .il-quick-search input::placeholder{ color:var(--fp-text-3); font-weight: 600; text-transform:none; letter-spacing:0; }
 .il-quick-search:focus-within{ border-color:var(--brand-gold)!important; box-shadow:0 0 0 3px var(--gold-tint); }
@@ -1442,7 +1442,7 @@ html[data-theme="dark"] .il-offer-card span{ color:rgba(230,224,210,.6)!importan
 
 /* ── Valuation range bar ────────────────────────────────────────────────────── */
 .il-range-bar{ margin:4px 0 16px; }
-.il-rb-title{ font:700 10px var(--mono); letter-spacing:.1em; text-transform:uppercase; color:var(--fp-text-3); margin-bottom:10px; }
+.il-rb-title{ font:700 10px var(--mono); letter-spacing:.02em; text-transform:none; color:var(--fp-text-3); margin-bottom:10px; }
 .il-rb-track{ position:relative; height:8px; border-radius: 4px; background:color-mix(in srgb,var(--fp-border) 60%,transparent); }
 .il-rb-fill{ position:absolute; top:0; bottom:0; border-radius: 4px; background:linear-gradient(90deg,#d96a70,#D9B35E,#46b184); opacity:.55; }
 .il-rb-dot{ position:absolute; top:50%; width:13px; height:13px; border-radius:50%; transform:translate(-50%,-50%); border:2.5px solid #fff; box-shadow:0 1px 4px rgba(0,0,0,.3); }
@@ -1465,7 +1465,7 @@ html[data-theme="dark"] .il-rb-labels .gold{ color:var(--brand-gold); }
 html[data-theme="dark"] .il-cov-step:hover{ background:rgba(230,190,110,.1); }
 .il-cov-step i{ font-size: 15px; color:var(--fp-text-3); }
 .il-cov-step.done i{ color:#2e9e6f; }
-.il-cov-step span{ margin-left:auto; font:700 10px var(--mono); text-transform:uppercase; letter-spacing:.06em; color:var(--fp-text-3); }
+.il-cov-step span{ margin-left:auto; font:700 10px var(--mono); text-transform:none; letter-spacing:.02em; color:var(--fp-text-3); }
 .il-cov-step.done span{ color:#2e9e6f; }
 .il-cov-src{ display:flex; flex-wrap:wrap; gap:6px 12px; padding-top:9px; border-top:1px solid var(--fp-border); }
 .il-cov-src span{ display:inline-flex; align-items:center; gap:5px; color:var(--fp-text-3); font:600 11px var(--sans); }

@@ -232,10 +232,10 @@ h1.hero-h1 em {
   align-items: center;
   gap: 9px;
   font-family: var(--il-sans) !important;
-  font-size: 10px !important;
+  font-size: 11px !important;
   font-weight: 600 !important;
-  letter-spacing: .17em !important;
-  text-transform: uppercase !important;
+  letter-spacing: .02em !important;
+  text-transform:none;
   color: var(--il-brass) !important;
   padding: 6px 13px 6px 11px !important;
   border: 1px solid var(--il-line-gold) !important;
@@ -660,7 +660,7 @@ a.nav-tab + a.nav-tab::before,
   border: 1px solid rgba(62, 201, 139, .3) !important;
   background: rgba(62, 201, 139, .12) !important;
   color: var(--il-green-bright) !important;
-  font-size: 10px !important;
+  font-size: 11px !important;
   letter-spacing: .1em !important;
   font-weight: 700 !important;
 }
@@ -875,7 +875,7 @@ a.nav-tab + a.nav-tab::before,
 #landing-page .il-hero-mock .ihm-lbl {
   color: var(--il-brass) !important;
   letter-spacing: .14em !important;
-  font-size: 10px !important;
+  font-size: 11px !important;
   font-weight: 700 !important;
 }
 
@@ -895,8 +895,8 @@ a.nav-tab + a.nav-tab::before,
   margin-left: auto !important;
   margin-right: auto !important;
   font-size: 11px !important;
-  letter-spacing: .08em !important;
-  text-transform: uppercase !important;
+  letter-spacing: .02em !important;
+  text-transform:none;
 }
 
 #landing-page .il-preview-caption span { color: var(--il-faint) !important; }
@@ -1064,9 +1064,9 @@ a.nav-tab + a.nav-tab::before,
 
 #landing-page .il-rail-label {
   color: var(--il-faint) !important;
-  letter-spacing: .16em !important;
-  text-transform: uppercase !important;
-  font-size: 10px !important;
+  letter-spacing: .02em !important;
+  text-transform:none;
+  font-size: 11px !important;
 }
 
 /* ───────────────────────────────────────────────────────────────────────────
@@ -1110,9 +1110,9 @@ a.nav-tab + a.nav-tab::before,
 
 .hsb-label, .app-sidebar-label {
   color: var(--il-faint) !important;
-  letter-spacing: .16em !important;
-  text-transform: uppercase !important;
-  font-size: 10px !important;
+  letter-spacing: .02em !important;
+  text-transform:none;
+  font-size: 11px !important;
   font-weight: 700 !important;
 }
 
@@ -1155,9 +1155,9 @@ a.nav-tab + a.nav-tab::before,
 
 .metric-lbl, .m-lbl, .metric-label {
   color: var(--il-faint) !important;
-  letter-spacing: .1em !important;
-  text-transform: uppercase !important;
-  font-size: 10px !important;
+  letter-spacing: .02em !important;
+  text-transform:none;
+  font-size: 11px !important;
   font-weight: 600 !important;
 }
 
@@ -1181,10 +1181,10 @@ table.data-table, table.fin-table, .tbl, table {
 table thead th, .tbl thead th {
   background: var(--il-surface-2) !important;
   color: var(--il-faint) !important;
-  font-size: 10px !important;
+  font-size: 11px !important;
   font-weight: 700 !important;
-  letter-spacing: .11em !important;
-  text-transform: uppercase !important;
+  letter-spacing: .02em !important;
+  text-transform:none;
   border-bottom: 1px solid var(--il-line-strong) !important;
   position: sticky;
   top: 0;
@@ -1476,10 +1476,10 @@ body.il-lens-page .eyebrow {
   display: inline-flex !important;
   align-items: center;
   gap: 9px;
-  font-size: 10px !important;
+  font-size: 11px !important;
   font-weight: 600 !important;
-  letter-spacing: .17em !important;
-  text-transform: uppercase !important;
+  letter-spacing: .02em !important;
+  text-transform:none;
   color: var(--il-brass) !important;
   padding: 6px 14px 6px 11px !important;
   border: 1px solid var(--il-line-gold) !important;
@@ -1667,9 +1667,9 @@ body.il-static-page .static-rail a.active {
 
 body.il-static-page .static-rail-label {
   color: var(--il-faint) !important;
-  letter-spacing: .16em !important;
-  text-transform: uppercase !important;
-  font-size: 10px !important;
+  letter-spacing: .02em !important;
+  text-transform:none;
+  font-size: 11px !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -1686,8 +1686,8 @@ body.il-auth-page label {
   color: var(--il-faint) !important;
   font-size: 11px !important;
   font-weight: 600 !important;
-  letter-spacing: .09em !important;
-  text-transform: uppercase !important;
+  letter-spacing: .02em !important;
+  text-transform:none;
 }
 
 body.il-auth-page input {
@@ -2142,10 +2142,10 @@ nav#main-nav, nav.il-global-nav { z-index: 100 !important; }
 
 .sb-group-label {
   color: var(--il-faint) !important;
-  font-size: 10px !important;
+  font-size: 11px !important;
   font-weight: 700 !important;
-  letter-spacing: .18em !important;
-  text-transform: uppercase !important;
+  letter-spacing: .02em !important;
+  text-transform:none;
 }
 
 .sb-item {
@@ -2204,10 +2204,10 @@ nav#main-nav, nav.il-global-nav { z-index: 100 !important; }
 
 .sec-label, .app-section-hdr .sec-label {
   color: var(--il-brass) !important;
-  font-size: 10px !important;
+  font-size: 11px !important;
   font-weight: 700 !important;
-  letter-spacing: .18em !important;
-  text-transform: uppercase !important;
+  letter-spacing: .02em !important;
+  text-transform:none;
 }
 
 .sec-h2 {
@@ -2280,9 +2280,9 @@ html:not([data-theme="dark"]) .edu-formula { background: var(--il-surface-3) !im
 
 .edu-kicker {
   color: var(--il-brass) !important;
-  letter-spacing: .16em !important;
-  text-transform: uppercase !important;
-  font-size: 10px !important;
+  letter-spacing: .02em !important;
+  text-transform:none;
+  font-size: 11px !important;
   font-weight: 700 !important;
 }
 
@@ -2327,7 +2327,7 @@ html:not([data-theme="dark"]) .edu-formula { background: var(--il-surface-3) !im
   border: 1px solid var(--il-line) !important;
   background: var(--il-surface-2) !important;
   color: var(--il-muted) !important;
-  font-size: 10px !important;
+  font-size: 11px !important;
   letter-spacing: .06em !important;
 }
 
@@ -2348,10 +2348,10 @@ html:not([data-theme="dark"]) .edu-formula { background: var(--il-surface-3) !im
 
 .asf-l {
   color: var(--il-faint) !important;
-  font-size: 10px !important;
+  font-size: 11px !important;
   font-weight: 600 !important;
-  letter-spacing: .12em !important;
-  text-transform: uppercase !important;
+  letter-spacing: .02em !important;
+  text-transform:none;
 }
 
 .asf-v {
@@ -2460,10 +2460,10 @@ html:not([data-theme="dark"]) .ticker-input {
 
 .fc-label, .fg-label {
   color: var(--il-faint) !important;
-  font-size: 10px !important;
+  font-size: 11px !important;
   font-weight: 600 !important;
-  letter-spacing: .12em !important;
-  text-transform: uppercase !important;
+  letter-spacing: .02em !important;
+  text-transform:none;
 }
 
 /* ── Data tables ───────────────────────────────────────────────────────────── */
@@ -2476,10 +2476,10 @@ html:not([data-theme="dark"]) .ticker-input {
 .scr-table th, .cmp-table th, .wl-table th {
   background: var(--il-surface-2) !important;
   color: var(--il-faint) !important;
-  font-size: 10px !important;
+  font-size: 11px !important;
   font-weight: 700 !important;
-  letter-spacing: .12em !important;
-  text-transform: uppercase !important;
+  letter-spacing: .02em !important;
+  text-transform:none;
   border-bottom: 1px solid var(--il-line-strong) !important;
 }
 
@@ -2512,9 +2512,9 @@ html:not([data-theme="dark"]) .ticker-input {
 
 .tw-kicker {
   color: var(--il-brass) !important;
-  letter-spacing: .16em !important;
-  text-transform: uppercase !important;
-  font-size: 10px !important;
+  letter-spacing: .02em !important;
+  text-transform:none;
+  font-size: 11px !important;
   font-weight: 700 !important;
 }
 

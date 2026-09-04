@@ -459,7 +459,7 @@ html[data-theme="dark"] .cta p{
 /* ═══ About-section left rail on static pages (2026-07-13) ═══ */
 .static-rail{position:fixed;left:18px;top:92px;z-index:40;width:176px;display:flex;flex-direction:column;gap:3px;padding:14px 12px;border:1px solid rgba(120,86,30,.16);border-radius: 8px;background:rgba(255,255,255,.75);backdrop-filter:blur(14px);box-shadow:0 1px 2px rgba(40,28,8,.05),0 10px 30px rgba(40,28,8,.09);}
 html[data-theme="dark"] .static-rail{background:linear-gradient(180deg,#171411,#12100D);border-color:rgba(217,179,94,.16);}
-.static-rail-label{font:700 10px 'Plus Jakarta Sans',Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#A86E15;margin:0 0 7px 6px;}
+.static-rail-label{font:700 10px 'Plus Jakarta Sans',Arial,sans-serif;letter-spacing:.02em;text-transform:none;color:#A86E15;margin:0 0 7px 6px;}
 html[data-theme="dark"] .static-rail-label{color:#F5CC63;}
 .static-rail a{display:block;padding:.52rem .65rem;border-radius: 8px;font:600 12px 'Plus Jakarta Sans',Arial,sans-serif;color:#514A3F;text-decoration:none;transition:background .14s,color .14s;}
 html[data-theme="dark"] .static-rail a{color:rgba(238,233,224,.72);}

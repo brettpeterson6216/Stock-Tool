@@ -67,7 +67,7 @@
   height: 70px !important;
   min-height: 70px !important;
   padding: 0 13px !important;
-  font-size: 10.5px !important;
+  font-size: 11px !important;
   font-weight: 560 !important;
   letter-spacing: .01em !important;
 }
@@ -78,7 +78,7 @@
   background: rgba(255,255,255,.018) !important;
 }
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #main-nav[data-view="home"] .nav-search input {
-  font-size: 10.5px !important;
+  font-size: 11px !important;
 }
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #main-nav[data-view="home"] .theme-toggle {
   transform: scale(.88);
@@ -88,7 +88,7 @@
   min-height: 36px !important;
   padding-inline: 15px !important;
   border-radius: 4px !important;
-  font-size: 10.5px !important;
+  font-size: 11px !important;
 }
 
 /* ── Reference-faithful landing composition ─────────────────────────── */
@@ -132,9 +132,9 @@
   display: none !important;
   margin-bottom: 17px !important;
   color: var(--prime-gold) !important;
-  font: 650 9px/1.2 "JetBrains Mono", ui-monospace, monospace !important;
-  letter-spacing: .17em !important;
-  text-transform: uppercase !important;
+  font: 650 11.5px/1.2 "JetBrains Mono", ui-monospace, monospace !important;
+  letter-spacing: .02em !important;
+  text-transform:none;
 }
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #landing-page h1.il-display {
   max-width: 500px !important;
@@ -171,7 +171,7 @@
   min-height: 42px !important;
   padding: 0 20px !important;
   border-radius: 4px !important;
-  font-size: 10px !important;
+  font-size: 11px !important;
   letter-spacing: .02em !important;
   box-shadow: none !important;
 }
@@ -184,14 +184,14 @@
   gap: 11px !important;
   margin: 24px 0 0 !important;
   color: #707b77 !important;
-  font-size: 9px !important;
+  font-size: 11.5px !important;
   letter-spacing: .02em !important;
 }
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #landing-page .il-trust-lead {
   color: #9aa39f !important;
-  font: 600 8px/1.2 "JetBrains Mono", ui-monospace, monospace !important;
-  letter-spacing: .12em !important;
-  text-transform: uppercase !important;
+  font: 600 11px/1.2 "JetBrains Mono", ui-monospace, monospace !important;
+  letter-spacing: .02em !important;
+  text-transform:none;
 }
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #landing-page .il-offer-card {
   display: none !important;
@@ -228,9 +228,9 @@
 }
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #landing-page .il-preview-caption span,
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #landing-page .il-preview-caption strong {
-  font: 600 8px/1 "JetBrains Mono", ui-monospace, monospace !important;
-  letter-spacing: .13em !important;
-  text-transform: uppercase !important;
+  font: 600 11px/1 "JetBrains Mono", ui-monospace, monospace !important;
+  letter-spacing: .02em !important;
+  text-transform:none;
 }
 
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #landing-page .il-rail {
@@ -262,11 +262,11 @@
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #landing-page .il-rail-item > b {
   margin-bottom: 4px !important;
   color: #e3e2db !important;
-  font-size: 10.5px !important;
+  font-size: 11px !important;
 }
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #landing-page .il-rail-item > span {
   color: #7e8985 !important;
-  font-size: 9px !important;
+  font-size: 11.5px !important;
   line-height: 1.5 !important;
 }
 
@@ -300,9 +300,9 @@
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #landing-page .ilm-card:last-child { border-right: 0 !important; }
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #landing-page .ilm-title {
   color: #9da6a2 !important;
-  font: 650 8px/1.2 "JetBrains Mono",ui-monospace,monospace !important;
-  letter-spacing: .12em !important;
-  text-transform: uppercase !important;
+  font: 650 11px/1.2 "JetBrains Mono",ui-monospace,monospace !important;
+  letter-spacing: .02em !important;
+  text-transform:none;
 }
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #landing-page .ilm-badge.live {
   color: var(--prime-green) !important;
@@ -332,8 +332,8 @@
   color: var(--prime-gold);
   font-size: 15px;
 }
-.ilm-method-list b { color:#d9dcd7; font-size:9.5px; font-weight:600; }
-.ilm-method-list em { color:#66716d; font-size:8px; font-style:normal; }
+.ilm-method-list b { color:#d9dcd7; font-size:11.5px; font-weight:600; }
+.ilm-method-list em { color:#66716d; font-size:11px; font-style:normal; }
 
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #landing-page .il-capabilities,
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #landing-page .il-workflow-visual,
@@ -408,7 +408,7 @@
     border-radius: 4px;
     color: #89938f !important;
     text-decoration: none !important;
-    font-size: 10.5px;
+    font-size: 11px;
     font-weight: 530;
   }
   .prime-side-global a:hover,
@@ -421,9 +421,9 @@
   .prime-side-section {
     padding: 10px 11px 7px;
     color: #515c58;
-    font: 650 8px/1 "JetBrains Mono",ui-monospace,monospace;
-    letter-spacing: .15em;
-    text-transform: uppercase;
+    font: 650 11px/1 "JetBrains Mono",ui-monospace,monospace;
+    letter-spacing: .02em;
+    text-transform:none;
   }
   :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page).il-tool-active #view-tool .sb-group-label { display:none !important; }
   :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page).il-tool-active #view-tool .sb-group-pad { padding:0 !important; }
@@ -432,7 +432,7 @@
     margin: 2px 0 !important;
     padding: 0 11px !important;
     color: #737e79 !important;
-    font-size: 10px !important;
+    font-size: 11px !important;
   }
   :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page).il-tool-active #view-tool .sb-item.active {
     color: #eee5d4 !important;
@@ -483,7 +483,7 @@
   }
   :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page).il-tool-active #view-tool .ash-sub {
     color:var(--prime-muted) !important;
-    font-size:10px !important;
+    font-size:11px !important;
   }
   :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page).il-tool-active #view-tool .ash-btn {
     min-height:34px !important;
@@ -505,7 +505,7 @@
   :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page).il-tool-active #view-tool .tf-tog {
     min-height:30px !important;
     border-radius:4px !important;
-    font-size:9.5px !important;
+    font-size:11.5px !important;
   }
   :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page).il-tool-active #view-tool .app-content-scroll {
     padding:13px 14px 34px !important;
@@ -528,7 +528,7 @@
 }
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #body-analyze:not(.has-stock) .tw-kicker {
   color:var(--prime-gold) !important;
-  font-size:8px !important;
+  font-size:11px !important;
   letter-spacing:.16em !important;
 }
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #body-analyze:not(.has-stock) .tw-title {
@@ -666,7 +666,7 @@
     padding:0 8px !important;
     border:0 !important;
     background:transparent !important;
-    font-size:10px !important;
+    font-size:11px !important;
   }
   :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #landing-page .il-landing-search button {
     flex:0 0 88px !important;
@@ -675,7 +675,7 @@
     height:42px !important;
     margin:0 !important;
     border-radius:4px !important;
-    font-size:10px !important;
+    font-size:11px !important;
   }
   :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #landing-page .il-trust {
     flex-wrap:wrap !important;
@@ -754,7 +754,7 @@
     grid-template-columns:1fr 1fr !important;
   }
   :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #landing-page .il-landing-actions > * { padding-inline:10px !important; }
-  :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #landing-page .il-trust { font-size:8px !important; }
+  :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #landing-page .il-trust { font-size:11px !important; }
   :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #landing-page .ihx-wrap { min-height:398px !important; }
   :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #landing-page .ihx-stage { min-height:255px !important; }
   .ilm-method-list { grid-template-columns:1fr 1fr; }
