@@ -149,3 +149,55 @@ test("the theme choice survives navigation", () => {
     "theme-bootstrap.js pins dark before reading the stored preference"
   );
 });
+
+// The bar itself was pinned in an earlier pass and measured stable on all
+// thirteen routes. That was not enough: the bar held still while its contents
+// slid. Driving the page rather than loading URLs cold showed every tab moving
+// 36px between the landing page and the tool view, and the tab row starting at
+// x=200 and landing at 266.5 during a single load.
+test("the bar's contents sit in fixed tracks, not a flex row", () => {
+  const css = fs.readFileSync(path.join(ROOT, "public", "clean-pass.css"), "utf8");
+  const block = css.slice(css.indexOf("THE BAR'S CONTENTS ARE PINNED TOO"));
+  assert.ok(block, "the grid block is gone");
+  assert.match(block, /display:\s*grid\s*!important/, "the bar must be a grid");
+  assert.match(
+    block,
+    /grid-template-columns:\s*200px\s+max-content\s+minmax\(0,\s*1fr\)\s+236px\s*!important/,
+    "the four tracks must be fixed so content changes cannot move anything"
+  );
+  // A fixed-width actions track is what stops the corner moving the tabs when
+  // Log in / Start trial is replaced by the account chip.
+  assert.match(block, /\.nav-right\s*\{[^}]*width:\s*236px\s*!important/, "the actions track must be fixed");
+});
+
+// Bold is wider than medium. With the active tab at 600 the row measured
+// 500.5px on the landing page, 490.5 on /blog and 488.1 on /login - so every
+// tab to the right of the active one moved as you navigated.
+test("the active tab does not change the row's width", () => {
+  const css = fs.readFileSync(path.join(ROOT, "public", "clean-pass.css"), "utf8");
+  const rules = [...css.matchAll(/#main-nav \.nav-tab(?:\.active-tab)?\s*\{([^}]*)\}/g)];
+  const weights = new Set();
+  for (const r of rules) {
+    const m = r[1].match(/font-weight:\s*(\d+)/);
+    if (m) weights.add(m[1]);
+  }
+  assert.equal(weights.size, 1, `nav tabs render at ${[...weights].join(" and ")}; the active state must not cost width`);
+});
+
+// The wrong section painted for about a third of a second on every tool load -
+// #sec-analyze ships class="open" in the markup - and the sidebar showed all
+// eighteen items before filtering to the active tab's group.
+test("the view, section and sidebar group resolve before first paint", () => {
+  const boot = fs.readFileSync(path.join(ROOT, "public", "theme-bootstrap.js"), "utf8");
+  assert.match(boot, /data-boot-view/, "the boot script must stamp the view");
+  assert.match(boot, /il-boot-view/, "the boot script must write the first-paint stylesheet");
+  assert.match(boot, /#view-tool #sec-' \+ section/, "only the requested section may paint");
+  assert.match(boot, /\.app-sidebar \.sb-item\{display:none!important\}/, "the sidebar must start filtered");
+  // and it must not outlive the load, or it pins the URL's section forever
+  const navJs = fs.readFileSync(path.join(ROOT, "public", "app-navigation.js"), "utf8");
+  assert.match(navJs, /function dropBootStyle\(\)/, "the boot stylesheet must be removed once nav resolves");
+  for (const fn of ["showView", "showLandingPage", "showMarketPage"]) {
+    const body = navJs.slice(navJs.indexOf(`function ${fn}(`), navJs.indexOf(`function ${fn}(`) + 260);
+    assert.match(body, /dropBootStyle\(\)/, `${fn} must drop the boot stylesheet`);
+  }
+});

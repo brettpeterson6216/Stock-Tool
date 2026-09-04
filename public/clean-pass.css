@@ -108,8 +108,13 @@ html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav 
   border-radius: 0 !important;
   position: relative !important;
 }
+/* The active tab must NOT change weight. Bold is wider than medium, so the tab
+   row measured 500.5px on the landing page, 490.5 on /blog and 488.1 on
+   /login purely because a different tab was bold - and every tab to the right
+   of the active one shifted as you navigated. The active state is carried by
+   colour and the gold underline instead, which cost no width. */
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .nav-tab.active-tab {
-  font-weight: 600 !important;
+  font-weight: 500 !important;
   color: var(--lpf-ink, #f2eee6) !important;
   -webkit-text-fill-color: var(--lpf-ink, #f2eee6) !important;
 }
@@ -303,6 +308,7 @@ html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav 
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .nav-tab.active-tab {
   color: var(--lpf-ink, #f2eee6) !important;
   -webkit-text-fill-color: currentColor !important;
+  font-weight: 500 !important;
 }
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .nav-search > i,
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .nav-search > svg {
@@ -818,4 +824,84 @@ html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-hero-l
    gradient failed once that chart went display:none at this width. */
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihl-area-m {
   fill: url(#ihlFillM) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE BAR'S CONTENTS ARE PINNED TOO, NOT JUST THE BAR.
+
+   The previous pass fixed the bar itself - y=0, 63px, same z-index on all
+   thirteen routes - and I measured that and called it done. It was not: the
+   bar held still while everything inside it slid.
+
+   Measured by driving the page rather than loading URLs cold:
+
+     landing -> Scanners     every tab moves left 36px, search moves 30px
+     during first load       the tab row starts at x=200 and lands at 266.5
+
+   The cause is the brand width, which eight stylesheets argue over - 160,
+   164, 174, 176, 206, 214 and auto - and which resolves differently by view
+   and by how far the cascade has loaded. The search width moves with it
+   (360 -> 330), and .nav-right changes width when a session resolves and
+   "Log in / Start trial" is replaced by the account chip.
+
+   Flex lets all of that propagate. A grid with fixed tracks cannot: the
+   columns are the same width whatever is in them, so nothing downstream of a
+   change can move. Being CSS, it is also true at first paint, which is what
+   fixes the load-time jump.
+   ═══════════════════════════════════════════════════════════════════════════ */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav {
+  display: grid !important;
+  grid-template-columns: 200px max-content minmax(0, 1fr) 236px !important;
+  align-items: center !important;
+  gap: 20px !important;
+  justify-content: start !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .nav-logo {
+  grid-column: 1 !important;
+  width: 200px !important; min-width: 200px !important; max-width: 200px !important;
+  flex: 0 0 200px !important;
+  overflow: hidden !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .nav-links {
+  grid-column: 2 !important;
+  width: max-content !important; min-width: 0 !important; max-width: none !important;
+  flex: 0 0 auto !important;
+  justify-self: start !important;
+  /* A 12px left margin applied on the landing page only, which is the last
+     thing that was still moving the row between views. */
+  margin: 0 !important;
+}
+/* The tabs' own width has to be stable for max-content to be stable, so their
+   padding and type are pinned here rather than left to whichever sheet wins. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .nav-tab {
+  padding: 0 14px !important;
+  font-size: 13px !important;
+  letter-spacing: 0 !important;
+  white-space: nowrap !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .nav-search {
+  grid-column: 3 !important;
+  width: 100% !important; max-width: 360px !important; min-width: 0 !important;
+  margin-left: auto !important; margin-right: 0 !important;
+  flex: 0 1 auto !important;
+}
+/* Fixed track, contents right-aligned inside it: the corner can change from
+   two buttons to an account chip without moving anything to its left. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .nav-right {
+  grid-column: 4 !important;
+  width: 236px !important; min-width: 236px !important; max-width: 236px !important;
+  flex: 0 0 236px !important;
+  justify-content: flex-end !important;
+  overflow: hidden !important;
+}
+@media (max-width: 900px) {
+  html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav {
+    grid-template-columns: minmax(0, 1fr) max-content !important;
+  }
+  html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .nav-logo {
+    grid-column: 1 !important; width: auto !important; min-width: 0 !important; max-width: none !important;
+  }
+  html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .nav-right {
+    grid-column: 2 !important; width: auto !important; min-width: 0 !important; max-width: none !important;
+  }
 }

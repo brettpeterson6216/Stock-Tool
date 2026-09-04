@@ -58,6 +58,7 @@
   }
 
   function showLandingPage() {
+    dropBootStyle();
     const home = document.getElementById('view-home');
     const tool = document.getElementById('view-tool');
     if (tool) tool.style.display = 'none';
@@ -69,6 +70,7 @@
   }
 
   function showMarketPage() {
+    dropBootStyle();
     const home = document.getElementById('view-home');
     const tool = document.getElementById('view-tool');
     if (tool) tool.style.display = 'none';
@@ -80,7 +82,18 @@
     if (typeof initializeHomeDashboard === 'function') initializeHomeDashboard();
   }
 
+  /* theme-bootstrap.js writes a <style id="il-boot-view"> in the head so the
+     right view, section and sidebar group are what paint first. This script is
+     deferred and therefore always runs later; the moment it has resolved the
+     view for real, that stylesheet has done its job and has to go, or it keeps
+     forcing the URL's section over whatever the user clicks next. */
+  function dropBootStyle() {
+    const el = document.getElementById('il-boot-view');
+    if (el) el.remove();
+  }
+
   function showView(view) {
+    dropBootStyle();
     const home = document.getElementById('view-home');
     const tool = document.getElementById('view-tool');
     if (view === 'tool') {
