@@ -194,10 +194,15 @@
         var note = document.getElementById("ihm-mkt-note");
         if (note) {
           var lead = indexes[0] || {};
-          var span = lead.range === "3mo" ? "3 months" : "30 days";
-          var res = lead.interval === "1d" ? "daily" : "intraday";
+          // The server reports which rung of the ladder answered, so the note
+          // states the resolution that was actually drawn rather than the one
+          // that was asked for.
+          var span = data && data.windowLabel ? data.windowLabel : "30 days";
+          var res = lead.interval === "1d" ? "daily closes"
+                  : lead.interval === "1wk" ? "weekly closes"
+                  : lead.interval + " bars";
           note.textContent = Number.isFinite(Number(lead.points))
-            ? "percent change \u00b7 " + span + " \u00b7 " + lead.points + " " + res + " points"
+            ? "percent change \u00b7 " + span + " \u00b7 " + lead.points + " " + res
             : "percent change";
         }
       } else if (chartHost) {
@@ -294,8 +299,65 @@
     }).join("");
   }
 
+  /* The timeframe picks the resolution, not just the span: a day is drawn from
+     five-minute bars and a month from daily closes, which is what every
+     finance site does and the reason a month of hourly bars read as noise -
+     over the same range the S&P changes direction 81 times hourly and 12
+     times daily. The server owns that mapping; this only asks for a window. */
+  var WINDOWS = ["1D", "1W", "1M", "3M", "1Y"];
+  var DEFAULT_WINDOW = "1M";
+  var currentWindow = DEFAULT_WINDOW;
+
+  function rememberedWindow() {
+    try {
+      var v = window.localStorage.getItem("il-mkt-window");
+      return WINDOWS.indexOf(v) >= 0 ? v : DEFAULT_WINDOW;
+    } catch (_) { return DEFAULT_WINDOW; }
+  }
+
+  function loadMarket(key) {
+    currentWindow = WINDOWS.indexOf(key) >= 0 ? key : DEFAULT_WINDOW;
+    try { window.localStorage.setItem("il-mkt-window", currentWindow); } catch (_) {}
+
+    var buttons = document.querySelectorAll("#ihm-tfs .ihm-tf");
+    for (var i = 0; i < buttons.length; i += 1) {
+      buttons[i].setAttribute("aria-pressed", String(buttons[i].getAttribute("data-window") === currentWindow));
+    }
+    var chartHost = document.getElementById("ihm-chart");
+    if (chartHost) chartHost.classList.add("is-loading");
+
+    var asked = currentWindow;
+    return json("/api/market/landing-summary?window=" + encodeURIComponent(currentWindow))
+      .then(function (data) {
+        // A slow answer for a window the reader has already moved off must not
+        // overwrite the one they are looking at.
+        if (asked !== currentWindow) return;
+        if (chartHost) chartHost.classList.remove("is-loading");
+        renderMarket(data);
+      })
+      .catch(function () {
+        if (asked !== currentWindow) return;
+        if (chartHost) chartHost.classList.remove("is-loading");
+        renderMarket(null);
+      });
+  }
+
+  function wireTimeframes() {
+    var group = document.getElementById("ihm-tfs");
+    if (!group || group.ilWired) return;
+    group.ilWired = true;
+    group.addEventListener("click", function (e) {
+      var btn = e.target && e.target.closest ? e.target.closest(".ihm-tf") : null;
+      if (!btn) return;
+      var key = btn.getAttribute("data-window");
+      if (!key || key === currentWindow) return;
+      loadMarket(key);
+    });
+  }
+
   function loadDashboard() {
-    json("/api/market/landing-summary").then(renderMarket).catch(function () { renderMarket(null); });
+    wireTimeframes();
+    loadMarket(rememberedWindow());
 
     Promise.all(INDEXES.map(function (i) { return quote(i.t); })).then(renderIndexes);
     Promise.all(POPULAR.map(quote)).then(renderPopulars);

@@ -77,9 +77,9 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/vendor/fonts/plus-jakarta-sans-files/plus-jakarta-sans-latin-700-normal.woff2">
 <link rel="stylesheet" href="/vendor/fonts/il-fonts.css?v=20260825-6">
 <link rel="stylesheet" href="/vendor/tabler-icons.min.css?v=3.46.0-1">
-<link href="/product-system.css?v=20260907-4" rel="stylesheet">
-<link href="/workspace-system.css?v=20260907-4" rel="stylesheet">
-<link href="/research-system.css?v=20260907-4" rel="stylesheet">
+<link href="/product-system.css?v=20260907-5" rel="stylesheet">
+<link href="/workspace-system.css?v=20260907-5" rel="stylesheet">
+<link href="/research-system.css?v=20260907-5" rel="stylesheet">
 <!-- defer: this was the only render-blocking script on the page, 201KB before first paint -->
 <script defer src="/vendor/chart.umd.min.js?v=4.4.1"></script>
 <script defer src="/vendor/hammer.min.js?v=2.0.8"></script>
@@ -96,22 +96,22 @@
 <script defer src="/hero-chart.js?v=20260825-6"></script>
 <script defer src="/tool-launch.js?v=20260904-1"></script>
 <script defer src="/share-studio.js?v=20260827-2"></script>
-<link href="/legacy-app.css?v=20260907-4" rel="stylesheet">
-<link href="/premium.css?v=20260907-4" rel="stylesheet">
-<link href="/release-polish.css?v=20260907-4" rel="stylesheet">
-<link href="/visual-refresh.css?v=20260907-4" rel="stylesheet">
-  <link href="/site-shell.css?v=20260907-4" rel="stylesheet">
-<link href="/landing-polish.css?v=20260907-4" rel="stylesheet">
-<link href="/beauty-system.css?v=20260907-4" rel="stylesheet">
-<link href="/chart-engine.css?v=20260907-4" rel="stylesheet">
-<link rel="stylesheet" href="/premium-revamp.css?v=20260907-4">
-<link rel="stylesheet" href="/il-system.css?v=20260907-4">
-<link rel="stylesheet" href="/lens-prime-v2.css?v=20260907-4">
-<link rel="stylesheet" href="/lens-prime-exact.css?v=20260907-4">
-<link rel="stylesheet" href="/lens-prime-shared.css?v=20260907-4">
-<link rel="stylesheet" href="/lens-prime-fidelity.css?v=20260907-4">
-<link rel="stylesheet" href="/lens-prime-match.css?v=20260907-4">
-<link href="/clean-pass.css?v=20260907-4" rel="stylesheet">
+<link href="/legacy-app.css?v=20260907-5" rel="stylesheet">
+<link href="/premium.css?v=20260907-5" rel="stylesheet">
+<link href="/release-polish.css?v=20260907-5" rel="stylesheet">
+<link href="/visual-refresh.css?v=20260907-5" rel="stylesheet">
+  <link href="/site-shell.css?v=20260907-5" rel="stylesheet">
+<link href="/landing-polish.css?v=20260907-5" rel="stylesheet">
+<link href="/beauty-system.css?v=20260907-5" rel="stylesheet">
+<link href="/chart-engine.css?v=20260907-5" rel="stylesheet">
+<link rel="stylesheet" href="/premium-revamp.css?v=20260907-5">
+<link rel="stylesheet" href="/il-system.css?v=20260907-5">
+<link rel="stylesheet" href="/lens-prime-v2.css?v=20260907-5">
+<link rel="stylesheet" href="/lens-prime-exact.css?v=20260907-5">
+<link rel="stylesheet" href="/lens-prime-shared.css?v=20260907-5">
+<link rel="stylesheet" href="/lens-prime-fidelity.css?v=20260907-5">
+<link rel="stylesheet" href="/lens-prime-match.css?v=20260907-5">
+<link href="/clean-pass.css?v=20260907-5" rel="stylesheet">
 <script defer src="/premium-motion.js?v=20260825-6"></script>
 </head>
 <body class="il-product-page">
@@ -249,6 +249,13 @@
           <div class="ihm-panel-id">
             <span class="ihm-panel-title">Market</span>
             <span class="ihm-panel-note" id="ihm-mkt-note">percent change, last 30 days</span>
+          </div>
+          <div class="ihm-tfs" id="ihm-tfs" role="group" aria-label="Chart timeframe">
+            <button type="button" class="ihm-tf" data-window="1D" aria-pressed="false">1D</button>
+            <button type="button" class="ihm-tf" data-window="1W" aria-pressed="false">1W</button>
+            <button type="button" class="ihm-tf" data-window="1M" aria-pressed="true">1M</button>
+            <button type="button" class="ihm-tf" data-window="3M" aria-pressed="false">3M</button>
+            <button type="button" class="ihm-tf" data-window="1Y" aria-pressed="false">1Y</button>
           </div>
           <div class="ihm-quote">
             <strong id="ihm-mkt-price">&mdash;</strong>
@@ -1940,7 +1947,7 @@
     <a href="#" class="mmenu-item" id="mmenu-logout" style="display:none;" onclick="var b=document.getElementById('nav-acct-logout');if(b){b.click();}_toggleMobileMenu();return false;"><i class="ti ti-logout-2"></i><span>Log out</span></a>
   </div>
 </div>
-  <script defer src="/index-chart.js?v=20260907-4"></script>
+  <script defer src="/index-chart.js?v=20260907-5"></script>
   <script defer src="/home-member.js?v=20260907-1"></script>
   <script defer src="/site-nav.js?v=20260905-2"></script>
 </body>

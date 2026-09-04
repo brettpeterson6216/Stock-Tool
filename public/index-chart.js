@@ -89,8 +89,42 @@
     return out;
   }
 
+  /* The chart is drawn at the container's real pixel size rather than at a
+     fixed viewBox stretched to fit. preserveAspectRatio="none" scaled x and y
+     by different factors, which is why axis labels came out 1.44x wide and
+     clipped, why dots had to be faked out of line caps, and why every stroke
+     needed non-scaling-stroke to keep one weight. At 1:1 none of that is
+     true: a circle is a circle and a pixel is a pixel. The cost is having to
+     redraw on resize, which is what the observer below is for. */
   window.ilRenderIndexChart = function (host, indexes) {
     if (!host) return;
+    if (host.ilxObserver) { host.ilxObserver.disconnect(); host.ilxObserver = null; }
+    host.ilxSeries = indexes;
+
+    var drawn = draw(host, indexes);
+
+    if (typeof ResizeObserver === "function") {
+      var lastW = host.clientWidth;
+      var pending = 0;
+      var ro = new ResizeObserver(function () {
+        var w = host.clientWidth;
+        if (!w || Math.abs(w - lastW) < 2) return;
+        lastW = w;
+        // Coalesce the burst a drag produces into one redraw per frame.
+        if (pending) cancelAnimationFrame(pending);
+        pending = requestAnimationFrame(function () {
+          pending = 0;
+          draw(host, host.ilxSeries);
+        });
+      });
+      ro.observe(host);
+      host.ilxObserver = ro;
+    }
+    return drawn;
+  };
+
+  function draw(host, indexes) {
+    if (!host) return null;
     host.innerHTML = "";
 
     var usable = (indexes || []).filter(function (s) {
@@ -116,8 +150,10 @@
 
     var intraday = usable.some(function (s) { return s.interval && s.interval !== "1d"; });
 
-    // Geometry in view units; the SVG scales to its container.
-    var W = 1000, H = 320, PAD_L = 6, PAD_R = 54, PAD_T = 14, PAD_B = 26;
+    // Real pixels, measured from the container. Never below a width where the
+    // plot would be narrower than the axis gutter.
+    var W = Math.max(320, Math.round(host.clientWidth) || 960);
+    var H = 320, PAD_L = 6, PAD_R = 54, PAD_T = 14, PAD_B = 26;
     var plotW = W - PAD_L - PAD_R, plotH = H - PAD_T - PAD_B;
 
     var lo = Infinity, hi = -Infinity;
@@ -135,7 +171,7 @@
     var y = function (pct) { return PAD_T + (1 - (pct - lo) / (hi - lo)) * plotH; };
 
     var svg = el("svg", {
-      viewBox: "0 0 " + W + " " + H, preserveAspectRatio: "none",
+      viewBox: "0 0 " + W + " " + H, width: W, height: H,
       class: "ilx-svg", role: "img",
       "aria-label": "Percent change of " + series.map(function (s) { return s.name; }).join(", ") +
         " over the selected window"
@@ -148,12 +184,11 @@
       svg.appendChild(el("line", { class: "ilx-zero", x1: PAD_L, x2: PAD_L + plotW, y1: zeroY, y2: zeroY }));
     }
 
-    /* Gridlines in the SVG; their labels in HTML. Text inside a
-       preserveAspectRatio="none" SVG is stretched horizontally by whatever
-       ratio the container happens to be - at 1440px wide that is 1.44x - and
-       the glyphs then run past the viewBox edge and get clipped, which is
-       exactly what the first version did to "+9.13%". Positioned HTML is not
-       distorted and cannot be clipped by the viewBox. */
+    /* Gridlines in the SVG; their labels in HTML. The labels were moved out
+       when the chart was still stretched to fit, which distorted them 1.44x
+       and clipped "+9.13%" to "+9.13:". The chart is drawn at real pixels now
+       so SVG text would be safe again, but positioned HTML inherits the
+       page's font stack and theme tokens directly, so it stays. */
     var ticks = 4;
     var axis = document.createElement("div");
     axis.className = "ilx-axis";
@@ -163,7 +198,7 @@
       svg.appendChild(el("line", { class: "ilx-grid", x1: PAD_L, x2: PAD_L + plotW, y1: gy, y2: gy }));
       var lab = document.createElement("span");
       lab.className = "ilx-ylab";
-      lab.style.top = ((gy / H) * 100).toFixed(3) + "%";
+      lab.style.top = gy.toFixed(1) + "px";
       lab.textContent = fmtPct(pct);
       axis.appendChild(lab);
     }
@@ -174,18 +209,7 @@
       }).join(" ");
       s.path = el("path", { class: "ilx-line", d: d, style: "stroke:" + s.colour });
       svg.appendChild(s.path);
-      /* The dot is two zero-length lines with round caps rather than a
-         circle. preserveAspectRatio="none" scales x and y by different
-         factors, so a circle drawn in view units comes out as an ellipse -
-         at 1024px the plot is squeezed to about half its width and the dots
-         turn into flat lozenges. A round line cap is sized by stroke-width,
-         and non-scaling-stroke measures stroke-width in screen pixels, so
-         this stays a true circle at every container width. */
-      s.dot = el("g", { class: "ilx-dot", opacity: 0 });
-      s.dotHalo = el("line", { class: "ilx-dot-halo" });
-      s.dotCore = el("line", { class: "ilx-dot-core", style: "stroke:" + s.colour });
-      s.dot.appendChild(s.dotHalo);
-      s.dot.appendChild(s.dotCore);
+      s.dot = el("circle", { class: "ilx-dot", r: 3.5, style: "fill:" + s.colour, opacity: 0 });
       svg.appendChild(s.dot);
     });
 
@@ -195,9 +219,8 @@
     host.appendChild(svg);
     host.appendChild(axis);
 
-    // Readout, legend and hit surface live in HTML rather than SVG so text
-    // stays at real pixel sizes: the SVG is stretched by preserveAspectRatio
-    // none, which would distort anything drawn inside it.
+    // Readout and legend are HTML: they carry live values and interaction,
+    // and they inherit the page's type and theme without restating any of it.
     var readout = document.createElement("div");
     readout.className = "ilx-readout";
     host.appendChild(readout);
@@ -223,13 +246,6 @@
       legend.appendChild(b);
     });
     host.appendChild(legend);
-
-    function placeDot(s, px, py) {
-      [s.dotHalo, s.dotCore].forEach(function (n) {
-        n.setAttribute("x1", px); n.setAttribute("x2", px);
-        n.setAttribute("y1", py); n.setAttribute("y2", py);
-      });
-    }
 
     function latest() {
       readout.textContent = "";
@@ -268,7 +284,8 @@
         var p = nearest(s.points, slot);
         if (!p) return;
         if (stamp == null) stamp = p.at;
-        placeDot(s, x(p.slot), y(p.pct));
+        s.dot.setAttribute("cx", x(p.slot));
+        s.dot.setAttribute("cy", y(p.pct));
         s.dot.setAttribute("opacity", 1);
         s.key.querySelector(".ilx-key-val").textContent = fmtPct(p.pct);
       });
@@ -280,6 +297,6 @@
     svg.addEventListener("pointerdown", function (e) { trace(e.clientX); });
 
     latest();
-    return { series: series, intraday: intraday };
-  };
+    return { series: series, intraday: intraday, width: W };
+  }
 }());

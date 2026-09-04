@@ -37,23 +37,43 @@ const chart = read("public/index-chart.js");
 const css = read("public/clean-pass.css");
 const html = read("index.html");
 
-test("the index series is fetched at a resolution worth plotting", () => {
-  assert.match(api, /SERIES_LADDER\s*=\s*\[/, "the resolution ladder is gone");
+test("the interval is a property of the window, not a number to maximise", () => {
+  // The first pass asked for a month of hourly bars on the theory that more
+  // points is more chart. Measured on the live feed, the S&P changes
+  // direction 81 times over that month at hourly resolution and 12 times at
+  // daily, across the same 2.4 percentage points - identical shape, seven
+  // times the zigzag. A one-month view is drawn from daily closes.
+  assert.match(api, /const WINDOWS = \{/, "the window table is gone");
+  const table = api.slice(api.indexOf("const WINDOWS = {"), api.indexOf("const DEFAULT_WINDOW"));
 
-  const block = api.slice(api.indexOf("SERIES_LADDER"), api.indexOf("SERIES_LADDER") + 400);
-  const rungs = [...block.matchAll(/interval:\s*"([^"]+)".*?min:\s*(\d+)/g)]
-    .map(m => ({ interval: m[1], min: Number(m[2]) }));
+  for (const key of ["1D", "1W", "1M", "3M", "1Y"]) {
+    assert.ok(table.includes(`"${key}":`), `the ${key} window is missing`);
+  }
 
-  assert.ok(rungs.length >= 2, "a ladder with one rung is not a ladder");
-  assert.notEqual(rungs[0].interval, "1d", "the first rung must be intraday, not daily bars");
-  assert.ok(
-    rungs[0].min >= 60,
-    `the first rung accepts ${rungs[0].min} points; a month of them needs at least 60`
-  );
+  const first = key => {
+    const row = table.slice(table.indexOf(`"${key}":`));
+    return (row.match(/interval: "([^"]+)"/) || [])[1];
+  };
+  assert.equal(first("1D"), "5m", "a one-day chart must not be drawn from daily bars");
+  assert.equal(first("1M"), "1d", "a one-month chart drawn from intraday bars reads as noise");
+  assert.equal(first("1Y"), "1wk", "a year of daily bars is 250 points in a 1000px box");
 
-  // Nothing may re-truncate the series after the ladder has earned it. The
-  // old code did exactly this with closes.slice(-22).
-  assert.doesNotMatch(api, /closes\.slice\(-2\d\)/, "the series is being truncated back down again");
+  // Each window keeps a ladder, because Yahoo does not guarantee every
+  // interval for every symbol - but the first rung is the conventional one.
+  assert.ok((table.match(/min:/g) || []).length >= 10, "the fallback rungs are gone");
+  assert.doesNotMatch(api, /closes\.slice\(-2\d\)/, "the series is being truncated after the ladder earned it");
+});
+
+test("the reader can choose the window, and it is remembered", () => {
+  assert.match(html, /class="ihm-tfs"/, "the timeframe control is gone from the market panel");
+  for (const key of ["1D", "1W", "1M", "3M", "1Y"]) {
+    assert.match(html, new RegExp('data-window="' + key + '"'), `the ${key} button is missing`);
+  }
+  const member = read("public/home-member.js");
+  assert.match(member, /landing-summary\?window=/, "the window is not being asked for");
+  assert.match(member, /il-mkt-window/, "the choice is not remembered between visits");
+  // A slow answer for an abandoned window must not overwrite the current one.
+  assert.match(member, /if \(asked !== currentWindow\) return;/, "a stale response can still land");
 });
 
 test("the payload carries what the chart needs to draw a real time axis", () => {
@@ -111,27 +131,24 @@ test("today's change is not measured from the edge of the chart range", () => {
   assert.match(summary, /America\/New_York/, "the session boundary is being taken at UTC midnight, which is mid-session");
 });
 
-test("nothing is drawn inside the stretched SVG that a stretch would ruin", () => {
-  // preserveAspectRatio="none" scales x and y by different factors. Text
-  // drawn in it is distorted and runs past the viewBox edge - that is what
-  // clipped "+9.13%" to "+9.13:". Circles become ellipses for the same
-  // reason. Text lives in HTML now, and the dots are round line caps whose
-  // size comes from a non-scaling stroke.
-  assert.match(chart, /preserveAspectRatio: "none"/, "the chart no longer fills its container");
-  assert.doesNotMatch(chart, /el\("text"/, "text is being drawn inside the stretched SVG again");
-  assert.doesNotMatch(chart, /el\("circle"/, "a circle in a stretched SVG renders as an ellipse");
+test("the chart is drawn at real pixels, not stretched to fit", () => {
+  // preserveAspectRatio="none" scaled x and y by different factors: axis
+  // labels came out 1.44x wide and clipped to "+9.13:", circles rendered as
+  // lozenges, and every stroke needed non-scaling-stroke to keep one weight.
+  // The viewBox is the container's measured size now, so none of that is
+  // true - and the cost, redrawing on resize, is paid by the observer.
+  assert.doesNotMatch(chart, /preserveAspectRatio:/, "the chart is being stretched again");
+  assert.match(chart, /var W = Math\.max\(320, Math\.round\(host\.clientWidth\)/,
+    "the width is no longer measured from the container");
+  assert.match(chart, /viewBox: "0 0 " \+ W \+ " " \+ H, width: W, height: H/,
+    "the viewBox no longer matches the drawn size");
+  assert.match(chart, /new ResizeObserver/, "a resized container would keep the old geometry");
+  assert.match(chart, /host\.ilxObserver\.disconnect\(\)/, "observers leak on every re-render");
   assert.match(chart, /axis\.className = "ilx-axis"/, "the y-axis is no longer HTML");
-
-  for (const cls of ["ilx-line", "ilx-grid", "ilx-zero", "ilx-cross", "ilx-dot-halo"]) {
-    const rule = css.slice(css.indexOf("." + cls + ",") >= 0 ? css.indexOf("." + cls + ",") : css.indexOf("." + cls + " {"));
-    assert.ok(rule, `.${cls} has no rule`);
-    assert.match(rule.slice(0, 400), /vector-effect: non-scaling-stroke/,
-      `.${cls} would be stroked unevenly by the aspect stretch`);
-  }
 });
 
 test("the chart states its own resolution rather than implying one", () => {
-  assert.match(read("public/home-member.js"), /" " \+ res \+ " points"/,
+  assert.match(read("public/home-member.js"), /daily closes|weekly closes/,
     "the chart no longer tells the reader what it is made of");
 });
 

@@ -587,12 +587,50 @@ router.get("/market/movers", async (req, res) => {
 
 // ============================================================
 //  Public landing summary — live index, sectors, breadth, news
+/* ═══════════════════════════════════════════════════════════════════════════
+   HOW LONG A WINDOW IS DECIDES HOW FINE THE BARS ARE.
+
+   The first pass at this asked for one month of hourly bars, on the theory
+   that more points is more chart. It is not. Over the same month the S&P
+   changes direction 81 times at hourly resolution and 12 times at daily,
+   across the same 2.4 percentage points of range - identical shape, seven
+   times the zigzag. That reads as noise, which is why every finance site
+   plots a one-month view from daily closes and reserves intraday bars for
+   intraday windows.
+
+   So the interval is a property of the window, not a thing to maximise. Each
+   window still carries a ladder because Yahoo does not guarantee every
+   interval for every symbol; the first rung is the conventional choice and
+   the rest are retreats. Whatever answers is reported back as `interval` and
+   `points`, so the resolution is checkable rather than assumed.
+   ═══════════════════════════════════════════════════════════════════════════ */
+const WINDOWS = {
+  "1D": { label: "1 day",    ladder: [ { interval: "5m",  range: "1d",  min: 30 },
+                                       { interval: "15m", range: "1d",  min: 10 },
+                                       { interval: "1h",  range: "5d",  min: 2  } ] },
+  "1W": { label: "1 week",   ladder: [ { interval: "30m", range: "5d",  min: 40 },
+                                       { interval: "1h",  range: "5d",  min: 20 },
+                                       { interval: "1d",  range: "1mo", min: 2  } ] },
+  "1M": { label: "30 days",  ladder: [ { interval: "1d",  range: "1mo", min: 15 },
+                                       { interval: "1d",  range: "3mo", min: 2  } ] },
+  "3M": { label: "3 months", ladder: [ { interval: "1d",  range: "3mo", min: 40 },
+                                       { interval: "1d",  range: "6mo", min: 2  } ] },
+  "1Y": { label: "1 year",   ladder: [ { interval: "1wk", range: "1y",  min: 30 },
+                                       { interval: "1d",  range: "1y",  min: 2  } ] },
+};
+const DEFAULT_WINDOW = "1M";
+function normaliseWindow(value) {
+  const key = String(value || "").toUpperCase();
+  return Object.prototype.hasOwnProperty.call(WINDOWS, key) ? key : DEFAULT_WINDOW;
+}
+
 // ============================================================
 // This endpoint exists so the reference-matched landing terminal can remain
 // honest. Every displayed number is returned by a provider and the entire
 // response is cached, rather than fabricating a polished marketing preview.
-router.get("/market/landing-summary", async (_req, res) => {
-  const cacheKey = "market:landing-summary";
+router.get("/market/landing-summary", async (req, res) => {
+  const chartWindow = normaliseWindow(req.query && req.query.window);
+  const cacheKey = "market:landing-summary:" + chartWindow;
   const cached = getCached(cacheKey, 5 * 60 * 1000);
   if (cached) return res.json(cached);
 
@@ -618,22 +656,7 @@ router.get("/market/landing-summary", async (_req, res) => {
     ["XLRE", "Real Estate"],
   ];
 
-  /* A month of daily bars is at most 22 points, and after nulls are dropped it
-     was drawing about fifteen - which is why the line read as a low-resolution
-     sketch rather than a chart. Hourly bars over the same month give roughly
-     ten times that.
-
-     Yahoo does not guarantee every interval for every symbol, so this walks a
-     ladder and takes the first response with enough points to be worth
-     drawing, rather than assuming. Whatever it settles on is reported back in
-     the payload as `interval` and `points`, so which rung answered is visible
-     from the response instead of being a guess. */
-  const SERIES_LADDER = [
-    { interval: "1h", range: "1mo", min: 60 },
-    { interval: "90m", range: "1mo", min: 40 },
-    { interval: "1d", range: "3mo", min: 40 },
-    { interval: "1d", range: "1mo", min: 2 },
-  ];
+  const SERIES_LADDER = WINDOWS[chartWindow].ladder;
 
   async function fetchSeries(symbol, interval, range) {
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}` +
@@ -760,6 +783,8 @@ router.get("/market/landing-summary", async (_req, res) => {
   }
 
   const result = {
+    window: chartWindow,
+    windowLabel: WINDOWS[chartWindow].label,
     overview,
     indexes,
     sectors,
