@@ -83,24 +83,7 @@ body.il-product-page #main-nav[data-view="home"] .nav-search {
   height: 33px !important;
 }
 body.il-product-page #main-nav[data-view="home"] .nav-right { gap: 9px !important; }
-body.il-product-page #main-nav[data-view="home"] .nav-live,
-body.il-product-page #main-nav[data-view="home"] #nav-signup { display: none !important; }
-body.il-product-page #main-nav[data-view="home"] #nav-login {
-  width: 34px !important;
-  min-width: 34px !important;
-  height: 34px !important;
-  padding: 0 !important;
-  overflow: hidden !important;
-  border-radius: 50% !important;
-  font-size: 0 !important;
-  color: #171108 !important;
-  background: #9d7b49 !important;
-  border: 0 !important;
-}
-body.il-product-page #main-nav[data-view="home"] #nav-login::after {
-  content: "IL";
-  font: 700 9px/34px var(--lpf-sans) !important;
-}
+body.il-product-page #main-nav[data-view="home"] .nav-live { display: none !important; }
 body.il-product-page #main-nav[data-view="home"] .theme-toggle {
   width: 34px !important;
   height: 34px !important;
@@ -504,25 +487,6 @@ body.il-product-page #market-page .home-guide-showcase { display: none !importan
   }
   html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #main-nav[data-view="home"] .theme-toggle,
   html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #main-nav[data-view="home"] .theme-toggle-track { width:34px !important;min-width:34px !important; }
-  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #main-nav[data-view="home"] #nav-login {
-    width: 34px !important;
-    min-width: 34px !important;
-    height: 34px !important;
-    padding: 0 !important;
-    font-size: 0 !important;
-    line-height: 34px !important;
-    border-radius: 50% !important;
-    color: transparent !important;
-    text-indent: -999px !important;
-  }
-  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #main-nav[data-view="home"] #nav-login::after {
-    content: "BP" !important;
-    display: block !important;
-    color: #171108 !important;
-    text-indent: 0 !important;
-    font: 700 9px/34px var(--lpf-sans) !important;
-  }
-  html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #main-nav[data-view="home"] #nav-signup,
   html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #main-nav[data-view="home"] .nav-live { display: none !important; }
   html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body.il-product-page:not(#lpm-d) #landing-page .il-landing-hero {
     width: calc(100% - clamp(28px, 2.8vw, 44px)) !important;

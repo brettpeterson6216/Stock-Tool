@@ -55,3 +55,287 @@
   filter: none !important;
   padding: 0 !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   NAV BAR — measured fixes
+
+   Toolbar is 63px. Measured before touching anything:
+
+     tabs          70px tall inside a 63px bar, so the active underline had
+                   nowhere to land; font-size was clamp(8px, .75vw, 10px), so
+                   it also changed with viewport width and never settled
+     search        a 140x32 input with its OWN 1px border, its own
+                   rgba(255,255,255,.06) fill and its own radius, inside a
+                   separate 360x34 bordered wrapper - two boxes, different
+                   widths: the overlap you saw
+     theme toggle  button 51x30, track 30x26, thumb 19x19 sitting at x=1363
+                   when the track ended at x=1365 - the thumb was almost
+                   entirely outside its own track, and the sun and moon
+                   overlapped each other at x=1343 and x=1345
+     avatar        34x36 - not square - overflow:hidden, initials drawn by a
+                   ::after at 9px, so they clipped
+
+   SPECIFICITY. lens-prime-match.css selects with
+     html:not(#lpm-a):not(#lpm-b):not(#lpm-c) body...:not(#lpm-d)
+   Every :not(#id) contributes id weight, so that rule carries four ids and
+   beats ordinary overrides regardless of !important. I first tried patching
+   those declarations at source and did it by value, which also hit the
+   avatar's own width:34px and stretched it to 48px. Reverted. This block
+   instead outweighs them explicitly and stays scoped to #main-nav, so the
+   blast radius is one component.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* tabs: fit the bar; the underline lands on its edge */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .nav-links {
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  align-self: stretch !important;
+  align-items: stretch !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .nav-tab {
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 0 14px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+  position: relative !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .nav-tab.active-tab {
+  font-weight: 600 !important;
+  color: var(--lpf-ink, #f2eee6) !important;
+  -webkit-text-fill-color: var(--lpf-ink, #f2eee6) !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .nav-tab.active-tab::after {
+  content: "" !important;
+  position: absolute !important;
+  left: 12px !important; right: 12px !important; bottom: 0 !important;
+  height: 2px !important;
+  border-radius: 2px 2px 0 0 !important;
+  background: linear-gradient(90deg, #B98A3D, #EFC66D, #B98A3D) !important;
+}
+
+/* search: one box, with a low-saturation gold edge instead of grey */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav :is(.nav-search, .nav-search-wrap) {
+  height: 34px !important;
+  border-radius: 8px !important;
+  border: 1px solid transparent !important;
+  background:
+    linear-gradient(var(--lpf-panel, #0a1216), var(--lpf-panel, #0a1216)) padding-box,
+    linear-gradient(120deg, rgba(216,163,63,.40), rgba(216,163,63,.10) 45%, rgba(216,163,63,.28)) border-box !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 0 12px !important;
+  box-shadow: none !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .nav-search > i,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .nav-search > svg {
+  width: auto !important;
+  height: auto !important;
+  flex: 0 0 auto !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  font-size: 15px !important;
+  line-height: 1 !important;
+  color: rgba(239,237,230,.42) !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav input {
+  height: 32px !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  border: 0 !important;
+  outline: none !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0 !important;
+  padding: 0 !important;
+  color: var(--lpf-ink, #f2eee6) !important;
+  -webkit-text-fill-color: var(--lpf-ink, #f2eee6) !important;
+}
+
+/* toggle: thumb inside its own track, icons at opposite ends */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .theme-toggle {
+  width: 52px !important; height: 34px !important; padding: 0 !important;
+  min-width: 52px !important; max-width: 52px !important;
+  min-height: 34px !important; max-height: 34px !important;
+  transform: none !important;
+  border: 0 !important; background: transparent !important;
+  display: inline-flex !important; align-items: center !important; justify-content: center !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .theme-toggle-track {
+  position: relative !important;
+  width: 48px !important; height: 26px !important;
+  border-radius: 999px !important;
+  background: var(--lpf-panel-raised, #0d171b) !important;
+  border: 1px solid var(--lpf-line, rgba(187,168,126,.17)) !important;
+  display: block !important; overflow: visible !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .theme-toggle-track > i.ti-sun {
+  position: absolute !important; left: 7px !important; right: auto !important;
+  top: 50% !important; transform: translateY(-50%) !important;
+  width: 11px !important; height: 11px !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .theme-toggle-track > i.ti-moon {
+  position: absolute !important; right: 7px !important; left: auto !important;
+  top: 50% !important; transform: translateY(-50%) !important;
+  width: 11px !important; height: 11px !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .theme-toggle-thumb {
+  position: absolute !important; top: 50% !important;
+  width: 20px !important; height: 20px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(180deg, #EFC66D, #C9922F) !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,.55) !important;
+  transition: left .18s ease !important;
+}
+html[data-theme="dark"]:not(#cp1):not(#cp2):not(#cp3):not(#cp4) body:not(#cp6) #main-nav .theme-toggle-thumb {
+  left: 25px !important; transform: translateY(-50%) !important;
+}
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4) body:not(#cp6) #main-nav .theme-toggle-thumb {
+  left: 3px !important; transform: translateY(-50%) !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .theme-toggle-thumb { transition: none !important; }
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   The gold circle at the right of the bar was NOT an account avatar.
+
+   #nav-login is <a href="/login">Log in</a>. app-navigation.js hides it the
+   moment a session is found and shows #nav-acct-wrap instead, so that circle
+   is only ever rendered to someone who is LOGGED OUT. lens-prime-match.css
+   set font-size:0 on it and drew content:"BP" in a ::after, and in the same
+   rule hid #nav-signup. Net effect: every visitor arrived to a stranger's
+   initials, no readable Log in, and no Start trial anywhere in the nav.
+   Screen readers still announced "Log in", so the control and its label
+   disagreed.
+
+   Making the initials bigger would have made that worse. Restored instead:
+   Log in reads "Log in", Start trial comes back as the primary action.
+   ─────────────────────────────────────────────────────────────────────────── */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav #nav-login {
+  width: auto !important;
+  min-width: 0 !important; max-width: none !important;
+  height: 34px !important;
+  min-height: 34px !important; max-height: 34px !important;
+  padding: 0 14px !important;
+  display: inline-flex !important; align-items: center !important; justify-content: center !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  line-height: 1 !important;
+  letter-spacing: 0 !important;
+  text-indent: 0 !important;
+  text-transform: none !important;
+  transform: none !important;
+  overflow: visible !important;
+  color: var(--lpf-ink, #f2eee6) !important;
+  -webkit-text-fill-color: var(--lpf-ink, #f2eee6) !important;
+  border: 1px solid transparent !important;
+  background:
+    linear-gradient(var(--lpf-panel, #0a1216), var(--lpf-panel, #0a1216)) padding-box,
+    linear-gradient(120deg, rgba(216,163,63,.40), rgba(216,163,63,.10) 45%, rgba(216,163,63,.28)) border-box !important;
+  box-shadow: none !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav #nav-login::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* Start trial: the primary action, put back into the bar */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav #nav-signup {
+  display: inline-flex !important;
+  align-items: center !important; justify-content: center !important;
+  height: 34px !important;
+  min-height: 34px !important; max-height: 34px !important;
+  padding: 0 16px !important;
+  border: 0 !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  transform: none !important;
+  background: linear-gradient(180deg, #E3B25A, #C08F3A) !important;
+  color: #17130B !important;
+  -webkit-text-fill-color: #17130B !important;
+  box-shadow: none !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav #nav-signup[hidden],
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav #nav-login[hidden] { display: none !important; }
+
+/* ───────────────────────────────────────────────────────────────────────────
+   Light mode was carrying dark-mode ink.
+
+   -webkit-text-fill-color paints over `color`, and several nav rules set it to
+   a literal near-white (rgba(239,237,230,.7)) rather than to a token. In dark
+   mode that is invisible because it matches. In light mode the tabs, the
+   search icon and the placeholder were all painting near-white onto a #fcfaf5
+   bar - measured, the inactive tabs were rendering at rgba(239,237,230,.7) on
+   cream, which is why five of the six tabs could not be read.
+
+   Fixed by making the fill follow the colour token instead of a literal.
+   ─────────────────────────────────────────────────────────────────────────── */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .nav-tab {
+  color: var(--lpf-copy, #b3bab8) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .nav-tab:hover {
+  color: var(--lpf-ink, #f2eee6) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .nav-tab.active-tab {
+  color: var(--lpf-ink, #f2eee6) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .nav-search > i,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .nav-search > svg {
+  color: var(--lpf-muted, #778180) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav input::placeholder {
+  color: var(--lpf-muted, #778180) !important;
+  -webkit-text-fill-color: var(--lpf-muted, #778180) !important;
+  opacity: 1 !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav #nav-login {
+  -webkit-text-fill-color: currentColor !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .il-wordmark {
+  color: var(--lpf-ink, #f2eee6) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .il-wordmark-b {
+  color: var(--lpf-muted, #778180) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+/* Toggle: the 20px thumb sits on top of one of the two 11px icons, so that
+   icon was a smudge under the gold disc. Hide whichever one the thumb covers;
+   the remaining icon then reads as "what you get if you press this". */
+html[data-theme="dark"]:not(#cp1):not(#cp2):not(#cp3):not(#cp4) body:not(#cp6) #main-nav .theme-toggle-track > i.ti-moon { opacity: 0 !important; }
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4) body:not(#cp6) #main-nav .theme-toggle-track > i.ti-sun { opacity: 0 !important; }
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .theme-toggle-track > i {
+  color: var(--lpf-copy, #b3bab8) !important;
+  -webkit-text-fill-color: currentColor !important;
+  transition: opacity .18s ease !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .theme-toggle-track > i { transition: none !important; }
+}
