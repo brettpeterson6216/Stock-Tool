@@ -569,11 +569,19 @@ html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-build 
 }
 
 /* The landing market cards kept a dark panel in light mode, which is why the
-   breadth score read as dark ink on a dark ground at 1.02:1. */
-html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilm-card,
-html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilm-gauge {
+   breadth score read as dark ink on a dark ground at 1.02:1.
+
+   .ilm-gauge is deliberately NOT in this list. It carries the conic-gradient
+   that draws the breadth ring, and setting a flat background on it in the
+   earlier pass painted over the dial - the gauge rendered as a plain disc with
+   no arc at all. Only its inner face needs theming; lens-prime-match.css pins
+   that to #091115, which is the black circle that showed up in light mode. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilm-card {
   background: var(--lp-panel, #0a1115) !important;
   border-color: var(--lp-border, rgba(176,160,126,.16)) !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilm-gauge > div {
+  background: var(--lp-panel, #0a1115) !important;
 }
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilm-gauge strong,
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilm-gauge span {
@@ -668,4 +676,146 @@ html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .field lab
   display: block !important;
   min-height: 2.2em !important;
   line-height: 1.1 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LIVE MARKET HERO
+
+   Replaces an illustration of a magnifying glass over candlesticks whose
+   readout panel said AAPL 191.62, implied move 4.23%, options sentiment
+   Bullish, IV rank 64. There is no options endpoint in this codebase, so three
+   of those five rows could never be real - and the "Sample data" line meant to
+   disclose that was clipped off the bottom of its own container, so it never
+   appeared. The old block also hardcoded background:#091013, which is why it
+   sat in the light-mode page as a dark slab with a hard edge.
+
+   Everything here is drawn from /api/market/landing-summary - the same request
+   the terminal lower down already makes - and every surface is a token, so it
+   follows the theme instead of fighting it.
+   ═══════════════════════════════════════════════════════════════════════════ */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-hero-live {
+  --ihl-accent: var(--lp-gold, #d8a23d);
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+  padding: 20px !important;
+  border-radius: 10px !important;
+  border: 1px solid var(--lp-border, rgba(176,160,126,.16)) !important;
+  background: var(--lp-elev, linear-gradient(155deg,#0d1519,#091013)) !important;
+  box-shadow: none !important;
+  min-height: 0 !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-hero-live.is-up { --ihl-accent: var(--lp-green, #4ec879); }
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-hero-live.is-dn { --ihl-accent: var(--lp-red, #ef626d); }
+
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihl-head {
+  display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 10px !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihl-id {
+  display: flex !important; align-items: baseline !important; gap: 9px !important; min-width: 0 !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihl-sym {
+  font-size: 13px !important; font-weight: 600 !important; color: var(--lp-text, #f2eee5) !important;
+  -webkit-text-fill-color: currentColor !important; white-space: nowrap !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihl-name,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihl-span {
+  font-size: 12px !important; color: var(--lp-muted, #929c9c) !important;
+  -webkit-text-fill-color: currentColor !important; white-space: nowrap !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihl-state {
+  font-size: 11px !important; font-weight: 600 !important;
+  padding: 3px 9px !important; border-radius: 999px !important; white-space: nowrap !important;
+  color: var(--lp-muted, #929c9c) !important; -webkit-text-fill-color: currentColor !important;
+  border: 1px solid var(--lp-border, rgba(176,160,126,.16)) !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihl-quote {
+  display: flex !important; align-items: baseline !important; gap: 10px !important; flex-wrap: wrap !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihl-price {
+  font-family: var(--lpf-serif, Georgia, 'Times New Roman', serif) !important;
+  font-size: clamp(30px, 3.1vw, 42px) !important; font-weight: 400 !important; line-height: 1 !important;
+  letter-spacing: -.02em !important; color: var(--lp-text, #f2eee5) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihl-change {
+  font-size: 14px !important; font-weight: 600 !important;
+  color: var(--lp-muted, #929c9c) !important; -webkit-text-fill-color: currentColor !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihl-change.is-up { color: var(--lp-green, #4ec879) !important; }
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihl-change.is-dn { color: var(--lp-red, #ef626d) !important; }
+
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihl-chart {
+  position: relative !important; min-height: 168px !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihl-chart svg {
+  display: block !important; width: 100% !important; height: 168px !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihl-line {
+  fill: none !important; stroke: var(--ihl-accent) !important; stroke-width: 2 !important;
+  stroke-linejoin: round !important; stroke-linecap: round !important;
+  vector-effect: non-scaling-stroke !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihl-area {
+  fill: url(#ihlFill) !important; stroke: none !important;
+}
+/* [hidden] is only display:none at user-agent weight, so the !important
+   display:flex below kept the unavailable message painted over a chart that
+   had loaded perfectly well. Caught by rendering the populated state against a
+   fixture rather than shipping a component I had only ever seen empty. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihl-empty[hidden] {
+  display: none !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihl-empty {
+  position: absolute !important; inset: 0 !important; margin: 0 !important;
+  display: flex !important; align-items: center !important; justify-content: center !important;
+  text-align: center !important; font-size: 13px !important;
+  color: var(--lp-muted, #929c9c) !important; -webkit-text-fill-color: currentColor !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-hero-live.is-empty .ihl-chart svg { opacity: 0 !important; }
+
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihl-sectors {
+  display: flex !important; flex-wrap: wrap !important; gap: 6px !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihl-sector {
+  display: inline-flex !important; align-items: baseline !important; gap: 6px !important;
+  padding: 4px 9px !important; border-radius: 6px !important;
+  border: 1px solid var(--lp-border, rgba(176,160,126,.16)) !important;
+  background: var(--lp-panel, #0a1115) !important;
+  font-size: 11px !important; white-space: nowrap !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihl-sector b {
+  font-weight: 500 !important; color: var(--lp-muted, #929c9c) !important; -webkit-text-fill-color: currentColor !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihl-sector i {
+  font-style: normal !important; font-weight: 600 !important;
+  color: var(--lp-text, #f2eee5) !important; -webkit-text-fill-color: currentColor !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihl-sector.is-up i { color: var(--lp-green, #4ec879) !important; }
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihl-sector.is-dn i { color: var(--lp-red, #ef626d) !important; }
+
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihl-foot {
+  display: flex !important; align-items: center !important; justify-content: space-between !important;
+  gap: 10px !important; padding-top: 12px !important;
+  border-top: 1px solid var(--lp-border, rgba(176,160,126,.16)) !important;
+  font-size: 11px !important; color: var(--lp-muted, #929c9c) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-hero-live-mobile { display: none !important; }
+@media (max-width: 900px) {
+  html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #il-hero-live { display: none !important; }
+  html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-hero-live-mobile {
+    display: flex !important; padding: 16px !important; gap: 12px !important;
+  }
+  html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-hero-live-mobile .ihl-chart,
+  html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-hero-live-mobile .ihl-chart svg {
+    min-height: 96px !important; height: 96px !important;
+  }
+}
+/* The mobile card is a separate <svg>; referencing the desktop chart's
+   gradient failed once that chart went display:none at this width. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihl-area-m {
+  fill: url(#ihlFillM) !important;
 }

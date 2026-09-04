@@ -77,9 +77,9 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/vendor/fonts/plus-jakarta-sans-files/plus-jakarta-sans-latin-700-normal.woff2">
 <link rel="stylesheet" href="/vendor/fonts/il-fonts.css?v=20260825-6">
 <link rel="stylesheet" href="/vendor/tabler-icons.min.css?v=3.46.0-1">
-<link href="/product-system.css?v=20260905-12" rel="stylesheet">
-<link href="/workspace-system.css?v=20260905-12" rel="stylesheet">
-<link href="/research-system.css?v=20260905-12" rel="stylesheet">
+<link href="/product-system.css?v=20260905-16" rel="stylesheet">
+<link href="/workspace-system.css?v=20260905-16" rel="stylesheet">
+<link href="/research-system.css?v=20260905-16" rel="stylesheet">
 <!-- defer: this was the only render-blocking script on the page, 201KB before first paint -->
 <script defer src="/vendor/chart.umd.min.js?v=4.4.1"></script>
 <script defer src="/vendor/hammer.min.js?v=2.0.8"></script>
@@ -96,22 +96,22 @@
 <script defer src="/hero-chart.js?v=20260825-6"></script>
 <script defer src="/tool-launch.js?v=20260904-1"></script>
 <script defer src="/share-studio.js?v=20260827-2"></script>
-<link href="/legacy-app.css?v=20260905-12" rel="stylesheet">
-<link href="/premium.css?v=20260905-12" rel="stylesheet">
-<link href="/release-polish.css?v=20260905-12" rel="stylesheet">
-<link href="/visual-refresh.css?v=20260905-12" rel="stylesheet">
-  <link href="/site-shell.css?v=20260905-12" rel="stylesheet">
-<link href="/landing-polish.css?v=20260905-12" rel="stylesheet">
-<link href="/beauty-system.css?v=20260905-12" rel="stylesheet">
-<link href="/chart-engine.css?v=20260905-12" rel="stylesheet">
-<link rel="stylesheet" href="/premium-revamp.css?v=20260905-12">
-<link rel="stylesheet" href="/il-system.css?v=20260905-12">
-<link rel="stylesheet" href="/lens-prime-v2.css?v=20260905-12">
-<link rel="stylesheet" href="/lens-prime-exact.css?v=20260905-12">
-<link rel="stylesheet" href="/lens-prime-shared.css?v=20260905-12">
-<link rel="stylesheet" href="/lens-prime-fidelity.css?v=20260905-12">
-<link rel="stylesheet" href="/lens-prime-match.css?v=20260905-12">
-<link href="/clean-pass.css?v=20260905-12" rel="stylesheet">
+<link href="/legacy-app.css?v=20260905-16" rel="stylesheet">
+<link href="/premium.css?v=20260905-16" rel="stylesheet">
+<link href="/release-polish.css?v=20260905-16" rel="stylesheet">
+<link href="/visual-refresh.css?v=20260905-16" rel="stylesheet">
+  <link href="/site-shell.css?v=20260905-16" rel="stylesheet">
+<link href="/landing-polish.css?v=20260905-16" rel="stylesheet">
+<link href="/beauty-system.css?v=20260905-16" rel="stylesheet">
+<link href="/chart-engine.css?v=20260905-16" rel="stylesheet">
+<link rel="stylesheet" href="/premium-revamp.css?v=20260905-16">
+<link rel="stylesheet" href="/il-system.css?v=20260905-16">
+<link rel="stylesheet" href="/lens-prime-v2.css?v=20260905-16">
+<link rel="stylesheet" href="/lens-prime-exact.css?v=20260905-16">
+<link rel="stylesheet" href="/lens-prime-shared.css?v=20260905-16">
+<link rel="stylesheet" href="/lens-prime-fidelity.css?v=20260905-16">
+<link rel="stylesheet" href="/lens-prime-match.css?v=20260905-16">
+<link href="/clean-pass.css?v=20260905-16" rel="stylesheet">
 <script defer src="/premium-motion.js?v=20260825-6"></script>
 </head>
 <body class="il-product-page">
@@ -176,7 +176,7 @@
   </div>
 </nav>
 <script defer src="/app-navigation.js?v=20260831-1"></script>
-<script defer src="/landing-market.js?v=20260831-2"></script>
+<script defer src="/landing-market.js?v=20260905-15"></script>
 <span id="main-content" tabindex="-1"></span>
 <!-- ══════════ VIEW: HOME ══════════ -->
 <div id="view-home" role="main">
@@ -189,226 +189,69 @@
     <a href="#" onclick="landingScrollTo('#landing-pricing',this);return false;"><i class="ti ti-tag"></i><span>Pricing</span></a>
   </aside>
   <div class="il-landing-hero">
-    <div class="il-landing-preview" aria-label="Illustration of the Implied Lens research workspace">
-      <div class="il-hero-mock ihx-wrap" role="img" aria-label="Illustration: a rising price chart under a magnifying lens, with an illustrative fair-value readout and sample quote panel">
-        <div class="ihx-stage">
-          <svg class="ihx-scene" viewBox="0 0 780 520" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
-  <defs>
-    <linearGradient id="ihxRing" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#F6DFA8"/><stop offset=".38" stop-color="#D89A37"/>
-      <stop offset=".66" stop-color="#8A6220"/><stop offset="1" stop-color="#EBC87E"/>
-    </linearGradient>
-    <linearGradient id="ihxHandle" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#E7C583"/><stop offset=".5" stop-color="#A9782B"/><stop offset="1" stop-color="#6E4E18"/>
-    </linearGradient>
-    <radialGradient id="ihxGlass" cx=".38" cy=".3" r=".85">
-      <stop offset="0" stop-color="rgba(255,240,205,.13)"/>
-      <stop offset=".6" stop-color="rgba(216,154,55,.05)"/>
-      <stop offset="1" stop-color="rgba(0,0,0,.18)"/>
-    </radialGradient>
-    <radialGradient id="ihxGlow" cx=".5" cy=".5" r=".5">
-      <stop offset="0" stop-color="rgba(216,154,55,.17)"/><stop offset="1" stop-color="rgba(216,154,55,0)"/>
-    </radialGradient>
-    <clipPath id="ihxLens"><circle cx="415" cy="222" r="166"/></clipPath>
-  </defs>
-
-  <ellipse cx="415" cy="222" rx="330" ry="275" fill="url(#ihxGlow)"/>
-  <g class="ihx-candles">
-      <line class="wk dn" x1="40.0" y1="362.9" x2="40.0" y2="394.6"/>
-      <rect class="cd dn" x="35.9" y="371.0" width="8.2" height="4.6" rx="1.2"/>
-      <line class="wk dn" x1="59.5" y1="359.0" x2="59.5" y2="409.5"/>
-      <rect class="cd dn" x="55.4" y="375.5" width="8.2" height="21.2" rx="1.2"/>
-      <line class="wk dn" x1="79.0" y1="380.8" x2="79.0" y2="424.4"/>
-      <rect class="cd dn" x="74.9" y="396.7" width="8.2" height="22.1" rx="1.2"/>
-      <line class="wk up" x1="98.5" y1="409.9" x2="98.5" y2="425.6"/>
-      <rect class="cd up" x="94.4" y="416.2" width="8.2" height="2.7" rx="1.2"/>
-      <line class="wk up" x1="118.0" y1="391.1" x2="118.0" y2="423.6"/>
-      <rect class="cd up" x="113.9" y="414.1" width="8.2" height="2.1" rx="1.2"/>
-      <line class="wk dn" x1="137.5" y1="395.5" x2="137.5" y2="450.9"/>
-      <rect class="cd dn" x="133.4" y="414.1" width="8.2" height="11.2" rx="1.2"/>
-      <line class="wk up" x1="157.0" y1="399.6" x2="157.0" y2="451.5"/>
-      <rect class="cd up" x="152.9" y="413.1" width="8.2" height="12.2" rx="1.2"/>
-      <line class="wk dn" x1="176.5" y1="389.5" x2="176.5" y2="447.1"/>
-      <rect class="cd dn" x="172.4" y="413.1" width="8.2" height="22.9" rx="1.2"/>
-      <line class="wk dn" x1="196.0" y1="428.7" x2="196.0" y2="464.0"/>
-      <rect class="cd dn" x="191.9" y="436.0" width="8.2" height="16.4" rx="1.2"/>
-      <line class="wk up" x1="215.5" y1="415.8" x2="215.5" y2="470.0"/>
-      <rect class="cd up" x="211.4" y="424.5" width="8.2" height="28.0" rx="1.2"/>
-      <line class="wk up" x1="235.0" y1="395.3" x2="235.0" y2="441.3"/>
-      <rect class="cd up" x="230.9" y="408.2" width="8.2" height="16.3" rx="1.2"/>
-      <line class="wk dn" x1="254.5" y1="402.2" x2="254.5" y2="439.3"/>
-      <rect class="cd dn" x="250.4" y="408.2" width="8.2" height="21.8" rx="1.2"/>
-      <line class="wk up" x1="274.0" y1="396.9" x2="274.0" y2="441.7"/>
-      <rect class="cd up" x="269.9" y="411.0" width="8.2" height="19.0" rx="1.2"/>
-      <line class="wk up" x1="293.5" y1="383.5" x2="293.5" y2="422.3"/>
-      <rect class="cd up" x="289.4" y="398.3" width="8.2" height="12.7" rx="1.2"/>
-      <line class="wk up" x1="313.0" y1="351.6" x2="313.0" y2="408.4"/>
-      <rect class="cd up" x="308.9" y="371.7" width="8.2" height="26.6" rx="1.2"/>
-      <line class="wk up" x1="332.5" y1="343.4" x2="332.5" y2="395.7"/>
-      <rect class="cd up" x="328.4" y="359.7" width="8.2" height="12.0" rx="1.2"/>
-      <line class="wk up" x1="352.0" y1="326.4" x2="352.0" y2="386.0"/>
-      <rect class="cd up" x="347.9" y="337.4" width="8.2" height="22.3" rx="1.2"/>
-      <line class="wk dn" x1="371.5" y1="323.5" x2="371.5" y2="369.2"/>
-      <rect class="cd dn" x="367.4" y="337.4" width="8.2" height="10.3" rx="1.2"/>
-      <line class="wk dn" x1="391.0" y1="332.2" x2="391.0" y2="361.4"/>
-      <rect class="cd dn" x="386.9" y="347.7" width="8.2" height="8.1" rx="1.2"/>
-      <line class="wk up" x1="410.5" y1="308.1" x2="410.5" y2="373.2"/>
-      <rect class="cd up" x="406.4" y="329.7" width="8.2" height="26.1" rx="1.2"/>
-      <line class="wk up" x1="430.0" y1="278.3" x2="430.0" y2="349.8"/>
-      <rect class="cd up" x="425.9" y="289.9" width="8.2" height="39.8" rx="1.2"/>
-      <line class="wk up" x1="449.5" y1="251.2" x2="449.5" y2="304.7"/>
-      <rect class="cd up" x="445.4" y="268.7" width="8.2" height="21.2" rx="1.2"/>
-      <line class="wk up" x1="469.0" y1="205.7" x2="469.0" y2="283.9"/>
-      <rect class="cd up" x="464.9" y="231.3" width="8.2" height="37.4" rx="1.2"/>
-      <line class="wk up" x1="488.5" y1="199.4" x2="488.5" y2="251.5"/>
-      <rect class="cd up" x="484.4" y="205.5" width="8.2" height="25.8" rx="1.2"/>
-      <line class="wk up" x1="508.0" y1="154.2" x2="508.0" y2="228.3"/>
-      <rect class="cd up" x="503.9" y="180.8" width="8.2" height="24.7" rx="1.2"/>
-      <line class="wk up" x1="527.5" y1="166.8" x2="527.5" y2="200.3"/>
-      <rect class="cd up" x="523.4" y="180.1" width="8.2" height="1.6" rx="1.2"/>
-      <line class="wk dn" x1="547.0" y1="165.2" x2="547.0" y2="205.1"/>
-      <rect class="cd dn" x="542.9" y="180.1" width="8.2" height="16.6" rx="1.2"/>
-      <line class="wk dn" x1="566.5" y1="190.7" x2="566.5" y2="228.7"/>
-      <rect class="cd dn" x="562.4" y="196.7" width="8.2" height="10.4" rx="1.2"/>
-      <line class="wk dn" x1="586.0" y1="196.9" x2="586.0" y2="229.9"/>
-      <rect class="cd dn" x="581.9" y="207.1" width="8.2" height="9.6" rx="1.2"/>
-      <line class="wk up" x1="605.5" y1="170.6" x2="605.5" y2="231.2"/>
-      <rect class="cd up" x="601.4" y="177.1" width="8.2" height="39.5" rx="1.2"/>
-      <line class="wk up" x1="625.0" y1="134.7" x2="625.0" y2="199.9"/>
-      <rect class="cd up" x="620.9" y="158.9" width="8.2" height="18.2" rx="1.2"/>
-      <line class="wk up" x1="644.5" y1="109.0" x2="644.5" y2="172.7"/>
-      <rect class="cd up" x="640.4" y="119.8" width="8.2" height="39.0" rx="1.2"/>
-      <line class="wk up" x1="664.0" y1="90.0" x2="664.0" y2="145.7"/>
-      <rect class="cd up" x="659.9" y="114.2" width="8.2" height="5.6" rx="1.2"/>
-      <line class="wk dn" x1="683.5" y1="105.6" x2="683.5" y2="132.2"/>
-      <rect class="cd dn" x="679.4" y="114.2" width="8.2" height="8.1" rx="1.2"/>
-      <line class="wk dn" x1="703.0" y1="106.9" x2="703.0" y2="142.7"/>
-      <rect class="cd dn" x="698.9" y="122.3" width="8.2" height="2.7" rx="1.2"/>
-      <line class="wk dn" x1="722.5" y1="120.2" x2="722.5" y2="139.7"/>
-      <rect class="cd dn" x="718.4" y="125.0" width="8.2" height="1.6" rx="1.2"/>
-  </g>
-
-  <!-- The same field again, scaled about the lens centre: the glass magnifies. -->
-  <g clip-path="url(#ihxLens)">
-    <circle cx="415" cy="222" r="166" fill="rgba(10,9,7,.55)"/>
-    <g transform="translate(415,222) scale(2.05) translate(-415,-222)" class="ihx-candles ihx-mag">
-      <line class="wk dn" x1="40.0" y1="362.9" x2="40.0" y2="394.6"/>
-      <rect class="cd dn" x="35.9" y="371.0" width="8.2" height="4.6" rx="1.2"/>
-      <line class="wk dn" x1="59.5" y1="359.0" x2="59.5" y2="409.5"/>
-      <rect class="cd dn" x="55.4" y="375.5" width="8.2" height="21.2" rx="1.2"/>
-      <line class="wk dn" x1="79.0" y1="380.8" x2="79.0" y2="424.4"/>
-      <rect class="cd dn" x="74.9" y="396.7" width="8.2" height="22.1" rx="1.2"/>
-      <line class="wk up" x1="98.5" y1="409.9" x2="98.5" y2="425.6"/>
-      <rect class="cd up" x="94.4" y="416.2" width="8.2" height="2.7" rx="1.2"/>
-      <line class="wk up" x1="118.0" y1="391.1" x2="118.0" y2="423.6"/>
-      <rect class="cd up" x="113.9" y="414.1" width="8.2" height="2.1" rx="1.2"/>
-      <line class="wk dn" x1="137.5" y1="395.5" x2="137.5" y2="450.9"/>
-      <rect class="cd dn" x="133.4" y="414.1" width="8.2" height="11.2" rx="1.2"/>
-      <line class="wk up" x1="157.0" y1="399.6" x2="157.0" y2="451.5"/>
-      <rect class="cd up" x="152.9" y="413.1" width="8.2" height="12.2" rx="1.2"/>
-      <line class="wk dn" x1="176.5" y1="389.5" x2="176.5" y2="447.1"/>
-      <rect class="cd dn" x="172.4" y="413.1" width="8.2" height="22.9" rx="1.2"/>
-      <line class="wk dn" x1="196.0" y1="428.7" x2="196.0" y2="464.0"/>
-      <rect class="cd dn" x="191.9" y="436.0" width="8.2" height="16.4" rx="1.2"/>
-      <line class="wk up" x1="215.5" y1="415.8" x2="215.5" y2="470.0"/>
-      <rect class="cd up" x="211.4" y="424.5" width="8.2" height="28.0" rx="1.2"/>
-      <line class="wk up" x1="235.0" y1="395.3" x2="235.0" y2="441.3"/>
-      <rect class="cd up" x="230.9" y="408.2" width="8.2" height="16.3" rx="1.2"/>
-      <line class="wk dn" x1="254.5" y1="402.2" x2="254.5" y2="439.3"/>
-      <rect class="cd dn" x="250.4" y="408.2" width="8.2" height="21.8" rx="1.2"/>
-      <line class="wk up" x1="274.0" y1="396.9" x2="274.0" y2="441.7"/>
-      <rect class="cd up" x="269.9" y="411.0" width="8.2" height="19.0" rx="1.2"/>
-      <line class="wk up" x1="293.5" y1="383.5" x2="293.5" y2="422.3"/>
-      <rect class="cd up" x="289.4" y="398.3" width="8.2" height="12.7" rx="1.2"/>
-      <line class="wk up" x1="313.0" y1="351.6" x2="313.0" y2="408.4"/>
-      <rect class="cd up" x="308.9" y="371.7" width="8.2" height="26.6" rx="1.2"/>
-      <line class="wk up" x1="332.5" y1="343.4" x2="332.5" y2="395.7"/>
-      <rect class="cd up" x="328.4" y="359.7" width="8.2" height="12.0" rx="1.2"/>
-      <line class="wk up" x1="352.0" y1="326.4" x2="352.0" y2="386.0"/>
-      <rect class="cd up" x="347.9" y="337.4" width="8.2" height="22.3" rx="1.2"/>
-      <line class="wk dn" x1="371.5" y1="323.5" x2="371.5" y2="369.2"/>
-      <rect class="cd dn" x="367.4" y="337.4" width="8.2" height="10.3" rx="1.2"/>
-      <line class="wk dn" x1="391.0" y1="332.2" x2="391.0" y2="361.4"/>
-      <rect class="cd dn" x="386.9" y="347.7" width="8.2" height="8.1" rx="1.2"/>
-      <line class="wk up" x1="410.5" y1="308.1" x2="410.5" y2="373.2"/>
-      <rect class="cd up" x="406.4" y="329.7" width="8.2" height="26.1" rx="1.2"/>
-      <line class="wk up" x1="430.0" y1="278.3" x2="430.0" y2="349.8"/>
-      <rect class="cd up" x="425.9" y="289.9" width="8.2" height="39.8" rx="1.2"/>
-      <line class="wk up" x1="449.5" y1="251.2" x2="449.5" y2="304.7"/>
-      <rect class="cd up" x="445.4" y="268.7" width="8.2" height="21.2" rx="1.2"/>
-      <line class="wk up" x1="469.0" y1="205.7" x2="469.0" y2="283.9"/>
-      <rect class="cd up" x="464.9" y="231.3" width="8.2" height="37.4" rx="1.2"/>
-      <line class="wk up" x1="488.5" y1="199.4" x2="488.5" y2="251.5"/>
-      <rect class="cd up" x="484.4" y="205.5" width="8.2" height="25.8" rx="1.2"/>
-      <line class="wk up" x1="508.0" y1="154.2" x2="508.0" y2="228.3"/>
-      <rect class="cd up" x="503.9" y="180.8" width="8.2" height="24.7" rx="1.2"/>
-      <line class="wk up" x1="527.5" y1="166.8" x2="527.5" y2="200.3"/>
-      <rect class="cd up" x="523.4" y="180.1" width="8.2" height="1.6" rx="1.2"/>
-      <line class="wk dn" x1="547.0" y1="165.2" x2="547.0" y2="205.1"/>
-      <rect class="cd dn" x="542.9" y="180.1" width="8.2" height="16.6" rx="1.2"/>
-      <line class="wk dn" x1="566.5" y1="190.7" x2="566.5" y2="228.7"/>
-      <rect class="cd dn" x="562.4" y="196.7" width="8.2" height="10.4" rx="1.2"/>
-      <line class="wk dn" x1="586.0" y1="196.9" x2="586.0" y2="229.9"/>
-      <rect class="cd dn" x="581.9" y="207.1" width="8.2" height="9.6" rx="1.2"/>
-      <line class="wk up" x1="605.5" y1="170.6" x2="605.5" y2="231.2"/>
-      <rect class="cd up" x="601.4" y="177.1" width="8.2" height="39.5" rx="1.2"/>
-      <line class="wk up" x1="625.0" y1="134.7" x2="625.0" y2="199.9"/>
-      <rect class="cd up" x="620.9" y="158.9" width="8.2" height="18.2" rx="1.2"/>
-      <line class="wk up" x1="644.5" y1="109.0" x2="644.5" y2="172.7"/>
-      <rect class="cd up" x="640.4" y="119.8" width="8.2" height="39.0" rx="1.2"/>
-      <line class="wk up" x1="664.0" y1="90.0" x2="664.0" y2="145.7"/>
-      <rect class="cd up" x="659.9" y="114.2" width="8.2" height="5.6" rx="1.2"/>
-      <line class="wk dn" x1="683.5" y1="105.6" x2="683.5" y2="132.2"/>
-      <rect class="cd dn" x="679.4" y="114.2" width="8.2" height="8.1" rx="1.2"/>
-      <line class="wk dn" x1="703.0" y1="106.9" x2="703.0" y2="142.7"/>
-      <rect class="cd dn" x="698.9" y="122.3" width="8.2" height="2.7" rx="1.2"/>
-      <line class="wk dn" x1="722.5" y1="120.2" x2="722.5" y2="139.7"/>
-      <rect class="cd dn" x="718.4" y="125.0" width="8.2" height="1.6" rx="1.2"/>
-    </g>
-    <circle cx="415" cy="222" r="166" fill="url(#ihxGlass)"/>
-  </g>
-
-  <g class="ihx-handle">
-    <rect x="533" y="345" width="185" height="30" rx="15" fill="url(#ihxHandle)" transform="rotate(41 533 345)"/>
-    <rect x="520" y="334" width="40" height="50" rx="14" fill="#C9922F" transform="rotate(41 520 334)"/>
-  </g>
-  <circle cx="415" cy="222" r="166" fill="none" stroke="url(#ihxRing)" stroke-width="16"/>
-  <circle cx="415" cy="222" r="174" fill="none" stroke="rgba(255,225,170,.16)" stroke-width="1.5"/>
-  <circle cx="415" cy="222" r="157" fill="none" stroke="rgba(0,0,0,.34)" stroke-width="1.5"/>
-</svg>
-          <div class="ihx-float">
-            <span class="ihx-f-lbl">Implied move (7D)</span>
-            <span class="ihx-f-val">&plusmn;4.23%</span>
-            <span class="ihx-f-tag">Bullish</span>
-            <svg class="ihx-f-spark" viewBox="0 0 120 34" aria-hidden="true"><path d="M2,30 C18,26 26,18 40,20 C54,22 62,12 78,11 C94,10 104,6 118,3" fill="none"/></svg>
-          </div>
+    <!-- Live market hero. Every number here comes from
+         /api/market/landing-summary (real Yahoo chart data, cached 5 min, no
+         login and no quota). What it replaced was an illustration of a
+         magnifying glass over candlesticks with a panel reading AAPL 191.62,
+         implied move 4.23%, options sentiment Bullish, IV rank 64 - and there
+         is no options endpoint anywhere in this codebase, so three of those
+         five rows could never be real. Its "Sample data" disclosure was also
+         clipped off the bottom of the container, so it never actually showed. -->
+    <div class="il-hero-live" id="il-hero-live" aria-label="Live market snapshot">
+      <div class="ihl-head">
+        <div class="ihl-id">
+          <span class="ihl-sym">S&amp;P 500</span>
+          <span class="ihl-name">US large cap</span>
         </div>
-        <aside class="ihx-rail" aria-label="Illustrative quote panel">
-          <div class="ihx-r-top">
-            <span class="ihx-r-sym">AAPL</span><span class="ihx-r-name">Apple Inc.</span>
-          </div>
-          <div class="ihx-r-price">191.62</div>
-          <div class="ihx-r-chg">+2.48 (1.31%)</div>
-          <div class="ihx-r-row"><span>Implied move (7D)</span><b>&plusmn;4.23%</b></div>
-          <div class="ihx-r-row"><span>Options sentiment</span><b>Bullish</b></div>
-          <div class="ihx-r-row"><span>IV rank</span><b>64 <small>Moderate</small></b></div>
-          <div class="ihx-r-row"><span>Earnings</span><b>May 2</b></div>
-          <div class="ihx-r-foot">Sample data</div>
-        </aside>
+        <span class="ihl-state" id="ihl-state">Loading</span>
       </div>
-      <div class="il-preview-caption"><span>Illustrative workspace</span><strong>Open any real ticker free</strong></div>
+      <div class="ihl-quote">
+        <strong class="ihl-price" id="ihl-price">&mdash;</strong>
+        <span class="ihl-change" id="ihl-change">&mdash;</span>
+        <span class="ihl-span">last 30 days</span>
+      </div>
+      <div class="ihl-chart">
+        <svg viewBox="-2 0 644 172" preserveAspectRatio="none" role="img" aria-labelledby="ihl-chart-title">
+          <title id="ihl-chart-title">S&amp;P 500 closing prices over the last 30 days</title>
+          <defs>
+            <linearGradient id="ihlFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="var(--ihl-accent)" stop-opacity=".26"/>
+              <stop offset="1" stop-color="var(--ihl-accent)" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path class="ihl-area" id="ihl-area" d=""/>
+          <path class="ihl-line" id="ihl-line" d=""/>
+        </svg>
+        <p class="ihl-empty" id="ihl-empty" hidden>Market data is unavailable right now.</p>
+      </div>
+      <div class="ihl-sectors" id="ihl-sectors" aria-label="Sector performance today"></div>
+      <div class="ihl-foot">
+        <span id="ihl-asof">&mdash;</span>
+        <span class="ihl-src" id="ihl-src">Yahoo Finance</span>
+      </div>
     </div>
-    <div class="prime-mobile-hero-card" aria-label="Illustrative AAPL market summary">
-      <div class="pmhc-quote"><div><strong>AAPL</strong><span>Apple Inc.</span></div><i class="ti ti-arrow-up-right" aria-hidden="true"></i></div>
-      <div class="pmhc-price"><strong>191.62</strong><span>+2.48 (1.31%)</span></div>
-      <div class="pmhc-stats"><div><span>Implied move (7D)</span><strong>&plusmn;4.23%</strong></div><div><span>Sentiment</span><strong>Bullish</strong></div></div>
-      <svg class="pmhc-chart" viewBox="0 0 330 105" role="img" aria-label="Illustrative rising AAPL price chart">
-        <defs><linearGradient id="pmhcFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d9a33e" stop-opacity=".25"/><stop offset="1" stop-color="#d9a33e" stop-opacity="0"/></linearGradient></defs>
-        <path d="M4 91 L15 86 L26 89 L37 78 L48 82 L59 71 L70 74 L81 63 L92 68 L103 55 L114 59 L125 47 L136 51 L147 42 L158 45 L169 34 L180 40 L191 29 L202 33 L213 23 L224 27 L235 18 L246 22 L257 12 L268 19 L279 10 L290 14 L302 6 L326 3 L326 105 L4 105 Z" fill="url(#pmhcFill)"/>
-        <path d="M4 91 L15 86 L26 89 L37 78 L48 82 L59 71 L70 74 L81 63 L92 68 L103 55 L114 59 L125 47 L136 51 L147 42 L158 45 L169 34 L180 40 L191 29 L202 33 L213 23 L224 27 L235 18 L246 22 L257 12 L268 19 L279 10 L290 14 L302 6 L326 3" fill="none" stroke="#d9a33e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      <div class="pmhc-range"><span>1D</span><span>1W</span><strong>1M</strong><span>3M</span><span>1Y</span><span>All</span></div>
-      <div class="pmhc-foot">Sample data &middot; illustrative only</div>
+    <div class="il-hero-live il-hero-live-mobile" id="il-hero-live-mobile" aria-hidden="true">
+      <div class="ihl-head">
+        <div class="ihl-id"><span class="ihl-sym">S&amp;P 500</span></div>
+        <span class="ihl-state" id="ihl-state-m">Loading</span>
+      </div>
+      <div class="ihl-quote">
+        <strong class="ihl-price" id="ihl-price-m">&mdash;</strong>
+        <span class="ihl-change" id="ihl-change-m">&mdash;</span>
+      </div>
+      <div class="ihl-chart">
+        <svg viewBox="-2 0 364 100" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <linearGradient id="ihlFillM" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="var(--ihl-accent)" stop-opacity=".26"/>
+              <stop offset="1" stop-color="var(--ihl-accent)" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path class="ihl-area ihl-area-m" id="ihl-area-m" d=""/>
+          <path class="ihl-line" id="ihl-line-m" d=""/>
+        </svg>
+      </div>
+      <div class="ihl-foot"><span id="ihl-asof-m">&mdash;</span></div>
     </div>
     <div class="il-landing-copy">
       <span class="il-landing-kicker">Research the expectation, not just the ticker</span>

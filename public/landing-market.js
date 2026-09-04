@@ -6,7 +6,10 @@
   'use strict';
 
   var root = document.getElementById('il-movers');
-  if (!root) return;
+  var hero = document.getElementById('il-hero-live');
+  // The hero and the lower terminal are two views of one request. Either can
+  // be absent; the fetch still runs if the other is present.
+  if (!root && !hero) return;
 
   function number(value, digits) {
     return Number.isFinite(Number(value))
@@ -40,6 +43,7 @@
   }
 
   function renderOverview(overview) {
+    if (!root) return;
     var priceEl = document.getElementById('ilm-index-price');
     var changeEl = document.getElementById('ilm-index-change');
     var line = root.querySelector('.ilm-market-line');
@@ -140,7 +144,98 @@
     });
   }
 
+  /* ── Live hero ───────────────────────────────────────────────────────────
+     Same request, same honesty rule as the terminal below it: if a provider
+     did not answer, the hero says so rather than showing a shaped number. */
+  function areaPath(values, width, height) {
+    var line = sparkPath(values, width, height);
+    return line ? line + ' L' + width + ' ' + height + ' L0 ' + height + ' Z' : '';
+  }
+
+  function relativeTime(iso) {
+    var t = Date.parse(iso || '');
+    if (!Number.isFinite(t)) return '';
+    var mins = Math.max(0, Math.round((Date.now() - t) / 60000));
+    if (mins < 1) return 'Updated just now';
+    if (mins === 1) return 'Updated 1 minute ago';
+    if (mins < 60) return 'Updated ' + mins + ' minutes ago';
+    var hrs = Math.round(mins / 60);
+    return 'Updated ' + hrs + (hrs === 1 ? ' hour ago' : ' hours ago');
+  }
+
+  function text(id, value) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = value;
+  }
+
+  function renderHero(data) {
+    if (!hero) return;
+    var overview = data && data.overview;
+    var empty = document.getElementById('ihl-empty');
+    var sectorWrap = document.getElementById('ihl-sectors');
+
+    if (!overview || !Number.isFinite(Number(overview.price))) {
+      var mobileEmpty = document.getElementById('il-hero-live-mobile');
+      hero.classList.add('is-empty');
+      if (mobileEmpty) mobileEmpty.classList.add('is-empty');
+      text('ihl-state', 'Unavailable');
+      text('ihl-state-m', 'Unavailable');
+      text('ihl-price', '—');
+      text('ihl-price-m', '—');
+      text('ihl-change', '');
+      text('ihl-change-m', '');
+      text('ihl-asof', 'The market data provider did not respond.');
+      text('ihl-asof-m', 'Market data unavailable');
+      if (empty) empty.hidden = false;
+      if (sectorWrap) sectorWrap.innerHTML = '';
+      return;
+    }
+
+    hero.classList.remove('is-empty');
+    if (empty) empty.hidden = true;
+    text('ihl-state', 'Live');
+    text('ihl-state-m', 'Live');
+    text('ihl-price', number(overview.price, 2));
+    text('ihl-price-m', number(overview.price, 2));
+    text('ihl-change', pct(overview.changePct));
+    text('ihl-change-m', pct(overview.changePct));
+    setDirection(document.getElementById('ihl-change'), overview.changePct);
+    setDirection(document.getElementById('ihl-change-m'), overview.changePct);
+    var mobile = document.getElementById('il-hero-live-mobile');
+    [hero, mobile].forEach(function (el) {
+      if (!el) return;
+      el.classList.remove('is-empty');
+      el.classList.toggle('is-up', Number(overview.changePct) >= 0);
+      el.classList.toggle('is-dn', Number(overview.changePct) < 0);
+    });
+
+    var pairs = [['ihl-line', 'ihl-area', 640, 168], ['ihl-line-m', 'ihl-area-m', 360, 96]];
+    for (var i = 0; i < pairs.length; i++) {
+      var lineEl = document.getElementById(pairs[i][0]);
+      var areaEl = document.getElementById(pairs[i][1]);
+      if (lineEl) lineEl.setAttribute('d', sparkPath(overview.closes, pairs[i][2], pairs[i][3]));
+      if (areaEl) areaEl.setAttribute('d', areaPath(overview.closes, pairs[i][2], pairs[i][3]));
+    }
+
+    if (sectorWrap) {
+      var sectors = Array.isArray(data.sectors) ? data.sectors : [];
+      sectorWrap.innerHTML = sectors.slice(0, 6).map(function (s) {
+        var up = Number(s.changePct) >= 0;
+        return '<span class="ihl-sector ' + (Number.isFinite(Number(s.changePct)) ? (up ? 'is-up' : 'is-dn') : '') + '">' +
+          '<b>' + String(s.name || s.symbol || '').replace(/[<>&]/g, '') + '</b>' +
+          '<i>' + pct(s.changePct) + '</i></span>';
+      }).join('');
+    }
+
+    text('ihl-asof', relativeTime(data.asOf));
+    text('ihl-asof-m', relativeTime(data.asOf));
+    var src = document.getElementById('ihl-src');
+    if (src && data.source) src.textContent = String(data.source).replace(/[<>&]/g, '');
+  }
+
   function render(data) {
+    renderHero(data || {});
+    if (!root) return;
     renderOverview(data && data.overview);
     renderSectors(data && data.sectors);
     renderBreadth(data || {});
@@ -154,14 +249,15 @@
       .catch(function () { render({}); });
   }
 
-  if ('IntersectionObserver' in window) {
+  // The hero is above the fold, so it cannot wait for an intersection.
+  if (hero || !('IntersectionObserver' in window)) {
+    load();
+  } else {
     var observer = new IntersectionObserver(function (entries) {
       if (entries.some(function (entry) { return entry.isIntersecting; })) {
         observer.disconnect(); load();
       }
     }, { rootMargin: '250px' });
     observer.observe(root);
-  } else {
-    load();
   }
 })();
