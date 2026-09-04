@@ -1016,15 +1016,9 @@
 
 /* ── wordmark ─────────────────────────────────────────────────────────────── */
 :is(#il-system, html) :is(#il-system, body) #main-nav .nav-logo > span {
-  font-family: "Plus Jakarta Sans", "PJS Fallback", ui-sans-serif, sans-serif !important;
-  text-transform: uppercase !important;
-  letter-spacing: .17em !important;
-  font-weight: 600 !important;
-  font-size: 13px !important;
   line-height: 1 !important;
 }
 :is(#il-system, html) :is(#il-system, body) #main-nav .nav-logo > span em {
-  font-style: normal !important;
   margin-left: .17em !important;
 }
 :is(#il-system, html) :is(#il-system, body) #main-nav .nav-logo img {
@@ -2120,7 +2114,7 @@ body.share-studio-open { overflow: hidden !important; }
 }
 
 @media (max-width: 640px) {
-  body.il-product-page #main-nav .nav-logo > span { font-size:11px !important; letter-spacing:.13em !important; }
+  body.il-product-page #main-nav .nav-logo > span { }
   body.il-product-page #landing-page h1.il-display { font-size:43px !important; }
   body.il-product-page #landing-page .ihx-stage { min-height:290px !important; }
   body.il-product-page #body-analyze:not(.has-stock) > .tool-welcome { padding:30px 22px !important; }

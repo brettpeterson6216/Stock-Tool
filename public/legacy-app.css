@@ -5604,9 +5604,6 @@ html[data-theme="dark"] #main-nav .nav-logo img{
 }
 html[data-theme="dark"] #main-nav .nav-logo span{
   color:#F8EED6!important;
-  font-size: 18px !important;
-  font-weight: 700 !important;
-  letter-spacing:-.02em!important;
 }
 html[data-theme="dark"] #main-nav .nav-logo em{
   color:var(--tool-sample-gold-2)!important;

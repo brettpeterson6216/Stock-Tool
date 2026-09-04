@@ -592,11 +592,7 @@ nav.il-global-nav.il-nav-scrolled {
 }
 
 .nav-logo em, .il-global-brand em {
-  font-family: var(--il-display) !important;
-  font-style: italic !important;
   color: var(--il-brass) !important;
-  font-weight: 400 !important;
-  font-size: 1.08em;
 }
 
 .nav-logo img, .il-global-brand img {

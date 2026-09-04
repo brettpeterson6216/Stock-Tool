@@ -53,15 +53,9 @@
 }
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #main-nav[data-view="home"] .nav-logo > span {
   color: var(--prime-ink) !important;
-  font-family: "Instrument Serif", Georgia, serif !important;
-  font-size: 18px !important;
-  font-weight: 400 !important;
-  letter-spacing: .045em !important;
-  text-transform: uppercase !important;
 }
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #main-nav[data-view="home"] .nav-logo em {
   color: var(--prime-ink) !important;
-  font-style: normal !important;
 }
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #main-nav[data-view="home"] .nav-links {
   height: 70px !important;
@@ -613,8 +607,6 @@
   }
   :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #main-nav .nav-logo > span,
   :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #main-nav[data-view="home"] .nav-logo > span {
-    font-size:14px !important;
-    letter-spacing:.045em !important;
   }
   :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #view-home,
   :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #view-tool { padding-top:64px !important; }

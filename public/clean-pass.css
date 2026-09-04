@@ -1,0 +1,57 @@
+
+/* ── The wordmark is one text block ────────────────────────────────────────
+   It was <span>Implied<em>Lens</em></span>: the <em> picked up an inherited
+   1.08em rule and an inline font-style:italic, so "Lens" rendered at
+   16.33px italic beside "Implied" at 15.12px upright — measured, two sizes
+   and two styles inside a two-word logo. Now one block, one size, one
+   tracking; the second word is distinguished by weight and tone alone. */
+:is(#clean-pass, html) :is(#clean-pass, body)
+  :is(#clean-pass, .il-wordmark):is(#clean-pass2, .il-wordmark) {
+  font-family: var(--lpf-sans, 'Plus Jakarta Sans', system-ui, sans-serif) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  font-style: normal !important;
+  letter-spacing: .16em !important;
+  line-height: 1 !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+  color: var(--lpf-ink, #f2eee6) !important;
+  -webkit-text-fill-color: var(--lpf-ink, #f2eee6) !important;
+}
+:is(#clean-pass, html) :is(#clean-pass, body)
+  :is(#clean-pass, .il-wordmark):is(#clean-pass2, .il-wordmark) > .il-wordmark-b {
+  font-family: inherit !important;
+  font-size: inherit !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+  letter-spacing: inherit !important;
+  margin-left: .34em !important;
+  color: var(--lpf-copy, #b3bab8) !important;
+  -webkit-text-fill-color: var(--lpf-copy, #b3bab8) !important;
+}
+
+/* ── The mark is a mark, not a badge ───────────────────────────────────────
+   Measured on the landing, the logo <img> computed to 34x27 with
+   object-fit:fill — so the circle was rendered as an ellipse — over a
+   rgb(9,10,11) plate, inside a 1px gold box-shadow ring, under a
+   sepia(.2) saturate(1.35) filter. Four treatments stacked on an icon that
+   already draws its own ring. On /login none of them applied, so the same
+   mark looked like two different logos depending on the page.
+
+   The SVG is transparent and self-contained: give it a square box and get
+   out of its way. */
+:is(#clean-pass, html) :is(#clean-pass, body)
+  :is(#clean-pass, .nav-logo, .il-global-brand, .f-logo):is(#clean-pass2, .nav-logo, .il-global-brand, .f-logo) > img {
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  aspect-ratio: 1 / 1 !important;
+  flex: 0 0 28px !important;
+  object-fit: contain !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  filter: none !important;
+  padding: 0 !important;
+}

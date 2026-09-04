@@ -428,8 +428,6 @@ body.il-auth-page form {
 }
 :is(#lpf-auth-a, html) :is(#lpf-auth-b, body.il-auth-page) nav .nav-logo,
 :is(#lpf-auth-a, html) :is(#lpf-auth-b, body.il-auth-page) nav .nav-logo span {
-  font-family: var(--lpf-serif) !important;
-  font-weight: 400 !important;
 }
 
 /* ── Shared static-page mobile drawer ─────────────────────────── */

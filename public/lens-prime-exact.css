@@ -25,8 +25,8 @@
   letter-spacing:.045em!important;font-size:18px!important;color:#f6f0e5!important;
 }
 :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #main-nav[data-view="home"] .nav-logo img{width:27px!important;height:27px!important;filter:sepia(.2) saturate(1.35)!important}
-:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #main-nav[data-view="home"] .nav-logo>span{font:inherit!important;text-transform:uppercase!important}
-:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #main-nav[data-view="home"] .nav-logo em{font-style:normal!important;color:inherit!important}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #main-nav[data-view="home"] .nav-logo>span{font:inherit!important;}
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #main-nav[data-view="home"] .nav-logo em{color:inherit!important}
 :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #main-nav[data-view="home"] .nav-links{gap:8px!important;align-self:stretch!important}
 :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #main-nav[data-view="home"] .nav-tab{
   min-width:auto!important;height:100%!important;padding:0 12px!important;border:0!important;border-radius:0!important;
