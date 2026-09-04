@@ -134,3 +134,45 @@ test("a brand-new account gets direction instead of a row of zeroes", () => {
   assert.match(html, /id="ihm-start"/, "the starter steps are gone");
   assert.match(html, /class="il-startpaths"/, "the visitor page needs its three ways in");
 });
+
+// ── The dashboard has to fill the screen ──────────────────────────────────
+test("the member dashboard has a working half, not just a greeting", () => {
+  const html = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
+  for (const [id, what] of [
+    ["ihm-line", "the market chart"],
+    ["ihm-indexes", "the index row"],
+    ["ihm-sectors", "the sector strip"],
+    ["ihm-populars", "the popular companies"],
+    ["ihm-favs", "the favourites list"],
+    ["ihm-news", "the news list"]
+  ]) {
+    assert.ok(html.includes(`id="${id}"`), `${what} is missing from the dashboard`);
+  }
+  assert.match(html, /class="ihm-grid"/, "the two-column layout is gone");
+});
+
+// A greeting, a search box, four tiles and a short list ended around 760px on
+// a 1440x900 screen, and the footer filled the rest.
+test("the footer is pushed to the bottom rather than floating up", () => {
+  const css = fs.readFileSync(path.join(ROOT, "public", "clean-pass.css"), "utf8");
+  const block = css.slice(css.indexOf("THE MEMBER DASHBOARD, FILLED"));
+  assert.match(block, /min-height:\s*100vh\s*!important/, "the page must be at least a viewport tall");
+  assert.match(block, />\s*footer\s*\{[^}]*margin-top:\s*auto\s*!important/, "the footer must be pushed down by the layout");
+});
+
+// Number(null) is 0 and 0 is finite, so a watchlist row with no target read
+// "target 0.00" - a real-looking price of zero.
+test("a watchlist row with no target does not invent one", () => {
+  const js = fs.readFileSync(path.join(ROOT, "public", "home-member.js"), "utf8");
+  assert.match(js, /item\.target_price != null/, "null must be excluded before the finite check");
+  assert.match(js, /Number\(item\.target_price\) > 0/, "zero is not a target price");
+});
+
+// Every figure on this page is a quote or a count the API returned.
+test("the dashboard panels state their own failures", () => {
+  const js = fs.readFileSync(path.join(ROOT, "public", "home-member.js"), "utf8");
+  for (const msg of ["Index data unavailable.", "Quotes unavailable right now.", "Sector data unavailable."]) {
+    assert.ok(js.includes(msg), `missing the failure state: ${msg}`);
+  }
+  assert.match(js, /preview=1/, "quotes must use the preview path so they cost no analysis quota");
+});

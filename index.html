@@ -77,9 +77,9 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/vendor/fonts/plus-jakarta-sans-files/plus-jakarta-sans-latin-700-normal.woff2">
 <link rel="stylesheet" href="/vendor/fonts/il-fonts.css?v=20260825-6">
 <link rel="stylesheet" href="/vendor/tabler-icons.min.css?v=3.46.0-1">
-<link href="/product-system.css?v=20260906-7" rel="stylesheet">
-<link href="/workspace-system.css?v=20260906-7" rel="stylesheet">
-<link href="/research-system.css?v=20260906-7" rel="stylesheet">
+<link href="/product-system.css?v=20260906-11" rel="stylesheet">
+<link href="/workspace-system.css?v=20260906-11" rel="stylesheet">
+<link href="/research-system.css?v=20260906-11" rel="stylesheet">
 <!-- defer: this was the only render-blocking script on the page, 201KB before first paint -->
 <script defer src="/vendor/chart.umd.min.js?v=4.4.1"></script>
 <script defer src="/vendor/hammer.min.js?v=2.0.8"></script>
@@ -96,22 +96,22 @@
 <script defer src="/hero-chart.js?v=20260825-6"></script>
 <script defer src="/tool-launch.js?v=20260904-1"></script>
 <script defer src="/share-studio.js?v=20260827-2"></script>
-<link href="/legacy-app.css?v=20260906-7" rel="stylesheet">
-<link href="/premium.css?v=20260906-7" rel="stylesheet">
-<link href="/release-polish.css?v=20260906-7" rel="stylesheet">
-<link href="/visual-refresh.css?v=20260906-7" rel="stylesheet">
-  <link href="/site-shell.css?v=20260906-7" rel="stylesheet">
-<link href="/landing-polish.css?v=20260906-7" rel="stylesheet">
-<link href="/beauty-system.css?v=20260906-7" rel="stylesheet">
-<link href="/chart-engine.css?v=20260906-7" rel="stylesheet">
-<link rel="stylesheet" href="/premium-revamp.css?v=20260906-7">
-<link rel="stylesheet" href="/il-system.css?v=20260906-7">
-<link rel="stylesheet" href="/lens-prime-v2.css?v=20260906-7">
-<link rel="stylesheet" href="/lens-prime-exact.css?v=20260906-7">
-<link rel="stylesheet" href="/lens-prime-shared.css?v=20260906-7">
-<link rel="stylesheet" href="/lens-prime-fidelity.css?v=20260906-7">
-<link rel="stylesheet" href="/lens-prime-match.css?v=20260906-7">
-<link href="/clean-pass.css?v=20260906-7" rel="stylesheet">
+<link href="/legacy-app.css?v=20260906-11" rel="stylesheet">
+<link href="/premium.css?v=20260906-11" rel="stylesheet">
+<link href="/release-polish.css?v=20260906-11" rel="stylesheet">
+<link href="/visual-refresh.css?v=20260906-11" rel="stylesheet">
+  <link href="/site-shell.css?v=20260906-11" rel="stylesheet">
+<link href="/landing-polish.css?v=20260906-11" rel="stylesheet">
+<link href="/beauty-system.css?v=20260906-11" rel="stylesheet">
+<link href="/chart-engine.css?v=20260906-11" rel="stylesheet">
+<link rel="stylesheet" href="/premium-revamp.css?v=20260906-11">
+<link rel="stylesheet" href="/il-system.css?v=20260906-11">
+<link rel="stylesheet" href="/lens-prime-v2.css?v=20260906-11">
+<link rel="stylesheet" href="/lens-prime-exact.css?v=20260906-11">
+<link rel="stylesheet" href="/lens-prime-shared.css?v=20260906-11">
+<link rel="stylesheet" href="/lens-prime-fidelity.css?v=20260906-11">
+<link rel="stylesheet" href="/lens-prime-match.css?v=20260906-11">
+<link href="/clean-pass.css?v=20260906-11" rel="stylesheet">
 <script defer src="/premium-motion.js?v=20260825-6"></script>
 </head>
 <body class="il-product-page">
@@ -217,10 +217,87 @@
     <li><span class="ihm-step-n">3</span><div><b>Set a review date</b><span>Come back on a schedule instead of when the price moves.</span></div></li>
   </ol>
 
-  <div class="ihm-recent" id="ihm-recent" hidden>
-    <div class="ihm-recent-head"><span>Recent analyses</span><a href="/?view=tool&amp;section=reports">See all</a></div>
-    <div class="ihm-recent-list" id="ihm-recent-list"></div>
+  <!-- The working half of the dashboard: the market on the left, the things
+       this person actually follows on the right. Everything is drawn from
+       /api/market/landing-summary, /api/quote and /api/workspace/watchlist -
+       no placeholder rows, and each panel states its own failure. -->
+  <div class="ihm-grid">
+    <div class="ihm-col-main">
+      <section class="ihm-panel ihm-market-panel" aria-label="Broader market">
+        <div class="ihm-panel-head">
+          <div class="ihm-panel-id">
+            <span class="ihm-panel-title">S&amp;P 500</span>
+            <span class="ihm-panel-note">last 30 days</span>
+          </div>
+          <div class="ihm-quote">
+            <strong id="ihm-mkt-price">&mdash;</strong>
+            <span id="ihm-mkt-change">&mdash;</span>
+          </div>
+        </div>
+        <div class="ihm-chart">
+          <svg viewBox="-2 0 644 172" preserveAspectRatio="none" role="img" aria-labelledby="ihm-chart-title">
+            <title id="ihm-chart-title">S&amp;P 500 closing prices over the last 30 days</title>
+            <defs>
+              <linearGradient id="ihmFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="var(--ihm-accent)" stop-opacity=".26"/>
+                <stop offset="1" stop-color="var(--ihm-accent)" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <path class="ihm-area" id="ihm-area" d=""/>
+            <path class="ihm-line" id="ihm-line" d=""/>
+          </svg>
+          <p class="ihm-chart-empty" id="ihm-chart-empty" hidden>Market data is unavailable right now.</p>
+        </div>
+        <div class="ihm-indexes" id="ihm-indexes" aria-label="Major indexes"></div>
+      </section>
+
+      <section class="ihm-panel" aria-label="Sector performance today">
+        <div class="ihm-panel-head">
+          <span class="ihm-panel-title">Sectors today</span>
+          <span class="ihm-panel-note" id="ihm-breadth">&mdash;</span>
+        </div>
+        <div class="ihm-sectors" id="ihm-sectors"></div>
+      </section>
+
+      <section class="ihm-panel" aria-label="Popular companies">
+        <div class="ihm-panel-head">
+          <span class="ihm-panel-title">Popular starting points</span>
+        </div>
+        <div class="ihm-populars" id="ihm-populars"></div>
+      </section>
+    </div>
+
+    <aside class="ihm-col-side" aria-label="Your favorites">
+      <section class="ihm-panel ihm-fav-panel">
+        <div class="ihm-panel-head">
+          <span class="ihm-panel-title">Favorites</span>
+          <a class="ihm-panel-link" href="/?view=tool&amp;section=workspace">Edit</a>
+        </div>
+        <div class="ihm-favs" id="ihm-favs"></div>
+        <p class="ihm-favs-empty" id="ihm-favs-empty" hidden>
+          Nothing on your watchlist yet. Analyze a company and add it to keep the reason and the level in one place.
+        </p>
+      </section>
+
+      <section class="ihm-panel" aria-label="Market news">
+        <div class="ihm-panel-head"><span class="ihm-panel-title">Market news</span></div>
+        <div class="ihm-news" id="ihm-news"></div>
+      </section>
+
+      <!-- Moved out of the full-width row below: the left column runs much
+           taller than the right, and this fills the gap instead of leaving
+           half the side of the page empty. -->
+      <section class="ihm-panel ihm-recent" id="ihm-recent" hidden aria-label="Recent analyses">
+        <div class="ihm-panel-head">
+          <span class="ihm-panel-title">Recent analyses</span>
+          <a class="ihm-panel-link" href="/?view=tool&amp;section=reports">See all</a>
+        </div>
+        <div class="ihm-recent-list" id="ihm-recent-list"></div>
+      </section>
+    </aside>
   </div>
+
+
 
 </section>
 
@@ -1860,7 +1937,7 @@
     <a href="#" class="mmenu-item" id="mmenu-logout" style="display:none;" onclick="var b=document.getElementById('nav-acct-logout');if(b){b.click();}_toggleMobileMenu();return false;"><i class="ti ti-logout-2"></i><span>Log out</span></a>
   </div>
 </div>
-  <script defer src="/home-member.js?v=20260906-4"></script>
+  <script defer src="/home-member.js?v=20260906-9"></script>
   <script defer src="/site-nav.js?v=20260905-2"></script>
 </body>
 </html>

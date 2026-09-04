@@ -96,6 +96,189 @@
       .then(function (r) { return r.ok ? r.json() : Promise.reject(new Error(String(r.status))); });
   }
 
+
+  /* ── The working half of the dashboard ─────────────────────────────────
+     The page was a greeting, a search box, four tiles and a list, which left
+     the footer occupying half the viewport. These panels fill it with things
+     that are actually useful to someone already signed in: where the market
+     is, what moved, and what they follow. */
+
+  var INDEXES = [
+    { t: "^IXIC", label: "Nasdaq" },
+    { t: "^DJI", label: "Dow Jones" },
+    { t: "^VIX", label: "Volatility" }
+  ];
+  var POPULAR = ["AAPL", "NVDA", "MSFT", "AMZN", "META", "TSLA"];
+
+  function num(value, digits) {
+    return Number.isFinite(Number(value))
+      ? Number(value).toLocaleString("en-US", { minimumFractionDigits: digits, maximumFractionDigits: digits })
+      : "\u2014";
+  }
+  function pct(value) {
+    if (!Number.isFinite(Number(value))) return "\u2014";
+    var n = Number(value);
+    return (n >= 0 ? "+" : "") + n.toFixed(2) + "%";
+  }
+  function dirClass(v) {
+    return Number.isFinite(Number(v)) ? (Number(v) >= 0 ? " is-up" : " is-dn") : "";
+  }
+  function linePath(values, w, h) {
+    var nums = (Array.isArray(values) ? values : []).map(Number).filter(Number.isFinite);
+    if (nums.length < 2) return "";
+    var min = Math.min.apply(Math, nums), max = Math.max.apply(Math, nums);
+    var span = max - min || 1;
+    return nums.map(function (v, i) {
+      var x = (i / (nums.length - 1)) * w;
+      var y = h - 3 - ((v - min) / span) * (h - 7);
+      return (i ? "L" : "M") + x.toFixed(2) + " " + y.toFixed(2);
+    }).join(" ");
+  }
+
+  /* One quote call per symbol, on the preview path so it costs no analysis
+     quota. Anything that does not answer is left out rather than guessed at. */
+  function quote(symbol) {
+    return json("/api/quote/" + encodeURIComponent(symbol) + "?range=1d&preview=1")
+      .then(function (d) {
+        var meta = d && d.chart && d.chart.result && d.chart.result[0] && d.chart.result[0].meta;
+        if (!meta) return null;
+        var price = Number(meta.regularMarketPrice != null ? meta.regularMarketPrice : meta.chartPreviousClose);
+        var prev = Number(meta.chartPreviousClose || meta.previousClose || price);
+        if (!Number.isFinite(price)) return null;
+        return { symbol: symbol, price: price, changePct: prev > 0 ? ((price - prev) / prev) * 100 : NaN };
+      })
+      .catch(function () { return null; });
+  }
+
+  function renderMarket(data) {
+    var overview = data && data.overview;
+    var host = document.getElementById("il-home-member");
+    var empty = document.getElementById("ihm-chart-empty");
+    if (!overview || !Number.isFinite(Number(overview.price))) {
+      if (empty) empty.hidden = false;
+      if (host) host.classList.add("mkt-empty");
+      return;
+    }
+    if (empty) empty.hidden = true;
+    if (host) {
+      host.classList.remove("mkt-empty");
+      host.classList.toggle("is-up", Number(overview.changePct) >= 0);
+      host.classList.toggle("is-dn", Number(overview.changePct) < 0);
+    }
+    var priceEl = document.getElementById("ihm-mkt-price");
+    var chgEl = document.getElementById("ihm-mkt-change");
+    if (priceEl) priceEl.textContent = num(overview.price, 2);
+    if (chgEl) {
+      chgEl.textContent = pct(overview.changePct);
+      chgEl.className = dirClass(overview.changePct).trim();
+    }
+    var line = document.getElementById("ihm-line");
+    var area = document.getElementById("ihm-area");
+    var d = linePath(overview.closes, 640, 168);
+    if (line) line.setAttribute("d", d);
+    if (area) area.setAttribute("d", d ? d + " L640 168 L0 168 Z" : "");
+
+    var sectors = Array.isArray(data.sectors) ? data.sectors : [];
+    var wrap = document.getElementById("ihm-sectors");
+    if (wrap) {
+      wrap.innerHTML = sectors.length
+        ? sectors.map(function (s) {
+            return '<span class="ihm-sector' + dirClass(s.changePct) + '"><b>' + esc(s.name || s.symbol) +
+              "</b><i>" + pct(s.changePct) + "</i></span>";
+          }).join("")
+        : '<span class="ihm-none">Sector data unavailable.</span>';
+    }
+    var breadth = document.getElementById("ihm-breadth");
+    if (breadth) {
+      breadth.textContent = Number.isFinite(Number(data.measured)) && Number(data.measured) > 0
+        ? Number(data.advancing || 0) + " of " + Number(data.measured) + " advancing"
+        : "\u2014";
+    }
+    var news = document.getElementById("ihm-news");
+    if (news) {
+      var items = Array.isArray(data.news) ? data.news.slice(0, 4) : [];
+      news.innerHTML = items.length
+        ? items.map(function (n) {
+            var href = n.url ? ' href="' + esc(n.url) + '" target="_blank" rel="noopener"' : "";
+            return "<a class=\"ihm-news-row\"" + href + "><span>" + esc(n.headline) +
+              '</span><i>' + esc(n.source || "") + "</i></a>";
+          }).join("")
+        : '<span class="ihm-none">No market news available right now.</span>';
+    }
+  }
+
+  function renderIndexes(rows) {
+    var wrap = document.getElementById("ihm-indexes");
+    if (!wrap) return;
+    var have = rows.filter(Boolean);
+    wrap.innerHTML = have.length
+      ? have.map(function (r) {
+          var label = (INDEXES.filter(function (i) { return i.t === r.symbol; })[0] || {}).label || r.symbol;
+          return '<div class="ihm-index' + dirClass(r.changePct) + '"><span>' + esc(label) +
+            "</span><b>" + num(r.price, 2) + "</b><i>" + pct(r.changePct) + "</i></div>";
+        }).join("")
+      : '<span class="ihm-none">Index data unavailable.</span>';
+  }
+
+  function renderPopulars(rows) {
+    var wrap = document.getElementById("ihm-populars");
+    if (!wrap) return;
+    var have = rows.filter(Boolean);
+    wrap.innerHTML = have.length
+      ? have.map(function (r) {
+          return '<a class="ihm-pop' + dirClass(r.changePct) + '" href="/?view=tool&section=analyze&symbol=' +
+            encodeURIComponent(r.symbol) + '"><b>' + esc(r.symbol) + "</b><span>" + num(r.price, 2) +
+            "</span><i>" + pct(r.changePct) + "</i></a>";
+        }).join("")
+      : '<span class="ihm-none">Quotes unavailable right now.</span>';
+  }
+
+  function renderFavourites(items, quotes) {
+    var wrap = document.getElementById("ihm-favs");
+    var empty = document.getElementById("ihm-favs-empty");
+    if (!wrap || !empty) return;
+    if (!Array.isArray(items) || !items.length) {
+      wrap.innerHTML = "";
+      empty.hidden = false;
+      return;
+    }
+    empty.hidden = true;
+    var byTicker = {};
+    (quotes || []).forEach(function (q) { if (q) byTicker[q.symbol] = q; });
+    wrap.innerHTML = items.slice(0, 10).map(function (item) {
+      var q = byTicker[item.ticker];
+      var right = q
+        ? '<b>' + num(q.price, 2) + "</b><i>" + pct(q.changePct) + "</i>"
+        : '<b>&mdash;</b><i class="ihm-na">no quote</i>';
+      // Number(null) is 0, and 0 is finite - so a row with no target rendered
+      // "target 0.00", which reads as a real price of zero.
+      var hasTarget = item.target_price != null && item.target_price !== "" &&
+        Number.isFinite(Number(item.target_price)) && Number(item.target_price) > 0;
+      var target = hasTarget
+        ? '<span class="ihm-fav-note">target ' + num(item.target_price, 2) + "</span>"
+        : item.note ? '<span class="ihm-fav-note">' + esc(String(item.note).slice(0, 40)) + "</span>" : "";
+      return '<a class="ihm-fav' + (q ? dirClass(q.changePct) : "") +
+        '" href="/?view=tool&section=analyze&symbol=' + encodeURIComponent(item.ticker) + '">' +
+        '<span class="ihm-fav-sym">' + esc(item.ticker) + target + "</span>" +
+        '<span class="ihm-fav-q">' + right + "</span></a>";
+    }).join("");
+  }
+
+  function loadDashboard() {
+    json("/api/market/landing-summary").then(renderMarket).catch(function () { renderMarket(null); });
+
+    Promise.all(INDEXES.map(function (i) { return quote(i.t); })).then(renderIndexes);
+    Promise.all(POPULAR.map(quote)).then(renderPopulars);
+
+    json("/api/workspace/watchlist")
+      .then(function (items) {
+        var list = Array.isArray(items) ? items : [];
+        return Promise.all(list.slice(0, 10).map(function (i) { return quote(i.ticker); }))
+          .then(function (quotes) { renderFavourites(list, quotes); });
+      })
+      .catch(function () { renderFavourites([], []); });
+  }
+
   function load(user) {
     var name = "";
     var label = String((user && (user.username || user.email)) || "").split("@")[0].trim();
@@ -119,6 +302,7 @@
         renderTiles(counts, !summary && !saves);
         renderRecent(saves);
       });
+    loadDashboard();
   }
 
   /* The hint decides the first paint; this decides the truth. */
