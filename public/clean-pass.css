@@ -700,6 +700,62 @@ html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-ws-act
   -webkit-text-fill-color: currentColor !important;
 }
 
+/* The mobile home grid - the market overview card, the analyst strip and their
+   labels - was only ever themed for dark. Below 1100px it appears on the home,
+   dashboard and market pages, and in light mode it painted near-white text on
+   a near-white card: "Market Overview" measured 1.36:1 and the breadth label
+   1.02:1, which is to say invisible. The colours are hardcoded across seven
+   stylesheets, so the component is themed here in one place instead. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .home-grid .mo-title,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .home-grid .hc-title,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .home-grid .mo-idx-price,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .home-grid .mo-bv2-val,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .home-grid strong,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .home-grid b,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .hg-market .mo-title,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .hg-market strong {
+  color: var(--lp-text, #f2eee5) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+/* Deliberately NOT `button`: a blanket colour on interactive elements
+   repainted .movers-tab.on, whose white-on-gold active state was correct, and
+   made it worse than it started. Text elements only. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .home-grid p,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .home-grid span,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .home-grid .as-note,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .home-grid .as-leg-name,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .hg-market span,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .hg-market .as-note,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #sec-education em {
+  color: var(--il-muted-ink) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+/* The narrow-viewport dashboard shell was half-themed, and in both directions.
+   Measured at 900px:
+
+     light   .home-shell background rgb(6,10,12)   - near-black behind a light
+             page, with .prime-mobile-kpi cards the same
+     dark    .home-shell color      rgb(23,18,11)  - near-black text on it
+
+   So a light-mode reader got near-white labels on a black slab and a dark-mode
+   reader got black text on black. Fixing this at the container is the only
+   honest way to do it: painting the individual labels without knowing what is
+   behind them made two of them worse when I tried, because their ground was
+   the thing that was wrong. Children inherit; nothing else is touched. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .home-shell {
+  background: var(--lp-bg, #070b0e) !important;
+  color: var(--lp-text, #f2eee5) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .home-shell .hs-sidebar { background: var(--lp-sidebar, #081014) !important; }
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .home-shell .hs-main { background: var(--lp-bg, #070b0e) !important; }
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .home-shell .prime-mobile-kpi,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .home-shell .prime-dashboard-index {
+  background: var(--lp-panel, #0a1115) !important;
+  color: var(--lp-text, #f2eee5) !important;
+}
+
 /* A destructive action in a red that was 3.36:1 on the light panel. */
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .sa-clear-btn {
   color: var(--il-danger-ink, #b3323d) !important;

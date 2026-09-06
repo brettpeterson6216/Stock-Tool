@@ -246,7 +246,14 @@
   :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #landing-page .ilm-card{border-right:0!important;border-bottom:1px solid rgba(170,155,124,.13)!important}
 
   :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page).il-authenticated #view-home{padding:0!important}
-  :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page.home-shell{display:block!important;min-height:100vh!important}
+  /* display:block!important here forced the market page visible on every
+   narrow viewport regardless of which view was active, so a visitor on
+   the home page scrolled past the marketing content into 2,207px of the
+   market dashboard - measured at 900px, logged out. The rest of this
+   block is the mobile LAYOUT for that page and is still right; only the
+   forced visibility was wrong, and the router's own show/hide governs it
+   again. */
+:is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page.home-shell{min-height:100vh!important}
   :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .hs-sidebar{display:none!important}
   :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .hs-main{height:auto!important;min-height:100vh!important;padding:0 13px 84px!important;overflow:visible!important}
   :is(#lens-prime-exact,html) :is(#lens-prime-exact,body.il-product-page) #market-page .prime-dashboard-head{display:block!important;min-height:0!important;padding:22px 2px 12px!important;border:0!important}
