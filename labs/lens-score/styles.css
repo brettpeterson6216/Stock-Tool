@@ -2,7 +2,7 @@
   color-scheme: dark;
   --ink: #ecf0e9;
   --ink-soft: #aeb8ad;
-  --ink-faint: #7e897f;
+  --ink-faint: #96a297;   /* was #7e897f: 3.97:1 measured on the painted card */
   --night: #0b0f0d;
   --surface: #111713;
   --surface-2: #171e19;
@@ -27,7 +27,7 @@ html[data-theme="light"] {
   color-scheme: light;
   --ink: #1c241f;
   --ink-soft: #4f5d54;
-  --ink-faint: #6d786f;
+  --ink-faint: #5c6a5e;   /* was #6d786f: 4.01:1 on the #f3efe6 card */
   --night: #f7f4ed;
   --surface: #fffdf8;
   --surface-2: #f3efe6;

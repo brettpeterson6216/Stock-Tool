@@ -527,9 +527,14 @@ html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body.il-tool-active:not(#
    clear 4.5:1 against every light ground the site uses - #f3f0e8, #fbfaf6,
    #ffffff and #efeae0 - with the worst case at 4.56 and 4.79.
    ═══════════════════════════════════════════════════════════════════════════ */
-:root { --il-gold-ink: #d8a23d; --il-muted-ink: #929c9c; }
+/* Muted ink, solved with margin rather than to the line. #5f6866 cleared 4.5:1
+   on the grounds it was solved against but only reached 4.40:1 on the
+   rgba(24,22,18,.1) wash used behind evidence panels - measured on the page,
+   not derived. These values clear 5.1:1 on the worst ground in either theme,
+   so a slightly different panel tint cannot push a label back under. */
+:root { --il-gold-ink: #d8a23d; --il-muted-ink: #a3adad; }
 html[data-theme="light"] body,
-html:not([data-theme="dark"]) body { --il-gold-ink: #8a6216; --il-muted-ink: #5f6866; }
+html:not([data-theme="dark"]) body { --il-gold-ink: #7d5814; --il-muted-ink: #565e5c; }
 
 /* Footer: the link colour was a near-white literal, and static-polish.css
    pinned the band itself to #08090a, so on the auth pages the footer stayed a
@@ -557,7 +562,12 @@ html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .eyebrow,
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .tagline,
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .auth-eyebrow,
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-landing-kicker,
-html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .pill {
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .pill,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-lens-context span,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-ws-kicker,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .tw-eyebrow,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ash-kicker,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .num {
   color: var(--il-gold-ink) !important;
   -webkit-text-fill-color: currentColor !important;
 }
@@ -570,6 +580,98 @@ html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) main p a,
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .hero-sub a {
   color: var(--il-gold-ink) !important;
   -webkit-text-fill-color: currentColor !important;
+}
+
+/* Measured on the rendered page rather than read off a stylesheet: the trust
+   line under the landing hero was #8d9696 on the cream panel, which is 2.78:1
+   at 11px against a 4.5 requirement. The solved ink token clears it in both
+   themes. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-trust-lead,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-trust-line,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .trust-lead {
+  color: var(--il-muted-ink) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MUTED TEXT THAT MISSED AA, FOUND BY MEASURING THE RENDERED PAGE
+
+   Every selector here was measured from pixels on the running site, not read
+   off a stylesheet: the crop is the text's own rectangle, the ground is the
+   modal colour in it, and the ink is the most extreme luminance with real
+   mass. They land between 2.13:1 and 4.38:1 against a 4.5 requirement.
+
+   They come from five different muted tokens - --ink5, --text5, --il-muted,
+   --lens-muted and a hardcoded #66717b - and those tokens cannot simply be
+   darkened, because --text5 and --ink5 are also used for borders and fills.
+   So the text uses are repointed at --il-muted-ink, which is solved for both
+   themes and clears 4.5:1 on every ground this site paints: worst case 4.86:1
+   on #efece4 light and 6.33:1 on #10191d dark.
+   ═══════════════════════════════════════════════════════════════════════════ */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .pgc-preview-tag,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .pgc-note,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .sb-pro-sub,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-ws-kicker,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .edu-kicker,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .src-desc,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .tool-disclaimer,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-shell-preview span,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-metric-note,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .wrap .note,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .principle span,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .result span,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-trust-field span,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-trust-note,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-trust-panel-head span,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .edu-note,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-learn-kicker,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-feedback-kicker,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .cex-tool-label,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-shell-status {
+  color: var(--il-muted-ink) !important;
+  -webkit-text-fill-color: currentColor !important;
+  opacity: 1 !important;
+}
+
+/* The paywall preview tags are the labels that say a number is a sample rather
+   than live. A label like that being the hardest thing on the card to read is
+   the exact failure this project has been correcting, so it gets full body ink
+   rather than muted. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .pgc-preview-tag {
+  color: var(--lp-text, #f2eee5) !important;
+  -webkit-text-fill-color: currentColor !important;
+  opacity: 1 !important;
+}
+
+/* These are not decoration and should never have been muted. A legal
+   disclaimer, a lesson definition, an error message and a note explaining how
+   a calculator compounds are all things the reader is meant to read, and each
+   was sitting on a tinted wash that put it just under AA even after the muted
+   token was strengthened. Body ink, not muted ink. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .tool-disclaimer,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .wrap .note,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .note,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .edu-def,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .edu-body,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-learn-preview>div>span,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-learn-examples span,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .edu-checklist span,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #ihl-asof,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #ihl-asof-m,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihl-foot,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihl-foot span {
+  color: var(--lp-text, #f2eee5) !important;
+  -webkit-text-fill-color: currentColor !important;
+  opacity: 1 !important;
+}
+
+/* A destructive action in a red that was 3.36:1 on the light panel. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .sa-clear-btn {
+  color: var(--il-danger-ink, #b3323d) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+html[data-theme="dark"]:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .sa-clear-btn {
+  color: #ef626d !important;
 }
 
 /* Muted labels that sat just under the line. */

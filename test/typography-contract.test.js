@@ -77,10 +77,51 @@ test("uppercase is reserved for the wordmark and ticker symbols", () => {
 
 // Every route measured zero contrast failures in dark and several in light,
 // because literal colours were written when dark was the only theme.
-test("light mode has ink tokens that clear 4.5:1", () => {
+/* Pin the property, not the literal. This test used to assert the exact hex
+   and broke the moment the token was strengthened for a ground it had not been
+   solved against - which is the wrong way round: the value is allowed to move,
+   the guarantee is not. So the ratio is computed here against every ground the
+   site actually paints. */
+function relLum(hex) {
+  const h = hex.replace("#", "");
+  const [r, g, b] = [0, 2, 4].map(i => {
+    const c = parseInt(h.slice(i, i + 2), 16) / 255;
+    return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+function contrast(a, b) {
+  const [x, y] = [relLum(a), relLum(b)];
+  return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
+}
+
+const LIGHT_GROUNDS = ["#ffffff", "#fbfaf6", "#f7f6f2", "#f3f0e8", "#efece4", "#e4e1da"];
+const DARK_GROUNDS = ["#070b0e", "#0a1115", "#10191d", "#1a2226"];
+
+test("the ink tokens clear 4.5:1 on every ground the site paints", () => {
   const cp = SHEETS.find(s => s.name === "clean-pass.css").css;
-  assert.match(cp, /--il-gold-ink:\s*#8a6216/i, "the light gold ink was solved for 4.56:1 at worst");
-  assert.match(cp, /--il-muted-ink:\s*#5f6866/i, "the light muted ink was solved for 4.79:1 at worst");
+  const tokenIn = (scope, name) => {
+    const block = cp.slice(cp.indexOf(scope));
+    const m = block.slice(0, 400).match(new RegExp(name + ":\\s*(#[0-9a-f]{6})", "i"));
+    assert.ok(m, `${name} is not defined in ${scope}`);
+    return m[1];
+  };
+
+  const lightMuted = tokenIn('html:not([data-theme="dark"]) body', "--il-muted-ink");
+  const lightGold = tokenIn('html:not([data-theme="dark"]) body', "--il-gold-ink");
+  const darkMuted = tokenIn(":root {", "--il-muted-ink");
+
+  for (const ground of LIGHT_GROUNDS) {
+    for (const [name, hex] of [["muted", lightMuted], ["gold", lightGold]]) {
+      const cr = contrast(hex, ground);
+      assert.ok(cr >= 4.5, `light ${name} ink ${hex} is ${cr.toFixed(2)}:1 on ${ground}`);
+    }
+  }
+  for (const ground of DARK_GROUNDS) {
+    const cr = contrast(darkMuted, ground);
+    assert.ok(cr >= 4.5, `dark muted ink ${darkMuted} is ${cr.toFixed(2)}:1 on ${ground}`);
+  }
+
   assert.match(
     cp,
     /html:not\(\[data-theme="dark"\]\) body\s*\{[^}]*--il-gold-ink/,

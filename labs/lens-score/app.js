@@ -36,6 +36,16 @@
   };
 
   const $ = selector => document.querySelector(selector);
+  /* Bind only if the element is there. bindEvents() wires the whole page in one
+     run, so a single $("#missing").addEventListener threw and every listener
+     after it - the ticker form, the chart presets, the methodology dialog, the
+     assumptions, the save button, the resize redraw - was silently never
+     attached. One absent node must not be able to take the page down. */
+  const on = (selector, type, handler, opts) => {
+    const node = typeof selector === "string" ? $(selector) : selector;
+    if (node) node.addEventListener(type, handler, opts);
+    return node;
+  };
   const $$ = selector => Array.from(document.querySelectorAll(selector));
   let activeRequestController = null;
   const finite = value => value !== null && value !== undefined && value !== "" && Number.isFinite(Number(value));
@@ -1268,25 +1278,29 @@
   }
 
   function bindEvents() {
-    $("#theme-button").addEventListener("click", toggleTheme);
-    $("#ticker-form").addEventListener("submit", event => {
+    /* The shared site header brought its own #theme-toggle-btn and this page's
+       original button became #theme-button-old, so this binding had been
+       pointing at nothing since. site-nav.js owns the shared toggle; this only
+       has to cover the legacy button if it is still in the markup. */
+    on("#theme-button, #theme-button-old", "click", toggleTheme);
+    on("#ticker-form", "submit", event => {
       event.preventDefault();
       loadTicker($("#ticker-input").value.trim().toUpperCase());
     });
     $$(".quick-tickers [data-ticker]").forEach(button => button.addEventListener("click", () => loadTicker(button.dataset.ticker)));
     $$(".company-nav [data-view]").forEach(button => button.addEventListener("click", () => showView(button.dataset.view)));
-    $("#open-chart-button").addEventListener("click", () => showView("chart"));
+    on("#open-chart-button", "click", () => showView("chart"));
     $$(".chart-presets [data-preset]").forEach(button => button.addEventListener("click", () => {
       state.chartPreset = button.dataset.preset;
       $$(".chart-presets [data-preset]").forEach(item => item.classList.toggle("active", item === button));
       drawChart();
     }));
-    $("#methodology-button").addEventListener("click", () => $("#methodology-dialog").showModal());
-    $("#close-methodology").addEventListener("click", () => $("#methodology-dialog").close());
-    $("#methodology-dialog").addEventListener("click", event => {
+    on("#methodology-button", "click", () => $("#methodology-dialog").showModal());
+    on("#close-methodology", "click", () => $("#methodology-dialog").close());
+    on("#methodology-dialog", "click", event => {
       if (event.target === $("#methodology-dialog")) $("#methodology-dialog").close();
     });
-    $("#reset-assumptions").addEventListener("click", () => {
+    on("#reset-assumptions", "click", () => {
       state.fundamentals = { ...state.reportedFundamentals };
       renderAssumptions();
       calculate(false);
@@ -1299,10 +1313,10 @@
       $("#entry-slider").value = state.entryPrice;
       renderScenario();
     };
-    $("#entry-slider").addEventListener("input", event => setEntry(event.target.value));
-    $("#entry-price").addEventListener("input", event => setEntry(event.target.value));
-    $("#save-scenario").addEventListener("click", saveCurrentScenario);
-    $("#price-chart").addEventListener("mousemove", event => {
+    on("#entry-slider", "input", event => setEntry(event.target.value));
+    on("#entry-price", "input", event => setEntry(event.target.value));
+    on("#save-scenario", "click", saveCurrentScenario);
+    on("#price-chart", "mousemove", event => {
       if (!state.chartPoints.length) return;
       const rect = event.currentTarget.getBoundingClientRect();
       const mouseX = event.clientX - rect.left;
@@ -1316,7 +1330,7 @@
       const date = new Date(nearest.bar.time * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
       tooltip.textContent = `${date} · O ${money(nearest.bar.open)} · H ${money(nearest.bar.high)} · L ${money(nearest.bar.low)} · C ${money(nearest.bar.close)} · Vol ${compact(nearest.bar.volume)}`;
     });
-    $("#price-chart").addEventListener("mouseleave", () => { $("#chart-tooltip").hidden = true; });
+    on("#price-chart", "mouseleave", () => { $("#chart-tooltip").hidden = true; });
     let resizeFrame = null;
     window.addEventListener("resize", () => {
       cancelAnimationFrame(resizeFrame);

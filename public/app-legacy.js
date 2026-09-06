@@ -259,10 +259,10 @@ const PRO_GATE_CONFIG = {
       'Sensitivity table: see exactly how fair value shifts with each assumption',
     ],
     preview: `<div style="text-align:center;padding:.4rem 0 .2rem;">
-      <div style="font-size:.63rem;color:var(--ink5);letter-spacing:.06em;text-transform:uppercase;margin-bottom:.3rem">Intrinsic Value Estimate</div>
+      <div style="font-size:.69rem;color:var(--ink5);letter-spacing:.04em;margin-bottom:.3rem">Intrinsic value estimate</div>
       <div style="font-size:1.9rem;font-family:var(--serif);color:var(--gold);font-weight:700;line-height:1">$198.40</div>
       <div style="font-size:.7rem;color:var(--ink4);margin-top:.25rem">vs market $219.86 · <span style="color:#d96a70">−9.8% overvalued</span></div>
-      <div style="margin-top:.65rem;display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;font-size:.67rem">
+      <div style="margin-top:.65rem;display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;font-size:.69rem">
         <div style="background:var(--bg2);border-radius:5px;padding:4px 3px"><div style="color:var(--ink5)">Growth</div><div style="color:var(--ink)">8.0%</div></div>
         <div style="background:var(--bg2);border-radius:5px;padding:4px 3px"><div style="color:var(--ink5)">Margin</div><div style="color:var(--ink)">25%</div></div>
         <div style="background:var(--bg2);border-radius:5px;padding:4px 3px"><div style="color:var(--ink5)">WACC</div><div style="color:var(--ink)">9.0%</div></div>
@@ -1371,14 +1371,14 @@ function updateLimitUI(remaining, limit, plan) {
     } catch (_) {}
   }
   wrap.innerHTML = `
-    <span style="font-size:.68rem;color:var(--text5);">${isGuest ? 'Guest analyses today:' : 'Free analyses today:'}</span>
-    <span style="font-size:.68rem;font-weight:700;color:${color};">${used}/${limit}</span>
+    <span style="font-size:.69rem;color:var(--text5);">${isGuest ? 'Guest analyses today:' : 'Free analyses today:'}</span>
+    <span style="font-size:.69rem;font-weight:700;color:${color};">${used}/${limit}</span>
     <div style="height:4px;width:60px;background:var(--t-chart-border);border-radius:2px;overflow:hidden;">
       <div style="height:100%;width:${pct}%;background:${color};border-radius:2px;transition:width .3s;"></div>
     </div>
     ${isGuest
-      ? `<button onclick="startGuestSignup('analysis_limit_counter')" style="font-size:.63rem;padding:.22rem .61rem;background:var(--gold);color:#17100A;border:none;border-radius:999px;cursor:pointer;font-weight:700;">Create free account for 5/day</button>`
-      : remaining === 0 ? `<button onclick="showUpgradeModal()" style="font-size:.63rem;padding:.15rem .45rem;background:var(--gold);color:var(--ink);border:none;border-radius:4px;cursor:pointer;font-weight:700;">Upgrade</button>` : ''}
+      ? `<button onclick="startGuestSignup('analysis_limit_counter')" style="font-size:.69rem;padding:.22rem .61rem;background:var(--gold);color:#17100A;border:none;border-radius:999px;cursor:pointer;font-weight:700;">Create free account for 5/day</button>`
+      : remaining === 0 ? `<button onclick="showUpgradeModal()" style="font-size:.69rem;padding:.15rem .45rem;background:var(--gold);color:var(--ink);border:none;border-radius:4px;cursor:pointer;font-weight:700;">Upgrade</button>` : ''}
   `;
 }
 
@@ -2232,7 +2232,7 @@ function renderStock(result, ticker) {
         if (btn && btn.parentNode) {
           const b = document.createElement('div');
           b.id = 'proj-est-badge';
-          b.style.cssText = 'font-size:.63rem;color:var(--gold);font-family:var(--mono);margin-bottom:.5rem;letter-spacing:.04em;';
+          b.style.cssText = 'font-size:.69rem;color:var(--gold);font-family:var(--mono);margin-bottom:.5rem;letter-spacing:.04em;';
           b.textContent = '\u2736 Base case seeded from analyst consensus; Bear and Bull stay custom';
           btn.parentNode.insertBefore(b, btn);
         }
@@ -2884,7 +2884,7 @@ function switchMovers(type,btn){_moversActive=type;document.querySelectorAll('.m
 function renderMovers(type) {
   const el = document.getElementById('home-movers-list'); if (!el) return;
   const items = (_moversCache[type] || []).slice(0, 5);
-  if (!items.length) { el.innerHTML = '<div style="color:var(--text5);font-size:.67rem;text-align:center;padding:.8rem 0;">Market movers are refreshing</div>'; return; }
+  if (!items.length) { el.innerHTML = '<div style="color:var(--text5);font-size:.69rem;text-align:center;padding:.8rem 0;">Market movers are refreshing</div>'; return; }
   el.innerHTML = items.map(m => {
     const up = m.chgPct >= 0;
     const price = m.price >= 1000 ? m.price.toLocaleString('en-US',{maximumFractionDigits:0}) : m.price.toFixed(2);
@@ -2903,7 +2903,7 @@ function loadHomeWatchlist(watchData) {
   const LOGOS = {AAPL:'apple.com',NVDA:'nvidia.com',MSFT:'microsoft.com',TSLA:'tesla.com',AMZN:'amazon.com',META:'meta.com',GOOGL:'google.com',SPY:'ssga.com'};
   const NAMES = {AAPL:'Apple Inc.',NVDA:'NVIDIA Corp.',MSFT:'Microsoft Corp.',TSLA:'Tesla, Inc.',AMZN:'Amazon.com, Inc.',META:'Meta Platforms',GOOGL:'Alphabet Inc.',SPY:'S&P 500 ETF'};
   const rows = (watchData || []).filter(d => starred.includes(d.t)).slice(0, 5);
-  if (!rows.length) { el.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:.9rem 0;color:var(--text5);font-size:.67rem;">Sign in to see your watchlist</td></tr>'; return; }
+  if (!rows.length) { el.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:.9rem 0;color:var(--text5);font-size:.69rem;">Sign in to see your watchlist</td></tr>'; return; }
   el.innerHTML = rows.map(({t, meta}) => {
     if (!meta) return '';
     const price = meta.regularMarketPrice ?? meta.chartPreviousClose;
@@ -3121,10 +3121,10 @@ async function loadAnalyst(ticker) {
           <span style="font-size:1.05rem;font-weight:700;color:var(--gold);">$${mean.toFixed(2)}</span>
         </div>
         ${upside!==null?`<div style="font-size:.7rem;color:${parseFloat(upside)>=0?'var(--market-up)':'var(--market-down)'};margin-bottom:8px;">${parseFloat(upside)>=0?'▲':'▼'} ${Math.abs(upside)}% from current price</div>`:''}
-        ${high||low?`<div style="font-size:.68rem;color:var(--text5);margin-bottom:10px;">Range: ${low?'$'+low.toFixed(2):'—'} – ${high?'$'+high.toFixed(2):'—'}</div>`:''}`;
+        ${high||low?`<div style="font-size:.69rem;color:var(--text5);margin-bottom:10px;">Range: ${low?'$'+low.toFixed(2):'—'} – ${high?'$'+high.toFixed(2):'—'}</div>`:''}`;
     } else {
       // Provider doesn't include street targets — say so, and offer the model instead
-      ptHtml = `<div style="font-size:.68rem;color:var(--text5);margin-bottom:10px;line-height:1.5;">Street price targets aren't included by the current data provider. Use the <a href="#" onclick="openSection('dcf');return false;" style="color:var(--gold);">intrinsic-value model</a> or <a href="#" onclick="openSection('projection');return false;" style="color:var(--gold);">Scenario Lab</a> to build your own range.</div>`;
+      ptHtml = `<div style="font-size:.69rem;color:var(--text5);margin-bottom:10px;line-height:1.5;">Street price targets aren't included by the current data provider. Use the <a href="#" onclick="openSection('dcf');return false;" style="color:var(--gold);">intrinsic-value model</a> or <a href="#" onclick="openSection('projection');return false;" style="color:var(--gold);">Scenario Lab</a> to build your own range.</div>`;
     }
 
     // Consensus bar
@@ -4435,7 +4435,7 @@ async function loadInstitutional(ticker) {
             <td>${escapeHtml(shares)}</td>
             <td>${escapeHtml(pct)}</td>
             <td>${chgStr}</td>
-            <td style="font-size:.68rem;color:var(--text5);">${escapeHtml(h.reportDate||h.date||'—')}</td>
+            <td style="font-size:.69rem;color:var(--text5);">${escapeHtml(h.reportDate||h.date||'—')}</td>
           </tr>`;
         }).join('');
       }
@@ -4489,7 +4489,7 @@ async function loadEarnings(ticker) {
           ${fwdQ.map(q => `<div style="background:var(--t-metric-bg);border:1px solid var(--t-metric-border);border-radius:6px;padding:6px 10px;min-width:90px;">
             <div style="font-size:.6rem;color:var(--text5);margin-bottom:2px;">Forecast period ${q.period}</div>
             <div style="font-size:.9rem;font-weight:700;color:var(--text);">$${q.epsAvg.toFixed(2)}</div>
-            <div style="font-size:.63rem;color:var(--text5);">$${(q.epsLow||q.epsAvg).toFixed(2)}–$${(q.epsHigh||q.epsAvg).toFixed(2)}</div>
+            <div style="font-size:.69rem;color:var(--text5);">$${(q.epsLow||q.epsAvg).toFixed(2)}–$${(q.epsHigh||q.epsAvg).toFixed(2)}</div>
             <div style="font-size:.62rem;color:var(--text5);">${q.numberAnalysts||'?'} analysts</div>
           </div>`).join('')}
         </div>
@@ -4515,7 +4515,7 @@ async function loadEarnings(ticker) {
       summaryHtml = `
         <div style="display:flex;gap:8px;align-items:center;background:var(--t-metric-bg);border:1px solid var(--t-metric-border);border-radius:8px;padding:10px 14px;margin-bottom:12px;flex-wrap:wrap;">
           <div style="flex:1;min-width:180px;">
-            <div style="font-size:.68rem;color:var(--text5);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">${ticker} EPS Beat Rate — Last ${withData.length} Quarters</div>
+            <div style="font-size:.69rem;color:var(--text5);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;">${ticker} EPS Beat Rate — Last ${withData.length} Quarters</div>
             <div style="height:6px;background:var(--t-acc-border);border-radius:3px;overflow:hidden;display:flex;">
               <div style="width:${beatPct}%;background:var(--chart-positive);"></div>
               <div style="width:${Math.round(inLine/withData.length*100)}%;background:var(--gold);"></div>
@@ -4585,7 +4585,7 @@ async function loadEarnings(ticker) {
               <div style="height:5px;background:var(--t-acc-border);border-radius:3px;overflow:hidden;">
                 <div style="width:${barWidth}%;background:${barColor};height:100%;border-radius:3px;transition:width .4s ease;"></div>
               </div>
-              <div style="display:flex;justify-content:space-between;font-size:.63rem;color:var(--text5);margin-top:2px;"><span>Miss</span><span>In-Line</span><span>Beat</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:.69rem;color:var(--text5);margin-top:2px;"><span>Miss</span><span>In-Line</span><span>Beat</span></div>
             </div>` : ''}
           </div>
         </td>
