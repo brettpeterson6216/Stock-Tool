@@ -1,300 +1,152 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   Overlaid index chart with a traceable crosshair.
+   Overlaid index comparison, drawn with TradingView Lightweight Charts.
 
-   Several indexes on one set of axes. Their levels are nowhere near each other
-   - the Dow is around 41,000 while the S&P is around 5,800 - so plotting raw
-   values would put two of the three lines flat against an edge and tell you
-   nothing. Every series is normalised to percent change from the first point
-   in the window, which is what a comparison chart is actually for: the shapes
-   become comparable and the y-axis means one thing for all three.
+   This was a hand-rolled SVG renderer until it turned out the library was
+   already vendored and already driving the Analysis page - which meant the
+   dashboard was paying for a second, worse chart engine that shipped no
+   additional bytes' worth of benefit. It renders through the same engine as
+   the rest of the site now, so the two pages look like one product and this
+   file is a thin adapter rather than a plotting library.
 
-   What this is: several lines, a crosshair that follows the pointer with each
-   series' value at that moment, a legend that toggles series, and a shared
-   time axis. What it is not: candlesticks, indicators, drawing tools, zoom or
-   pan. Those belong to a charting library, and a shallow imitation of them
-   would be worse than their absence.
+   Two things the library does better than the code it replaced:
+
+     · Percentage price-scale mode normalises every series against the left
+       edge of the *visible* range and re-normalises as you pan, so a
+       comparison stays a comparison at any zoom. The old code normalised
+       once, against the first point in the payload, and a zoomed view then
+       measured from a moment off screen.
+     · The time scale is session-aware, so closed hours take no width without
+       anyone having to build an ordinal axis by hand.
+
+   What it still is not: candlesticks, indicators or drawing tools. Those live
+   on the Analysis page, where they belong.
+
+   Public shape is unchanged - window.ilRenderIndexChart(host, indexes) - so
+   home-member.js and the timeframe control did not have to move.
    ═══════════════════════════════════════════════════════════════════════════ */
 (function () {
   "use strict";
 
-  var NS = "http://www.w3.org/2000/svg";
-  var COLORS = ["var(--ilx-a)", "var(--ilx-b)", "var(--ilx-c)"];
+  var SLOTS = ["--ilx-a", "--ilx-b", "--ilx-c"];
 
-  function el(name, attrs) {
-    var node = document.createElementNS(NS, name);
-    for (var k in attrs) if (attrs[k] != null) node.setAttribute(k, attrs[k]);
-    return node;
-  }
-
-  /* ── The y scale ──────────────────────────────────────────────────────────
-     Fitting the axis tightly to the data and padding it by a flat percentage
-     produced gridlines at +9.13%, +6.42%, +3.72% - arbitrary numbers nobody
-     reads, and the loudest single tell that a chart was drawn by hand rather
-     than by something that does this for a living. Every real one rounds
-     outward to clean intervals first and labels those. */
-  function niceScale(lo, hi, target) {
-    if (!Number.isFinite(lo) || !Number.isFinite(hi)) { lo = 0; hi = 1; }
-    if (!(hi > lo)) { hi = lo + 1; }
-    var rawStep = (hi - lo) / Math.max(1, target);
-    var mag = Math.pow(10, Math.floor(Math.log(rawStep) / Math.LN10));
-    var norm = rawStep / mag;
-    var step = (norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 2.5 ? 2.5 : norm <= 5 ? 5 : 10) * mag;
-    var start = Math.floor(lo / step) * step;
-    var end = Math.ceil(hi / step) * step;
-    var ticks = [];
-    for (var i = 0; start + i * step <= end + step / 2; i += 1) ticks.push(start + i * step);
-    return { lo: start, hi: end, step: step, ticks: ticks };
-  }
-
-  function fmtPct(v, step) {
+  function fmtPct(v) {
     if (!Number.isFinite(v)) return "—";
-    var dp = step == null ? 2 : (step >= 1 ? 0 : step >= 0.5 ? 1 : 2);
-    var n = Number(v.toFixed(dp));
-    if (Object.is(n, -0)) n = 0;
-    return (n > 0 ? "+" : "") + n.toFixed(dp) + "%";
+    return (v > 0 ? "+" : "") + v.toFixed(2) + "%";
   }
 
-  /* ── The x scale ──────────────────────────────────────────────────────────
-     A chart with no time axis reads as unfinished however good the line is.
-     The label format follows the window: a day wants clock times, a year wants
-     months, and stamping the year on every tick of a one-month chart is noise. */
-  function tickFormat(spanSeconds) {
-    if (spanSeconds <= 3 * 86400) {
-      return function (d) { return d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }); };
-    }
-    if (spanSeconds <= 200 * 86400) {
-      return function (d) { return d.toLocaleDateString("en-US", { month: "short", day: "numeric" }); };
-    }
-    return function (d) { return d.toLocaleDateString("en-US", { month: "short", year: "2-digit" }); };
+  function token(host, name, fallback) {
+    var v = getComputedStyle(host).getPropertyValue(name);
+    v = v && v.trim();
+    return v || fallback;
   }
 
-  function fmtWhen(seconds, intraday) {
-    if (!Number.isFinite(seconds)) return "";
-    var d = new Date(seconds * 1000);
-    var date = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-    if (!intraday) return date;
-    return date + " " + d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
-  }
-
-  /* Series arrive on their own timestamps - a holiday or a halt in one index
-     is not a gap in another - so they share one axis built from the union of
-     every timestamp any series reported, sorted. Each series is then drawn
-     against that axis by position in it.
-
-     Two things fall out of that. Series stay aligned: lining them up by array
-     index instead would slide one against the others by however many bars
-     they differ. And the axis is ordinal rather than real time, so the
-     sixty-five closed hours of a weekend take up no width - the same reason a
-     trading chart does not leave two-thirds of itself blank. Mapping x to
-     real seconds looked correct and drew a month of markets as a row of thin
-     stripes separated by voids. */
-  function buildSlots(series) {
-    var seen = Object.create(null);
-    series.forEach(function (s) {
-      (s.stamps || []).forEach(function (at) {
-        if (Number.isFinite(at)) seen[at] = true;
-      });
-    });
-    var slots = Object.keys(seen).map(Number).sort(function (a, b) { return a - b; });
-    if (slots.length < 2) return null;
-    var index = Object.create(null);
-    for (var i = 0; i < slots.length; i += 1) index[slots[i]] = i;
-    return { slots: slots, index: index, last: slots.length - 1 };
-  }
-
-  /* A close of zero is not a price, it is a bar that has not printed. Plotting
-     it gives -100% and drags the axis to the floor, which is what put a cliff
-     at the front of the chart and flattened every real move into the bottom
-     edge. Holes are dropped; the line joins across them, which is honest for
-     a missing bar and invisible for a missing session. */
-  function normalise(s, frame) {
-    var base = null, i;
-    for (i = 0; i < s.closes.length; i += 1) {
-      var c0 = Number(s.closes[i]);
-      if (Number.isFinite(c0) && c0 > 0) { base = c0; break; }
-    }
-    if (base == null) return [];
-    var out = [];
-    for (i = 0; i < s.closes.length; i += 1) {
+  /* A close of zero is not a price, it is a bar that has not printed. Yahoo
+     sends null for those and Number(null) is 0, which is finite - so they have
+     to be rejected explicitly or they plot as a -100% cliff. Lightweight
+     Charts also requires strictly ascending, unique timestamps per series and
+     drops the whole series if it gets anything else. */
+  function toPoints(s) {
+    var out = [], lastAt = -Infinity;
+    for (var i = 0; i < s.closes.length; i += 1) {
       var c = Number(s.closes[i]);
       var at = Number(s.stamps[i]);
-      if (!Number.isFinite(c) || c <= 0 || !Number.isFinite(at)) continue;
-      var slot = frame.index[at];
-      if (slot == null) continue;
-      out.push({ at: at, slot: slot, pct: ((c - base) / base) * 100, raw: c });
+      if (!Number.isFinite(c) || c <= 0) continue;
+      if (!Number.isFinite(at) || at <= lastAt) continue;
+      lastAt = at;
+      out.push({ time: at, value: c });
     }
     return out;
   }
 
-  /* The chart is drawn at the container's real pixel size rather than at a
-     fixed viewBox stretched to fit. preserveAspectRatio="none" scaled x and y
-     by different factors, which is why axis labels came out 1.44x wide and
-     clipped, why dots had to be faked out of line caps, and why every stroke
-     needed non-scaling-stroke to keep one weight. At 1:1 none of that is
-     true: a circle is a circle and a pixel is a pixel. The cost is having to
-     redraw on resize, which is what the observer below is for. */
   window.ilRenderIndexChart = function (host, indexes) {
-    if (!host) return;
-    if (host.ilxObserver) { host.ilxObserver.disconnect(); host.ilxObserver = null; }
-    host.ilxSeries = indexes;
-
-    var drawn = draw(host, indexes);
-
-    if (typeof ResizeObserver === "function") {
-      var lastW = host.clientWidth;
-      var pending = 0;
-      var ro = new ResizeObserver(function () {
-        var w = host.clientWidth;
-        if (!w || Math.abs(w - lastW) < 2) return;
-        lastW = w;
-        // Coalesce the burst a drag produces into one redraw per frame.
-        if (pending) cancelAnimationFrame(pending);
-        pending = requestAnimationFrame(function () {
-          pending = 0;
-          draw(host, host.ilxSeries);
-        });
-      });
-      ro.observe(host);
-      host.ilxObserver = ro;
-    }
-    return drawn;
-  };
-
-  function draw(host, indexes) {
     if (!host) return null;
+
+    // One chart per host: tearing the old one down is what stops a timeframe
+    // click from stacking a second canvas on top of the first.
+    if (host.ilxChart) {
+      try { host.ilxChart.remove(); } catch (e) {}
+      host.ilxChart = null;
+    }
     host.innerHTML = "";
 
+    var LWC = window.LightweightCharts;
     var usable = (indexes || []).filter(function (s) {
-      return s && Array.isArray(s.closes) && Array.isArray(s.stamps) && s.closes.length > 1 &&
-        s.closes.length === s.stamps.length;
+      return s && Array.isArray(s.closes) && Array.isArray(s.stamps) &&
+        s.closes.length > 1 && s.closes.length === s.stamps.length;
     });
-    if (!usable.length) {
-      var msg = document.createElement("p");
-      msg.className = "ilx-empty";
-      msg.textContent = "Index history is unavailable right now.";
-      host.appendChild(msg);
-      return null;
-    }
 
-    var frame = buildSlots(usable);
-    if (!frame) return null;
+    if (!usable.length) {
+      return fail(host, "Index history is unavailable right now.");
+    }
+    if (!LWC || !LWC.createChart) {
+      // The vendor file is the only thing that draws this now, so say so
+      // rather than leaving an empty box that reads as a loading state.
+      return fail(host, "The charting library did not load.");
+    }
 
     var series = usable.map(function (s, i) {
-      return { symbol: s.symbol, name: s.name || s.symbol, colour: COLORS[i % COLORS.length],
-               points: normalise(s, frame), on: true, interval: s.interval };
+      return {
+        symbol: s.symbol,
+        name: s.name || s.symbol,
+        colour: token(host, SLOTS[i % SLOTS.length], "#3987e5"),
+        points: toPoints(s),
+        on: true
+      };
     }).filter(function (s) { return s.points.length > 1; });
-    if (!series.length) return null;
 
-    var intraday = usable.some(function (s) {
-      return s.interval && s.interval !== "1d" && s.interval !== "1wk";
+    if (!series.length) return fail(host, "Index history is unavailable right now.");
+
+    var plot = document.createElement("div");
+    plot.className = "ilx-plot";
+    host.appendChild(plot);
+
+    var grid = token(host, "--lp-border", "rgba(176,160,126,.16)");
+    var text = token(host, "--lp-muted", "#929c9c");
+
+    var chart = LWC.createChart(plot, {
+      autoSize: true,
+      layout: {
+        background: { type: "solid", color: "transparent" },
+        textColor: text,
+        fontFamily: '"JetBrains Mono", ui-monospace, monospace',
+        fontSize: 11,
+        attributionLogo: true
+      },
+      grid: { vertLines: { color: grid }, horzLines: { color: grid } },
+      rightPriceScale: {
+        borderVisible: false,
+        scaleMargins: { top: 0.12, bottom: 0.12 },
+        /* Percentage mode is the whole reason three indexes can share an axis:
+           the Dow near 41,000 and the S&P near 5,800 have no common scale in
+           absolute terms, and two of the three lines would sit flat against an
+           edge. The library measures each series from the left edge of the
+           visible range, so the comparison survives panning. */
+        mode: LWC.PriceScaleMode.Percentage
+      },
+      timeScale: { borderVisible: false, rightOffset: 2, fixLeftEdge: true, fixRightEdge: true },
+      crosshair: { mode: LWC.CrosshairMode.Normal },
+      /* Drag to pan and pinch to zoom, but the wheel is left to the page.
+         A dashboard chart that swallows scroll traps the reader halfway down
+         the page, which is a worse failure than not having wheel zoom. */
+      handleScroll: { mouseWheel: false, pressedMouseMove: true, horzTouchDrag: true, vertTouchDrag: false },
+      handleScale: { mouseWheel: false, pinch: true, axisPressedMouseMove: true, axisDoubleClickReset: true }
     });
 
-    // Real pixels, measured from the container. The bottom padding is the
-    // x-axis band: a fixed height that excludes it is what gives a chart card
-    // its own little scrollbar.
-    var W = Math.max(320, Math.round(host.clientWidth) || 960);
-    var H = 372, PAD_L = 8, PAD_R = 62, PAD_T = 18, PAD_B = 34;
-    var plotW = W - PAD_L - PAD_R, plotH = H - PAD_T - PAD_B;
-
-    var dataLo = Infinity, dataHi = -Infinity;
     series.forEach(function (s) {
-      s.points.forEach(function (p) {
-        if (p.pct < dataLo) dataLo = p.pct;
-        if (p.pct > dataHi) dataHi = p.pct;
+      s.line = chart.addSeries(LWC.LineSeries, {
+        color: s.colour,
+        lineWidth: 2,
+        priceLineVisible: false,
+        lastValueVisible: false,
+        crosshairMarkerVisible: true,
+        crosshairMarkerRadius: 4
       });
+      s.line.setData(s.points);
     });
-    var scale = niceScale(dataLo, dataHi, Math.max(3, Math.min(6, Math.round(plotH / 64))));
-    var lo = scale.lo, hi = scale.hi;
+    chart.timeScale().fitContent();
 
-    var x = function (slot) { return PAD_L + (slot / frame.last) * plotW; };
-    var y = function (pct) { return PAD_T + (1 - (pct - lo) / (hi - lo)) * plotH; };
-
-    var svg = el("svg", {
-      viewBox: "0 0 " + W + " " + H, width: W, height: H,
-      class: "ilx-svg", role: "img",
-      "aria-label": "Percent change of " + series.map(function (s) { return s.name; }).join(", ") +
-        " over the selected window"
-    });
-
-    /* Gridlines in the SVG; their labels in HTML. The labels were moved out
-       when the chart was still stretched to fit, which distorted them 1.44x
-       and clipped "+9.13%" to "+9.13:". The chart is drawn at real pixels now
-       so SVG text would be safe again, but positioned HTML inherits the
-       page's font stack and theme tokens directly, so it stays. */
-    var axis = document.createElement("div");
-    axis.className = "ilx-axis";
-    scale.ticks.forEach(function (pct) {
-      var gy = y(pct);
-      if (gy < PAD_T - 0.5 || gy > PAD_T + plotH + 0.5) return;
-      /* Zero is the level every series started at, which is what the
-         normalised numbers are measured against, so it is drawn one step
-         stronger than the rest of the grid - and solid, like them. A dashed
-         rule reads as a projection or a threshold when it is just an origin. */
-      svg.appendChild(el("line", {
-        class: Math.abs(pct) < scale.step / 100 ? "ilx-zero" : "ilx-grid",
-        x1: PAD_L, x2: PAD_L + plotW, y1: gy, y2: gy
-      }));
-      var lab = document.createElement("span");
-      lab.className = "ilx-ylab";
-      lab.style.top = gy.toFixed(1) + "px";
-      lab.textContent = fmtPct(pct, scale.step);
-      axis.appendChild(lab);
-    });
-
-    // Time axis. Roughly one label per 130px, snapped to real data slots so a
-    // label never names a moment the chart does not contain.
-    var span = frame.slots[frame.last] - frame.slots[0];
-    var fmtTick = tickFormat(span);
-    var wantTicks = Math.max(2, Math.min(8, Math.floor(plotW / 130)));
-    var xband = document.createElement("div");
-    xband.className = "ilx-xaxis";
-    xband.style.height = PAD_B + "px";
-    for (var t = 0; t <= wantTicks; t += 1) {
-      var slot = Math.round((frame.last * t) / wantTicks);
-      var gx = x(slot);
-      if (t > 0 && t < wantTicks) {
-        svg.appendChild(el("line", { class: "ilx-vgrid", x1: gx, x2: gx, y1: PAD_T, y2: PAD_T + plotH }));
-      }
-      var xl = document.createElement("span");
-      // The edge labels align to the plot edge instead of centring on it, or
-      // half of "Aug 26" hangs off the left of the card and gets clipped. This
-      // is a class rather than an inline transform because the stylesheet's
-      // rule carries !important, which an inline style does not beat.
-      xl.className = "ilx-xlab" + (t === 0 ? " at-start" : t === wantTicks ? " at-end" : "");
-      xl.style.left = gx.toFixed(1) + "px";
-      xl.textContent = fmtTick(new Date(frame.slots[slot] * 1000));
-      xband.appendChild(xl);
-    }
-
-    series.forEach(function (s) {
-      var d = s.points.map(function (p, i) {
-        return (i ? "L" : "M") + x(p.slot).toFixed(2) + " " + y(p.pct).toFixed(2);
-      }).join(" ");
-      s.path = el("path", { class: "ilx-line", d: d, style: "stroke:" + s.colour });
-      svg.appendChild(s.path);
-    });
-
-    var cross = el("line", { class: "ilx-cross", y1: PAD_T, y2: PAD_T + plotH, opacity: 0 });
-    svg.appendChild(cross);
-
-    // Dots last so they sit above every line, each with a ring in the surface
-    // colour so it stays legible where two series cross.
-    series.forEach(function (s) {
-      s.dot = el("circle", { class: "ilx-dot", r: 4, style: "fill:" + s.colour, opacity: 0 });
-      svg.appendChild(s.dot);
-    });
-
-    host.appendChild(svg);
-    host.appendChild(axis);
-    host.appendChild(xband);
-
-    // The crosshair's moment rides the time axis in a pill, the way it does on
-    // a trading chart, rather than floating loose in a corner of the plot.
-    var readout = document.createElement("div");
-    readout.className = "ilx-readout";
-    readout.hidden = true;
-    xband.appendChild(readout);
-
+    // Legend doubles as the crosshair readout: the pointer never has to land
+    // on a line to get its value, and every series answers at once.
     var legend = document.createElement("div");
     legend.className = "ilx-legend";
     series.forEach(function (s) {
@@ -302,78 +154,57 @@
       b.type = "button";
       b.className = "ilx-key is-on";
       b.setAttribute("aria-pressed", "true");
-      // A line key, not a filled box: the legend mirrors the mark it stands for.
-      b.innerHTML = '<span class="ilx-swatch" style="background:' + s.colour + '"></span>' +
+      b.innerHTML = '<span class="ilx-swatch"></span>' +
         '<span class="ilx-key-name"></span><span class="ilx-key-val"></span>';
+      b.querySelector(".ilx-swatch").style.background = s.colour;
       b.querySelector(".ilx-key-name").textContent = s.name;
       b.addEventListener("click", function () {
         s.on = !s.on;
         b.classList.toggle("is-on", s.on);
         b.setAttribute("aria-pressed", String(s.on));
-        s.path.style.opacity = s.on ? "" : "0";
-        if (!s.on) s.dot.setAttribute("opacity", 0);
+        s.line.applyOptions({ visible: s.on });
       });
       s.key = b;
       legend.appendChild(b);
     });
     host.appendChild(legend);
 
-    function latest() {
-      readout.hidden = true;
+    // Percent change against the first point of the series, which is what the
+    // axis is showing; the crosshair then reports the same measure it does.
+    function pctAt(s, value) {
+      var base = s.points[0] && s.points[0].value;
+      if (!(base > 0) || !Number.isFinite(value)) return NaN;
+      return ((value - base) / base) * 100;
+    }
+
+    function showLatest() {
       series.forEach(function (s) {
         var last = s.points[s.points.length - 1];
-        s.key.querySelector(".ilx-key-val").textContent = last ? fmtPct(last.pct) : "—";
-        s.dot.setAttribute("opacity", 0);
+        s.key.querySelector(".ilx-key-val").textContent =
+          s.on && last ? fmtPct(pctAt(s, last.value)) : "—";
       });
-      cross.setAttribute("opacity", 0);
     }
 
-    function nearest(points, slot) {
-      var best = null, bestD = Infinity;
-      for (var i = 0; i < points.length; i += 1) {
-        var d = Math.abs(points[i].slot - slot);
-        if (d < bestD) { bestD = d; best = points[i]; }
-        if (d === 0) break;
-      }
-      return best;
-    }
-
-    function trace(clientX) {
-      var box = svg.getBoundingClientRect();
-      if (!box.width) return;
-      var ratio = Math.min(1, Math.max(0, (clientX - box.left) / box.width));
-      var slot = Math.round(Math.min(1, Math.max(0, (ratio * W - PAD_L) / plotW)) * frame.last);
-      var viewX = x(slot);
-
-      cross.setAttribute("x1", viewX);
-      cross.setAttribute("x2", viewX);
-      cross.setAttribute("opacity", 1);
-
-      var stamp = null;
+    chart.subscribeCrosshairMove(function (param) {
+      if (!param || !param.time || !param.seriesData) return showLatest();
       series.forEach(function (s) {
-        if (!s.on) { s.dot.setAttribute("opacity", 0); s.key.querySelector(".ilx-key-val").textContent = "—"; return; }
-        var p = nearest(s.points, slot);
-        if (!p) return;
-        if (stamp == null) stamp = p.at;
-        s.dot.setAttribute("cx", x(p.slot));
-        s.dot.setAttribute("cy", y(p.pct));
-        s.dot.setAttribute("opacity", 1);
-        s.key.querySelector(".ilx-key-val").textContent = fmtPct(p.pct);
+        var d = param.seriesData.get(s.line);
+        var v = d && (d.value != null ? d.value : d.close);
+        s.key.querySelector(".ilx-key-val").textContent =
+          s.on && v != null ? fmtPct(pctAt(s, v)) : "—";
       });
+    });
 
-      readout.textContent = fmtWhen(stamp, intraday);
-      readout.hidden = stamp == null;
-      // Keep the pill inside the plot rather than letting it hang off an edge.
-      readout.style.left = Math.min(W - 4, Math.max(4, viewX)) + "px";
-      readout.style.transform =
-        viewX < 46 ? "translateX(0)" : viewX > W - 46 ? "translateX(-100%)" : "translateX(-50%)";
-    }
+    showLatest();
+    host.ilxChart = chart;
+    return { chart: chart, series: series };
+  };
 
-    svg.addEventListener("pointermove", function (e) { trace(e.clientX); });
-    svg.addEventListener("pointerleave", latest);
-    svg.addEventListener("pointerdown", function (e) { trace(e.clientX); });
-
-    latest();
-    return { series: series, intraday: intraday, width: W, ticks: scale.ticks };
+  function fail(host, message) {
+    var msg = document.createElement("p");
+    msg.className = "ilx-empty";
+    msg.textContent = message;
+    host.appendChild(msg);
+    return null;
   }
 }());

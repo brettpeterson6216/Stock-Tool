@@ -161,10 +161,13 @@ canvas.il-chart-mirror {
 
 html:not([data-theme="dark"]) .chart-key.key-vwap { background: #127C6C !important; }
 
-/* Lightweight Charts injects its own attribution link; the brand line already
-   credits sources in the data-source row beneath the chart. */
+/* Lightweight Charts is Apache-2.0 and its terms ask for the NOTICE
+   attribution plus a link to tradingview.com on the page, "in a prominent
+   place". The library injects that link itself; dimming it to 35% was the
+   opposite of what was asked, so it renders at full strength now. The NOTICE
+   text lives in the footer's licences line. */
 .il-chart-host #tv-attr-logo,
-.il-chart-host a[href*="tradingview"] { opacity: .35; }
+.il-chart-host a[href*="tradingview"] { opacity: 1; }
 
 @media (max-width: 768px) {
   .il-chart-slot {
@@ -487,12 +490,13 @@ html:not([data-theme="dark"]) .chart-key.key-vwap { background: #127C6C !importa
   min-width: 0 !important;
 }
 
-/* Attribution stays, but scaled to the mock rather than dominating it */
+/* Attribution renders at the size the library intends here too. It was scaled
+   to 62% at 28% opacity to keep a mock tidy, which is not a good reason to
+   shrink a licence requirement. */
 #landing-page .ihm-live #tv-attr-logo,
 #landing-page .ihm-live a[href*="tradingview"] {
-  transform: scale(.62);
-  transform-origin: bottom left;
-  opacity: .28 !important;
+  transform: none;
+  opacity: 1 !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
