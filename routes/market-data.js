@@ -605,18 +605,21 @@ router.get("/market/movers", async (req, res) => {
    `points`, so the resolution is checkable rather than assumed.
    ═══════════════════════════════════════════════════════════════════════════ */
 const WINDOWS = {
-  "1D": { label: "1 day",    ladder: [ { interval: "5m",  range: "1d",  min: 30 },
-                                       { interval: "15m", range: "1d",  min: 10 },
-                                       { interval: "1h",  range: "5d",  min: 2  } ] },
-  "1W": { label: "1 week",   ladder: [ { interval: "30m", range: "5d",  min: 40 },
-                                       { interval: "1h",  range: "5d",  min: 20 },
+  "1D": { label: "1 day",    ladder: [ { interval: "2m",  range: "1d",  min: 90 },
+                                       { interval: "5m",  range: "1d",  min: 30 },
+                                       { interval: "15m", range: "1d",  min: 10 } ] },
+  "1W": { label: "1 week",   ladder: [ { interval: "15m", range: "5d",  min: 90 },
+                                       { interval: "30m", range: "5d",  min: 40 },
+                                       { interval: "1h",  range: "5d",  min: 10 } ] },
+  "1M": { label: "30 days",  ladder: [ { interval: "1h",  range: "1mo", min: 90 },
+                                       { interval: "90m", range: "1mo", min: 50 },
                                        { interval: "1d",  range: "1mo", min: 2  } ] },
-  "1M": { label: "30 days",  ladder: [ { interval: "1d",  range: "1mo", min: 15 },
-                                       { interval: "1d",  range: "3mo", min: 2  } ] },
-  "3M": { label: "3 months", ladder: [ { interval: "1d",  range: "3mo", min: 40 },
+  "3M": { label: "3 months", ladder: [ { interval: "1h",  range: "3mo", min: 200 },
+                                       { interval: "1d",  range: "3mo", min: 40 },
                                        { interval: "1d",  range: "6mo", min: 2  } ] },
-  "1Y": { label: "1 year",   ladder: [ { interval: "1wk", range: "1y",  min: 30 },
-                                       { interval: "1d",  range: "1y",  min: 2  } ] },
+  "1Y": { label: "1 year",   ladder: [ { interval: "1d",  range: "1y",  min: 150 },
+                                       { interval: "1wk", range: "1y",  min: 30 },
+                                       { interval: "1d",  range: "6mo", min: 2  } ] },
 };
 const DEFAULT_WINDOW = "1M";
 function normaliseWindow(value) {
@@ -738,7 +741,7 @@ router.get("/market/landing-summary", async (req, res) => {
 
     // Cap the payload: beyond a few hundred points a line chart this size is
     // drawing several samples per pixel.
-    const MAX = 260;
+    const MAX = 420;
     const series = best.points.length > MAX
       ? best.points.filter((_, i) => i % Math.ceil(best.points.length / MAX) === 0)
       : best.points;

@@ -54,14 +54,73 @@ test("the interval is a property of the window, not a number to maximise", () =>
     const row = table.slice(table.indexOf(`"${key}":`));
     return (row.match(/interval: "([^"]+)"/) || [])[1];
   };
-  assert.equal(first("1D"), "5m", "a one-day chart must not be drawn from daily bars");
-  assert.equal(first("1M"), "1d", "a one-month chart drawn from intraday bars reads as noise");
-  assert.equal(first("1Y"), "1wk", "a year of daily bars is 250 points in a 1000px box");
+  // Rather than pin exact strings - the right density is a judgement that has
+  // moved twice already - assert the invariant: the bars get coarser as the
+  // window gets longer, and a one-day chart is never drawn from daily bars.
+  const seconds = iv => {
+    const n = parseFloat(iv);
+    return iv.endsWith("m") ? n * 60 : iv.endsWith("h") ? n * 3600 : iv.endsWith("wk") ? n * 604800 : n * 86400;
+  };
+  const order = ["1D", "1W", "1M", "3M", "1Y"].map(first);
+  assert.ok(seconds(order[0]) < 3600, "a one-day chart must not be drawn from hourly or daily bars");
+  for (let i = 1; i < order.length; i += 1) {
+    assert.ok(
+      seconds(order[i]) >= seconds(order[i - 1]),
+      `the bars get finer going from a shorter window to a longer one (${order[i - 1]} then ${order[i]})`
+    );
+  }
 
   // Each window keeps a ladder, because Yahoo does not guarantee every
   // interval for every symbol - but the first rung is the conventional one.
   assert.ok((table.match(/min:/g) || []).length >= 10, "the fallback rungs are gone");
   assert.doesNotMatch(api, /closes\.slice\(-2\d\)/, "the series is being truncated after the ladder earned it");
+});
+
+test("the axis is rounded to clean intervals and labelled on both dimensions", () => {
+  // Gridlines at +9.13% / +6.42% / +3.72% are the loudest tell that a chart was
+  // drawn by hand. Real ones round outward to a clean step first.
+  assert.match(chart, /function niceScale\(lo, hi, target\)/, "the axis is back to a flat percentage pad");
+  assert.match(chart, /norm <= 1 \? 1 : norm <= 2 \? 2 : norm <= 2\.5 \? 2\.5 : norm <= 5 \? 5 : 10/,
+    "the tick step is no longer snapped to a 1 / 2 / 2.5 / 5 / 10 ladder");
+
+  // A chart with no time axis reads as unfinished however good the line is.
+  assert.match(chart, /className = "ilx-xaxis"/, "the time axis is gone");
+  assert.match(chart, /function tickFormat\(spanSeconds\)/, "the time labels no longer follow the window");
+  assert.match(css, /\.ilx-xlab/, "the time labels have no styling");
+
+  // Edge labels align to the plot edge; centring them clips half of "Aug 26".
+  assert.match(chart, /at-start/, "the first time label will be clipped by the card");
+  assert.match(css, /\.ilx-xlab\.at-start/, "the edge alignment has no rule to apply");
+
+  // Solid hairlines. A dashed grid reads as a projection or a threshold.
+  const block = css.slice(css.indexOf(".ilx-grid,"), css.indexOf(".ilx-legend"));
+  assert.doesNotMatch(block, /stroke-dasharray/, "the grid or the origin line is dashed again");
+});
+
+test("the series palette is validated, and light mode actually gets it", () => {
+  // The previous set failed: green against blue measured a colour-vision
+  // Delta E of 4.8 against a target of 8, and in light mode green against gold
+  // measured 13.5 against a hard floor of 15.
+  for (const hex of ["#3987e5", "#d1a03f", "#5fc4ad"]) {
+    assert.ok(css.includes(hex), `the validated dark series colour ${hex} is gone`);
+  }
+  for (const hex of ["#2a78d6", "#a06a10", "#0f6b52"]) {
+    assert.ok(css.includes(hex), `the validated light series colour ${hex} is gone`);
+  }
+  assert.doesNotMatch(css, /--ilx-a: #4ec879/, "the failing green is back");
+
+  /* And the light override has to out-weigh the base rule. Written with four
+     :not(#id) against the base rule's five it never applied, and light mode
+     silently kept the dark palette - ID count is compared before anything
+     else, so !important cannot rescue it. */
+  const light = css.slice(css.indexOf('.ihm-chart {\n  --ilx-a: #2a78d6') - 400);
+  const sel = light.slice(0, light.indexOf(".ihm-chart"));
+  const baseIds = 6;
+  const lightIds = (sel.match(/#cp\d/g) || []).length;
+  assert.ok(
+    lightIds >= baseIds,
+    `the light palette carries ${lightIds} IDs against the base rule's ${baseIds}, so it never applies`
+  );
 });
 
 test("the reader can choose the window, and it is remembered", () => {

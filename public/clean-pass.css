@@ -211,7 +211,7 @@ html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav 
 html[data-theme="dark"]:not(#cp1):not(#cp2):not(#cp3):not(#cp4) body:not(#cp6) #main-nav .theme-toggle-thumb {
   left: 25px !important; transform: translateY(-50%) !important;
 }
-html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4) body:not(#cp6) #main-nav .theme-toggle-thumb {
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .theme-toggle-thumb {
   left: 3px !important; transform: translateY(-50%) !important;
 }
 @media (prefers-reduced-motion: reduce) {
@@ -336,7 +336,7 @@ html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav 
    icon was a smudge under the gold disc. Hide whichever one the thumb covers;
    the remaining icon then reads as "what you get if you press this". */
 html[data-theme="dark"]:not(#cp1):not(#cp2):not(#cp3):not(#cp4) body:not(#cp6) #main-nav .theme-toggle-track > i.ti-moon { opacity: 0 !important; }
-html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4) body:not(#cp6) #main-nav .theme-toggle-track > i.ti-sun { opacity: 0 !important; }
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .theme-toggle-track > i.ti-sun { opacity: 0 !important; }
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .theme-toggle-track > i {
   color: var(--lpf-copy, #b3bab8) !important;
   -webkit-text-fill-color: currentColor !important;
@@ -1457,21 +1457,36 @@ html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-col-s
    The chart is drawn at the container's measured pixel size and redrawn on
    resize, so the SVG's own geometry is 1:1 and needs no stretching. */
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-chart {
-  --ilx-a: #4ec879;
-  --ilx-b: #d8a23d;
-  --ilx-c: #6aa8e8;
+  /* Series colours chosen by computation, not by eye. The previous set -
+     green, gold, blue - failed: green against blue came out at a
+     colour-vision Delta E of 4.8 (the target is 8, measured in OKLab x100),
+     which is to say a deuteranope saw one line where there were two, and in
+     light mode green against gold was 13.5 against a hard floor of 15, so
+     full-colour readers had trouble too. Blue / gold / mint clears every
+     pair on both surfaces: worst all-pairs CVD 17.4 dark, 8.9 light; worst
+     normal-vision 23.3 dark, 18.3 light; every series at least 4.2:1 against
+     its own ground. The gold is the site's, so the chart still reads as
+     part of the page. */
+  --ilx-a: #3987e5;
+  --ilx-b: #d1a03f;
+  --ilx-c: #5fc4ad;
   position: relative !important;
-  min-height: 340px !important;
+  min-height: 392px !important;
 }
-html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4) body:not(#cp6) .ihm-chart {
-  --ilx-a: #1d7a45;
-  --ilx-b: #8a6216;
-  --ilx-c: #2f6fb0;
+/* Five :not(#id) here, not four. The base .ihm-chart rule above carries six
+   IDs of weight and ID count is compared before anything else, so a light
+   override written with five never applied and light mode quietly kept the
+   dark palette - measured, not guessed: getComputedStyle returned #3987e5 in
+   both themes. !important cannot rescue a lower ID count. */
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-chart {
+  --ilx-a: #2a78d6;
+  --ilx-b: #a06a10;
+  --ilx-c: #0f6b52;
 }
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilx-svg {
   display: block !important;
   width: 100% !important;
-  height: 320px !important;
+  height: 372px !important;
   touch-action: pan-y !important;
   cursor: crosshair !important;
 }
@@ -1480,109 +1495,121 @@ html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilx-line 
   stroke-width: 1.75 !important;
   stroke-linejoin: round !important;
   stroke-linecap: round !important;
-  vector-effect: non-scaling-stroke !important;
   transition: opacity .12s ease !important;
 }
-html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilx-grid {
+/* Grid and axes are hairlines one step off the surface, solid and recessive.
+   Dashing them adds noise and reads as a projection or a threshold. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilx-grid,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilx-vgrid {
   stroke: var(--lp-border, rgba(176,160,126,.16)) !important;
   stroke-width: 1 !important;
-  vector-effect: non-scaling-stroke !important;
-}
-html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilx-zero {
-  stroke: var(--lp-muted, #929c9c) !important;
-  stroke-width: 1 !important;
-  stroke-dasharray: 3 3 !important;
-  vector-effect: non-scaling-stroke !important;
   opacity: .55 !important;
 }
-html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilx-cross {
-  stroke: var(--lp-muted, #929c9c) !important;
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilx-zero {
+  stroke: var(--lp-border, rgba(176,160,126,.16)) !important;
   stroke-width: 1 !important;
-  vector-effect: non-scaling-stroke !important;
+  opacity: 1 !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilx-cross {
+  stroke: var(--il-muted-ink, var(--lp-muted, #929c9c)) !important;
+  stroke-width: 1 !important;
+  opacity: .75 !important;
   pointer-events: none !important;
 }
+/* A 2px ring in the surface colour keeps a dot legible where two lines cross. */
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilx-dot {
   pointer-events: none !important;
   stroke: var(--lp-panel, #0a1115) !important;
-  stroke-width: 1.5 !important;
+  stroke-width: 2 !important;
 }
-/* The axis is HTML over the chart, not text inside it: the SVG is stretched
-   horizontally, so glyphs drawn in it are distorted and run past the viewBox
-   edge. The scale reserves its own column via padding-right on .ilx-svg. */
+
+/* The price scale is HTML over the plot: it inherits the page's font stack and
+   theme tokens instead of restating them, and the SVG reserves its column with
+   padding rather than the labels overlapping the line. */
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilx-axis {
   position: absolute !important;
   top: 0 !important; right: 0 !important;
-  width: 54px !important; height: 320px !important;
+  width: 62px !important; height: 372px !important;
   pointer-events: none !important;
 }
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilx-ylab {
   position: absolute !important;
-  right: 0 !important;
+  right: 2px !important;
   transform: translateY(-50%) !important;
   font-family: var(--lpf-mono, 'JetBrains Mono', monospace) !important;
   font-size: 11px !important;
+  font-variant-numeric: tabular-nums !important;
+  letter-spacing: .01em !important;
   white-space: nowrap !important;
-  color: var(--lp-muted, #929c9c) !important; -webkit-text-fill-color: currentColor !important;
-}
-html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilx-readout {
-  position: absolute !important;
-  top: 0 !important; left: 0 !important;
-  font-size: 12px !important; min-height: 16px !important;
-  color: var(--lp-muted, #929c9c) !important; -webkit-text-fill-color: currentColor !important;
-  pointer-events: none !important;
-}
-/* Timeframe control. The interval follows the window - five-minute bars for a
-   day, daily closes for a month - so this picks the resolution too. */
-html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-tfs {
-  display: inline-flex !important; gap: 2px !important; padding: 2px !important;
-  align-self: center !important; margin-right: auto !important;
-  border-radius: 7px !important;
-  border: 1px solid var(--lp-border, rgba(176,160,126,.16)) !important;
-  background: var(--lp-hover, #10191d) !important;
-}
-html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-tf {
-  border: 0 !important; background: transparent !important; cursor: pointer !important;
-  padding: 4px 9px !important; border-radius: 5px !important;
-  font-family: var(--lpf-mono, 'JetBrains Mono', monospace) !important;
-  font-size: 11px !important; font-weight: 600 !important; letter-spacing: .02em !important;
   color: var(--il-muted-ink, var(--lp-muted, #929c9c)) !important; -webkit-text-fill-color: currentColor !important;
 }
-html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-tf:hover { color: var(--lp-text, #f2eee5) !important; }
-html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-tf[aria-pressed="true"] {
-  background: var(--lp-panel, #0a1115) !important;
-  border: 1px solid var(--lp-border-gold, rgba(216,164,63,.34)) !important;
-  padding: 3px 8px !important;
-  color: var(--il-gold-ink, var(--lp-gold, #d8a23d)) !important; -webkit-text-fill-color: currentColor !important;
+
+/* The time axis. A chart without one reads as unfinished, and the band is part
+   of the container's height rather than something that overflows it. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilx-xaxis {
+  position: absolute !important;
+  left: 0 !important; right: 62px !important;
+  bottom: auto !important; top: 338px !important;
+  pointer-events: none !important;
 }
-html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-chart.is-loading { opacity: .45 !important; transition: opacity .12s ease !important; }
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilx-xlab {
+  position: absolute !important;
+  top: 8px !important;
+  transform: translateX(-50%) !important;
+  font-family: var(--lpf-mono, 'JetBrains Mono', monospace) !important;
+  font-size: 11px !important;
+  font-variant-numeric: tabular-nums !important;
+  white-space: nowrap !important;
+  color: var(--il-muted-ink, var(--lp-muted, #929c9c)) !important; -webkit-text-fill-color: currentColor !important;
+}
+/* The crosshair's moment, as a pill on the time axis. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilx-xlab.at-start { transform: translateX(0) !important; }
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilx-xlab.at-end { transform: translateX(-100%) !important; }
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilx-readout {
+  position: absolute !important;
+  top: 4px !important;
+  padding: 2px 7px !important; border-radius: 5px !important;
+  border: 1px solid var(--lp-border, rgba(176,160,126,.16)) !important;
+  background: var(--lp-hover, #10191d) !important;
+  font-family: var(--lpf-mono, 'JetBrains Mono', monospace) !important;
+  font-size: 11px !important;
+  font-variant-numeric: tabular-nums !important;
+  white-space: nowrap !important;
+  color: var(--lp-text, #f2eee5) !important; -webkit-text-fill-color: currentColor !important;
+  pointer-events: none !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilx-readout[hidden] { display: none !important; }
 
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilx-legend {
   display: flex !important; flex-wrap: wrap !important; gap: 8px !important;
-  margin-top: 6px !important;
+  margin-top: 10px !important;
 }
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilx-key {
-  display: inline-flex !important; align-items: center !important; gap: 7px !important;
+  display: inline-flex !important; align-items: center !important; gap: 8px !important;
   padding: 5px 10px !important; border-radius: 7px !important; cursor: pointer !important;
   border: 1px solid var(--lp-border, rgba(176,160,126,.16)) !important;
-  background: var(--lp-hover, #10191d) !important;
+  background: transparent !important;
   font-size: 12px !important;
-  opacity: .45 !important;
+  opacity: .5 !important;
   transition: opacity .12s ease !important;
 }
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilx-key.is-on { opacity: 1 !important; }
+/* A line key, not a filled block: the legend mirrors the mark it stands for,
+   and at this size a solid square is data-weight ink doing a label's job. */
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilx-swatch {
-  width: 9px !important; height: 9px !important; border-radius: 2px !important; flex: 0 0 auto !important;
+  width: 14px !important; height: 2px !important; border-radius: 1px !important; flex: 0 0 auto !important;
 }
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilx-key-name {
-  color: var(--lp-muted, #929c9c) !important; -webkit-text-fill-color: currentColor !important;
+  color: var(--il-muted-ink, var(--lp-muted, #929c9c)) !important; -webkit-text-fill-color: currentColor !important;
 }
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilx-key-val {
   font-family: var(--lpf-mono, 'JetBrains Mono', monospace) !important;
-  font-weight: 600 !important; min-width: 52px !important; text-align: right !important;
+  font-weight: 600 !important; min-width: 54px !important; text-align: right !important;
+  font-variant-numeric: tabular-nums !important;
   color: var(--lp-text, #f2eee5) !important; -webkit-text-fill-color: currentColor !important;
 }
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilx-empty {
-  margin: 0 !important; padding: 120px 0 !important; text-align: center !important;
+  margin: 0 !important; padding: 150px 0 !important; text-align: center !important;
   font-size: 13px !important;
-  color: var(--lp-muted, #929c9c) !important; -webkit-text-fill-color: currentColor !important;
+  color: var(--il-muted-ink, var(--lp-muted, #929c9c)) !important; -webkit-text-fill-color: currentColor !important;
 }
