@@ -616,6 +616,7 @@ html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .edu-kicke
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .src-desc,
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .tool-disclaimer,
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-shell-preview span,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-shell-preview div span,
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-metric-note,
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .wrap .note,
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .principle span,
@@ -648,6 +649,7 @@ html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .pgc-previ
    a calculator compounds are all things the reader is meant to read, and each
    was sitting on a tinted wash that put it just under AA even after the muted
    token was strengthened. Body ink, not muted ink. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-shell-preview span,
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .tool-disclaimer,
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .wrap .note,
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .note,
@@ -770,6 +772,11 @@ html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .home-shel
    because painting the text without fixing the ground is guesswork - that
    mistake is recorded above.
    ═══════════════════════════════════════════════════════════════════════════ */
+/* The narrow layout has its own market strip, and it was another dark slab:
+   rgb(10,18,21), 870x108, with the index price and name on top of it. Seen in
+   a dumped crop rather than inferred - the computed colours of a same-named
+   element elsewhere on the page said it was fine. */
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .prime-mobile-market,
 html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .hsb-upgrade,
 html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .prime-dashboard-status,
 html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .prime-add-widget,
@@ -779,6 +786,7 @@ html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) 
   background: var(--lp-panel-2, #ffffff) !important;
   border-color: var(--lp-border, rgba(176,160,126,.16)) !important;
 }
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .prime-mobile-market *,
 html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .hsb-upgrade *,
 html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .prime-dashboard-status *,
 html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .prime-add-widget,
@@ -796,7 +804,16 @@ html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) 
 }
 
 /* Text that carried dark-mode values regardless of the surface under it. */
+/* .prime-mobile-brand, not .prime-dash-brand - the narrow layout has its own
+   wordmark element, and the desktop one is display:none there. Named by the
+   harness's ancestor path rather than guessed at, after two rules aimed at the
+   wrong element left it at 1.02:1. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .prime-mobile-brand,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .prime-mobile-brand span,
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .prime-dash-brand,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .prime-dash-brand *,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .il-wordmark-a,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .il-wordmark-b,
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .prime-dash-brand span,
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .prime-dashboard-greeting h1,
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .prime-dashboard-greeting h2,
@@ -859,8 +876,7 @@ html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-pa
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .hsb-up-sub,
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .mo-idx-name,
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .mo-bv2-label,
-html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .mm-note,
-html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .prime-dashboard-greeting p {
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .mm-note {
   color: var(--il-muted-ink) !important;
   -webkit-text-fill-color: currentColor !important;
 }
@@ -879,6 +895,12 @@ html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) 
 html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .prime-dashboard-index em,
 html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .mo-live {
   color: #0f6b52 !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .prime-mobile-market span,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .prime-mobile-market strong {
+  color: var(--lp-text, #f2eee5) !important;
   -webkit-text-fill-color: currentColor !important;
 }
 
@@ -1845,4 +1867,15 @@ html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilx-empty
   margin: 0 !important; padding: 150px 0 !important; text-align: center !important;
   font-size: 13px !important;
   color: var(--il-muted-ink, var(--lp-muted, #929c9c)) !important; -webkit-text-fill-color: currentColor !important;
+}
+
+/* Last rule in the last stylesheet, because the same selector appears in two
+   groups in this file and the earlier one kept winning - which only happens
+   when something between them re-states it. Appending settles it without
+   having to unpick the order. The tool-shell's explanatory copy sits on an
+   rgba(24,22,18,.1) wash where even the strengthened muted ink is 3.99:1. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-tool-shell .il-shell-preview span,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-shell-preview div span {
+  color: var(--lp-text, #f2eee5) !important;
+  -webkit-text-fill-color: currentColor !important;
 }
