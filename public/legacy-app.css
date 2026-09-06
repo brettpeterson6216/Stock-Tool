@@ -2904,7 +2904,7 @@ html:not([data-theme="dark"]) .hh-search-btn{color:#fff!important}
   --lens-gold:#D9B35E;
   --lens-gold-2:#F2D58A;
   --lens-text:#F5EBD7;
-  --lens-muted:rgba(245,235,215,.62);
+  --lens-muted:rgba(245,235,215,.72);
   --lens-muted-2:rgba(245,235,215,.42);
   --lens-shadow:0 34px 90px rgba(30,22,9,.20);
 }
@@ -3402,7 +3402,7 @@ html[data-theme="dark"] .il-landing{
   color:#17120B!important;
 }
 .il-workflow-copy p{
-  color:rgba(23,18,11,.68)!important;
+  color:rgba(23,18,11,.80)!important;
 }
 .il-workflow-visual .il-landing-kicker{
   color:#7B541C!important;
@@ -3739,7 +3739,7 @@ html[data-theme="dark"] .nav-acct-name{
 .modal p,
 .modal-note,
 .nav-acct-email{
-  color:rgba(23,18,11,.68)!important;
+  color:rgba(23,18,11,.80)!important;
 }
 html[data-theme="dark"] .app-main p,
 html[data-theme="dark"] .app-main li,
@@ -3877,7 +3877,7 @@ html[data-theme="dark"] #market-page .mo-bv2-val{
 #market-page .hc-link,
 #market-page .wl-table th,
 #market-page .wl-table td{
-  color:rgba(23,18,11,.68)!important;
+  color:rgba(23,18,11,.80)!important;
 }
 html[data-theme="dark"] #market-page .mo-subtitle,
 html[data-theme="dark"] #market-page .ht-name,
@@ -4823,7 +4823,7 @@ html[data-theme="dark"] #view-tool .price-time,
 html[data-theme="dark"] #view-tool .m-lbl,
 html[data-theme="dark"] #view-tool .m-sub,
 html[data-theme="dark"] #view-tool .fc-label{
-  color:rgba(23,18,11,.68)!important;
+  color:rgba(23,18,11,.80)!important;
 }
 
 /* Remove text-card backgrounds; let copy and promo art sit directly on the gold backdrop. */
