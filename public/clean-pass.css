@@ -1879,3 +1879,15 @@ html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-shell-
   color: var(--lp-text, #f2eee5) !important;
   -webkit-text-fill-color: currentColor !important;
 }
+
+/* The account chip is one of the four things the header was required to carry
+   on every page - "see your profile" - and it was painted at 48% opacity,
+   which is 1.06:1 on the light header. A control that has to be findable
+   should not be the faintest thing in the bar. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .nav-acct-btn,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .nav-acct-btn span,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav .nav-acct-email {
+  color: var(--lp-text, #f2eee5) !important;
+  -webkit-text-fill-color: currentColor !important;
+  opacity: 1 !important;
+}
