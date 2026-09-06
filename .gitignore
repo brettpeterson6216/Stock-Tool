@@ -29,3 +29,7 @@ public/.lac5.tmp
 # Local scratch from assistant file transfers
 _to_delete/
 .claude/
+
+# Cowork scratch folder: bundles, commit messages and audit screenshots
+# written while working. Outputs, not source.
+Claude outputs/
