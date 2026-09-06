@@ -756,6 +756,132 @@ html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .home-shel
   color: var(--lp-text, #f2eee5) !important;
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE MARKET PAGE HAD NEVER BEEN THEMED FOR LIGHT MODE
+
+   It only became measurable once ?market=1 was audited as its own route - the
+   harness had been pointing at ?view=market, which the router ignores, so it
+   had been measuring the landing page and calling it the market page.
+
+   Rendered in light mode it showed near-invisible cream-on-cream text for the
+   sidebar wordmark, the active sidebar item and the greeting, and five dark
+   slabs left over from the dark palette: the status chip, the add-widget and
+   overflow buttons, the upgrade card and the index strip. Surfaces first,
+   because painting the text without fixing the ground is guesswork - that
+   mistake is recorded above.
+   ═══════════════════════════════════════════════════════════════════════════ */
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .hsb-upgrade,
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .prime-dashboard-status,
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .prime-add-widget,
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .prime-more-button,
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .mo-indices,
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .mo-footer {
+  background: var(--lp-panel-2, #ffffff) !important;
+  border-color: var(--lp-border, rgba(176,160,126,.16)) !important;
+}
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .hsb-upgrade *,
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .prime-dashboard-status *,
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .prime-add-widget,
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .prime-more-button,
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .mo-indices *,
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .mo-footer * {
+  color: var(--lp-text, #14161a) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .hsb-up-sub,
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .mo-footer span,
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .prime-status-label {
+  color: var(--il-muted-ink) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+/* Text that carried dark-mode values regardless of the surface under it. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .prime-dash-brand,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .prime-dash-brand span,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .prime-dashboard-greeting h1,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .prime-dashboard-greeting h2,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .hs-sidebar a,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .hsb-up-title,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .insight-time,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .hs-nav-item {
+  color: var(--lp-text, #f2eee5) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .prime-dashboard-greeting p,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .hsb-up-link,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .insight-time {
+  color: var(--il-muted-ink) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+/* The active movers tab is gold-on-gold at 1.91:1. Its sibling rule gives
+   .movers-tab.active white text but the class in use is .on, so the active tab
+   never got it. White on the solved gold measures 6.41:1. */
+/* The gold differs by theme, so the ink on it has to as well: white on the
+   light-mode gold measures 6.41:1, and near-black on the dark-mode gold 8.62:1.
+   Applying white to both made the dark tab worse than it started. */
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .movers-tab.on,
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .movers-tab.active {
+  background: var(--il-gold-ink) !important;
+  border-color: var(--il-gold-ink) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+html[data-theme="dark"]:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .movers-tab.on,
+html[data-theme="dark"]:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .movers-tab.active {
+  background: var(--il-gold-ink) !important;
+  border-color: var(--il-gold-ink) !important;
+  color: #17120b !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+/* The last of the market page's muted labels, all between 3.9 and 4.4. */
+/* These carry the solved muted ink already and still measure 4.2-4.4, because
+   they sit on tinted washes darker than any panel the token was solved
+   against. Chasing the ground for each one is a losing game; they are readable
+   content, so they get body ink, which passes on every ground in its theme. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .prime-dashboard-greeting p,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .insight-time,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .prime-dashboard-index span,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .prime-mobile-kpi span,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .hg-movers div,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .mm-note {
+  color: var(--lp-text, #f2eee5) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .il-home-watch-empty button,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-home-watch-empty button {
+  color: var(--il-gold-ink) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .prime-status-label,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .hsb-up-sub,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .mo-idx-name,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .mo-bv2-label,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .mm-note,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .prime-dashboard-greeting p {
+  color: var(--il-muted-ink) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+/* Index names and the live badge on the market page's tinted strips. */
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .mo-idx-name,
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .mo-indices span,
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .prime-dashboard-index strong {
+  color: var(--lp-text, #14161a) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+/* The dark-mode positive green is rgb(85,189,116), which is 2.1:1 on a white
+   card - fine on a dark panel, unreadable on a light one. Light mode gets the
+   darker green, which measures 5.79:1. */
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .prime-mobile-kpi em,
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .prime-dashboard-index em,
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #market-page .mo-live {
+  color: #0f6b52 !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
 /* A destructive action in a red that was 3.36:1 on the light panel. */
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .sa-clear-btn {
   color: var(--il-danger-ink, #b3323d) !important;
