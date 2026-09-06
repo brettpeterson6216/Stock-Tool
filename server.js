@@ -421,12 +421,16 @@ async function runReviewDigests() {
   try {
     const { sendEmail } = require("./lib/email");
     const monday = (() => { const d = new Date(); const day = (d.getUTCDay() + 6) % 7; d.setUTCDate(d.getUTCDate() - day); return d.toISOString().slice(0, 10); })();
-    const users = await db.execute({ sql: `
+    // Statement form matters here. The libSQL HTTP client (production/Turso)
+    // only defaults `args` for the *string* form; an object statement without
+    // `args` reaches Object.entries(undefined) and throws a TypeError. The
+    // local file: client tolerates it, so this only ever failed in production.
+    const users = await db.execute(`
       SELECT u.id, u.email FROM users u WHERE u.email IS NOT NULL AND EXISTS (
         SELECT 1 FROM investment_theses t
         WHERE t.user_id = u.id AND t.review_date IS NOT NULL AND t.review_date != ''
           AND t.review_date <= date('now', '+7 days') AND t.review_date >= date('now', '-30 days')
-      ) LIMIT 200` });
+      ) LIMIT 200`);
     for (const u of ((users && users.rows) || [])) {
       try {
       const claim = await db.execute({
@@ -465,3 +469,7 @@ if (require.main === module) {
 }
 
 module.exports = app;
+// Exposed so the digest can be exercised in tests. It is a background timer in
+// production, which is precisely why nothing caught the statement-shape bug
+// that made it throw on every cycle.
+module.exports.runReviewDigests = runReviewDigests;

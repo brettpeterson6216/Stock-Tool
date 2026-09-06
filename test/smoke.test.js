@@ -731,6 +731,7 @@ test("Anonymous funnel analytics use a stable hashed guest actor", async () => {
   const { db } = require("../lib/db");
   const tracked = await db.execute({
     sql: "SELECT properties FROM analytics_events WHERE event IN ('landing_page_view','landing_cta_clicked') AND json_extract(properties, '$.ticker') = 'SMOKE' ORDER BY id",
+    args: [],
   });
   const actors = tracked.rows.map(row => JSON.parse(row.properties).guest_actor);
   assert.equal(actors.length, 2);
