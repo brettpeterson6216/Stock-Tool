@@ -142,13 +142,13 @@ test("GET / serves the homepage with a successful status", async () => {
   assert.match(html, /id="mbn-workspace"/);
   assert.match(html, /aria-label="Home"/);
   assert.match(html, /viewport-fit=cover/);
-  assert.match(html, /legacy-app\.css\?v=\d{8}(-\d+)?/);
+  assert.match(html, /legacy-app\.css\?v=[\w.-]+/);
   assert.match(legacyCss, /input,select,textarea\{font-size:16px!important\}/);
   assert.match(legacyCss, /#main-nav\[data-view="tool"\] #nav-ticker-bar\{display:none!important\}/);
   assert.match(legacyCss, /\.nav-acct-wrap,\.nav-acct-btn\{min-width:0;max-width:100%\}/);
   assert.match(legacyCss, /\.nav-acct-menu\{right:0;min-width:min\(220px,calc\(100vw - 1\.5rem\)\)/);
-  assert.match(html, /workspace-system\.js\?v=\d{8}(-\d+)?/);
-  assert.match(html, /workspace-system\.css\?v=\d{8}(-\d+)?/);
+  assert.match(html, /workspace-system\.js\?v=[\w.-]+/);
+  assert.match(html, /workspace-system\.css\?v=[\w.-]+/);
   assert.match(appSource, /__initialWorkspaceTab/);
   assert.match(res.headers.get("cache-control"), /no-cache/);
 });
@@ -210,7 +210,7 @@ test("Auth pages preserve a local return path and expose attribution hooks", asy
     const res = await req(`${pagePath}?next=https%3A%2F%2Fevil.example%2Fsteal&source=smoke&ticker=AAPL`);
     assert.equal(res.status, 200);
     const html = await res.text();
-    assert.match(html, new RegExp(`<script src="${scriptPath.replace(".", "\\.")}\\?v=\\d{8}-\\d+"><\\/script>`));
+    assert.match(html, new RegExp(`<script src="${scriptPath.replace(".", "\\.")}\\?v=[\\w.-]+"><\\/script>`));
     const scriptRes = await req(scriptPath);
     assert.equal(scriptRes.status, 200);
     const script = await scriptRes.text();
@@ -226,7 +226,7 @@ test("Auth pages use executable external scripts under the production CSP", asyn
     assert.equal(page.status, 200);
     assert.match(page.headers.get("content-security-policy"), /script-src 'self'/);
     const html = await page.text();
-    assert.match(html, new RegExp(`<script src="${scriptPath.replace(".", "\\.")}\\?v=\\d{8}-\\d+"><\\/script>`));
+    assert.match(html, new RegExp(`<script src="${scriptPath.replace(".", "\\.")}\\?v=[\\w.-]+"><\\/script>`));
     const script = await req(scriptPath);
     assert.equal(script.status, 200);
     assert.match(script.headers.get("content-type"), /javascript/);
@@ -446,7 +446,7 @@ test("canonical visual system is served and included on primary product surfaces
     const page = await req(pagePath);
     assert.equal(page.status, 200);
     const markup = await page.text();
-    assert.match(markup, /beauty-system\.css\?v=\d{8}-\d+/);
+    assert.match(markup, /beauty-system\.css\?v=[\w.-]+/);
     if (pagePath === "/stock/AAPL") {
       assert.match(markup, /<nav id="main-nav" class="il-global-nav il-static-main-nav"/);
     }

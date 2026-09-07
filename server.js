@@ -56,6 +56,7 @@ const { PORT, SESSION_SECRET } = cfg;
 }());
 
 const path    = require("path");
+const { sendPage, stampHtml } = require("./lib/asset-stamp");
 const fs      = require("fs");
 const crypto  = require("crypto");
 const express = require("express");
@@ -219,19 +220,19 @@ app.use("/api",         analysisRouter);     // /api/analysis/:ticker
 // ============================================================
 //  Static HTML pages
 // ============================================================
-app.get("/", (_req, res) => res.sendFile(path.join(__dirname, "index.html")));
+app.get("/", (_req, res) => sendPage(res, path.join(__dirname, "index.html")));
 
-app.get(["/login",  "/login.html"],  (req, res) => res.sendFile(path.join(__dirname, "public", "login.html")));
-app.get(["/signup", "/signup.html"], (req, res) => res.sendFile(path.join(__dirname, "public", "signup.html")));
+app.get(["/login",  "/login.html"],  (req, res) => sendPage(res, path.join(__dirname, "public", "login.html")));
+app.get(["/signup", "/signup.html"], (req, res) => sendPage(res, path.join(__dirname, "public", "signup.html")));
 app.get(["/reset-password", "/reset-password.html"], (req, res) =>
-  res.sendFile(path.join(__dirname, "public", "reset-password.html"))
+  sendPage(res, path.join(__dirname, "public", "reset-password.html"))
 );
 
-app.get(["/about", "/about.html"], (_req, res) => res.sendFile(path.join(__dirname, "public", "about.html")));
+app.get(["/about", "/about.html"], (_req, res) => sendPage(res, path.join(__dirname, "public", "about.html")));
 
-app.get(["/blog",  "/blog.html"],  (_req, res) => res.sendFile(path.join(__dirname, "public", "blog.html")));
-app.get(["/research-process", "/research-process.html"], (_req, res) => res.sendFile(path.join(__dirname, "public", "research-process.html")));
-app.get(["/compound-calculator", "/compound-calculator.html"], (_req, res) => res.sendFile(path.join(__dirname, "public", "compound-calculator.html")));
+app.get(["/blog",  "/blog.html"],  (_req, res) => sendPage(res, path.join(__dirname, "public", "blog.html")));
+app.get(["/research-process", "/research-process.html"], (_req, res) => sendPage(res, path.join(__dirname, "public", "research-process.html")));
+app.get(["/compound-calculator", "/compound-calculator.html"], (_req, res) => sendPage(res, path.join(__dirname, "public", "compound-calculator.html")));
 
 // Production LensScore surface. It reuses the same independently tested
 // browser engine as the private lab, but is served from a stable public route
@@ -250,7 +251,11 @@ app.get(["/lens-score", "/lens-score/"], async (_req, res) => {
       .replaceAll("/__lab/lens-score/assets/", "/lens-score/assets/")
       .replace("Reported data · production candidate", "Reported data · live research")
       .replace('<link rel="icon" href="/logo.svg" type="image/svg+xml">', '<link rel="canonical" href="https://impliedlens.com/lens-score"><link rel="icon" href="/logo.svg" type="image/svg+xml">');
-    res.type("html").send(html);
+    // This page builds its HTML rather than sending a file, so it needs the
+    // asset stamp applied by hand or its stylesheets keep a week-old cache
+    // through every deploy like the rest of the site used to.
+    res.setHeader("Cache-Control", "no-cache, must-revalidate");
+    res.type("html").send(stampHtml(html));
   } catch (error) {
     console.error("[lens-score-page]", error.message);
     res.status(500).send("LensScore is temporarily unavailable.");
@@ -273,7 +278,7 @@ if (process.env.NODE_ENV !== "production") {
   app.get(["/__lab/lens-score", "/__lab/lens-score/"], (_req, res) => {
     res.setHeader("Cache-Control", "no-store");
     res.setHeader("X-Robots-Tag", "noindex, nofollow, noarchive");
-    res.sendFile(path.join(lensScoreLabRoot, "index.html"));
+    sendPage(res, path.join(lensScoreLabRoot, "index.html"));
   });
 }
 
@@ -355,14 +360,14 @@ app.get("/verify-email", (req, res) => {
 // ============================================================
 //  Trust & legal pages
 // ============================================================
-app.get(["/privacy", "/privacy.html"],         (_req, res) => res.sendFile(path.join(__dirname, "public", "privacy.html")));
-app.get(["/terms",   "/terms.html"],            (_req, res) => res.sendFile(path.join(__dirname, "public", "terms.html")));
-app.get(["/data-sources", "/data-sources.html"],(_req, res) => res.sendFile(path.join(__dirname, "public", "data-sources.html")));
+app.get(["/privacy", "/privacy.html"],         (_req, res) => sendPage(res, path.join(__dirname, "public", "privacy.html")));
+app.get(["/terms",   "/terms.html"],            (_req, res) => sendPage(res, path.join(__dirname, "public", "terms.html")));
+app.get(["/data-sources", "/data-sources.html"],(_req, res) => sendPage(res, path.join(__dirname, "public", "data-sources.html")));
 
 // Every other static page has an extension-less route; this one was missed, so
 // /admin-analytics fell through to the catch-all 404 handler.
 app.get(["/admin-analytics", "/admin-analytics.html"], (_req, res) =>
-  res.sendFile(path.join(__dirname, "public", "admin-analytics.html"))
+  sendPage(res, path.join(__dirname, "public", "admin-analytics.html"))
 );
 
 // Ticker landing pages — server-rendered SEO pages for /stock/:ticker
@@ -406,7 +411,7 @@ app.get("/api/version", (_req, res) => {
 app.use("/api", (_req, res) => res.status(404).json({ error: "API route not found." }));
 
 // SPA catch-all — must be last
-app.get("*", (_req, res) => res.status(404).sendFile(path.join(__dirname, "index.html")));
+app.get("*", (_req, res) => sendPage(res, path.join(__dirname, "index.html"), 404));
 
 // ============================================================
 //  Start
