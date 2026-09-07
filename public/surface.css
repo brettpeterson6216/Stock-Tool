@@ -630,3 +630,37 @@ html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) 
 html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .pgc-badge {
   background: linear-gradient(135deg, #E8C079 0%, #C9A052 55%, #B78B40 100%) !important;
 }
+
+/* ── The hero card was not in the hero grid ────────────────────────────────
+   .il-landing-hero declares grid-template-areas "copy preview" / "features
+   features", and .il-landing-copy and .il-rail claim `copy` and `features` -
+   but #il-hero-live claims nothing. Its computed grid-area is `auto`, so it
+   is auto-placed into row 1 column 2 rather than into `preview`, the row
+   sizes to the copy beside it instead of to the card, and with
+   align-items:center the card overflows that row symmetrically: 27px above
+   and 27px below at 1400px, 36 each way at 1000px. The bottom half lands on
+   the feature rail.
+
+   Measured: the card and the rail overlap by 72px at 1000, 63 at 1100, 54 at
+   1180, 25 at 1280 and 10 at 1400 - every laptop width there is - and the
+   card's "Updated just now" line prints straight through the first row of
+   feature cards. It reproduces on the commit before this pass, so it has
+   been shipping; it is fixed here because the guest page is what this pass
+   is for. Naming the area is the whole fix. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-hero-live { grid-area: preview !important; }
+/* Naming the area is necessary and not sufficient: with it in place the row
+   still resolved to 312.7px around a 420px card, so the card kept overflowing
+   by 107px, centred - 54 above the hero and 54 onto the rail below. Sizing
+   both rows to their content is what actually closes it: row one becomes
+   420px, the card's bottom and the rail's top meet at the same pixel, and the
+   overlap is 0 at every width from 800 to 2560. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-landing-hero {
+  grid-template-rows: max-content max-content !important;
+}
+
+/* The "Built on verified sources" row carries an explicit max-width of
+   389-430px inside a copy column that is 319-390px wide, so it overhangs its
+   own column by 55-75px and the last logo - FRED - is drawn underneath the
+   left edge of the market card. True at every width measured, 1180 through
+   2560. It already wraps; it just was not allowed to. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-trust { max-width: 100% !important; }

@@ -89,3 +89,27 @@ test("the plot's viewport height is not itself trapped in a breakpoint", () => {
   assert.match(unconditional, /\.ilx-plot \{ height: clamp\(/,
     "the responsive plot height moved inside a media query");
 });
+
+// ── The hero card and the grid it was never in ────────────────────────────
+// .il-landing-hero declares grid-template-areas "copy preview" / "features
+// features". `grid-area: preview` was written for .il-landing-preview — the
+// old hero illustration — and when that was replaced by the live market card
+// the assignment did not come with it, so #il-hero-live was auto-placed, the
+// row sized to the copy beside it rather than to the card, and the card
+// overflowed its row by 107px: 54 above the hero and 54 straight onto the
+// feature rail. Measured overlap ran 72px at 1000 down to 10px at 1400 — the
+// whole laptop range — and it reproduced on the commit before this pass.
+test("the hero card is placed in the hero grid, and the row is sized to it", () => {
+  assert.match(surface, /#landing-page \.il-hero-live \{[^}]*grid-area: preview/,
+    "the market card is not claiming the preview area, so it will be auto-placed again");
+  assert.match(surface, /#landing-page \.il-landing-hero \{[^}]*grid-template-rows: max-content max-content/,
+    "naming the area is not enough on its own — the row has to be allowed to size to the card");
+});
+
+test("the trust row is bounded by the column it sits in", () => {
+  // Its own max-width (389-430px) was wider than the copy column (319-390px),
+  // so it overhung by 55-75px and FRED was drawn under the market card at
+  // every width from 1180 to 2560.
+  assert.match(surface, /#landing-page \.il-trust \{ max-width: 100%/,
+    "the trust row can overhang its column again");
+});
