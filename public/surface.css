@@ -1,0 +1,632 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   SURFACE - the last sheet, loaded after clean-pass.css.
+
+   Two complaints, both measured before anything here was written.
+
+   1. "Requires scrolling to see all data the dashboard should normally just
+      have readily available." At 1920x1080 - so a 960px page viewport once
+      Chrome's tab strip and omnibox are taken off - the dashboard was 1548px
+      tall: 1.61 screens, 588px hidden. The cause was not density, it was
+      balance. The middle column ran 1190px while the left ran 633 and the
+      right 789, so 557px of left rail and 401px of right rail sat empty while
+      the middle stacked four panels and pushed two of them off the screen.
+
+      The fix is packing, not shrinking: the search leaves the middle column
+      for the header row it belongs in (-121px), sectors fold into the market
+      panel they describe (-110px), popular starting points goes from a
+      3x2 card grid to one row (-179px), and the plot takes its height from
+      the viewport instead of a fixed 372px.
+
+   2. "Add more color contrasts to make things stand out ... make the borders
+      between panels stand out and have color blends." The panel was #0a1115
+      on a #070b0e ground - three points of separation in each channel, which
+      is why the panels read as one flat sheet. Panels now sit on a gradient,
+      carry a real edge and a lifted inner highlight, and each one is topped
+      by a hairline that runs gold through its middle. The market panel's
+      hairline is the only one that changes colour, because it is the only
+      panel whose subject has a direction.
+
+      BRAND.md asks for "restrained motion and minimal decoration" and "green
+      and red only for directional data", so none of this is ornament for its
+      own sake: the edge separates panels, the wash gives the page a top-left
+      light source, and colour stays on the two jobs it already had - gold for
+      the product, green/red for direction.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── The ground ────────────────────────────────────────────────────────────
+   Three washes and a hairline horizon. The washes are fixed to the viewport so
+   the light source stays where it is while the page scrolls under it, and
+   both are far enough below the panel surface that no text sits on a gradient
+   steep enough to change its contrast reading. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-home-member {
+  position: relative !important;
+  isolation: isolate !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-home-member::before {
+  content: "" !important;
+  position: fixed !important; inset: 0 !important;
+  z-index: -1 !important; pointer-events: none !important;
+  background:
+    radial-gradient(900px 520px at 12% -6%, rgba(216, 162, 61, .085), transparent 62%),
+    radial-gradient(760px 480px at 92% 8%, rgba(63, 134, 168, .075), transparent 66%),
+    radial-gradient(1100px 700px at 78% 108%, rgba(95, 196, 173, .05), transparent 68%) !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-home-member::after {
+  /* A single lit edge under the header row. It is what tells you the header
+     is a header without spending a panel or a border on saying so. */
+  content: "" !important;
+  position: absolute !important; left: 0 !important; right: 0 !important; top: 0 !important;
+  height: 1px !important; z-index: -1 !important; pointer-events: none !important;
+  background: linear-gradient(90deg, transparent, rgba(216, 162, 61, .28) 22%, rgba(216, 162, 61, .28) 70%, transparent) !important;
+}
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-home-member::before {
+  background:
+    radial-gradient(900px 520px at 12% -6%, rgba(168, 120, 31, .10), transparent 62%),
+    radial-gradient(760px 480px at 92% 8%, rgba(42, 120, 214, .06), transparent 66%),
+    radial-gradient(1100px 700px at 78% 108%, rgba(15, 107, 82, .05), transparent 68%) !important;
+}
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-home-member::after {
+  background: linear-gradient(90deg, transparent, rgba(140, 100, 24, .30) 22%, rgba(140, 100, 24, .30) 70%, transparent) !important;
+}
+
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-home-member {
+  /* 64px of bottom padding on a page whose whole point is to fit was the last
+     40px of the overflow. */
+  padding: 34px clamp(16px, 3vw, 56px) 30px !important;
+}
+
+/* ── The header row ────────────────────────────────────────────────────────
+   Greeting, search, workspace link - one line, on a row that was already
+   70px tall and mostly empty. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-head {
+  display: flex !important; align-items: center !important;
+  justify-content: space-between !important;
+  gap: 18px !important; flex-wrap: wrap !important;
+  padding-bottom: 18px !important; margin-bottom: 4px !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-head-id { flex: 0 1 auto !important; min-width: 0 !important; }
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-greeting { font-size: clamp(26px, 2.4vw, 33px) !important; }
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-sub { margin-top: 5px !important; font-size: 13px !important; }
+
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-search {
+  flex: 1 1 300px !important; max-width: 470px !important;
+  display: block !important; padding: 0 !important; border: 0 !important;
+  background: none !important; border-radius: 0 !important;
+}
+/* One shell around icon, field and button, so the search reads as a single
+   control rather than as a box next to a button. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-search-row {
+  display: flex !important; align-items: center !important; gap: 0 !important;
+  max-width: none !important; height: 44px !important;
+  border: 1px solid var(--lp-border, rgba(176, 160, 126, .16)) !important;
+  border-radius: 11px !important;
+  background: var(--lp-input-shell, #070d10) !important;
+  padding-left: 13px !important; overflow: hidden !important;
+  transition: border-color .14s ease, box-shadow .14s ease !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-search-row:focus-within {
+  border-color: var(--lp-border-gold, rgba(216, 164, 63, .34)) !important;
+  box-shadow: 0 0 0 3px rgba(216, 162, 61, .13) !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-search-icon {
+  font-size: 16px !important; flex: 0 0 auto !important;
+  color: var(--il-muted-ink, var(--lp-muted, #929c9c)) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #ihm-ticker {
+  flex: 1 1 auto !important; min-width: 0 !important; height: 42px !important;
+  border: 0 !important; background: transparent !important;
+  padding: 0 11px !important; border-radius: 0 !important; font-size: 14px !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #ihm-ticker:focus { outline: none !important; box-shadow: none !important; }
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-go {
+  height: 44px !important; flex: 0 0 auto !important;
+  padding: 0 17px !important; border-radius: 0 !important;
+  font-size: 13px !important;
+}
+
+/* ── The grid ──────────────────────────────────────────────────────────────
+   Three columns, and now three columns that finish at roughly the same place. */
+/* SCOPED, and this is the whole reason: clean-pass.css turns the dashboard
+   into two columns below 1500px and one below 1000px, in media queries that
+   come EARLIER in the cascade. An unconditional three-column rule in a later
+   sheet outranks all of them at equal specificity, which is exactly what
+   happened - at 900px the 240/1fr/336 grid was still in force, the market
+   panel's head collapsed onto its own price, the timeframe buttons stacked
+   into a vertical stripe and the index tiles ran through each other. Every
+   rule below that assumes three real columns is scoped with it. */
+@media (min-width: 1501px) {
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-grid {
+    grid-template-columns: 240px minmax(0, 1fr) 336px !important;
+    gap: 16px !important;
+  }
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-col-tools,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-col-main,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-col-side { gap: 16px !important; }
+
+/* ── Panels: an edge, a lift, and a lit top ────────────────────────────────
+   The old panel was flat fill plus a 16%-alpha hairline, which on this ground
+   is a 3-point step. It now has a gradient body, a stronger border, an inner
+   highlight along the top edge and a shadow underneath - four cues instead of
+   one, which is what makes a panel read as sitting ON the page. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-panel {
+  position: relative !important;
+  padding: 15px 17px !important;
+  border-radius: 13px !important;
+  border: 1px solid var(--il-panel-edge, rgba(176, 160, 126, .26)) !important;
+  background: var(--il-panel-face, linear-gradient(168deg, #101a20 0%, #0b1317 62%, #0a1115 100%)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .045),
+    0 12px 28px -20px rgba(0, 0, 0, .95) !important;
+  overflow: hidden !important;
+}
+/* The lit top edge. Gold everywhere, because gold is the product's colour and
+   this line is decoration with a job: it is what separates one panel from the
+   next when they stack 16px apart. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-panel::before {
+  content: "" !important;
+  position: absolute !important; top: 0 !important; left: 0 !important; right: 0 !important;
+  height: 1px !important; pointer-events: none !important;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--il-panel-hair, rgba(216, 162, 61, .5)) 26%,
+    var(--il-panel-hair, rgba(216, 162, 61, .5)) 74%,
+    transparent 100%) !important;
+}
+/* A corner glow, keyed to the same top-left light source as the page wash.
+   Low enough that no text on the panel sits on a measurably different ground. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-panel::after {
+  content: "" !important;
+  position: absolute !important; inset: 0 !important;
+  pointer-events: none !important; z-index: 0 !important;
+  background: radial-gradient(420px 190px at 0% 0%, var(--il-panel-glow, rgba(216, 162, 61, .055)), transparent 70%) !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-panel > * { position: relative !important; z-index: 1 !important; }
+
+/* The market panel is the one panel whose subject has a direction, so it is
+   the one panel whose hairline is allowed to carry a direction. --ihm-accent
+   is already green on an up day and red on a down one. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-market-panel {
+  --il-panel-hair: color-mix(in srgb, var(--ihm-accent) 62%, transparent) !important;
+  --il-panel-glow: color-mix(in srgb, var(--ihm-accent) 7%, transparent) !important;
+}
+
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-panel:hover {
+  border-color: var(--lp-border-gold, rgba(216, 164, 63, .34)) !important;
+}
+
+/* Light mode is not the dark values inverted: on a warm paper ground the
+   panel is the lighter surface, the edge does more of the work, and the
+   shadow is what carries the lift. */
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-panel {
+  --il-panel-edge: rgba(62, 54, 39, .22);
+  --il-panel-face: linear-gradient(168deg, #ffffff 0%, #fdfbf6 60%, #faf7f0 100%);
+  --il-panel-hair: rgba(140, 100, 24, .45);
+  --il-panel-glow: rgba(168, 120, 31, .05);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .9),
+    0 10px 24px -18px rgba(50, 42, 26, .5) !important;
+}
+
+/* A title reads faster with a mark in front of it than with more weight on
+   it, and the mark is where the panel's colour lives at text size. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-panel-title,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-strip-title {
+  display: inline-flex !important; align-items: center !important; gap: 8px !important;
+}
+/* Gold, not --ihm-accent. clean-pass sets --ihm-accent to green on an up day
+   for every .ihm-panel on the dashboard, so keying the tick to it painted a
+   green mark in front of "Favorites", "Market news" and "Jump into a tool" -
+   colour carrying no information, which is the thing BRAND.md rules out and
+   the thing the comment at the top of this file claims not to do. The tick is
+   the product's colour; only the market panel's tick has a direction to
+   report, and it is the only one allowed to change. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-panel-title::before,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-strip-title::before {
+  content: "" !important; flex: 0 0 auto !important;
+  width: 2px !important; height: 11px !important; border-radius: 2px !important;
+  background: var(--il-gold-ink, #d8a23d) !important;
+  opacity: .85 !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-market-panel .ihm-panel-title::before,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-market-panel .ihm-strip-title::before {
+  background: var(--ihm-accent, #d8a23d) !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-panel-head { margin-bottom: 11px !important; }
+
+/* ── Market panel internals ────────────────────────────────────────────────
+   The plot takes what the window has instead of a fixed 372px. At a 960px
+   page viewport that is 320px; at 1440p it reaches its 420px ceiling; on a
+   short laptop screen it bottoms out at 230 rather than pushing the indexes
+   off the page. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-chart { min-height: 0 !important; }
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilx-plot { height: clamp(230px, calc(100vh - 636px), 420px) !important; }
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-indexes { margin-top: 12px !important; padding-top: 12px !important; }
+
+/* Sectors, now a strip inside the market panel rather than a panel of its
+   own: one rule, one head, one set of padding instead of three. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-strip {
+  margin-top: 12px !important; padding-top: 12px !important;
+  border-top: 1px solid var(--lp-border, rgba(176, 160, 126, .16)) !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-strip-head {
+  display: flex !important; align-items: baseline !important;
+  justify-content: space-between !important; gap: 12px !important; margin-bottom: 9px !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-strip-title {
+  font-size: 12px !important; font-weight: 600 !important;
+  color: var(--lp-text, #f2eee5) !important; -webkit-text-fill-color: currentColor !important;
+}
+/* The chips are directional data, so they get the directional tint on their
+   own edge - the one place on the dashboard where six small colours at once
+   is the point rather than noise. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-sector.is-up {
+  border-color: color-mix(in srgb, var(--lp-green, #4ec879) 40%, transparent) !important;
+  background: color-mix(in srgb, var(--lp-green, #4ec879) 9%, transparent) !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-sector.is-dn {
+  border-color: color-mix(in srgb, var(--lp-red, #ef626d) 40%, transparent) !important;
+  background: color-mix(in srgb, var(--lp-red, #ef626d) 9%, transparent) !important;
+}
+
+/* ── Popular starting points: one row, not two ─────────────────────────────
+   Six cards across a 1100px column is 170px each, which is more than a
+   ticker, a name, a percentage and a 30px sparkline need. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-populars { grid-template-columns: repeat(6, minmax(0, 1fr)) !important; gap: 9px !important; }
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-pop { padding: 9px 10px !important; gap: 6px !important; }
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-spark { height: 26px !important; }
+
+/* ── The right rail ────────────────────────────────────────────────────────
+   Three panels that between them ran 789px against a 740px budget. The rows
+   were the loose part, not the panels. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-col-side .ihm-panel-head { margin-bottom: 8px !important; }
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-col-side .ihm-fav { padding-top: 9px !important; padding-bottom: 9px !important; }
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-col-side .ihm-recent-row { padding-top: 8px !important; padding-bottom: 8px !important; }
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-news a { padding-top: 8px !important; padding-bottom: 8px !important; }
+
+/* ── Narrower windows ──────────────────────────────────────────────────────
+   Below 1500px six populars across stops being six readable cards. */
+@media (max-width: 1499px) {
+  html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-populars { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+}
+@media (max-width: 1500px) {
+  html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-search { max-width: none !important; order: 3 !important; flex-basis: 100% !important; }
+}
+
+/* ── Index tiles: the stat-tile contract, on one line ──────────────────────
+   Each tile was label / value / delta / sparkline stacked four deep, 96px for
+   three numbers - and three of them made the market panel 109px taller than
+   the chart needed. Stacked as label over (value + delta + trend) they are
+   44px and read faster, because the value and its direction are now on the
+   same line instead of two rows apart. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-indexes { gap: 14px !important; }
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-index {
+  display: grid !important; align-items: center !important; gap: 0 !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-index {
+  grid-template-columns: minmax(0, 1fr) 92px !important; column-gap: 12px !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-index-txt {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) !important;
+  align-items: baseline !important; column-gap: 9px !important; row-gap: 0 !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-index-txt span { grid-column: 1 / -1 !important; font-size: 11px !important; line-height: 1.5 !important; }
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-index-txt b { font-size: 17px !important; line-height: 1.35 !important; }
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-index-txt i { line-height: 1.35 !important; }
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-index .ihm-spark { height: 30px !important; grid-row: span 1 !important; }
+
+/* The plot is the single biggest thing on the page, so it is the one that
+   answers to the window. 100vh - 710px is everything the dashboard needs
+   around it; at a 960px page viewport that leaves 250px, at 1440p it reaches
+   the 460px ceiling, and on a short laptop it stops at 210 rather than
+   pushing the indexes off the bottom. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilx-plot { height: clamp(210px, calc(100vh - 710px), 460px) !important; }
+
+/* ── Rail rows ─────────────────────────────────────────────────────────────
+   The right rail was the tallest column after the middle one was fixed, and
+   the loose part was the rows, not the panels. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-col-side .ihm-fav { padding: 8px 0 !important; }
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-col-side .ihm-news-row { padding: 7px 0 !important; }
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-col-side .ihm-recent-row { padding: 7px 0 !important; }
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-pop { padding: 8px 10px !important; }
+
+/* ── Corrections from looking at the render ────────────────────────────────
+   Everything below was wrong in the first pass and is here because the
+   screenshot showed it, not because a rule predicted it. */
+
+/* 1. The sparkline sat at the far right of a 341px tile while its own numbers
+   sat at the far left, so each trend line read as belonging to the label that
+   followed it. The tile is sized to its content now and the trend rides
+   directly beside the value it describes. */
+/* No breakpoint here on purpose. Below 1500px the grid gives the market panel
+   the wider of two columns and below 1000px the whole page, and clean-pass
+   drops the index row to two across - so the tile is never narrower than it is
+   at 1920, and a breakpoint of its own would only be a width at which the page
+   changes shape for no reason. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-index {
+  grid-template-columns: auto 88px !important;
+  justify-content: start !important; column-gap: 14px !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-index-txt b { white-space: nowrap !important; }
+
+/* 2. The placeholder was rgba(245,235,215,.42) in BOTH themes - a near-white
+   at 42% alpha, which on light mode's white field measures about 1.05:1 and
+   is simply not there. A placeholder is text; it gets a text token. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #ihm-ticker::placeholder {
+  color: var(--il-muted-ink, #a3adad) !important;
+  -webkit-text-fill-color: var(--il-muted-ink, #a3adad) !important;
+  opacity: 1 !important;
+}
+
+/* 3. Two search fields now sit within 100px of each other - the nav's
+   sitewide one and this one. They are not the same control: the nav searches,
+   this one starts an analysis. So this one wears the product colour and the
+   nav's stays chrome, and the duplication reads as hierarchy rather than as a
+   mistake. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-search-row {
+  border-color: rgba(216, 164, 63, .30) !important;
+  background:
+    linear-gradient(180deg, rgba(216, 162, 61, .07), rgba(216, 162, 61, .02)),
+    var(--lp-input-shell, #070d10) !important;
+}
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-search-row {
+  border-color: rgba(176, 128, 40, .34) !important;
+  background:
+    linear-gradient(180deg, rgba(168, 120, 31, .07), rgba(168, 120, 31, .02)),
+    var(--lp-input-shell, #ffffff) !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-search-icon { color: var(--il-gold-ink, #d8a23d) !important; -webkit-text-fill-color: currentColor !important; }
+
+/* 4. The three columns ended at 833, 925 and 925, so the left rail stopped
+   92px short and the grid read as ragged rather than as a grid. Columns
+   stretch to the tallest and the shortest column's last panel takes up the
+   slack, with its rows sharing it instead of a void opening at the bottom. */
+@media (min-width: 1501px) {
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-grid { align-items: stretch !important; }
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6)   .ihm-col-tools > .ihm-panel:last-child,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6)   .ihm-col-side > .ihm-panel:last-child { flex: 1 1 auto !important; }
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6)   .ihm-col-tools .ihm-tools { flex: 1 1 auto !important; justify-content: stretch !important; }
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6)   .ihm-col-tools .ihm-tool { flex: 1 1 auto !important; align-content: center !important; }
+}
+
+/* 4b. flex:1 on .ihm-tools did nothing, because .ihm-panel is a block - so
+   the panel stretched and the tool list stayed put, opening exactly the void
+   the stretch was meant to close. The panel has to be a flex column for its
+   children to share the height. */
+@media (min-width: 1501px) {
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6)   .ihm-col-tools > .ihm-panel:last-child,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6)   .ihm-col-side > .ihm-panel:last-child {
+    display: flex !important; flex-direction: column !important;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE GUEST PAGE
+
+   The signed-out page had the same flat-sheet problem the dashboard had, and
+   one shipped defect: the market strip is pinned at height:164px with
+   overflow:hidden while its sector card needs 185px, so six sectors go in and
+   five and a half come out - the last row is cut through the middle on every
+   visit. Everything else here is the member side's surface system applied to
+   the guest side, so a visitor who signs up does not arrive somewhere that
+   looks like a different product.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* The same ground as the member dashboard. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page { position: relative !important; isolation: isolate !important; }
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page::before {
+  content: "" !important;
+  position: fixed !important; inset: 0 !important;
+  z-index: -1 !important; pointer-events: none !important;
+  background:
+    radial-gradient(1000px 560px at 10% -8%, rgba(216, 162, 61, .09), transparent 62%),
+    radial-gradient(820px 520px at 94% 6%, rgba(63, 134, 168, .07), transparent 66%),
+    radial-gradient(1200px 760px at 70% 104%, rgba(95, 196, 173, .045), transparent 68%) !important;
+}
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page::before {
+  background:
+    radial-gradient(1000px 560px at 10% -8%, rgba(168, 120, 31, .10), transparent 62%),
+    radial-gradient(820px 520px at 94% 6%, rgba(42, 120, 214, .055), transparent 66%),
+    radial-gradient(1200px 760px at 70% 104%, rgba(15, 107, 82, .045), transparent 68%) !important;
+}
+
+/* ── The shipped defect ────────────────────────────────────────────────────
+   height:164px on the strip and 162px on the cards, with overflow:hidden on
+   both. Six sector rows need 185. Let the strip be as tall as its content and
+   keep the 164 as a floor, so a short payload still holds the band's shape. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-ms-inner {
+  height: auto !important; max-height: none !important; min-height: 164px !important;
+  overflow: visible !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .ilm-card {
+  height: auto !important; min-height: 162px !important; overflow: visible !important;
+}
+
+/* ── The guest surfaces, given the member surfaces' treatment ──────────────
+   Edge, gradient body, inner highlight, shadow, and the gold hairline along
+   the top - the same four cues, so the two halves of the site read as one. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-hero-live,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-ms-inner,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-startpath,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-cap-card,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-landing-band,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-landing-pricing {
+  position: relative !important;
+  border: 1px solid var(--il-panel-edge, rgba(176, 160, 126, .26)) !important;
+  border-radius: 13px !important;
+  background: var(--il-panel-face, linear-gradient(168deg, #101a20 0%, #0b1317 62%, #0a1115 100%)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .045),
+    0 14px 32px -22px rgba(0, 0, 0, .95) !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-hero-live::after,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-ms-inner::after,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-startpath::after,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-cap-card::after,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-landing-band::after,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-landing-pricing::after {
+  content: "" !important;
+  position: absolute !important; top: 0 !important; left: 0 !important; right: 0 !important;
+  height: 1px !important; pointer-events: none !important; z-index: 2 !important;
+  background: linear-gradient(90deg, transparent, var(--il-panel-hair, rgba(216, 162, 61, .5)) 26%,
+              var(--il-panel-hair, rgba(216, 162, 61, .5)) 74%, transparent) !important;
+}
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-hero-live,
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-ms-inner,
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-startpath,
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-cap-card,
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-landing-band,
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-landing-pricing {
+  --il-panel-edge: rgba(62, 54, 39, .22);
+  --il-panel-face: linear-gradient(168deg, #ffffff 0%, #fdfbf6 60%, #faf7f0 100%);
+  --il-panel-hair: rgba(140, 100, 24, .45);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .9),
+    0 12px 28px -20px rgba(50, 42, 26, .5) !important;
+}
+
+/* The market strip's internal dividers were doing the separating on a card
+   that had no edge of its own. Now that it has one, they can be quieter. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .ilm-card { border-right-color: var(--lp-border, rgba(176, 160, 126, .16)) !important; }
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .ilm-card:last-child { border-right: 0 !important; }
+
+/* The capability rail under the hero was five cells divided by hairlines with
+   no ground at all - the flattest thing on the page and the first thing under
+   the fold. It gets cards. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-rail {
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  gap: 12px !important; border: 0 !important; background: none !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-rail-item {
+  position: relative !important;
+  padding: 15px 16px !important; border-radius: 12px !important;
+  border: 1px solid var(--il-panel-edge, rgba(176, 160, 126, .22)) !important;
+  background: var(--il-panel-face, linear-gradient(168deg, #0f181d, #0a1115)) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .035) !important;
+  transition: border-color .14s ease, transform .14s ease !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-rail-item:hover {
+  border-color: var(--lp-border-gold, rgba(216, 164, 63, .34)) !important;
+  transform: translateY(-1px) !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-rail-item i {
+  font-size: 19px !important;
+  color: var(--il-gold-ink, #d8a23d) !important; -webkit-text-fill-color: currentColor !important;
+}
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-rail-item {
+  --il-panel-edge: rgba(62, 54, 39, .18);
+  --il-panel-face: linear-gradient(168deg, #ffffff, #faf7f0);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), 0 8px 20px -18px rgba(50, 42, 26, .45) !important;
+}
+
+/* The numerals are icons now, so the slot they sat in becomes a chip. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .isp-n {
+  display: inline-flex !important; align-items: center !important; justify-content: center !important;
+  width: 32px !important; height: 32px !important; border-radius: 9px !important;
+  border: 1px solid var(--lp-border-gold, rgba(216, 164, 63, .30)) !important;
+  background: rgba(216, 162, 61, .10) !important;
+  font-size: 16px !important;
+  color: var(--il-gold-ink, #d8a23d) !important; -webkit-text-fill-color: currentColor !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-startpath { padding: 18px 20px !important; }
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-startpath:hover { border-color: var(--lp-border-gold, rgba(216, 164, 63, .34)) !important; }
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-startpaths-title { font-size: clamp(21px, 2vw, 27px) !important; }
+
+/* ── Rhythm ────────────────────────────────────────────────────────────────
+   Measured on the rendered page: 100px of nothing between the market strip
+   and the next heading, 150px between the capability grid and the section
+   after it. On a page a visitor is scanning, that is not breathing room, it
+   is distance between the reasons to stay. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-capabilities,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-workflow-visual { padding-block: 56px !important; }
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-cap-head { margin-bottom: 30px !important; }
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-landing-band,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-landing-pricing { margin-block: 26px !important; }
+
+/* ── Two things this sheet broke, put back ─────────────────────────────────
+
+   1. premium-revamp.css already owned #landing-page::before - a blurred gold
+      hero light, centred and 900px tall. Writing the page wash on the same
+      pseudo-element silently replaced it, which is not a trade anyone
+      decided to make. The wash stays, because it is what makes the guest and
+      member pages one product, and the hero light comes back as a fourth
+      radial in it.
+
+   2. premium-revamp.css also owned .il-cap-card::after - a gold hairline at
+      opacity 0 that "wakes up on hover". The resting hairline above overrode
+      it, so the hover tell was gone. Both now: it rests visible, because a
+      card with no edge at rest is the flatness this pass is fixing, and it
+      still brightens under the cursor. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page::before {
+  background:
+    radial-gradient(closest-side at 50% 3%, rgba(214, 172, 100, .13), rgba(214, 172, 100, .04) 46%, transparent 74%),
+    radial-gradient(1000px 560px at 10% -8%, rgba(216, 162, 61, .07), transparent 62%),
+    radial-gradient(820px 520px at 94% 6%, rgba(63, 134, 168, .07), transparent 66%),
+    radial-gradient(1200px 760px at 70% 104%, rgba(95, 196, 173, .045), transparent 68%) !important;
+}
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page::before {
+  background:
+    radial-gradient(closest-side at 50% 3%, rgba(168, 120, 31, .10), rgba(168, 120, 31, .03) 46%, transparent 74%),
+    radial-gradient(1000px 560px at 10% -8%, rgba(168, 120, 31, .07), transparent 62%),
+    radial-gradient(820px 520px at 94% 6%, rgba(42, 120, 214, .05), transparent 66%),
+    radial-gradient(1200px 760px at 70% 104%, rgba(15, 107, 82, .04), transparent 68%) !important;
+}
+
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-hero-live::after,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-ms-inner::after,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-startpath::after,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-cap-card::after,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-landing-band::after,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-landing-pricing::after {
+  opacity: .8 !important;
+  transition: opacity .18s ease !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-startpath:hover::after,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-cap-card:hover::after,
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-landing-band:hover::after {
+  opacity: 1 !important;
+}
+
+/* ── A pre-existing light-mode defect, found while auditing this pass ──────
+   The workflow mock's ticker field is painted `background: rgba(0,0,0,.25)`
+   with no light-mode variant. On a dark panel that is a recessed input; on
+   light mode's paper it is a mid grey behind ink specified at #33373e, which
+   measures 1.76:1 against a 4.5 requirement - the word "NVDA" is effectively
+   unreadable. It is a mock, not a control, which is exactly why nobody was
+   ever going to notice it by using the page.
+
+   Not caused by this pass - it reproduces with this sheet unlinked - but it
+   is on the guest page, and the guest page is what this pass is for. */
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #landing-page .il-wf-input {
+  background: var(--lp-input-shell, #ffffff) !important;
+  border-color: var(--lp-border, rgba(62, 54, 39, .17)) !important;
+  color: var(--lp-text, #171a1a) !important;
+  -webkit-text-fill-color: var(--lp-text, #171a1a) !important;
+}
+
+/* ── Two light-mode near-misses, found by the repaired audit ───────────────
+   Both are gold on a near-white ground, landing just under the line: the
+   blog's playbook line at 4.38:1 and the Pro-gate badge at 4.43:1, against a
+   4.5 requirement.
+
+   The playbook line is --il-brass (#9b6b2d in light), which is a FILL colour
+   being used as an ink colour. --il-gold-ink (#7d5814) is the same hue solved
+   for text on these grounds and already exists for exactly this.
+
+   The badge is different: #17100a ink on a linear-gradient(#966d2b ->
+   #b87c10), which is 5.33:1 against the light stop and 3.99:1 against the
+   dark one - a fill that starts below the line and ends above it. Repainting
+   its ink dark made it worse (1.68:1, measured), because the ink was never
+   the problem. It wears the gold gradient every primary button on the site
+   already wears, whose darkest stop clears 6:1. */
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .guide-num {
+  color: var(--il-gold-ink, #7d5814) !important;
+  -webkit-text-fill-color: var(--il-gold-ink, #7d5814) !important;
+}
+html:not([data-theme="dark"]):not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .pgc-badge {
+  background: linear-gradient(135deg, #E8C079 0%, #C9A052 55%, #B78B40 100%) !important;
+}

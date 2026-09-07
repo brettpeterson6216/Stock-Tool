@@ -23,8 +23,23 @@
     return (n >= 0 ? '+' : '') + n.toFixed(2) + '%';
   }
 
+  /* Number(null) is 0, and 0 is finite - so `.map(Number).filter(isFinite)`
+     kept every missing bar as a price of zero. Yahoo returns null closes for
+     bars that have not printed, and each one dropped the line to the floor
+     and back, which is the sawtooth this hero chart drew. The API strips
+     nulls before this ever sees them, so the guest page is not showing it
+     today; it is guarded here because this is the third place in this
+     codebase the same conversion has produced the same broken chart, and the
+     one place a reader would never think to check. Reject the value before
+     converting it, and reject prices that cannot be prices. */
   function sparkPath(values, width, height) {
-    var nums = (Array.isArray(values) ? values : []).map(Number).filter(Number.isFinite);
+    var nums = [];
+    (Array.isArray(values) ? values : []).forEach(function (value) {
+      if (value === null || value === undefined || value === '') return;
+      var n = Number(value);
+      if (!Number.isFinite(n) || n <= 0) return;
+      nums.push(n);
+    });
     if (nums.length < 2) return '';
     var min = Math.min.apply(Math, nums);
     var max = Math.max.apply(Math, nums);

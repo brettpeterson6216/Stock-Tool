@@ -112,6 +112,7 @@
 <link rel="stylesheet" href="/lens-prime-fidelity.css?v=20260907-16">
 <link rel="stylesheet" href="/lens-prime-match.css?v=20260907-16">
 <link href="/clean-pass.css?v=20260907-16" rel="stylesheet">
+<link href="/surface.css?v=20260907-16" rel="stylesheet">
 <script defer src="/premium-motion.js?v=20260825-6"></script>
 </head>
 <body class="il-product-page">
@@ -188,11 +189,25 @@
      pitch, and a first-time visitor never sees an empty workspace.
      static-auth.js corrects the class afterwards if the hint was stale. -->
 <section class="il-home-member" id="il-home-member" aria-label="Your workspace">
+  <!-- The search used to be a panel of its own inside the middle column: a
+       19px label, a 46px field and 40px of panel padding, 121px of page spent
+       on one input. It is a header control, so it lives in the header row,
+       where it costs nothing - the greeting block is 70px tall either way. -->
   <div class="ihm-head">
-    <div>
+    <div class="ihm-head-id">
       <h1 class="ihm-greeting" id="ihm-greeting">Welcome back.</h1>
       <p class="ihm-sub" id="ihm-sub">Pick up where you left off, or start a new company.</p>
     </div>
+    <form class="ihm-search" id="ihm-search" role="search" action="/" method="get">
+      <input type="hidden" name="view" value="tool">
+      <input type="hidden" name="section" value="analyze">
+      <div class="ihm-search-row">
+        <i class="ti ti-search ihm-search-icon" aria-hidden="true"></i>
+        <input type="text" id="ihm-ticker" name="symbol" placeholder="Research a company or ticker"
+               autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Research a company or ticker">
+        <button type="submit" class="ihm-go">Analyze</button>
+      </div>
+    </form>
     <a class="ihm-head-link" href="/?view=tool&amp;section=workspace">Open workspace</a>
   </div>
 
@@ -233,17 +248,6 @@
     </aside>
 
     <div class="ihm-col-main">
-      <form class="ihm-panel ihm-search" id="ihm-search" role="search" action="/" method="get">
-        <input type="hidden" name="view" value="tool">
-        <input type="hidden" name="section" value="analyze">
-        <label class="ihm-search-label" for="ihm-ticker">Research a company</label>
-        <div class="ihm-search-row">
-          <input type="text" id="ihm-ticker" name="symbol" placeholder="Ticker or company name"
-                 autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Ticker or company name">
-          <button type="submit" class="ihm-go">Analyze</button>
-        </div>
-      </form>
-
       <section class="ihm-panel ihm-market-panel" aria-label="Broader market">
         <div class="ihm-panel-head">
           <div class="ihm-panel-id">
@@ -264,6 +268,17 @@
         </div>
         <div class="ihm-chart" id="ihm-chart"></div>
         <div class="ihm-indexes" id="ihm-indexes" aria-label="Major indexes"></div>
+        <!-- Sectors were a panel of their own carrying a 29px row of chips
+             under 67px of head and padding. They are the same market on the
+             same day as the chart above them, so they belong in the same
+             panel, under one rule. -->
+        <div class="ihm-strip" aria-label="Sector performance today">
+          <div class="ihm-strip-head">
+            <span class="ihm-strip-title">Sectors today</span>
+            <span class="ihm-panel-note" id="ihm-breadth">&mdash;</span>
+          </div>
+          <div class="ihm-sectors" id="ihm-sectors"></div>
+        </div>
       </section>
 
       <section class="ihm-panel" aria-label="Popular companies">
@@ -272,14 +287,6 @@
           <span class="ihm-panel-note">one day</span>
         </div>
         <div class="ihm-populars" id="ihm-populars"></div>
-      </section>
-
-      <section class="ihm-panel" aria-label="Sector performance today">
-        <div class="ihm-panel-head">
-          <span class="ihm-panel-title">Sectors today</span>
-          <span class="ihm-panel-note" id="ihm-breadth">&mdash;</span>
-        </div>
-        <div class="ihm-sectors" id="ihm-sectors"></div>
       </section>
     </div>
 
@@ -443,23 +450,28 @@
   <!-- Three ways in, stated plainly. A first-time visitor arriving at a
        research tool needs to be told where to start; the feature strip above
        says what exists, not what to do first. -->
+  <!-- These were numbered 01 / 02 / 03 under "Three ways to start", which read
+       as an onboarding sequence you were meant to work through. They are not a
+       sequence - they are three doors into the same product, and a visitor
+       picks one. The numerals are icons now and the heading says what the
+       doors are rather than counting them. -->
   <section class="il-startpaths" aria-label="Ways to start">
-    <h2 class="il-startpaths-title">Three ways to start</h2>
+    <h2 class="il-startpaths-title">Start with one company, or the whole market.</h2>
     <div class="il-startpaths-grid">
       <a class="il-startpath" href="/?view=tool&amp;section=analyze">
-        <span class="isp-n">01</span>
+        <span class="isp-n"><i class="ti ti-search" aria-hidden="true"></i></span>
         <b>Look up a company</b>
         <span class="isp-d">Price, fundamentals, filings and a 0&ndash;10 LensScore for any ticker. Two free analyses a day, no account.</span>
         <span class="isp-go">Analyze a ticker &rarr;</span>
       </a>
       <a class="il-startpath" href="/?view=tool&amp;section=screener">
-        <span class="isp-n">02</span>
+        <span class="isp-n"><i class="ti ti-filter" aria-hidden="true"></i></span>
         <b>Scan the market</b>
         <span class="isp-d">Filter by value, size and momentum to find candidates worth the work, instead of starting from a headline.</span>
         <span class="isp-go">Open the screener &rarr;</span>
       </a>
       <a class="il-startpath" href="/lens-score">
-        <span class="isp-n">03</span>
+        <span class="isp-n"><i class="ti ti-player-play" aria-hidden="true"></i></span>
         <b>See the method first</b>
         <span class="isp-d">Watch one company scored end to end, and decide whether the process is one you would actually follow.</span>
         <span class="isp-go">See a worked example &rarr;</span>

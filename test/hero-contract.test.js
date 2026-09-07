@@ -92,6 +92,9 @@ test("the hero paints from theme tokens", () => {
 
 // ── The home page serves two audiences from one URL ────────────────────────
 const homeCss = fs.readFileSync(path.join(ROOT, "public", "clean-pass.css"), "utf8");
+// surface.css is loaded after clean-pass.css and is where the dashboard's
+// layout now lives, so a contract about the layout has to read both.
+const surfaceCss = fs.readFileSync(path.join(ROOT, "public", "surface.css"), "utf8");
 const memberJs = fs.readFileSync(path.join(ROOT, "public", "home-member.js"), "utf8");
 
 test("the signed-in and signed-out homes cannot both be hidden", () => {
@@ -142,17 +145,50 @@ test("the dashboard offers places to go, not a lecture on how to use it", () => 
   assert.match(html, /class="il-startpaths"/, "the visitor page needs its three ways in");
 });
 
-test("the search, the tools and the favourites each get their own column", () => {
+test("the tools, the market and the favourites each get their own column", () => {
   const html = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
-  // Favourites had to sit beside the search as well as beside the chart, so
-  // the search moved inside the middle column and the rail starts at the top.
   const grid = html.slice(html.indexOf('class="ihm-grid"'), html.indexOf('</section>\n\n<section class="il-landing"'));
   for (const cls of ["ihm-col-tools", "ihm-col-main", "ihm-col-side"]) {
     assert.ok(grid.includes(cls), `${cls} is not inside the grid`);
   }
-  assert.ok(grid.indexOf('id="ihm-search"') > 0, "the search is outside the grid again, so it spans the page");
-  assert.match(homeCss, /grid-template-columns: 236px minmax\(0, 1fr\) 320px/, "the three-column grid is gone");
-  assert.match(homeCss, /max-width: 620px !important/, "the ticker field is unbounded again");
+  assert.match(surfaceCss, /grid-template-columns: 240px minmax\(0, 1fr\) 336px/, "the three-column grid is gone");
+});
+
+// This test used to require the search to be INSIDE the middle column, which
+// was right when the alternative was a search box spanning the whole page.
+// It was costing 121px of a 960px screen for one input, and the complaint that
+// replaced it was that the dashboard needed scrolling to see its own data. The
+// requirement was never "in the middle column" - it was "not spanning the
+// page, with favourites beside it". The header row satisfies both.
+test("the search is a bounded header control, not a band across the page", () => {
+  const html = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
+  const head = html.slice(html.indexOf('class="ihm-head"'), html.indexOf('class="ihm-grid"'));
+  assert.ok(head.includes('id="ihm-search"'), "the search left the header row");
+  assert.ok(head.includes('id="ihm-ticker"'), "the ticker field left the header row");
+
+  assert.match(surfaceCss, /\.ihm-search \{[^}]*max-width: 470px/,
+    "the search is unbounded again, so it spans the page");
+  // The favourites rail still starts at the top of the grid, so it runs
+  // alongside the header and the chart rather than only alongside the chart.
+  assert.match(surfaceCss, /\.ihm-grid \{[^}]*align-items: stretch/,
+    "the columns no longer share a baseline");
+});
+
+// The whole point of the refit: the dashboard's data fits the screen it is
+// looked at on. The plot is the only element large enough to decide that, so
+// it is the one that has to answer to the viewport.
+test("the chart takes its height from the window, not from a constant", () => {
+  assert.match(surfaceCss, /\.ilx-plot \{ height: clamp\(\d+px, calc\(100vh - \d+px\), \d+px\)/,
+    "the plot is back to a fixed height, so it cannot fit a short screen or use a tall one");
+  const m = surfaceCss.match(/\.ilx-plot \{ height: clamp\((\d+)px, calc\(100vh - (\d+)px\), (\d+)px\)/);
+  const [, floor, offset, ceiling] = m.map(Number);
+  assert.ok(floor >= 180 && floor <= 260, `a ${floor}px floor is not a chart`);
+  assert.ok(ceiling >= floor, "the ceiling is below the floor");
+  // At a 1080p window - 960px of page once Chrome's chrome is taken off -
+  // the plot has to leave room for everything else in the column.
+  const at1080 = Math.min(ceiling, Math.max(floor, 960 - offset));
+  assert.ok(at1080 >= 210 && at1080 <= 340,
+    `at a 960px page viewport the plot resolves to ${at1080}px, which does not fit the column`);
 });
 
 // ── The dashboard has to fill the screen ──────────────────────────────────
