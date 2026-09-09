@@ -28,7 +28,9 @@ function compile(url) {
 }
 function output(file, content) {
   if (check) {
-    if (!fs.existsSync(file) || fs.readFileSync(file, "utf8") !== content) {
+    // Git may check text files out with CRLF on Windows. Line endings alone
+    // do not make a generated bundle stale.
+    if (!fs.existsSync(file) || fs.readFileSync(file, "utf8").replace(/\r\n/g, "\n") !== content.replace(/\r\n/g, "\n")) {
       throw new Error(`Styles are out of date: ${path.relative(root, file)}. Run npm run build:styles.`);
     }
   } else {
