@@ -142,13 +142,13 @@ test("GET / serves the homepage with a successful status", async () => {
   assert.match(html, /id="mbn-workspace"/);
   assert.match(html, /aria-label="Home"/);
   assert.match(html, /viewport-fit=cover/);
-  assert.match(html, /legacy-app\.css\?v=[\w.-]+/);
+  assert.match(html, /\/bundles\/site-[a-f0-9]+\.css\?v=[\w.-]+/);
   assert.match(legacyCss, /input,select,textarea\{font-size:16px!important\}/);
   assert.match(legacyCss, /#main-nav\[data-view="tool"\] #nav-ticker-bar\{display:none!important\}/);
   assert.match(legacyCss, /\.nav-acct-wrap,\.nav-acct-btn\{min-width:0;max-width:100%\}/);
   assert.match(legacyCss, /\.nav-acct-menu\{right:0;min-width:min\(220px,calc\(100vw - 1\.5rem\)\)/);
   assert.match(html, /workspace-system\.js\?v=[\w.-]+/);
-  assert.match(html, /workspace-system\.css\?v=[\w.-]+/);
+  assert.equal((html.match(/rel="stylesheet"/g) || []).length, 1);
   assert.match(appSource, /__initialWorkspaceTab/);
   assert.match(res.headers.get("cache-control"), /no-cache/);
 });
@@ -446,7 +446,13 @@ test("canonical visual system is served and included on primary product surfaces
     const page = await req(pagePath);
     assert.equal(page.status, 200);
     const markup = await page.text();
-    assert.match(markup, /beauty-system\.css\?v=[\w.-]+/);
+    const bundleUrl = markup.match(/href="(\/bundles\/site-[a-f0-9]+\.css\?v=[\w.-]+)"/)?.[1];
+    assert.ok(bundleUrl, `${pagePath} must serve the compiled visual system`);
+    const bundle = await req(bundleUrl);
+    assert.equal(bundle.status, 200);
+    const styles = await bundle.text();
+    assert.ok(styles.includes("@layer premium,heritage"));
+    assert.ok(styles.includes("--rp-bg"));
     if (pagePath === "/stock/AAPL") {
       assert.match(markup, /<nav id="main-nav" class="il-global-nav il-static-main-nav"/);
     }

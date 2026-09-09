@@ -193,11 +193,11 @@ footer{
   </a>
   <div class="nav-links il-global-links" id="nav-links">
     <a href="/" id="nav-home" class="nav-tab il-global-tab" data-nav="home">Dashboard</a>
-    <a href="/?view=tool&amp;section=screener" id="nav-analyze" class="nav-tab il-global-tab" data-nav="screener">Scanners</a>
-    <a href="/lens-score" id="nav-lensscore-link" class="nav-tab il-global-tab" data-nav="lens-score">Analysis</a>
-    <a href="/?view=tool&amp;section=reports" id="nav-saved-link" class="nav-tab il-global-tab" data-nav="reports">Watchlists</a>
-    <a href="/blog" id="nav-news-link" class="nav-tab il-global-tab" data-nav="blog">News</a>
-    <a href="/signup" id="nav-pricing-link" class="nav-tab il-global-tab" data-nav="pricing">Pricing</a>
+    <a href="/?view=tool&amp;section=analyze" id="nav-analyze" class="nav-tab il-global-tab" data-nav="research">Research</a>
+    <a href="/lens-score" id="nav-lensscore-link" class="nav-tab il-global-tab" data-nav="lens-score">LensScore</a>
+    <a href="/?view=tool&amp;section=workspace&amp;workspace_tab=watchlist" id="nav-saved-link" class="nav-tab il-global-tab" data-nav="reports">Watchlists</a>
+    <a href="/blog" id="nav-news-link" class="nav-tab il-global-tab" data-nav="blog">Learn</a>
+    <a href="/?pricing=1" id="nav-pricing-link" class="nav-tab il-global-tab" data-nav="pricing">Pricing</a>
   </div>
   <form class="nav-search il-global-search" id="nav-search" role="search" action="/" method="get">
     <input type="hidden" name="view" value="tool">
@@ -221,7 +221,7 @@ footer{
     <button class="prime-nav-menu" type="button" aria-label="Open navigation" onclick="_toggleMobileMenu()"><span aria-hidden="true">&#9776;</span></button>
     <button class="nav-acct-mobile" id="nav-acct-mobile" type="button" aria-label="Account" onclick="navAccountTap()"><i class="ti ti-user-circle"></i></button>
     <a class="btn-nav-outline il-global-login" id="nav-login" href="/login">Log in</a>
-    <a class="btn-nav il-global-trial" id="nav-signup" href="/signup">Start trial</a>
+    <a class="btn-nav il-global-trial" id="nav-signup" href="/signup?next=%2F%3Fpricing%3D1&amp;source=nav_trial">Start trial</a>
     <a class="btn-nav" id="nav-upgrade" href="/signup" hidden>Upgrade to Pro</a>
     <div class="nav-acct-wrap" id="nav-acct-wrap" style="display:none;">
       <button class="nav-acct-btn" id="nav-acct-btn">
@@ -277,7 +277,7 @@ footer{
     </div>
 
     <div class="sec-note">
-      <strong>Your password is encrypted.</strong> We hash it with bcrypt (12 rounds) before saving — even we can't read it.
+      <strong>Your password is protected.</strong> We never store your original password.
     </div>
   </div>
 </main>

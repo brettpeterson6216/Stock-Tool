@@ -51,7 +51,7 @@
       var c = Number(s.closes[i]);
       var at = Number(s.stamps[i]);
       if (!Number.isFinite(c) || c <= 0) continue;
-      if (!Number.isFinite(at) || at <= lastAt) continue;
+      if (!Number.isFinite(at) || at <= 0 || at <= lastAt) continue;
       lastAt = at;
       out.push({ time: at, value: c });
     }
@@ -108,11 +108,11 @@
       layout: {
         background: { type: "solid", color: "transparent" },
         textColor: text,
-        fontFamily: '"JetBrains Mono", ui-monospace, monospace',
-        fontSize: 11,
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+        fontSize: 12,
         attributionLogo: true
       },
-      grid: { vertLines: { color: grid }, horzLines: { color: grid } },
+      grid: { vertLines: { visible: false }, horzLines: { color: grid } },
       rightPriceScale: {
         borderVisible: false,
         scaleMargins: { top: 0.12, bottom: 0.12 },
@@ -163,6 +163,7 @@
         b.classList.toggle("is-on", s.on);
         b.setAttribute("aria-pressed", String(s.on));
         s.line.applyOptions({ visible: s.on });
+        showLatest();
       });
       s.key = b;
       legend.appendChild(b);
@@ -172,7 +173,9 @@
     // Percent change against the first point of the series, which is what the
     // axis is showing; the crosshair then reports the same measure it does.
     function pctAt(s, value) {
-      var base = s.points[0] && s.points[0].value;
+      var visible = chart.timeScale().getVisibleRange();
+      var first = visible ? s.points.find(function (point) { return point.time >= visible.from; }) : s.points[0];
+      var base = first && first.value;
       if (!(base > 0) || !Number.isFinite(value)) return NaN;
       return ((value - base) / base) * 100;
     }
@@ -195,6 +198,19 @@
       });
     });
 
+    chart.timeScale().subscribeVisibleTimeRangeChange(showLatest);
+    var themeObserver = new MutationObserver(function () {
+      chart.applyOptions({ layout: { textColor: token(host, "--lp-muted", "#929c9c") },
+        grid: { horzLines: { color: token(host, "--lp-border", "rgba(176,160,126,.16)") } } });
+      series.forEach(function (s, i) {
+        s.colour = token(host, SLOTS[i % SLOTS.length], "#3987e5");
+        s.line.applyOptions({ color: s.colour });
+        s.key.querySelector(".ilx-swatch").style.background = s.colour;
+      });
+    });
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    var remove = chart.remove.bind(chart);
+    chart.remove = function () { themeObserver.disconnect(); remove(); };
     showLatest();
     host.ilxChart = chart;
     return { chart: chart, series: series };

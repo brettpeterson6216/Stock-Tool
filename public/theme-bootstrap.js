@@ -25,7 +25,7 @@
     var dark = document.documentElement.getAttribute("data-theme") === "dark";
     var color = document.querySelector('meta[name="theme-color"]');
     var status = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
-    if (color) color.setAttribute("content", dark ? "#07080B" : "#F6F4EF");
+    if (color) color.setAttribute("content", dark ? "#0D100F" : "#F7F5EF");
     if (status) status.setAttribute("content", dark ? "black-translucent" : "default");
   };
 

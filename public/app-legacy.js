@@ -617,7 +617,7 @@ const SECTION_META = {
   institutional:{ icon:'ti-building-bank', title:'Institutional' },
   compare:     { icon:'ti-adjustments-horizontal', title:'Compare Stocks' },
   projection:  { icon:'ti-timeline',      title:'Projection' },
-  dcf:         { icon:'ti-calculator',    title:'EPS Intrinsic Value' },
+  dcf:         { icon:'ti-calculator',    title:'Valuation Lab' },
   screener:    { icon:'ti-filter',        title:'Screener' },
   reports:     { icon:'ti-bookmark',      title:'Saved Analyses' },
   education:   { icon:'ti-school',        title:'Learn' },

@@ -6,6 +6,7 @@ Professional stock-analysis platform built with Node.js, Express, Chart.js, and 
 
 ```bash
 npm ci
+npm run check:styles
 npm run check
 npm test
 npm audit --audit-level=moderate
@@ -45,5 +46,8 @@ Keep `STRIPE_PRICE_MONTHLY`, `STRIPE_PRICE_ANNUAL`, `STRIPE_SECRET_KEY`, and `ST
 - `public/model-math.js`: pure projection and valuation formulas.
 - `public/product-system.js`: chart persistence, data trust, education context, onboarding, and build identity.
 - `public/product-system.css`: styles for those product systems.
+- `public/research-premium.css`: shared cream, dark, chart, and responsive presentation.
+
+After changing CSS or the stylesheet links in a page, run `npm run build:styles` and commit the generated `public/bundles/` files and `lib/style-bundles.json`. Pages retain their original ordered stylesheet links as the source of truth; HTML delivery replaces recognized combinations with one compressed bundle. The `premium` cascade layer provides the shared visual rules and `heritage` preserves the existing stylesheet order. CI verifies generated files with `npm run check:styles`.
 
 Do not add executable inline scripts. Put domain behavior in the narrowest owned module, and keep financial math DOM-free and independently tested. See `docs/PRODUCT_ARCHITECTURE.md` and `docs/PRODUCTION_AUDIT_2026-08-12.md`.

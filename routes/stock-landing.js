@@ -10,6 +10,7 @@
 //  it up client-side; this module only handles /stock/:ticker).
 // ============================================================
 const express  = require("express");
+const { stampHtml } = require("../lib/asset-stamp");
 const { FINNHUB_KEY, APP_URL } = require("../lib/config");
 const {
   ACQUISITION_TICKER_SET,
@@ -525,7 +526,7 @@ router.get("/stock/:ticker", async (req, res) => {
   res.setHeader("Content-Type", "text/html; charset=utf-8");
   // Cache for 5 minutes on CDN, 60s stale-while-revalidate
   res.setHeader("Cache-Control", "public, max-age=300, stale-while-revalidate=60");
-  res.send(html);
+  res.send(stampHtml(html));
 });
 
 module.exports = router;

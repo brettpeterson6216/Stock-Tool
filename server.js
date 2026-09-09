@@ -148,7 +148,7 @@ app.get("/sitemap.xml", (_req, res) => {
   res.send(buildSitemapXml(cfg.APP_URL));
 });
 
-app.use(express.static(path.join(__dirname, "public"), {
+const publicAssets = express.static(path.join(__dirname, "public"), {
   maxAge: "7d",
   etag: true,
   setHeaders(res, filePath) {
@@ -157,7 +157,13 @@ app.use(express.static(path.join(__dirname, "public"), {
     if (filePath.endsWith("robots.txt"))  res.setHeader("Content-Type", "text/plain");
     if (filePath.endsWith("sitemap.xml")) res.setHeader("Content-Type", "application/xml");
   },
-}));
+});
+app.use((req, res, next) => {
+  // Named pages must reach sendPage so their asset URLs carry this deployment's
+  // stamp. The verification document is static and has no executable assets.
+  if (/\.html$/i.test(req.path) && req.path !== "/google632a25f7c62ca0ab.html") return next();
+  return publicAssets(req, res, next);
+});
 
 // Raw-body capture for Stripe webhook signature verification
 app.use(express.json({ limit: "64kb", verify: (req, _res, buf) => { req.rawBody = buf; } }));

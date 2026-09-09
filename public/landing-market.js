@@ -257,22 +257,28 @@
     renderNews(data && data.news);
   }
 
-  function load() {
-    fetch('/api/market/landing-summary', { headers: { Accept: 'application/json' } })
+  var loaded = false;
+  var authReady = !window.IL_AUTH_READY;
+  function loadWhenVisible() {
+    var host = hero || root;
+    if (loaded || !authReady || document.hidden || !host.getClientRects().length) return;
+    loaded = true;
+    var controller = new AbortController();
+    var timeout = setTimeout(function () { controller.abort(); }, 15000);
+    fetch('/api/market/landing-summary', { headers: { Accept: 'application/json' }, signal: controller.signal })
       .then(function (response) { if (!response.ok) throw new Error('summary unavailable'); return response.json(); })
       .then(render)
-      .catch(function () { render({}); });
+      .catch(function () { render({}); })
+      .finally(function () { clearTimeout(timeout); });
   }
 
-  // The hero is above the fold, so it cannot wait for an intersection.
-  if (hero || !('IntersectionObserver' in window)) {
-    load();
+  // A hidden visitor hero exists on every research and signed-in home page.
+  // Only the visible audience needs its market request.
+  window.addEventListener('il:viewchange', loadWhenVisible);
+  document.addEventListener('visibilitychange', loadWhenVisible);
+  if (window.IL_AUTH_READY) {
+    window.IL_AUTH_READY.finally(function () { authReady = true; loadWhenVisible(); });
   } else {
-    var observer = new IntersectionObserver(function (entries) {
-      if (entries.some(function (entry) { return entry.isIntersecting; })) {
-        observer.disconnect(); load();
-      }
-    }, { rootMargin: '250px' });
-    observer.observe(root);
+    loadWhenVisible();
   }
 })();

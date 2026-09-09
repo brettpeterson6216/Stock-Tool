@@ -103,17 +103,19 @@
 
   function palette() {
     var d = isDark();
+    var css = getComputedStyle(document.documentElement);
+    function token(name, fallback) { return css.getPropertyValue(name).trim() || fallback; }
     return {
-      text: d ? "#9A968D" : "#6B6F78",
-      textStrong: d ? "#F2F0EB" : "#14161A",
+      text: token("--rp-muted", d ? "#9A968D" : "#6B6F78"),
+      textStrong: token("--rp-ink", d ? "#F2F0EB" : "#14161A"),
       grid: d ? "rgba(255,255,255,.045)" : "rgba(24,22,18,.06)",
       border: d ? "rgba(255,255,255,.08)" : "rgba(24,22,18,.10)",
       crosshair: d ? "rgba(214,172,100,.55)" : "rgba(150,109,43,.5)",
-      up: d ? "#2FD98C" : "#0B7A4C",
-      down: d ? "#F05C6A" : "#BE3A4B",
+      up: token("--rp-green", d ? "#2FD98C" : "#0B7A4C"),
+      down: token("--rp-red", d ? "#F05C6A" : "#BE3A4B"),
       upFill: d ? "rgba(47,217,140,.5)" : "rgba(11,122,76,.45)",
       downFill: d ? "rgba(240,92,106,.5)" : "rgba(190,58,75,.45)",
-      gold: d ? "#D6AC64" : "#966D2B",
+      gold: token("--rp-gold", d ? "#D6AC64" : "#966D2B"),
       ma50: d ? "#7FB2E5" : "#2F6FA8",
       ma200: d ? "#C79BE8" : "#6D46A0",
       ema: d ? "#EDCB84" : "#B8892F",
@@ -173,11 +175,11 @@
       layout: {
         background: { type: "solid", color: "transparent" },
         textColor: p.text,
-        fontFamily: '"DM Mono", ui-monospace, monospace',
-        fontSize: 10,
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+        fontSize: 12,
         panes: { separatorColor: p.border, separatorHoverColor: p.crosshair, enableResize: true }
       },
-      grid: { vertLines: { color: p.grid }, horzLines: { color: p.grid } },
+      grid: { vertLines: { visible: false }, horzLines: { color: p.grid } },
       rightPriceScale: {
         borderColor: p.border,
         scaleMargins: { top: 0.12, bottom: 0.12 },
@@ -198,8 +200,8 @@
         vertLine: { color: p.crosshair, width: 1, style: 2, labelBackgroundColor: p.gold },
         horzLine: { color: p.crosshair, width: 1, style: 2, labelBackgroundColor: p.gold }
       },
-      handleScroll: true,
-      handleScale: true,
+      handleScroll: { mouseWheel: false, pressedMouseMove: true, horzTouchDrag: true, vertTouchDrag: false },
+      handleScale: { mouseWheel: false, pinch: true, axisPressedMouseMove: true, axisDoubleClickReset: true },
       autoSize: true
     });
 
@@ -217,17 +219,16 @@
         return { time: r.time, open: r.open, high: r.high, low: r.low, close: r.close };
       }));
     } else {
-      /* Robinhood reading: the line is green or red against where the visible
-         period opened, not against the previous bar. */
+      /* Direction lives in the readout; the line keeps the product's gold. */
       var base = rows.length ? rows[0].close : 0;
       var last = rows.length ? rows[rows.length - 1].close : 0;
       var rising = last >= base;
-      var stroke = rising ? p.up : p.down;
+      var stroke = p.gold;
 
       if (type === "area") {
         series.price = chart.addSeries(LWC.AreaSeries, {
           lineColor: stroke, lineWidth: 2,
-          topColor: rising ? p.upFill : p.downFill,
+          topColor: isDark() ? "rgba(224,186,104,.16)" : "rgba(132,96,24,.12)",
           bottomColor: "rgba(0,0,0,0)",
           priceLineVisible: true, priceLineColor: stroke, priceLineStyle: 2, priceLineWidth: 1,
           crosshairMarkerRadius: 4, crosshairMarkerBorderWidth: 2,
@@ -460,7 +461,7 @@
     var ts = instance.chart.timeScale();
     var host = instance.host;
     var frame = null;
-    host.addEventListener("mousemove", function (ev) {
+    function onMove(ev) {
       if (frame) return;
       frame = requestAnimationFrame(function () {
         frame = null;
@@ -475,11 +476,20 @@
         idx = Math.max(0, Math.min(rows.length - 1, idx));
         paint(rows[idx], false);
       });
-    }, { passive: true });
+    }
+    host.addEventListener("mousemove", onMove, { passive: true });
 
-    host.addEventListener("mouseleave", function () {
+    function onLeave() {
+      if (frame) { cancelAnimationFrame(frame); frame = null; }
       paint(rows[rows.length - 1], true);
-    }, { passive: true });
+    }
+    host.addEventListener("mouseleave", onLeave, { passive: true });
+    instance.disposeReadout = function () {
+      if (frame) cancelAnimationFrame(frame);
+      host.removeEventListener("mousemove", onMove);
+      host.removeEventListener("mouseleave", onLeave);
+      el.remove();
+    };
 
     return el;
   }
@@ -540,6 +550,7 @@
         })
         .catch(function () { return (markerCache[key] = []); });
     })).then(function (sets) {
+      if (instance.disposed) return;
       var rows = instance.rows;
       if (!rows.length) return;
       var times = rows.map(function (r) { return r.time; });
@@ -596,17 +607,21 @@
     var cl = closes || q.close || [];
     var n = Math.min(ts.length, cl.length);
     var rows = [], seen = {};
+    function price(value, fallback) {
+      return value != null && value !== "" && Number.isFinite(Number(value)) && Number(value) > 0 ? Number(value) : fallback;
+    }
     for (var i = 0; i < n; i++) {
-      var c = Number(cl[i]);
-      if (!isFinite(c)) continue;
+      var c = price(cl[i], NaN);
+      if (!Number.isFinite(c)) continue;
       var t = Math.floor(Number(ts[i]));
-      if (!isFinite(t) || seen[t]) continue;           // LWC requires strictly ascending unique times
+      if (!Number.isFinite(t) || t <= 0 || seen[t]) continue;
       seen[t] = 1;
+      var o = price(q.open && q.open[i], c);
       rows.push({
         time: t,
-        open: isFinite(Number(q.open && q.open[i])) ? Number(q.open[i]) : c,
-        high: isFinite(Number(q.high && q.high[i])) ? Number(q.high[i]) : c,
-        low: isFinite(Number(q.low && q.low[i])) ? Number(q.low[i]) : c,
+        open: o,
+        high: Math.max(price(q.high && q.high[i], c), o, c),
+        low: Math.min(price(q.low && q.low[i], c), o, c),
         close: c,
         volume: isFinite(Number(q.volume && q.volume[i])) ? Number(q.volume[i]) : 0
       });
@@ -615,23 +630,37 @@
     return rows;
   }
 
+  function dispose(instance) {
+    if (!instance || instance.disposed) return;
+    instance.disposed = true;
+    if (instance.disposeReadout) instance.disposeReadout();
+    if (instance.chart._ilResizeObserver) instance.chart._ilResizeObserver.disconnect();
+    try { instance.chart.remove(); } catch (_) {}
+  }
+
   function render(result, closes, timestamps) {
     var host = hostFor();
     if (!host) return;
     var rows = rowsFrom(result, closes, timestamps);
-    if (!rows.length) return;
+    if (!rows.length) {
+      dispose(inst); inst = null; lastFrame = null;
+      host.textContent = "Price history is unavailable for this company.";
+      return;
+    }
 
     var keepRange = null;
     var prevLength = inst ? inst._ilLength : null;
+    var chartKey = window.S ? S.ticker + ":" + S.range : "";
+    var prevKey = inst ? inst._ilKey : null;
     if (inst && inst.chart) {
       try { keepRange = inst.chart.timeScale().getVisibleLogicalRange(); } catch (e) {}
-      try { if (inst.chart._ilResizeObserver) inst.chart._ilResizeObserver.disconnect(); } catch (e) {}
-      try { inst.chart.remove(); } catch (e) {}
+      dispose(inst);
       inst = null;
     }
     host.innerHTML = "";
 
     inst = buildInstance(host, rows);
+    var rendered = inst;
     lastFrame = { rows: rows, result: result };
     wireReadout(inst, host.parentElement);
     applyMarkers(inst);
@@ -641,26 +670,27 @@
        i.e. they flipped candle→line or toggled an indicator. Changing timeframe
        changes the bar count, and reusing the old logical range there is what made
        the candle size appear frozen across timeframes. */
-    if (keepRange && prevLength === rows.length) {
+    if (keepRange && prevLength === rows.length && prevKey === chartKey) {
       inst.chart._ilViewLocked = true;
       try { inst.chart.timeScale().setVisibleLogicalRange(keepRange); } catch (e) {}
       requestAnimationFrame(function () {
         requestAnimationFrame(function () {
-          try { inst.chart.timeScale().setVisibleLogicalRange(keepRange); } catch (e) {}
+          try { if (!rendered.disposed) rendered.chart.timeScale().setVisibleLogicalRange(keepRange); } catch (e) {}
         });
       });
     }
     inst._ilLength = rows.length;
+    inst._ilKey = chartKey;
     window.__ilChart = inst;   // debug + integration handle
 
-    setTimeout(function () { mirrorToCanvas(inst); }, 260);
+    setTimeout(function () { if (!rendered.disposed) mirrorToCanvas(rendered); }, 260);
 
     /* keep existing callers alive */
     if (window.S) {
       S.charts = S.charts || {};
       S.charts["price-chart"] = {
         _il: true,
-        destroy: function () { try { inst && inst.chart.remove(); } catch (e) {} inst = null; },
+        destroy: function () { dispose(rendered); if (inst === rendered) inst = null; },
         resetZoom: function () { try { inst.applyInitialView(); } catch (e) { try { inst.chart.timeScale().fitContent(); } catch (e2) {} } },
         zoom: function (f) {
           try {
@@ -765,9 +795,11 @@
   }
 
   var zoneCache = {};
+  var zonesKey = null;
   function fetchZones(then) {
     if (!window.S || !S.ticker) return;
     var key = S.ticker + ":" + (S.range || "1y");
+    if (zonesKey !== key) { window.__ilLensZones = null; zonesKey = key; }
     if (zoneCache[key]) { window.__ilLensZones = zoneCache[key]; then && then(); return; }
     fetch("/api/analysis/" + encodeURIComponent(S.ticker) + "?range=" + encodeURIComponent(S.range || "1y"),
           { credentials: "same-origin" })
@@ -776,6 +808,7 @@
         var z = j && j.lensSetup && j.lensSetup.ok ? j.lensSetup : null;
         if (!z) return;
         zoneCache[key] = z;
+        if (!window.S || S.ticker + ":" + (S.range || "1y") !== key) return;
         window.__ilLensZones = z;
         then && then();
       })
@@ -795,7 +828,7 @@
       var modal = document.getElementById("chart-expand-modal");
       if (modal && modal._ilExpanded) applyZones(modal._ilExpanded);
     }
-    if (zonesOn && !window.__ilLensZones) fetchZones(paint); else paint();
+    if (zonesOn) fetchZones(paint); else paint();
   };
 
   /* ── full-screen control strip ─────────────────────────────────────────── */
@@ -886,6 +919,9 @@
 
   /* ── take over the global entry points ─────────────────────────────────── */
   function install() {
+    // A slow connection can fire the fallback timer before the legacy script
+    // arrives. Installing then is overwritten by its function declarations.
+    if (!window.S || typeof window.buildPriceChart !== "function") return;
     if (window.__ilChartEngine) return;
     window.__ilChartEngine = true;
 
@@ -946,7 +982,7 @@
     function mountExpanded(modal) {
       var slot = modal.querySelector(".cex-workspace") || modal.querySelector(".cex-body") || modal;
       if (modal._ilExpanded) {
-        try { modal._ilExpanded.chart.remove(); } catch (e) {}
+        dispose(modal._ilExpanded);
         modal._ilExpanded = null;
       }
       var old = slot.querySelector(".il-chart-host-expanded");
@@ -985,7 +1021,7 @@
     window.closeExpandModal = function () {
       var modal = document.getElementById("chart-expand-modal");
       if (modal && modal._ilExpanded) {
-        try { modal._ilExpanded.chart.remove(); } catch (e) {}
+        dispose(modal._ilExpanded);
         modal._ilExpanded = null;
         var h = modal.querySelector(".il-chart-host-expanded");
         if (h) h.remove();

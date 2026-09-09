@@ -81,9 +81,16 @@
     }).join("");
   }
 
+  var pendingJson = new Map();
   function json(url) {
-    return fetch(url, { credentials: "same-origin", headers: { Accept: "application/json" } })
-      .then(function (r) { return r.ok ? r.json() : Promise.reject(new Error(String(r.status))); });
+    if (pendingJson.has(url)) return pendingJson.get(url);
+    var controller = new AbortController();
+    var timeout = setTimeout(function () { controller.abort(); }, 15000);
+    var request = fetch(url, { credentials: "same-origin", headers: { Accept: "application/json" }, signal: controller.signal })
+      .then(function (r) { return r.ok ? r.json() : Promise.reject(new Error(String(r.status))); })
+      .finally(function () { clearTimeout(timeout); pendingJson.delete(url); });
+    pendingJson.set(url, request);
+    return request;
   }
 
 
@@ -100,18 +107,21 @@
   ];
   var POPULAR = ["AAPL", "NVDA", "MSFT", "AMZN", "META", "TSLA"];
 
+  function isNumber(value) {
+    return value != null && value !== "" && Number.isFinite(Number(value));
+  }
   function num(value, digits) {
-    return Number.isFinite(Number(value))
+    return isNumber(value)
       ? Number(value).toLocaleString("en-US", { minimumFractionDigits: digits, maximumFractionDigits: digits })
       : "\u2014";
   }
   function pct(value) {
-    if (!Number.isFinite(Number(value))) return "\u2014";
+    if (!isNumber(value)) return "\u2014";
     var n = Number(value);
     return (n >= 0 ? "+" : "") + n.toFixed(2) + "%";
   }
   function dirClass(v) {
-    return Number.isFinite(Number(v)) ? (Number(v) >= 0 ? " is-up" : " is-dn") : "";
+    return isNumber(v) ? (Number(v) >= 0 ? " is-up" : " is-dn") : "";
   }
   function linePath(values, w, h) {
     var nums = (Array.isArray(values) ? values : []).map(Number).filter(Number.isFinite);
@@ -164,18 +174,24 @@
   }
 
   function renderMarket(data) {
+    data = data || {};
     var overview = data && data.overview;
     var host = document.getElementById("il-home-member");
     var chartHost = document.getElementById("ihm-chart");
 
-    if (!overview || !Number.isFinite(Number(overview.price))) {
+    if (!overview || !isNumber(overview.price) || Number(overview.price) <= 0) {
+      var stalePrice = document.getElementById("ihm-mkt-price");
+      var staleChange = document.getElementById("ihm-mkt-change");
+      if (stalePrice) stalePrice.textContent = "\u2014";
+      if (staleChange) { staleChange.textContent = "\u2014"; staleChange.className = ""; }
+      if (chartHost && chartHost.ilxChart) { chartHost.ilxChart.remove(); chartHost.ilxChart = null; }
       if (chartHost) chartHost.innerHTML = '<p class="ilx-empty">Market data is unavailable right now.</p>';
       if (host) host.classList.add("mkt-empty");
     } else {
       if (host) {
         host.classList.remove("mkt-empty");
-        host.classList.toggle("is-up", Number(overview.changePct) >= 0);
-        host.classList.toggle("is-dn", Number(overview.changePct) < 0);
+        host.classList.toggle("is-up", isNumber(overview.changePct) && Number(overview.changePct) >= 0);
+        host.classList.toggle("is-dn", isNumber(overview.changePct) && Number(overview.changePct) < 0);
       }
       var priceEl = document.getElementById("ihm-mkt-price");
       var chgEl = document.getElementById("ihm-mkt-change");
@@ -201,9 +217,8 @@
           var res = lead.interval === "1d" ? "daily closes"
                   : lead.interval === "1wk" ? "weekly closes"
                   : lead.interval + " bars";
-          note.textContent = Number.isFinite(Number(lead.points))
-            ? "percent change \u00b7 " + span + " \u00b7 " + lead.points + " " + res
-            : "percent change";
+          note.textContent = "Percent change · " + span;
+          note.title = Number.isFinite(Number(lead.points)) ? lead.points + " " + res : "";
         }
       } else if (chartHost) {
         chartHost.innerHTML = '<p class="ilx-empty">Index history is unavailable right now.</p>';
@@ -397,15 +412,25 @@
     loadDashboard();
   }
 
-  /* The hint decides the first paint; this decides the truth. */
-  json("/api/auth/me")
-    .then(function (data) {
-      var user = data && data.user;
+  // Reuse the nav's session check. Research deep links contain this dashboard
+  // too, so its requests wait until the member actually opens Home.
+  var resolvedUser = null;
+  var loaded = false;
+  function loadWhenVisible() {
+    if (loaded || !resolvedUser || document.hidden || !root.getClientRects().length) return;
+    loaded = true;
+    load(resolvedUser);
+  }
+  window.addEventListener("il:viewchange", loadWhenVisible);
+  document.addEventListener("visibilitychange", loadWhenVisible);
+  var auth = window.IL_AUTH_READY || json("/api/auth/me").then(function (data) { return data && data.user; });
+  auth.then(function (user) {
+      resolvedUser = user || null;
       var html = document.documentElement;
       html.classList.remove("il-hint-unknown");
       html.classList.toggle("il-hint-in", !!user);
       html.classList.toggle("il-hint-out", !user);
-      if (user) load(user);
+      loadWhenVisible();
     })
     .catch(function () {
       // Session unresolvable: fall back to the visitor page rather than an

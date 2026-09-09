@@ -388,7 +388,10 @@
         url.searchParams.set("section", section);
       }
       const ticker = window.IL_STATE?.ticker || document.getElementById("main-ticker")?.value?.trim()?.toUpperCase();
-      if (ticker) url.searchParams.set("symbol", ticker);
+      if (ticker) {
+        url.searchParams.set("symbol", ticker);
+        if (window.IL_STATE?.range) url.searchParams.set("range", window.IL_STATE.range);
+      }
       else url.searchParams.delete("symbol");
       if (mode) url.searchParams.set("mode", mode);
       const next = `${url.pathname}${url.search}${url.hash}`;
@@ -399,6 +402,14 @@
   function installUrlState() {
     if (window.__ilUrlStateInstalled) return;
     window.__ilUrlStateInstalled = true;
+    if (typeof window.openSection === "function") {
+      const originalOpen = window.openSection;
+      window.openSection = function (section, skipProCheck) {
+        const output = originalOpen.call(this, section, skipProCheck);
+        if (document.getElementById("view-tool")?.getClientRects().length) syncToolUrl(section);
+        return output;
+      };
+    }
     if (typeof window.navGoTo === "function") {
       const original = window.navGoTo;
       window.navGoTo = function (section, attempt) {

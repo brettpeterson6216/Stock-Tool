@@ -1,4 +1,5 @@
   // ── View + nav controller ──
+  window.__initialWorkspaceTab = new URLSearchParams(window.location.search).get('workspace_tab');
   // Each top-level tab owns its own left panel. The panel only switches sections
   // WITHIN the active tab — it can never change which top tab you're on.
   const NAV_GROUPS = {
@@ -57,6 +58,10 @@
     if (homeBtn) homeBtn.classList.toggle('active', mode === 'market');
   }
 
+  function notifyViewChange(view) {
+    window.dispatchEvent(new CustomEvent('il:viewchange', { detail: { view } }));
+  }
+
   function showLandingPage() {
     dropBootStyle();
     const home = document.getElementById('view-home');
@@ -67,6 +72,7 @@
     document.body.classList.remove('il-tool-active');
     setHomeMode('landing');
     history.replaceState(null, '', '/');
+    notifyViewChange('home');
   }
 
   function showMarketPage() {
@@ -79,7 +85,13 @@
     document.body.classList.remove('il-tool-active');
     setHomeMode('market');
     history.replaceState(null, '', '/?view=home&market=1');
-    if (typeof initializeHomeDashboard === 'function') initializeHomeDashboard();
+    // The member home replaces the legacy market page. Wait for the session
+    // hint to settle before starting requests for a surface that may be hidden.
+    Promise.resolve(window.IL_AUTH_READY).then(() => {
+      const market = document.getElementById('market-page');
+      if (market?.getClientRects().length && typeof initializeHomeDashboard === 'function') initializeHomeDashboard();
+    });
+    notifyViewChange('market');
   }
 
   /* theme-bootstrap.js writes a <style id="il-boot-view"> in the head so the
@@ -108,6 +120,7 @@
       var _grp = (typeof navGroupOf==='function') ? navGroupOf(_sec) : 'research';
       var _tabId = (typeof NAV_GROUP_TAB!=='undefined' && NAV_GROUP_TAB[_grp]) ? NAV_GROUP_TAB[_grp] : 'nav-analyze';
       var tt = document.getElementById(_tabId); if(tt) tt.classList.add('active-tab');
+      notifyViewChange('tool');
     } else {
       showLandingPage();
     }
@@ -192,7 +205,6 @@
   document.addEventListener('DOMContentLoaded', function() {
     const params = new URLSearchParams(window.location.search);
     const requestedSection = params.get('section');
-    window.__initialWorkspaceTab = params.get('workspace_tab');
     if (params.get('view') === 'tool') {
       showView('tool');
       setTimeout(() => navGoTo(requestedSection || 'analyze'), 0); // always resolve a section so the tab + left panel group render correctly
@@ -265,6 +277,7 @@
         fetch('/api/csrf',    { credentials: 'same-origin' }),
       ]);
       const { user } = await meRes.json();
+      window.IL_AUTH_USER = user || null;
       const csrfData = await csrfRes.json().catch(() => ({}));
       if (typeof S !== 'undefined' && csrfData.token) S.csrfToken = csrfData.token;
       if (user) {
@@ -452,7 +465,7 @@
       }
       if (typeof syncPlanUI === 'function') syncPlanUI();
       if (typeof S !== 'undefined') S.authReady = true;
-      if (_resolveAuthReady) _resolveAuthReady();
+      if (_resolveAuthReady) _resolveAuthReady(window.IL_AUTH_USER || null);
       trackWhenReady('page_view', {
         plan: (typeof S !== 'undefined' && S.loggedIn) ? _plan : 'guest',
         logged_in: !!(typeof S !== 'undefined' && S.loggedIn),

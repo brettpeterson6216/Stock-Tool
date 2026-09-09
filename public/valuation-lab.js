@@ -20,6 +20,11 @@
   function pctS(x, d) { if (x == null || !Number.isFinite(x)) return "—"; return (x >= 0 ? "" : "") + (x * 100).toFixed(d == null ? 1 : d) + "%"; }
   function signPct(x) { if (x == null || !Number.isFinite(x)) return "—"; return (x >= 0 ? "+" : "") + (x * 100).toFixed(1) + "%"; }
 
+  function statementYear(row) {
+    var end = raw(row && row.endDate);
+    return Number.isFinite(end) && end > 0 ? new Date(end * 1000).getUTCFullYear() : null;
+  }
+
   /* ---- seeding from the app ---- */
   function readSeed() {
     var S = window.S || {}, meta = (S.data && S.data.meta) || {}, r = S.financialsRaw;
@@ -39,7 +44,7 @@
         if (rev > 0 && Number.isFinite(oi)) seed.opMarginStart = oi / rev;
         if (Number.isFinite(pretax) && pretax !== 0 && Number.isFinite(taxexp)) seed.taxRate = Math.max(0, Math.min(0.5, taxexp / pretax));
         if (inc.length > 1) { var rev1 = raw(inc[1].totalRevenue); if (rev1 > 0 && rev > 0) seed.histGrowth = rev / rev1 - 1; }
-        seed.hist = inc.slice(0, 4).map(function (row, i) { return { year: (r.__y || new Date().getFullYear() - i), rev: raw(row.totalRevenue), gp: raw(row.grossProfit), oi: raw(row.operatingIncome), ni: raw(row.netIncome), eps: raw(row.dilutedEPS) }; });
+        seed.hist = inc.slice(0, 4).map(function (row) { return { year: statementYear(row), rev: raw(row.totalRevenue), gp: raw(row.grossProfit), oi: raw(row.operatingIncome), ni: raw(row.netIncome), eps: raw(row.dilutedEPS) }; });
       }
       if (bal.length) { var b = bal[0]; var cash = raw(b.cash) + (raw(b.shortTermInvestments) || 0); var debt = (raw(b.shortLongTermDebt) || 0) + (raw(b.longTermDebt) || 0); if (Number.isFinite(cash)) seed.startCash = cash; if (Number.isFinite(debt)) seed.startDebt = debt; }
       if (cf.length) { var c = cf[0]; var dep = raw(c.depreciation), capex = Math.abs(raw(c.capitalExpenditures)); if (seed.startRevenue > 0) { if (Number.isFinite(dep)) seed.daPct = dep / seed.startRevenue; if (Number.isFinite(capex)) seed.capexPct = capex / seed.startRevenue; } }
@@ -182,11 +187,11 @@
       '<div class="vlab-head-ctrl">' +
       '<label class="vlab-sel">Company type<select id="vlab-mtype">' +
       '<option value="standard">Standard operating company</option>' +
-      '<option value="bank" disabled>Bank / fintech lender (Phase 2)</option>' +
-      '<option value="reit" disabled>REIT (Phase 2)</option>' +
-      '<option value="insurance" disabled>Insurance (Phase 2)</option>' +
-      '<option value="prerev" disabled>Pre-revenue (Phase 2)</option>' +
-      '<option value="commodity" disabled>Commodity / resources (Phase 2)</option>' +
+      '<option value="bank" disabled>Bank / fintech lender (not supported)</option>' +
+      '<option value="reit" disabled>REIT (not supported)</option>' +
+      '<option value="insurance" disabled>Insurance (not supported)</option>' +
+      '<option value="prerev" disabled>Pre-revenue (not supported)</option>' +
+      '<option value="commodity" disabled>Commodity / resources (not supported)</option>' +
       '</select></label>' +
       '<div class="vlab-mode"><button class="' + (st.mode === "simple" ? "active" : "") + '" data-mode="simple">Simple</button><button class="' + (st.mode === "advanced" ? "active" : "") + '" data-mode="advanced">Advanced</button></div>' +
       '<div class="vlab-hz"><span>Horizon</span><button class="' + (st.years === 5 ? "active" : "") + '" data-yr="5">5y</button><button class="' + (st.years === 10 ? "active" : "") + '" data-yr="10">10y</button></div>' +

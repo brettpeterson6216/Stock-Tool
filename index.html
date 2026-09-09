@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <script src="/theme-bootstrap.js?v=20260906-4"></script>
@@ -73,8 +73,6 @@
   }
 }
 </script>
-<link rel="preload" as="font" type="font/woff2" crossorigin href="/vendor/fonts/plus-jakarta-sans-files/plus-jakarta-sans-latin-400-normal.woff2">
-<link rel="preload" as="font" type="font/woff2" crossorigin href="/vendor/fonts/plus-jakarta-sans-files/plus-jakarta-sans-latin-700-normal.woff2">
 <link rel="stylesheet" href="/vendor/fonts/il-fonts.css?v=20260825-6">
 <link rel="stylesheet" href="/vendor/tabler-icons.min.css?v=3.46.0-1">
 <link href="/product-system.css?v=20260907-16" rel="stylesheet">
@@ -87,15 +85,7 @@
 <script defer src="/model-math.js?v=20260825-6"></script>
 <script defer src="/projection-lab.js?v=20260825-6"></script>
 <script defer src="/valuation-lab.js?v=20260825-6"></script>
-<script defer src="/research-system.js?v=20260825-6"></script>
-<script defer src="/product-system.js?v=20260825-6"></script>
-<script defer src="/workspace-system.js?v=20260825-6"></script>
 <script defer src="/vendor/lightweight-charts.standalone.production.js?v=5.2.1"></script>
-<script defer src="/chart-engine.js?v=20260825-6"></script>
-<script defer src="/chart-analysis.js?v=20260825-6"></script>
-<script defer src="/hero-chart.js?v=20260825-6"></script>
-<script defer src="/tool-launch.js?v=20260904-1"></script>
-<script defer src="/share-studio.js?v=20260827-2"></script>
 <link href="/legacy-app.css?v=20260907-16" rel="stylesheet">
 <link href="/premium.css?v=20260907-16" rel="stylesheet">
 <link href="/release-polish.css?v=20260907-16" rel="stylesheet">
@@ -127,11 +117,11 @@
   </a>
   <div class="nav-links il-global-links" id="nav-links">
     <a href="/" id="nav-home" class="nav-tab il-global-tab" data-nav="home">Dashboard</a>
-    <a href="/?view=tool&amp;section=screener" id="nav-analyze" class="nav-tab il-global-tab" data-nav="screener">Scanners</a>
-    <a href="/lens-score" id="nav-lensscore-link" class="nav-tab il-global-tab" data-nav="lens-score">Analysis</a>
-    <a href="/?view=tool&amp;section=reports" id="nav-saved-link" class="nav-tab il-global-tab" data-nav="reports">Watchlists</a>
-    <a href="/blog" id="nav-news-link" class="nav-tab il-global-tab" data-nav="blog">News</a>
-    <a href="/signup" id="nav-pricing-link" class="nav-tab il-global-tab" data-nav="pricing">Pricing</a>
+    <a href="/?view=tool&amp;section=analyze" id="nav-analyze" class="nav-tab il-global-tab" data-nav="research">Research</a>
+    <a href="/lens-score" id="nav-lensscore-link" class="nav-tab il-global-tab" data-nav="lens-score">LensScore</a>
+    <a href="/?view=tool&amp;section=workspace&amp;workspace_tab=watchlist" id="nav-saved-link" class="nav-tab il-global-tab" data-nav="reports">Watchlists</a>
+    <a href="/blog" id="nav-news-link" class="nav-tab il-global-tab" data-nav="blog">Learn</a>
+    <a href="/?pricing=1" id="nav-pricing-link" class="nav-tab il-global-tab" data-nav="pricing">Pricing</a>
   </div>
   <form class="nav-search il-global-search" id="nav-search" role="search" action="/" method="get">
     <input type="hidden" name="view" value="tool">
@@ -155,7 +145,7 @@
     <button class="prime-nav-menu" type="button" aria-label="Open navigation" onclick="_toggleMobileMenu()"><span aria-hidden="true">&#9776;</span></button>
     <button class="nav-acct-mobile" id="nav-acct-mobile" type="button" aria-label="Account" onclick="navAccountTap()"><i class="ti ti-user-circle"></i></button>
     <a class="btn-nav-outline il-global-login" id="nav-login" href="/login">Log in</a>
-    <a class="btn-nav il-global-trial" id="nav-signup" href="/signup">Start trial</a>
+    <a class="btn-nav il-global-trial" id="nav-signup" href="/signup?next=%2F%3Fpricing%3D1&amp;source=nav_trial">Start trial</a>
     <a class="btn-nav" id="nav-upgrade" href="/signup" hidden>Upgrade to Pro</a>
     <div class="nav-acct-wrap" id="nav-acct-wrap" style="display:none;">
       <button class="nav-acct-btn" id="nav-acct-btn">
@@ -262,6 +252,7 @@
             <button type="button" class="ihm-tf" data-window="1Y" aria-pressed="false">1Y</button>
           </div>
           <div class="ihm-quote">
+            <small class="ihm-quote-label">S&amp;P 500 · today</small>
             <strong id="ihm-mkt-price">&mdash;</strong>
             <span id="ihm-mkt-change">&mdash;</span>
           </div>
@@ -392,16 +383,16 @@
       <div class="ihl-foot"><span id="ihl-asof-m">&mdash;</span></div>
     </div>
     <div class="il-landing-copy">
-      <span class="il-landing-kicker">Research the expectation, not just the ticker</span>
+      <span class="il-landing-kicker">Independent research. Clearer decisions.</span>
       <h1 class="il-display"><span class="il-d1">Find the edge.</span> <span class="il-d2">See the <em>bigger picture.</em></span></h1>
-      <p>Implied Lens combines price action, fundamentals, and market expectations to surface high-conviction opportunities&mdash;before the crowd.</p>
+      <p>Understand the business. Read what the price implies. Build a thesis with clear charts, sourced financials, and scenarios you control.</p>
       <div class="il-landing-actions il-cta-pair">
-        <a class="il-landing-secondary il-cta-solid" id="il-hero-secondary" href="/signup">Start free trial <i class="ti ti-arrow-right" aria-hidden="true"></i></a>
+        <a class="il-landing-secondary il-cta-solid" id="il-hero-secondary" href="/signup?next=%2F%3Fpricing%3D1&amp;source=hero_trial">Start free trial <i class="ti ti-arrow-right" aria-hidden="true"></i></a>
         <button type="button" id="il-hero-primary" class="il-landing-primary il-cta-ghost" onclick="heroLoadTicker('AAPL')"><i class="ti ti-player-play" aria-hidden="true"></i> See how it works</button>
       </div>
       <div class="il-landing-search" role="search">
         <i class="ti ti-search" aria-hidden="true"></i>
-        <input type="text" id="landing-search" aria-label="Enter a ticker symbol to analyze" placeholder="Enter a ticker like NVDA, AAPL, or TSLA" autocomplete="off" spellcheck="false" onkeydown="if(event.key==='Enter'){landingSearch()}">
+        <input type="text" id="landing-search" aria-label="Enter a ticker symbol to analyze" placeholder="Research a ticker, e.g. AAPL" autocomplete="off" spellcheck="false" onkeydown="if(event.key==='Enter'){landingSearch()}">
         <button type="button" onclick="landingSearch()">Analyze</button>
       </div>
       <div class="il-trust" aria-label="Data sources and terms">
@@ -423,12 +414,7 @@
         <div class="il-rail-item">
           <i class="ti ti-radar" aria-hidden="true"></i>
           <b>Market Scanners</b>
-          <span>Real-time scans to find high-probability setups across the market.</span>
-        </div>
-        <div class="il-rail-item">
-          <i class="ti ti-chart-histogram" aria-hidden="true"></i>
-          <b>Options Intelligence<em>Coming soon</em></b>
-          <span>Unusual flow, positioning and volatility insights, once an options data provider is connected.</span>
+          <span>Filter companies by valuation, size, and momentum.</span>
         </div>
         <div class="il-rail-item">
           <i class="ti ti-chart-arrows-vertical" aria-hidden="true"></i>
@@ -437,13 +423,13 @@
         </div>
         <div class="il-rail-item">
           <i class="ti ti-news" aria-hidden="true"></i>
-          <b>News &amp; Sentiment</b>
-          <span>AI-powered insights, earnings, filings, and market news in the noise.</span>
+          <b>Company Research</b>
+          <span>Financial statements, earnings, and filings with sources attached.</span>
         </div>
         <div class="il-rail-item">
           <i class="ti ti-bookmark" aria-hidden="true"></i>
           <b>Watchlists</b>
-          <span>Track your ideas, alerts, and key levels so you never miss a signal.</span>
+          <span>Keep your thesis, key levels, and next review together.</span>
         </div>
       </div>
     </div>
@@ -990,7 +976,7 @@
         <div class="sb-item" data-sec="compare"><i class="ti ti-adjustments-horizontal sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Compare</span></div>
         <div class="sb-item" data-sec="screener"><i class="ti ti-filter sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Screener</span></div>
         <div class="sb-item" data-sec="projection"><i class="ti ti-timeline sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Projection Lab</span></div>
-        <div class="sb-item" data-sec="dcf"><i class="ti ti-calculator sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">EPS Value</span></div>
+        <div class="sb-item" data-sec="dcf"><i class="ti ti-calculator sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Valuation Lab</span></div>
         <div class="sb-item" data-sec="education"><i class="ti ti-school sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Lessons &amp; Guides</span></div>
         <div class="sb-item" data-sec="education" data-scroll=".edu-glossary"><i class="ti ti-book-2 sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Glossary</span></div>
         <div class="sb-item" data-sec="reports"><i class="ti ti-bookmark sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Saved Analyses</span></div>
@@ -1912,6 +1898,16 @@
 </div>
 
 <script defer src="/app-legacy.js?v=20260904-1"></script>
+<!-- Enhancement modules depend on the application controller. Deferred
+     scripts execute in document order, before DOMContentLoaded. -->
+<script defer src="/research-system.js?v=20260825-6"></script>
+<script defer src="/product-system.js?v=20260825-6"></script>
+<script defer src="/workspace-system.js?v=20260825-6"></script>
+<script defer src="/chart-engine.js?v=20260825-6"></script>
+<script defer src="/chart-analysis.js?v=20260825-6"></script>
+<script defer src="/hero-chart.js?v=20260825-6"></script>
+<script defer src="/tool-launch.js?v=20260904-1"></script>
+<script defer src="/share-studio.js?v=20260827-2"></script>
 
 <!-- ── Mobile Bottom Navigation ── -->
 <nav class="mobile-bottom-nav" id="mobile-bottom-nav" aria-label="Mobile navigation">
@@ -1955,7 +1951,7 @@
   </div>
   <div class="mmenu-grid mmenu-acct-row">
     <a href="/login" class="mmenu-item" id="mmenu-login"><i class="ti ti-login-2"></i><span>Log in</span></a>
-    <a href="/signup" class="mmenu-item" id="mmenu-signup"><i class="ti ti-user-plus"></i><span>Start trial</span></a>
+    <a href="/signup?next=%2F%3Fpricing%3D1&amp;source=nav_trial" class="mmenu-item" id="mmenu-signup"><i class="ti ti-user-plus"></i><span>Start trial</span></a>
     <a href="#" class="mmenu-item" id="mmenu-account" style="display:none;" onclick="_mobileAccount();return false;"><i class="ti ti-user-circle"></i><span>Account</span></a>
     <a href="#" class="mmenu-item" id="mmenu-logout" style="display:none;" onclick="var b=document.getElementById('nav-acct-logout');if(b){b.click();}_toggleMobileMenu();return false;"><i class="ti ti-logout-2"></i><span>Log out</span></a>
   </div>

@@ -189,24 +189,31 @@
   if (!nav || nav.querySelector(".lp-static-menu-toggle")) return;
 
   var actions = nav.querySelector(".il-global-actions") || nav;
-  var toggle = document.createElement("button");
+  // Reuse the common header button; adding another created two hamburgers.
+  var toggle = nav.querySelector(".prime-nav-menu") || document.createElement("button");
   toggle.type = "button";
-  toggle.className = "lp-static-menu-toggle";
+  toggle.classList.add("lp-static-menu-toggle");
+  toggle.removeAttribute("onclick");
+  toggle.setAttribute("aria-controls", "static-navigation-drawer");
   toggle.setAttribute("aria-label", "Open navigation");
   toggle.setAttribute("aria-expanded", "false");
   toggle.innerHTML = '<span aria-hidden="true">☰</span>';
-  actions.appendChild(toggle);
+  if (!toggle.parentNode) actions.appendChild(toggle);
 
   var drawer = document.createElement("div");
   drawer.className = "lp-static-drawer";
+  drawer.id = "static-navigation-drawer";
+  drawer.setAttribute("role", "dialog");
+  drawer.setAttribute("aria-modal", "true");
+  drawer.setAttribute("aria-label", "Navigation");
   drawer.setAttribute("aria-hidden", "true");
   drawer.innerHTML =
     '<div class="lp-static-drawer-panel">' +
       '<form class="lp-static-drawer-search" action="/" method="get" role="search">' +
         '<input type="hidden" name="view" value="tool">' +
         '<input type="hidden" name="section" value="analyze">' +
-        '<input name="symbol" type="text" maxlength="12" placeholder="SEARCH A TICKER" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Search for a ticker">' +
-        '<button type="submit">GO</button>' +
+        '<input name="symbol" type="text" maxlength="12" placeholder="Search a ticker" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Search for a ticker">' +
+        '<button type="submit">Go</button>' +
       '</form>' +
       '<nav aria-label="Mobile product navigation">' +
         '<a href="/"><span aria-hidden="true">⌂</span>Dashboard</a>' +
@@ -214,31 +221,54 @@
         '<a href="/lens-score"><span aria-hidden="true">◎</span>LensScore</a>' +
         '<a href="/?view=tool&amp;section=projection"><span aria-hidden="true">↗</span>Scenarios</a>' +
         '<a href="/?view=tool&amp;section=compare"><span aria-hidden="true">⇄</span>Compare</a>' +
-        '<a href="/?view=tool&amp;section=reports"><span aria-hidden="true">◇</span>Saved</a>' +
+        '<a href="/?view=tool&amp;section=workspace&amp;workspace_tab=watchlist"><span aria-hidden="true">◇</span>Watchlists</a>' +
+        '<a href="/blog"><span aria-hidden="true">ⓘ</span>Learn</a>' +
+        '<a href="/?pricing=1"><span aria-hidden="true">◇</span>Pricing</a>' +
         '<a href="/about"><span aria-hidden="true">ⓘ</span>About</a>' +
         '<a class="lp-guest-link" href="/login"><span aria-hidden="true">→</span>Log in</a>' +
-        '<a class="lp-guest-link" href="/signup"><span aria-hidden="true">＋</span>Start trial</a>' +
+        '<a class="lp-guest-link" href="/signup?next=%2F%3Fpricing%3D1&amp;source=mobile_trial"><span aria-hidden="true">＋</span>Start trial</a>' +
         '<a class="lp-account-link" href="/?view=tool&amp;section=reports"><span aria-hidden="true">◉</span>Account</a>' +
       '</nav>' +
     '</div>';
   nav.insertAdjacentElement("afterend", drawer);
 
+  function focusableControls() {
+    return Array.prototype.filter.call(drawer.querySelectorAll('a[href], button, input:not([type="hidden"]), [tabindex="0"]'), function (el) {
+      return !el.disabled && !el.hidden && el.getClientRects().length > 0;
+    });
+  }
   function setOpen(open) {
     drawer.classList.toggle("open", open);
     drawer.setAttribute("aria-hidden", open ? "false" : "true");
     toggle.setAttribute("aria-expanded", open ? "true" : "false");
     toggle.setAttribute("aria-label", open ? "Close navigation" : "Open navigation");
     document.documentElement.classList.toggle("lp-static-menu-open", open);
+    if (open) {
+      var controls = focusableControls();
+      if (controls[0]) controls[0].focus();
+    }
   }
 
   toggle.addEventListener("click", function () { setOpen(!drawer.classList.contains("open")); });
   drawer.addEventListener("click", function (event) {
-    if (event.target === drawer || event.target.closest("a")) setOpen(false);
+    if (event.target === drawer) { setOpen(false); toggle.focus(); }
+    else if (event.target.closest("a")) setOpen(false);
   });
   document.addEventListener("keydown", function (event) {
-    if (event.key === "Escape" && drawer.classList.contains("open")) {
+    if (!drawer.classList.contains("open")) return;
+    if (event.key === "Escape") {
+      event.preventDefault();
       setOpen(false);
       toggle.focus();
+    } else if (event.key === "Tab") {
+      var controls = focusableControls();
+      var first = controls[0], last = controls[controls.length - 1];
+      if (!first) { event.preventDefault(); toggle.focus(); return; }
+      if (event.shiftKey && (document.activeElement === first || !drawer.contains(document.activeElement))) {
+        event.preventDefault(); last.focus();
+      } else if (!event.shiftKey && (document.activeElement === last || !drawer.contains(document.activeElement))) {
+        event.preventDefault(); first.focus();
+      }
     }
   });
   window.addEventListener("resize", function () {

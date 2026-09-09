@@ -119,6 +119,7 @@
       document.querySelectorAll(".il-ws-tab").forEach(el => el.classList.toggle("active", el.dataset.tab === tab));
       document.querySelectorAll(".il-ws-panel").forEach(el => el.classList.toggle("active", el.dataset.panel === tab));
       if (tab === "guide") track("portfolio_guide_viewed", { has_profile: Boolean(state.portfolioProfile) });
+      refreshProviderPolling();
     });
     if (window.SECTION_META) window.SECTION_META.workspace = { icon: "ti-briefcase", title: "Investment Workspace" };
     const originalOpen = window.openSection;
@@ -130,6 +131,7 @@
         if (icon) icon.className = "ti ti-briefcase ash-icon";
         loadWorkspace();
       }
+      refreshProviderPolling();
       return out;
     };
     window.openWorkspaceWatchlist = function () {
@@ -523,7 +525,33 @@
     }).join("") : `<div class="il-ws-empty il-ws-empty-rich"><i class="ti ti-radar"></i><strong>No provider request observed yet.</strong><span>Load a ticker and this panel will show the providers, freshness, latency, and latest outcome observed by this running service.</span><button class="il-ws-btn" data-empty-action="analyze">Analyze a company</button></div>`}</div></div><div class="il-ws-block"><h3>How to read the signal</h3><p>Operational means a recent request completed. Stale means the last observation is older than 15 minutes. Degraded means the latest observed request failed or returned no usable data.</p><div class="il-ws-freshness"><i class="ti ti-clock"></i>${esc(relativeAge(state.providers?.latestObservation))}</div><a class="il-ws-btn" href="/data-sources"><i class="ti ti-external-link"></i>Data methodology</a></div></div>`;
     panel.querySelector("[data-empty-action='analyze']")?.addEventListener("click", () => window.openSection?.("analyze"));
   }
-  async function loadProviders() { try { const r = await fetch("/api/providers/health", { cache: "no-store" }); state.providers = await r.json(); renderTrust(); } catch (_) {} }
+  let providerTimer = null;
+  let providerLoading = false;
+  function trustVisible() {
+    const panel = document.querySelector('[data-panel="trust"]');
+    return !document.hidden && state.tab === "trust" && panel && panel.getClientRects().length > 0;
+  }
+  async function loadProviders() {
+    if (providerLoading || !trustVisible()) return;
+    providerLoading = true;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+    try {
+      const r = await fetch("/api/providers/health", { cache: "no-store", signal: controller.signal });
+      if (!r.ok) throw new Error("Provider status unavailable");
+      state.providers = await r.json();
+      renderTrust();
+    } catch (_) {} finally {
+      clearTimeout(timeout);
+      providerLoading = false;
+      if (trustVisible()) providerTimer = setTimeout(loadProviders, 30000);
+    }
+  }
+  function refreshProviderPolling() {
+    clearTimeout(providerTimer);
+    providerTimer = null;
+    if (trustVisible()) loadProviders();
+  }
 
   function installChartWorkspace() {
     const toolbar = document.getElementById("app-chart-toolbar");
@@ -565,9 +593,14 @@
   }
 
   function init() {
-    injectShell(); installChartWorkspace(); installGuidanceShortcut(); loadWorkspace(); loadProviders();
-    setInterval(loadProviders, 30000);
-    setTimeout(loadWorkspace, 1200);
+    const initialTab = window.__initialWorkspaceTab || new URLSearchParams(window.location.search).get("workspace_tab");
+    if (["review", "thesis", "portfolio", "guide", "watchlist", "trust"].includes(initialTab)) state.tab = initialTab;
+    injectShell(); installChartWorkspace(); installGuidanceShortcut();
+    document.querySelector('.il-ws-tab[data-tab="' + state.tab + '"]')?.click();
+    // openSection loads workspace data when needed; its old startup and 1.2s
+    // fallback performed the same five authenticated requests twice.
+    document.addEventListener("visibilitychange", refreshProviderPolling);
+    window.addEventListener("il:viewchange", refreshProviderPolling);
     if (window.__initialWorkspaceTab === "guide" || new URLSearchParams(window.location.search).get("workspace_tab") === "guide") {
       setTimeout(() => window.openPortfolioGuide?.(), 0);
     }
@@ -621,12 +654,11 @@
   setInterval(wire, 4000); // pro-gated sections re-render their bodies; re-wire quietly
 }());
 
-/* ── Dock chart controls inside the Price Chart card (desktop) ────────────────
+/* ── Dock chart controls inside the Price Chart card ──────────────────────────
    The page chrome keeps a single tab bar; chart type, overlays, ranges, and
    scale toggles live where they act — in the chart card, TradingView-style. */
 (function () {
   function dock() {
-    if (window.innerWidth < 961) return;
     const card = document.querySelector("#body-analyze .dash-main > .chart-wrap");
     const toolbar = document.getElementById("app-chart-toolbar");
     const strip = document.getElementById("app-tf-strip");
@@ -1050,17 +1082,23 @@ ${thesis ? `<h2>Saved thesis</h2><div class="rp-thesis"><strong>${esc2(thesis.ti
   document.addEventListener("click", (e) => {
     const b = e.target.closest?.(".mst-btn[data-sec]"); if (b) visited.add(b.dataset.sec);
   }, true);
-  let secCount = null, secFor = null;
+  const filingRequests = new Map();
   async function filings(t) {
-    if (secFor === t) return secCount;
-    secFor = t; secCount = null;
-    try { const r = await fetch(`/api/sec/${encodeURIComponent(t)}`, { credentials: "same-origin" }); if (r.ok) { const d = await r.json(); secCount = (d.filings || []).length; } } catch (_) {}
-    return secCount;
+    if (!filingRequests.has(t)) {
+      const request = fetch(`/api/sec/${encodeURIComponent(t)}`, { credentials: "same-origin" })
+        .then(r => r.ok ? r.json() : null)
+        .then(d => d && Array.isArray(d.filings) ? d.filings.length : null)
+        .catch(() => null);
+      filingRequests.set(t, request);
+      if (filingRequests.size > 20) filingRequests.delete(filingRequests.keys().next().value);
+    }
+    return filingRequests.get(t);
   }
   async function render() {
     const sidebar = document.querySelector("#view-tool .dash-sidebar");
     const S = window.IL_STATE || {};
-    if (!sidebar || !S.ticker) return;
+    if (document.hidden || !sidebar || !sidebar.getClientRects().length || !S.ticker) return;
+    const ticker = S.ticker;
     let thesis = null;
     try { thesis = (JSON.parse(localStorage.getItem("il-workspace-v1") || "{}").theses || []).find(t => t.ticker === S.ticker); } catch (_) {}
     const modelRun = Boolean((document.getElementById("dcf-output")?.innerHTML || "").trim() || (document.getElementById("qdcf-output")?.innerHTML || "").trim() || document.getElementById("proj-results")?.style.display === "block");
@@ -1071,17 +1109,24 @@ ${thesis ? `<h2>Saved thesis</h2><div class="rp-thesis"><strong>${esc2(thesis.ti
       ["Thesis saved", Boolean(thesis), "workspace"],
       ["Review date set", Boolean(thesis?.review_date), "workspace"],
     ];
-    const n = await filings(S.ticker);
+    const n = await filings(ticker);
+    if (window.IL_STATE?.ticker !== ticker) return;
     const newsN = document.querySelectorAll("#news-items .news-item").length;
     let card = document.getElementById("il-coverage");
     if (!card) {
       card = document.createElement("div"); card.className = "sidebar-card"; card.id = "il-coverage";
       sidebar.appendChild(card);
     }
-    card.innerHTML = `<div class="sidebar-card-title">Research coverage</div>
+    const markup = `<div class="sidebar-card-title">Research coverage</div>
       <div class="il-cov-list">${steps.map(([l, done, sec]) =>
         `<button type="button" class="il-cov-step${done ? " done" : ""}" onclick="openSection('${sec}')"><i class="ti ${done ? "ti-circle-check-filled" : "ti-circle"}"></i>${l}<span>${done ? "Complete" : "Open"}</span></button>`).join("")}</div>
       <div class="il-cov-src">${n != null ? `<span><i class="ti ti-file-text"></i>${n} SEC filings</span>` : ""}<span><i class="ti ti-news"></i>${newsN} news items</span><span><i class="ti ti-database"></i>3 data providers</span></div>`;
+    // Preserve the reader's focused control and avoid rebuilding an unchanged
+    // sidebar every three seconds (which also woke the document observers).
+    if (card.dataset.coverageMarkup !== markup) {
+      card.innerHTML = markup;
+      card.dataset.coverageMarkup = markup;
+    }
   }
-  setInterval(() => { try { render(); } catch (_) {} }, 3000);
+  setInterval(() => { render().catch(() => {}); }, 3000);
 }());

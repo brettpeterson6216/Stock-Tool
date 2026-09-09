@@ -21,7 +21,7 @@
   function save() { try { localStorage.setItem(PREF, JSON.stringify(pref)); } catch (e) {} }
 
   var cache = {};      // ticker:range → payload
-  var busy = false;
+  var pending = null;
 
   function el(tag, cls, html) {
     var n = document.createElement(tag);
@@ -41,7 +41,7 @@
     var TA = window.ILTA, S = window.S;
     if (!TA || !S || !S.data || !S.data.indicators) return null;
     var q = S.data.indicators.quote[0] || {};
-    var c = (q.close || []).map(Number).filter(isFinite);
+    var c = (q.close || []).filter(function (v) { return v != null && v !== ""; }).map(Number).filter(function (v) { return Number.isFinite(v) && v > 0; });
     if (c.length < 30) return null;
     var n = c.length, last = c[n - 1];
     var s50 = TA.sma(c, 50)[n - 1], s200 = TA.sma(c, 200)[n - 1];
@@ -100,22 +100,33 @@
 
   function fetchRead(box) {
     var S = window.S;
-    if (!S || !S.ticker || busy) return;
+    if (!S || !S.ticker) return;
     var key = S.ticker + ":" + (S.range || "1y");
+    if (pending && pending.key !== key) { pending.controller.abort(); pending = null; }
     if (cache[key]) { renderBody(box, cache[key]); return; }
+    if (pending && pending.key === key) return;
 
-    busy = true;
+    var request = { key: key, controller: new AbortController() };
+    pending = request;
+    var timeout = setTimeout(function () { request.controller.abort(); }, 20000);
+    function current() { return window.S && (window.S.ticker + ":" + (window.S.range || "1y")) === key && box.isConnected; }
     box.querySelector(".ilan-body").innerHTML = '<div class="ilan-loading">Reading the series…</div>';
     fetch("/api/analysis/" + encodeURIComponent(S.ticker) +
           "?range=" + encodeURIComponent(S.range || "1y") + "&explain=1",
-          { credentials: "same-origin" })
+          { credentials: "same-origin", signal: request.controller.signal })
       .then(function (r) { return r.ok ? r.json() : Promise.reject(new Error("HTTP " + r.status)); })
-      .then(function (j) { cache[key] = j; renderBody(box, j); })
+      .then(function (j) {
+        cache[key] = j;
+        var keys = Object.keys(cache);
+        if (keys.length > 20) delete cache[keys[0]];
+        if (current()) renderBody(box, j);
+      })
       .catch(function () {
+        if (!current()) return;
         box.querySelector(".ilan-body").innerHTML =
           '<div class="ilan-empty">Could not compute a read right now. The chart above is unaffected.</div>';
       })
-      .finally(function () { busy = false; });
+      .finally(function () { clearTimeout(timeout); if (pending === request) pending = null; });
   }
 
   /* ── mount ────────────────────────────────────────────────────────────── */

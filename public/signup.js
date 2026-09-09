@@ -25,6 +25,15 @@
   }
 
   const nextPath = safeNext(query.get("next"));
+  const planIntent = new URL(nextPath, window.location.origin).searchParams.get("pricing") === "1";
+  const submitLabel = planIntent ? "Create account and view plans" : "Create account →";
+  btn.textContent = submitLabel;
+  alertEl.setAttribute("role", "status");
+  alertEl.setAttribute("aria-live", "polite");
+  if (planIntent) {
+    const subtitle = document.querySelector(".auth-sub");
+    if (subtitle) subtitle.textContent = "Create your free account, then choose a Pro plan. No payment is taken here.";
+  }
   const analytics = {
     source: query.get("source") || "direct",
     ticker: (query.get("ticker") || "").toUpperCase().replace(/[^A-Z0-9.\-^]/g, "").slice(0, 10),
@@ -130,7 +139,7 @@
       window.setTimeout(() => {
         submitting = false;
         btn.disabled = false;
-        btn.textContent = "Create account →";
+        btn.textContent = submitLabel;
       }, 2000);
     }
   });

@@ -26,6 +26,20 @@
   var nav = document.getElementById("main-nav");
   if (!nav) return;
 
+  // A pricing visit opens the existing plan chooser. It never starts checkout.
+  // Capture the request before the application normalizes its initial URL.
+  var pricingRequested = new URLSearchParams(location.search).get("pricing") === "1";
+  function openPricing() {
+    if (typeof window.showUpgradeModal !== "function") return false;
+    window.showUpgradeModal(false, "pricing_navigation");
+    return true;
+  }
+  if (pricingRequested && location.pathname === "/") {
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", openPricing, { once: true });
+    } else openPricing();
+  }
+
   /* ── active tab, derived from the URL rather than hand-marked per page ──
      Six copies of the markup meant six chances to mark the wrong tab, and
      several pages marked none. */
@@ -40,12 +54,11 @@
     var want = "";
     if (path === "/" && view === "tool") {
       if (section === "reports" || section === "workspace") want = "reports";
-      else if (section === "screener") want = "screener";
-      else want = "screener";
+      else want = "research";
     } else if (path === "/") want = "home";
     else if (path === "/lens-score") want = "lens-score";
     else if (path === "/blog") want = "blog";
-    else if (path === "/signup" || path === "/pricing") want = "pricing";
+    else if (path === "/pricing") want = "pricing";
 
     var tabs = nav.querySelectorAll(".nav-tab");
     for (var i = 0; i < tabs.length; i++) {
@@ -58,19 +71,32 @@
   }
   markActiveTab();
   window.addEventListener("popstate", markActiveTab);
+  window.addEventListener("il:viewchange", function () { queueMicrotask(markActiveTab); });
 
   /* ── tabs ──────────────────────────────────────────────────────────────
      On the SPA, hand the click to navGoTo so the view switches without a
      document load. Anywhere else the href is a real URL and the browser
      handles it, which is why the markup no longer carries inline onclick
      attributes that referenced functions six of the pages never loaded. */
-  var SECTION_FOR = { screener: "screener", reports: "reports" };
+  var SECTION_FOR = { research: "analyze", screener: "screener", reports: "workspace" };
   nav.addEventListener("click", function (e) {
+    // Preserve the browser's open-in-new-tab and open-in-new-window actions.
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     var tab = e.target.closest ? e.target.closest(".nav-tab, .nav-logo") : null;
     if (!tab || !nav.contains(tab)) return;
     var key = tab.getAttribute("data-nav");
     if (!key) return;
 
+    if (key === "pricing" && location.pathname === "/" && openPricing()) {
+      e.preventDefault();
+      return;
+    }
+    if (key === "reports" && typeof window.openWorkspaceWatchlist === "function") {
+      e.preventDefault();
+      window.openWorkspaceWatchlist();
+      markActiveTab();
+      return;
+    }
     if (key === "lens-score" && typeof window.navGoLensScore === "function") {
       if (window.navGoLensScore(tab, e) === false) e.preventDefault();
       return;
@@ -133,7 +159,49 @@
      shared, so the buttons exist on pages that never load it; without these
      fallbacks they threw ReferenceError on tap. */
   if (typeof window._toggleMobileMenu !== "function") {
-    window._toggleMobileMenu = function () { nav.classList.toggle("il-nav-open"); };
+    window._toggleMobileMenu = function () {
+      var toggle = nav.querySelector(".lp-static-menu-toggle");
+      if (toggle) toggle.click();
+    };
+  }
+  // The application drawer is a disclosure, so focus may leave it normally.
+  // Keep every trigger in sync, including when navigation closes the drawer.
+  var appDrawer = document.getElementById("mobile-more-menu");
+  if (appDrawer) {
+    var triggers = document.querySelectorAll(".prime-nav-menu, .prime-mobile-appbar button, #mbn-more");
+    var lastTrigger = null;
+    var wasOpen = false;
+    appDrawer.setAttribute("role", "region");
+    appDrawer.setAttribute("aria-label", "Research navigation");
+    function syncAppDrawer() {
+      var open = appDrawer.classList.contains("open");
+      appDrawer.setAttribute("aria-hidden", String(!open));
+      triggers.forEach(function (trigger) {
+        trigger.setAttribute("aria-controls", "mobile-more-menu");
+        trigger.setAttribute("aria-expanded", String(open));
+      });
+      if (open && !wasOpen) {
+        lastTrigger = document.activeElement;
+        var input = appDrawer.querySelector('input:not([type="hidden"]), a[href], button');
+        if (input) input.focus();
+      }
+      wasOpen = open;
+    }
+    syncAppDrawer();
+    new MutationObserver(syncAppDrawer).observe(appDrawer, { attributes: true, attributeFilter: ["class"] });
+    document.addEventListener("keydown", function (event) {
+      if (event.key !== "Escape" || !appDrawer.classList.contains("open")) return;
+      event.preventDefault();
+      appDrawer.classList.remove("open");
+      if (lastTrigger && typeof lastTrigger.focus === "function") lastTrigger.focus();
+    });
+    document.addEventListener("focusin", function (event) {
+      if (!appDrawer.classList.contains("open") || appDrawer.contains(event.target)) return;
+      if (Array.prototype.indexOf.call(triggers, event.target) === -1) appDrawer.classList.remove("open");
+    });
+    window.addEventListener("resize", function () {
+      if (window.innerWidth > 900) appDrawer.classList.remove("open");
+    });
   }
   if (typeof window.navAccountTap !== "function") {
     window.navAccountTap = function () {
