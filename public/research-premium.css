@@ -517,3 +517,140 @@ html[data-theme="dark"] :is(.ihm-panel,.ilm-card,.il-startpath,.il-cap-card) {
   .ihm-strip-head { flex-wrap: wrap !important; row-gap: 2px !important; }
   .ihm-strip-title { white-space: nowrap !important; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE GREEN CAST, THE STACKED PANELS, AND THE FOUR TYPEFACES
+
+   All three measured on the Research page before anything was written.
+
+   1. Every neutral in the palette has green above red and blue:
+        --rp-bg    #0d100f   R13  G16  B15
+        --rp-panel #151917   R21  G25  B23
+        --rp-copy  #50564f / #c0c6bd
+        --rp-muted #6c7068 / #9aA396
+        --rp-line  rgba(215,226,208,.12)  and  rgba(46,48,39,.12)
+      while --rp-ink is warm (#f3f3eb). A green ground under warm ink beside a
+      gold accent is the hue clash - the surfaces pull one way and everything
+      printed on them pulls the other. The ramp below keeps every lightness
+      and moves the hue to warm graphite, so it sits with the gold instead of
+      fighting it.
+
+   2. Four grounds stack on the tool page, alternating:
+        .app-content-scroll   #0d100f   page
+        #sec-analyze          #151917   panel, 1px border, 8px radius
+        #body-analyze         #0d100f   page colour again, 8px radius
+        .il-tool-shell        #151917   panel, 1px border, 8px radius
+      A panel inside a page inside a panel inside a page. The middle two are
+      the "darker panel that fits poorly behind all the features": a
+      page-coloured rectangle with rounded corners, painted inside a lighter
+      panel, for no reason anyone chose. The tool page gets one level - the
+      cards - and everything behind them is the page.
+
+   3. The section header is rgba(9,13,11,.92): a different hue from the page
+      (blue-black against green-black), a different lightness, and 92% opaque
+      over whatever scrolls under it. That is the box behind "Chart &
+      Analysis" that does not blend. It becomes the page's own colour with a
+      hairline under it, which is what a sticky header needs to be.
+
+   4. Four families render on one page: -apple-system on 330 elements,
+      JetBrains Mono on 190, Plus Jakarta Sans on 71 - the entire top nav, so
+      the header is in a different sans from the page beneath it - and Georgia
+      on the wordmark, which is a fallback nobody picked. Plus 26 <code>
+      elements falling back to bare monospace instead of the site's mono.
+      One sans for words, one mono for values, and the brand face on the
+      wordmark alone.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Warm graphite, same lightness ───────────────────────────────────── */
+:root {
+  --rp-bg: #f6f3ec !important;
+  --rp-panel: #fffdf8 !important;
+  --rp-raised: #ffffff !important;
+  --rp-inset: #efeade !important;
+  --rp-ink: #211f1b !important;
+  --rp-copy: #53504a !important;
+  --rp-muted: #6e6a61 !important;
+  --rp-line: rgba(48, 44, 35, .13) !important;
+  --rp-line-strong: rgba(48, 44, 35, .25) !important;
+  --rp-shadow: 0 2px 4px rgba(45, 38, 22, .03), 0 16px 42px -30px rgba(45, 38, 22, .16) !important;
+}
+html[data-theme="dark"] {
+  --rp-bg: #100f0e !important;
+  --rp-panel: #171614 !important;
+  --rp-raised: #1e1d1a !important;
+  --rp-inset: #131211 !important;
+  --rp-ink: #f2efe6 !important;
+  --rp-copy: #c6c1b5 !important;
+  --rp-muted: #9d988c !important;
+  --rp-line: rgba(232, 224, 206, .13) !important;
+  --rp-line-strong: rgba(232, 224, 206, .24) !important;
+}
+html[data-theme="dark"] :is(.ihm-panel,.ilm-card,.il-startpath,.il-cap-card) {
+  --rp-edge: rgba(232, 224, 206, .21);
+}
+:is(.ihm-panel,.ilm-card,.il-startpath,.il-cap-card) { --rp-edge: rgba(48, 44, 35, .30); }
+
+/* ── 2. One level of surface on the tool page ───────────────────────────── */
+#view-tool :is(.app-section,.acc-body,.il-tool-shell,.app-content-scroll) {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+#view-tool .app-section { margin-bottom: 0 !important; }
+#view-tool .il-tool-shell { overflow: visible !important; }
+
+/* ── 3. The section header belongs to the page ──────────────────────────── */
+.il-product-page .app-section-hdr,
+html[data-theme="dark"] .il-product-page .app-section-hdr {
+  background: var(--rp-bg) !important;
+  border-bottom: 1px solid var(--rp-line) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+/* ── 4. One sans for words, one mono for values ─────────────────────────── */
+:is(#main-nav,nav.il-global-nav) :is(a,button,span,div,input) {
+  font-family: var(--rp-sans) !important;
+}
+/* The brand face keeps exactly one job. It was rendering as Georgia, which is
+   a serif fallback sitting next to a sans nav - nobody chose that pairing. */
+#main-nav .il-wordmark,
+#main-nav .nav-logo span,
+.il-global-brand .il-wordmark {
+  font-family: "Plus Jakarta Sans", var(--rp-sans) !important;
+  font-weight: 600 !important;
+}
+/* <code> was falling through to whatever the platform calls monospace. */
+code, kbd, samp, pre {
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace !important;
+}
+/* Mono labels a value, not a heading. Card titles and badges are words. */
+:is(.ilm-title,.ilm-badge,.il-shell-title,.ash-title,.app-section-hdr) {
+  font-family: var(--rp-sans) !important;
+  letter-spacing: 0 !important;
+}
+
+/* Two surfaces on the tool page were still painted in blue-grey rather than
+   from the palette - a.tw-tool at #14181f and .tool-disclaimer at #181c21 -
+   so with the page corrected to warm graphite they read as blue boxes on a
+   warm ground. Every card on this page comes from the same two tokens now. */
+#view-tool :is(.tw-tool,.tool-disclaimer,.twm-cell,.tw-market,.tw-welcome,.il-shell-preview,.ilw-card) {
+  background: var(--rp-panel) !important;
+  border-color: var(--rp-line) !important;
+  backdrop-filter: none !important;
+}
+#view-tool .tw-tool:hover { border-color: var(--rp-line-strong) !important; }
+
+/* The Scanners ticker strip used --rp-line as a fill - a border token doing a
+   surface's job - and painted "Exchange unavailable" in #63666e, a blue-grey
+   from no palette at all. On the corrected ground both landed under the line
+   (3.80:1 and 4.07:1 against 4.5). The strip gets the palette's recessed
+   surface, and both strings get inks measured against it. */
+.il-shell-ticker {
+  background: var(--rp-inset) !important;
+  border-color: var(--rp-line) !important;
+}
+.il-shell-ticker span { color: var(--rp-gold) !important; -webkit-text-fill-color: var(--rp-gold) !important; }
+.il-shell-ticker em,
+.il-shell-ticker div { color: var(--rp-copy) !important; -webkit-text-fill-color: var(--rp-copy) !important; }
