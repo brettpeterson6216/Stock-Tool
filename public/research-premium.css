@@ -341,3 +341,179 @@ tbody tr:hover { background: var(--rp-gold-soft) !important; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DASHBOARD FIT, PANEL EDGES, AND THE NARROW INDEX TILE
+
+   Appended, so these win inside the premium layer by order rather than by a
+   new specificity trick.
+
+   Measured before writing any of it, at 1920x1080 - a 960px page viewport
+   once Chrome's tab strip and omnibox are off the screen:
+
+     document 1415px, 1.47 screens, 455px hidden
+     the grid needs 1062px and has 746
+     2560x1440 scrolls too: 1508px against 1320
+     1536x864 is 1.84 screens
+
+   The 316px is all in fixed costs, not in data: the market panel's head is
+   108px because the title, the subtitle and the timeframe row each take their
+   own line; the plot is 307px; "Popular starting points" is two rows of
+   cards; panel padding and grid gaps are both 20px; and the news rail is
+   280px wide, which makes every headline three lines instead of two.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── The header band and the shell ──────────────────────────────────────── */
+.il-home-member { padding: 24px clamp(20px,3vw,48px) 28px !important; }
+.ihm-head { padding-bottom: 18px !important; gap: 20px !important; }
+.ihm-sub { margin-top: 5px !important; }
+
+/* ── The grid ───────────────────────────────────────────────────────────────
+   The rails were 200 and 280 against a 1064px middle. Widening the news rail
+   to 330 is worth more than it costs: at 280px a headline wraps to three
+   lines, at 330 it wraps to two, and the middle column has width to spare. */
+.ihm-grid { grid-template-columns: 220px minmax(0,1fr) 330px !important; gap: 16px !important; }
+.ihm-col-tools,.ihm-col-main,.ihm-col-side { gap: 16px !important; }
+.ihm-panel { padding: 16px 18px !important; }
+.ihm-panel-head { margin-bottom: 12px !important; }
+
+/* ── The market panel's head, on one line ───────────────────────────────────
+   Title and note stacked in column one, price in column two, and the
+   timeframes spanning a third row of their own: 108px to introduce a chart.
+   Three columns instead - identity, timeframes, price - is 58. */
+.ihm-market-panel .ihm-panel-head {
+  grid-template-columns: auto 1fr auto !important;
+  align-items: center !important; gap: 14px !important;
+}
+.ihm-panel-id { flex-direction: row !important; align-items: baseline !important; gap: 10px !important; }
+.ihm-tfs { grid-column: 2 !important; grid-row: 1 !important; justify-content: center !important; }
+.ihm-quote { grid-column: 3 !important; grid-row: 1 !important; }
+.ihm-quote-label { display: none !important; }
+.ihm-tf { min-height: 30px !important; padding: 4px 9px !important; }
+
+/* ── The plot answers to the window ─────────────────────────────────────────
+   32vh is 307px at a 1080p window and 422 at 1440p, and neither number knows
+   what else has to fit underneath it. 100vh minus what the rest of the column
+   costs does: 250px at a 960px page viewport, the 420 ceiling at 1440p, and a
+   230 floor on a short laptop rather than pushing the indexes off. */
+.ilx-plot { height: clamp(230px, calc(100vh - 710px), 420px) !important; }
+.ihm-chart { min-height: 0 !important; }
+.ilx-legend { padding: 8px 0 0 !important; gap: 4px 18px !important; }
+.ilx-key { min-height: 26px !important; }
+.ihm-indexes { margin-top: 12px !important; padding-top: 12px !important; gap: 10px !important; }
+.ihm-strip { margin-top: 12px !important; padding-top: 12px !important; }
+
+/* ── Popular starting points: one row ───────────────────────────────────────
+   Six across a 1000px column is 160px each, which is more than a ticker, a
+   price, a percentage and a 26px sparkline need. */
+@media (min-width: 1251px) {
+  .ihm-populars { grid-template-columns: repeat(6,minmax(0,1fr)) !important; gap: 10px !important; }
+  .ihm-pop { padding: 10px !important; }
+}
+
+/* ── The rails ──────────────────────────────────────────────────────────────
+   The loose part of the right column was the rows, not the panels. */
+.ihm-col-side .ihm-news a { padding: 9px 0 !important; }
+.ihm-col-side .ihm-fav { padding: 8px 0 !important; }
+.ihm-col-side .ihm-recent-row { padding: 7px 0 !important; }
+.ihm-tool { min-height: 0 !important; padding: 11px 0 !important; }
+.ihm-stat { padding: 8px 0 !important; }
+
+/* ── The narrow index tile ──────────────────────────────────────────────────
+   The tile is `auto 88px`: the value column takes what it needs and the
+   sparkline takes 88. On a 390px screen the tile is 158px wide, so a
+   no-wrap "26,497.77" at 85px leaves the delta nowhere to go but underneath
+   the sparkline's column - and "+0.42%", "-0.51%" and "-0.77%" are printed
+   with the trend line drawn straight through them. Below 600 the trend goes
+   on its own row, where there is room for it. */
+@media (max-width: 600px) {
+  .ihm-index { grid-template-columns: minmax(0,1fr) !important; row-gap: 6px !important; }
+  .ihm-index .ihm-spark { width: 100% !important; }
+}
+
+/* ── Panels get their edges back ────────────────────────────────────────────
+   "Make the borders between panels stand out and have colour blends" was the
+   ask, and the flat --rp-panel fill on a --rp-bg ground answered it with a
+   12%-alpha hairline. The palette stays exactly as it is; what comes back is
+   the definition: a stronger edge, a body that is not one flat value, an
+   inner highlight along the top, and a lit top hairline. Gold, because gold
+   is the product's colour - except on the market panel, which is the one
+   panel whose subject has a direction and so the one allowed to show it. */
+:is(.ihm-panel,.ilm-card,.il-startpath,.il-cap-card) {
+  position: relative !important;
+  border-color: var(--rp-line-strong) !important;
+  background:
+    linear-gradient(174deg, var(--rp-raised) 0%, var(--rp-panel) 58%) !important;
+  box-shadow:
+    inset 0 1px 0 var(--rp-lift, rgba(255,255,255,.55)),
+    var(--rp-shadow) !important;
+}
+:is(.ihm-panel,.ilm-card,.il-startpath,.il-cap-card)::before {
+  content: "" !important;
+  position: absolute !important; top: 0 !important; left: 0 !important; right: 0 !important;
+  height: 1px !important; pointer-events: none !important; z-index: 1 !important;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--rp-hair, rgba(155,116,35,.42)) 24%,
+    var(--rp-hair, rgba(155,116,35,.42)) 76%,
+    transparent 100%) !important;
+  box-shadow: none !important;
+}
+:is(.ihm-panel,.ilm-card,.il-startpath,.il-cap-card) > * { position: relative !important; z-index: 2 !important; }
+:is(.ihm-panel,.ilm-card,.il-startpath,.il-cap-card):hover {
+  border-color: var(--rp-line-strong) !important;
+}
+:is(.il-startpath,.il-cap-card):hover::before { --rp-hair: rgba(155,116,35,.7) !important; }
+.ihm-market-panel { --rp-hair: color-mix(in srgb, var(--ihm-accent, #846018) 55%, transparent) !important; }
+html[data-theme="dark"] :is(.ihm-panel,.ilm-card,.il-startpath,.il-cap-card) {
+  --rp-lift: rgba(255,255,255,.045);
+  --rp-hair: rgba(224,186,104,.45);
+}
+html[data-theme="dark"] :is(.il-startpath,.il-cap-card):hover::before { --rp-hair: rgba(224,186,104,.72) !important; }
+
+/* The right rail was still 50px past the fold at 1080p, all of it in the news
+   list: three headlines at 90px each, where the height is line-height rather
+   than words. 1.4 on a 14px headline is still comfortable at this size. */
+.ihm-col-side .ihm-news a { padding: 8px 0 !important; }
+.ihm-col-side .ihm-news b,
+.ihm-col-side .ihm-news-title { line-height: 1.4 !important; }
+.ihm-col-side .ihm-news span { font-size: 11.5px !important; }
+.ihm-col-side .ihm-fav { padding: 7px 0 !important; }
+.ihm-col-side .ihm-fav-sym { gap: 1px !important; }
+
+/* The first pass at the edge was too polite to answer the request. The border
+   goes to a value of its own rather than borrowing --rp-line-strong, the
+   hairline runs most of the panel instead of the middle half, and both are
+   brighter. Still one hairline and one border - the panel is not decorated,
+   it is defined. */
+:is(.ihm-panel,.ilm-card,.il-startpath,.il-cap-card) {
+  border-color: var(--rp-edge, rgba(46,48,39,.30)) !important;
+}
+:is(.ihm-panel,.ilm-card,.il-startpath,.il-cap-card)::before {
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--rp-hair, rgba(155,116,35,.6)) 12%,
+    var(--rp-hair, rgba(155,116,35,.6)) 88%,
+    transparent 100%) !important;
+}
+html[data-theme="dark"] :is(.ihm-panel,.ilm-card,.il-startpath,.il-cap-card) {
+  --rp-edge: rgba(215,226,208,.20);
+  --rp-hair: rgba(224,186,104,.62);
+}
+.ihm-market-panel { --rp-hair: color-mix(in srgb, var(--ihm-accent, #846018) 70%, transparent) !important; }
+
+/* Stacking the tile was necessary and not sufficient. Two tiles across a
+   390px screen is 158px each, and "26,497.77" plus "+0.42%" needs about 150
+   with no wrap allowed - so the delta went from under its own sparkline to
+   under the next tile's price. Below 600 the indexes get one per row, which
+   is the width the numbers actually need, and the value may wrap rather than
+   run into its neighbour. */
+@media (max-width: 600px) {
+  .ihm-indexes { grid-template-columns: minmax(0,1fr) !important; }
+  .ihm-index-txt { grid-template-columns: auto auto !important; justify-content: start !important; column-gap: 10px !important; }
+  .ihm-index-txt b { white-space: normal !important; }
+  /* And the strip's title wrapped to two lines because the breadth note beside
+     it was allowed to take the width first. */
+  .ihm-strip-head { flex-wrap: wrap !important; row-gap: 2px !important; }
+  .ihm-strip-title { white-space: nowrap !important; }
+}

@@ -955,13 +955,11 @@
         <img src="/logo.svg?v=4" alt="">
         <span>IMPLIED LENS</span>
       </a>
-      <nav class="prime-side-global" aria-label="Primary workspace navigation">
-        <a href="/" onclick="navGoTo('home');return false;"><i class="ti ti-layout-dashboard"></i><span>Dashboard</span></a>
-        <a class="active" href="/?view=tool&amp;section=analyze" onclick="navGoTo('analyze');return false;"><i class="ti ti-chart-candle"></i><span>Research</span></a>
-        <a href="/lens-score"><i class="ti ti-focus-2"></i><span>LensScore</span></a>
-        <a href="/?view=tool&amp;section=projection" onclick="navGoTo('projection');return false;"><i class="ti ti-chart-dots-3"></i><span>Scenarios</span></a>
-        <a href="/?view=tool&amp;section=workspace" onclick="navGoTo('workspace');return false;"><i class="ti ti-bookmark"></i><span>Watchlists</span></a>
-      </nav>
+      <!-- The five-item rail that used to sit here - Dashboard, Research,
+           LensScore, Scenarios, Watchlists - repeated the top bar exactly,
+           two inches below it. The sidebar's job is moving around inside
+           Research; the header's job is moving between products. The tool
+           list below is the part that was doing work. -->
       <div class="prime-side-section">Research tools</div>
       <!-- One panel per top-level tab: items are shown/hidden by renderSidebarGroup()
            so the left panel never navigates across top-level tabs. -->
