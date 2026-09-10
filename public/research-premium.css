@@ -9,13 +9,28 @@
   --rp-ink: #20231f !important;
   --rp-copy: #50564f !important;
   --rp-muted: #6c7068 !important;
-  --rp-gold: #846018 !important;
-  --rp-gold-fill: #dfb960 !important;
-  --rp-gold-soft: rgba(155, 116, 35, .09) !important;
+  /* Sampled from brand/logo-source.png: the mark's gold runs hsl(36 79% 32%)
+     through hsl(40 64% 51%), its candles hsl(141 55% 42%) and hsl(358 75% 50%).
+     Those hues are the brand; the lightness is per theme, because a colour
+     that clears AA on graphite will not clear it on cream.
+     Gold is a ramp, not one value. --rp-gold is the text-safe end (6.1:1 on
+     the page ground); --rp-gold-accent is the bolder gold used for borders,
+     rules, icons and chart strokes, where 3:1 is the bar. Flattening these
+     into a single token is what drained the colour out of the brand. */
+  --rp-gold: #7a5310 !important;
+  --rp-gold-accent: #a8741a !important;
+  --rp-gold-bright: #ce9127 !important;
+  --rp-gold-deep: #6e470d !important;
+  --rp-gold-fill: #e3b448 !important;
+  --rp-gold-grad: linear-gradient(160deg, #eabe57 0%, #ce9127 100%) !important;
+  --rp-gold-glow: 0 6px 18px -6px rgba(168, 116, 26, .45) !important;
+  --rp-gold-ring: rgba(168, 116, 26, .38) !important;
+  --rp-gold-soft: rgba(168, 116, 26, .10) !important;
+  --rp-on-gold: #211f1b !important;
   --rp-line: rgba(46, 48, 39, .12) !important;
   --rp-line-strong: rgba(46, 48, 39, .24) !important;
-  --rp-green: #147653 !important;
-  --rp-red: #b63d49 !important;
+  --rp-green: #186d3d !important;
+  --rp-red: #ad2e32 !important;
   --rp-shadow: 0 2px 4px rgba(40, 35, 20, .025), 0 16px 42px -30px rgba(40, 35, 20, .14) !important;
   --rp-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif !important;
 }
@@ -27,13 +42,24 @@ html[data-theme="dark"] {
   --rp-ink: #f3f3eb !important;
   --rp-copy: #c0c6bd !important;
   --rp-muted: #9aA396 !important;
-  --rp-gold: #e0ba68 !important;
-  --rp-gold-fill: #e0ba68 !important;
-  --rp-gold-soft: rgba(224, 186, 104, .09) !important;
+  /* Dark carries the bold end of the ramp: hsl(40 85% 57%) against the old
+     flat hsl(41 66% 64%) - nineteen points more saturation at 9.3:1 on a
+     panel, so it reads as gold rather than sand and still clears AA by
+     double. */
+  --rp-gold: #efb133 !important;
+  --rp-gold-accent: #efb133 !important;
+  --rp-gold-bright: #f6cd6f !important;
+  --rp-gold-deep: #9b6412 !important;
+  --rp-gold-fill: #efb133 !important;
+  --rp-gold-grad: linear-gradient(160deg, #f4cc67 0%, #d5911a 100%) !important;
+  --rp-gold-glow: 0 6px 22px -8px rgba(239, 177, 51, .55) !important;
+  --rp-gold-ring: rgba(239, 177, 51, .38) !important;
+  --rp-gold-soft: rgba(239, 177, 51, .10) !important;
+  --rp-on-gold: #17120a !important;
   --rp-line: rgba(215, 226, 208, .12) !important;
   --rp-line-strong: rgba(215, 226, 208, .23) !important;
-  --rp-green: #68c99a !important;
-  --rp-red: #ef8790 !important;
+  --rp-green: #5ec984 !important;
+  --rp-red: #e76a6e !important;
   --rp-shadow: 0 2px 4px rgba(0, 0, 0, .08), 0 16px 42px -30px rgba(0, 0, 0, .4) !important;
 }
 /* Bridge established token families to one palette, including the standalone
@@ -45,7 +71,7 @@ html[data-theme="dark"] {
   --il-ink-2: var(--rp-copy) !important; --il-muted: var(--rp-muted) !important;
   --il-faint: var(--rp-muted) !important; --il-line: var(--rp-line) !important;
   --il-line-strong: var(--rp-line-strong) !important; --il-brass: var(--rp-gold) !important;
-  --il-brass-bright: var(--rp-gold) !important; --il-brass-deep: var(--rp-gold) !important;
+  --il-brass-bright: var(--rp-gold-bright) !important; --il-brass-deep: var(--rp-gold-deep) !important;
   --il-brass-soft: var(--rp-gold-soft) !important; --il-brass-softer: var(--rp-gold-soft) !important;
   --il-green: var(--rp-green) !important; --il-red: var(--rp-red) !important;
   --il-gold-ink: var(--rp-gold) !important; --il-muted-ink: var(--rp-muted) !important;
@@ -57,7 +83,7 @@ html[data-theme="dark"] {
   --lpf-line-soft: var(--rp-line) !important; --lpf-line-gold: var(--rp-line-strong) !important;
   --lpf-ink: var(--rp-ink) !important; --lpf-copy: var(--rp-copy) !important;
   --lpf-muted: var(--rp-muted) !important; --lpf-gold: var(--rp-gold) !important;
-  --lpf-gold-bright: var(--rp-gold) !important; --lpf-sans: var(--rp-sans) !important;
+  --lpf-gold-bright: var(--rp-gold-bright) !important; --lpf-sans: var(--rp-sans) !important;
   --lpf-serif: var(--rp-sans) !important;
   --lp-bg: var(--rp-bg) !important; --lp-panel: var(--rp-panel) !important;
   --lp-card: var(--rp-panel) !important; --lp-ink: var(--rp-ink) !important;
@@ -70,7 +96,10 @@ html[data-theme="dark"] {
   --ink: var(--rp-ink) !important; --ink2: var(--rp-copy) !important;
   --ink3: var(--rp-copy) !important; --ink4: var(--rp-muted) !important;
   --ink-soft: var(--rp-copy) !important; --ink-faint: var(--rp-muted) !important;
-  --gold: var(--rp-gold) !important; --gold-d: var(--rp-gold) !important;
+  --gold: var(--rp-gold) !important; --gold-d: var(--rp-gold-deep) !important;
+  --gold-bright: var(--rp-gold-bright) !important; --gold-hi: var(--rp-gold-bright) !important;
+  --gold-ring: var(--rp-gold-ring) !important; --gold-tint: var(--rp-gold-soft) !important;
+  --gold-glow: var(--rp-gold-glow) !important; --gold-grad: var(--rp-gold-grad) !important;
   --gold-l: var(--rp-gold-fill) !important; --green: var(--rp-green) !important;
   --red: var(--rp-red) !important; --night: var(--rp-bg) !important;
   --surface: var(--rp-panel) !important; --surface-2: var(--rp-inset) !important;
@@ -111,12 +140,13 @@ button:disabled { cursor: not-allowed; }
 #main-nav .nav-search input { font-size: 14px !important; }
 #main-nav .nav-acct-btn, #main-nav #nav-acct-btn { border-radius: 8px !important; background: var(--rp-panel) !important; border-color: var(--rp-line) !important; }
 :is(.btn-gold,.btn-modal-cta,.btn-analyze,.ihm-go,.il-cta-solid,#nav-signup,.auth-submit,.btn-primary) {
-  background: var(--rp-gold-fill) !important; color: #252115 !important;
-  -webkit-text-fill-color: #252115 !important; border: 1px solid transparent !important;
-  box-shadow: none !important; font-weight: 600 !important; text-shadow: none !important;
+  background: var(--rp-gold-grad) !important; color: var(--rp-on-gold) !important;
+  -webkit-text-fill-color: var(--rp-on-gold) !important;
+  border: 1px solid var(--rp-gold-deep) !important;
+  box-shadow: var(--rp-gold-glow) !important; font-weight: 600 !important; text-shadow: none !important;
 }
 :is(.btn-gold,.btn-modal-cta,.btn-analyze,.ihm-go,.il-cta-solid,#nav-signup,.auth-submit,.btn-primary):hover {
-  filter: brightness(1.05) !important; transform: none !important;
+  filter: brightness(1.06) saturate(1.05) !important; transform: none !important;
 }
 /* Reusable working surfaces. Avoid gold frames around every block of data. */
 :is(.ihm-panel,.ilm-card,.il-startpath,.il-cap-card,.auth-card,.modal-box,.ws-card,.rs-card,.vl-card,.pl-card,.panel,.score-card,.evidence-card) {
@@ -654,3 +684,658 @@ code, kbd, samp, pre {
 .il-shell-ticker span { color: var(--rp-gold) !important; -webkit-text-fill-color: var(--rp-gold) !important; }
 .il-shell-ticker em,
 .il-shell-ticker div { color: var(--rp-copy) !important; -webkit-text-fill-color: var(--rp-copy) !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PHONE. Everything below was photographed on a real iPhone and reproduced
+   locally at 360/390/414 before being touched.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── One ground. A hardcoded #070b0e in the prime sheets painted #view-home a
+   cool blue-black while the body, nav and footer were the warm #100f0e, so a
+   hard horizontal seam ran across the bottom of every landing page - and that
+   blue-green cast is what read as "the site has a green hue". The literal is
+   outranked here rather than edited in six places. ──────────────────────── */
+#view-home, #view-tool, #landing-page, .il-landing, .home-shell, .hs-main {
+  background: var(--rp-bg) !important;
+  background-color: var(--rp-bg) !important;
+  background-image: none !important;
+}
+/* The page ended in ~350px of nothing because the shell was holding a
+   viewport minimum it no longer needs once the content is this long. */
+#view-home { min-height: 0 !important; }
+#landing-page > :last-child { padding-bottom: 12px !important; }
+
+@media (max-width: 640px) {
+  /* ── The pricing CTAs were two flex children at 1 1 0% inside a 308px row,
+     so each got 130px while "Start 7-day free trial" needs 151 and white-space
+     was nowrap: the label overflowed its own button and lost a character off
+     each end. The hero pair on the same page already stacks correctly. ──── */
+  #landing-page .il-landing-actions,
+  #landing-page .il-landing-actions.centered {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    width: 100% !important;
+  }
+  #landing-page :is(.il-landing-primary, .il-landing-secondary, .il-landing-band button) {
+    width: 100% !important;
+    flex: none !important;
+    white-space: normal !important;
+    padding-inline: 16px !important;
+  }
+
+  /* ── The four-up feature rail kept its desktop column borders while the
+     grid reflowed, which drew a box around one cell and half a box around
+     others. Stacked, the divider is a bottom rule between rows. ────────── */
+  #landing-page .il-rail {
+    grid-template-columns: 1fr !important;
+    padding: 8px 0 !important;
+  }
+  #landing-page .il-rail-item {
+    padding: 14px 2px !important;
+  }
+  #landing-page .il-rail-item + .il-rail-item {
+    border-left: 0 !important;
+    border-top: 1px solid var(--rp-line) !important;
+  }
+
+  /* ── The hero broke as "Find the edge." / "See the" / "bigger picture.",
+     leaving a two-word orphan in the middle of the gold. Each sentence gets
+     its own block and balances its own lines. ─────────────────────────── */
+  #landing-page .il-landing h1 :is(.il-d1, .il-d2) {
+    display: block !important;
+    text-wrap: balance !important;
+  }
+
+  /* The provider row wrapped 3 + 1, leaving FRED alone on its own line. The
+     lead label spans both columns so the four sources read as a set. */
+  #landing-page .il-trust {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 9px 14px !important;
+    align-items: center !important;
+  }
+  #landing-page .il-trust .il-trust-lead,
+  #landing-page .il-trust #il-trust-nocard { grid-column: 1 / -1 !important; }
+  #landing-page .il-trust .il-trust-dot { display: none !important; }
+
+  /* At 36-42px "See the bigger picture." cannot fit one line, so it broke as
+     a two-word orphan. Dropping to 30px lets each sentence hold its own line
+     and reproduces the desktop composition instead of fighting it. */
+  #landing-page h1.il-display {
+    font-size: 30px !important;
+    letter-spacing: -.04em !important;
+    max-width: none !important;
+  }
+
+  /* Section gutters match the rail and the footer rather than running to 0. */
+  #landing-page :is(.il-startpaths,.il-capabilities,.il-workflow-visual,.il-market-teaser,.il-landing-pricing) {
+    padding-inline: max(16px, env(safe-area-inset-left, 0px)) !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   AUTH FIELDS. The card painted a navy #080e11 while the rest of the site is
+   warm graphite, and the inputs sat on it at #131211 behind a .13 alpha
+   hairline — a two-point step. So the only thing separating "a field you type
+   in" from "a label above a field" was a border almost nobody can see, and
+   the form read as seven stacked inputs, four of them containing label text.
+   The fix is not subtlety: the input has to look recessed and the label has
+   to look like type.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.auth-card {
+  background: var(--rp-panel) !important;
+  border: 1px solid var(--rp-line) !important;
+}
+/* The <form> inside the card carried its own navy rgba(8,15,18,.96) panel.
+   That is the actual block people were seeing: it painted a full-card-width
+   ground behind every label row, so the labels sat on the same kind of
+   surface as the inputs and the form read as seven stacked fields. The card
+   is the panel; the form is just layout. */
+.auth-card form,
+.il-auth-page .auth-card form {
+  background: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+.auth-card .field { margin-bottom: 18px !important; }
+.auth-card .field label,
+.auth-card label {
+  display: block !important;
+  margin: 0 0 6px !important;
+  font-family: var(--rp-sans) !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: .02em !important;
+  color: var(--rp-copy) !important;
+  background: transparent !important;
+}
+.auth-card :is(input[type="text"],input[type="email"],input[type="password"],input:not([type])) {
+  display: block !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  background: var(--rp-inset) !important;
+  border: 1px solid var(--rp-line-strong) !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .28) !important;
+  border-radius: 8px !important;
+  min-height: 46px !important;
+  font-size: 16px !important;
+  color: var(--rp-ink) !important;
+}
+.auth-card :is(input:focus, input:focus-visible) {
+  border-color: var(--rp-gold) !important;
+  box-shadow: 0 0 0 3px var(--rp-gold-ring) !important;
+  outline: 0 !important;
+}
+/* Hints and the strength read-out belong to the field above them, not to the
+   next one down, and they are words — so they are not set in mono. */
+.auth-card :is(.field-hint, .meter-label) {
+  margin: 6px 0 0 !important;
+  font-family: var(--rp-sans) !important;
+  font-size: 12px !important;
+  letter-spacing: 0 !important;
+  color: var(--rp-copy) !important;
+  background: transparent !important;
+}
+/* The auth footer is a bare <footer> with two spans and no inner wrapper; it
+   inherits the site gutter from clean-pass. The second wordmark goes — see
+   the note on the footer lockup. */
+.il-auth-page footer {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+  flex-wrap: wrap !important;
+  font-size: 12px !important;
+  color: var(--rp-muted) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PRO TEASER. blur(3px) at .55 opacity on 13px type does not read as "there
+   is more behind this" — it destroys the glyphs while leaving the row rhythm,
+   which is what a corrupted render looks like. Half the blur, most of the
+   opacity back, and a mask so the sample dissolves into the card instead of
+   ending on a hard line. The caption moves to the top-left so it is read
+   before the blur is interpreted.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.pgc-preview {
+  max-height: 118px !important;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0 46%, rgba(0,0,0,.35) 82%, transparent 100%) !important;
+          mask-image: linear-gradient(to bottom, #000 0 46%, rgba(0,0,0,.35) 82%, transparent 100%) !important;
+}
+.pgc-preview-blur {
+  filter: blur(1.6px) !important;
+  opacity: .82 !important;
+}
+/* The mask does the fading now; a second opaque gradient on top just muddies
+   it and re-introduces the hard edge. */
+.pgc-preview-overlay { background: none !important; }
+.pgc-preview-tag {
+  top: 8px !important; right: auto !important; left: 10px !important;
+  font-family: var(--rp-sans) !important;
+  letter-spacing: .04em !important;
+  background: var(--rp-panel) !important;
+  border-color: var(--rp-line-strong) !important;
+  color: var(--rp-muted) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PLAYBOOK CARDS. "Playbook 01 · 8 min" was set in mono in a ~170px column,
+   so it broke over three lines — at a different point in each card, which
+   pushed all three titles onto different baselines and cost the row its
+   alignment. The card becomes a four-row grid so the CTA sits on one line
+   across all three regardless of how long the body runs.
+   ═══════════════════════════════════════════════════════════════════════════ */
+body.il-static-page .guide {
+  display: grid !important;
+  grid-template-rows: max-content max-content 1fr max-content !important;
+  gap: 0 !important;
+}
+body.il-static-page .guide-num {
+  /* premium-revamp styles this as a 44x44 numeral tile, but the markup puts
+     the whole string "Playbook 01 · 8 min" inside it — which is why it broke
+     over three lines and why a gold square sat behind the text. It is a
+     kicker, not a tile. */
+  display: block !important;
+  width: auto !important;
+  height: auto !important;
+  border: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  font-family: var(--rp-sans) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: .07em !important;
+  white-space: nowrap !important;
+  color: var(--rp-copy) !important;
+  margin-bottom: 10px !important;
+}
+body.il-static-page .guide h2 { margin-top: 0 !important; }
+body.il-static-page .guide-cta {
+  align-self: end !important;
+  justify-self: start !important;
+  margin-top: 16px !important;
+  padding: 7px 13px !important;
+  white-space: nowrap !important;
+  border-radius: 7px !important;
+}
+
+/* ── Inline evidence badges. "User assumption" sat at 4.03:1 and "Observed"
+   at 4.19:1 in light — both are words in a coloured pill on a tint of their
+   own colour, which is the arrangement that always lands just under AA.
+   Neutral tint, copy-weight ink, and they clear it with room. ──────────── */
+.il-manual-eps span,
+.il-observed-note span {
+  background: var(--rp-inset) !important;
+  border: 1px solid var(--rp-line) !important;
+  color: var(--rp-copy) !important;
+  -webkit-text-fill-color: var(--rp-copy) !important;
+  font-family: var(--rp-sans) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: .02em !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ONE MONO RULE: numerals, tickers, code and formulas. Nothing else.
+
+   Mono is a data face. Used for words it does something specific and bad —
+   it makes copy look emitted rather than written, and it is the single
+   largest reason this site read as machine output. It had spread to panel
+   eyebrows ("Evidence Panel"), form labels ("Starting portfolio"), status
+   copy ("Load a company to start."), lesson meta ("6 min · Start here"),
+   step names ("01 / SOURCE"), stat labels ("Theses"), and whole sentences
+   ("Templates are starting points, not recommendations.").
+
+   The list below is not guesswork: it is every selector a DOM walk across
+   eighteen routes found rendering a monospace face over text containing
+   three or more letters, minus tickers, numerals and .edu-term code — which
+   keep the mono, because a formula is exactly what it is for.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:is(
+  .il-lens-context span,
+  .il-lens-context strong,
+  .il-proj-head span,
+  .il-trust-field span,
+  .il-template-row span,
+  .il-ws-kicker,
+  .il-ws-stat span,
+  .il-ws-intro strong,
+  .cmp-ig label,
+  .cmp-ig label span,
+  .edu-path em,
+  .step .num,
+  .result span,
+  .field label,
+  .field-hint,
+  .meter-label,
+  .fg-label span,
+  .tw-kicker,
+  .sb-group-label,
+  .prime-side-section,
+  .il-shell-top,
+  [data-il-current-name],
+  [data-il-current-exchange],
+  [data-il-current-move]
+) {
+  font-family: var(--rp-sans) !important;
+  letter-spacing: normal !important;
+}
+/* Eyebrows keep their small-label voice without the typewriter. Sentence
+   case, because the site's uppercase rule allows the wordmark and tickers
+   and nothing else. */
+:is(.il-lens-context span, .il-ws-kicker, .tw-kicker, .sb-group-label, .il-proj-head span) {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: .07em !important;
+  color: var(--rp-copy) !important;
+}
+/* Form and stat labels read as labels, not as fields or values. */
+:is(.field label, .cmp-ig label, .il-ws-stat span, .result span, .il-trust-field span) {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: .02em !important;
+  color: var(--rp-copy) !important;
+}
+/* A whole sentence had been set as a badge. It is a caption. */
+.il-template-row span {
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  letter-spacing: normal !important;
+  color: var(--rp-copy) !important;
+}
+
+/* ── The <em> inside the observed note is the last word left in mono. ───── */
+.il-observed-note em { font-family: var(--rp-sans) !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   WORKSPACE STAT TILES. Four tiles carried four different coloured top bars —
+   blue, green, gold, pink — encoding nothing. A row of arbitrary colour above
+   a row of zeros reads as a legend for something that does not exist. One
+   hairline in the panel's own line colour, and the only tile allowed to take
+   a colour is the one where the colour means something: reviews that are due.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.il-ws-stat::before {
+  background: var(--rp-line-strong) !important;
+  height: 1px !important;
+}
+.il-ws-stat:is(.accent-blue, .accent-green, .accent-red)::before {
+  background: var(--rp-line-strong) !important;
+}
+.il-ws-stat.is-due::before { background: var(--rp-gold) !important; height: 2px !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   EMPTY STATES. A dashed rectangle is the visual language of an unfinished
+   mockup — it says "this part is not built", which is the opposite of what an
+   empty state should say. Solid panel, same edge as every other panel, and
+   the copy carries the message instead of the border.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:is(.il-ws-empty, .il-call-empty, .il-ws-asof, .il-empty, .empty-state) {
+  border-style: solid !important;
+  border-color: var(--rp-line) !important;
+  background: var(--rp-inset) !important;
+  border-radius: 10px !important;
+  padding: 24px 18px !important;
+  font-size: 13px !important;
+  line-height: 1.6 !important;
+  color: var(--rp-copy) !important;
+}
+.il-ws-guide-model.preview { border-style: solid !important; opacity: 1 !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ONE STEP COMPONENT. The same idea was drawn three ways: "01 /" over
+   "SOURCE" in mono on Research Process, five outline boxes on LensScore, and
+   a mono numeral floating in a card corner on Learn. A filled gold numeral
+   with the step name beside it, everywhere.
+   ═══════════════════════════════════════════════════════════════════════════ */
+body.il-static-page .step .num {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  background: none !important;
+  border: 0 !important;
+  padding: 0 !important;
+  font-family: var(--rp-sans) !important;
+  white-space: nowrap !important;
+}
+body.il-static-page .step .il-step-name {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: .07em !important;
+  color: var(--rp-copy) !important;
+}
+.il-step-num {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 28px !important;
+  height: 28px !important;
+  flex: 0 0 28px !important;
+  border-radius: 999px !important;
+  background: var(--rp-gold) !important;
+  color: var(--rp-on-gold) !important;
+  -webkit-text-fill-color: var(--rp-on-gold) !important;
+  font-family: var(--rp-sans) !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ONE LOCKUP, ONE FOOTER VOICE.
+
+   The header said IMPLIED LENS — letterspaced uppercase sans beside a
+   circular mark. The footer, on the same page, said Implied*Lens* — tight
+   lowercase with the second word in italic serif and no mark. Two logos, one
+   scroll apart. And "Give feedback" was set larger and heavier than every
+   link beside it, so the loudest thing in the footer was the feedback prompt.
+
+   The footer wordmark now matches the header, and the feedback control is a
+   small outline pill on the right instead of oversized type in the middle of
+   a link row.
+   ═══════════════════════════════════════════════════════════════════════════ */
+footer .f-logo,
+footer .f-logo .il-wordmark {
+  font-family: var(--rp-sans) !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  font-style: normal !important;
+  letter-spacing: .16em !important;
+  text-transform: uppercase !important;
+  color: var(--rp-ink) !important;
+  -webkit-text-fill-color: var(--rp-ink) !important;
+}
+footer .f-logo em {
+  font-style: normal !important;
+  font-weight: 400 !important;
+  color: var(--rp-muted) !important;
+  -webkit-text-fill-color: var(--rp-muted) !important;
+}
+footer .il-feedback-link {
+  order: 99 !important;
+  font-family: var(--rp-sans) !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+  color: var(--rp-copy) !important;
+  background: transparent !important;
+  border: 1px solid var(--rp-line-strong) !important;
+  border-radius: 999px !important;
+  padding: 4px 12px !important;
+  line-height: 1.5 !important;
+  cursor: pointer !important;
+}
+footer .il-feedback-link:hover {
+  border-color: var(--rp-gold) !important;
+  color: var(--rp-gold) !important;
+}
+/* Every footer on the site reads at the same size and colour, whichever of
+   the six variants the page happens to carry. */
+:is(footer, .site-footer, footer.foot) :is(a, .f-copy, span) {
+  font-family: var(--rp-sans) !important;
+  font-size: 12px !important;
+}
+:is(footer, .site-footer, footer.foot) a { color: var(--rp-copy) !important; text-decoration: none !important; }
+:is(footer, .site-footer, footer.foot) a:hover { color: var(--rp-gold) !important; }
+:is(footer, .site-footer, footer.foot) .f-copy { color: var(--rp-muted) !important; }
+footer.foot {
+  display: flex !important; flex-wrap: wrap !important;
+  gap: 18px !important; justify-content: center !important;
+  padding: 22px max(18px, env(safe-area-inset-left, 0px)) !important;
+  border-top: 1px solid var(--rp-line) !important;
+  background: var(--rp-bg) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ICONOGRAPHY AND THE ABOUT PAGE.
+
+   About and Data Sources drew their product iconography with emoji — literal
+   📊 🧾 🏛 🔍 🏦 🌐 glyphs in a tinted tile. They render differently on every
+   OS, sit at the wrong optical weight beside the 1.5px line set used in the
+   nav and the research sidebar, and on About the mono 01–06 numeral was
+   crammed into the same 20px chip, so the digits and the emoji overlapped.
+   The markup now carries Tabler glyphs, which both pages were already
+   loading; this sizes them to match the rest of the site.
+
+   About also set its card titles and section headings in a serif that exists
+   nowhere else, which is what made the page read as a different company's
+   marketing site bolted onto the product.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:is(.feat-icon, .src-icon) {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 9px !important;
+  background: var(--rp-gold-soft) !important;
+  border: 1px solid var(--rp-line) !important;
+  color: var(--rp-gold) !important;
+  font-size: 18px !important;
+}
+:is(.feat-icon, .src-icon) i { font-size: 18px !important; line-height: 1 !important; }
+.soc-btn { display: inline-flex !important; align-items: center !important; gap: 7px !important; }
+.soc-btn i { font-size: 15px !important; color: var(--rp-gold) !important; }
+
+:is(.feat-title, .about .section h2, body.il-static-page .section h2, .feat h3) {
+  font-family: var(--rp-sans) !important;
+  letter-spacing: -.015em !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE STATIC PAGES JOIN THE PRODUCT.
+
+   about, data-sources, terms, privacy and blog each hardcode background:#08090D
+   in their own <style> block — a navy that is nowhere in the token system.
+   compound-calculator and research-process hardcode the light equivalents.
+   That is why About, the Calculator and LensScore read as three different
+   products with the same header: the ground under them was never the ground.
+   ═══════════════════════════════════════════════════════════════════════════ */
+body.il-static-page,
+body.il-auth-page,
+body:is(.about-page, .legal-page, .blog-page) {
+  background: var(--rp-bg) !important;
+  color: var(--rp-copy) !important;
+}
+body.il-static-page :is(.feat, .src-card, .guide, .step, .principle, .section, .note, .panel, .tool) {
+  background: var(--rp-panel) !important;
+  border-color: var(--rp-line) !important;
+}
+/* One radius scale: 8 for chips, 12 for panels, 16 for hero cards. LensScore
+   was running 18–20 and the static pages 4–12, which is most of why nothing
+   felt like it came from the same place. */
+body.il-static-page :is(.feat, .src-card, .guide, .principle, .note) { border-radius: 12px !important; }
+:is(.score-card, .lens-card, .ls-card, .ls-panel, .ls-section) { border-radius: 12px !important; }
+
+/* The six feature tiles are parallel, not a sequence, so the counter numeral
+   that static-polish injected into .feat-icon::before was labelling nothing —
+   and because .feat-icon also carried font-size:0 to suppress the old emoji,
+   the numeral and the real icon ended up stacked in the same 34px box. */
+body.il-static-page .feat-icon::before { content: none !important; }
+body.il-static-page .feat-icon { font-size: 18px !important; }
+/* Both social chips read "@ImpliedLens" with an emoji standing in for the
+   network, so the two links were indistinguishable. The network is named. */
+.soc-btn .soc-net {
+  font-weight: 600 !important;
+  color: var(--rp-gold) !important;
+  margin-right: 7px !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LIGHT THEME NEEDS ITS OWN ELEVATION MODEL.
+
+   In dark, panels separate from the ground because the panel is lighter than
+   the page. In light that trick inverts and stops working: #fffdf8 panels on
+   an #f6f3ec ground behind a .13 alpha hairline is a two-point step, so a
+   whole dashboard reads as one undifferentiated white sheet with the chart
+   dissolving into its own panel.
+
+   The fix is not a heavier border on everything - that turns the page into a
+   wireframe. Drop the PAGE further from the panel, keep the panel paper-white,
+   and give it the softest possible shadow so the edge is felt rather than
+   drawn. Inset regions (chart plots, code, table bodies) go the other way.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root {
+  --rp-bg: #f1ece1 !important;
+  --rp-inset: #f7f3e9 !important;
+  --rp-shadow: 0 1px 2px rgba(52, 44, 26, .05),
+               0 12px 28px -20px rgba(52, 44, 26, .22) !important;
+}
+:root:not([data-theme="dark"]) :is(.ihm-panel,.ilm-card,.il-startpath,.il-cap-card,.auth-card,
+  .modal-box,.ws-card,.rs-card,.vl-card,.pl-card,.panel,.score-card,.evidence-card,.il-ws-block) {
+  box-shadow: var(--rp-shadow) !important;
+  border-color: rgba(48, 44, 35, .16) !important;
+}
+/* A chart is a region, not a panel: it reads as recessed. */
+:root:not([data-theme="dark"]) :is(.chart-wrap, .chart-shell, .ihm-chart, .il-chart-box, .tv-chart-host) {
+  background: var(--rp-inset) !important;
+  border: 1px solid var(--rp-line) !important;
+  border-radius: 10px !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE SPARSE PAGES.
+
+   Compare put four inputs and a button directly on the page with no panel -
+   the only tool page that does - then ~400px of nothing, an orphaned
+   disclaimer floating mid-page, and more nothing. The gate pages end at 60%
+   of the viewport with the disclaimer marooned the same way. Two rules fix
+   most of it: the tool shell fills the viewport so the footer sits at the
+   bottom instead of halfway up, and the disclaimer attaches to the end of the
+   content rather than floating in the middle of it.
+   ═══════════════════════════════════════════════════════════════════════════ */
+#view-tool .app-content-scroll,
+#view-tool .il-tool-shell {
+  min-height: calc(100vh - 63px - env(safe-area-inset-top, 0px) - 220px) !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+:is(.tool-disclaimer, .il-disclaimer, .il-legal-note, .app-disclaimer, .il-tool-disclaimer) {
+  margin-top: auto !important;
+  padding-top: 18px !important;
+  border-top: 1px solid var(--rp-line) !important;
+  background: transparent !important;
+  border-left: 0 !important; border-right: 0 !important; border-bottom: 0 !important;
+  border-radius: 0 !important;
+  font-size: 12px !important;
+  color: var(--rp-muted) !important;
+}
+/* Compare's form belongs in a panel like every other tool, and a sidebar with
+   one item in it is not a sidebar. */
+#body-compare .cmp-inputs {
+  background: var(--rp-panel) !important;
+  border: 1px solid var(--rp-line) !important;
+  border-radius: 12px !important;
+  padding: 18px 20px !important;
+  box-shadow: var(--rp-shadow) !important;
+}
+/* A sidebar holding a single link is not a sidebar; it is a label that stole
+   240px. Below two items the rail collapses and the page takes the width. */
+#view-tool .app-sidebar:has(.sb-item:only-child),
+#view-tool .app-sidebar:has(> nav > a:only-child) { display: none !important; }
+
+/* Compare's inputs sit in a panel like every other tool's controls. */
+#body-compare .cmp-inputs {
+  align-items: end !important;
+  gap: 14px !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ONE RAIL ON THE LANDING PAGE.
+
+   Measured at 1600: the hero's content started at x=144, the start-paths,
+   capabilities, workflow and pricing bands at 188, the market strip at 85,
+   and the closing band at 243. Five different left edges stacked vertically,
+   so the page visibly steps in and out as you scroll. Four different
+   max-widths (1440 / 1320 / none / 1180) and four different gutters were
+   doing it.
+
+   One max-width, one gutter, everywhere. Full-bleed stays available - the
+   market strip still spans the viewport - but its contents land on the same
+   rail as everything above and below it.
+   ═══════════════════════════════════════════════════════════════════════════ */
+#landing-page > :is(.il-landing-hero, .il-startpaths, .il-capabilities,
+  .il-workflow-visual, .il-landing-band, .il-landing-pricing, .il-market-teaser, .il-rail) {
+  max-width: 1320px !important;
+  margin-inline: auto !important;
+  padding-inline: clamp(20px, 3.5vw, 48px) !important;
+  box-sizing: border-box !important;
+}
+/* The strip keeps its full-width ground; only its inner row is railed. */
+#landing-page > .il-market-strip {
+  max-width: none !important;
+  padding-inline: 0 !important;
+}
+#landing-page > .il-market-strip > * {
+  max-width: 1320px !important;
+  margin-inline: auto !important;
+  padding-inline: clamp(20px, 3.5vw, 48px) !important;
+  box-sizing: border-box !important;
+}
+/* and nothing inside it re-indents off that rail */
+#landing-page > .il-market-strip > * > * { padding-inline: 0 !important; margin-inline: 0 !important; }

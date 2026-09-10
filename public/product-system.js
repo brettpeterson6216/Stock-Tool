@@ -718,18 +718,20 @@
     box.querySelector(".il-onboarding-close").onclick = () => { write(KEYS.onboarding, true); box.remove(); };
   }
 
+  // The build stamp is worth having when something goes wrong and worthless
+  // to a visitor — and it used to render as literal footer text, so every
+  // user of the live site read "Build local" under the copyright line.
+  // It now lands on <html> as data attributes: still one devtools glance
+  // away for support, invisible to everyone else.
   async function installBuildBadge() {
     try {
       const response = await fetch("/api/version", { cache: "no-store" });
       if (!response.ok) return;
       const build = await response.json();
-      const footer = document.querySelector(".f-copy");
-      if (!footer) return;
-      const badge = document.createElement("span");
-      badge.className = "il-build";
-      badge.title = `Version ${build.version}; started ${build.startedAt}`;
-      badge.textContent = `Build ${build.shortCommit}`;
-      footer.append(" · ", badge);
+      const root = document.documentElement;
+      root.dataset.build = String(build.shortCommit || "");
+      root.dataset.buildVersion = String(build.version || "");
+      root.dataset.buildStarted = String(build.startedAt || "");
     } catch (_) {}
   }
 

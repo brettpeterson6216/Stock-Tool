@@ -69,18 +69,24 @@ test("the header geometry is pinned in one place", () => {
   const css = read("public/clean-pass.css");
   const block = css.slice(css.indexOf("ONE HEADER, PINNED"));
   assert.ok(block, "the pinning block is gone");
+  // The bar is 63px of chrome plus whatever the device reserves above it.
+  // It used to be a flat 63px, which put the wordmark under the iPhone clock
+  // and the account control under the battery icon; --nav-h carries the sum
+  // so the height and the offsets below cannot drift apart. See
+  // test/mobile-chrome.test.js for the inset half of this contract.
   for (const decl of [
     /position:\s*fixed\s*!important/,
     /top:\s*0\s*!important/,
-    /height:\s*63px\s*!important/,
-    /min-height:\s*63px\s*!important/,
-    /max-height:\s*63px\s*!important/,
+    /--nav-chrome:\s*63px/,
+    /height:\s*var\(--nav-h\)\s*!important/,
+    /min-height:\s*var\(--nav-h\)\s*!important/,
+    /max-height:\s*var\(--nav-h\)\s*!important/,
     /z-index:\s*2147482000\s*!important/,
   ]) {
     assert.match(block, decl, `the header pin is missing ${decl}`);
   }
   // A fixed bar with nothing accounting for it is how content ends up beneath it.
-  assert.match(block, /body:not\(#cp6\)\s*\{\s*padding-top:\s*63px\s*!important/,
+  assert.match(block, /body:not\(#cp6\)\s*\{\s*padding-top:\s*calc\(63px \+ env\(safe-area-inset-top/,
     "the body offset for the fixed bar is missing");
 });
 

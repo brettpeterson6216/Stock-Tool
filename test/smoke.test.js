@@ -249,7 +249,11 @@ test("Public pages expose canonical, favicon, and social metadata", async () => 
     assert.equal(res.status, 200);
     const html = await res.text();
     assert.match(html, new RegExp(`<link rel="canonical" href="https://impliedlens\\.com${pagePath}">`));
-    assert.match(html, /<link rel="icon" type="image\/svg\+xml" href="\/logo\.svg">/);
+    // Icon URLs carry the deploy stamp now (see lib/asset-stamp.js): a
+    // browser that cached the old mark would otherwise keep it for a week,
+    // and a bookmark or a pinned tab for far longer.
+    assert.match(html, /<link rel="icon" type="image\/svg\+xml" href="\/logo\.svg(\?v=[^"]+)?">/);
+    assert.match(html, /<link rel="icon" href="\/favicon\.ico(\?v=[^"]+)?" sizes="48x48">/);
     assert.match(html, /<meta property="og:title"/);
     assert.match(html, /<meta property="og:description"/);
     assert.match(html, /<meta property="og:image" content="https:\/\/impliedlens\.com\/social-card\.png">/);
@@ -273,18 +277,22 @@ test("GET /gold-ripple-background.jpg serves the shared gold backdrop", async ()
   assert.ok(Number(res.headers.get("content-length")) > 100000);
 });
 
-test("GET /favicon.ico serves the brand mark", async () => {
+test("GET /favicon.ico serves a real ICO, not an SVG wearing its name", async () => {
+  // Search engines and bookmark managers request this URL by convention and
+  // several of them will not accept an SVG from it.
   const res = await req("/favicon.ico");
   assert.equal(res.status, 200);
-  assert.match(res.headers.get("content-type"), /image\/svg\+xml/);
-  assert.match(await res.text(), /<svg/);
+  assert.match(res.headers.get("content-type"), /image\/(x-icon|vnd\.microsoft\.icon)/);
+  const buf = Buffer.from(await res.arrayBuffer());
+  assert.deepEqual([...buf.subarray(0, 4)], [0, 0, 1, 0], "not an ICO header");
+  assert.ok(buf[4] >= 3, "the ICO should carry 16, 32 and 48px images");
 });
 
 test("Apple Home Screen icon and web app manifest are available", async () => {
   const home = await req("/");
   const html = await home.text();
-  assert.match(html, /<link rel="apple-touch-icon" sizes="180x180" href="\/apple-touch-icon\.png">/);
-  assert.match(html, /<link rel="manifest" href="\/site\.webmanifest">/);
+  assert.match(html, /<link rel="apple-touch-icon" sizes="180x180" href="\/apple-touch-icon\.png(\?v=[^"]+)?">/);
+  assert.match(html, /<link rel="manifest" href="\/site\.webmanifest(\?v=[^"]+)?">/);
 
   for (const asset of ["/apple-touch-icon.png", "/app-icon-192.png", "/app-icon-512.png"]) {
     const res = await req(asset);
@@ -298,7 +306,11 @@ test("Apple Home Screen icon and web app manifest are available", async () => {
   assert.match(manifest.headers.get("content-type"), /manifest\+json|application\/json/);
   const data = await manifest.json();
   assert.equal(data.short_name, "ImpliedLens");
-  assert.equal(data.theme_color, "#f9f8f5");
+  // The manifest paints the splash screen and the OS chrome around an
+  // installed app, so it takes the brand ground rather than the old light
+  // one - a dark logo on a #f9f8f5 splash was the wrong way round.
+  assert.equal(data.theme_color, "#100f0e");
+  assert.equal(data.background_color, "#100f0e");
 });
 
 test("GET /healthz reports database and build health", async () => {

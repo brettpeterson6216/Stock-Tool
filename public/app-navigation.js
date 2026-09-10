@@ -10,12 +10,17 @@
     learn:       ['education'],
     saved:       ['reports','workspace'],
   };
+  // Which TOP tab lights up for each group. Every one of these except `saved`
+  // used to point at the LensScore tab, so the Learn page highlighted
+  // LensScore, and so did Valuation Lab, Projection Lab and Compare — none of
+  // which are LensScore. The tools live behind Research; the lessons live
+  // behind Learn; LensScore lights up only on LensScore.
   const NAV_GROUP_TAB   = {
     research: 'nav-analyze',
-    projections: 'nav-lensscore-link',
-    comparison: 'nav-lensscore-link',
-    planner: 'nav-lensscore-link',
-    learn: 'nav-lensscore-link',
+    projections: 'nav-analyze',
+    comparison: 'nav-analyze',
+    planner: 'nav-analyze',
+    learn: 'nav-news-link',
     saved: 'nav-saved-link',
   };
   const NAV_GROUP_LABEL = { research:'Research', projections:'Scenarios', comparison:'Compare', planner:'Planner', learn:'Learn', saved:'Saved' };
