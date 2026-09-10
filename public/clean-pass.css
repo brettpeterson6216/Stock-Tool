@@ -367,13 +367,23 @@ html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav 
    set here too, because a fixed bar that nothing accounts for is exactly how
    content ends up underneath it.
    ═══════════════════════════════════════════════════════════════════════════ */
+/* The bar is 63px of chrome PLUS whatever the device puts above it. index.html
+   opts into viewport-fit=cover, which tells iOS to paint the page underneath
+   the status bar - correct, but only if the bar compensates. legacy-app.css
+   already did this; the hard heights below used to clobber it, which put the
+   wordmark through the clock and the account control behind the battery icon
+   on every iPhone. --nav-h exists so the bar height is stated once and the
+   sidebar and shell offsets below cannot drift away from it again. */
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav {
+  --nav-chrome: 63px;
+  --nav-h: calc(var(--nav-chrome) + env(safe-area-inset-top, 0px));
   position: fixed !important;
   top: 0 !important; left: 0 !important; right: 0 !important;
   width: 100% !important;
-  height: 63px !important;
-  min-height: 63px !important;
-  max-height: 63px !important;
+  height: var(--nav-h) !important;
+  min-height: var(--nav-h) !important;
+  max-height: var(--nav-h) !important;
+  padding-top: env(safe-area-inset-top, 0px) !important;
   margin: 0 !important;
   transform: none !important;
   z-index: 2147482000 !important;
@@ -388,7 +398,9 @@ html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav 
      x=436 - four hundred pixels of disagreement, which is what "everything
      is condensed into the middle" actually looks like. The gutter matches
      the dashboard's own padding: clamp(16px, 3vw, 56px). */
-  padding: 0 calc(max(0px, (100% - 1800px) / 2) + clamp(16px, 3vw, 56px)) !important;
+  padding-inline: calc(max(0px, (100% - 1800px) / 2)
+    + max(clamp(16px, 3vw, 56px), env(safe-area-inset-left, 0px))) !important;
+  padding-bottom: 0 !important;
   box-sizing: border-box !important;
   background: var(--lpf-panel, #0a1216) !important;
   border-bottom: 1px solid var(--lpf-line, rgba(187,168,126,.17)) !important;
@@ -396,17 +408,17 @@ html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav 
   backdrop-filter: blur(18px) !important;
 }
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) {
-  padding-top: 63px !important;
+  padding-top: calc(63px + env(safe-area-inset-top, 0px)) !important;
 }
 /* The bar is fixed, so the page's own scroll container - not the window -
    has to carry the offset in the terminal. */
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body.il-tool-active:not(#cp6) #view-tool .app-sidebar,
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body.il-tool-active:not(#cp6) #view-tool .app-shell {
-  height: calc(100vh - 63px) !important;
-  min-height: calc(100vh - 63px) !important;
+  height: calc(100vh - 63px - env(safe-area-inset-top, 0px)) !important;
+  min-height: calc(100vh - 63px - env(safe-area-inset-top, 0px)) !important;
 }
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body.il-tool-active:not(#cp6) #view-tool .app-sidebar {
-  top: 63px !important;
+  top: calc(63px + env(safe-area-inset-top, 0px)) !important;
 }
 /* The terminal used to hide the bar outright. */
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body.il-tool-active:not(#cp6) #main-nav {
@@ -1534,13 +1546,33 @@ html.il-hint-in:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6)
 html.il-hint-in:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) > footer {
   margin-top: auto !important;
 }
-/* It was also simply too tall for what it holds. */
+/* It was also simply too tall for what it holds. The side padding has to be
+   stated: .footer-inner's only gutter used to come from centring inside its
+   own max-width, so below 1100px there was none at all and every link sat
+   flush against x=0 with its first glyph cut off on a phone. */
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) > footer {
-  padding: 20px 0 !important;
+  padding-block: 20px !important;
+  padding-inline: max(18px, env(safe-area-inset-left, 0px))
+                  max(18px, env(safe-area-inset-right, 0px)) !important;
 }
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) > footer .footer-inner {
   padding-top: 0 !important; padding-bottom: 0 !important;
+  padding-inline: 0 !important;
   gap: 10px !important;
+}
+/* Four link columns do not fit a phone. Two rows of two, left aligned with
+   the wordmark above them, and the feedback link stops being the odd one out. */
+@media (max-width: 640px) {
+  html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) > footer .footer-inner {
+    flex-direction: column !important; align-items: flex-start !important; gap: 14px !important;
+  }
+  html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) > footer .f-links {
+    display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px 18px !important; width: 100% !important;
+  }
+  html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) > footer .f-links a {
+    white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;
+  }
 }
 
 /* Three columns, and the search sits in the middle one. The right rail

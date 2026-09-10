@@ -137,9 +137,17 @@ app.use((req, res, next) => {
 });
 
 // Static public assets (logo, robots.txt, sitemap.xml, …)
+//
+// /favicon.ico used to answer with logo.svg under an image/svg+xml type. That
+// is the one icon URL search engines and bookmark managers request by
+// convention, and several of them will not take an SVG from it - which is how
+// a site ends up with a blank page icon in results and in a bookmarks bar
+// while the tab itself looks fine. It now serves a real multi-resolution ICO
+// (16/32/48) built from the brand source by scripts/build-brand.js.
 app.get("/favicon.ico", (_req, res) => {
-  res.type("image/svg+xml");
-  res.sendFile(path.join(__dirname, "public", "logo.svg"));
+  res.type("image/x-icon");
+  res.setHeader("Cache-Control", "public, max-age=86400");
+  res.sendFile(path.join(__dirname, "public", "favicon.ico"));
 });
 
 app.get("/sitemap.xml", (_req, res) => {

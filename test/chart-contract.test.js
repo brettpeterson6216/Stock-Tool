@@ -221,7 +221,10 @@ test("the dashboard and the header share one content column", () => {
 
   // The header stays full-bleed - its background spans the viewport - but its
   // contents stop where the page's contents stop.
-  assert.match(css, /padding: 0 calc\(max\(0px, \(100% - 1800px\) \/ 2\) \+ clamp\(16px, 3vw, 56px\)\)/,
+  // padding-inline rather than the `padding: 0 ...` shorthand: the bar's TOP
+  // padding now carries env(safe-area-inset-top), and a shorthand would keep
+  // resetting it to zero.
+  assert.match(css, /padding-inline: calc\(max\(0px, \(100% - 1800px\) \/ 2\)\s*\+ max\(clamp\(16px, 3vw, 56px\)/,
     "the header no longer shares the content column, so the logo and the page heading disagree");
 
   const gutters = [...css.matchAll(/clamp\(16px, 3vw, 56px\)/g)].length;

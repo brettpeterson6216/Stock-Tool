@@ -9,7 +9,7 @@
 <meta name="keywords" content="stock analysis, stock screener, intrinsic value, earnings history, SEC filings, analyst price targets, FINRA OTC data, institutional holdings, stock comparison, financial statements, implied lens">
 <meta name="author" content="Implied Lens">
 <meta name="robots" content="index, follow">
-<meta name="theme-color" content="#07080B">
+<meta name="theme-color" content="#100f0e">
 <!-- Open Graph -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://impliedlens.com/">
@@ -31,8 +31,10 @@
 <!-- Canonical -->
 <link rel="canonical" href="https://impliedlens.com/">
 <!-- Favicon -->
-<link rel="icon" type="image/svg+xml" href="/logo.svg?v=4">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
 <meta name="apple-mobile-web-app-title" content="ImpliedLens">
@@ -565,11 +567,11 @@
     </a>
     <nav class="prime-dash-nav" aria-label="Dashboard navigation">
       <a class="active" href="/?view=home&amp;market=1" onclick="showMarketPage();return false;"><i class="ti ti-layout-dashboard"></i><span>Dashboard</span></a>
-      <a href="/?view=tool&amp;section=screener" onclick="navGoTo('screener');return false;"><i class="ti ti-scan"></i><span>Scanners</span></a>
+      <a href="/?view=tool&amp;section=screener" onclick="navGoTo('screener');return false;"><i class="ti ti-focus-2"></i><span>Scanners</span></a>
       <a href="/?view=tool&amp;section=analyze" onclick="navGoTo('analyze');return false;"><i class="ti ti-chart-candle"></i><span>Analysis</span></a>
       <a href="/?view=tool&amp;section=workspace" onclick="navGoTo('workspace');return false;"><i class="ti ti-bookmark"></i><span>Watchlists</span></a>
       <a href="/?view=tool&amp;section=calls" onclick="navGoTo('calls');return false;"><i class="ti ti-news"></i><span>News &amp; Calls</span></a>
-      <a href="/?view=tool&amp;section=education" onclick="navGoTo('education');return false;"><i class="ti ti-calendar-event"></i><span>Calendar &amp; Learn</span></a>
+      <a href="/?view=tool&amp;section=education" onclick="navGoTo('education');return false;"><i class="ti ti-calendar-check"></i><span>Calendar &amp; Learn</span></a>
     </nav>
     <div class="hsb-section">
       <div class="hsb-label">Market</div>
@@ -591,7 +593,7 @@
   <div class="hs-main">
 
     <header class="prime-dashboard-head">
-      <div class="prime-mobile-brand"><img src="/logo.svg?v=4" alt=""><span>IMPLIED LENS</span><button type="button" aria-label="Open research navigation" onclick="navGoTo('analyze')"><i class="ti ti-menu-2"></i></button></div>
+      <div class="prime-mobile-brand"><img src="/logo.svg?v=4" alt=""><span>IMPLIED LENS</span><button type="button" aria-label="Open research navigation" onclick="navGoTo('analyze')"><i class="ti ti-layout"></i></button></div>
       <div class="prime-dashboard-greeting">
         <h1 id="prime-user-greeting">Good evening.</h1>
         <p>Here&rsquo;s what the market is telling us today.</p>
@@ -606,7 +608,7 @@
         <em id="prime-sp-change">Live</em>
       </div>
       <button class="prime-add-widget" type="button" onclick="navGoTo('workspace')"><i class="ti ti-plus"></i> Add widget</button>
-      <button class="prime-more-button" type="button" aria-label="More dashboard options"><i class="ti ti-dots-vertical"></i></button>
+      <button class="prime-more-button" type="button" aria-label="More dashboard options"><i class="ti ti-dots"></i></button>
       <div class="prime-mobile-summary" aria-label="Mobile market summary">
         <div class="prime-mobile-market"><span>S&amp;P 500</span><strong id="prime-mobile-sp-value">Loading&hellip;</strong><em id="prime-mobile-sp-change">Live market</em></div>
         <div class="prime-mobile-kpi"><span>Market breadth</span><strong id="prime-mobile-breadth">Live</strong><em>Current session</em></div>
@@ -1001,8 +1003,8 @@
         <div class="ash-actions">
           <button class="ash-btn" title="Add to watchlist" aria-label="Add to watchlist" onclick="if(S.ticker&amp;&amp;window.openWorkspaceWatchlist)openWorkspaceWatchlist()"><i class="ti ti-star"></i>Watch</button>
           <button class="ash-btn" title="Save analysis" aria-label="Save analysis" onclick="if(S.ticker)saveAnalysis('price')"><i class="ti ti-bookmark"></i>Save</button>
-          <button class="ash-btn ash-studio" title="Create a branded chart image" aria-label="Open Share Studio" onclick="openShareStudio()"><i class="ti ti-camera"></i>Studio</button>
-          <button class="ash-btn" title="Export full research report" aria-label="Export analysis" onclick="window.print()"><i class="ti ti-file-export"></i>Report</button>
+          <button class="ash-btn ash-studio" title="Create a branded chart image" aria-label="Open Share Studio" onclick="openShareStudio()"><i class="ti ti-photo-down"></i>Studio</button>
+          <button class="ash-btn" title="Export full research report" aria-label="Export analysis" onclick="window.print()"><i class="ti ti-table-export"></i>Report</button>
         </div>
       </div>
       <!-- Chart toolbar (analyze section only) -->
@@ -1672,7 +1674,7 @@
         <button class="cex-btn cex-icon-btn" onclick="zoomExpandedChart(.8)" title="Zoom out or load older history" aria-label="Zoom expanded chart out or load older history"><i class="ti ti-zoom-out"></i></button>
         <button class="cex-btn cex-icon-btn" onclick="zoomExpandedChart(1.25)" title="Zoom in" aria-label="Zoom expanded chart in"><i class="ti ti-zoom-in"></i></button>
         <button class="cex-btn" onclick="resetExpandZoom()" title="Reset zoom"><i class="ti ti-focus-2"></i> <span>Reset zoom</span></button>
-        <button class="cex-btn cex-share" onclick="openShareStudio()" title="Build a branded 16:9 chart image"><i class="ti ti-camera"></i> <span>Share studio</span></button>
+        <button class="cex-btn cex-share" onclick="openShareStudio()" title="Build a branded 16:9 chart image"><i class="ti ti-photo-down"></i> <span>Share studio</span></button>
         <button class="cex-btn gold" onclick="closeExpandModal()" title="Close expanded chart"><i class="ti ti-x"></i> <span>Close</span></button>
       </div>
     </div>
@@ -1746,7 +1748,7 @@
 <!-- FOOTER (home view) -->
   <footer>
     <div class="footer-inner">
-      <div class="f-logo">Implied<em style="font-style:italic;color:var(--gold-d);">Lens</em></div>
+      <div class="f-logo"><span class="il-wordmark">Implied <em>Lens</em></span></div>
       <div class="f-links">
         <a href="/privacy">Privacy Policy</a>
         <a href="/terms">Terms of Service</a>
