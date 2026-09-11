@@ -402,7 +402,24 @@ tbody tr:hover { background: var(--rp-gold-soft) !important; }
    The rails were 200 and 280 against a 1064px middle. Widening the news rail
    to 330 is worth more than it costs: at 280px a headline wraps to three
    lines, at 330 it wraps to two, and the middle column has width to spare. */
-.ihm-grid { grid-template-columns: 220px minmax(0,1fr) 330px !important; gap: 16px !important; }
+/* This template is DESKTOP ONLY, and the media query matters more than the
+   numbers. Unscoped, it sat after the @media (max-width:1250px) and
+   (max-width:900px) blocks above and beat both of them - an unconditional
+   rule outranks an earlier media query at every width. The breakpoints then
+   reassigned grid-column without being able to change the template, so below
+   1250px the main column and the tools column were both pushed into column
+   one, which is 220px wide, while a phantom 330px column sat beside them.
+
+   Measured at a 1100px viewport before this: .ihm-panel 102px,
+   .ihm-panel-head 64px, .ihm-tool's grid "20px 35px", and a .ihm-tfs strip
+   220px wide overflowing a 64px head - which is why the timeframe buttons
+   printed on top of the word "Market" on phones AND on any desktop window
+   under 1280. Same class of regression as the one surface-cascade.test.js
+   was written for; it now guards this file too. */
+@media (min-width: 1251px) {
+  .ihm-grid { grid-template-columns: 220px minmax(0,1fr) 330px !important; }
+}
+.ihm-grid { gap: 16px !important; }
 .ihm-col-tools,.ihm-col-main,.ihm-col-side { gap: 16px !important; }
 .ihm-panel { padding: 16px 18px !important; }
 .ihm-panel-head { margin-bottom: 12px !important; }
@@ -411,13 +428,38 @@ tbody tr:hover { background: var(--rp-gold-soft) !important; }
    Title and note stacked in column one, price in column two, and the
    timeframes spanning a third row of their own: 108px to introduce a chart.
    Three columns instead - identity, timeframes, price - is 58. */
-.ihm-market-panel .ihm-panel-head {
-  grid-template-columns: auto 1fr auto !important;
-  align-items: center !important; gap: 14px !important;
+@media (min-width: 1101px) {
+  .ihm-market-panel .ihm-panel-head {
+    grid-template-columns: auto 1fr auto !important;
+    align-items: center !important; gap: 14px !important;
+  }
+  .ihm-tfs { grid-column: 2 !important; grid-row: 1 !important; justify-content: center !important; }
+  .ihm-quote { grid-column: 3 !important; grid-row: 1 !important; }
 }
-.ihm-panel-id { flex-direction: row !important; align-items: baseline !important; gap: 10px !important; }
-.ihm-tfs { grid-column: 2 !important; grid-row: 1 !important; justify-content: center !important; }
-.ihm-quote { grid-column: 3 !important; grid-row: 1 !important; }
+/* Below that, identity and price share row one and the timeframes take a row
+   of their own. Three things do not fit on one line in a narrow panel, and
+   forcing them to is what produced the collision. */
+@media (max-width: 1100px) {
+  .ihm-market-panel .ihm-panel-head {
+    display: grid !important;
+    grid-template-columns: minmax(0,1fr) auto !important;
+    align-items: baseline !important;
+    gap: 6px 12px !important;
+  }
+  .ihm-market-panel .ihm-panel-id { grid-column: 1 !important; grid-row: 1 !important; min-width: 0 !important; }
+  .ihm-market-panel .ihm-quote    { grid-column: 2 !important; grid-row: 1 !important; }
+  .ihm-market-panel .ihm-tfs {
+    grid-column: 1 / -1 !important; grid-row: 2 !important;
+    justify-content: flex-start !important;
+    overflow-x: auto !important; scrollbar-width: none !important;
+  }
+  .ihm-market-panel .ihm-tfs::-webkit-scrollbar { display: none !important; }
+  /* the note is the first thing to give up room, not the title */
+  .ihm-market-panel .ihm-panel-note {
+    overflow: hidden !important; text-overflow: ellipsis !important; min-width: 0 !important;
+  }
+}
+.ihm-panel-id { flex-direction: row !important; align-items: baseline !important; gap: 10px !important; min-width: 0 !important; }
 .ihm-quote-label { display: none !important; }
 .ihm-tf { min-height: 30px !important; padding: 4px 9px !important; }
 
@@ -1364,3 +1406,55 @@ body.il-static-page .feat-icon { font-size: 18px !important; }
 }
 /* The wordmark sits beside a taller mark now. */
 #main-nav .nav-logo { gap: 10px !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE LAST OF THE NARROW-WIDTH COLLISIONS.
+
+   Measured with the width sweep rather than guessed at.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* The index tile's inner grid resolved to "70.3px 6.4px" at 1280 and
+   "auto 22px" at 1024: the name took what it liked and the change percent got
+   whatever was left, which was six pixels for a forty-pixel string. The
+   percent is the fixed half of this pair - it is never longer than "-12.34%" -
+   so it sizes to content and the name takes the remainder. */
+.ihm-index {
+  grid-template-columns: minmax(0, 1fr) clamp(44px, 20%, 88px) !important;
+  column-gap: 10px !important;
+}
+.ihm-index-txt {
+  grid-template-columns: minmax(0, max-content) auto !important;
+  column-gap: 8px !important;
+  align-items: baseline !important;
+}
+.ihm-index-txt > * { min-width: 0 !important; white-space: nowrap !important; }
+
+@media (max-width: 600px) {
+  /* Two columns of tool tiles inside a 360px phone leaves ~170px each, and
+     the tiles overflowed their own panel onto the Favorites card below it.
+     One column, and the panels stop colliding. */
+  .ihm-col-tools { grid-template-columns: minmax(0, 1fr) !important; }
+  .ihm-col-side  { grid-template-columns: minmax(0, 1fr) !important; }
+  .ihm-tool { grid-template-columns: 20px minmax(0, 1fr) !important; }
+}
+
+@media (max-width: 420px) {
+  /* "Percent change · 30 days" cannot fit beside the price at this width, and
+     the timeframe buttons directly below already say which window is showing. */
+  .ihm-market-panel .ihm-panel-note { display: none !important; }
+}
+
+/* ── The research rail's section labels ────────────────────────────────────
+   Twelve tools in one undifferentiated list is its own kind of maze. These
+   sit between the group name and the items: quieter than the group label,
+   louder than an item. */
+.app-sidebar .sb-sub {
+  margin: 16px 0 6px !important;
+  padding: 0 10px !important;
+  font-family: var(--rp-sans) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: .07em !important;
+  color: var(--rp-muted) !important;
+}
+.app-sidebar .sb-sub:first-of-type { margin-top: 8px !important; }

@@ -2,13 +2,32 @@
   window.__initialWorkspaceTab = new URLSearchParams(window.location.search).get('workspace_tab');
   // Each top-level tab owns its own left panel. The panel only switches sections
   // WITHIN the active tab — it can never change which top tab you're on.
+  // Every research tool lives behind the Research tab. Projection Lab,
+  // Valuation Lab, Compare and the Wealth Planner used to sit in groups of
+  // their own - `projections`, `comparison`, `planner` - which no top tab
+  // opened, so renderSidebarGroup() hid them whenever you were anywhere in
+  // Research. The sidebar items were in the markup the whole time; you simply
+  // could not see them unless you went back to the dashboard first. Measured
+  // before this change: from Financials, Projection Lab / Valuation Lab /
+  // Compare were 2 clicks (via the dashboard) and the Wealth Planner was
+  // unreachable from any research page at all.
   const NAV_GROUPS = {
-    research:    ['analyze','financials','advmetrics','earnings','calls','secfilings','institutional','screener'],
-    projections: ['projection','dcf'],
-    comparison:  ['compare'],
-    planner:     ['wealth'],
-    learn:       ['education'],
-    saved:       ['reports','workspace'],
+    research: ['analyze','financials','advmetrics','earnings','calls','secfilings','institutional',
+               'screener','compare','projection','dcf','wealth'],
+    learn:    ['education'],
+    saved:    ['reports','workspace'],
+  };
+  // Twelve tools in one flat list is a different kind of maze, so the rail is
+  // ordered and labelled: what a company IS, how to find one, what it is
+  // worth. The order here is the order they render in.
+  const SIDEBAR_SUBGROUPS = {
+    research: [
+      ['Company',   ['analyze','financials','advmetrics','earnings','calls','secfilings','institutional']],
+      ['Screening', ['screener','compare']],
+      ['Modeling',  ['projection','dcf','wealth']],
+    ],
+    learn: [[null, ['education']]],
+    saved: [[null, ['reports','workspace']]],
   };
   // Which TOP tab lights up for each group. Every one of these except `saved`
   // used to point at the LensScore tab, so the Learn page highlighted
@@ -17,13 +36,10 @@
   // behind Learn; LensScore lights up only on LensScore.
   const NAV_GROUP_TAB   = {
     research: 'nav-analyze',
-    projections: 'nav-analyze',
-    comparison: 'nav-analyze',
-    planner: 'nav-analyze',
     learn: 'nav-news-link',
     saved: 'nav-saved-link',
   };
-  const NAV_GROUP_LABEL = { research:'Research', projections:'Scenarios', comparison:'Compare', planner:'Planner', learn:'Learn', saved:'Saved' };
+  const NAV_GROUP_LABEL = { research:'Research', learn:'Learn', saved:'Watchlists' };
   function navGroupOf(sec) {
     for (const g in NAV_GROUPS) if (NAV_GROUPS[g].includes(sec)) return g;
     return 'research';
@@ -36,6 +52,31 @@
     const lbl = document.querySelector('.app-sidebar .sb-group-label');
     if (lbl) lbl.textContent = NAV_GROUP_LABEL[group] || 'Research';
     document.getElementById('view-tool')?.setAttribute('data-nav-group', group);
+
+    // Order the rail and label its sections. Items are re-appended rather than
+    // rebuilt so the ones research-system.js injects at runtime (Call Research,
+    // Wealth Planner) take their place alongside the static ones.
+    const pad = document.querySelector('.app-sidebar .sb-group-pad');
+    const subs = SIDEBAR_SUBGROUPS[group];
+    if (!pad || !subs) return;
+    const named = subs.filter(([label]) => label).length > 1;
+    pad.querySelectorAll('.sb-sub').forEach(h => { h.style.display = 'none'; });
+    subs.forEach(([label, secs]) => {
+      if (named && label) {
+        let h = pad.querySelector('.sb-sub[data-sub="' + label + '"]');
+        if (!h) {
+          h = document.createElement('div');
+          h.className = 'sb-sub';
+          h.dataset.sub = label;
+          h.textContent = label;
+        }
+        pad.appendChild(h);
+        h.style.display = '';
+      }
+      secs.forEach(sec => {
+        pad.querySelectorAll('.sb-item[data-sec="' + sec + '"]').forEach(it => pad.appendChild(it));
+      });
+    });
   }
   window.renderSidebarGroup = renderSidebarGroup;
   function marketScrollTo(key) {
