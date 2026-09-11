@@ -33,3 +33,8 @@ _to_delete/
 # Cowork scratch folder: bundles, commit messages and audit screenshots
 # written while working. Outputs, not source.
 Claude outputs/
+
+# Carried over from the old working folder when this repo replaced it:
+# the local dev database, the old data/ directory, and the verification rig.
+# Reference material, never part of a build.
+_archive/
