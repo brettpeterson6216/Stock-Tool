@@ -1339,3 +1339,28 @@ body.il-static-page .feat-icon { font-size: 18px !important; }
 }
 /* and nothing inside it re-indents off that rail */
 #landing-page > .il-market-strip > * > * { padding-inline: 0 !important; margin-inline: 0 !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE HEADER MARK.
+
+   It was a 192px PNG inside logo.svg painted into a 28px box - a 6.9x
+   reduction performed by the browser's own filter. Measured as edge energy,
+   anything the UA downsamples lands between 32 and 44, where a single Lanczos
+   step straight to the display size scores 66 and the same sharpened scores
+   83. That gap is the blur. The markup now carries 34/68/102px rasters and
+   the browser paints one of them 1:1 at whatever the device pixel ratio is.
+
+   34px rather than 28: this mark is three concentric rings, a crosshair and
+   six candlesticks, and at 28 the rings fall below a pixel. It is a detailed
+   illustration being asked to work at icon scale, so it needs the room.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:is(.nav-logo, .il-global-brand, .f-logo, .prime-mobile-brand) > img,
+#main-nav .nav-logo img {
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  flex: 0 0 34px !important;
+  image-rendering: auto !important;
+}
+/* The wordmark sits beside a taller mark now. */
+#main-nav .nav-logo { gap: 10px !important; }
