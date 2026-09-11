@@ -138,34 +138,11 @@ svg = (
 )
 written.append(emit("logo.svg", svg.encode()))
 
-# Open Graph / Twitter card. Every shared link used to render with a stale
-# product screenshot; this is the mark, the wordmark and one line, on the
-# brand ground, in the brand face.
-def brand_font(name, size):
-    p = os.path.join(ROOT, "brand", "fonts", name)
-    if os.path.exists(p):
-        return ImageFont.truetype(p, size)
-    return ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", size)
-
-card = Image.new("RGB", (1200, 630), GROUND)
-d = ImageDraw.Draw(card)
-for i in range(250, 0, -3):                    # the warm field the heroes use
-    t = i / 250.0
-    d.ellipse([215 - i, 315 - i, 215 + i, 315 + i],
-              fill=(int(GROUND[0] + 24 * (1 - t) ** 2),
-                    int(GROUND[1] + 18 * (1 - t) ** 2),
-                    int(GROUND[2] + 7 * (1 - t) ** 2)))
-art = mark(320)
-card.paste(art, (55, 155), art)
-bold = brand_font("PlusJakartaSans-Bold.ttf", 76)
-reg = brand_font("PlusJakartaSans-Regular.ttf", 30)
-small = brand_font("PlusJakartaSans-Bold.ttf", 22)
-d.text((430, 214), "Implied", font=bold, fill=(242, 239, 230))
-d.text((430 + d.textlength("Implied", font=bold), 214), " Lens", font=bold, fill=(232, 167, 51))
-d.text((434, 320), "Research the business. Test the thesis.", font=reg, fill=(198, 193, 181))
-d.text((434, 360), "Revisit the decision.", font=reg, fill=(198, 193, 181))
-d.text((434, 430), "I M P L I E D L E N S . C O M", font=small, fill=(157, 152, 140))
-written.append(emit("social-card.png", png_bytes(card)))
+# The Open Graph / Twitter card is NOT built here. It carries a chart, and
+# that chart is rendered by the site's own lightweight-charts bundle on real
+# AAPL bars rather than drawn with a drawing library - a stock research tool
+# whose social card shows a hand-drawn squiggle is advertising the wrong
+# thing. See scripts/build-social-card.js.
 
 for name, n in written:
     print(f"  {name:28} {n/1024:7.1f} KB")

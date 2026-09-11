@@ -189,9 +189,9 @@ test("Ticker landing pages explain free allowances and protect uncurated pages f
   assert.match(curatedHtml, /Create a free account for 5\/day/);
   assert.match(curatedHtml, /landing_page_view/);
   assert.match(curatedHtml, /Questions to answer before investing in AAPL/);
-  assert.match(curatedHtml, /<meta property="og:image"\s+content="[^"]+\/social-card\.png">/);
+  assert.match(curatedHtml, /<meta property="og:image"\s+content="[^"]+\/social-card\.png\?v=[^"]+">/);
   assert.match(curatedHtml, /<meta name="twitter:card"\s+content="summary_large_image">/);
-  assert.match(curatedHtml, /<meta name="twitter:image"\s+content="[^"]+\/social-card\.png">/);
+  assert.match(curatedHtml, /<meta name="twitter:image"\s+content="[^"]+\/social-card\.png\?v=[^"]+">/);
 
   const uncurated = await req("/stock/NOTREAL");
   assert.equal(uncurated.status, 200);
@@ -256,10 +256,10 @@ test("Public pages expose canonical, favicon, and social metadata", async () => 
     assert.match(html, /<link rel="icon" href="\/favicon\.ico(\?v=[^"]+)?" sizes="48x48">/);
     assert.match(html, /<meta property="og:title"/);
     assert.match(html, /<meta property="og:description"/);
-    assert.match(html, /<meta property="og:image" content="https:\/\/impliedlens\.com\/social-card\.png">/);
+    assert.match(html, /<meta property="og:image" content="https:\/\/impliedlens\.com\/social-card\.png\?v=[^"]+">/);
     assert.match(html, /<meta property="og:image:width" content="1200">/);
     assert.match(html, /<meta name="twitter:card" content="summary_large_image">/);
-    assert.match(html, /<meta name="twitter:image" content="https:\/\/impliedlens\.com\/social-card\.png">/);
+    assert.match(html, /<meta name="twitter:image" content="https:\/\/impliedlens\.com\/social-card\.png\?v=[^"]+">/);
   }
 });
 
