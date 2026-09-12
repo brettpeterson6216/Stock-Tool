@@ -24,7 +24,15 @@
     research: [
       ['Company',   ['analyze','financials','advmetrics','earnings','calls','secfilings','institutional']],
       ['Screening', ['screener','compare']],
-      ['Modeling',  ['projection','dcf','wealth']],
+      /* `dcf` is deliberately absent from the rail order: it is the second
+         pane of the Valuation Lab, not a tool of its own. Two adjacent
+         entries called Projection Lab and Valuation Lab asked the reader to
+         pick a method before they had a question - and the honest answer is
+         that you want both numbers for the same company. One entry, a switch
+         inside. It stays in NAV_GROUPS above, because it is still a research
+         section and must still light the Research tab; RAIL_PANES is what
+         keeps it out of the list. */
+      ['Modeling',  ['projection','wealth']],
     ],
     learn: [[null, ['education']]],
     saved: [[null, ['reports','workspace']]],
@@ -44,10 +52,18 @@
     for (const g in NAV_GROUPS) if (NAV_GROUPS[g].includes(sec)) return g;
     return 'research';
   }
+  /* Sections that belong to a group and light its tab, but own no rail entry
+     because they are a second pane of a tool that already has one. Hiding
+     these by dropping them from NAV_GROUPS would have worked, and would also
+     have broken the rule that every section belongs to a group - which is
+     what decides the top tab. So they stay in the group and get filtered
+     here, at the one place that draws the rail. */
+  const RAIL_PANES = { dcf: 'projection' };
   function renderSidebarGroup(group) {
     const items = NAV_GROUPS[group] || [];
     document.querySelectorAll('.app-sidebar .sb-item').forEach(it => {
-      it.style.display = items.includes(it.dataset.sec) ? '' : 'none';
+      const sec = it.dataset.sec;
+      it.style.display = (items.includes(sec) && !RAIL_PANES[sec]) ? '' : 'none';
     });
     const lbl = document.querySelector('.app-sidebar .sb-group-label');
     if (lbl) lbl.textContent = NAV_GROUP_LABEL[group] || 'Research';

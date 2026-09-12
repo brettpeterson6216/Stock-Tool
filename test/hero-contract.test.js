@@ -139,7 +139,10 @@ test("the dashboard offers places to go, not a lecture on how to use it", () => 
   // them to. Four named tools are what replaced them.
   assert.doesNotMatch(html, /id="ihm-start"/, "the numbered how-to steps are back");
   assert.doesNotMatch(html, /ihm-step-n/, "the numbered how-to steps are back");
-  for (const tool of ["Projection Lab", "Valuation Lab", "Compare", "Screener"]) {
+  // Projection Lab and Valuation Lab were two of these four. They are one
+  // tool now — see test/valuation-lab-merge.test.js — and the freed slot went
+  // to LensToolkit, which had no route off this panel at all.
+  for (const tool of ["Valuation Lab", "LensToolkit", "Compare", "Screener"]) {
     assert.ok(html.includes(">" + tool + "<"), `the ${tool} link is missing from the tool rail`);
   }
   assert.match(html, /class="il-startpaths"/, "the visitor page needs its three ways in");

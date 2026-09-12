@@ -227,11 +227,11 @@
         <div class="ihm-panel-head"><span class="ihm-panel-title">Jump into a tool</span></div>
         <div class="ihm-tools">
           <a class="ihm-tool" href="/?view=tool&amp;section=projection">
-            <i class="ti ti-timeline" aria-hidden="true"></i>
-            <b>Projection Lab</b><span>Year-by-year revenue-to-price model.</span></a>
-          <a class="ihm-tool" href="/?view=tool&amp;section=dcf">
             <i class="ti ti-calculator" aria-hidden="true"></i>
-            <b>Valuation Lab</b><span>DCF, exit P/E and EV/EBITDA with scenarios.</span></a>
+            <b>Valuation Lab</b><span>Year-by-year projection and a DCF, in one place.</span></a>
+          <a class="ihm-tool" href="/lens-score">
+            <i class="ti ti-target" aria-hidden="true"></i>
+            <b>LensToolkit</b><span>One score for quality, value, growth and risk.</span></a>
           <a class="ihm-tool" href="/?view=tool&amp;section=compare">
             <i class="ti ti-adjustments-horizontal" aria-hidden="true"></i>
             <b>Compare</b><span>Four stocks side by side, normalised.</span></a>
@@ -982,8 +982,8 @@
         <div class="sb-item" data-sec="institutional"><i class="ti ti-building-bank sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Institutional</span></div>
         <div class="sb-item" data-sec="compare"><i class="ti ti-adjustments-horizontal sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Compare</span></div>
         <div class="sb-item" data-sec="screener"><i class="ti ti-filter sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Screener</span></div>
-        <div class="sb-item" data-sec="projection"><i class="ti ti-timeline sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Projection Lab</span></div>
-        <div class="sb-item" data-sec="dcf"><i class="ti ti-calculator sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Valuation Lab</span></div>
+        <div class="sb-item" data-sec="projection"><i class="ti ti-calculator sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Valuation Lab</span></div>
+        <div class="sb-item" data-sec="dcf" hidden><i class="ti ti-calculator sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Valuation Lab</span></div>
         <div class="sb-item" data-sec="education"><i class="ti ti-school sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Lessons &amp; Guides</span></div>
         <div class="sb-item" data-sec="education" data-scroll=".edu-glossary"><i class="ti ti-book-2 sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Glossary</span></div>
         <div class="sb-item" data-sec="reports"><i class="ti ti-bookmark sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Saved Analyses</span></div>
@@ -1212,7 +1212,7 @@
               <!-- Custom Projection -->
               <div class="panel-box" style="margin-bottom:14px;">
                 <div class="panel-box-title">Custom Bear, Base &amp; Bull Projection</div>
-                <div style="font-size:11px;line-height:1.5;color:var(--text5);margin:-.35rem 0 .85rem;">Set each case independently. Open Projection Lab for a full year-by-year revenue-to-price model with editable growth, margins, and P/E.</div>
+                <div style="font-size:11px;line-height:1.5;color:var(--text5);margin:-.35rem 0 .85rem;">Set each case independently. Open the Valuation Lab for a full year-by-year revenue-to-price model with editable growth, margins, and P/E — and a DCF on the same company.</div>
                 <div class="proj-controls projection-shared">
                   <div><label class="fc-label" for="proj-years">Time Horizon</label>
                     <select class="fc-select" id="proj-years"><option value="1">1 Year</option><option value="2">2 Years</option><option value="3" selected>3 Years</option><option value="5">5 Years</option><option value="10">10 Years</option></select>
@@ -1239,7 +1239,7 @@
                 <div id="proj-error" class="projection-error" role="alert"></div>
                 <div class="projection-actions">
                   <button class="btn-run" onclick="runProjection()"><i class="ti ti-calculator"></i> Calculate Custom Cases</button>
-                  <button class="btn-save-analysis" onclick="openSection('projection')"><i class="ti ti-adjustments-horizontal"></i> Open Projection Lab</button>
+                  <button class="btn-save-analysis" onclick="openSection('projection')"><i class="ti ti-adjustments-horizontal"></i> Open Valuation Lab</button>
                 </div>
                 <div id="proj-results" style="display:none;">
                   <div class="scenario-row" id="scenario-cards"></div>
@@ -1389,9 +1389,15 @@
             </div><!-- /body-compare -->
           </div><!-- /sec-compare -->
 
-          <div class="app-section" id="sec-projection"><div class="acc-body" id="body-projection" style="display:none;">
+          <div class="app-section" id="sec-projection">
+            <div class="lab-modes" role="tablist" aria-label="Valuation method">
+              <button type="button" class="lab-mode is-on" role="tab" aria-selected="true" data-mode="projection" onclick="labMode('projection')"><i class="ti ti-timeline" aria-hidden="true"></i>Projection</button>
+              <button type="button" class="lab-mode" role="tab" aria-selected="false" data-mode="dcf" onclick="labMode('dcf')"><i class="ti ti-calculator" aria-hidden="true"></i>Intrinsic value</button>
+            </div>
+            <div class="acc-body" id="body-projection" style="display:none;">
             <div class="tool-intro">
-              <div><strong>Projection Lab</strong> turns your growth, margin, and P/E assumptions into a year-by-year share-price range for independent Bear, Base, and Bull cases. Open “How this model works” inside the lab for the full method.</div>
+              <div><strong>Projection</strong> turns your growth, margin, and P/E assumptions into a year-by-year share-price range for independent Bear, Base, and Bull cases. Open “How this model works” inside the lab for the full method.</div>
+              <div class="tool-intro-note">Same company, a second opinion: <strong>Intrinsic value</strong> discounts the cash flows instead of applying a multiple. Two answers that disagree is information, not a bug.</div>
             </div>
             <div id="il-projlab-empty" class="lab-empty">
               <div class="lab-empty-title">Model any company</div>
@@ -1406,8 +1412,13 @@
             </div><!-- /body-projection -->
           </div><!-- /sec-projection -->
 
-          <div class="app-section" id="sec-dcf"><div class="acc-body" id="body-dcf" style="display:none;">
-<div class="tool-intro"><div><strong>Valuation Lab</strong> projects the operating business first — revenue, margins, cash flow, and dilution — then values it with a free-cash-flow DCF, exit P/E, and EV/EBITDA across Bear, Base, and Bull cases.</div><div class="tool-intro-note">Auto-seeds from the company's financials. Switch between Simple and Advanced, weight the methods, run the sensitivity grid, and see what today's price implies under “What's priced in?”.</div></div>
+          <div class="app-section" id="sec-dcf">
+            <div class="lab-modes" role="tablist" aria-label="Valuation method">
+              <button type="button" class="lab-mode" role="tab" aria-selected="false" data-mode="projection" onclick="labMode('projection')"><i class="ti ti-timeline" aria-hidden="true"></i>Projection</button>
+              <button type="button" class="lab-mode is-on" role="tab" aria-selected="true" data-mode="dcf" onclick="labMode('dcf')"><i class="ti ti-calculator" aria-hidden="true"></i>Intrinsic value</button>
+            </div>
+            <div class="acc-body" id="body-dcf" style="display:none;">
+<div class="tool-intro"><div><strong>Intrinsic value</strong> projects the operating business first — revenue, margins, cash flow, and dilution — then values it with a free-cash-flow DCF, exit P/E, and EV/EBITDA across Bear, Base, and Bull cases.</div><div class="tool-intro-note">Auto-seeds from the company's financials. Switch between Simple and Advanced, weight the methods, run the sensitivity grid, and see what today's price implies under “What's priced in?”.</div></div>
             <div id="vlab-empty" class="lab-empty">
               <div class="lab-empty-title">Value any company</div>
               <div class="lab-empty-sub">Enter a ticker to auto-seed a DCF, exit P/E, and EV/EBITDA valuation — no need to open Research first.</div>

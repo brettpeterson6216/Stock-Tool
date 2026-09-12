@@ -442,6 +442,19 @@ function safeExternalUrl(value) {
 }
 
 // ── Accordion open/close ──
+/* The two panes of the Valuation Lab, and the rail item each one lights.
+   Kept as a map rather than a constant so a third method later is one line. */
+const LAB_PANES = { dcf: 'projection' };
+
+/* The segmented control at the top of both panes. It is openSection with a
+   name, so Pro gating, mounting, seeding and the URL all behave exactly as
+   they do when you arrive from the rail. */
+function labMode(which) {
+  if (which !== 'projection' && which !== 'dcf') return;
+  openSection(which);
+}
+window.labMode = labMode;
+
 function openSection(id, skipProCheck) {
   // For Pro sections: open the panel and show the gate card inline
   // (still shows modal only if user explicitly triggers upgrade button)
@@ -456,13 +469,15 @@ function openSection(id, skipProCheck) {
   });
   // Update sidebar active state (workspace sub-items are activated by the click handler)
   const wsItems = document.querySelectorAll('.sb-item[data-sec="' + id + '"][data-wstab]');
+  const railId = LAB_PANES[id] || id;
   document.querySelectorAll('.sb-item').forEach(el => {
-    el.classList.toggle('active', el.dataset.sec === id && !el.dataset.wstab && !el.dataset.scroll);
+    el.classList.toggle('active', el.dataset.sec === railId && !el.dataset.wstab && !el.dataset.scroll);
   });
   if (wsItems.length && !document.querySelector('.sb-item.active')) wsItems[0].classList.add('active');
   // Sync the mobile section strip active state.
   document.querySelectorAll('.mst-btn').forEach(b => {
-    b.classList.toggle('active', b.getAttribute('data-sec') === id);
+    const sec = b.getAttribute('data-sec');
+    b.classList.toggle('active', sec === id || (sec === 'dcf' && id === 'projection'));
   });
   // Top-bar active tab follows the section's nav group; the left panel shows
   // only that group's options and can never change the top tab.
@@ -616,7 +631,12 @@ const SECTION_META = {
   secfilings:  { icon:'ti-file-text',     title:'SEC Filings' },
   institutional:{ icon:'ti-building-bank', title:'Institutional' },
   compare:     { icon:'ti-adjustments-horizontal', title:'Compare Stocks' },
-  projection:  { icon:'ti-timeline',      title:'Projection' },
+  /* Two engines, one destination. The rail has a single Valuation Lab entry;
+     `projection` and `dcf` are the two panes behind it, switched by the
+     segmented control at the top of each. They keep separate section ids so
+     every existing deep link (?section=dcf), every saved-analysis type and
+     every mount path keeps working untouched. */
+  projection:  { icon:'ti-calculator',    title:'Valuation Lab' },
   dcf:         { icon:'ti-calculator',    title:'Valuation Lab' },
   screener:    { icon:'ti-filter',        title:'Screener' },
   reports:     { icon:'ti-bookmark',      title:'Saved Analyses' },
@@ -4744,7 +4764,8 @@ function _setMobileNav(id) {
   }
   // sync mobile section tabs
   document.querySelectorAll('.mst-btn').forEach(b => {
-    b.classList.toggle('active', b.getAttribute('data-sec') === id);
+    const sec = b.getAttribute('data-sec');
+    b.classList.toggle('active', sec === id || (sec === 'dcf' && id === 'projection'));
   });
 }
 function setMobileTab(btn) {

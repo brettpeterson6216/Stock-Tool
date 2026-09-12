@@ -51,6 +51,14 @@ const SUBS = {};
     SUBS[key] = [...body.matchAll(/'([^']+)'/g)].map((m) => m[1]);
   }
 }
+/* Sections that are deliberately absent from the rail because they are a
+   second pane of a tool that already has an entry — `dcf` is the Intrinsic
+   value half of the Valuation Lab. They are still one click away, from the
+   segmented control at the top of their sibling pane, so the click budget
+   below still holds; what they must NOT be is a second rail entry asking the
+   reader to choose a valuation method before they have a question. */
+const PANES = {};
+for (const [, key, host] of block("RAIL_PANES").matchAll(/(\w+)\s*:\s*'([^']+)'/g)) PANES[key] = host;
 
 test("every group is opened by a top tab that exists", () => {
   for (const g of Object.keys(GROUPS)) {
@@ -70,11 +78,19 @@ test("every tool section has a sidebar item", () => {
 
 test("the research rail lists every research tool", () => {
   // A section in the group but absent from SIDEBAR_SUBGROUPS renders nowhere,
-  // which is exactly how the Wealth Planner went missing.
+  // which is exactly how the Wealth Planner went missing. A declared pane is
+  // the one allowed exception, and only if its host tool is itself listed —
+  // otherwise hiding a pane would take its sibling down with it.
   for (const [group, secs] of Object.entries(GROUPS)) {
     const listed = SUBS[group] || [];
-    const missing = secs.filter((s) => !listed.includes(s));
+    const missing = secs.filter((s) => !listed.includes(s) && !PANES[s]);
     assert.deepEqual(missing, [], `group "${group}" hides these from its own sidebar: ${missing.join(", ")}`);
+  }
+  for (const [pane, host] of Object.entries(PANES)) {
+    const group = Object.keys(GROUPS).find((g) => GROUPS[g].includes(pane));
+    assert.ok(group, `pane "${pane}" is in no nav group, so nothing lights its top tab`);
+    assert.ok((SUBS[group] || []).includes(host),
+      `pane "${pane}" hides behind "${host}", which is itself not in the rail — both are now unreachable`);
   }
 });
 

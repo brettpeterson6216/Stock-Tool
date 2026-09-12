@@ -1710,3 +1710,55 @@ html:not([data-theme="dark"]) .theme-toggle-sun { color: #241d0f !important; }
   border-top: 1px solid var(--rp-line) !important; }
 .learn-seq a { font-size: 14px !important; color: var(--rp-muted) !important; text-decoration: none !important; }
 .learn-seq a:hover { color: var(--rp-gold) !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   The Valuation Lab's method switch.
+
+   There used to be two rail entries — Projection Lab and Valuation Lab —
+   sitting next to each other under Modeling. That asked the reader to choose a
+   valuation method before they had asked a valuation question, and the honest
+   answer for almost every company is that you want both numbers: the multiple
+   you would pay in five years, and the cash flows discounted back to today.
+   When the two disagree, that gap IS the analysis.
+
+   So it is one tool now with one rail entry, and this is the control that
+   moves between its two panes. It is styled as a segmented control rather
+   than as tabs on purpose: tabs imply different content, a segment implies the
+   same question answered two ways.
+   ═══════════════════════════════════════════════════════════════════════════ */
+/* The switch sits in .app-section, OUTSIDE .acc-body, because the Pro gate
+   replaces acc-body.innerHTML wholesale — which used to take the switch with
+   it, so a free visitor saw a gate card and no sign the tool had two methods.
+   Living outside the body means it must hide itself when the section is
+   closed; acc-body's inline display:none no longer covers it. */
+.app-section:not(.open) > .lab-modes { display: none !important; }
+
+.lab-modes {
+  display: inline-flex !important; gap: 2px !important;
+  margin: 0 0 16px !important; padding: 3px !important;
+  border: 1px solid var(--rp-line) !important; border-radius: 10px !important;
+  background: var(--rp-inset) !important;
+}
+.lab-mode {
+  display: inline-flex !important; align-items: center !important; gap: 7px !important;
+  padding: 8px 15px !important; border: 0 !important; border-radius: 7px !important;
+  background: transparent !important; cursor: pointer !important;
+  font-family: var(--rp-sans) !important; font-size: 13.5px !important;
+  font-weight: 600 !important; letter-spacing: 0 !important; text-transform: none !important;
+  color: var(--rp-muted) !important;
+  transition: color .14s ease, background .14s ease !important;
+}
+.lab-mode i { font-size: 15px !important; opacity: .85 !important; }
+.lab-mode:hover { color: var(--rp-copy) !important; }
+.lab-mode.is-on {
+  background: var(--rp-panel) !important;
+  color: var(--rp-gold) !important;
+  box-shadow: 0 1px 2px rgba(0,0,0,.10) !important;
+}
+.lab-mode.is-on i { opacity: 1 !important; }
+.lab-mode:focus-visible { outline: 2px solid var(--rp-gold) !important; outline-offset: 2px !important; }
+
+@media (max-width: 560px) {
+  .lab-modes { display: flex !important; width: 100% !important; }
+  .lab-mode { flex: 1 1 0 !important; justify-content: center !important; padding: 9px 8px !important; }
+}

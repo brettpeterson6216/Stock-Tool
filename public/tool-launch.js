@@ -39,8 +39,7 @@
     var el = document.getElementById("tw-launch");
     if (!el) return;
     var tools = [
-      ["projection", "ti-timeline", "Projection Lab", "Year-by-year Bear / Base / Bull revenue-to-price model."],
-      ["dcf", "ti-calculator", "Valuation Lab", "DCF, exit P/E and EV/EBITDA with scenarios."],
+      ["projection", "ti-calculator", "Valuation Lab", "Year-by-year projection and a DCF, Bear / Base / Bull."],
       ["compare", "ti-arrows-split-2", "Compare", "Four stocks side by side, normalized."],
       ["screener", "ti-filter", "Screener", "Filter the market by value, size and momentum."],
     ];
