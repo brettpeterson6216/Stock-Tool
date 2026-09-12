@@ -32,7 +32,11 @@
   --rp-green: #186d3d !important;
   --rp-red: #ad2e32 !important;
   --rp-shadow: 0 2px 4px rgba(40, 35, 20, .025), 0 16px 42px -30px rgba(40, 35, 20, .14) !important;
-  --rp-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif !important;
+  /* The site already downloads Plus Jakarta Sans - every weight, plus italics
+     - and then this line used to override it with the OS default, so on
+     Windows the whole product rendered in Segoe UI. A typeface that is paid
+     for in page weight and then refused is the worst of both. Switched on. */
+  --rp-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif !important;
 }
 html[data-theme="dark"] {
   --rp-bg: #0d100f !important;
@@ -1541,3 +1545,69 @@ html:not([data-theme="dark"]) .ihm-market-panel { --rp-hair: rgba(155, 116, 35, 
 /* No direction resolved yet means no wash, rather than a gold one: the panel
    should not imply a reading it does not have. */
 #il-home-member:not(.is-up):not(.is-dn) .ihm-market-panel::after { background: none !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   The wordmark.
+
+   "Lens" has never been gold. It resolves to --il-muted-ink in the body
+   (clean-pass.css:929) and --lpf-muted in the nav (clean-pass.css:330), both
+   of which are grey - so the half of the name that carries the brand was the
+   half painted to recede. It is gold, and italic, everywhere the wordmark
+   appears: the nav, the dashboard brand, the sidebar, the footer.
+
+   The footer writes it as <em>Lens</em> rather than a span, so both spellings
+   are covered here rather than leaving one of them behind.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.il-wordmark-b,
+#main-nav .il-wordmark-b,
+#market-page .il-wordmark-b,
+.il-global-brand .il-wordmark-b,
+.prime-dash-brand .il-wordmark-b,
+.prime-sidebar-brand .il-wordmark-b,
+footer .f-logo .il-wordmark em,
+.il-wordmark em {
+  font-style: italic !important;
+  font-weight: inherit !important;
+  color: var(--rp-gold) !important;
+  -webkit-text-fill-color: var(--rp-gold) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   The light/dark toggle.
+
+   il-system.css:691-712 sets font-size:0 on both icons and draws replacements:
+   a plain filled circle for the sun and a crescent for the moon. Its comment
+   says Plus Jakarta has no U+2600 - true, but irrelevant, because the markup
+   is <i class="ti ti-sun">, which is a Tabler icon drawn from the bundled
+   icon font, not a Unicode character in the body face. Both ti-sun and ti-moon
+   ARE in public/vendor/tabler-icons.min.css. The hack suppressed two perfectly
+   good glyphs and replaced the sun with a dot, which is why the control reads
+   as a smudge rather than as a sun and a moon.
+
+   Give the real glyphs back, and settle the colour: four files
+   (site-shell, premium-revamp, clean-pass, surface) each set their own with
+   !important, which is how it ended up at .65 opacity in a grey that nearly
+   matches the track.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.theme-toggle-sun, .theme-toggle-moon {
+  font-family: "tabler-icons" !important;
+  font-size: 13px !important;
+  line-height: 1 !important;
+  width: 14px !important; height: 14px !important;
+  display: inline-flex !important; align-items: center !important; justify-content: center !important;
+}
+.theme-toggle-sun::before, .theme-toggle-moon::before {
+  width: auto !important; height: auto !important;
+  background: none !important; box-shadow: none !important; border-radius: 0 !important;
+  display: inline !important;
+}
+/* One colour each, opaque, and enough contrast against the track to be read
+   as a picture rather than guessed at from position. */
+html[data-theme="dark"] .theme-toggle-sun  { color: #f4e7c9 !important; opacity: 1 !important; }
+html[data-theme="dark"] .theme-toggle-moon { color: #f4e7c9 !important; opacity: 1 !important; }
+html:not([data-theme="dark"]) .theme-toggle-sun  { color: #6b4d12 !important; opacity: 1 !important; }
+html:not([data-theme="dark"]) .theme-toggle-moon { color: #4a4f57 !important; opacity: 1 !important; }
+/* The thumb sits over one of them; that one goes dark so it reads against the
+   gold rather than disappearing into it. */
+html[data-theme="dark"] .theme-toggle-moon { color: #241d0f !important; }
+html:not([data-theme="dark"]) .theme-toggle-sun { color: #241d0f !important; }

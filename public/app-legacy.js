@@ -4943,6 +4943,58 @@ document.addEventListener('click', function(e) {
       if (wrap) wrap.classList.remove('open');
     });
 
+    /* --- Subscription & billing ---
+       #nav-acct-billing has been in the markup on all thirteen pages since the
+       menu was built and had no listener anywhere in the repo: clicking it did
+       nothing at all. There is a real Stripe billing portal at
+       POST /api/stripe/portal (routes/billing.js:246); send members there, and
+       send anyone without a subscription to the upgrade view rather than to a
+       Stripe error page. */
+    var acctBilling = document.getElementById('nav-acct-billing');
+    if (acctBilling) acctBilling.addEventListener('click', async function (e) {
+      e.preventDefault();
+      var wrap = document.getElementById('nav-acct-wrap');
+      if (wrap) wrap.classList.remove('open');
+      var plan = (typeof S !== 'undefined' && S.userPlan) || 'free';
+      if (plan !== 'pro' && plan !== 'trial') {
+        if (typeof showUpgradeModal === 'function') showUpgradeModal(false, 'account_menu_billing');
+        return;
+      }
+      try {
+        var res = await fetch('/api/stripe/portal', {
+          method: 'POST', credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': (typeof S !== 'undefined' && S.csrfToken) || '' },
+        });
+        var out = await res.json().catch(function () { return {}; });
+        if (out && out.url) { window.location.href = out.url; return; }
+        throw new Error(out && out.error);
+      } catch (err) {
+        // Never leave the click silent again — that was the original fault.
+        if (typeof toast === 'function') toast('Could not open the billing portal. Email support@impliedlens.com and we will sort it.', 'red');
+      }
+    });
+
+    /* --- Leave a review --- opens the feedback prompt product-system.js
+       already builds, which previously had no entry point from the chrome. */
+    var acctFeedback = document.getElementById('nav-acct-feedback');
+    if (acctFeedback) acctFeedback.addEventListener('click', function (e) {
+      e.preventDefault();
+      var wrap = document.getElementById('nav-acct-wrap');
+      if (wrap) wrap.classList.remove('open');
+      var opener = document.querySelector('.il-feedback-open, [data-il-feedback]');
+      if (opener) { opener.click(); return; }
+      if (typeof window.ilOpenFeedback === 'function') { window.ilOpenFeedback(); return; }
+      window.location.href = 'mailto:support@impliedlens.com?subject=ImpliedLens%20review';
+    });
+
+    /* --- Contact support --- a real mailto in the markup, so it needs no
+       handler; it only needs the menu to close behind it. */
+    var acctSupport = document.getElementById('nav-acct-support');
+    if (acctSupport) acctSupport.addEventListener('click', function () {
+      var wrap = document.getElementById('nav-acct-wrap');
+      if (wrap) wrap.classList.remove('open');
+    });
+
     // --- Login modal close ---
     var loginClose = document.getElementById('modal-close-btn');
     if (loginClose) loginClose.addEventListener('click', closeModal);

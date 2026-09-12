@@ -769,6 +769,10 @@
       if (typeof window.track === "function") window.track("feedback_opened");
       setTimeout(() => modal.querySelector(".il-feedback-star")?.focus(), 0);
     };
+    /* The prompt could only be opened by whatever installFeedbackPrompt wired
+       internally, so the account menu's "Leave a review" had nothing to call
+       and fell through to a mailto. Expose it. */
+    window.ilOpenFeedback = open;
     modal.querySelector(".il-feedback-close").onclick = close;
     modal.onclick = event => { if (event.target === modal) close(); };
     document.addEventListener("keydown", event => { if (event.key === "Escape" && modal.classList.contains("open")) close(); });
