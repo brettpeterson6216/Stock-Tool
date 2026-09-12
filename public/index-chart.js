@@ -103,11 +103,15 @@
     var grid = token(host, "--lp-border", "rgba(176,160,126,.16)");
     var text = token(host, "--lp-muted", "#929c9c");
 
-    /* Bars less than 23 hours apart are intraday. Measured from the first
-       series because every series shares one window. */
+    /* Whether to label the axis with clock times is decided by the SPAN, not
+       by the bar spacing. 1M now asks for hourly bars (routes/market-data.js),
+       so "the bars are an hour apart" no longer means "this is one session" -
+       a month of hourly bars wants dates on the axis, not 09:30 and 10:30.
+       Anything inside about two days is a session view; beyond that, dates. */
     var firstPts = (series[0] && series[0].points) || [];
-    var barGap = firstPts.length > 2 ? Math.abs(firstPts[1].time - firstPts[0].time) : 86400;
-    var intraday = barGap > 0 && barGap < 82800;
+    var span = firstPts.length > 1
+      ? Math.abs(firstPts[firstPts.length - 1].time - firstPts[0].time) : 0;
+    var intraday = span > 0 && span <= 2 * 86400;
 
     var chart = LWC.createChart(plot, {
       autoSize: true,

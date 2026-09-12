@@ -113,10 +113,20 @@ test("bundles preserve ordered styles and rebase local font URLs", () => {
   assert.equal(bundleStyles(unknown), unknown);
 });
 
-test("monthly index views prioritize daily closes over hourly noise", () => {
+test("a month is drawn from intraday bars and a quarter from daily closes", () => {
+  // This test used to assert the opposite for 1M: daily closes, on the
+  // grounds that hourly bars over a month are noise. True about noise, wrong
+  // about the picture — twenty-two daily closes across an 880x372 plot is
+  // twenty straight segments with hard corners, and it read as a coarse
+  // polyline rather than as a market. Rendered side by side from the same
+  // month of real S&P data, hourly looked like a chart and daily looked
+  // cheap, even though hourly is objectively busier. Density was what was
+  // missing. 3M keeps daily closes: sixty-three points is already enough
+  // line to read, and intraday over a quarter is a genuine hairball.
   const api = fs.readFileSync(path.join(root,"routes/market-data.js"),"utf8");
-  assert.match(api, /"1M":\s*\{[^\n]+interval: "1d"/);
+  assert.match(api, /"1M":\s*\{[^\n]+interval: "1h"/);
   assert.match(api, /"3M":\s*\{[^\n]+interval: "1d"/);
+  assert.match(api, /"1Y":\s*\{[^\n]+interval: "1d"/);
 });
 
 test("section navigation retains the researched company and chart range", () => {

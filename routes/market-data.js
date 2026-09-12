@@ -590,15 +590,24 @@ router.get("/market/movers", async (req, res) => {
 /* ═══════════════════════════════════════════════════════════════════════════
    HOW LONG A WINDOW IS DECIDES HOW FINE THE BARS ARE.
 
-   The first pass at this asked for one month of hourly bars, on the theory
-   that more points is more chart. It is not. Over the same month the S&P
-   changes direction 81 times at hourly resolution and 12 times at daily,
-   across the same 2.4 percentage points of range - identical shape, seven
-   times the zigzag. That reads as noise, which is why every finance site
-   plots a one-month view from daily closes and reserves intraday bars for
-   intraday windows.
+   An earlier pass moved 1M from hourly to daily closes on the grounds that
+   more points is more zigzag: over the same month the S&P changes direction
+   81 times hourly and 12 times daily across the same 2.4 points of range.
+   That reasoning is sound about noise and wrong about the picture. Twenty-two
+   daily closes across an 880x372 plot is twenty straight segments with hard
+   corners - it reads as a coarse polyline, not as a market. Rendered side by
+   side from the same month of real S&P data, the daily version looks cheap
+   and the hourly version looks like a chart, even though the hourly one is
+   objectively busier. "Smoother" was not what was missing; density was.
 
-   So the interval is a property of the window, not a thing to maximise. Each
+   So 1M asks for hourly bars again, with daily closes as the retreat rather
+   than the default - the opposite of what it was. Note the retreats now
+   actually retreat: the old 1M ladder had a second rung FINER than its first
+   and a third byte-identical to its first, so a thin symbol re-issued the
+   same request twice and called it a fallback.
+
+   The interval is still a property of the window rather than a thing to
+   maximise - 1Y stays on daily closes, where 250 points is already dense. Each
    window still carries a ladder because Yahoo does not guarantee every
    interval for every symbol; the first rung is the conventional choice and
    the rest are retreats. Whatever answers is reported back as `interval` and
@@ -611,8 +620,8 @@ const WINDOWS = {
   "1W": { label: "1 week",   ladder: [ { interval: "15m", range: "5d",  min: 90 },
                                        { interval: "30m", range: "5d",  min: 40 },
                                        { interval: "1h",  range: "5d",  min: 10 } ] },
-  "1M": { label: "30 days",  ladder: [ { interval: "1d",  range: "1mo", min: 15 },
-                                       { interval: "1h", range: "1mo", min: 50 },
+  "1M": { label: "30 days",  ladder: [ { interval: "1h",  range: "1mo", min: 60 },
+                                       { interval: "90m", range: "1mo", min: 40 },
                                        { interval: "1d",  range: "1mo", min: 2  } ] },
   "3M": { label: "3 months", ladder: [ { interval: "1d",  range: "3mo", min: 40 },
                                        { interval: "1wk", range: "3mo", min: 8 },
