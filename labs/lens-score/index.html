@@ -6,10 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="robots" content="noindex,nofollow,noarchive">
   <meta name="description" content="LensScore combines independent long-term value and tactical setup scores into one transparent 0–10 stock buyability metric.">
-  <meta property="og:title" content="LensScore · ImpliedLens">
+  <meta property="og:title" content="LensToolkit · ImpliedLens">
   <meta property="og:description" content="See business quality, valuation, support zones, trend, momentum, risk, and source dates in one transparent stock score.">
   <meta property="og:type" content="website">
-  <title>LensScore · ImpliedLens</title>
+  <title>LensToolkit · ImpliedLens</title>
 <meta property="og:image" content="https://impliedlens.com/social-card.png">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
@@ -18,7 +18,7 @@
 <meta property="og:site_name" content="ImpliedLens">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@ImpliedLens">
-<meta name="twitter:title" content="LensScore · ImpliedLens">
+<meta name="twitter:title" content="LensToolkit · ImpliedLens">
 <meta name="twitter:description" content="Business quality, valuation, support zones, trend, momentum and risk in one transparent 0-10 score.">
 <meta name="twitter:image" content="https://impliedlens.com/social-card.png">
 <meta name="twitter:image:alt" content="ImpliedLens — daily AAPL candles with a 30-day average, on the ImpliedLens research card">
@@ -40,6 +40,11 @@
 <link rel="stylesheet" href="/lens-prime-shared.css?v=20260906-8">
 <link rel="stylesheet" href="/lens-prime-fidelity.css?v=20260906-8">
 <link href="/clean-pass.css?v=20260906-8" rel="stylesheet">
+<!-- surface.css is the last sheet index.html loads and this page did not
+     load it at all, so the settled surface treatment - panels, inputs,
+     fields, the search row - stopped at the boundary of this document and
+     the page read as a different product. -->
+<link href="/surface.css?v=20260906-8" rel="stylesheet">
 <script defer src="/premium-motion.js?v=20260825-6"></script>
 </head>
 <body class="il-lens-page">
@@ -53,7 +58,7 @@
   <div class="nav-links il-global-links" id="nav-links">
     <a href="/" id="nav-home" class="nav-tab il-global-tab" data-nav="home">Dashboard</a>
     <a href="/?view=tool&amp;section=analyze" id="nav-analyze" class="nav-tab il-global-tab" data-nav="research">Research</a>
-    <a href="/lens-score" id="nav-lensscore-link" class="nav-tab il-global-tab" data-nav="lens-score">LensScore</a>
+    <a href="/lens-score" id="nav-lensscore-link" class="nav-tab il-global-tab" data-nav="lens-score">LensToolkit</a>
     <a href="/?view=tool&amp;section=workspace&amp;workspace_tab=watchlist" id="nav-saved-link" class="nav-tab il-global-tab" data-nav="reports">Watchlists</a>
     <a href="/blog" id="nav-news-link" class="nav-tab il-global-tab" data-nav="blog">Learn</a>
     <a href="/pricing" id="nav-pricing-link" class="nav-tab il-global-tab" data-nav="pricing">Pricing</a>

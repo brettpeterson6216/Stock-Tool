@@ -1641,3 +1641,12 @@ html:not([data-theme="dark"]) .theme-toggle-sun { color: #241d0f !important; }
     -webkit-text-fill-color: var(--rp-gold) !important;
   }
 }
+
+/* The static pages' account chip builds the plan badge inside the outline
+   button rather than in the app's own .nav-acct-wrap, so it inherits none of
+   that component's spacing and rendered as "brettPRO". */
+.il-global-account .nav-acct-badge {
+  margin-left: 7px !important;
+  display: inline-block !important;
+  vertical-align: baseline !important;
+}

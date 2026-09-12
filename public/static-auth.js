@@ -48,13 +48,26 @@
     } catch (e) { return null; }
   }
 
+  /* One answer to "what plan is this", used by the cached hint and by the
+     reconcile, so first paint and the server response cannot disagree. */
+  function planOf(user) {
+    if (!user) return null;
+    var p = user.effectivePlan || user.plan;
+    return p && p !== "free" ? String(p).toUpperCase() : null;
+  }
+
   function writeHint(user) {
     try {
       localStorage.setItem(CACHE_KEY, JSON.stringify({
         in: !!user,
         at: Date.now(),
         label: user ? (user.username || user.email || "Account") : null,
-        plan: user && user.plan && user.plan !== "free" ? String(user.plan).toUpperCase() : null
+        /* effectivePlan, not plan. `plan` is the raw users.plan column; a
+           gifted or comped account sits at plan='free' with
+           effectivePlan='pro' (lib/plan.js), and a trial is only ever
+           effectivePlan. Reading the column meant the static pages showed a
+           bare username while the app showed PRO for the same session. */
+        plan: planOf(user)
       }));
     } catch (e) { /* private mode — the fetch still resolves it */ }
   }
@@ -65,7 +78,7 @@
   }
 
   /* ── apply ─────────────────────────────────────────────────────────────── */
-  function apply(signedIn, label) {
+  function apply(signedIn, label, plan) {
     nav.classList.remove("il-auth-pending");
     nav.classList.toggle("il-auth-in", !!signedIn);
     nav.classList.toggle("il-auth-out", !signedIn);
@@ -97,14 +110,26 @@
       account.href = "/?view=tool&section=reports";
       actions.appendChild(account);
     }
-    account.textContent = label || "Account";
+    /* The app paints the plan as a gold pill (.nav-acct-badge); these pages
+       used to paste " · PRO" into the text, so the same account looked like a
+       different product depending on which page you were on. Same element,
+       same class. */
+    var name = String(label || "Account").split(" · ")[0];
+    account.textContent = "";
+    account.appendChild(document.createTextNode(name));
+    if (plan) {
+      var badge = document.createElement("span");
+      badge.className = "nav-acct-badge" + (plan === "TRIAL" ? " trial" : "");
+      badge.textContent = plan;
+      account.appendChild(badge);
+    }
   }
 
   /* First paint: use the hint if we have one, otherwise hold the guest links
      back briefly rather than flashing them at a signed-in visitor. */
   var hint = readHint();
   if (hint) {
-    apply(hint.in, accountLabel(hint));
+    apply(hint.in, accountLabel(hint), hint.plan || null);
   } else {
     nav.classList.add("il-auth-pending");
     setTimeout(function () { nav.classList.remove("il-auth-pending"); }, PENDING_MS);
@@ -121,8 +146,9 @@
       var user = d && d.user;
       writeHint(user);
       var label = user ? (user.username || user.email || "Account") : null;
-      if (user && user.plan && user.plan !== "free") label += " · " + String(user.plan).toUpperCase();
-      apply(!!user, label);
+      var plan = planOf(user);
+      if (label && plan) label += " · " + plan;
+      apply(!!user, label, plan);
     })
     .catch(function () {
       /* Session detection unavailable — fall back to guest links rather than
