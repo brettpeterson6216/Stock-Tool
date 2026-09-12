@@ -245,6 +245,11 @@ app.get(["/reset-password", "/reset-password.html"], (req, res) =>
 app.get(["/about", "/about.html"], (_req, res) => sendPage(res, path.join(__dirname, "public", "about.html")));
 
 app.get(["/blog",  "/blog.html"],  (_req, res) => sendPage(res, path.join(__dirname, "public", "blog.html")));
+/* The Pricing tab pointed at /?pricing=1, which is the landing page with a
+   modal on top of it: no page, no URL to share, nothing for a search engine,
+   and site-nav.js could never mark the tab active because it only matches
+   /pricing. It is a page now. */
+app.get(["/pricing", "/pricing.html"], (_req, res) => sendPage(res, path.join(__dirname, "public", "pricing.html")));
 app.get(["/research-process", "/research-process.html"], (_req, res) => sendPage(res, path.join(__dirname, "public", "research-process.html")));
 app.get(["/compound-calculator", "/compound-calculator.html"], (_req, res) => sendPage(res, path.join(__dirname, "public", "compound-calculator.html")));
 

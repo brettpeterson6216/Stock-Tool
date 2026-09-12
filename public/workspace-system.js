@@ -134,16 +134,35 @@
       refreshProviderPolling();
       return out;
     };
+    /* Clicking the Watchlists tab in the header used to land you on the
+       Workspace's default tab, so you had to click Watchlist a second time to
+       get where the header said it was taking you.
+
+       The click was synchronous. navGoTo() renders the section asynchronously
+       - it even retries itself for up to five seconds waiting for openSection
+       to exist - so by the time this line ran, .il-ws-tab[data-tab=watchlist]
+       had not been created yet, querySelector returned null, and the click
+       silently never happened. openPortfolioGuide immediately below already
+       wrapped the same call in a setTimeout, so the shape of the problem was
+       known; the watchlist just never got the same treatment.
+
+       A single setTimeout(0) is still a guess about render timing. Poll for
+       the tab instead, and give up rather than spin. */
+    function clickWorkspaceTab(name, attempt) {
+      const tab = document.querySelector('.il-ws-tab[data-tab="' + name + '"]');
+      if (tab) { tab.click(); return; }
+      const next = (attempt || 0) + 1;
+      if (next <= 60) setTimeout(() => clickWorkspaceTab(name, next), 50);
+    }
     window.openWorkspaceWatchlist = function () {
       state.tab = "watchlist";
       if (typeof window.navGoTo === "function") window.navGoTo("workspace");
-      const tab = document.querySelector('.il-ws-tab[data-tab="watchlist"]');
-      if (tab) tab.click();
+      clickWorkspaceTab("watchlist");
     };
     window.openPortfolioGuide = function () {
       state.tab = "guide";
       if (typeof window.navGoTo === "function") window.navGoTo("workspace");
-      setTimeout(() => document.querySelector('.il-ws-tab[data-tab="guide"]')?.click(), 0);
+      clickWorkspaceTab("guide");
     };
   }
 

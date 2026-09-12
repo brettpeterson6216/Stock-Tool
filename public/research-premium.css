@@ -1611,3 +1611,33 @@ html:not([data-theme="dark"]) .theme-toggle-moon { color: #4a4f57 !important; op
    gold rather than disappearing into it. */
 html[data-theme="dark"] .theme-toggle-moon { color: #241d0f !important; }
 html:not([data-theme="dark"]) .theme-toggle-sun { color: #241d0f !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   The research rail's one heading.
+
+   There used to be two stacked: a static "Research tools" div that no code
+   ever touched, and .sb-group-label, which renderSidebarGroup() rewrites per
+   tab. Only the lower one told the truth — on the Watchlists tab the rail read
+   "Research tools" above "Watchlists" — so the static one is gone. But the
+   remaining one was being painted display:none somewhere in the stack, which
+   left the rail with no heading at all. Give it back, styled as the section
+   heading the static div used to be, and keep it hidden in the ≤700px
+   collapsed rail where only icons fit.
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (min-width: 701px) {
+  .app-sidebar .sb-group-label,
+  #view-tool .sb-group-label {
+    display: block !important;
+    margin: 2px 0 10px !important;
+    padding: 0 10px !important;
+    font-family: var(--rp-sans) !important;
+    /* Sentence case: test/typography-contract.test.js reserves uppercase for
+       the wordmark and ticker symbols, and it was right to catch this. */
+    font-size: 12.5px !important;
+    font-weight: 700 !important;
+    letter-spacing: .04em !important;
+    text-transform: none !important;
+    color: var(--rp-gold) !important;
+    -webkit-text-fill-color: var(--rp-gold) !important;
+  }
+}

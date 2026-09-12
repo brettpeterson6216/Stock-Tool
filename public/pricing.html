@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <script src="/theme-bootstrap.js?v=20260906-4"></script>
-  <title>Blog — ImpliedLens</title>
-  <meta name="description" content="The ImpliedLens blog — analysis walkthroughs, platform updates, and investing frameworks.">
-  <link rel="canonical" href="https://impliedlens.com/blog">
+  <title>Pricing — ImpliedLens</title>
+  <meta name="description" content="What ImpliedLens costs, what that pays for, and how it compares with the terminals built for institutions.">
+  <link rel="canonical" href="https://impliedlens.com/pricing">
   <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" type="image/svg+xml" href="/logo.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
@@ -15,9 +15,9 @@
   <link rel="manifest" href="/site.webmanifest">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="ImpliedLens">
-  <meta property="og:url" content="https://impliedlens.com/blog">
-  <meta property="og:title" content="ImpliedLens Blog">
-  <meta property="og:description" content="Analysis walkthroughs, platform updates, and investing frameworks from ImpliedLens.">
+  <meta property="og:url" content="https://impliedlens.com/pricing">
+  <meta property="og:title" content="Pricing — ImpliedLens">
+  <meta property="og:description" content="What the tool costs, what that pays for, and why it is priced for retail investors rather than institutions.">
   <meta property="og:image" content="https://impliedlens.com/social-card.png">
   <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1200">
@@ -25,8 +25,8 @@
   <meta property="og:image:alt" content="ImpliedLens — daily AAPL candles with a 30-day average, on the ImpliedLens research card">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@ImpliedLens">
-  <meta name="twitter:title" content="ImpliedLens Blog">
-  <meta name="twitter:description" content="Analysis walkthroughs, platform updates, and investing frameworks from ImpliedLens.">
+  <meta name="twitter:title" content="Pricing — ImpliedLens">
+  <meta name="twitter:description" content="What the tool costs, what that pays for, and why it is priced for retail investors rather than institutions.">
   <meta name="twitter:image" content="https://impliedlens.com/social-card.png">
   <meta name="twitter:image:alt" content="ImpliedLens — daily AAPL candles with a 30-day average, on the ImpliedLens research card">
   <link rel="preload" as="font" type="font/woff2" crossorigin href="/vendor/fonts/plus-jakarta-sans-files/plus-jakarta-sans-latin-400-normal.woff2">
@@ -43,29 +43,30 @@
     .logo em{color:#B98A3D;font-style:italic}
     .top-bar a.back{font-size:13px;color:rgba(237,232,224,.4);margin-left:auto}
     .top-bar a.back:hover{color:#B98A3D}
-    .wrap{max-width:980px;margin:0 auto;padding:3.5rem 2rem 5rem}
-    .pill{display:inline-block;padding:.25rem .85rem;border-radius:100px;background:rgba(185,138,61,.1);color:#B98A3D;font-size:12px;font-weight:700;letter-spacing:.02em;text-transform:none;margin-bottom:1.5rem}
-    h1{font-family:'Plus Jakarta Sans',serif;font-size:35px;color:#fff;margin-bottom:1rem;line-height:1.25}
-    p{font-size:15px;color:rgba(237,232,224,.55);line-height:1.8;margin-bottom:1.25rem}
-    .socials{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;margin:2rem 0}
+    .hero{text-align:center;padding:4rem 2rem 3rem;max-width:680px;margin:0 auto}
+    .tagline{font-size:13px;color:rgba(237,232,224,.35);letter-spacing:.02em;text-transform:none;margin-bottom:1.25rem}
+    h1{font-family:'Plus Jakarta Sans',serif;font-size:38px;color:#fff;line-height:1.25;margin-bottom:1.1rem}
+    h1 em{color:#B98A3D;font-style:italic}
+    .hero-sub{font-size:16px;color:rgba(237,232,224,.55);line-height:1.75;max-width:560px;margin:0 auto 2rem}
+    .cta-row{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;margin-bottom:1rem}
+    .btn-primary{display:inline-block;background:#B98A3D;color:#08090D;padding:.7rem 1.6rem;border-radius:9px;font-size:14px;font-weight:700;transition:opacity .15s}
+    .btn-primary:hover{opacity:.85;text-decoration:none}
+    .btn-ghost{display:inline-block;border:1px solid rgba(185,138,61,.4);color:#B98A3D;padding:.7rem 1.6rem;border-radius:9px;font-size:14px;font-weight:600;transition:all .15s}
+    .btn-ghost:hover{background:rgba(185,138,61,.08);text-decoration:none}
+    .features{max-width:780px;margin:0 auto;padding:0 2rem 3rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem}
+    .feat{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:1.25rem 1.4rem}
+    .feat-icon{font-size:22px;margin-bottom:.6rem}
+    .feat-title{font-weight:600;font-size:14px;color:#fff;margin-bottom:.3rem}
+    .feat-desc{font-size:13px;color:rgba(237,232,224,.5);line-height:1.6}
+    .section{max-width:680px;margin:0 auto;padding:1rem 2rem 2.5rem;text-align:center}
+    h2{font-family:'Plus Jakarta Sans',serif;font-size:24px;color:#fff;margin-bottom:.75rem}
+    p{font-size:15px;color:rgba(237,232,224,.6);line-height:1.8;margin-bottom:1rem}
+    .socials{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;margin:1.5rem 0}
     .soc-btn{display:inline-flex;align-items:center;gap:8px;padding:.6rem 1.3rem;border-radius:8px;border:1px solid rgba(185,138,61,.3);color:#B98A3D;font-size:13px;font-weight:500;transition:all .18s}
     .soc-btn:hover{background:rgba(185,138,61,.08);border-color:#B98A3D;text-decoration:none}
-    footer{margin-top:3rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,.07);display:flex;gap:1.25rem;flex-wrap:wrap;justify-content:center;font-size:12px}
-    footer a{color:rgba(237,232,224,.3)}
+    footer{border-top:1px solid rgba(255,255,255,.07);padding:1.5rem 2rem;text-align:center;display:flex;gap:1.25rem;flex-wrap:wrap;justify-content:center;font-size:12px}
+    footer a{color:rgba(237,232,224,.35)}
     footer a:hover{color:#B98A3D}
-    .intro{max-width:680px;margin:0 auto 2.5rem;text-align:center}
-    .guide-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
-    .guide{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:1.35rem;transition:border-color .15s,transform .15s}
-    .guide:hover{border-color:rgba(185,138,61,.45);transform:translateY(-2px)}
-    .guide-num{font:600 11px monospace;color:#B98A3D;letter-spacing:.02em;text-transform:none;margin-bottom:.7rem}
-    .guide h2{font-family:'Plus Jakarta Sans',serif;font-size:18px;color:#fff;margin-bottom:.61rem}
-    .guide p{font-size:13px;line-height:1.65;margin:0 0 .8rem}
-    .guide ul{list-style:none;display:grid;gap:.45rem}
-    .guide li{font-size:12px;color:rgba(237,232,224,.6);padding-left:1rem;position:relative}
-    .guide li::before{content:'·';position:absolute;left:.2rem;color:#B98A3D}
-    .guide-cta{margin-top:1rem;display:inline-block;font-size:12px;font-weight:600}
-    .note{margin:2rem auto 0;max-width:760px;padding:1rem 1.2rem;border-left:2px solid #B98A3D;background:rgba(185,138,61,.06);font-size:12px;color:rgba(237,232,224,.58);line-height:1.65}
-    @media(max-width:760px){.guide-grid{grid-template-columns:1fr}.wrap{padding:2.5rem 1rem 4rem}.top-bar{padding:.75rem 1rem}}
   </style>
 <link rel="stylesheet" href="/static-polish.css?v=20260906-8">
 <link rel="stylesheet" href="/visual-refresh.css?v=20260906-8">
@@ -77,11 +78,10 @@
 <link rel="stylesheet" href="/lens-prime-shared.css?v=20260906-8">
 <link rel="stylesheet" href="/lens-prime-fidelity.css?v=20260906-8">
 <link href="/clean-pass.css?v=20260906-8" rel="stylesheet">
-<link href="/surface.css?v=20260907-16" rel="stylesheet">
 <script defer src="/premium-motion.js?v=20260825-6"></script>
 </head>
 <body class="il-static-page">
-<a class="il-skip-link" href="#public-main">Skip to content</a>
+  <a class="il-skip-link" href="#about-main">Skip to content</a>
 <nav id="main-nav" class="il-global-nav" data-view="home" aria-label="Primary navigation">
   <a class="nav-logo il-global-brand" href="/" data-nav="home">
     <img src="/logo-mark-34.png" srcset="/logo-mark-34.png 1x, /logo-mark-68.png 2x, /logo-mark-102.png 3x" width="34" height="34" alt="ImpliedLens">
@@ -144,53 +144,70 @@
 <aside class="static-rail" aria-label="About ImpliedLens">
   <div class="static-rail-label">About</div>
   <a href="/about">About</a>
+  <a href="/pricing" class="active">Pricing</a>
   <a href="/data-sources">Data Sources</a>
   <a href="/research-process">Research Process</a>
-  <a href="/blog" class="active">Blog</a>
+  <a href="/blog">Blog</a>
   <a href="/privacy">Privacy</a>
   <a href="/terms">Terms</a>
 </aside>
 
-   <div class="wrap" id="public-main" role="main">
-    <div class="intro">
-      <span class="pill">Research Playbooks</span>
-      <h1>A cleaner way to think about stocks.</h1>
-      <p>Practical frameworks for using data, valuation, and risk management without pretending the future is predictable.</p>
+  <div class="hero" id="pricing-main" role="main">
+    <div class="tagline">Priced for the person doing their own work.</div>
+    <h1>What it costs, and <em>what that pays for</em>.</h1>
+    <p class="hero-sub">A real research tool has real running costs — market data, SEC filings, fundamentals, earnings transcripts, servers. Here is what those are, what you get, and how the number compares with the terminals built for institutions.</p>
+  </div>
+
+  <div class="prose">
+    <h2>The number</h2>
+    <p>Pro is <strong>$19/month</strong>, or <strong>$180/year</strong> — two months free if you pay annually. There is a free tier that is genuinely usable, and a trial that does not ask for a card.</p>
+    <p>You can cancel in two clicks from your account menu, any time, and keep access until the period you have paid for runs out. Nothing is retained on cancellation that you cannot export first: your saved cases, theses and watchlists all download as CSV.</p>
+
+    <h2>Where the money goes</h2>
+    <p>None of this is free to run, and pretending otherwise would mean paying for it another way — by selling your attention, your data, or order flow. The subscription is the whole business model, which is the point.</p>
+    <ul>
+      <li><strong>Market data.</strong> Live and historical prices, indexes and volume.</li>
+      <li><strong>Fundamentals and estimates.</strong> Statements, ratios, analyst figures, institutional holdings.</li>
+      <li><strong>Filings and transcripts.</strong> SEC EDGAR documents and earnings-call research.</li>
+      <li><strong>Infrastructure.</strong> Servers, storage and the work of keeping it correct.</li>
+    </ul>
+    <p>Every figure the tool shows names the provider it came from and the date it was pulled. That is on the <a href="/data-sources">data sources</a> page, and it is checkable rather than asserted.</p>
+
+    <h2>What the alternatives cost</h2>
+    <p>A professional terminal runs into the tens of thousands of dollars a year, per seat. That is not a criticism of those products — they are built for desks with compliance departments and dedicated data budgets, and they earn it. But it does mean the research advantage they provide has effectively been priced out of reach for anyone doing this with their own money.</p>
+    <p>The gap that creates is the reason this exists. An individual investor is competing for the same information as institutions, with a fraction of the tooling and none of the staff. Closing some of that gap for the price of a couple of coffees a month is the entire ambition.</p>
+    <p>We are not going to tell you what any competitor charges today — those numbers move, and a page that quotes them goes stale and starts misleading people. Go and look, then come back.</p>
+
+    <h2>What free gets you</h2>
+    <p>Enough to decide whether the paid tier is worth it, which is the only honest reason to have a free tier. Charts, company financials, filings and a limited number of full analyses per day. The <a href="/?view=tool&amp;section=education">lessons</a> are free and stay free — learning how to read a balance sheet should not be behind a paywall.</p>
+
+    <h2>What Pro adds</h2>
+    <ul>
+      <li>Unlimited analyses, rather than a daily allowance.</li>
+      <li>The Projection Lab with saved, named cases you can revisit and revise.</li>
+      <li>The Valuation Lab, LensScore, and the comparison tools.</li>
+      <li>Earnings-call research and institutional holdings.</li>
+      <li>A workspace that keeps your thesis, your positions and your review dates together.</li>
+    </ul>
+
+    <h2>Why it keeps improving</h2>
+    <p>Subscriptions are what pay for the next thing being built, and the work is continuous rather than finished. If something is wrong or missing, <a href="mailto:support@impliedlens.com">say so</a> — that mail goes to a person, and a good proportion of what is on the site started as someone pointing out a problem.</p>
+
+    <div class="cta-row" style="margin-top:2rem;">
+      <a href="/signup" class="btn-primary">Start free — no card</a>
+      <a href="/about" class="btn-ghost">What the tool actually does</a>
     </div>
-    <div class="guide-grid">
-      <article class="guide">
-        <div class="guide-num">Playbook 01 · 8 min</div>
-        <h2>From ticker to investment thesis</h2>
-        <p>Build a testable case before looking for evidence that agrees with you.</p>
-        <ul><li>Define the market disagreement</li><li>Name the catalyst and time horizon</li><li>Write the thesis-break conditions</li></ul>
-        <a class="guide-cta" href="/?view=tool&amp;section=education">Open the Academy →</a>
-      </article>
-      <article class="guide">
-        <div class="guide-num">Playbook 02 · 12 min</div>
-        <h2>How to read business quality</h2>
-        <p>Use the statements to separate durable economics from a good-looking quarter.</p>
-        <ul><li>Connect revenue, margins, and cash</li><li>Compare ROIC with capital needs</li><li>Stress-test debt and dilution</li></ul>
-        <a class="guide-cta" href="/?view=tool&amp;section=financials">Explore financials →</a>
-      </article>
-      <article class="guide">
-        <div class="guide-num">Playbook 03 · 14 min</div>
-        <h2>Valuation without false precision</h2>
-        <p>Treat valuation as a range of expectations rather than a magic target price.</p>
-        <ul><li>Normalize cash flow</li><li>Run bear, base, and bull cases</li><li>Demand a margin of safety</li></ul>
-        <a class="guide-cta" href="/?view=tool&amp;section=dcf">Open valuation tools →</a>
-      </article>
-    </div>
-    <div class="note">ImpliedLens education is informational only. The strongest process still includes independent verification, position sizing, and a clear understanding of what could go wrong.</div>
-    <footer>
-      <a href="/privacy">Privacy</a>
-      <a href="/terms">Terms</a>
+    <p style="margin-top:1.25rem;font-size:.9rem;opacity:.7;">ImpliedLens provides market data and modelling tools for research and education. It is not investment advice, and no figure on the site is a recommendation to buy or sell anything.</p>
+  </div>
+
+  <footer>
+    <a href="/privacy">Privacy Policy</a>
+    <a href="/terms">Terms of Service</a>
       <a href="/data-sources">Data Sources</a>
       <a href="/research-process">Research Process</a>
-      <a href="/compound-calculator">Compound Calculator</a>
-      <a href="/about">About</a>
-      <a href="/">ImpliedLens</a>
-    </footer>
-  </div>
+    <a href="/blog">Blog</a>
+    <a href="/">ImpliedLens</a>
+  </footer>
   <script defer src="/site-nav.js?v=20260905-2"></script>
 </body>
 </html>

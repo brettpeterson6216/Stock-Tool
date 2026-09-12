@@ -87,10 +87,12 @@
     var key = tab.getAttribute("data-nav");
     if (!key) return;
 
-    if (key === "pricing" && location.pathname === "/" && openPricing()) {
-      e.preventDefault();
-      return;
-    }
+    /* Pricing used to be intercepted here and turned into a modal over the
+       landing page. A top tab that opens a modal cannot be marked active -
+       markActiveTab derives the active tab from the URL, and the URL had not
+       changed - which is why the Dashboard stayed lit while the pricing modal
+       was open. It is a real page at /pricing now, so the link is left alone
+       and the active state follows from the path like every other tab. */
     if (key === "reports" && typeof window.openWorkspaceWatchlist === "function") {
       e.preventDefault();
       window.openWorkspaceWatchlist();
