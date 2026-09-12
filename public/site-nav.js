@@ -57,7 +57,11 @@
       else want = "research";
     } else if (path === "/") want = "home";
     else if (path === "/lens-score") want = "lens-score";
-    else if (path === "/blog") want = "blog";
+    /* /blog keeps working and keeps lighting the Learn tab, because the tab's
+       data-nav moved from "blog" to "learn" when it started pointing at the
+       lessons — a reader who lands on the blog from a link should still see
+       where they are. */
+    else if (path === "/learn" || path.indexOf("/learn/") === 0 || path === "/blog") want = "learn";
     else if (path === "/pricing") want = "pricing";
 
     var tabs = nav.querySelectorAll(".nav-tab");

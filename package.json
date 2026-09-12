@@ -13,7 +13,9 @@
     "verify:deploy": "node scripts/verify-deploy.js",
     "calibrate:lens": "node scripts/calibrate-lens-score.js",
     "build:brand": "node scripts/build-brand.js",
-    "check:brand": "node scripts/build-brand.js --check"
+    "check:brand": "node scripts/build-brand.js --check",
+    "build:learn": "node scripts/build-learn.js",
+    "check:learn": "node scripts/build-learn.js --check"
   },
   "dependencies": {
     "@libsql/client": "^0.14.0",
