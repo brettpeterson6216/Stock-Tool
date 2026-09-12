@@ -1458,3 +1458,52 @@ body.il-static-page .feat-icon { font-size: 18px !important; }
   color: var(--rp-muted) !important;
 }
 .app-sidebar .sb-sub:first-of-type { margin-top: 8px !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Dashboard: the percentages were being coloured by the wrong thing.
+
+   clean-pass.css:1680-1683 declares the up/down colour as a bare descendant
+   selector - `.is-up i` / `.is-dn i` - and home-member.js:193 puts `is-up` or
+   `is-dn` on the PAGE ROOT (#il-home-member), derived from the S&P. So every
+   <i> on the dashboard matched the root's rule as well as its own tile's, at
+   identical specificity, and source order handed it to `.is-dn i`.
+
+   Net effect: whenever the S&P was down, every percentage on the dashboard
+   rendered red regardless of its own direction. Volatility exposed it because
+   VIX moves opposite the market - red text over a green sparkline - but the
+   tiles were all lying, not just that one. The sparklines were never wrong:
+   their colour is scoped to the SVG's own class (clean-pass.css:1725).
+
+   Fixed by scoping the colour to the tile that owns the number. The <i> is a
+   grandchild (.ihm-index > .ihm-index-txt > i), so a child combinator will
+   not do; the tile class is what has to be on the left.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.ihm-index.is-up i, .ihm-pop.is-up i, .ihm-sector.is-up i, .ihm-fav-q.is-up i,
+.ihl-sector.is-up i, .ihm-quote span.is-up {
+  color: var(--rp-green) !important; -webkit-text-fill-color: currentColor !important;
+}
+.ihm-index.is-dn i, .ihm-pop.is-dn i, .ihm-sector.is-dn i, .ihm-fav-q.is-dn i,
+.ihl-sector.is-dn i, .ihm-quote span.is-dn {
+  color: var(--rp-red) !important; -webkit-text-fill-color: currentColor !important;
+}
+/* A tile with no direction of its own stays ink, rather than inheriting the
+   market's. */
+#il-home-member.is-up .ihm-index:not(.is-up):not(.is-dn) i,
+#il-home-member.is-dn .ihm-index:not(.is-up):not(.is-dn) i,
+#il-home-member.is-up .ihm-pop:not(.is-up):not(.is-dn) i,
+#il-home-member.is-dn .ihm-pop:not(.is-up):not(.is-dn) i {
+  color: var(--rp-muted) !important; -webkit-text-fill-color: currentColor !important;
+}
+
+/* The "stray chart with no label" is not a chart. It is TradingView's
+   attribution mark - a 35x19 <svg> the library injects into the plot - caught
+   by clean-pass.css:1642-1644, which sizes EVERY svg inside .ihm-chart to
+   100% x 172px. That rule is a leftover from the hand-rolled SVG renderer
+   that Lightweight Charts replaced; nothing legitimate matches it any more.
+   Put the mark back at its own size rather than hiding it: the attribution is
+   cheap to keep and the defect was only ever the stretching. */
+.ihm-chart #tv-attr-logo svg,
+.ihm-chart a[id^="tv-attr"] svg {
+  width: 35px !important; height: 19px !important; display: inline-block !important;
+}
+.ihm-chart #tv-attr-logo, .ihm-chart a[id^="tv-attr"] { opacity: .35 !important; }

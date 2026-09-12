@@ -103,6 +103,12 @@
     var grid = token(host, "--lp-border", "rgba(176,160,126,.16)");
     var text = token(host, "--lp-muted", "#929c9c");
 
+    /* Bars less than 23 hours apart are intraday. Measured from the first
+       series because every series shares one window. */
+    var firstPts = (series[0] && series[0].points) || [];
+    var barGap = firstPts.length > 2 ? Math.abs(firstPts[1].time - firstPts[0].time) : 86400;
+    var intraday = barGap > 0 && barGap < 82800;
+
     var chart = LWC.createChart(plot, {
       autoSize: true,
       layout: {
@@ -123,7 +129,21 @@
            visible range, so the comparison survives panning. */
         mode: LWC.PriceScaleMode.Percentage
       },
-      timeScale: { borderVisible: false, rightOffset: 2, fixLeftEdge: true, fixRightEdge: true },
+      /* Every tick on the 1D chart read "11".
+
+         Lightweight Charts defaults `timeVisible` to false, and with it off
+         the library collapses every intraday tick weight to a date-only
+         format - so all 195 two-minute bars of a single session render as the
+         same day-of-month. The axis was not broken, it was being asked for
+         the wrong thing. public/chart-engine.js:190 already got this right;
+         this renderer never adopted it.
+
+         The window is not passed in, so infer it from the data: bars closer
+         together than a day are intraday. */
+      timeScale: {
+        borderVisible: false, rightOffset: 2, fixLeftEdge: true, fixRightEdge: true,
+        timeVisible: intraday, secondsVisible: false
+      },
       crosshair: { mode: LWC.CrosshairMode.Normal },
       /* Drag to pan and pinch to zoom, but the wheel is left to the page.
          A dashboard chart that swallows scroll traps the reader halfway down
