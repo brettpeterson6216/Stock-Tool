@@ -1507,3 +1507,37 @@ body.il-static-page .feat-icon { font-size: 18px !important; }
   width: 35px !important; height: 19px !important; display: inline-block !important;
 }
 .ihm-chart #tv-attr-logo, .ihm-chart a[id^="tv-attr"] { opacity: .35 !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   The market's direction stops painting the panel's edge.
+
+   `--ihm-accent` is set on .ihm-panel from the S&P's direction
+   (clean-pass.css:1601-1603), and lines 539/575 above piped it straight into
+   `--rp-hair` - the panel's gold hairline. So on a down day the Market panel's
+   edge went red and on an up day green, which is a real signal put in the one
+   place it cannot go: the brand's own line. Every other panel on the page
+   keeps its gold edge, so the one that changes reads as a rendering fault
+   rather than as information.
+
+   The signal itself is worth keeping. It moves inside: a soft wash across the
+   top of the panel's interior, behind the header, which carries the same
+   up/down reading without touching the frame. The edge goes back to gold and
+   matches every other panel again.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.ihm-market-panel { --rp-hair: rgba(224, 186, 104, .62) !important; }
+html:not([data-theme="dark"]) .ihm-market-panel { --rp-hair: rgba(155, 116, 35, .45) !important; }
+
+.ihm-market-panel { position: relative !important; overflow: hidden !important; }
+/* Behind everything (children are already z-index:2, line 534) and inert to
+   the pointer, so it can never sit over the timeframe buttons. */
+.ihm-market-panel::after {
+  content: "" !important; position: absolute !important;
+  left: 0 !important; right: 0 !important; top: 0 !important; height: 116px !important;
+  z-index: 0 !important; pointer-events: none !important;
+  background: linear-gradient(180deg,
+      color-mix(in srgb, var(--ihm-accent, transparent) 13%, transparent) 0%,
+      transparent 100%) !important;
+}
+/* No direction resolved yet means no wash, rather than a gold one: the panel
+   should not imply a reading it does not have. */
+#il-home-member:not(.is-up):not(.is-dn) .ihm-market-panel::after { background: none !important; }

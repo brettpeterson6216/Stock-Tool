@@ -217,7 +217,16 @@
           var res = lead.interval === "1d" ? "daily closes"
                   : lead.interval === "1wk" ? "weekly closes"
                   : lead.interval + " bars";
-          note.textContent = "Percent change · " + span;
+          /* The chart had no label of any kind: no heading, no caption, and a
+             note that named the measure and the window but never said WHICH
+             indexes were plotted. Three unexplained lines on a dashboard read
+             as decoration, and the legend that does name them sits below the
+             plot, after you have already tried to read it. Name them here. */
+          var names = (data && Array.isArray(data.indexes) ? data.indexes : [])
+            .map(function (s) { return s && s.name; })
+            .filter(Boolean);
+          note.textContent = (names.length ? names.join(" · ") + "  —  " : "")
+            + "percent change · " + span;
           note.title = Number.isFinite(Number(lead.points)) ? lead.points + " " + res : "";
         }
       } else if (chartHost) {

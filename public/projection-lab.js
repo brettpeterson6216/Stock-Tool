@@ -269,10 +269,16 @@
     actions.innerHTML =
       '<button type="button" class="plab2-btn" id="plab2-reseed" aria-label="Re-seed the model from the latest company data"><i class="ti ti-wand" aria-hidden="true"></i> Re-seed from data</button>' +
       '<span class="plab2-spacer"></span>' +
-      '<button type="button" class="plab2-btn" id="plab2-save" aria-label="Save this projection model"><i class="ti ti-bookmark" aria-hidden="true"></i> Save</button>' +
+      '<button type="button" class="plab2-btn" id="plab2-cases" aria-label="Open, rename or delete saved cases for this ticker"><i class="ti ti-folder" aria-hidden="true"></i> Cases</button>' +
+      '<button type="button" class="plab2-btn" id="plab2-save" aria-label="Save this projection case"><i class="ti ti-bookmark" aria-hidden="true"></i> Save</button>' +
       '<button type="button" class="plab2-btn" id="plab2-csv" aria-label="Export the full model as CSV"><i class="ti ti-table-export" aria-hidden="true"></i> CSV</button>' +
       '<button type="button" class="plab2-btn plab2-btn-gold" id="plab2-img" aria-label="Export a shareable image of this projection"><i class="ti ti-photo-down" aria-hidden="true"></i> Export image</button>';
     root.appendChild(actions);
+    var casesBox = el("div", "plab2-cases");
+    casesBox.id = "plab2-cases-panel";
+    casesBox.hidden = true;
+    root.appendChild(casesBox);
+
     var confirmBox = el("div", "plab2-confirm");
     confirmBox.id = "plab2-confirm";
     confirmBox.hidden = true;
@@ -288,6 +294,7 @@
     wireTable();
     q("#plab2-reseed").onclick = function () { requestReseed(); };
     q("#plab2-save").onclick = saveModel;
+    q("#plab2-cases").onclick = toggleCases;
     q("#plab2-csv").onclick = exportCSV;
     q("#plab2-img").onclick = exportImage;
 
@@ -750,17 +757,199 @@
     box.innerHTML = chips.join("") + (warn ? '<span class="plab2-chip plab2-chip-warn"><i class="ti ti-alert-triangle" aria-hidden="true"></i> ' + esc(warn) + "</span>" : "");
   }
 
+  /* ═══════════════════════ named cases ═══════════════════════
+
+     The Lab used to have exactly one shelf per ticker. The working model was
+     written to localStorage under il-projlab:v2:<TICKER>, and that key is the
+     only thing loadSaved() ever reads. Saving also pushed a snapshot to
+     /api/saves, and reopening one wrote it straight back over that same key.
+     So a bull case and a bear case for the same company could not coexist:
+     building the second destroyed the first in the Lab, and reopening the
+     first destroyed the second. "My cases went away and I could not revisit
+     them" was not a bug in the save button - there was nowhere to put a
+     second case.
+
+     Cases now live on the server, which is the only copy that survives a
+     cleared browser or a different machine. localStorage keeps one thing and
+     one thing only: the working draft, so a refresh mid-edit loses nothing.
+     PL.caseId is the open case; null means an unsaved draft. */
+
+  function csrf() { try { return (window.S && window.S.csrfToken) || ""; } catch (e) { return ""; } }
+  function loggedIn() { try { return !!(window.S && window.S.loggedIn); } catch (e) { return false; } }
+
+  function caseTicker() { return (PL.model && PL.model.ticker) || "GEN"; }
+
+  async function listCases() {
+    if (!loggedIn()) return [];
+    var res = await fetch("/api/saves", { credentials: "same-origin" });
+    if (!res.ok) throw new Error("Could not read your saved cases");
+    var all = await res.json();
+    var t = caseTicker();
+    return (Array.isArray(all) ? all : []).filter(function (r) {
+      return r && r.type === "projection" && String(r.ticker || "").toUpperCase() === t;
+    });
+  }
+
+  async function writeCase(name, id) {
+    var body = JSON.stringify({
+      ticker: caseTicker(), type: "projection", label: name,
+      data: { model: PL.model, price: PL.model.startPrice || null, savedAt: new Date().toISOString() },
+    });
+    var res = await fetch(id ? "/api/saves/" + id : "/api/saves", {
+      method: id ? "PUT" : "POST",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json", "X-CSRF-Token": csrf() },
+      body: body,
+    });
+    var out = await res.json().catch(function () { return {}; });
+    if (!res.ok || !out.ok) throw new Error(out.error || "Save failed");
+    return out.id || id;
+  }
+
+  function toggleCases() {
+    var box = q("#plab2-cases-panel");
+    if (!box) return;
+    box.hidden = !box.hidden;
+    if (!box.hidden) renderCases();
+  }
+
+  function renderCases(rows, err) {
+    var box = q("#plab2-cases-panel");
+    if (!box) return;
+    var t = caseTicker();
+    if (rows === undefined && !err) {
+      box.innerHTML = '<div class="plab2-cases-head">Loading your ' + esc(t) + ' cases…</div>';
+      listCases().then(function (r) { renderCases(r); }).catch(function (e) { renderCases(null, e); });
+      return;
+    }
+    var head = '<div class="plab2-cases-head"><strong>' + esc(t) + ' cases</strong>'
+      + '<span class="plab2-cases-sub">Saved to your account. A case keeps its own copy of every assumption.</span></div>';
+
+    if (!loggedIn()) {
+      box.innerHTML = head + '<div class="plab2-cases-empty">Sign in to keep cases. Right now this model lives only in this browser, '
+        + 'and clearing site data or switching machines loses it.</div>';
+      return;
+    }
+    if (err) { box.innerHTML = head + '<div class="plab2-cases-empty">' + esc(err.message || "Could not load cases") + '</div>'; return; }
+
+    var list = (rows || []).map(function (r) {
+      var when = "";
+      try { when = new Date(r.created_at + "Z").toLocaleDateString(undefined, { month: "short", day: "numeric" }); } catch (e) {}
+      var open = r.id === PL.caseId ? ' plab2-case-open' : '';
+      return '<li class="plab2-case' + open + '" data-id="' + r.id + '">'
+        + '<button type="button" class="plab2-case-name" data-act="open" data-id="' + r.id + '">'
+        + esc(r.label || "Untitled case") + '</button>'
+        + '<span class="plab2-case-when">' + esc(when) + (open ? ' · open' : '') + '</span>'
+        + '<button type="button" class="plab2-case-del" data-act="del" data-id="' + r.id + '" '
+        + 'aria-label="Delete this case"><i class="ti ti-trash" aria-hidden="true"></i></button></li>';
+    }).join("");
+
+    box.innerHTML = head
+      + (list ? '<ul class="plab2-case-list">' + list + '</ul>'
+              : '<div class="plab2-cases-empty">No saved cases for ' + esc(t) + ' yet.</div>')
+      + '<div class="plab2-cases-new">'
+      + '<input type="text" id="plab2-case-name" class="plab2-case-input" maxlength="80" '
+      + 'placeholder="Name this case — Bull, Base, Margin recovery…" aria-label="Name for a new case">'
+      + '<button type="button" class="plab2-btn plab2-btn-gold" id="plab2-case-add">Save as new case</button>'
+      + '</div>';
+
+    box.querySelectorAll("[data-act]").forEach(function (b) {
+      b.onclick = function () {
+        var id = Number(b.getAttribute("data-id"));
+        if (b.getAttribute("data-act") === "open") return openCase(id, rows);
+        return deleteCase(id);
+      };
+    });
+    var add = q("#plab2-case-add");
+    if (add) add.onclick = function () {
+      var input = q("#plab2-case-name");
+      var name = (input && input.value || "").trim();
+      if (!name) { toastPL("Give the case a name first"); if (input) input.focus(); return; }
+      writeCase(name, null).then(function (id) {
+        PL.caseId = id; PL.caseName = name;
+        PL.savedJson = JSON.stringify(PL.model);
+        toastPL('Saved "' + name + '"');
+        renderCases(); renderStatus(PL.lastOutlook);
+      }).catch(function (e) { toastPL(e.message || "Could not save"); });
+    };
+  }
+
+  function openCase(id, rows) {
+    var row = (rows || []).filter(function (r) { return r.id === id; })[0];
+    var model = row && row.data && row.data.model;
+    if (!model) { toastPL("That case has no model attached"); return; }
+    try {
+      var migrated = M().plMigrateSavedModel(model) || model;
+      migrated.ticker = caseTicker();
+      PL.model = migrated;
+      PL.caseId = id;
+      PL.caseName = row.label || "";
+      PL.savedJson = JSON.stringify(PL.model);
+      writeDraft();
+      syncFoundationInputs();
+      recompute();
+      renderCases();
+      toastPL('Opened "' + (row.label || "case") + '"');
+    } catch (e) { toastPL("That case could not be opened"); }
+  }
+
+  function deleteCase(id) {
+    fetch("/api/saves/" + id, {
+      method: "DELETE", credentials: "same-origin",
+      headers: { "X-CSRF-Token": csrf() },
+    }).then(function (r) {
+      if (!r.ok) throw new Error("Delete failed");
+      if (PL.caseId === id) { PL.caseId = null; PL.caseName = ""; }
+      toastPL("Case deleted");
+      renderCases(); renderStatus(PL.lastOutlook);
+    }).catch(function (e) { toastPL(e.message || "Could not delete"); });
+  }
+
   /* ═══════════════════════ persistence ═══════════════════════ */
-  function saveModel() {
+  /* The working draft. Written on every save and on every open so a refresh
+     mid-edit loses nothing, and deliberately NOT the place a case lives. */
+  function writeDraft() {
     try {
       var json = JSON.stringify(PL.model);
-      localStorage.setItem(LS_PREFIX_V2 + (PL.model.ticker || "GEN"), json);
-      try { localStorage.removeItem(LS_PREFIX_V1 + (PL.model.ticker || "GEN")); } catch (e0) { /* legacy key may not exist */ }
+      localStorage.setItem(LS_PREFIX_V2 + caseTicker(), json);
+      try { localStorage.removeItem(LS_PREFIX_V1 + caseTicker()); } catch (e0) { /* legacy key may not exist */ }
+      return json;
+    } catch (e) { return null; }
+  }
+
+  function saveModel() {
+    var json = writeDraft();
+
+    /* Signed out there is nowhere durable to put it, and the old code said
+       "Projection saved" anyway - which is how work got lost without anyone
+       being told. Say what actually happened. */
+    if (!loggedIn()) {
       PL.savedJson = json;
-      if (typeof window.saveProjectionToAnalyses === "function") window.saveProjectionToAnalyses(PL.model);
-      else toastPL("Projection saved for " + PL.model.ticker);
+      toastPL(json ? "Saved in this browser only — sign in to keep it" : "Could not save (storage unavailable)");
       renderStatus(PL.lastOutlook);
-    } catch (e) { toastPL("Could not save (storage unavailable)"); }
+      return;
+    }
+
+    /* An unsaved draft has no name yet, and an unnamed case is the thing that
+       made the old saves impossible to tell apart. Ask, rather than quietly
+       writing another "AAPL — Projection Lab". */
+    if (!PL.caseId) {
+      var box = q("#plab2-cases-panel");
+      if (box) { box.hidden = false; renderCases(); }
+      setTimeout(function () { var i = q("#plab2-case-name"); if (i) i.focus(); }, 60);
+      toastPL("Name this case to save it");
+      return;
+    }
+
+    writeCase(PL.caseName || "Untitled case", PL.caseId).then(function () {
+      PL.savedJson = json;
+      toastPL('Saved "' + (PL.caseName || "case") + '"');
+      renderStatus(PL.lastOutlook);
+      var box = q("#plab2-cases-panel");
+      if (box && !box.hidden) renderCases();
+    }).catch(function (e) {
+      toastPL(e.message || "Could not save to your account");
+    });
   }
 
   function loadSaved(ticker) {
@@ -1272,6 +1461,29 @@
 
       /* actions */
       ".plab2-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:14px;}" +
+      /* Cases panel. Sits under the actions row, closed by default, so the
+         Lab looks no busier until you want it. */
+      ".plab2-cases{margin-top:12px;padding:14px 16px;border:1px solid var(--rp-line,rgba(224,186,104,.28));" +
+      "border-radius:10px;background:var(--rp-inset,rgba(255,255,255,.03));}" +
+      ".plab2-cases[hidden]{display:none;}" +
+      ".plab2-cases-head{display:flex;flex-direction:column;gap:3px;margin-bottom:10px;}" +
+      ".plab2-cases-head strong{font-size:13px;letter-spacing:.02em;}" +
+      ".plab2-cases-sub{font-size:12px;color:var(--rp-muted,#9d988c);}" +
+      ".plab2-cases-empty{font-size:12.5px;color:var(--rp-muted,#9d988c);padding:8px 0 10px;}" +
+      ".plab2-case-list{list-style:none;margin:0 0 10px;padding:0;display:flex;flex-direction:column;gap:2px;}" +
+      ".plab2-case{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:7px;}" +
+      ".plab2-case:hover{background:var(--rp-lift,rgba(255,255,255,.05));}" +
+      ".plab2-case-open{background:color-mix(in srgb,var(--rp-gold,#efb133) 12%,transparent);}" +
+      ".plab2-case-name{flex:1;min-width:0;text-align:left;background:none;border:0;padding:0;cursor:pointer;" +
+      "font:inherit;font-size:13.5px;color:var(--rp-copy,#f2efe6);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}" +
+      ".plab2-case-name:hover{color:var(--rp-gold,#efb133);}" +
+      ".plab2-case-when{font-size:11.5px;color:var(--rp-muted,#9d988c);white-space:nowrap;}" +
+      ".plab2-case-del{background:none;border:0;padding:2px 4px;cursor:pointer;color:var(--rp-muted,#9d988c);}" +
+      ".plab2-case-del:hover{color:var(--rp-red,#e76a6e);}" +
+      ".plab2-cases-new{display:flex;gap:8px;flex-wrap:wrap;}" +
+      ".plab2-case-input{flex:1;min-width:190px;padding:7px 10px;border-radius:7px;font:inherit;font-size:13px;" +
+      "border:1px solid var(--rp-line,rgba(224,186,104,.28));background:var(--rp-panel,#151412);color:var(--rp-copy,#f2efe6);}" +
+      ".plab2-case-input:focus{outline:none;border-color:var(--rp-gold,#efb133);}" +
       ".plab2-spacer{flex:1;}" +
       ".plab2-btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border2);background:var(--card);color:var(--text2);font:700 .74rem var(--sans);padding:.6rem .95rem;border-radius:var(--r2,6px);cursor:pointer;min-height:38px;transition:border-color .14s,background .14s;}" +
       ".plab2-btn:hover{border-color:var(--gold-ring);}" +

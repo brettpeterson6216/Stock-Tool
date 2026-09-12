@@ -287,6 +287,30 @@ router.post("/saves", validateCsrf, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+/* Updating a save in place.
+
+   There was only INSERT and DELETE, so a tool that wanted to revise something
+   it had already saved had no move except to write a second row - which is
+   how the Projection Lab ended up with no way to keep a case and edit it. A
+   named case you cannot re-save is a snapshot, not a case. */
+router.put("/saves/:id", validateCsrf, async (req, res) => {
+  if (!req.session.userId) return res.status(401).json({ error: "Not logged in" });
+  const { label, data } = req.body || {};
+  if (!data || typeof data !== "object" || Array.isArray(data)) {
+    return res.status(400).json({ error: "Analysis data required." });
+  }
+  const safeLabel = String(label || "").trim().slice(0, 160);
+  try {
+    // Scoped to the owner, so an id from another account updates nothing.
+    const r = await db.execute({
+      sql:  "UPDATE saved_analyses SET label=?, data=? WHERE id=? AND user_id=?",
+      args: [safeLabel, JSON.stringify(data), req.params.id, req.session.userId],
+    });
+    if (!r.rowsAffected) return res.status(404).json({ error: "Not found" });
+    res.json({ ok: true, id: Number(req.params.id) });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 router.delete("/saves/:id", validateCsrf, async (req, res) => {
   if (!req.session.userId) return res.status(401).json({ error: "Not logged in" });
   try {
