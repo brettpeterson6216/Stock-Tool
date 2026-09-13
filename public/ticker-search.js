@@ -130,6 +130,19 @@
     var has = !!this.input.value.length;
     this.clear.hidden = !has;
     if (this.wrap) this.wrap.classList.toggle("ts-has-value", has);
+    if (has) this.placeClear();
+  };
+
+  /* The button is positioned against the wrapper, but the wrapper is not
+     always just the field: the research workspace puts an Analyze button
+     beside its input, and a clear pinned to the wrapper's right edge landed on
+     top of it. Pin it to the field's own right edge instead. */
+  Combobox.prototype.placeClear = function () {
+    if (!this.wrap || this.wrap === this.input) return;
+    var wrap = this.wrap.getBoundingClientRect();
+    var field = this.input.getBoundingClientRect();
+    var inset = Math.max(4, Math.round(wrap.right - field.right) + 4);
+    this.clear.style.right = inset + "px";
   };
 
   Combobox.prototype.schedule = function () {
@@ -206,6 +219,7 @@
     // Inside the masthead the field is 34px tall in a 63px bar, so hanging the
     // list off the field itself tucked its first row behind the bar. Hang it
     // off the bar.
+    this.placeClear();
     var bar = this.input.closest("nav#main-nav, nav.il-global-nav, header");
     var top = anchor.bottom;
     if (bar) top = Math.max(top, bar.getBoundingClientRect().bottom);

@@ -1483,8 +1483,28 @@ function syncIndicatorAvailability(barCount) {
   note.classList.toggle('warn',unavailableActive.length>0);
   note.textContent=unavailableActive.length
     ? `${unavailableActive.join(' and ')} ${unavailableActive.length===1?'needs':'need'} more trading days. Choose a longer range.`
+    : chartViewNote();
+}
+
+/* The opening view is the most recent slice of the loaded range, wide enough
+   that a candle is a candle rather than a hairline. That is deliberate, but
+   with a 1Y pill lit and roughly three months on screen it looks like the
+   chart ignored the pill. Say the number instead. */
+function chartViewNote() {
+  const host=document.querySelector('[data-il-visible-bars]');
+  const shown=Number(host&&host.dataset.ilVisibleBars||0);
+  const total=Number(host&&host.dataset.ilTotalBars||0);
+  return shown&&total&&shown<total-1
+    ? `Showing the last ${shown} of ${total} sessions, at full candle width. Drag left for the rest.`
     : 'Zoom out at full view to load more price history';
 }
+
+/* The bar count is only known once the chart has laid out, which happens after
+   the render pass that writes this caption. */
+document.addEventListener('il:chart-view',()=>{
+  const note=document.getElementById('chart-data-note');
+  if(note&&!note.classList.contains('warn')) note.textContent=chartViewNote();
+});
 
 function rebuildPriceChart() {
   if(!S.data) return;

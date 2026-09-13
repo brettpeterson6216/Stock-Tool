@@ -183,7 +183,11 @@
 .il-tool-shell{margin-bottom:10px}
 .il-shell-top{grid-template-columns:minmax(132px,.42fr) minmax(220px,.9fr) auto;padding:9px 10px}
 .il-shell-top strong{font:700 12px/1.15 var(--sans)}
-.il-shell-ticker{grid-template-columns:1.15fr repeat(2,minmax(88px,.48fr)) auto}
+/* Four data cells and the freshness button, on one row. The declutter pass
+   left four columns for five laid-out items - the four cells plus the
+   button - so the button wrapped onto a second row at column one and read
+   as a stray band under the ticker line. */
+.il-shell-ticker{grid-template-columns:1.15fr repeat(3,minmax(88px,.48fr)) auto}
 .il-shell-ticker>div:nth-child(n+5){display:none}
 .il-shell-preview{grid-template-columns:1fr}
 .il-shell-preview>div{padding:10px 11px;display:flex;align-items:center;gap:9px}

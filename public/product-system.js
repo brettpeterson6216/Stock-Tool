@@ -280,7 +280,7 @@
     return `<div class="il-tool-shell" data-il-shell="${kind}">
       <div class="il-shell-top">
         <div><span>${isProjection ? "Projection" : "Analyze"}</span><strong>${isProjection ? "Projection builder" : "Ticker workspace"}</strong></div>
-        <div class="il-shell-search"><input type="text" aria-label="Search ticker or company" placeholder="Search ticker or company"><button type="button">Analyze</button></div>
+        <div class="il-shell-search"><input type="text" data-ticker-search aria-label="Search ticker or company" placeholder="Search ticker or company"><button type="button">Analyze</button></div>
         <div class="il-shell-actions">
           <button type="button" data-il-drawer="${isProjection ? "projection-help" : "analyze-help"}" aria-label="Open help"><i class="ti ti-help-circle"></i><span>Help</span></button>
           <button type="button" data-il-drawer="sources" aria-label="Open sources"><i class="ti ti-database"></i><span>Sources</span></button>

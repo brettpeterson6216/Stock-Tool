@@ -376,6 +376,18 @@
         ts.applyOptions({ barSpacing: Math.max(floorSpacing, (width - gutter) / visible) });
         ts.setVisibleLogicalRange({ from: rows.length - visible, to: rows.length + 3 });
       } catch (e) { try { ts.fitContent(); } catch (e2) {} }
+      /* Say how much of the range is on screen. The range pills load a year of
+         data but the opening view is the most recent slice of it, so a chart
+         labelled 1Y opens showing about three months - which reads as the
+         chart being wrong rather than zoomed. Nothing else can know this
+         number: it depends on the rendered width. */
+      try {
+        host.dataset.ilVisibleBars = String(Math.min(visible, rows.length));
+        host.dataset.ilTotalBars = String(rows.length);
+        document.dispatchEvent(new CustomEvent("il:chart-view", {
+          detail: { visible: Math.min(visible, rows.length), total: rows.length },
+        }));
+      } catch (e) {}
     }
     /* Run once now (so the first paint is right) and once after layout settles
        (so autoSize has the real width). The second pass must stand down if the

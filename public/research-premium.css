@@ -1321,6 +1321,15 @@ body.il-static-page .feat-icon { font-size: 18px !important; }
   display: flex !important;
   flex-direction: column !important;
 }
+/* ...but only while the page really is sparse. Once a company is loaded the
+   shell is a header strip above the result, not the page: holding it at the
+   viewport height put 460px of nothing between the ticker line and the chart,
+   which is the first thing anyone sees after pressing Analyze. Measured at
+   1440x900: shell 617px tall around 155px of content. */
+#view-tool.has-stock .il-tool-shell,
+#view-tool .acc-body.has-stock > .il-tool-shell {
+  min-height: 0 !important;
+}
 :is(.tool-disclaimer, .il-disclaimer, .il-legal-note, .app-disclaimer, .il-tool-disclaimer) {
   margin-top: auto !important;
   padding-top: 18px !important;
