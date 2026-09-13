@@ -244,6 +244,17 @@
     </aside>
 
     <div class="ihm-col-main">
+      <!-- Companies first, market second. Someone arriving at the dashboard is
+           here to look at a company; the index chart is the backdrop to that,
+           not the errand. It used to sit above the fold with the companies
+           below it. -->
+      <section class="ihm-panel" aria-label="Popular companies">
+        <div class="ihm-panel-head">
+          <span class="ihm-panel-title">Popular starting points</span>
+          <span class="ihm-panel-note">one day</span>
+        </div>
+        <div class="ihm-populars" id="ihm-populars"></div>
+      </section>
       <section class="ihm-panel ihm-market-panel" aria-label="Broader market">
         <div class="ihm-panel-head">
           <div class="ihm-panel-id">
@@ -278,13 +289,6 @@
         </div>
       </section>
 
-      <section class="ihm-panel" aria-label="Popular companies">
-        <div class="ihm-panel-head">
-          <span class="ihm-panel-title">Popular starting points</span>
-          <span class="ihm-panel-note">one day</span>
-        </div>
-        <div class="ihm-populars" id="ihm-populars"></div>
-      </section>
     </div>
 
     <aside class="ihm-col-side" aria-label="Your favorites">

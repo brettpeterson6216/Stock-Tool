@@ -278,6 +278,17 @@
       : '<span class="ihm-none">Index data unavailable.</span>';
   }
 
+  /* The mark a company is recognised by, before its ticker is read. Served
+     from our own origin (routes/logo.js) rather than hotlinked, so loading the
+     dashboard does not announce the visitor to a logo host. Anything without
+     one falls back to its first two letters, which is why the tile is drawn
+     and sized here rather than by the image. */
+  function logoTile(symbol) {
+    var mono = String(symbol || "").replace(/[^A-Za-z0-9]/g, "").slice(0, 2).toUpperCase();
+    return '<span class="ihm-pop-logo" data-mono="' + esc(mono) + '" aria-hidden="true">' +
+      '<img src="/api/logo/' + encodeURIComponent(symbol) + '" alt="" loading="lazy" decoding="async"></span>';
+  }
+
   function renderPopulars(rows) {
     var wrap = document.getElementById("ihm-populars");
     if (!wrap) return;
@@ -286,10 +297,20 @@
       ? have.map(function (r) {
           return '<a class="ihm-pop' + dirClass(r.changePct) + '" href="/?view=tool&section=analyze&symbol=' +
             encodeURIComponent(r.symbol) + '">' + spark(r.closes, Number(r.changePct) >= 0) +
-            '<div class="ihm-pop-txt"><b>' + esc(r.symbol) + "</b><span>" + num(r.price, 2) +
+            '<div class="ihm-pop-txt"><span class="ihm-pop-id">' + logoTile(r.symbol) +
+            "<b>" + esc(r.symbol) + "</b></span><span>" + num(r.price, 2) +
             "</span><i>" + pct(r.changePct) + "</i></div></a>";
         }).join("")
       : '<span class="ihm-none">Quotes unavailable right now.</span>';
+    /* No provider logo, or the provider is down: show the monogram instead of
+       a broken-image glyph. Bound per render because the rows are replaced. */
+    wrap.querySelectorAll(".ihm-pop-logo img").forEach(function (img) {
+      img.addEventListener("error", function () {
+        var tile = img.parentNode;
+        if (tile) tile.classList.add("is-mono");
+        img.remove();
+      });
+    });
   }
 
   function renderFavourites(items, quotes) {

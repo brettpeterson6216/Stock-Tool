@@ -1192,3 +1192,17 @@ test("GET /api/search needs no session", async () => {
   assert.equal(res.status, 200);
   assert.equal((await res.json()).results[0].symbol, "NVDA");
 });
+
+// ── Company logos ─────────────────────────────────────────────
+// Every external fetch fails in this harness, which is the provider-outage
+// case. The dashboard must get a clean 404 it can fall back from, not a 500,
+// and not a redirect that would point the browser at a third party.
+test("GET /api/logo/:ticker 404s cleanly when the provider is unreachable", async () => {
+  const res = await req("/api/logo/AAPL", { redirect: "manual" });
+  assert.equal(res.status, 404);
+});
+
+test("GET /api/logo rejects a ticker that is not one", async () => {
+  const res = await req("/api/logo/..%2F..%2Fetc");
+  assert.equal(res.status, 400);
+});

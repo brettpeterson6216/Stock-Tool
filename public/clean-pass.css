@@ -1923,3 +1923,27 @@ html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) #main-nav 
   -webkit-text-fill-color: currentColor !important;
   opacity: 1 !important;
 }
+
+/* ── The popular-companies row ───────────────────────────────────────────────
+   Eight ticker strings in a grid is a list you read rather than scan. The mark
+   goes in front of the symbol; anything the provider has no logo for keeps the
+   same tile with its first two letters in it, so the row stays on one rhythm
+   whether the image arrives or not. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-pop-id {
+  display: flex !important; align-items: center !important; gap: 7px !important; min-width: 0 !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-pop-logo {
+  flex: 0 0 22px !important; width: 22px !important; height: 20px !important;
+  display: grid !important; place-items: center !important; overflow: hidden !important;
+  border-radius: 4px !important;
+  background: var(--lp-border, rgba(176, 160, 126, .16)) !important;
+  font-size: 11px !important; font-weight: 700 !important; line-height: 1 !important;
+  color: var(--il-muted-ink, #a3adad) !important; -webkit-text-fill-color: currentColor !important;
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-pop-logo.is-mono::before {
+  content: attr(data-mono);
+}
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-pop-logo img {
+  width: 100% !important; height: 100% !important; object-fit: contain !important;
+  background: #fff !important;                 /* most logos are drawn for light */
+}

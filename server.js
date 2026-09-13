@@ -79,6 +79,7 @@ const stockLandingRouter = require("./routes/stock-landing");
 const workspaceRouter     = require("./routes/workspace");
 const analysisRouter      = require("./routes/analysis");
 const searchRouter        = require("./routes/search");
+const logoRouter          = require("./routes/logo");
 const tickerIndex         = require("./lib/ticker-index");
 const providerHealth      = require("./lib/provider-health");
 const { productionReadiness } = require("./lib/readiness");
@@ -222,6 +223,7 @@ app.use([
   "/api/darkpool",
   "/api/lens-score",
   "/api/search",
+  "/api/logo",
 ], marketDataLimiter);
 
 app.use("/api",         authRouter);        // /api/auth/*, /api/saves, /api/admin/*
@@ -234,6 +236,7 @@ app.use("/api",         lensScoreRouter);    // /api/lens-score/*
 app.use("/api",         workspaceRouter);    // /api/workspace/*
 app.use("/api",         analysisRouter);     // /api/analysis/:ticker
 app.use("/api",         searchRouter);       // /api/search
+app.use("/api",         logoRouter);         // /api/logo/:ticker
 
 // ============================================================
 //  Static HTML pages
