@@ -78,6 +78,8 @@ const lensScoreRouter   = require("./routes/lens-score");
 const stockLandingRouter = require("./routes/stock-landing");
 const workspaceRouter     = require("./routes/workspace");
 const analysisRouter      = require("./routes/analysis");
+const searchRouter        = require("./routes/search");
+const tickerIndex         = require("./lib/ticker-index");
 const providerHealth      = require("./lib/provider-health");
 const { productionReadiness } = require("./lib/readiness");
 const { buildSitemapXml } = require("./lib/acquisition-tickers");
@@ -219,6 +221,7 @@ app.use([
   "/api/institutional",
   "/api/darkpool",
   "/api/lens-score",
+  "/api/search",
 ], marketDataLimiter);
 
 app.use("/api",         authRouter);        // /api/auth/*, /api/saves, /api/admin/*
@@ -230,6 +233,7 @@ app.use("/api",         financialsRouter);  // /api/financials/*, /api/earnings/
 app.use("/api",         lensScoreRouter);    // /api/lens-score/*
 app.use("/api",         workspaceRouter);    // /api/workspace/*
 app.use("/api",         analysisRouter);     // /api/analysis/:ticker
+app.use("/api",         searchRouter);       // /api/search
 
 // ============================================================
 //  Static HTML pages
@@ -502,6 +506,14 @@ async function runReviewDigests() {
 if (require.main === module) {
   initDb().then(() => {
     app.listen(PORT, () => console.log(`Implied Lens running on port ${PORT}`));
+    // Company-name search answers from memory. The seed list in
+    // lib/ticker-index.js serves the first few seconds; this pulls the full
+    // SEC registrant list behind it and refreshes daily. It can fail freely —
+    // a stale index is a working search.
+    tickerIndex.startBackgroundRefresh().then(ok => {
+      console.log(ok ? `Ticker index: ${tickerIndex.size()} symbols from SEC.`
+                     : `Ticker index: seed only (${tickerIndex.size()} symbols).`);
+    });
     setTimeout(runReviewDigests, 90 * 1000);               // shortly after boot
     setInterval(runReviewDigests, 6 * 60 * 60 * 1000);     // then every 6 hours
   }).catch(err => { console.error("DB init failed:", err); process.exit(1); });

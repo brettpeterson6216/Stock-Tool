@@ -2163,3 +2163,118 @@ body.share-studio-open { overflow: hidden !important; }
   .share-studio-head h2 { font-size:21px; }
   .share-studio-preview { padding:12px; }
 }
+
+/* ── 9 · TICKER SEARCH ───────────────────────────────────────────────────────
+   The suggestion list for every search box on the site (public/ticker-search.js).
+   It is mounted on <body> and positioned fixed, because the header is a 63px
+   bar and several of the inputs it upgrades sit inside panels that clip their
+   overflow — a dropdown parented to the input was invisible in three of the
+   four places it appears.
+
+   Two-ID prefix for the same reason as every other rule in this file, plus one
+   specific reason: section 2 zeroes box-shadow on `body *`, and a floating
+   popover is exactly the case depth is reserved for. */
+:is(#il-system, html) :is(#il-system, body) .ts-wrap {
+  position: relative;
+}
+:is(#il-system, html) :is(#il-system, body) .ts-clear {
+  /* Stretched top-to-bottom rather than centred with a negative margin: the
+     reset in this file zeroes margins on everything, so the margin trick put
+     the button on the field's bottom edge. This also gives it a target you can
+     hit without aiming. */
+  position: absolute;
+  right: 4px;
+  top: 0;
+  bottom: 0;
+  width: 20px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: currentColor;
+  opacity: .62;
+  cursor: pointer;
+  z-index: 2;
+}
+:is(#il-system, html) :is(#il-system, body) .ts-clear svg { width: 12px; height: 12px; }
+:is(#il-system, html) :is(#il-system, body) .ts-clear:hover { opacity: 1; background: color-mix(in srgb, currentColor 12%, transparent); }
+:is(#il-system, html) :is(#il-system, body) .ts-clear:focus-visible {
+  outline: 2px solid var(--il-gold-ink, #d8a23d);
+  outline-offset: 1px;
+  opacity: 1;
+}
+/* Keep the caret clear of the button, but only while there is something to
+   clear — the placeholder should still use the full width. */
+:is(#il-system, html) :is(#il-system, body) .ts-wrap.ts-has-value .ts-input {
+  padding-right: 22px !important;
+}
+
+:is(#il-system, html) :is(#il-system, body) .ts-list {
+  --ts-bg: #ffffff;
+  --ts-line: rgba(12, 14, 18, .14);
+  --ts-ink: #14171c;
+  --ts-hover: rgba(216, 162, 61, .12);
+
+  position: fixed;
+  z-index: 10050;                       /* the masthead sits at 10000 */
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 4px;
+  border: 1px solid var(--ts-line);
+  border-radius: var(--r-md);
+  background: var(--ts-bg);
+  color: var(--ts-ink);
+  box-shadow: var(--e-overlay) !important;
+}
+:is(#il-system, html)[data-theme="dark"] :is(#il-system, body) .ts-list {
+  --ts-bg: #10141b;
+  --ts-line: rgba(255, 255, 255, .12);
+  --ts-ink: #F2F0EB;
+  --ts-hover: rgba(216, 162, 61, .16);
+}
+:is(#il-system, html) :is(#il-system, body) .ts-list[hidden] { display: none; }
+
+:is(#il-system, html) :is(#il-system, body) .ts-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s2);
+  padding: 7px 9px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+}
+:is(#il-system, html) :is(#il-system, body) .ts-row.ts-active {
+  background: var(--ts-hover);
+}
+:is(#il-system, html) :is(#il-system, body) .ts-sym {
+  flex: 0 0 auto;
+  min-width: 54px;
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: var(--t-small);
+  font-weight: var(--w-bold);
+  color: var(--ts-ink);
+}
+:is(#il-system, html) :is(#il-system, body) .ts-name {
+  flex: 1 1 auto;
+  overflow: hidden;
+  font-size: var(--t-small);
+  font-weight: var(--w-regular);
+  color: var(--il-muted-ink, #565e5c);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* The matched characters, not a block of highlighter. */
+:is(#il-system, html) :is(#il-system, body) .ts-list mark {
+  background: transparent;
+  color: var(--il-gold-ink, #7d5814);
+  font-weight: var(--w-bold);
+}
+:is(#il-system, html)[data-theme="dark"] :is(#il-system, body) .ts-list mark {
+  color: var(--il-gold-ink, #d8a23d);
+}
+:is(#il-system, html) :is(#il-system, body) .ts-empty {
+  padding: 9px;
+  font-size: var(--t-small);
+  color: var(--il-muted-ink, #565e5c);
+}

@@ -1160,3 +1160,35 @@ test("Resend verification is rate limited", async () => {
   }
   assert.equal(lastStatus, 429, "4th resend request should be rate-limited");
 });
+
+// ── Ticker / company search ───────────────────────────────────
+// The endpoint has to answer without any vendor reachable: the smoke harness
+// fails every external fetch, which is exactly the production case where
+// Finnhub is down. A search that only works when a third party is up is not
+// the search this site needs.
+test("GET /api/search resolves a company name to a symbol with no vendor", async () => {
+  const res = await req("/api/search?q=apple");
+  assert.equal(res.status, 200);
+  const body = await res.json();
+  assert.equal(body.results[0].symbol, "AAPL");
+  assert.equal(body.results[0].name, "Apple Inc.");
+  assert.equal(body.source, "index");
+});
+
+test("GET /api/search is case-insensitive and trims what a person typed", async () => {
+  const lower = await (await req("/api/search?q=%20ford%20")).json();
+  assert.equal(lower.results[0].symbol, "F");
+  assert.equal(lower.query, "FORD");
+});
+
+test("GET /api/search answers an empty query with an empty list, not a 500", async () => {
+  const res = await req("/api/search?q=");
+  assert.equal(res.status, 200);
+  assert.deepEqual((await res.json()).results, []);
+});
+
+test("GET /api/search needs no session", async () => {
+  const res = await req("/api/search?q=nvda");
+  assert.equal(res.status, 200);
+  assert.equal((await res.json()).results[0].symbol, "NVDA");
+});
