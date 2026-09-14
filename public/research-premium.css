@@ -169,8 +169,32 @@ button:disabled { cursor: not-allowed; }
 .ihm-head-id { min-width: 0 !important; }
 .ihm-greeting { font-size: clamp(24px,2.4vw,34px) !important; font-weight: 600 !important; line-height: 1.2 !important; }
 .ihm-sub { margin-top: 8px !important; font-size: 14px !important; color: var(--rp-muted) !important; }
-.ihm-head-link { font-size: 13px !important; color: var(--rp-copy) !important; text-decoration: none !important; }
-.ihm-head-link:hover { color: var(--rp-gold) !important; }
+/* The head is a grid here, but surface.css still carries the flex-era rule
+   that gave .ihm-search order:3 to drop it onto its own row below 1500px.
+   order survives into grid and flex-basis does not, so the search took the
+   third column and "Open workspace" was left sitting in the middle of the
+   400px column meant for the search - 13px of bare text with 380px of space
+   around it, which is why it read as something left behind rather than
+   something to press. Place all three explicitly, and give the link the shape
+   of a control. */
+.ihm-head-id { order: 1 !important; }
+.ihm-search { order: 2 !important; }
+.ihm-head-link {
+  order: 3 !important;
+  justify-self: end !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 10px 14px !important;
+  border: 1px solid var(--rp-line) !important;
+  border-radius: 9px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: var(--rp-copy) !important;
+  text-decoration: none !important;
+  white-space: nowrap !important;
+}
+.ihm-head-link:hover { border-color: var(--rp-gold) !important; color: var(--rp-gold) !important; }
 .ihm-search { width: 100% !important; max-width: none !important; margin: 0 !important; }
 .ihm-search-row { background: var(--rp-panel) !important; border: 1px solid var(--rp-line) !important; border-radius: 10px !important; }
 .ihm-search-icon { color: var(--rp-gold) !important; }
@@ -464,7 +488,23 @@ tbody tr:hover { background: var(--rp-gold-soft) !important; }
   }
 }
 .ihm-panel-id { flex-direction: row !important; align-items: baseline !important; gap: 10px !important; min-width: 0 !important; }
-.ihm-quote-label { display: none !important; }
+
+/* The note names the three plotted indexes, which is worth saying, but it was
+   only clipped below 1100px - so at 1280 and 1440 it ran out of its column and
+   printed straight over the timeframe buttons. The clip belongs at every
+   width: the note is the first thing that should give up room, not the title
+   and not the controls. */
+.ihm-market-panel .ihm-panel-note {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/* And the headline number is a PRICE sitting above an axis that reads 0% to
+   16%. Unlabelled, 5,514.97 looks like a value off that axis. It has always
+   had a label in the markup; a compact pass hid it. Say what the number is. */
+.ihm-quote-label { display: block !important; }
 .ihm-tf { min-height: 30px !important; padding: 4px 9px !important; }
 
 /* ── The plot answers to the window ─────────────────────────────────────────

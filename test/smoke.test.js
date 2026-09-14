@@ -1206,3 +1206,55 @@ test("GET /api/logo rejects a ticker that is not one", async () => {
   const res = await req("/api/logo/..%2F..%2Fetc");
   assert.equal(res.status, 400);
 });
+
+// ── Saved cases ───────────────────────────────────────────────
+// The Lab used to keep one shelf per ticker in localStorage, so a bull case
+// and a bear case for the same company could not coexist: building the second
+// destroyed the first, and reopening the first destroyed the second. Cases
+// live on the server now. These hold the shape that makes that possible.
+test("two cases for the same company coexist, each with its own numbers", async () => {
+  const s = await makeSession("savedcases_one", "savedcases_one@test.com");
+  const save = (label, growth) => req("/api/saves", {
+    method: "POST",
+    headers: { cookie: s.cookie, "X-CSRF-Token": s.csrfToken },
+    body: { ticker: "AAPL", type: "projection", label, data: { model: { ticker: "AAPL", growth } } },
+  });
+
+  const bull = await (await save("Bull case", 18)).json();
+  const bear = await (await save("Bear case", 4)).json();
+  assert.ok(bull.ok && bear.ok, "a save was rejected");
+  assert.notEqual(bull.id, bear.id, "the second case overwrote the first");
+
+  const rows = await (await req("/api/saves", { headers: { cookie: s.cookie } })).json();
+  const mine = rows.filter(r => r.ticker === "AAPL" && r.type === "projection");
+  assert.equal(mine.length, 2, `${mine.length} cases came back, not 2`);
+  assert.deepEqual(
+    mine.map(r => [r.label, r.data.model.growth]).sort(),
+    [["Bear case", 4], ["Bull case", 18]],
+    "the two cases do not have their own assumptions"
+  );
+});
+
+test("updating one saved case leaves the other alone", async () => {
+  const s = await makeSession("savedcases_two", "savedcases_two@test.com");
+  const save = (label, growth) => req("/api/saves", {
+    method: "POST",
+    headers: { cookie: s.cookie, "X-CSRF-Token": s.csrfToken },
+    body: { ticker: "NVDA", type: "projection", label, data: { model: { ticker: "NVDA", growth } } },
+  });
+  const bull = await (await save("Bull", 30)).json();
+  await save("Bear", 6);
+
+  const put = await req("/api/saves/" + bull.id, {
+    method: "PUT",
+    headers: { cookie: s.cookie, "X-CSRF-Token": s.csrfToken },
+    body: { ticker: "NVDA", type: "projection", label: "Bull", data: { model: { ticker: "NVDA", growth: 25 } } },
+  });
+  assert.equal(put.status, 200);
+
+  const rows = await (await req("/api/saves", { headers: { cookie: s.cookie } })).json();
+  const mine = rows.filter(r => r.ticker === "NVDA");
+  assert.equal(mine.length, 2, "the update created or destroyed a row");
+  assert.equal(mine.find(r => r.label === "Bull").data.model.growth, 25, "the edit did not stick");
+  assert.equal(mine.find(r => r.label === "Bear").data.model.growth, 6, "editing one case changed the other");
+});

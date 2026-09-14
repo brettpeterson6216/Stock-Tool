@@ -164,9 +164,38 @@ test("every page with the header also loads the search behaviour", () => {
 
 test("the search upgrades every input on the site, not just the header one", () => {
   const js = read("public/ticker-search.js");
-  for (const selector of ["#nav-ticker-input", "#main-ticker", "#il-quick-ticker", "[data-ticker-search]"]) {
+  for (const selector of [
+    "#nav-ticker-input",      // the header, on every page
+    "#ihm-ticker",            // the dashboard's own search
+    "#landing-search",        // the landing hero — the first box a visitor meets
+    "#mmenu-ticker",          // the mobile menu
+    "input[id$='-ticker']",   // main, quick, compare, thesis, learn, lab empty states
+    "#cmp1",
+    "[data-ticker-search]",   // the research workspace
+  ]) {
     assert.ok(js.includes(selector), `${selector} is not upgraded`);
   }
+});
+
+// "Connected across the site" means the boxes a person actually types in. Each
+// of these was found by listing every ticker input on a rendered page, not by
+// reading the markup.
+test("no ticker input on the home page is left on the old behaviour", () => {
+  const js = read("public/ticker-search.js");
+  const html = read("index.html");
+  // Not every box with "search" in its id takes a company: the glossary filter
+  // is a text filter over concepts and has no business suggesting NVDA.
+  const NOT_A_TICKER_BOX = new Set(["edu-glossary-search"]);
+  const ids = [...html.matchAll(/<input[^>]*id="([^"]*(?:ticker|search|cmp\d)[^"]*)"/g)]
+    .map(m => m[1])
+    .filter(id => !NOT_A_TICKER_BOX.has(id));
+  const covered = id =>
+    js.includes("#" + id) ||
+    (/-ticker$/.test(id) && js.includes("input[id$='-ticker']")) ||
+    new RegExp('id="' + id + '"[^>]*data-ticker-search').test(html) ||
+    id === "nav-ticker-input";
+  const missed = ids.filter(id => !covered(id));
+  assert.deepEqual(missed, [], "ticker inputs with no suggestions behind them");
 });
 
 // The header block is hashed byte-for-byte across every page (see

@@ -18,7 +18,21 @@
 (function () {
   "use strict";
 
-  var TARGETS = ["#nav-ticker-input", "#main-ticker", "#il-quick-ticker", "[data-ticker-search]"];
+  /* Every box on the site that takes a company. The id suffix covers the ones
+     built at runtime (the Compare rows, the thesis form, the lab empty states)
+     without each of them having to remember to opt in; anything that does not
+     fit the pattern carries data-ticker-search. Upgrading a field that has no
+     Enter handler of its own is harmless: choosing a suggestion fills it in,
+     which is what a form field wants anyway. */
+  var TARGETS = [
+    "#nav-ticker-input",          // the header, on every page
+    "#ihm-ticker",                // the dashboard's own search
+    "#landing-search", "#hero-search",  // the two landing heroes
+    "#mmenu-ticker",              // the mobile menu
+    "input[id$='-ticker']",       // main, quick, compare, thesis, learn, lab empty states
+    "#cmp1", "#cmp2", "#cmp3", "#cmp4",
+    "[data-ticker-search]",       // the research workspace, and anything new
+  ];
   var DEBOUNCE_MS = 160;
   var MIN_CHARS = 1;
   var LIMIT = 7;
