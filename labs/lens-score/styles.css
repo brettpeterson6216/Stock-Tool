@@ -62,8 +62,16 @@ html[data-theme="light"] body {
     radial-gradient(circle at 72% -10%, rgba(155, 106, 23, 0.11), transparent 28rem),
     linear-gradient(180deg, #fbf8f1 0, var(--night) 34rem);
 }
-button, input { font: inherit; }
-button { color: inherit; }
+/* Scoped away from #main-nav on purpose. This is a page-level reset, and the
+   top bar is not this page's to reset: the markup is shared byte-for-byte
+   across all fourteen documents, so `font: inherit` here resized every control
+   in the shared toolbar from the 13.3px the other pages render to this page's
+   16px body size. The account chip came out 108x30 instead of 85x21, sitting
+   5px higher, and LensToolkit looked like a different site's header.
+   A page stylesheet may reset the page. It may not reset the chrome. */
+:not(#main-nav) > button, :not(#main-nav) > input,
+main button, main input, .lens-card button, .lens-card input { font: inherit; }
+:not(#main-nav) > button, main button { color: inherit; }
 button:focus-visible, input:focus-visible {
   outline: 3px solid rgba(239, 201, 119, 0.78);
   outline-offset: 3px;

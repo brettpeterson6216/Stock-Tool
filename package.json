@@ -1,7 +1,7 @@
 {
   "name": "implied-lens",
   "version": "1.2.0",
-  "description": "Implied Lens \u2014 institutional-grade stock analysis platform (Node + Express + Turso + bcryptjs).",
+  "description": "Implied Lens — institutional-grade stock analysis platform (Node + Express + Turso + bcryptjs).",
   "main": "server.js",
   "scripts": {
     "build:styles": "node scripts/build-styles.js",
@@ -15,7 +15,8 @@
     "build:brand": "node scripts/build-brand.js",
     "check:brand": "node scripts/build-brand.js --check",
     "build:learn": "node scripts/build-learn.js",
-    "check:learn": "node scripts/build-learn.js --check"
+    "check:learn": "node scripts/build-learn.js --check",
+    "check:bar": "node scripts/check-bar.js"
   },
   "dependencies": {
     "@libsql/client": "^0.14.0",

@@ -67,7 +67,11 @@ html[data-theme="dark"] { background:#12100D; }
 ::-webkit-scrollbar { width:5px; height:5px; }
 ::-webkit-scrollbar-track { background:var(--cream2); }
 ::-webkit-scrollbar-thumb { background:var(--cream3); border-radius: 4px; }
-button { cursor:pointer; font-family:var(--sans); }
+/* Scoped out of the shared toolbar. :where() contributes no specificity,
+   so this excludes #main-nav without changing what this rule outranks
+   anywhere else. A sheet that only some pages load must not be able to
+   resize the chrome that every page shares. */
+button:not(:where(#main-nav *)) { cursor:pointer; font-family:var(--sans); }
 
 /* ═══════════════════════════════ NAV ═══════════════════════════════ */
 nav {

@@ -2208,3 +2208,136 @@ html body :is(.tagline,.eyebrow,.tag,.tag.gold,.isp-n,.pill,.score-label,
 /* The warning block keeps its red rule — it is the one border on the site
    that carries meaning — but at the token, not a hand-mixed grey. */
 html body .learn-warning { border-color: var(--rp-red) !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE TOP BAR IS ONE THING.
+
+   The markup already was: header-contract.test.js SHA1s the <nav id="main-nav">
+   block across all fourteen documents and fails if any byte differs. That test
+   passed the whole time LensToolkit's bar looked wrong, because the markup was
+   never the problem — seventeen stylesheets carry rules for this bar, and every
+   page gets a different subset of them. premium-revamp has 125 such rules,
+   site-shell 120, legacy-app 108, clean-pass 76, and LensToolkit loads its own
+   sheet on top with a page-level reset in it.
+
+   Identical markup styled by a different set of sheets is not one toolbar. So
+   the bar is specified here, in the one sheet appended to every bundle, at a
+   weight that page-level sheets cannot outbid. Anything below is the bar's
+   real definition; the copies elsewhere are free to disagree and lose.
+
+   The type scale is explicit rather than inherited. 13.3px was never a design
+   decision on the other thirteen pages — it is Chrome's default <button>
+   size, which the shared chrome happened to fall back to, and which any page
+   that resets `button { font: inherit }` silently overrides.
+   ═══════════════════════════════════════════════════════════════════════════ */
+html body #main-nav {
+  --bar-h: 62px;
+  height: var(--bar-h) !important; min-height: var(--bar-h) !important;
+  font-family: var(--rp-sans) !important;
+}
+/* The chrome sets its own type. Nothing inherits into it from the document. */
+html body #main-nav :is(button, input, a, span, div, form, select) {
+  font-family: var(--rp-sans) !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+}
+html body #main-nav .nav-tab { font-size: 14px !important; font-weight: 500 !important; letter-spacing: -.015em !important; }
+html body #main-nav #nav-ticker-input { font-size: 14px !important; }
+html body #main-nav #theme-toggle-btn { font-size: 13.5px !important; height: 34px !important; }
+html body #main-nav :is(#nav-login, #nav-signup, .il-global-login, .il-global-trial) {
+  font-size: 13.5px !important; height: 34px !important;
+}
+
+/* The account chip — the part that read as "terribly different". Explicit
+   height and type so it is the same object on every route, and a real target
+   size rather than the 21px the button default happened to produce. */
+html body #main-nav #nav-acct-wrap { display: block !important; position: relative !important; }
+html body #main-nav #nav-acct-btn {
+  display: inline-flex !important; align-items: center !important; gap: 7px !important;
+  height: 30px !important; padding: 0 10px !important;
+  font-size: 13.5px !important; font-weight: 600 !important; line-height: 1 !important;
+  border: 1px solid var(--rp-line) !important; border-radius: 8px !important;
+  background: var(--rp-panel) !important; color: var(--rp-ink) !important;
+}
+html body #main-nav #nav-acct-btn:hover { border-color: var(--rp-line-strong) !important; }
+html body #main-nav #nav-acct-name { font-size: 13.5px !important; font-weight: 600 !important; line-height: 1 !important; }
+html body #main-nav #nav-acct-badge, html body #main-nav .nav-acct-badge {
+  display: inline-flex !important; align-items: center !important;
+  height: 18px !important; padding: 0 7px !important;
+  font-size: 11px !important; font-weight: 700 !important; line-height: 1 !important;
+  border-radius: 999px !important;
+  background: var(--rp-gold-soft) !important; color: var(--rp-gold) !important;
+  border: 1px solid var(--rp-gold-ring) !important;
+}
+html body #main-nav .nav-acct-chevron { font-size: 11px !important; line-height: 1 !important; opacity: .7 !important; }
+html body #main-nav .il-global-actions {
+  display: flex !important; align-items: center !important; gap: 10px !important;
+}
+
+/* The active tab was 2px wider than the same tab inactive — it picks up a 1px
+   left and right border that the others do not have — so the whole row, the
+   search box and the account chip shifted 2px sideways every time you changed
+   page. A "you are here" mark must not move the furniture.
+
+   Every tab now carries the same box at all times and the indicator is drawn
+   inside it: gold text plus a 2px gold rule on the bottom edge, added with an
+   inset shadow so it costs no layout at all. */
+html body #main-nav .nav-tab {
+  border: 1px solid transparent !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  display: inline-flex !important; align-items: center !important;
+  height: 100% !important;
+  color: var(--rp-muted) !important;
+  transition: color .14s ease, box-shadow .14s ease !important;
+}
+html body #main-nav .nav-tab:hover { color: var(--rp-ink) !important; }
+html body #main-nav .nav-tab:is(.active-tab, .active, [aria-current="page"]) {
+  color: var(--rp-gold) !important;
+  box-shadow: inset 0 -2px 0 0 var(--rp-gold) !important;
+}
+
+/* The last three. The dashboard drew the wordmark at 15.12px where the static
+   pages drew it at 18px; the two auth pages gave the logo block a 34px height
+   against everyone else's 44px and dimmed the whole actions cluster to 58%
+   opacity, which shrank the search field by 28px to make room. All of it is
+   the same shape of bug: a page-level sheet reaching into shared chrome. */
+html body #main-nav .nav-logo {
+  height: 100% !important;
+  display: flex !important; align-items: center !important;
+  font-size: 15.5px !important; font-weight: 700 !important;
+  color: var(--rp-ink) !important; text-decoration: none !important;
+}
+html body #main-nav .il-global-actions,
+html body #main-nav .il-global-actions * {
+  font-size: 13.5px !important;
+  color: var(--rp-ink) !important;
+  opacity: 1 !important;
+}
+html body #main-nav .il-global-actions .nav-acct-badge { color: var(--rp-gold) !important; }
+html body #main-nav .il-global-actions .nav-acct-chevron { color: var(--rp-muted) !important; }
+html body #main-nav :is(#nav-signup, .il-global-trial) { color: var(--rp-on-gold) !important; }
+
+/* ── hidden means hidden ─────────────────────────────────────────────────────
+   `[hidden]` is only a User-Agent rule at `display:none`, so ANY author rule
+   that sets display beats it. That has now produced three separate bugs here:
+   the dashboard needed its own guard, the account lookalike link drew beside
+   the chip it duplicates, and the search box's clear "x" appeared on the auth
+   pages with an empty field — because something there sets the button to
+   `display:grid`, and `hidden` lost.
+
+   Every one was found by eye, one at a time, after shipping. The attribute is
+   the platform's way of saying "not rendered"; make it mean that once. */
+html body [hidden] { display: none !important; }
+
+/* The one place the bar's type scale must yield.
+   legacy-app.css carries `input,select,textarea{font-size:16px!important}`
+   inside its 640px query, with a comment saying why: mobile Safari zooms the
+   viewport when a focused input renders below 16px. That is a functional
+   floor, not a style choice — and pinning the search field to 14px above
+   would have quietly reintroduced the zoom on every phone. Same breakpoint,
+   same floor, stated here so the bar's own rule cannot outrank it by accident. */
+@media (max-width: 640px) {
+  html body #main-nav :is(input, select, textarea),
+  html body #main-nav #nav-ticker-input { font-size: 16px !important; }
+}
