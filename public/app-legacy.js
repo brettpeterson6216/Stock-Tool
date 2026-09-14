@@ -4981,7 +4981,7 @@ document.addEventListener('click', function(e) {
       e.preventDefault();
       openAccountModal();
       var wrap = document.getElementById('nav-acct-wrap');
-      if (wrap) wrap.classList.remove('open');
+      if (wrap) wrap.classList.remove('open'); document.getElementById('main-nav') && document.getElementById('main-nav').classList.remove('il-acct-open');
     });
 
     /* --- Subscription & billing ---
@@ -4995,7 +4995,7 @@ document.addEventListener('click', function(e) {
     if (acctBilling) acctBilling.addEventListener('click', async function (e) {
       e.preventDefault();
       var wrap = document.getElementById('nav-acct-wrap');
-      if (wrap) wrap.classList.remove('open');
+      if (wrap) wrap.classList.remove('open'); document.getElementById('main-nav') && document.getElementById('main-nav').classList.remove('il-acct-open');
       var plan = (typeof S !== 'undefined' && S.userPlan) || 'free';
       if (plan !== 'pro' && plan !== 'trial') {
         if (typeof showUpgradeModal === 'function') showUpgradeModal(false, 'account_menu_billing');
@@ -5021,7 +5021,7 @@ document.addEventListener('click', function(e) {
     if (acctFeedback) acctFeedback.addEventListener('click', function (e) {
       e.preventDefault();
       var wrap = document.getElementById('nav-acct-wrap');
-      if (wrap) wrap.classList.remove('open');
+      if (wrap) wrap.classList.remove('open'); document.getElementById('main-nav') && document.getElementById('main-nav').classList.remove('il-acct-open');
       var opener = document.querySelector('.il-feedback-open, [data-il-feedback]');
       if (opener) { opener.click(); return; }
       if (typeof window.ilOpenFeedback === 'function') { window.ilOpenFeedback(); return; }
@@ -5033,8 +5033,35 @@ document.addEventListener('click', function(e) {
     var acctSupport = document.getElementById('nav-acct-support');
     if (acctSupport) acctSupport.addEventListener('click', function () {
       var wrap = document.getElementById('nav-acct-wrap');
-      if (wrap) wrap.classList.remove('open');
+      if (wrap) wrap.classList.remove('open'); document.getElementById('main-nav') && document.getElementById('main-nav').classList.remove('il-acct-open');
     });
+
+    /* --- arriving from a static page with an intent in the URL ---
+       Account settings and Leave a review are modals that only exist in the
+       app. The thirteen static pages carry the same menu, so rather than build
+       second copies of both modals there (which would drift), site-nav.js
+       sends the visitor here with ?account=1 or ?review=1 and this opens the
+       right one. Without this the hand-off lands on the dashboard and the
+       click looks like it did nothing - which is the bug it is replacing. */
+    try {
+      var intent = new URLSearchParams(window.location.search);
+      var clean = function () {
+        var u = new URL(window.location.href);
+        u.searchParams.delete('account'); u.searchParams.delete('review');
+        history.replaceState(null, '', u.pathname + (u.search || '') + u.hash);
+      };
+      if (intent.get('account') === '1') {
+        clean();
+        setTimeout(function () { if (typeof openAccountModal === 'function') openAccountModal(); }, 0);
+      } else if (intent.get('review') === '1') {
+        clean();
+        setTimeout(function () {
+          if (typeof window.ilOpenFeedback === 'function') { window.ilOpenFeedback(); return; }
+          var opener = document.querySelector('.il-feedback-open, [data-il-feedback]');
+          if (opener) opener.click();
+        }, 400);   // product-system.js defines the opener after its own boot
+      }
+    } catch (e) {}
 
     // --- Login modal close ---
     var loginClose = document.getElementById('modal-close-btn');

@@ -215,4 +215,115 @@
       location.href = acct ? acct.getAttribute("href") : "/login";
     };
   }
+
+  /* ── the account menu, on the pages that are not the app ──────────────────
+     The menu markup is part of the shared header, so it is on all fifteen
+     pages. Its behaviour was not: every listener lives in app-legacy.js, and
+     app-legacy.js is loaded by index.html and nothing else. On /pricing,
+     /learn, /about, /terms and nine more, the account button did not even
+     OPEN the menu — no script on those pages referenced #nav-acct-btn at all.
+
+     That is the original "the dropdown does nothing" complaint, still intact
+     on thirteen pages after it was fixed on one, and worst on /pricing: the
+     page where a member decides whether to keep paying is the page where
+     "Subscription & billing" was a dead href="#".
+
+     Same contract as the rest of this file: if the app already defined the
+     behaviour, do not touch it. app-legacy.js binds its own listeners on
+     index.html, so this guard is what keeps the two from double-firing. */
+  var acctBtn  = document.getElementById("nav-acct-btn");
+  var acctWrap = document.getElementById("nav-acct-wrap");
+  /* The guard has to be exact. toggleAcctMenu lives inside app-navigation.js
+     as a module-local function, never on window, so a `typeof window.x` check
+     reads false ON THE APP TOO and this file would bind a second listener
+     beside app-legacy.js's — two toggles per click, and the menu never opens
+     on the dashboard. Ask the only question that actually answers it: does
+     this page load the app? */
+  var appPresent = !!document.querySelector('script[src*="app-legacy"]');
+  if (acctBtn && acctWrap && !appPresent) {
+    /* `nav` also gets a class: the actions container clips its children with
+       overflow:hidden, so the popup has to un-clip the row while it is open.
+       See the .il-acct-open rule in research-premium.css. */
+    var closeAcct = function () {
+      acctWrap.classList.remove("open"); nav.classList.remove("il-acct-open");
+      acctBtn.setAttribute("aria-expanded", "false");
+    };
+    var openAcct = function () {
+      acctWrap.classList.add("open"); nav.classList.add("il-acct-open");
+      acctBtn.setAttribute("aria-expanded", "true");
+    };
+
+    acctBtn.setAttribute("aria-haspopup", "menu");
+    acctBtn.setAttribute("aria-expanded", "false");
+    acctBtn.addEventListener("click", function (e) {
+      e.preventDefault();
+      if (acctWrap.classList.contains("open")) closeAcct(); else openAcct();
+    });
+    document.addEventListener("click", function (e) {
+      if (!acctWrap.classList.contains("open")) return;
+      if (!acctWrap.contains(e.target)) closeAcct();
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && acctWrap.classList.contains("open")) { closeAcct(); acctBtn.focus(); }
+    });
+
+    /* A CSRF token, for the two items that POST. The app keeps one in memory;
+       a static page has to ask for it, and only when it is actually needed —
+       fetching one on every page load would be a request per page for a menu
+       most visits never open. */
+    var csrf = null;
+    var token = function () {
+      if (csrf) return Promise.resolve(csrf);
+      return fetch("/api/csrf", { credentials: "same-origin" })
+        .then(function (r) { return r.json(); })
+        .then(function (j) { csrf = (j && j.csrfToken) || ""; return csrf; })
+        .catch(function () { return ""; });
+    };
+
+    var on = function (id, fn) {
+      var el = document.getElementById(id);
+      if (el) el.addEventListener("click", function (e) { fn(e, el); });
+    };
+
+    /* Account settings and Leave a review open modals that only exist inside
+       the app. Rather than build second copies here that would drift, hand the
+       page to the app with the intent in the URL; app-legacy.js opens the right
+       one on arrival. */
+    on("nav-acct-settings", function (e) { e.preventDefault(); closeAcct(); location.href = "/?account=1"; });
+    on("nav-acct-feedback", function (e) { e.preventDefault(); closeAcct(); location.href = "/?review=1"; });
+    on("nav-acct-support", function () { closeAcct(); });   // a real mailto in the markup
+
+    /* Billing goes to the same Stripe portal the app uses. Anyone without a
+       subscription goes to /pricing instead of to a Stripe error page. */
+    on("nav-acct-billing", function (e) {
+      e.preventDefault();
+      closeAcct();
+      var plan = String(window.__ilPlan || "").toLowerCase();
+      if (plan !== "pro" && plan !== "trial") { location.href = "/pricing"; return; }
+      token().then(function (t) {
+        return fetch("/api/stripe/portal", {
+          method: "POST", credentials: "same-origin",
+          headers: { "Content-Type": "application/json", "X-CSRF-Token": t },
+        });
+      }).then(function (r) { return r.json(); }).then(function (out) {
+        if (out && out.url) { location.href = out.url; return; }
+        throw new Error("no portal url");
+      }).catch(function () {
+        // Never silent. That silence was the original complaint.
+        location.href = "mailto:support@impliedlens.com?subject=ImpliedLens%20billing";
+      });
+    });
+
+    on("nav-acct-logout", function (e) {
+      e.preventDefault();
+      closeAcct();
+      token().then(function (t) {
+        return fetch("/api/auth/logout", {
+          method: "POST", credentials: "same-origin",
+          headers: { "Content-Type": "application/json", "X-CSRF-Token": t },
+        });
+      }).then(function () { location.href = "/"; })
+        .catch(function () { location.href = "/"; });
+    });
+  }
 }());

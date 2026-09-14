@@ -96,6 +96,42 @@
       el.setAttribute("aria-label", signedIn ? "Open saved research" : "Log in");
     });
 
+    /* ── the real account menu, not a lookalike ───────────────────────────
+       These pages used to build their own <a class="il-global-account"> that
+       navigated straight to saved research, while the app showed a dropdown
+       with settings, billing, reviews, support and log out. Same session, same
+       chip, two different behaviours depending only on which page you were
+       standing on — and the menu's own markup (#nav-acct-wrap) was sitting
+       right there, display:none, on all fifteen pages.
+
+       So use it. site-nav.js supplies the behaviour on pages that do not load
+       app-legacy.js, research-premium.css supplies the popup styling that
+       used to live only in legacy-app.css, and this fills in the name and the
+       plan and reveals it. */
+    var wrap = document.getElementById("nav-acct-wrap");
+    if (wrap) {
+      wrap.style.display = signedIn ? "" : "none";
+      if (signedIn) {
+        var nm = String(label || "Account").split(" \u00b7 ")[0];
+        var set = function (id, text, show) {
+          var el = document.getElementById(id);
+          if (!el) return;
+          el.textContent = text || "";
+          if (show !== undefined) el.style.display = show ? "" : "none";
+        };
+        set("nav-acct-name", nm);
+        set("nav-acct-badge", plan || "", !!plan);
+        set("nav-acct-header-name", nm);
+        set("nav-acct-header-plan", plan ? plan.charAt(0) + plan.slice(1).toLowerCase() + " plan" : "Free plan");
+        var badgeEl = document.getElementById("nav-acct-badge");
+        if (badgeEl) badgeEl.className = "nav-acct-badge" + (plan === "TRIAL" ? " trial" : "");
+      }
+    }
+    /* The billing item needs to know whether there is a subscription to manage
+       before it POSTs to Stripe. One place decides it — planOf() — and this is
+       how site-nav.js reads that decision without refetching /auth/me. */
+    window.__ilPlan = signedIn && plan ? String(plan).toLowerCase() : "free";
+
     var actions = nav.querySelector(".il-global-actions");
     if (!actions) return;
     var account = actions.querySelector(".il-global-account");
@@ -114,6 +150,17 @@
        used to paste " · PRO" into the text, so the same account looked like a
        different product depending on which page you were on. Same element,
        same class. */
+    /* One account control, not two. The lookalike link exists for the narrow
+       layout, where the mobile chrome hides the dropdown and navAccountTap()
+       needs an href to follow. Wherever the real menu is on screen, the link
+       is a duplicate of the chip standing next to it. */
+    if (wrap) {
+      var syncDup = function () {
+        if (account) account.hidden = wrap.getBoundingClientRect().height > 0;
+      };
+      syncDup();
+      window.addEventListener("resize", syncDup);
+    }
     var name = String(label || "Account").split(" · ")[0];
     account.textContent = "";
     account.appendChild(document.createTextNode(name));

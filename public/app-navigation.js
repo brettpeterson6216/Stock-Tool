@@ -288,13 +288,23 @@
   });
 
   // ── Account dropdown toggle ──
+  /* The nav carries the open state as well as the wrap: .il-global-actions
+     clips its children with overflow:hidden, so the popup has to un-clip the
+     row while it is open. See .il-acct-open in research-premium.css. */
+  function syncAcctOpen() {
+    const w = document.getElementById('nav-acct-wrap');
+    const n = document.getElementById('main-nav');
+    if (n) n.classList.toggle('il-acct-open', !!(w && w.classList.contains('open')));
+  }
   function toggleAcctMenu(e) {
     e.stopPropagation();
     document.getElementById('nav-acct-wrap').classList.toggle('open');
+    syncAcctOpen();
   }
   document.addEventListener('click', () => {
     const w = document.getElementById('nav-acct-wrap');
     if (w) w.classList.remove('open');
+    syncAcctOpen();
   });
 
   // ---- Auth-aware nav (talks to /api/auth/me + /api/auth/logout) ----

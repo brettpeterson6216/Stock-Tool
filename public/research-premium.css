@@ -139,7 +139,45 @@ button:disabled { cursor: not-allowed; }
 #main-nav .nav-tab { font-size: 14px !important; font-weight: 500 !important; letter-spacing: -.015em !important; }
 #main-nav .nav-tab.active-tab { color: var(--rp-ink) !important; }
 #main-nav .nav-logo { border-right: 0 !important; padding-right: 22px !important; }
-#main-nav .il-wordmark { letter-spacing: .1em !important; font-size: 12px !important; }
+/* ═══ The wordmark reads as ONE word, because it is one word ═══
+   The brand is ImpliedLens. The markup has always said so — a single
+   <span class="il-wordmark">Implied<span class="il-wordmark-b">Lens</span></span>
+   with no space in it. THREE rules were undoing that at render time, none of
+   which mentions the brand decision:
+
+     lens-prime-shared.css:75  text-transform: uppercase   (+ Georgia serif)
+     this file                 letter-spacing: .1em
+     clean-pass.css:22         margin-left: .34em  (+ font-style: normal)
+
+   Uppercase destroys the camel-case seam that is the only thing making
+   "ImpliedLens" legible as one word; .1em tracking pushes the halves apart;
+   and the .34em margin is a literal 5px gap between them. Fixing any two of
+   the three still rendered "Implied Lens". Tracking goes slightly NEGATIVE
+   instead: at mixed case the capital L is its own separator. */
+#main-nav .il-wordmark, .il-global-brand > .il-wordmark, footer .f-logo .il-wordmark {
+  text-transform: none !important;
+  letter-spacing: -.005em !important;
+  font-size: 15.5px !important;
+  font-weight: 700 !important;
+  font-family: var(--rp-sans) !important;
+}
+/* lens-prime-shared.css also flattens the accent to normal weight and inherited
+   colour via `.il-global-brand em`, and clean-pass.css sets font-style:normal.
+   The gold italic is the brand; restate it here, where the premium layer wins,
+   and cover both spellings of the accent. */
+#main-nav .il-wordmark-b, #main-nav .il-wordmark em,
+.il-global-brand .il-wordmark-b, .il-global-brand em,
+footer .f-logo .il-wordmark-b, footer .f-logo .il-wordmark em {
+  font-style: italic !important;
+  font-weight: 700 !important;
+  color: var(--rp-gold) !important;
+  -webkit-text-fill-color: var(--rp-gold) !important;
+  letter-spacing: -.005em !important;
+  /* The third rule, and the one that survived fixing the other two. */
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 0 !important;
+}
 #main-nav .nav-search { background: var(--rp-panel) !important; border-color: var(--rp-line) !important; border-radius: 9px !important; }
 #main-nav .nav-search input { font-size: 14px !important; }
 #main-nav .nav-acct-btn, #main-nav #nav-acct-btn { border-radius: 8px !important; background: var(--rp-panel) !important; border-color: var(--rp-line) !important; }
@@ -1811,3 +1849,71 @@ html:not([data-theme="dark"]) .theme-toggle-sun { color: #241d0f !important; }
   .lab-modes { display: flex !important; width: 100% !important; }
   .lab-mode { flex: 1 1 0 !important; justify-content: center !important; padding: 9px 8px !important; }
 }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   The account menu, on the pages that are not the app.
+
+   The menu's markup is in the shared header, so it is on all fifteen pages.
+   Its PRESENTATION was in legacy-app.css — `.nav-acct-menu { display:none }`
+   and `.nav-acct-wrap.open .nav-acct-menu { display:block }` — and
+   legacy-app.css is loaded by index.html alone. So the moment a static page
+   revealed the wrap, the whole menu rendered expanded and in flow, 253px tall,
+   shoving the button it belongs to off the top of the window.
+
+   Markup shared, behaviour shared (site-nav.js), stylesheet not: that is the
+   third time this split has produced a bug here. This sheet is appended to
+   every bundle, so the popup now lives where the markup already does.
+
+   Scoped to .nav-acct-wrap and matched to what legacy-app.css already does on
+   the app, so the two cannot disagree on the one page that loads both.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.nav-acct-wrap { position: relative !important; }
+.nav-acct-menu {
+  display: none !important; position: absolute !important;
+  top: calc(100% + 6px) !important; right: 0 !important; left: auto !important;
+  min-width: 224px !important; width: max-content !important;
+  background: var(--rp-panel) !important;
+  border: 1px solid var(--rp-line) !important; border-radius: 10px !important;
+  box-shadow: var(--rp-shadow, 0 10px 30px rgba(0,0,0,.18)) !important;
+  overflow: hidden !important; z-index: 1200 !important;
+}
+.nav-acct-wrap.open .nav-acct-menu { display: block !important; }
+
+/* The popup was still invisible after all of the above, because
+   `.nav-right.il-global-actions` carries `overflow: hidden` — it is there to
+   stop the nav row spilling — and an absolutely positioned child is clipped by
+   it just the same. The menu was painting at 1075,48, 224x256, fully formed,
+   and cropped to nothing below the bar.
+
+   Opened only while the menu is open, and driven by a class site-nav.js and
+   app-legacy.js both toggle, rather than by :has() — the same rule then works
+   without depending on selector support, and the row keeps its clip the other
+   99% of the time. */
+#main-nav.il-acct-open .il-global-actions,
+#main-nav.il-acct-open .nav-right { overflow: visible !important; }
+
+/* And one account control, not two. static-auth.js sets `hidden` on the
+   lookalike link once the real chip is on screen, but `[hidden]` is only a UA
+   rule at `display:none` — any component rule that sets display beats it, and
+   one does, so both chips rendered side by side reading "brett PRO brett PRO".
+   Same trap the dashboard hit; same fix. */
+#main-nav .il-global-account[hidden], .il-global-actions .il-global-account[hidden] {
+  display: none !important;
+}
+.nav-acct-wrap.open .nav-acct-chevron { transform: rotate(180deg) !important; }
+.nav-acct-header {
+  padding: 11px 14px 9px !important;
+  border-bottom: 1px solid var(--rp-line) !important;
+  background: var(--rp-inset) !important;
+}
+.nav-acct-header-name { font-size: 13.5px !important; font-weight: 600 !important; color: var(--rp-copy) !important; }
+.nav-acct-header-plan { font-size: 12px !important; color: var(--rp-muted) !important; margin-top: 2px !important; }
+.nav-acct-item {
+  display: block !important; padding: 10px 14px !important;
+  font-size: 13.5px !important; color: var(--rp-copy) !important;
+  text-decoration: none !important; transition: background .12s ease !important;
+}
+.nav-acct-item:hover { background: var(--rp-lift, rgba(0,0,0,.04)) !important; }
+.nav-acct-item.danger { color: var(--rp-red) !important; }
+.nav-acct-divider { border-top: 1px solid var(--rp-line) !important; margin: 3px 0 !important; }
