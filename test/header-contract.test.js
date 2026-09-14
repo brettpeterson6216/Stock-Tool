@@ -20,6 +20,18 @@ const PAGES = [
 const read = rel => fs.readFileSync(path.join(ROOT, rel), "utf8");
 const NAV_RE = /<nav id="main-nav"[\s\S]*?<\/nav>/;
 
+/* The ~103 /stock/:ticker acquisition pages are not in PAGES because they have
+   no HTML file - routes/stock-landing.js builds them. They were outside this
+   contract for exactly that reason, and they drifted the furthest: nine tabs
+   with retired names, "LensScore" three renames out of date, no account menu,
+   and none of the stylesheets that make the bar theme-aware. Those are the
+   pages Google sends new visitors to.
+   They render lib/site-header.js now, which reads the canonical block out of a
+   document this contract already pins - so they are covered by it too, as long
+   as nobody reintroduces a second copy. */
+const siteHeader = require("../lib/site-header");
+const stockLanding = read("routes/stock-landing.js");
+
 // There were three different bars: #main-nav at 63px fixed on the landing page,
 // .il-global-nav at 60px sticky on six static pages, a bare <nav> at 60px static
 // with no tabs / no search / no account on the three auth pages, and nothing at
@@ -206,4 +218,29 @@ test("the view, section and sidebar group resolve before first paint", () => {
     const body = navJs.slice(navJs.indexOf(`function ${fn}(`), navJs.indexOf(`function ${fn}(`) + 260);
     assert.match(body, /dropBootStyle\(\)/, `${fn} must drop the boot stylesheet`);
   }
+});
+
+
+test("the acquisition pages render the shared header, not a copy of it", () => {
+  assert.equal(siteHeader.nav, read(PAGES[0]).match(NAV_RE)[0],
+    "lib/site-header.js no longer returns the same block the pages carry");
+  assert.match(stockLanding, /\$\{siteHeader\.nav\}/,
+    "routes/stock-landing.js has stopped using the shared header");
+  const own = stockLanding.match(/<nav id="main-nav"[\s\S]{0,400}/);
+  assert.equal(own, null, "routes/stock-landing.js is hand-writing a second header again");
+  // Markup without the styling is how /stock/ looked wrong while passing.
+  assert.match(stockLanding, /\$\{siteHeader\.styles\}/, "the acquisition pages do not load the header's stylesheets");
+  assert.match(stockLanding, /\$\{siteHeader\.scripts\}/, "the acquisition pages do not load the header's scripts");
+});
+
+test("the shared header brings a stylesheet set that actually compiles to a bundle", () => {
+  /* site-header first read the sheets with its own regex and found ten of
+     eleven - it missed `<link href=".." rel="stylesheet">`, attributes
+     reversed. Ten of eleven matches no bundle, so every acquisition page would
+     have shipped eleven uncompiled requests. Same parser, or same bug again. */
+  const { styleLinks } = require("../lib/style-delivery");
+  const manifest = require("../lib/style-bundles.json");
+  const key = styleLinks("<head>" + siteHeader.styles + "</head>").map(l => l.href).join("|");
+  assert.ok(manifest[key],
+    `the header's ${key.split("|").length} stylesheets match no bundle, so pages using it serve them uncompiled`);
 });

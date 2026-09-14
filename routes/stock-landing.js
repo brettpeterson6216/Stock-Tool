@@ -11,6 +11,7 @@
 // ============================================================
 const express  = require("express");
 const { stampHtml } = require("../lib/asset-stamp");
+const siteHeader = require("../lib/site-header");
 const { FINNHUB_KEY, APP_URL } = require("../lib/config");
 const {
   ACQUISITION_TICKER_SET,
@@ -331,34 +332,11 @@ function renderPage(ticker, q) {
     html:not([data-theme="dark"]) .research-item{color:#3e392f;background:rgba(200,136,42,.08)}
     html:not([data-theme="dark"]) footer{border-color:rgba(42,35,24,.12)}
   </style>
-  <link rel="stylesheet" href="/static-polish.css?v=20260725-2">
-  <link rel="stylesheet" href="/visual-refresh.css?v=20260730-10">
-  <link rel="stylesheet" href="/site-shell.css?v=20260813-1">
-  <link rel="stylesheet" href="/beauty-system.css?v=20260813-1">
+  ${siteHeader.styles}
 </head>
 <body class="il-static-page il-stock-page">
   <a class="il-skip-link" href="#public-main">Skip to content</a>
-  <nav id="main-nav" class="il-global-nav il-static-main-nav" aria-label="Primary navigation">
-    <a class="il-global-brand" href="/"><img src="/logo.svg" alt=""><span>Implied<em>Lens</em></span></a>
-    <div class="il-global-links">
-      <a class="il-global-tab" href="/">Home</a>
-      <a class="il-global-tab" href="/?view=home&amp;market=1">Market</a>
-      <a class="il-global-tab active" href="/?view=tool&amp;section=analyze">Research</a>
-      <a class="il-global-tab" href="/lens-score">LensScore</a>
-      <a class="il-global-tab" href="/?view=tool&amp;section=projection">Projections</a>
-      <a class="il-global-tab" href="/?view=tool&amp;section=wealth">Planner</a>
-      <a class="il-global-tab" href="/?view=tool&amp;section=education">Learn</a>
-      <a class="il-global-tab" href="/?view=tool&amp;section=reports">Saved</a>
-      <a class="il-global-tab" href="/about">About</a>
-    </div>
-    <form class="il-global-search" action="/" method="get" role="search"><input type="hidden" name="view" value="tool"><input type="hidden" name="section" value="analyze"><span aria-hidden="true">⌕</span><input name="symbol" type="text" placeholder="Search ticker…" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Search for a ticker"></form>
-    <div class="il-global-actions">
-      <button class="static-theme-toggle" type="button" aria-label="Switch theme"><span class="static-theme-thumb"></span></button>
-      <span class="il-global-live" title="ImpliedLens is live">Live</span>
-      <a class="il-global-login" href="/login">Log in</a>
-      <a class="il-global-trial" href="/signup">Start trial</a>
-    </div>
-  </nav>
+  ${siteHeader.nav}
   <div class="top-bar" hidden>
     <a href="/" class="logo">Implied<em>Lens</em></a>
     <a href="/" class="back">← All analysis</a>
@@ -451,7 +429,7 @@ function renderPage(ticker, q) {
     <a href="/">ImpliedLens</a>
   </footer>
 
-  <script src="/static-theme.js?v=20260609"></script>
+  ${siteHeader.scripts}
   <script>
     const landingContext = ${landingContextJson};
     function trackLanding(event, properties) {

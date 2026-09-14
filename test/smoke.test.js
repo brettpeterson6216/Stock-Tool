@@ -466,7 +466,16 @@ test("canonical visual system is served and included on primary product surfaces
     assert.ok(styles.includes("@layer premium,heritage"));
     assert.ok(styles.includes("--rp-bg"));
     if (pagePath === "/stock/AAPL") {
-      assert.match(markup, /<nav id="main-nav" class="il-global-nav il-static-main-nav"/);
+      /* The acquisition pages used to hand-write their own bar, and this line
+         asserted that separate copy stayed separate. It had drifted to nine
+         tabs with retired names - including "LensScore", renamed in d82ef52 -
+         a bare character where the search icon goes, and no account menu at
+         all, on the ~103 pages Google sends new visitors to. They render the
+         shared header now, from lib/site-header.js. */
+      assert.match(markup, /<nav id="main-nav"/);
+      assert.doesNotMatch(markup, /LensScore</, "the acquisition bar is back on the retired product name");
+      assert.match(markup, /id="nav-acct-wrap"/, "the acquisition bar has no account menu");
+      assert.match(markup, /id="nav-lensscore-link"/, "the acquisition bar is not the shared header");
     }
   }
 });

@@ -2251,7 +2251,14 @@ html body #main-nav :is(#nav-login, #nav-signup, .il-global-login, .il-global-tr
 /* The account chip — the part that read as "terribly different". Explicit
    height and type so it is the same object on every route, and a real target
    size rather than the 21px the button default happened to produce. */
-html body #main-nav #nav-acct-wrap { display: block !important; position: relative !important; }
+/* position only, never display. static-auth.js hides this wrapper with an
+   inline `style.display = "none"` when nobody is signed in, and an inline
+   style loses to an author rule marked !important — so forcing display:block
+   here kept a 14-24px sliver of empty account chip in the bar for every
+   logged-out visitor, on every page. The width of that sliver varied with
+   whatever text was left in it, which is what showed up as .nav-logo being
+   2-10px narrower on some routes at phone width. */
+html body #main-nav #nav-acct-wrap { position: relative !important; }
 html body #main-nav #nav-acct-btn {
   display: inline-flex !important; align-items: center !important; gap: 7px !important;
   height: 30px !important; padding: 0 10px !important;
@@ -2341,3 +2348,11 @@ html body [hidden] { display: none !important; }
   html body #main-nav :is(input, select, textarea),
   html body #main-nav #nav-ticker-input { font-size: 16px !important; }
 }
+
+/* Action buttons take their natural width, everywhere.
+   "Log in" measured 68px on /pricing and 59.22px on /login — same string, same
+   face, same size, same weight. 59.22 is the text; 68 is the text stretched by
+   a flex parent with room to spare. A control whose width depends on how much
+   space happens to be left over is a control that is a different size on every
+   route, which is the whole complaint. */
+html body #main-nav .il-global-actions > * { flex: 0 0 auto !important; }
