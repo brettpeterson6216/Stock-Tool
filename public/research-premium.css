@@ -122,7 +122,7 @@ h1, h2, h3, h4, .ihm-greeting, .ihl-price, .ihm-quote strong, .stat-val, .stock-
   font-variant-numeric: tabular-nums !important; letter-spacing: -.035em !important;
 }
 h1 em,h2 em,h3 em { font-family: inherit !important; font-style: normal !important; font-weight: inherit !important; }
-.search-shell { background: var(--rp-panel) !important; border: 1px solid var(--rp-line) !important; border-radius: 16px !important; padding: clamp(24px,3vw,40px) !important; }
+.search-shell { background: var(--rp-panel) !important; border: 1px solid var(--rp-line) !important; border-radius: 14px !important; padding: clamp(24px,3vw,40px) !important; }
 body::before, body::after, .il-home-member::before, .il-home-member::after,
 .il-landing::before, .il-landing-hero::before, .il-landing-hero::after {
   background: none !important; box-shadow: none !important; pointer-events: none !important;
@@ -178,7 +178,7 @@ footer .f-logo .il-wordmark-b, footer .f-logo .il-wordmark em {
   margin-right: 0 !important;
   padding-left: 0 !important;
 }
-#main-nav .nav-search { background: var(--rp-panel) !important; border-color: var(--rp-line) !important; border-radius: 9px !important; }
+#main-nav .nav-search { background: var(--rp-panel) !important; border-color: var(--rp-line) !important; border-radius: 8px !important; }
 #main-nav .nav-search input { font-size: 14px !important; }
 #main-nav .nav-acct-btn, #main-nav #nav-acct-btn { border-radius: 8px !important; background: var(--rp-panel) !important; border-color: var(--rp-line) !important; }
 :is(.btn-gold,.btn-modal-cta,.btn-analyze,.ihm-go,.il-cta-solid,#nav-signup,.auth-submit,.btn-primary) {
@@ -225,7 +225,7 @@ footer .f-logo .il-wordmark-b, footer .f-logo .il-wordmark em {
   gap: 6px !important;
   padding: 10px 14px !important;
   border: 1px solid var(--rp-line) !important;
-  border-radius: 9px !important;
+  border-radius: 8px !important;
   font-size: 13px !important;
   font-weight: 600 !important;
   color: var(--rp-copy) !important;
@@ -234,7 +234,7 @@ footer .f-logo .il-wordmark-b, footer .f-logo .il-wordmark em {
 }
 .ihm-head-link:hover { border-color: var(--rp-gold) !important; color: var(--rp-gold) !important; }
 .ihm-search { width: 100% !important; max-width: none !important; margin: 0 !important; }
-.ihm-search-row { background: var(--rp-panel) !important; border: 1px solid var(--rp-line) !important; border-radius: 10px !important; }
+.ihm-search-row { background: var(--rp-panel) !important; border: 1px solid var(--rp-line) !important; border-radius: 8px !important; }
 .ihm-search-icon { color: var(--rp-gold) !important; }
 .ihm-grid { display: grid !important; grid-template-columns: 200px minmax(0,1fr) 280px !important; gap: 20px !important; align-items: start !important; }
 .ihm-col-tools,.ihm-col-main,.ihm-col-side { display: flex !important; flex-direction: column !important; grid-column: auto !important; grid-row: auto !important; min-width: 0 !important; gap: 20px !important; }
@@ -250,7 +250,7 @@ footer .f-logo .il-wordmark-b, footer .f-logo .il-wordmark em {
 .ihm-quote-label { display: block !important; grid-column: 1/-1 !important; font-size: 11px !important; color: var(--rp-muted) !important; font-weight: 400 !important; margin-bottom: 3px !important; }
 #ihm-chart { --ilx-a: var(--rp-gold) !important; --ilx-b: #558fcc !important; --ilx-c: #609f91 !important; }
 .ihm-tfs { grid-column: 1/-1 !important; display: flex !important; align-items: center !important; gap: 5px !important; }
-.ihm-tf { appearance: none !important; border: 0 !important; border-radius: 7px !important; background: transparent !important; color: var(--rp-muted) !important; min-width: 40px !important; min-height: 34px !important; padding: 6px 10px !important; font-size: 13px !important; font-weight: 600 !important; }
+.ihm-tf { appearance: none !important; border: 0 !important; border-radius: 8px !important; background: transparent !important; color: var(--rp-muted) !important; min-width: 40px !important; min-height: 34px !important; padding: 6px 10px !important; font-size: 13px !important; font-weight: 600 !important; }
 .ihm-tf:hover { background: var(--rp-inset) !important; color: var(--rp-ink) !important; }
 .ihm-tf[aria-pressed="true"] { background: var(--rp-gold-soft) !important; color: var(--rp-gold) !important; }
 .ihm-chart { background: transparent !important; min-height: 290px !important; border: 0 !important; }
@@ -265,7 +265,7 @@ footer .f-logo .il-wordmark-b, footer .f-logo .il-wordmark em {
 .ihm-index b { font-family: var(--rp-sans) !important; font-size: 16px !important; font-weight: 600 !important; }
 .ihm-strip { margin-top: 18px !important; padding-top: 16px !important; border-color: var(--rp-line) !important; }
 .ihm-sectors { gap: 8px !important; }
-.ihm-sector { background: var(--rp-inset) !important; border: 0 !important; padding: 7px 9px !important; border-radius: 6px !important; }
+.ihm-sector { background: var(--rp-inset) !important; border: 0 !important; padding: 7px 9px !important; border-radius: 8px !important; }
 .ihm-sector span,.ihm-sector b { font-size: 12px !important; }
 .ihm-tool { min-height: 70px !important; padding: 14px 0 !important; border: 0 !important; border-bottom: 1px solid var(--rp-line) !important; border-radius: 0 !important; background: transparent !important; }
 .ihm-tool:last-child { border-bottom: 0 !important; }
@@ -275,7 +275,7 @@ footer .f-logo .il-wordmark-b, footer .f-logo .il-wordmark em {
 .ihm-tile { background: transparent !important; border-color: var(--rp-line) !important; }
 .ihm-tile b { font-family: var(--rp-sans) !important; }
 .ihm-populars { display: grid !important; grid-template-columns: repeat(3,minmax(0,1fr)) !important; gap: 12px !important; }
-.ihm-pop { min-width: 0 !important; padding: 12px !important; background: var(--rp-inset) !important; border: 0 !important; border-radius: 9px !important; }
+.ihm-pop { min-width: 0 !important; padding: 12px !important; background: var(--rp-inset) !important; border: 0 !important; border-radius: 8px !important; }
 .ihm-favs-empty,.ihm-empty { font-size: 14px !important; line-height: 1.65 !important; color: var(--rp-muted) !important; }
 .ihm-news a { padding: 14px 0 !important; border-color: var(--rp-line) !important; }
 .ihm-news b,.ihm-news-title { font-size: 14px !important; line-height: 1.55 !important; font-weight: 500 !important; }
@@ -297,15 +297,15 @@ footer .f-logo .il-wordmark-b, footer .f-logo .il-wordmark em {
 #landing-page .il-display .il-d2 { color: var(--rp-gold) !important; -webkit-text-fill-color: var(--rp-gold) !important; }
 #landing-page .il-landing-copy > p { font-size: 17px !important; line-height: 1.65 !important; color: var(--rp-copy) !important; max-width: 480px !important; margin-bottom: 24px !important; }
 #landing-page .il-landing-actions { gap: 12px !important; margin: 20px 0 !important; }
-#landing-page .il-landing-actions > * { min-height: 46px !important; border-radius: 9px !important; padding: 12px 18px !important; font-size: 14px !important; }
+#landing-page .il-landing-actions > * { min-height: 46px !important; border-radius: 8px !important; padding: 12px 18px !important; font-size: 14px !important; }
 #landing-page .il-cta-ghost { background: transparent !important; border: 1px solid var(--rp-line-strong) !important; color: var(--rp-ink) !important; box-shadow: none !important; }
-#landing-page .il-landing-search { display: flex !important; width: 100% !important; max-width: 460px !important; min-height: 50px !important; margin: 24px 0 !important; padding: 4px 5px 4px 15px !important; border: 1px solid var(--rp-line-strong) !important; background: var(--rp-panel) !important; border-radius: 10px !important; gap: 10px !important; }
+#landing-page .il-landing-search { display: flex !important; width: 100% !important; max-width: 460px !important; min-height: 50px !important; margin: 24px 0 !important; padding: 4px 5px 4px 15px !important; border: 1px solid var(--rp-line-strong) !important; background: var(--rp-panel) !important; border-radius: 8px !important; gap: 10px !important; }
 #landing-page .il-landing-search input { min-width: 0 !important; flex: 1 !important; width: 100% !important; border: 0 !important; background: transparent !important; font-size: 15px !important; padding: 8px 0 !important; }
-#landing-page .il-landing-search button { padding: 10px 14px !important; border: 0 !important; border-radius: 7px !important; background: var(--rp-gold-fill) !important; color: #252115 !important; -webkit-text-fill-color: #252115 !important; font-size: 14px !important; }
+#landing-page .il-landing-search button { padding: 10px 14px !important; border: 0 !important; border-radius: 8px !important; background: var(--rp-gold-fill) !important; color: #252115 !important; -webkit-text-fill-color: #252115 !important; font-size: 14px !important; }
 #landing-page .il-trust { display: flex !important; flex-wrap: wrap !important; width: 100% !important; max-width: 100% !important; gap: 12px !important; margin-top: 24px !important; }
 #landing-page .il-trust > span { font-size: 12px !important; color: var(--rp-muted) !important; }
 #landing-page .il-trust-lead { flex-basis: 100% !important; }
-#landing-page #il-hero-live { display: flex !important; flex-direction: column !important; height: auto !important; min-height: 350px !important; width: 100% !important; grid-area: preview !important; padding: 26px !important; background: var(--rp-panel) !important; border: 1px solid var(--rp-line) !important; border-radius: 18px !important; box-shadow: var(--rp-shadow) !important; transform: none !important; }
+#landing-page #il-hero-live { display: flex !important; flex-direction: column !important; height: auto !important; min-height: 350px !important; width: 100% !important; grid-area: preview !important; padding: 26px !important; background: var(--rp-panel) !important; border: 1px solid var(--rp-line) !important; border-radius: 12px !important; box-shadow: var(--rp-shadow) !important; transform: none !important; }
 #landing-page #il-hero-live-mobile { display: none !important; }
 #landing-page .ihl-price { font-size: clamp(30px,3vw,44px) !important; font-weight: 600 !important; }
 #landing-page .ihl-chart { height: 185px !important; flex: 1 !important; }
@@ -326,7 +326,7 @@ footer .f-logo .il-wordmark-b, footer .f-logo .il-wordmark em {
 :is(.app-sidebar,.app-topbar,.app-subbar,.acc-body,.stock-header) { background: var(--rp-bg) !important; border-color: var(--rp-line) !important; box-shadow: none !important; }
 .app-main,.app-content-scroll { background: var(--rp-bg) !important; }
 .app-sidebar { border-right: 1px solid var(--rp-line) !important; }
-.sb-item { font-size: 14px !important; border-radius: 7px !important; }
+.sb-item { font-size: 14px !important; border-radius: 8px !important; }
 .sb-item.active { background: var(--rp-gold-soft) !important; color: var(--rp-gold) !important; }
 :is(.chart-card,.chart-container,.il-chart-shell) { background: var(--rp-panel) !important; border-color: var(--rp-line) !important; border-radius: 12px !important; box-shadow: none !important; }
 .il-chart-readout { background: transparent !important; border: 0 !important; border-bottom: 1px solid var(--rp-line) !important; border-radius: 0 !important; box-shadow: none !important; padding: 10px 4px !important; }
@@ -336,26 +336,26 @@ footer .f-logo .il-wordmark-b, footer .f-logo .il-wordmark em {
 .price-big { font-size: 36px !important; font-weight: 600 !important; }
 .ash-title { font-size: 17px !important; font-weight: 600 !important; }
 .result-header { background: var(--rp-panel) !important; border-color: var(--rp-line) !important; padding: 24px !important; }
-.metrics-grid { gap: 0 !important; border: 1px solid var(--rp-line) !important; border-radius: 10px !important; overflow: hidden !important; margin: 18px 0 !important; }
+.metrics-grid { gap: 0 !important; border: 1px solid var(--rp-line) !important; border-radius: 8px !important; overflow: hidden !important; margin: 18px 0 !important; }
 .metric-card { background: var(--rp-panel) !important; border: 0 !important; border-right: 1px solid var(--rp-line) !important; border-radius: 0 !important; box-shadow: none !important; }
 .chart-wrap,.sidebar-card { background: var(--rp-panel) !important; border: 1px solid var(--rp-line) !important; border-radius: 12px !important; box-shadow: none !important; }
 .chart-title,.sidebar-card-title { font-family: var(--rp-sans) !important; font-size: 14px !important; font-weight: 600 !important; }
 .chart-header { padding: 16px !important; border-color: var(--rp-line) !important; }
 #app-chart-toolbar { background: var(--rp-panel) !important; border-color: var(--rp-line) !important; gap: 5px !important; padding: 10px !important; }
-#app-chart-toolbar .act-btn { background: transparent !important; color: var(--rp-copy) !important; border: 0 !important; border-radius: 6px !important; font-size: 12px !important; min-height: 32px !important; box-shadow: none !important; }
+#app-chart-toolbar .act-btn { background: transparent !important; color: var(--rp-copy) !important; border: 0 !important; border-radius: 8px !important; font-size: 12px !important; min-height: 32px !important; box-shadow: none !important; }
 #app-chart-toolbar .act-btn.on,#app-chart-toolbar .act-btn.active { background: var(--rp-gold-soft) !important; color: var(--rp-gold) !important; }
 #app-tf-strip { background: var(--rp-panel) !important; border-color: var(--rp-line) !important; }
-#app-tf-strip .tf-pill,#app-tf-strip .tf-tog { background: transparent !important; color: var(--rp-copy) !important; box-shadow: none !important; border: 0 !important; border-radius: 6px !important; font-size: 12px !important; min-height: 34px !important; }
+#app-tf-strip .tf-pill,#app-tf-strip .tf-tog { background: transparent !important; color: var(--rp-copy) !important; box-shadow: none !important; border: 0 !important; border-radius: 8px !important; font-size: 12px !important; min-height: 34px !important; }
 #app-tf-strip .tf-pill.on,#app-tf-strip .tf-pill.active,#app-tf-strip .tf-tog.on { background: var(--rp-gold-soft) !important; color: var(--rp-gold) !important; }
 .ihm-news-row > span { font-size: 14px !important; color: var(--rp-copy) !important; line-height: 1.6 !important; }
 .ihm-news-row > i { font-size: 12px !important; font-style: normal !important; color: var(--rp-muted) !important; }
 #landing-page .il-landing-kicker::before,#landing-page .il-landing-kicker::after { display: none !important; }
-:is(.chart-tf-btn,.tf-btn,.chart-type-btn) { min-height: 34px !important; font-size: 13px !important; border-radius: 6px !important; }
+:is(.chart-tf-btn,.tf-btn,.chart-type-btn) { min-height: 34px !important; font-size: 13px !important; border-radius: 8px !important; }
 table { font-variant-numeric: tabular-nums !important; }
 th,td { font-family: var(--rp-sans) !important; }
 .price-row { flex-wrap: wrap !important; }
 .il-trust-row { flex-basis: 100% !important; gap: 6px !important; }
-.il-trust-chip { background: var(--rp-inset) !important; border: 0 !important; border-radius: 5px !important; color: var(--rp-copy) !important; font-family: var(--rp-sans) !important; font-size: 11px !important; font-weight: 400 !important; }
+.il-trust-chip { background: var(--rp-inset) !important; border: 0 !important; border-radius: 8px !important; color: var(--rp-copy) !important; font-family: var(--rp-sans) !important; font-size: 11px !important; font-weight: 400 !important; }
 thead th { background: var(--rp-inset) !important; color: var(--rp-muted) !important; font-size: 12px !important; font-weight: 500 !important; }
 tbody td { font-size: 14px !important; border-color: var(--rp-line) !important; }
 tbody tr:hover { background: var(--rp-gold-soft) !important; }
@@ -370,8 +370,8 @@ tbody tr:hover { background: var(--rp-gold-soft) !important; }
 .lp-static-drawer-panel { background: var(--rp-panel) !important; border: 1px solid var(--rp-line) !important; border-radius: 12px !important; box-shadow: var(--rp-shadow) !important; }
 .lp-static-drawer-panel nav a { background: transparent !important; color: var(--rp-ink) !important; border-color: var(--rp-line) !important; font-size: 14px !important; }
 .lp-static-drawer-panel nav a span { color: var(--rp-gold) !important; }
-.lp-static-drawer-search input { background: var(--rp-inset) !important; color: var(--rp-ink) !important; border-color: var(--rp-line) !important; border-radius: 7px !important; font-size: 16px !important; }
-.lp-static-drawer-search button { background: var(--rp-gold-fill) !important; color: #252115 !important; border: 0 !important; border-radius: 7px !important; }
+.lp-static-drawer-search input { background: var(--rp-inset) !important; color: var(--rp-ink) !important; border-color: var(--rp-line) !important; border-radius: 8px !important; font-size: 16px !important; }
+.lp-static-drawer-search button { background: var(--rp-gold-fill) !important; color: #252115 !important; border: 0 !important; border-radius: 8px !important; }
 @media (max-width: 1250px) {
   .ihm-grid { grid-template-columns: minmax(0,1fr) 280px !important; }
   .ihm-col-main { grid-column: 1 !important; grid-row: 1 !important; }
@@ -383,7 +383,7 @@ tbody tr:hover { background: var(--rp-gold-soft) !important; }
 @media (max-width: 900px) {
   .prime-mobile-appbar { display: none !important; }
   .mobile-sec-tabs { background: var(--rp-bg) !important; border-color: var(--rp-line) !important; box-shadow: none !important; top: 0 !important; min-height: 48px !important; padding: 4px 10px !important; }
-  .mobile-sec-tabs .mst-btn { background: transparent !important; color: var(--rp-copy) !important; border: 0 !important; box-shadow: none !important; min-height: 40px !important; font-size: 13px !important; border-radius: 7px !important; }
+  .mobile-sec-tabs .mst-btn { background: transparent !important; color: var(--rp-copy) !important; border: 0 !important; box-shadow: none !important; min-height: 40px !important; font-size: 13px !important; border-radius: 8px !important; }
   .mobile-sec-tabs .mst-btn.active { background: var(--rp-gold-soft) !important; color: var(--rp-gold) !important; }
   .ihm-grid { grid-template-columns: minmax(0,1fr) !important; }
   .ihm-col-main,.ihm-col-side,.ihm-col-tools { grid-column: 1 !important; grid-row: auto !important; }
@@ -1044,7 +1044,7 @@ body.il-static-page .guide-cta {
   margin-top: 16px !important;
   padding: 7px 13px !important;
   white-space: nowrap !important;
-  border-radius: 7px !important;
+  border-radius: 8px !important;
 }
 
 /* ── Inline evidence badges. "User assumption" sat at 4.03:1 and "Observed"
@@ -1161,7 +1161,7 @@ body.il-static-page .guide-cta {
   border-style: solid !important;
   border-color: var(--rp-line) !important;
   background: var(--rp-inset) !important;
-  border-radius: 10px !important;
+  border-radius: 8px !important;
   padding: 24px 18px !important;
   font-size: 13px !important;
   line-height: 1.6 !important;
@@ -1296,7 +1296,7 @@ footer.foot {
   justify-content: center !important;
   width: 34px !important;
   height: 34px !important;
-  border-radius: 9px !important;
+  border-radius: 8px !important;
   background: var(--rp-gold-soft) !important;
   border: 1px solid var(--rp-line) !important;
   color: var(--rp-gold) !important;
@@ -1379,7 +1379,7 @@ body.il-static-page .feat-icon { font-size: 18px !important; }
 :root:not([data-theme="dark"]) :is(.chart-wrap, .chart-shell, .ihm-chart, .il-chart-box, .tv-chart-host) {
   background: var(--rp-inset) !important;
   border: 1px solid var(--rp-line) !important;
-  border-radius: 10px !important;
+  border-radius: 8px !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -1693,7 +1693,7 @@ footer .f-logo .il-wordmark em,
 html[data-theme="dark"] .theme-toggle-sun  { color: #f4e7c9 !important; opacity: 1 !important; }
 html[data-theme="dark"] .theme-toggle-moon { color: #f4e7c9 !important; opacity: 1 !important; }
 html:not([data-theme="dark"]) .theme-toggle-sun  { color: #6b4d12 !important; opacity: 1 !important; }
-html:not([data-theme="dark"]) .theme-toggle-moon { color: #4a4f57 !important; opacity: 1 !important; }
+html:not([data-theme="dark"]) .theme-toggle-moon { color: var(--rp-muted) !important; opacity: 1 !important; }
 /* The thumb sits over one of them; that one goes dark so it reads against the
    gold rather than disappearing into it. */
 html[data-theme="dark"] .theme-toggle-moon { color: #241d0f !important; }
@@ -1769,7 +1769,7 @@ html:not([data-theme="dark"]) .theme-toggle-sun { color: #241d0f !important; }
 
 .learn-list { list-style: none !important; margin: 0 0 28px !important; padding: 0 !important;
   display: flex !important; flex-direction: column !important; gap: 8px !important; }
-.learn-list a { display: block !important; padding: 14px 16px !important; border-radius: 10px !important;
+.learn-list a { display: block !important; padding: 14px 16px !important; border-radius: 8px !important;
   border: 1px solid var(--rp-line) !important; background: var(--rp-inset) !important;
   text-decoration: none !important; transition: border-color .15s ease, background .15s ease !important; }
 .learn-list a:hover { border-color: var(--rp-gold) !important; background: var(--rp-lift) !important; }
@@ -1783,12 +1783,12 @@ html:not([data-theme="dark"]) .theme-toggle-sun { color: #241d0f !important; }
 /* The one-line summary of the idea. A pull-quote, not a code sample — the
    monospace is there because it reads as a definition rather than prose. */
 .learn-formula { margin: 0 0 22px !important; }
-.learn-formula code { display: block !important; padding: 13px 16px !important; border-radius: 9px !important;
+.learn-formula code { display: block !important; padding: 13px 16px !important; border-radius: 8px !important;
   border-left: 3px solid var(--rp-gold) !important; background: var(--rp-inset) !important;
   font-family: var(--rp-mono, ui-monospace, monospace) !important; font-size: 14px !important;
   line-height: 1.55 !important; color: var(--rp-copy) !important; }
 
-.learn-warning { padding: 13px 16px !important; border-radius: 9px !important;
+.learn-warning { padding: 13px 16px !important; border-radius: 8px !important;
   border-left: 3px solid var(--rp-red) !important;
   background: color-mix(in srgb, var(--rp-red) 8%, transparent) !important; }
 
@@ -1823,12 +1823,12 @@ html:not([data-theme="dark"]) .theme-toggle-sun { color: #241d0f !important; }
 .lab-modes {
   display: inline-flex !important; gap: 2px !important;
   margin: 0 0 16px !important; padding: 3px !important;
-  border: 1px solid var(--rp-line) !important; border-radius: 10px !important;
+  border: 1px solid var(--rp-line) !important; border-radius: 8px !important;
   background: var(--rp-inset) !important;
 }
 .lab-mode {
   display: inline-flex !important; align-items: center !important; gap: 7px !important;
-  padding: 8px 15px !important; border: 0 !important; border-radius: 7px !important;
+  padding: 8px 15px !important; border: 0 !important; border-radius: 8px !important;
   background: transparent !important; cursor: pointer !important;
   font-family: var(--rp-sans) !important; font-size: 13.5px !important;
   font-weight: 600 !important; letter-spacing: 0 !important; text-transform: none !important;
@@ -1874,7 +1874,7 @@ html:not([data-theme="dark"]) .theme-toggle-sun { color: #241d0f !important; }
   top: calc(100% + 6px) !important; right: 0 !important; left: auto !important;
   min-width: 224px !important; width: max-content !important;
   background: var(--rp-panel) !important;
-  border: 1px solid var(--rp-line) !important; border-radius: 10px !important;
+  border: 1px solid var(--rp-line) !important; border-radius: 8px !important;
   box-shadow: var(--rp-shadow, 0 10px 30px rgba(0,0,0,.18)) !important;
   overflow: hidden !important; z-index: 1200 !important;
 }
@@ -1917,3 +1917,294 @@ html:not([data-theme="dark"]) .theme-toggle-sun { color: #241d0f !important; }
 .nav-acct-item:hover { background: var(--rp-lift, rgba(0,0,0,.04)) !important; }
 .nav-acct-item.danger { color: var(--rp-red) !important; }
 .nav-acct-divider { border-top: 1px solid var(--rp-line) !important; margin: 3px 0 !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ONE BOX SYSTEM.
+
+   Measured across 14 routes in both themes before this block existed:
+   39 distinct border colours, 38 distinct backgrounds, 12 distinct corner
+   radii. Not because anyone chose 39 borders — because twenty-three
+   stylesheets from five design generations each brought their own palette,
+   and eight of them style .il-rail-item alone. The tokens above were already
+   right; nothing was made to use them.
+
+   The values below are not new inventions. Each is whichever value the site
+   ALREADY used most, so this collapses the outliers rather than restyling
+   the product:
+
+     radius   8px  buttons, inputs, small controls   (152 elements already)
+             12px  cards, panels                     (the majority already)
+             14px  modals and large surfaces
+            999px  pills, badges, status chips       (already universal)
+
+     border  --rp-line         the hairline, at one alpha   (247 already)
+             --rp-line-strong  hover and emphasis
+             --rp-gold-ring    anything gold-edged          (was 6 golds × 8 alphas)
+
+   Scoped to the shared component classes, not to bare tags, so a deliberate
+   one-off can still opt out by not using them.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── radius ──────────────────────────────────────────────────────────────── */
+:is(.btn-gold,.btn-ghost,.btn-primary,.btn-nav,.btn-nav-outline,.soc-btn,
+    .il-landing-primary,.il-landing-secondary,.il-cta-solid,.il-cta-ghost,
+    .btn-analyze,.btn-save-analysis,.auth-submit,.pgc-btn,.ihm-go,
+    .lab-mode,.guide-cta,.methodology-inline,.mst-btn,.sa-pill) {
+  border-radius: 8px !important;
+}
+:is(.ts-input,.nav-search,.il-global-search,.ts-wrap,.lab-empty-search input,
+    input[type="text"],input[type="email"],input[type="password"],input[type="number"],
+    input[type="search"],select,textarea) {
+  border-radius: 8px !important;
+}
+:is(.ihm-panel,.ilm-card,.il-startpath,.il-cap-card,.ws-card,.rs-card,.vl-card,
+    .pl-card,.panel,.score-card,.evidence-card,.feat,.principle,.lens-card,
+    .il-hero-live,.il-rail-item,.tw-tool,.ihm-tool,.next-move,.sec-note,
+    .proof,.cta,.highlight,.results,.il-ms-inner,.learn-list a,.learn-formula code,
+    .learn-warning,.nav-acct-menu,.tool-intro) {
+  border-radius: 12px !important;
+}
+:is(.auth-card,.modal-box,.search-shell,.pro-gate-card) { border-radius: 14px !important; }
+/* Pills stay pills. They were the one thing the whole site already agreed on. */
+:is(.ihl-state,.ilm-badge,.tagline,.eyebrow,.tag,.score-label,.horizon-pill,
+    .nav-acct-badge,.pgc-badge,.il-step-num,.theme-toggle-track) {
+  border-radius: 999px !important;
+}
+
+/* ── borders ─────────────────────────────────────────────────────────────── */
+/* Every hairline at one alpha. The site had 0.10, 0.12, 0.13, 0.16, 0.17,
+   0.18, 0.20, 0.21, 0.22, 0.24 and 0.25 in play; individually invisible,
+   collectively the reason adjacent boxes look like they were drawn by
+   different people. */
+:is(.ihm-panel,.ilm-card,.il-startpath,.il-cap-card,.ws-card,.rs-card,.vl-card,
+    .pl-card,.panel,.score-card,.evidence-card,.feat,.principle,.lens-card,
+    .il-hero-live,.il-rail-item,.tw-tool,.ihm-tool,.sec-note,.proof,.results,
+    .il-ms-inner,.learn-list a,.footer-links,.nav-acct-menu,.tool-intro,
+    .btn-ghost,.btn-nav-outline,.soc-btn,.il-landing-secondary,.il-cta-ghost,
+    .methodology-inline,.horizon-pill,.ihl-state,.ts-input,.nav-search,
+    .il-global-search,.ts-wrap,.mst-btn,.sa-pill,.lab-modes) {
+  border-color: var(--rp-line) !important;
+}
+:is(.ihm-panel,.ilm-card,.il-startpath,.il-cap-card,.feat,.principle,
+    .lens-card,.tw-tool,.ihm-tool,.learn-list a):hover {
+  border-color: var(--rp-line-strong) !important;
+}
+/* One gold edge. Six different golds at eight alphas became one ring. */
+:is(.tagline,.eyebrow,.tag.gold,.score-label,.next-move,.cta,.highlight,
+    .pgc-badge,.il-wordmark-ring) {
+  border-color: var(--rp-gold-ring) !important;
+}
+
+/* ── backgrounds that belong to a different palette ──────────────────────── */
+/* These were the loudest offenders: a warm site with cool boxes in it.
+   #0d1519 and #10191d (teal) on LensToolkit, #14181f and #33373e (blue-grey)
+   on section notes and proof blocks, #151719 from the oldest sheet. Next to
+   #151917 they do not read as a shade — they read as a mistake. */
+:is(.sec-note,.proof,.results,.highlight,.next-move,.il-ms-inner,.footer-links,
+    .lens-card,.feat,.principle) {
+  background: var(--rp-panel) !important;
+}
+:is(.tw-tool,.ihm-tool,.il-rail-item,.learn-list a,.soc-btn,.btn-ghost,
+    .il-landing-secondary,.methodology-inline) {
+  background: var(--rp-inset) !important;
+}
+/* Gold-tinted fills, at one strength instead of .06/.07/.08/.086/.10/.12 */
+:is(.tagline,.eyebrow,.tag.gold,.score-label,.pgc-badge) {
+  background: var(--rp-gold-soft) !important;
+}
+
+/* An opaque border in a dark theme is a white rectangle drawn around your
+   content. .il-rail-item carried rgb(242,238,229), .proof rgb(210,207,200),
+   and the Learn <code> and warning blocks their own opaque greys — all from
+   sheets written before the dark theme existed. */
+:is(.il-rail-item,.proof,.learn-formula code,.learn-warning,.next-move) {
+  border-width: 1px !important; border-style: solid !important;
+}
+
+/* Green and red stay meaningful: they mark market direction and live state,
+   and nothing else. Routed through the tokens so they match the charts. */
+:is(.ilm-badge.live,.ihl-state.is-live) { border-color: color-mix(in srgb, var(--rp-green) 40%, transparent) !important; }
+.learn-warning { border-left: 3px solid var(--rp-red) !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ONE PAGE FRAME.
+
+   Measured below the 63px nav before this block: the first line of content
+   appeared 56px down on /terms, /privacy, /blog, /data-sources and
+   /compound-calculator; 64px on the dashboard; 126px on /pricing, /learn,
+   /about and /research-process; 129px on /lens-score. Four different answers
+   to "where does this page start", so moving between them makes the content
+   jump. The 126 came from `.hero { padding-top: clamp(4rem,8vw,7rem) }` in
+   static-polish.css — 112px at a 1440 viewport — which only the pages with a
+   .hero ever got.
+
+   And the content column started at x=230 on eight pages, x=135 on /about,
+   x=100 on /lens-score. Same site, three left margins.
+
+   One number for each. 80px of air is close enough to the dashboard's 64 that
+   nothing jumps, and it takes 46px of dead space off the marketing pages
+   without leaving the headline cramped.
+   ═══════════════════════════════════════════════════════════════════════════ */
+/* Targeted by class, not by position: `:first-of-type` looked right and was
+   wrong, because the first DIV child of a static page is the zero-height
+   .lp-static-drawer, not the hero. It zeroed every page instead of setting
+   one value — caught by re-measuring rather than by reading the selector. */
+.il-static-page > :is(.hero, .wrap, .section), .il-static-page > main {
+  padding-top: 80px !important;
+}
+/* and whatever sits first inside it does not stack its own gap on top */
+.il-static-page > :is(.hero, .wrap, .section) > :first-child,
+.il-static-page > main > :first-child {
+  margin-top: 0 !important; padding-top: 0 !important;
+}
+@media (max-width: 700px) {
+  .il-static-page > :is(.hero, .wrap, .section), .il-static-page > main {
+    padding-top: 44px !important;
+  }
+}
+
+/* One column, one left edge. 980px keeps the measure readable (~95 characters
+   at 16px); wider was not a design decision, it was three defaults. */
+.il-static-page :is(.wrap,.hero,.section,.prose,.features,.principles,main.wrap) {
+  max-width: min(calc(100% - 40px), 980px) !important;
+  margin-inline: auto !important;
+}
+
+/* The trailing gap before the footer had the same spread. */
+.il-static-page > :last-child { padding-bottom: 72px !important; }
+
+/* LensToolkit is its own document with its own sheet, so it missed the frame
+   above and kept a 129px opening gap. Its column stays wider — it is a tool,
+   not a reading page — but it opens where everything else opens. */
+body.il-lens-page > main#lab-main { padding-top: 80px !important; }
+
+/* The last few radii came from outside this sheet and outbid the :is() lists
+   above on specificity — beauty-system.css puts 4px on bare inputs and
+   buttons, clean-pass.css puts 10px on several blocks behind a six-ID prefix.
+   Matched here with enough weight to settle it, rather than edited in five
+   old sheets that other pages still depend on. */
+html body :is(input,button,select,textarea):not(.theme-toggle-track):not([class*="pill"]):not([class*="badge"]) {
+  border-radius: 8px !important;
+}
+html body :is(.guide-cta,.feat-icon,.src-icon,.il-landing-search,.ihm-pop,
+               .il-landing-primary,.il-landing-secondary,.il-cta-solid,.il-cta-ghost) {
+  border-radius: 8px !important;
+}
+html body .il-hero-live { border-radius: 12px !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE COOL PALETTE, RETIRED.
+
+   lens-prime-shared.css declares a complete second palette as --lp-* tokens,
+   and it is blue-black where the brand is warm:
+
+     --lp-bg      #070b0e      --lp-panel    #0a1115
+     --lp-sidebar #081014      --lp-panel-2  #0d1519   (teal)
+     --lp-hover   #10191d      --lp-elev     gradient(#0d1519 → #091013)
+
+   clean-pass.css consumes them in dozens of rules, so those surfaces came out
+   cool while everything around them came out warm — #0d1519 next to #151917
+   does not read as a deeper shade, it reads as a different site. This was the
+   single biggest source of "colours that don't fit".
+
+   Redefining the tokens fixes every consumer at once, in every sheet, without
+   editing rules that other pages still depend on. The names stay; only the
+   hues move, onto the --rp-* ramp that the rest of the product already uses.
+   --lp-radius joins the scale for the same reason.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root, html[data-theme="dark"] {
+  --lp-bg: var(--rp-bg) !important;
+  --lp-sidebar: var(--rp-bg) !important;
+  --lp-panel: var(--rp-panel) !important;
+  --lp-panel-2: var(--rp-raised) !important;
+  --lp-elev: var(--rp-panel) !important;
+  --lp-elev-lg: var(--rp-raised) !important;
+  --lp-hover: var(--rp-raised) !important;
+  --lp-input-shell: var(--rp-inset) !important;
+  --lp-hdr: var(--rp-bg) !important;
+  --lp-border: var(--rp-line) !important;
+  --lp-border-gold: var(--rp-gold-ring) !important;
+  --lp-brand-line: var(--rp-line) !important;
+  --lp-gold: var(--rp-gold) !important;
+  --lp-gold-hi: var(--rp-gold-bright) !important;
+  --lp-text: var(--rp-ink) !important;
+  --lp-muted: var(--rp-muted) !important;
+  --lp-label: var(--rp-muted) !important;
+  --lp-nav-ink: var(--rp-muted) !important;
+  --lp-nav-ink-active: var(--rp-ink) !important;
+  --lp-btn-ink: var(--rp-copy) !important;
+  --lp-green: var(--rp-green) !important;
+  --lp-red: var(--rp-red) !important;
+  --lp-wash: transparent !important;
+  --lp-radius: 8px !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE OTHER COOL PALETTE, RETIRED.
+
+   premium-revamp.css declares a third one, and its own comment says what it
+   is: "Ink surfaces — cool neutral, layered by elevation".
+
+     --il-bg #07080B   --il-surface #101319   --il-surface-2 #14181F
+     and the aliases --cream/--cream2/--cream3, --card, --panel,
+     --surface/-2/-3, --sp-bg, --sp-panel/-2, --glass/-strong
+
+   Cool neutral was a real decision, once. The brand went warm afterwards and
+   this generation was never retired, so chart panels, expectation grids,
+   quality grids and scenario blocks still paint #14181F while the card they
+   sit inside paints #151917. Same fix as the --lp-* ramp above: keep the
+   names, move the hues. Mapped through the --rp-* tokens, which are already
+   theme-aware, so one declaration covers light and dark.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root, html[data-theme="dark"], html[data-theme="dark"] body, html[data-theme="light"], body {
+  --il-bg: var(--rp-bg) !important;
+  --il-bg-elevated: var(--rp-bg) !important;
+  --il-surface: var(--rp-panel) !important;
+  --il-surface-2: var(--rp-panel) !important;
+  --il-surface-3: var(--rp-raised) !important;
+  --il-surface-4: var(--rp-raised) !important;
+  --il-ink: var(--rp-ink) !important;
+  --il-ink-2: var(--rp-copy) !important;
+  --il-muted: var(--rp-muted) !important;
+  --il-faint: var(--rp-muted) !important;
+  --il-line: var(--rp-line) !important;
+
+  --cream: var(--rp-bg) !important;
+  --cream2: var(--rp-inset) !important;
+  --cream3: var(--rp-inset) !important;
+  --card: var(--rp-panel) !important;
+  --panel: var(--rp-panel) !important;
+  --surface: var(--rp-panel) !important;
+  --surface-2: var(--rp-panel) !important;
+  --surface-3: var(--rp-raised) !important;
+  --sp-bg: var(--rp-bg) !important;
+  --sp-panel: var(--rp-panel) !important;
+  --sp-panel-2: var(--rp-raised) !important;
+  --glass: var(--rp-panel) !important;
+  --glass-strong: var(--rp-panel) !important;
+}
+
+/* ── the stragglers ──────────────────────────────────────────────────────────
+   What survived the lists above did so on specificity, not on merit: eight
+   more neutral hairlines at 0.10 / 0.16 / 0.17 / 0.25, six more gold edges at
+   0.18 / 0.24 / 0.26 / 0.30 / 0.34 / 0.38, and a handful of opaque borders
+   left over from before the dark theme existed (.il-rail-item at
+   rgb(242,238,229) is a near-white rectangle drawn round a menu item).
+
+   Matched with `html body` so weight is not the deciding factor, and listed
+   by name so nothing is swept up that meant to be different. Focus rings,
+   market direction and validation states are deliberately NOT in here. */
+html body :is(.il-rail-item,.caveat,.process,.il-wf-input,.panel,.results,
+               .ticker-form,.sec-note,.proof,.footer-links,.il-startpath,
+               .il-landing-primary,.il-landing-secondary,.il-cta-ghost,
+               .methodology-inline,.soc-btn,.btn-ghost,.btn-nav-outline,
+               .il-ms-inner,.learn-list a,.next-move,code,pre) {
+  border-color: var(--rp-line) !important;
+}
+html body :is(.tagline,.eyebrow,.tag,.tag.gold,.isp-n,.pill,.score-label,
+               .pgc-badge,.nav-tab.active-tab,.highlight,.cta,.btn.primary) {
+  border-color: var(--rp-gold-ring) !important;
+}
+/* The warning block keeps its red rule — it is the one border on the site
+   that carries meaning — but at the token, not a hand-mixed grey. */
+html body .learn-warning { border-color: var(--rp-red) !important; }
