@@ -130,6 +130,18 @@ test("the homepage quotes no plan number it did not get from the catalog", () =>
     );
   }
 
+  /* app-legacy.js is served as a static file -- no tokens reach it -- so its
+     buttons and gate cards have to read the embedded catalog at runtime. Five
+     of them used to spell the trial length out, which is the same drift that
+     put $19 on the pricing page while Stripe charged $7.99. */
+  const appJs = fs.readFileSync(path.join(ROOT, "public", "app-legacy.js"), "utf8");
+  assert.doesNotMatch(
+    appJs,
+    /\d+-day free trial/,
+    "app-legacy.js spells out a trial length instead of reading the catalog"
+  );
+  assert.match(appJs, /function trialDays\(\)/);
+
   const rendered = renderProductTemplate(source);
   const money = getPublicProductConfig();
   const savings = annualSavingsPercent(money);

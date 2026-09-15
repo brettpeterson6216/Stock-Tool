@@ -6,8 +6,13 @@ const { PRODUCT_CONFIG } = require("../lib/product-config");
 const fs = require("node:fs");
 const path = require("node:path");
 const { subscriptionStatusToPlan } = require("../lib/plan");
+const { renderProductTemplate } = require("../lib/product-template");
 
-const indexHtml = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
+/* Rendered, not raw: the homepage states the price and trial length through
+   {{TOKEN}} placeholders now, so the raw file says nothing a customer sees. */
+const indexHtml = renderProductTemplate(
+  fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8")
+);
 const html = `${indexHtml}\n${fs.readFileSync(path.join(__dirname, "..", "public", "app-navigation.js"), "utf8")}\n${fs.readFileSync(path.join(__dirname, "..", "public", "app-legacy.js"), "utf8")}`;
 const authSource = fs.readFileSync(path.join(__dirname, "..", "routes", "auth.js"), "utf8");
 const billingSource = fs.readFileSync(path.join(__dirname, "..", "routes", "billing.js"), "utf8");
@@ -37,10 +42,10 @@ test("Stripe webhooks preserve a durable link from checkout to subscription upda
      now come from lib/product-config.js, so the literal is gone from the
      source — but the CONTRACT is unchanged, and asserting the contract is
      stronger than asserting the spelling: check that checkout reads the
-     catalog, then check the catalog still says 7 days with codes enabled. */
+     catalog, then check the catalog still says one month with codes enabled. */
   assert.match(billingSource, /subscription_data: \{ trial_period_days: PRODUCT_CONFIG\.trial\.days, metadata \}/);
   assert.match(billingSource, /allow_promotion_codes: PRODUCT_CONFIG\.checkout\.allowPromotionCodes/);
-  assert.equal(PRODUCT_CONFIG.trial.days, 7, "the free trial is no longer 7 days");
+  assert.equal(PRODUCT_CONFIG.trial.days, 30, "the free trial is no longer one month");
   assert.equal(PRODUCT_CONFIG.checkout.allowPromotionCodes, true, "promotion codes are switched off");
   assert.match(billingSource, /client_reference_id: String\(req\.session\.userId\)/);
   assert.match(billingSource, /async function findUserIdForStripeEvent/);
@@ -49,7 +54,10 @@ test("Stripe webhooks preserve a durable link from checkout to subscription upda
 });
 
 test("discount-code sales work through Stripe Checkout without replacing the trial", () => {
-  assert.match(html, /Start 7-day free trial/);
+  /* The homepage states the trial length in several places and none of them
+     spell it out any more, so match what the catalog renders rather than a
+     literal that would have to be chased on the next change. */
+  assert.match(html, new RegExp(`Start ${PRODUCT_CONFIG.trial.days}-day free trial`));
   assert.match(html, /Discount codes can be entered in Checkout/);
   assert.match(html, /\$0\.99 paid month/);
   assert.doesNotMatch(billingSource, /firstMonthDiscounts/);

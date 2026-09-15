@@ -26,7 +26,10 @@ test("canonical product configuration matches the repository-backed offer", () =
     monthly: { unitAmountCents: PRODUCT_CONFIG.pricing.monthly.unitAmountCents, interval: "month", intervalCount: 1 },
     annual: { unitAmountCents: PRODUCT_CONFIG.pricing.annual.unitAmountCents, interval: "year", intervalCount: 1 },
   });
-  assert.deepEqual(PRODUCT_CONFIG.trial, { days: 7, requiresCard: true });
+  /* Unlike the price, the trial length is pinned here on purpose: it is sent
+     to Stripe as trial_period_days on every checkout, so changing it changes
+     what customers are actually granted, and that should not pass silently. */
+  assert.deepEqual(PRODUCT_CONFIG.trial, { days: 30, requiresCard: true });
   assert.deepEqual(PRODUCT_CONFIG.analysisLimits, { guestDaily: 2, registeredFreeDaily: 5 });
   assert.equal(PRODUCT_CONFIG.checkout.allowPromotionCodes, true);
   assert.deepEqual(PRODUCT_CONFIG.proSections, [...PRO_SECTIONS]);

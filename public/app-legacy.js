@@ -307,8 +307,8 @@ function sectionProGateHtml(id) {
     return `<div class="pro-gate-card"><div class="pgc-body">
       <div class="pgc-badge">⚡ Pro Feature</div>
       <div class="pgc-title">Pro Feature${titleSuffix}</div>
-      <button class="pgc-btn js-pgc-upgrade">Start 7-day free trial →</button>
-      <div class="pgc-note">7-day free trial · Discount codes accepted in Checkout</div>
+      <button class="pgc-btn js-pgc-upgrade">${trialCtaLabel()}</button>
+      <div class="pgc-note">${trialDays()}-day free trial · Discount codes accepted in Checkout</div>
     </div></div>`;
   }
 
@@ -327,8 +327,8 @@ function sectionProGateHtml(id) {
       <ul class="pgc-bullets">
         ${cfg.bullets.map(b => `<li>${b}</li>`).join('\n        ')}
       </ul>
-      <button class="pgc-btn js-pgc-upgrade">Start 7-day free trial →</button>
-      <div class="pgc-note">7-day free trial · Discount codes accepted in Checkout</div>
+      <button class="pgc-btn js-pgc-upgrade">${trialCtaLabel()}</button>
+      <div class="pgc-note">${trialDays()}-day free trial · Discount codes accepted in Checkout</div>
     </div>
   </div>`;
 }
@@ -409,8 +409,8 @@ function handleSectionError(e, sectionId, container) {
         <li>Advanced projections, institutional data, and analyst targets</li>
         <li>Comes back tomorrow free, or unlock everything now</li>
       </ul>
-      <button class="pgc-btn js-pgc-upgrade">Start 7-day free trial →</button>
-      <div class="pgc-note">7-day free trial · Discount codes accepted in Checkout</div>
+      <button class="pgc-btn js-pgc-upgrade">${trialCtaLabel()}</button>
+      <div class="pgc-note">${trialDays()}-day free trial · Discount codes accepted in Checkout</div>
     </div></div>`;
     container.style.display = 'block';
   } else {
@@ -1277,14 +1277,14 @@ async function handleUpgradeClick() {
   const btn = document.getElementById('upgrade-cta-btn');
   btn.disabled = true; btn.textContent = 'Redirecting to checkout…';
   await startTrial(_upgradePlan === 'annual');
-  btn.disabled = false; btn.textContent = 'Start 7-day free trial →';
+  btn.disabled = false; btn.textContent = trialCtaLabel();
 }
 
 // Reset modal state when closed
 function _resetUpgradeModal() {
   const cta = document.getElementById('upgrade-cta-btn');
   const note = document.querySelector('#upgrade-modal-bg .modal-note');
-  if (cta)  { cta.style.display = ''; cta.disabled = false; cta.textContent = 'Start 7-day free trial →'; }
+  if (cta)  { cta.style.display = ''; cta.disabled = false; cta.textContent = trialCtaLabel(); }
   if (note) note.style.display = '';
   const authDiv  = document.getElementById('upgrade-modal-auth');
   const unverifDiv = document.getElementById('upgrade-modal-unverified');
@@ -2357,19 +2357,29 @@ function ilProduct(){
   catch (_) { window.__ilProduct = null; }
   return window.__ilProduct;
 }
+/* The trial length is a billing term: routes/billing.js sends exactly this
+   number to Stripe as trial_period_days. Every button and gate card that
+   promises a trial reads it here rather than stating its own, so the promise
+   and the subscription cannot disagree. Function declarations hoist, so the
+   gate cards defined earlier in this file can call it. */
+function trialDays(){
+  var cfg = ilProduct();
+  return (cfg && cfg.trial && cfg.trial.days) || 30;
+}
+function trialCtaLabel(){ return 'Start ' + trialDays() + '-day free trial \u2192'; }
 function pricingPlan(){
   var cfg = ilProduct() || {};
   var p = cfg.pricing || null;
   var monthly = (p && p.monthly && p.monthly.unitAmountCents) || 799;
   var annual  = (p && p.annual  && p.annual.unitAmountCents)  || 5999;
-  var trialDays = (cfg.trial && cfg.trial.days) || 7;
+
   var savings = Math.max(0, Math.round((1 - annual / (monthly * 12)) * 100));
   return {
     monthly: (monthly / 100).toFixed(2),
     annual: (annual / 100).toFixed(2),
     perMonthAnnual: '$' + (annual / 1200).toFixed(2),
     savings: savings,
-    trialDays: trialDays
+    trialDays: trialDays()
   };
 }
 function setPricingPeriod(period){
@@ -2384,7 +2394,7 @@ function setPricingPeriod(period){
   if(note)note.textContent=annual
     ?('Equivalent to about '+plan.perMonthAnnual+'/month. Save '+plan.savings+'% versus monthly billing. Discount codes can be entered in Checkout.')
     :('Start with a '+plan.trialDays+'-day free trial. Have a discount code? Enter it in Stripe Checkout for offers like a $0.99 paid month.');
-  if(btn)btn.textContent=annual?'Start annual Pro \u2192':('Start '+plan.trialDays+'-day free trial \u2192');
+  if(btn)btn.textContent=annual?'Start annual Pro \u2192':trialCtaLabel();
 }
 
 async function initGlobe(){
