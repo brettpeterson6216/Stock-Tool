@@ -49,8 +49,16 @@ test("every page points Pricing at the page", () => {
 });
 
 test("the pricing page says what it costs and where the money goes", () => {
-  const html = read("public", "pricing.html");
-  assert.match(html, /\$\d+\/month/, "no price on the pricing page");
+  /* The price is a {{token}} in the source now — one catalog feeds the page,
+     Terms and the Stripe validation, so they cannot drift. Render before
+     asserting, or this checks the placeholder instead of the price. */
+  const { renderProductTemplate } = require("../lib/product-template");
+  const html = renderProductTemplate(read("public", "pricing.html"));
+  /* Strip markup before asserting copy: the amount sits inside <strong> and
+     the interval outside it, so a regex run against raw HTML looks for
+     "$19.00 a month" across a closing tag and never matches. */
+  const text = html.replace(/<[^>]+>/g, "");
+  assert.match(text, /\$\d+(?:\.\d\d)?\s*(?:\/|a )\s*month/, "no price on the pricing page");
   assert.match(html, /cancel/i, "does not say how to cancel");
   assert.match(html, /data-sources/, "does not point at where the data comes from");
   assert.match(html, /not investment advice/i, "no disclaimer");

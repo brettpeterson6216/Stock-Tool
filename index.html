@@ -407,12 +407,13 @@
       </div>
       <div class="il-trust" aria-label="Data sources and terms">
         <span class="il-trust-lead">Built on verified sources</span>
-        <span><i class="ti ti-file-certificate"></i>SEC EDGAR</span>
-        <span><i class="ti ti-chart-line"></i>Yahoo Finance</span>
-        <span><i class="ti ti-broadcast"></i>Finnhub</span>
-        <span><i class="ti ti-building-bank"></i>FRED</span>
+        <!-- Badges come from lib/provider-registry.js, and the trial line from
+             lib/product-config.js. Hardcoded, this row named a provider the
+             product does not use and promised "No credit card to start" beside
+             a trial Stripe is configured to require a card for. -->
+        {{HOMEPAGE_PROVIDER_BADGES}}
         <span class="il-trust-dot" id="il-trust-nocard-dot" aria-hidden="true">·</span>
-        <span id="il-trust-nocard"><i class="ti ti-credit-card-off"></i>No credit card to start</span>
+        <span id="il-trust-nocard"><i class="ti ti-clock"></i>{{TRIAL_CARD_SHORT}} · {{TRIAL_DAYS}}-day trial</span>
       </div>
       <div class="il-offer-card" aria-label="Introductory offer">
         <strong>Discount codes accepted</strong>

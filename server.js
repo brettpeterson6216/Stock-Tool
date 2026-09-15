@@ -82,6 +82,7 @@ const searchRouter        = require("./routes/search");
 const logoRouter          = require("./routes/logo");
 const tickerIndex         = require("./lib/ticker-index");
 const providerHealth      = require("./lib/provider-health");
+const { getPublicProviderRegistry } = require("./lib/provider-registry");
 const { productionReadiness } = require("./lib/readiness");
 const { buildSitemapXml } = require("./lib/acquisition-tickers");
 
@@ -436,12 +437,51 @@ app.get("/readyz", async (_req, res) => {
     databaseReady = false;
   }
   const readiness = productionReadiness(process.env, databaseReady);
-  res.status(readiness.ready ? 200 : 503).json({ ...readiness, ...buildInfo });
+
+  /* Does the live Stripe price actually match what the site advertises?
+     Reported, never enforced here. routes/billing.js only blocks checkout on a
+     mismatch when STRIPE_CATALOG_ENFORCE is set, so this line is how you learn
+     the answer before turning that on — one request, no Stripe dashboard, and
+     no possibility of this check itself taking the site out of "ready".
+     Booleans only: the verifier is built to be safe to surface. */
+  let stripeCatalog = null;
+  if (typeof billingRouter.verifyCatalog === "function") {
+    try {
+      const result = await Promise.race([
+        billingRouter.verifyCatalog(),
+        new Promise(resolve => setTimeout(() => resolve(null), 4000)),
+      ]);
+      stripeCatalog = result
+        ? { matchesConfiguredPrices: result.ready === true, checkedAt: result.checkedAt, prices: result.prices }
+        : { matchesConfiguredPrices: null, reason: "verification timed out or is unavailable" };
+    } catch {
+      stripeCatalog = { matchesConfiguredPrices: null, reason: "verification threw" };
+    }
+  }
+
+  res.status(readiness.ready ? 200 : 503).json({
+    ...readiness,
+    stripeCatalog,
+    stripeCatalogEnforced: /^(1|true|yes)$/i.test(String(process.env.STRIPE_CATALOG_ENFORCE || "")),
+    ...buildInfo,
+  });
 });
 
 app.get("/api/providers/health", (_req, res) => {
   res.setHeader("Cache-Control", "no-store");
   res.json(providerHealth.snapshot());
+});
+
+/* The provider catalog, as the site is allowed to describe it publicly.
+   lib/provider-registry.js is the single record of who supplies what and how
+   fresh it is, so Data Sources, the homepage badges and the policy pages can
+   read from one place and the claims on the site cannot drift from the
+   providers actually in use. getPublicProviderRegistry() returns only the
+   disclosable fields - verified by reading it before wiring this up, because
+   "public-safe" is a claim to check, not one to take on trust. */
+app.get("/api/providers/catalog", (_req, res) => {
+  res.setHeader("Cache-Control", "public, max-age=300");
+  res.json(getPublicProviderRegistry());
 });
 
 app.get("/api/version", (_req, res) => {

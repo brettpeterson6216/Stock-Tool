@@ -2,6 +2,7 @@
 
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
+const { PRODUCT_CONFIG } = require("../lib/product-config");
 const fs = require("node:fs");
 const path = require("node:path");
 const { subscriptionStatusToPlan } = require("../lib/plan");
@@ -31,8 +32,16 @@ test("locked paid accounts reconcile against Stripe before Pro rejection", () =>
 });
 
 test("Stripe webhooks preserve a durable link from checkout to subscription updates", () => {
-  assert.match(billingSource, /subscription_data: \{ trial_period_days: 7, metadata \}/);
-  assert.match(billingSource, /allow_promotion_codes: true/);
+  /* These used to assert the literals `trial_period_days: 7` and
+     `allow_promotion_codes: true`. The trial length and the promo-code switch
+     now come from lib/product-config.js, so the literal is gone from the
+     source — but the CONTRACT is unchanged, and asserting the contract is
+     stronger than asserting the spelling: check that checkout reads the
+     catalog, then check the catalog still says 7 days with codes enabled. */
+  assert.match(billingSource, /subscription_data: \{ trial_period_days: PRODUCT_CONFIG\.trial\.days, metadata \}/);
+  assert.match(billingSource, /allow_promotion_codes: PRODUCT_CONFIG\.checkout\.allowPromotionCodes/);
+  assert.equal(PRODUCT_CONFIG.trial.days, 7, "the free trial is no longer 7 days");
+  assert.equal(PRODUCT_CONFIG.checkout.allowPromotionCodes, true, "promotion codes are switched off");
   assert.match(billingSource, /client_reference_id: String\(req\.session\.userId\)/);
   assert.match(billingSource, /async function findUserIdForStripeEvent/);
   assert.match(billingSource, /sess\.customer_details\?\.email \|\| sess\.customer_email \|\| await stripeCustomerEmail\(customerId\)/);
@@ -45,7 +54,12 @@ test("discount-code sales work through Stripe Checkout without replacing the tri
   assert.match(html, /\$0\.99 paid month/);
   assert.doesNotMatch(billingSource, /firstMonthDiscounts/);
   assert.doesNotMatch(billingSource, /\$0\.99 first-month offer is not configured yet/);
-  assert.match(billingSource, /track\("checkout_started", \{ annual, plan: annual \? "annual" : "monthly", trialDays: 7, promotionCodes: true \}/);
+  assert.match(billingSource, /trialDays: PRODUCT_CONFIG\.trial\.days/);
+  assert.match(billingSource, /promotionCodes: PRODUCT_CONFIG\.checkout\.allowPromotionCodes/);
+  /* And the reason the catalog exists: checkout refuses to run when the live
+     Stripe price does not match the configured amount, currency or interval,
+     rather than quietly charging something else. */
+  assert.match(billingSource, /verifyStripeCatalog/, "checkout no longer verifies the Stripe catalog before charging");
 });
 
 test("protected sections wait for authoritative auth state before gating", () => {

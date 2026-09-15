@@ -36,3 +36,9 @@ test("production readiness reports capability names without exposing secrets", (
   assert.equal(result.checks.transactionalEmail, false);
   assert.doesNotMatch(JSON.stringify(result), /sk_live_example|whsec_example|market-key|re_example/);
 });
+
+test("production readiness can incorporate a safe Stripe catalog result", () => {
+  assert.equal(productionReadiness(completeEnvironment, true, { ready: true }).checks.billing, true);
+  assert.equal(productionReadiness(completeEnvironment, true, { ready: false }).checks.billing, false);
+  assert.equal(productionReadiness(completeEnvironment, true, false).checks.billing, false);
+});

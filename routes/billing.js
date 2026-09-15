@@ -8,6 +8,7 @@ const { db }                                                    = require("../li
 const { subscriptionStatusToPlan } = require("../lib/plan");
 const { validateCsrf } = require("../lib/csrf");
 const { track }        = require("../lib/analytics");
+const { PRODUCT_CONFIG, verifyStripeCatalog } = require("../lib/product-config");
 const { STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET,
         STRIPE_PRICE_MONTHLY, STRIPE_PRICE_ANNUAL, APP_URL }   = require("../lib/config");
 
@@ -94,17 +95,50 @@ router.post("/stripe/create-checkout", validateCsrf, async (req, res) => {
     const priceId = annual ? STRIPE_PRICE_ANNUAL : STRIPE_PRICE_MONTHLY;
     if (!priceId) return res.status(503).json({ error: "Price not configured." });
 
+    /* Catalog check: loud by default, blocking only when asked.
+
+       verifyStripeCatalog compares the live Stripe price against the amount,
+       currency and interval in lib/product-config.js. Blocking on a mismatch
+       is the right INSTINCT — charging a price the page did not advertise is
+       worse than not charging at all — but it fails closed, and it fails
+       closed on a transient Stripe error too. Turning it on blind, in the same
+       deploy that introduces it, risks 503'ing every checkout on a site that
+       is already taking money, with nobody watching.
+
+       So the first deploy only reports. The log line names exactly what did
+       not line up (booleans only — never IDs, amounts or provider errors), and
+       GET /readyz carries the same answer, so the mismatch is visible without
+       reading Render logs and without a Stripe dashboard round trip.
+
+       Set STRIPE_CATALOG_ENFORCE=1 once the catalog is confirmed against the
+       real prices, and it blocks from then on. */
+    const catalog = await verifyStripeCatalog({
+      stripe,
+      priceIds: { monthly: STRIPE_PRICE_MONTHLY, annual: STRIPE_PRICE_ANNUAL },
+    }).catch(() => null);
+    const enforceCatalog = /^(1|true|yes)$/i.test(String(process.env.STRIPE_CATALOG_ENFORCE || ""));
+    if (!catalog || !catalog.ready) {
+      console.error("[stripe] product catalog does not match plan configuration",
+        catalog || { ready: false, reason: "verification threw" });
+      if (enforceCatalog) {
+        return res.status(503).json({ error: "Payments are temporarily unavailable." });
+      }
+      console.warn("[stripe] continuing anyway: STRIPE_CATALOG_ENFORCE is not set. " +
+        "Confirm the Stripe prices, then set it to 1 to make this block.");
+    }
+
     const metadata = { userId: String(req.session.userId) };
     const params = {
       mode: "subscription",
       payment_method_types: ["card"],
+      payment_method_collection: PRODUCT_CONFIG.trial.requiresCard ? "always" : "if_required",
       line_items: [{ price: priceId, quantity: 1 }],
-      subscription_data: { trial_period_days: 7, metadata },
+      subscription_data: { trial_period_days: PRODUCT_CONFIG.trial.days, metadata },
       success_url: `${APP_URL}/?upgraded=1`,
       cancel_url:  `${APP_URL}/?checkout=cancelled`,
       client_reference_id: String(req.session.userId),
       metadata,
-      allow_promotion_codes: true,
+      allow_promotion_codes: PRODUCT_CONFIG.checkout.allowPromotionCodes,
     };
     if (user.stripe_customer_id) {
       params.customer = user.stripe_customer_id;
@@ -115,7 +149,12 @@ router.post("/stripe/create-checkout", validateCsrf, async (req, res) => {
     const checkoutSession = await stripe.checkout.sessions.create(params, {
       idempotencyKey: `checkout:${req.session.userId}:${annual ? "annual" : "monthly"}:${Math.floor(Date.now() / (5 * 60 * 1000))}`,
     });
-    track("checkout_started", { annual, plan: annual ? "annual" : "monthly", trialDays: 7, promotionCodes: true },
+    track("checkout_started", {
+      annual,
+      plan: annual ? "annual" : "monthly",
+      trialDays: PRODUCT_CONFIG.trial.days,
+      promotionCodes: PRODUCT_CONFIG.checkout.allowPromotionCodes,
+    },
           req.sessionID, req.session.userId).catch(() => {});
     res.json({ url: checkoutSession.url });
   } catch (err) {
@@ -260,6 +299,12 @@ router.post("/stripe/portal", validateCsrf, async (req, res) => {
     console.error("portal error:", err);
     res.status(500).json({ error: "Could not open the billing portal." });
   }
+});
+
+router.verifyCatalog = (options = {}) => verifyStripeCatalog({
+  stripe,
+  priceIds: { monthly: STRIPE_PRICE_MONTHLY, annual: STRIPE_PRICE_ANNUAL },
+  ...options,
 });
 
 module.exports = router;

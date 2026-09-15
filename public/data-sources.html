@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <script src="/theme-bootstrap.js?v=20260906-4"></script>
   <title>Data Sources — ImpliedLens</title>
-  <meta name="description" content="Where ImpliedLens gets its data — Finnhub, SEC EDGAR, Yahoo Finance, and how each source is used.">
+  <meta name="description" content="Where ImpliedLens gets its data, what each provider supplies, and how freshness, fallbacks, and attribution are communicated.">
   <link rel="canonical" href="https://impliedlens.com/data-sources">
   <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" type="image/svg+xml" href="/logo.svg">
@@ -22,13 +22,13 @@
   <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="ImpliedLens — daily AAPL candles with a 30-day average, on the ImpliedLens research card">
+  <meta property="og:image:alt" content="ImpliedLens stock research workspace preview">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@ImpliedLens">
   <meta name="twitter:title" content="ImpliedLens Data Sources">
   <meta name="twitter:description" content="See where ImpliedLens gets its market, filing, estimate, and financial data and how each source is used.">
   <meta name="twitter:image" content="https://impliedlens.com/social-card.png">
-  <meta name="twitter:image:alt" content="ImpliedLens — daily AAPL candles with a 30-day average, on the ImpliedLens research card">
+  <meta name="twitter:image:alt" content="ImpliedLens stock research workspace preview">
   <link rel="preload" as="font" type="font/woff2" crossorigin href="/vendor/fonts/plus-jakarta-sans-files/plus-jakarta-sans-latin-400-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/vendor/fonts/plus-jakarta-sans-files/plus-jakarta-sans-latin-700-normal.woff2">
 <link rel="stylesheet" href="/vendor/tabler-icons.min.css?v=3.46.0-1">
@@ -153,77 +153,7 @@
     <h1>Data Sources</h1>
     <p class="subtitle">ImpliedLens labels the providers and calculations behind its research surfaces. Here is where the data comes from and how it is used.</p>
 
-    <div class="source-card">
-      <div class="src-head">
-        <div class="src-icon"><i class="ti ti-chart-line" aria-hidden="true"></i></div>
-        <div>
-          <div class="src-name">Yahoo Finance</div>
-          <div class="src-url">finance.yahoo.com</div>
-        </div>
-      </div>
-      <p class="src-desc">Used for price history, OHLCV candles, and current quote context. The interface shows the latest provider observation and does not present this as a direct exchange feed.</p>
-      <div class="src-tags">
-        <span class="tag gold">Price Charts</span>
-        <span class="tag gold">LensSetup</span>
-        <span class="tag">Current quotes</span>
-        <span class="tag">Market context</span>
-      </div>
-    </div>
-
-    <div class="source-card">
-      <div class="src-head">
-        <div class="src-icon"><i class="ti ti-broadcast" aria-hidden="true"></i></div>
-        <div>
-          <div class="src-name">Finnhub</div>
-          <div class="src-url">finnhub.io</div>
-        </div>
-      </div>
-      <p class="src-desc">Used for analyst price targets, earnings surprises, recommendation trends, news feeds, institutional ownership, earnings-call transcript availability, and selected market metrics. All calls are server-side — provider credentials are never exposed to the browser.</p>
-      <div class="src-tags">
-        <span class="tag gold">Analyst Targets</span>
-        <span class="tag gold">Institutional</span>
-        <span class="tag gold">News</span>
-        <span class="tag">Insider transactions</span>
-        <span class="tag">Recommendations</span>
-        <span class="tag">Market metrics</span>
-      </div>
-    </div>
-
-    <div class="source-card">
-      <div class="src-head">
-        <div class="src-icon"><i class="ti ti-building-bank" aria-hidden="true"></i></div>
-        <div>
-          <div class="src-name">SEC EDGAR</div>
-          <div class="src-url">sec.gov/cgi-bin/browse-edgar</div>
-        </div>
-      </div>
-      <p class="src-desc">Official company facts and filing history. SEC XBRL facts populate annual financial statements, reported EPS history, and the reported inputs used by LensValue. Filing links open the original 10-K, 10-Q, 8-K, and DEF 14A documents on SEC.gov.</p>
-      <div class="src-tags">
-        <span class="tag gold">SEC Filings</span>
-        <span class="tag gold">Financial Statements</span>
-        <span class="tag gold">LensValue Inputs</span>
-        <span class="tag">10-K / 10-Q</span>
-        <span class="tag">8-K / DEF 14A</span>
-        <span class="tag">Form 4</span>
-        <span class="tag">Primary source</span>
-      </div>
-    </div>
-
-    <div class="source-card">
-      <div class="src-head">
-        <div class="src-icon"><i class="ti ti-users" aria-hidden="true"></i></div>
-        <div>
-          <div class="src-name">FINRA OTC Transparency</div>
-          <div class="src-url">finra.org/filing-reporting/otc-transparency</div>
-        </div>
-      </div>
-      <p class="src-desc">Used for delayed, aggregated weekly OTC trading volume and trade counts. This is labeled as OTC activity—not as venue-level dark-pool order flow.</p>
-      <div class="src-tags">
-        <span class="tag gold">OTC Activity</span>
-        <span class="tag">Weekly aggregates</span>
-        <span class="tag">Delayed reporting</span>
-      </div>
-    </div>
+    {{DATA_PROVIDER_CARDS}}
 
     <h2>Data Freshness and Delays</h2>
     <p>Timing varies by provider, exchange, instrument, and market session. ImpliedLens displays the provider observation time when available and identifies fallback sources; it does not infer a guaranteed delay from the chart interval. Daily OHLCV history reflects the provider's latest completed observation. Analyst estimates and institutional ownership update on their providers' schedules, and FINRA OTC data is published on a delayed basis.</p>
@@ -235,7 +165,7 @@
     <p>LensSetup has a preliminary no-lookahead walk-forward diagnostic across 525 observations and 15 liquid U.S. symbols. Current separation is positive but weak, so no historical-performance claim is made. LensValue and Golden Lens require broader point-in-time fundamental and estimate history before performance claims are allowed. The production interface exposes model version, confidence, inputs, source dates, and missing-data status. <a href="/lens-calibration.json">View the current machine-readable diagnostic.</a></p>
 
     <div class="caveat">
-      <p><strong>Important:</strong> Data accuracy depends on the upstream providers. ImpliedLens is not responsible for errors, delays, or omissions in data supplied by Finnhub, Yahoo Finance, or SEC EDGAR. Always verify critical figures against primary sources before making investment decisions.</p>
+      <p><strong>Important:</strong> Data accuracy depends on the upstream providers. ImpliedLens is not responsible for errors, delays, or omissions in data supplied by {{MARKET_PROVIDER_NAMES}}. Always verify critical figures against primary sources before making investment decisions.</p>
     </div>
 
     <h2>Screener Data</h2>
