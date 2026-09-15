@@ -155,3 +155,60 @@ test("Stripe catalog failures are complete and do not expose IDs or provider err
   assert.equal(result.prices.annual.checks.retrievable, false);
   assert.doesNotMatch(JSON.stringify(result), /private|No such price|price_monthly|price_annual/);
 });
+
+/* The advertised price and the charged price were once two different numbers:
+   the pricing page said $19/month while Stripe billed $7.99. These tests exist
+   so that can only happen again if someone edits the one line that means it. */
+test("the configured price is the price Stripe is expected to charge", () => {
+  assert.equal(PRODUCT_CONFIG.pricing.monthly.unitAmountCents, 799);
+  assert.equal(PRODUCT_CONFIG.pricing.annual.unitAmountCents, 5999);
+  const money = getPublicProductConfig();
+  assert.equal(money.pricing.monthly.formatted, "$7.99");
+  assert.equal(money.pricing.annual.formatted, "$59.99");
+});
+
+test("a catalog mismatch reports both amounts, not just a false", async () => {
+  clearStripeCatalogVerifierCache();
+  const stripe = {
+    prices: {
+      retrieve: async (id) => ({
+        id,
+        currency: "usd",
+        active: true,
+        unit_amount: id.includes("month") ? 1900 : 5999,
+        recurring: {
+          interval: id.includes("month") ? "month" : "year",
+          interval_count: 1,
+        },
+      }),
+    },
+  };
+  const result = await verifyStripeCatalog({
+    stripe,
+    priceIds: { monthly: "price_month_x", annual: "price_year_x" },
+    cacheTtlMs: 0,
+  });
+
+  assert.equal(result.ready, false);
+  // The whole point: an operator can read what Stripe holds without opening it.
+  assert.equal(result.prices.monthly.expected.formatted, "$7.99");
+  assert.equal(result.prices.monthly.observed.formatted, "$19.00");
+  assert.equal(result.prices.monthly.observed.interval, "month");
+  // The half that agrees still says so.
+  assert.equal(result.prices.annual.ready, true);
+  assert.equal(result.prices.annual.observed.formatted, "$59.99");
+  // Reporting the amount must not start leaking the price ID.
+  assert.doesNotMatch(JSON.stringify(result), /price_month_x|price_year_x/);
+});
+
+test("an unreachable price still reports what was expected of it", async () => {
+  clearStripeCatalogVerifierCache();
+  const result = await verifyStripeCatalog({
+    stripe: { prices: { retrieve: async () => { throw new Error("network"); } } },
+    priceIds: { monthly: "price_gone_a", annual: "price_gone_b" },
+    cacheTtlMs: 0,
+  });
+  assert.equal(result.prices.monthly.observed, null);
+  assert.equal(result.prices.monthly.expected.formatted, "$7.99");
+  assert.doesNotMatch(JSON.stringify(result), /network|price_gone/);
+});

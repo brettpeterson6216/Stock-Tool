@@ -106,6 +106,11 @@
 <link href="/clean-pass.css?v=20260907-16" rel="stylesheet">
 <link href="/surface.css?v=20260907-16" rel="stylesheet">
 <script defer src="/premium-motion.js?v=20260825-6"></script>
+<!-- The price the site shows comes from one place: lib/product-config.js,
+     which is the same value verifyStripeCatalog checks against Stripe.
+     A meta attribute, not an inline script: script-src has no
+     'unsafe-inline', so an inline block would never run. -->
+<meta name="il-product" content="{{PUBLIC_PRODUCT_CONFIG_ATTR}}">
 </head>
 <body class="il-product-page">
 <a href="#main-content" class="skip-link">Skip to content</a>
@@ -557,10 +562,10 @@
   </div>
   <div class="il-landing-pricing" id="landing-pricing">
     <span class="il-landing-kicker">Try the full workflow</span>
-    <h2>Start with a 7-day Pro trial.</h2>
+    <h2>Start with a {{TRIAL_DAYS}}-day Pro trial.</h2>
     <p>Use the full Pro workflow before you commit. Discount codes can be entered in Stripe Checkout for limited offers like a $0.99 paid month.</p>
     <div class="il-landing-actions centered">
-      <a class="il-landing-primary" href="/signup">Start 7-day free trial</a>
+      <a class="il-landing-primary" href="/signup">Start {{TRIAL_DAYS}}-day free trial</a>
       <a class="il-landing-secondary" href="/signup">Create free account</a>
     </div>
   </div>
@@ -930,10 +935,10 @@
       <span class="sec-label">Simple, honest pricing</span>
       <h2 class="sec-h2">Start free. Upgrade when you're ready.</h2>
       <p class="sec-sub">Clear pricing. No hidden paywalls. A focused research workspace built for repeat use.</p>
-      <div class="pricing-toggle" role="group" aria-label="Pro billing period"><button class="active" id="pricing-period-monthly" onclick="setPricingPeriod('monthly')">Monthly</button><button id="pricing-period-annual" onclick="setPricingPeriod('annual')">Annual · save 37%</button></div>
+      <div class="pricing-toggle" role="group" aria-label="Pro billing period"><button class="active" id="pricing-period-monthly" onclick="setPricingPeriod('monthly')">Monthly</button><button id="pricing-period-annual" onclick="setPricingPeriod('annual')">Annual · save {{PLAN_ANNUAL_SAVINGS_PERCENT}}%</button></div>
       <div class="pricing-grid">
         <div class="pricing-card"><div class="pricing-tier">Free</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">0</span><span class="p-per">/month</span></div><p class="p-desc">Build a repeatable research habit before paying.</p><ul class="p-features"><li>5 stock analyses per day</li><li>Charts, indicators, and scenarios</li><li>Cloud-saved analyses</li><li>Decision workspace and thesis tracking</li><li>AI Portfolio Guide</li><li>Review-date reminders</li></ul><button class="btn-plan btn-plan-dark" id="pricing-free-btn">Create free account</button></div>
-        <div class="pricing-card featured"><div class="pricing-pop">7-day free trial</div><div class="pricing-tier">Pro</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount" id="pricing-pro-amount">7.99</span><span class="p-per" id="pricing-pro-period">/month</span></div><p class="p-desc" id="pricing-pro-note">Start with a 7-day free trial. Have a discount code? Enter it in Stripe Checkout for offers like a $0.99 paid month.</p><ul class="p-features"><li>Unlimited stock analyses</li><li>Intrinsic value and advanced projections</li><li>Earnings-call research center</li><li>4-stock side-by-side comparison</li><li>Full stock screener</li><li>PDF report export</li></ul><button class="btn-plan btn-plan-gold" id="pricing-pro-btn">Start 7-day free trial &rarr;</button></div>
+        <div class="pricing-card featured"><div class="pricing-pop">{{TRIAL_DAYS}}-day free trial</div><div class="pricing-tier">Pro</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount" id="pricing-pro-amount">{{PLAN_MONTHLY_AMOUNT}}</span><span class="p-per" id="pricing-pro-period">/month</span></div><p class="p-desc" id="pricing-pro-note">Start with a {{TRIAL_DAYS}}-day free trial. Have a discount code? Enter it in Stripe Checkout for offers like a $0.99 paid month.</p><ul class="p-features"><li>Unlimited stock analyses</li><li>Intrinsic value and advanced projections</li><li>Earnings-call research center</li><li>4-stock side-by-side comparison</li><li>Full stock screener</li><li>PDF report export</li></ul><button class="btn-plan btn-plan-gold" id="pricing-pro-btn">Start {{TRIAL_DAYS}}-day free trial &rarr;</button></div>
       </div>
       <div class="pricing-compare" aria-label="Free and Pro feature comparison"><div class="pricing-compare-row head"><span>Capability</span><span>Free</span><span>Pro</span></div><div class="pricing-compare-row"><span>Workspace, thesis, watchlist, Portfolio Guide</span><span class="yes">Included</span><span class="yes">Included</span></div><div class="pricing-compare-row"><span>Daily stock analyses</span><span>5 / day</span><span class="yes">Unlimited</span></div><div class="pricing-compare-row"><span>Advanced valuation, calls, screener, export</span><span>Preview</span><span class="yes">Included</span></div></div>
     </div></section>
@@ -1793,7 +1798,7 @@
   <div class="modal">
     <button class="modal-close" id="modal-close-btn">✕</button>
     <h3>Upgrade to Pro</h3>
-    <p>Get full access to all Pro features with a 7-day free trial. Discount codes can be entered in Checkout.</p>
+    <p>Get full access to all Pro features with a {{TRIAL_DAYS}}-day free trial. Discount codes can be entered in Checkout.</p>
     <button class="btn-modal-cta" id="modal-see-plans-btn">See plans →</button>
   </div>
 </div>
@@ -1866,18 +1871,18 @@
     <button class="modal-close" id="upgrade-modal-close-btn">✕</button>
     <div style="font-family:var(--mono);font-size:11px;color:var(--gold-d);text-transform:uppercase;letter-spacing:.14em;margin-bottom:.5rem;">Pro Plan</div>
     <h3 style="font-family:var(--serif);font-size:24px;letter-spacing:-.01em;margin-bottom:.5rem;">Unlock <em style="color:var(--gold-d);font-style:italic;">all</em> the tools.</h3>
-    <p style="font-size:14px;color:var(--ink4);margin-bottom:1.5rem;">7-day free trial. Have a discount code? Enter it in Checkout for offers like a $0.99 paid month.</p>
+    <p style="font-size:14px;color:var(--ink4);margin-bottom:1.5rem;">{{TRIAL_DAYS}}-day free trial. Have a discount code? Enter it in Checkout for offers like a $0.99 paid month.</p>
 
     <div class="modal-2col" style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1.25rem;">
       <div id="plan-monthly" class="plan-opt sel" onclick="selectUpgradePlan('monthly')" style="cursor:pointer;">
         <div class="plan-opt-name">Monthly</div>
-        <div class="plan-opt-price">$7.99<span class="plan-opt-per">/mo</span></div>
+        <div class="plan-opt-price">{{PLAN_MONTHLY_PRICE}}<span class="plan-opt-per">/mo</span></div>
         <div class="plan-opt-sub">Billed monthly</div>
       </div>
       <div id="plan-annual" class="plan-opt" onclick="selectUpgradePlan('annual')" style="cursor:pointer;">
-        <div class="plan-opt-name">Annual <span style="font-size:11px;background:var(--gold);color:#fff;border-radius:3px;padding:1px 5px;">SAVE 37%</span></div>
-        <div class="plan-opt-price">$5.00<span class="plan-opt-per">/mo</span></div>
-        <div class="plan-opt-sub">$59.99 billed yearly</div>
+        <div class="plan-opt-name">Annual <span style="font-size:11px;background:var(--gold);color:#fff;border-radius:3px;padding:1px 5px;">SAVE {{PLAN_ANNUAL_SAVINGS_PERCENT}}%</span></div>
+        <div class="plan-opt-price">{{PLAN_ANNUAL_EQUIVALENT}}<span class="plan-opt-per">/mo</span></div>
+        <div class="plan-opt-sub">{{PLAN_ANNUAL_PRICE}} billed yearly</div>
       </div>
     </div>
 
@@ -1890,8 +1895,8 @@
       <li style="font-size:12px;color:var(--ink3);">✓ Risk dashboard</li>
     </ul>
 
-    <button id="upgrade-cta-btn" class="btn-modal-cta" onclick="handleUpgradeClick()">Start 7-day free trial →</button>
-    <div class="modal-note" style="margin-top:.75rem;">Card required. You won't be charged during the 7-day trial. Discount codes can be entered in Checkout.</div>
+    <button id="upgrade-cta-btn" class="btn-modal-cta" onclick="handleUpgradeClick()">Start {{TRIAL_DAYS}}-day free trial →</button>
+    <div class="modal-note" style="margin-top:.75rem;">Card required. You won't be charged during the {{TRIAL_DAYS}}-day trial. Discount codes can be entered in Checkout.</div>
 
     <!-- Shown instead of CTA when user is not logged in -->
     <div id="upgrade-modal-auth" style="display:none;margin-top:.75rem;">

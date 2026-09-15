@@ -2346,16 +2346,45 @@ window.loadTickerInLab=loadTickerInLab;
 function landingSearch(){const v=(document.getElementById('landing-search')||{}).value;if(!v||!v.trim())return;heroLoadTicker(v.trim().toUpperCase());}
 (function(){const hi=document.getElementById('hero-search');if(hi)hi.addEventListener('keydown',e=>{if(e.key==='Enter')heroSearch();});})();
 window._pricingAnnual=false;
+/* The numbers come from <meta name="il-product">, which index.html fills from
+   lib/product-config.js -- the same values verifyStripeCatalog compares
+   against the live Stripe catalog. The literals below are only a fallback for
+   a page served without it, and are never the source of truth. */
+function ilProduct(){
+  if (window.__ilProduct !== undefined) return window.__ilProduct;
+  var meta = document.querySelector('meta[name="il-product"]');
+  try { window.__ilProduct = meta ? JSON.parse(meta.content) : null; }
+  catch (_) { window.__ilProduct = null; }
+  return window.__ilProduct;
+}
+function pricingPlan(){
+  var cfg = ilProduct() || {};
+  var p = cfg.pricing || null;
+  var monthly = (p && p.monthly && p.monthly.unitAmountCents) || 799;
+  var annual  = (p && p.annual  && p.annual.unitAmountCents)  || 5999;
+  var trialDays = (cfg.trial && cfg.trial.days) || 7;
+  var savings = Math.max(0, Math.round((1 - annual / (monthly * 12)) * 100));
+  return {
+    monthly: (monthly / 100).toFixed(2),
+    annual: (annual / 100).toFixed(2),
+    perMonthAnnual: '$' + (annual / 1200).toFixed(2),
+    savings: savings,
+    trialDays: trialDays
+  };
+}
 function setPricingPeriod(period){
   const annual=period==='annual';window._pricingAnnual=annual;
+  const plan=pricingPlan();
   document.getElementById('pricing-period-monthly')?.classList.toggle('active',!annual);
   document.getElementById('pricing-period-annual')?.classList.toggle('active',annual);
   const amount=document.getElementById('pricing-pro-amount'),per=document.getElementById('pricing-pro-period'),note=document.getElementById('pricing-pro-note');
   const btn=document.getElementById('pricing-pro-btn');
-  if(amount)amount.textContent=annual?'59.99':'7.99';
+  if(amount)amount.textContent=annual?plan.annual:plan.monthly;
   if(per)per.textContent=annual?'/year':'/month';
-  if(note)note.textContent=annual?'Equivalent to about $5/month. Save 37% versus monthly billing. Discount codes can be entered in Checkout.':'Start with a 7-day free trial. Have a discount code? Enter it in Stripe Checkout for offers like a $0.99 paid month.';
-  if(btn)btn.textContent=annual?'Start annual Pro \u2192':'Start 7-day free trial \u2192';
+  if(note)note.textContent=annual
+    ?('Equivalent to about '+plan.perMonthAnnual+'/month. Save '+plan.savings+'% versus monthly billing. Discount codes can be entered in Checkout.')
+    :('Start with a '+plan.trialDays+'-day free trial. Have a discount code? Enter it in Stripe Checkout for offers like a $0.99 paid month.');
+  if(btn)btn.textContent=annual?'Start annual Pro \u2192':('Start '+plan.trialDays+'-day free trial \u2192');
 }
 
 async function initGlobe(){
