@@ -15,6 +15,20 @@ const used = new Set(require('child_process').execSync("grep -rhoE '\\bti-[a-z0-
 
 const src = fs.readFileSync(CSS, 'utf8');
 
+/* This script rewrites the sheet in place, using the sheet as its own input,
+ * so a second run subsets the subset. That is not theoretical: running it
+ * twice dropped four more icons and left `ti-folder` defined nowhere, because
+ * the second pass only keeps what the first pass had already narrowed to.
+ * The vendor sheet is the input; once it has been narrowed, restore it from
+ * the upstream package before running this again.
+ */
+if (/Subset for ImpliedLens/.test(src)) {
+  console.error('refusing — public/vendor/tabler-icons.min.css is already subset.');
+  console.error('Running again narrows it further and silently drops icons.');
+  console.error('Restore the vendor sheet first (git checkout, or reinstall @tabler/icons-webfont).');
+  process.exit(1);
+}
+
 // Split into top-level rules. The file is minified: `selector{decls}` repeated.
 const rules = src.match(/[^{}]+\{[^{}]*\}/g) || [];
 const kept = [];

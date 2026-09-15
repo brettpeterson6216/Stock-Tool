@@ -179,6 +179,65 @@ footer .f-logo .il-wordmark-b, footer .f-logo .il-wordmark em {
   padding-left: 0 !important;
 }
 
+/* ═══ The bar does not flash "Log in" at someone who is signed in ═══════════
+   theme-bootstrap.js stamps html.il-hint-in from a blocking <head> script, so
+   the answer is known before the first pixel. premium-revamp.css already had
+   a rule keyed off it -- and on the static pages it works. On the app it did
+   nothing, because clean-pass.css:236 restores the guest buttons with
+
+     html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6)
+       #main-nav #nav-login { display: inline-flex !important }
+
+   which is six ID selectors' worth of specificity and beats it outright. Both
+   sheets are in the heritage layer, so specificity decided, and the hint lost.
+
+   Measured on a signed-in load of /?view=tool&section=analyze: "Log in" and
+   "Start trial" were on screen for 660ms, until app-navigation.js finished
+   /api/auth/me and set [hidden]. On / it was 386ms. That is the tab switch
+   that "looks like it logged me out" -- it is not the static pages that are
+   wrong, it is the app, on every full document load.
+
+   This is the premium layer, which wins for !important regardless of
+   specificity, so it is the one place the first-paint answer can be stated
+   and stay stated. By id AND by class: the app names them #nav-login and
+   #nav-signup, and clean-pass targets the ids.
+
+   static-auth.js and app-navigation.js still do the authoritative check; if
+   the hint was wrong, .il-auth-out and [hidden] below put the guest links
+   back. A stale hint costs one frame, which is what it already cost. */
+html.il-hint-in body #main-nav #nav-login,
+html.il-hint-in body #main-nav #nav-signup,
+html.il-hint-in body #main-nav .il-global-login,
+html.il-hint-in body #main-nav .il-global-trial,
+html.il-hint-in body .il-global-nav #nav-login,
+html.il-hint-in body .il-global-nav #nav-signup,
+html.il-hint-in body .il-global-nav .il-global-login,
+html.il-hint-in body .il-global-nav .il-global-trial {
+  display: none !important;
+}
+/* The hint said signed in and the server disagreed: guest links come back. */
+html.il-hint-in body #main-nav.il-auth-out #nav-login,
+html.il-hint-in body #main-nav.il-auth-out #nav-signup,
+html.il-hint-in body #main-nav.il-auth-out .il-global-login,
+html.il-hint-in body #main-nav.il-auth-out .il-global-trial,
+html.il-hint-in body .il-global-nav.il-auth-out #nav-login,
+html.il-hint-in body .il-global-nav.il-auth-out #nav-signup,
+html.il-hint-in body .il-global-nav.il-auth-out .il-global-login,
+html.il-hint-in body .il-global-nav.il-auth-out .il-global-trial {
+  display: inline-flex !important;
+}
+/* ...and the same rule the other way. `hidden` is what app-navigation.js sets
+   once /api/auth/me answers, and clean-pass's six IDs beat the [hidden] UA
+   rule too. The site-wide [hidden] guard further down this file already
+   covers it; these are named explicitly so the guest buttons cannot come back
+   if that guard is ever narrowed. */
+html body #main-nav #nav-login[hidden],
+html body #main-nav #nav-signup[hidden],
+html body .il-global-nav #nav-login[hidden],
+html body .il-global-nav #nav-signup[hidden] {
+  display: none !important;
+}
+
 /* ── The same fix, for the four brand marks inside the signed-in app shell ──
    The nav wordmark was fixed months ago. These four were not, because they
    are only on screen once you sign in, so every check of a logged-out page

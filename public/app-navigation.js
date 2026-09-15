@@ -343,6 +343,39 @@
       if ($signup) $signup.hidden = loggedIn;
     };
 
+    /* ── paint the chip from the hint, before the round trip ───────────────
+       CSS can hide the guest buttons on the first frame, because hiding needs
+       no data. The account chip needs a name and a plan, so it waited for
+       /api/auth/me -- 617ms on a measured signed-in load of
+       /?view=tool&section=analyze, with the corner empty the whole time.
+
+       The hint already carries both. Fill them in here, synchronously, the
+       moment this deferred script runs (~135ms), and let the fetch below
+       overwrite whatever it says. Nothing moves when it does: the actions
+       column is a fixed grid track, so a wrong name is corrected in place
+       rather than relaid out. This is the same thing static-auth.js does on
+       the static pages, which is why those already felt instant. */
+    try {
+      const _h = JSON.parse(localStorage.getItem('il-auth-hint') || 'null');
+      if (_h && _h.in === true && Date.now() - (_h.at || 0) < 864e5) {
+        const _nm = String(_h.label || 'Account').split(' \u00b7 ')[0];
+        setAuthEntryVisibility(true);
+        if ($acctName) $acctName.textContent = _nm;
+        if ($acctHdrName) $acctHdrName.textContent = _nm;
+        if ($acctBadge) {
+          $acctBadge.textContent = _h.plan || '';
+          $acctBadge.style.display = _h.plan ? 'inline' : 'none';
+          $acctBadge.className = 'nav-acct-badge' + (_h.plan === 'TRIAL' ? ' trial' : '');
+        }
+        if ($acctHdrPlan) {
+          $acctHdrPlan.textContent = _h.plan
+            ? _h.plan.charAt(0) + _h.plan.slice(1).toLowerCase() + ' plan'
+            : 'Free plan';
+        }
+        if ($acctWrap) $acctWrap.style.display = 'block';
+      }
+    } catch (_) { /* no hint, private mode, or bad JSON: the fetch decides */ }
+
     try {
       const [meRes, csrfRes] = await Promise.all([
         fetch('/api/auth/me', { credentials: 'same-origin' }),
@@ -350,6 +383,33 @@
       ]);
       const { user } = await meRes.json();
       window.IL_AUTH_USER = user || null;
+      /* ── hand the answer to the next document ─────────────────────────────
+         The static pages (LensScore, Learn, About, the policy set) paint their
+         first frame from `il-auth-hint` in localStorage, which theme-bootstrap
+         reads in a blocking <head> script. Only static-auth.js was writing it,
+         and static-auth.js does not run here -- so a session that began in the
+         app carried no hint at all, and the FIRST jump to LensScore or Learn
+         painted "Log in / Start trial" at someone who was signed in, every
+         time, until /api/auth/me came back.
+
+         Same key, same shape, same effectivePlan rule as static-auth.js
+         (`plan` is the raw column; a comped or trialing account sits at
+         plan='free' with effectivePlan='pro'). Writing it from whichever page
+         resolves the session first is what makes the hint actually cover the
+         navigation people do. */
+      try {
+        var _hintPlan = null;
+        if (user) {
+          var _p = user.effectivePlan || user.plan;
+          _hintPlan = _p && _p !== 'free' ? String(_p).toUpperCase() : null;
+        }
+        localStorage.setItem('il-auth-hint', JSON.stringify({
+          in: !!user,
+          at: Date.now(),
+          label: user ? (user.username || user.email || 'Account') : null,
+          plan: _hintPlan
+        }));
+      } catch (_) { /* private mode: the fetch on the next page still resolves it */ }
       const csrfData = await csrfRes.json().catch(() => ({}));
       if (typeof S !== 'undefined' && csrfData.token) S.csrfToken = csrfData.token;
       if (user) {
@@ -520,10 +580,15 @@
       } else {
         setAuthEntryVisibility(false);
         document.body.classList.remove('il-authenticated');
+        /* The hint may have painted a chip a moment ago. It was a guess, the
+           server has now disagreed, and an account chip left standing for a
+           signed-out visitor is worse than the flash this replaced. */
+        if ($acctWrap) $acctWrap.style.display = 'none';
       }
     } catch (_) {
       // Authentication could not be resolved, so preserve a route back in.
       setAuthEntryVisibility(false);
+      if ($acctWrap) $acctWrap.style.display = 'none';
     } finally {
       // Show Go Pro banner only for free/guest users
       const _plan = (typeof S !== 'undefined' && S.userPlan) || 'free';

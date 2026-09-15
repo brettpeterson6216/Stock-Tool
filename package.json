@@ -16,7 +16,8 @@
     "check:brand": "node scripts/build-brand.js --check",
     "build:learn": "node scripts/build-learn.js",
     "check:learn": "node scripts/build-learn.js --check",
-    "check:bar": "node scripts/check-bar.js"
+    "check:bar": "node scripts/check-bar.js",
+    "build:icons": "node scripts/subset-icon-font.js"
   },
   "dependencies": {
     "@libsql/client": "^0.14.0",
