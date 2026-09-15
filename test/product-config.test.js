@@ -164,10 +164,13 @@ test("Stripe catalog failures are complete and do not expose IDs or provider err
    so that can only happen again if someone edits the one line that means it. */
 test("the configured price is the price Stripe is expected to charge", () => {
   assert.equal(PRODUCT_CONFIG.pricing.monthly.unitAmountCents, 799);
-  assert.equal(PRODUCT_CONFIG.pricing.annual.unitAmountCents, 5999);
+  /* 6000 is what the live Stripe account actually holds -- the /readyz catalog
+     check read it back. It was believed to be 5999 by everyone including the
+     account owner, and the page said $59.99 while the card was billed $60.00. */
+  assert.equal(PRODUCT_CONFIG.pricing.annual.unitAmountCents, 6000);
   const money = getPublicProductConfig();
   assert.equal(money.pricing.monthly.formatted, "$7.99");
-  assert.equal(money.pricing.annual.formatted, "$59.99");
+  assert.equal(money.pricing.annual.formatted, "$60.00");
 });
 
 test("a catalog mismatch reports both amounts, not just a false", async () => {
@@ -178,7 +181,7 @@ test("a catalog mismatch reports both amounts, not just a false", async () => {
         id,
         currency: "usd",
         active: true,
-        unit_amount: id.includes("month") ? 1900 : 5999,
+        unit_amount: id.includes("month") ? 1900 : 6000,
         recurring: {
           interval: id.includes("month") ? "month" : "year",
           interval_count: 1,
@@ -199,7 +202,7 @@ test("a catalog mismatch reports both amounts, not just a false", async () => {
   assert.equal(result.prices.monthly.observed.interval, "month");
   // The half that agrees still says so.
   assert.equal(result.prices.annual.ready, true);
-  assert.equal(result.prices.annual.observed.formatted, "$59.99");
+  assert.equal(result.prices.annual.observed.formatted, "$60.00");
   // Reporting the amount must not start leaking the price ID.
   assert.doesNotMatch(JSON.stringify(result), /price_month_x|price_year_x/);
 });

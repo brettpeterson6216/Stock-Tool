@@ -178,6 +178,53 @@ footer .f-logo .il-wordmark-b, footer .f-logo .il-wordmark em {
   margin-right: 0 !important;
   padding-left: 0 !important;
 }
+
+/* ── The same fix, for the four brand marks inside the signed-in app shell ──
+   The nav wordmark was fixed months ago. These four were not, because they
+   are only on screen once you sign in, so every check of a logged-out page
+   passed: the dashboard sidebar, the research sidebar, the mobile dashboard
+   header and the mobile app bar each carried a literal <span>IMPLIED LENS</span>
+   -- two words, with a space, in the markup.
+
+   They were also three different typefaces at three different sizes for the
+   same brand: Georgia 17px, Plus Jakarta Sans 16px, Georgia 15px. The markup
+   is now the canonical wordmark span, and this block gives it the same
+   treatment the top bar has, so a signed-in user sees one brand, not four.
+
+   lens-prime-shared.css:136 is what uppercases these back into two words
+   (`font: 16px/1 Georgia...; text-transform: uppercase`), the same way it did
+   to the nav. It is in the heritage layer; this file is the premium layer,
+   which wins for !important. */
+.prime-dash-brand .il-wordmark,
+.prime-sidebar-brand .il-wordmark,
+.prime-mobile-brand .il-wordmark,
+.prime-mobile-appbar a .il-wordmark {
+  text-transform: none !important;
+  letter-spacing: -.005em !important;
+  font-size: 15.5px !important;
+  /* 600, not 700. Section 4 below re-declares the nav brand at 600 and wins by
+     source order, so 600 is what the top bar actually renders. Matching the
+     computed value rather than the declared one is the only way these five
+     marks are the same weight on screen. */
+  font-weight: 600 !important;
+  font-family: "Plus Jakarta Sans", var(--rp-sans) !important;
+  font-style: normal !important;
+  white-space: nowrap !important;
+}
+.prime-dash-brand .il-wordmark-b,
+.prime-sidebar-brand .il-wordmark-b,
+.prime-mobile-brand .il-wordmark-b,
+.prime-mobile-appbar a .il-wordmark-b {
+  font-style: italic !important;
+  font-weight: 600 !important;
+  color: var(--rp-gold) !important;
+  -webkit-text-fill-color: var(--rp-gold) !important;
+  letter-spacing: -.005em !important;
+  text-transform: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 0 !important;
+}
 #main-nav .nav-search { background: var(--rp-panel) !important; border-color: var(--rp-line) !important; border-radius: 8px !important; }
 #main-nav .nav-search input { font-size: 14px !important; }
 #main-nav .nav-acct-btn, #main-nav #nav-acct-btn { border-radius: 8px !important; background: var(--rp-panel) !important; border-color: var(--rp-line) !important; }
