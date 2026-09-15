@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   Implied Lens — price chart engine
+   ImpliedLens — price chart engine
 
    Replaces the Chart.js price chart with TradingView Lightweight Charts while
    keeping every existing entry point intact. app-legacy.js still calls

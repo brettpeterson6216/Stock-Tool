@@ -1,5 +1,5 @@
 // ============================================================
-//  Implied Lens — entry point
+//  ImpliedLens — entry point
 //
 //  Responsibilities here:
 //    • load config (must be first — sets up dotenv)
@@ -533,7 +533,7 @@ async function runReviewDigests() {
       const items = due.rows.map(r => `<li style="margin-bottom:6px"><strong>${esc(r.ticker)}</strong> — ${esc(r.status || "thesis")} — review ${esc(r.review_date)}</li>`).join("");
       const result = await sendEmail({
         to: u.email,
-        subject: `Implied Lens: ${due.rows.length} thesis review${due.rows.length === 1 ? "" : "s"} due this week`,
+        subject: `ImpliedLens: ${due.rows.length} thesis review${due.rows.length === 1 ? "" : "s"} due this week`,
         html: `<div style="font-family:Arial,sans-serif;max-width:560px"><h2 style="color:#9A6A18">Your reviews are due</h2><p>You set these review dates when you saved each thesis. Check the evidence before changing a position — not the price.</p><ul>${items}</ul><p><a href="${process.env.APP_URL || "https://impliedlens.com"}/?view=tool&section=workspace" style="color:#9A6A18;font-weight:bold">Open your workspace →</a></p><p style="color:#999;font-size:12px">Not investment advice. You receive this because a saved thesis has a review date this week.</p></div>`,
       });
       if (!result?.sent && !result?.simulated) {
@@ -548,7 +548,7 @@ async function runReviewDigests() {
 
 if (require.main === module) {
   initDb().then(() => {
-    app.listen(PORT, () => console.log(`Implied Lens running on port ${PORT}`));
+    app.listen(PORT, () => console.log(`ImpliedLens running on port ${PORT}`));
     // Company-name search answers from memory. The seed list in
     // lib/ticker-index.js serves the first few seconds; this pulls the full
     // SEC registrant list behind it and refreshes daily. It can fail freely —

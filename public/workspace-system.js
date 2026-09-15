@@ -1016,7 +1016,7 @@
     try { if (chartCanvas) chartImg = chartCanvas.toDataURL("image/png"); } catch (_) {}
     const now = new Date();
     const pct = m.regularMarketChangePercent != null ? `${m.regularMarketChangePercent >= 0 ? "+" : ""}${m.regularMarketChangePercent.toFixed(2)}%` : "";
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc2(S.ticker)} — Implied Lens research report</title>
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc2(S.ticker)} — ImpliedLens research report</title>
 <style>
   @page{ margin:18mm 15mm; }
   body{ font:14px/1.5 'DM Sans','Segoe UI',Arial,sans-serif; color:#241c0e; margin:0; padding:28px; }
@@ -1043,7 +1043,7 @@ ${metrics.length ? `<h2>Key metrics</h2><table>${metrics.map(x => `<tr><td class
 ${plain.length ? `<h2>Plain-English read</h2><ul>${plain.map(p => `<li>${esc2(p)}</li>`).join("")}</ul>` : ""}
 ${dcfOut ? `<h2>Valuation model output</h2><pre>${esc2(dcfOut)}</pre>` : ""}
 ${thesis ? `<h2>Saved thesis</h2><div class="rp-thesis"><strong>${esc2(thesis.title || S.ticker + " thesis")}</strong><br>${esc2(thesis.thesis || thesis.summary || "")}${thesis.review_date ? `<br><br><em>Next review: ${esc2(thesis.review_date)}</em>` : ""}</div>` : ""}
-<div class="rp-foot"><strong>Sources:</strong> Yahoo Finance chart data · SEC EDGAR XBRL statements · Finnhub fundamentals &amp; estimates · FINRA OTC data. Methodology: impliedlens.com/data-sources.<br><strong>Disclaimer:</strong> Implied Lens provides market data and modeling tools for informational and educational purposes only. This report reflects user-selected assumptions and is not investment advice. Past performance does not guarantee future results.</div>
+<div class="rp-foot"><strong>Sources:</strong> Yahoo Finance chart data · SEC EDGAR XBRL statements · Finnhub fundamentals &amp; estimates · FINRA OTC data. Methodology: impliedlens.com/data-sources.<br><strong>Disclaimer:</strong> ImpliedLens provides market data and modeling tools for informational and educational purposes only. This report reflects user-selected assumptions and is not investment advice. Past performance does not guarantee future results.</div>
 <script>window.onload=()=>setTimeout(()=>window.print(),350)<\/script>
 </body></html>`;
     const w = window.open("", "_blank", "width=880,height=1000");

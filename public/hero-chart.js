@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   Implied Lens — hero chart
+   ImpliedLens — hero chart
 
    The landing hero used to show a hand-drawn SVG arc: impossibly smooth, with
    a ruler-straight dotted "projection" through it. It read as clip art, which

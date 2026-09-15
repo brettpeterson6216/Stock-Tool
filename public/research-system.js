@@ -307,10 +307,10 @@
     const input = wealthInput();
     const output = window.ImpliedLensMath?.compoundScenarios(input);
     if (!output?.ok) return runWealthPlanner();
-    const text = `Implied Lens wealth plan: ${money(input.principal)} starting balance + ${money(input.monthlyContribution)}/month for ${input.years} years. Base scenario: ${money(output.base.value)} at ${(input.baseReturn * 100).toFixed(1)}%. Hypothetical, not investment advice.`;
+    const text = `ImpliedLens wealth plan: ${money(input.principal)} starting balance + ${money(input.monthlyContribution)}/month for ${input.years} years. Base scenario: ${money(output.base.value)} at ${(input.baseReturn * 100).toFixed(1)}%. Hypothetical, not investment advice.`;
     trackEvent("wealth_plan_shared", { years: input.years });
     if (navigator.share) {
-      try { await navigator.share({ title: "Implied Lens Wealth Plan", text, url: "https://impliedlens.com/?view=tool&section=wealth" }); return; } catch (_) {}
+      try { await navigator.share({ title: "ImpliedLens Wealth Plan", text, url: "https://impliedlens.com/?view=tool&section=wealth" }); return; } catch (_) {}
     }
     try { await navigator.clipboard.writeText(text); toastMsg("Plan summary copied", "ok"); } catch (_) { toastMsg("Could not copy plan summary", "red"); }
   }

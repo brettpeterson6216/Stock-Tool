@@ -636,7 +636,7 @@
     var derived = plBaseDerived(model);
     var esc = function (v) { return /[",\n]/.test(String(v)) ? '"' + String(v).replace(/"/g, '""') + '"' : String(v); };
     var lines = [];
-    lines.push("Implied Lens — Projection Lab");
+    lines.push("ImpliedLens — Projection Lab");
     lines.push("Ticker," + esc(model.ticker || ""));
     if (model.companyName) lines.push("Company," + esc(model.companyName));
     lines.push("Currency," + esc(model.currency || "USD"));

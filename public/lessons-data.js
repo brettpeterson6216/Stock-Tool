@@ -92,11 +92,11 @@
       minutes: 7,
       summary: "Separating what a company reported from what you are assuming, and the ratios worth checking before anything else.",
       opening: "Financial statements are the only part of stock research that is not an opinion. Everything else — the valuation, the projection, the price target — is an assumption wearing a number. Keeping those two categories apart is most of what separates research from storytelling.",
-      body: "Financial analysis is most useful when every number has a clear status. Implied Lens distinguishes observed provider data, derived calculations, modeled estimates, and user scenarios.",
+      body: "Financial analysis is most useful when every number has a clear status. ImpliedLens distinguishes observed provider data, derived calculations, modeled estimates, and user scenarios.",
       points: [
         "Observed: revenue, net income, cash flow, balance-sheet values, price, and reported earnings from named sources.",
         "Derived: growth rates, margins, ROIC, leverage, dilution, and multiples calculated from observed inputs.",
-        "Modeled: fair multiples, value ranges, and expectations gaps produced by disclosed Implied Lens assumptions.",
+        "Modeled: fair multiples, value ranges, and expectations gaps produced by disclosed ImpliedLens assumptions.",
         "Scenario: your changed price, growth, margin, or discount-rate inputs; it never replaces reported history.",
         "Always read the source badge, as-of date, EPS basis, unavailable-field message, and sensitivity before acting.",
       ],

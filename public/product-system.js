@@ -490,10 +490,10 @@
     const symbol = String(ticker || window.IL_STATE?.ticker || "").toUpperCase().replace(/[^A-Z0-9.^-]/g, "").slice(0, 15);
     if (!symbol) return;
     const url = `https://impliedlens.com/stock/${encodeURIComponent(symbol)}`;
-    const text = `Research ${symbol} with source-aware market context, valuation tools, and a reviewable decision process on Implied Lens.`;
+    const text = `Research ${symbol} with source-aware market context, valuation tools, and a reviewable decision process on ImpliedLens.`;
     if (typeof window.track === "function") window.track("research_shared", { ticker: symbol });
     if (navigator.share) {
-      try { await navigator.share({ title: `${symbol} research | Implied Lens`, text, url }); return; } catch (_) {}
+      try { await navigator.share({ title: `${symbol} research | ImpliedLens`, text, url }); return; } catch (_) {}
     }
     try {
       await navigator.clipboard.writeText(url);
@@ -528,7 +528,7 @@
   ];
 
   function decisionPathHtml(compact = false) {
-    return `<div class="il-decision-path ${compact ? "compact" : ""}" aria-label="Implied Lens decision workflow">
+    return `<div class="il-decision-path ${compact ? "compact" : ""}" aria-label="ImpliedLens decision workflow">
       ${DECISION_PATH.map((step, index) => `<button type="button" class="il-decision-step" data-il-spine="${step.section}">
         <span class="il-decision-num">${String(index + 1).padStart(2, "0")}</span>
         <i class="ti ${step.icon}" aria-hidden="true"></i>
@@ -742,7 +742,7 @@
       "",
       "We want to understand what fell short.",
       "Tell us what would make the experience more useful.",
-      "Thank you. What would move Implied Lens forward?",
+      "Thank you. What would move ImpliedLens forward?",
       "Great to hear. What should we refine next?",
       "Thank you. Tell us what is working especially well.",
     ];
@@ -753,7 +753,7 @@
     modal.setAttribute("aria-modal", "true");
     modal.setAttribute("aria-labelledby", "il-feedback-title");
     modal.innerHTML = `<div class="il-feedback-card">
-      <div class="il-feedback-top"><div><div class="il-feedback-kicker">Member experience</div><h2 id="il-feedback-title">How is Implied Lens working for you?</h2><p>Your honest perspective helps us prioritize the right improvements.</p></div><button class="il-feedback-close" aria-label="Close feedback"><i class="ti ti-x"></i></button></div>
+      <div class="il-feedback-top"><div><div class="il-feedback-kicker">Member experience</div><h2 id="il-feedback-title">How is ImpliedLens working for you?</h2><p>Your honest perspective helps us prioritize the right improvements.</p></div><button class="il-feedback-close" aria-label="Close feedback"><i class="ti ti-x"></i></button></div>
       <div class="il-feedback-stars" role="group" aria-label="Rate your experience">${[1,2,3,4,5].map(value => `<button class="il-feedback-star" data-rating="${value}" aria-label="${value} out of 5 stars" aria-pressed="false"><i class="ti ti-star-filled"></i></button>`).join("")}</div>
       <p class="il-feedback-label" id="il-feedback-label">Choose a rating to begin.</p>
       <textarea class="il-feedback-note" id="il-feedback-note" aria-label="Feedback details" placeholder="What is working well, and what should we improve?"></textarea>
@@ -787,16 +787,16 @@
       if (typeof window.track === "function") window.track("feedback_rated", { rating });
     });
     modal.querySelector("#il-feedback-email").onclick = () => {
-      const subject = `Implied Lens feedback${rating ? ` - ${rating}/5` : ""}`;
+      const subject = `ImpliedLens feedback${rating ? ` - ${rating}/5` : ""}`;
       const body = `${rating ? `Experience rating: ${rating}/5\n\n` : ""}${note.value.trim()}`;
       if (typeof window.track === "function") window.track("feedback_email_opened", { rating: rating || null });
       window.location.href = `mailto:support@impliedlens.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     };
     modal.querySelector("#il-feedback-share").onclick = async () => {
-      const text = "My honest experience with Implied Lens:";
+      const text = "My honest experience with ImpliedLens:";
       if (typeof window.track === "function") window.track("feedback_shared", { rating: rating || null });
       if (navigator.share) {
-        try { await navigator.share({ title: "Implied Lens", text, url: "https://impliedlens.com" }); return; } catch (_) {}
+        try { await navigator.share({ title: "ImpliedLens", text, url: "https://impliedlens.com" }); return; } catch (_) {}
       }
       window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent("https://impliedlens.com")}`, "_blank", "noopener,noreferrer");
     };

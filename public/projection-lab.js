@@ -999,7 +999,7 @@
 
     var cream = "#F1EDE3", creamDim = "rgba(241,237,227,.62)", gold = "#E0A53C";
     g.fillStyle = gold; g.font = "700 14px 'DM Sans', Arial";
-    g.fillText("IMPLIED LENS — PROJECTION LAB", 60, 74);
+    g.fillText("IMPLIEDLENS — PROJECTION LAB", 60, 74);
     g.fillStyle = cream; g.font = "800 52px 'Space Grotesk','DM Sans',Arial";
     g.fillText(m.ticker, 60, 130);
     if (m.companyName) {
@@ -1280,7 +1280,7 @@
     _state: function () { return PL.model; },
   };
 
-  /* ═══════════════════════ styles — Implied Lens tokens, both themes ═══════════════════════ */
+  /* ═══════════════════════ styles — ImpliedLens tokens, both themes ═══════════════════════ */
   function injectCSS() {
     if (document.getElementById("plab2-css")) return;
     var old = document.getElementById("plab-css");

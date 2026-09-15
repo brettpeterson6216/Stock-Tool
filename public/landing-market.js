@@ -139,7 +139,7 @@
         ['See where every number comes from', '/data-sources', 'Data sources'],
         ['Read quality, value, and setup together', '/lens-score', 'LensScore'],
       ];
-      document.getElementById('ilm-source-label').textContent = 'Implied Lens';
+      document.getElementById('ilm-source-label').textContent = 'ImpliedLens';
       links.forEach(function (entry) {
         var link = document.createElement('a');
         link.href = entry[1];

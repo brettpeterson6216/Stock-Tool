@@ -1,4 +1,4 @@
-/* Implied Lens — premium motion layer.
+/* ImpliedLens — premium motion layer.
    Progressive enhancement only. Nothing here is required for the page to
    function; if it never runs, every element is visible and interactive.
    Restrained by design: state on scroll, one reveal per element, no loops. */

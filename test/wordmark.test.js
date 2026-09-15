@@ -97,3 +97,31 @@ test("the accent half stays gold and italic, and stays attached", () => {
   assert.match(premium, /\.il-global-brand em/,
     "the `em` spelling of the accent is uncovered, so lens-prime-shared flattens it wherever it is used");
 });
+
+/* The brand also appears in shipped JavaScript -- share sheets, email
+   subjects, exported report titles, canvas labels, the Learn copy, the source
+   badge on the market panel. Thirty-three of those said "Implied Lens". None
+   of them is HTML, so the test above could never have seen them, and they are
+   the strings that leave the site: a shared link, an emailed review digest, a
+   PDF someone keeps. */
+test("shipped JavaScript spells the brand as one word", () => {
+  const roots = [
+    ["public", f => f.endsWith(".js")],
+    ["lib", f => f.endsWith(".js")],
+    ["routes", f => f.endsWith(".js")],
+  ];
+  const files = ["server.js"];
+  for (const [dir, keep] of roots) {
+    for (const f of fs.readdirSync(path.join(ROOT, dir))) {
+      if (!keep(f)) continue;
+      files.push(path.join(dir, f));
+    }
+  }
+  const bad = [];
+  for (const rel of files) {
+    const src = fs.readFileSync(path.join(ROOT, rel), "utf8");
+    const hits = src.match(/Implied\s+Lens/gi);
+    if (hits) bad.push(`${rel} (${hits.length})`);
+  }
+  assert.deepEqual(bad, [], "these files split the brand into two words");
+});

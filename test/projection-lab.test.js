@@ -325,7 +325,7 @@ test("CSV export matches the canonical calculation exactly", () => {
   const built = math.plBuildCsv(model);
   assert.equal(built.ok, true);
   const lines = built.csv.split("\n");
-  assert.equal(lines[0], "Implied Lens — Projection Lab");
+  assert.equal(lines[0], "ImpliedLens — Projection Lab");
   assert.ok(lines.includes("Start price,18.18"));
   assert.ok(lines.includes("Diluted shares,1355979000"));
   assert.ok(lines.includes("Base revenue,4655000000"));

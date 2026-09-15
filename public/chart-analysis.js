@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   Implied Lens — technical read
+   ImpliedLens — technical read
 
    Design constraint from the brief: this must never get in the way of someone
    who already knows how to read a chart.

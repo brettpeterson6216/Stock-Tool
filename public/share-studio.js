@@ -20,7 +20,7 @@
     const ticker = text("r-ticker", state.ticker || "").replace(/[^A-Z0-9.^-]/gi, "");
     return {
       ticker,
-      company: text("r-name", ticker || "Implied Lens research"),
+      company: text("r-name", ticker || "ImpliedLens research"),
       exchange: text("r-exchange", ""),
       price: text("r-price"),
       change: text("r-change", "Latest session"),
@@ -166,7 +166,7 @@
     ctx.fillStyle = "#F3F0E9";
     ctx.font = '600 22px "Plus Jakarta Sans", Arial';
     ctx.letterSpacing = "4px";
-    ctx.fillText("IMPLIED LENS", 126, 90);
+    ctx.fillText("IMPLIEDLENS", 126, 90);
     ctx.letterSpacing = "0px";
     ctx.fillStyle = accent.main;
     ctx.font = '600 13px "JetBrains Mono", Consolas';
