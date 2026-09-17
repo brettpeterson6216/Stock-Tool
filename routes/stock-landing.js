@@ -18,6 +18,8 @@ const {
   relatedTickers,
 } = require("../lib/acquisition-tickers");
 const { loadPriceHistory } = require("../lib/stock-research");
+const { nameFor } = require("../lib/ticker-index");
+const { landingFacts } = require("../lib/stock-landing-facts");
 
 const router = express.Router();
 const TICKER_RE = /^[A-Z0-9.^-]{1,15}$/;
@@ -50,7 +52,7 @@ function fmtBig(n) {
   return "$" + Number(n).toLocaleString();
 }
 
-function researchQuestions(name, ticker, industry) {
+function researchQuestions(name, ticker, industry, facts) {
   const label = name && name !== ticker ? name : ticker;
   const category = String(industry || "").toLowerCase();
   let tailored = `What assumptions does the current ${ticker} price require to deliver an attractive return?`;
@@ -67,8 +69,32 @@ function researchQuestions(name, ticker, industry) {
   } else if (/aerospace|defense|industrial|machinery/.test(category)) {
     tailored = `How durable are ${label}'s backlog, margins, and capital-return plans?`;
   }
+  /* The three questions below were the same on every page but for the symbol.
+     Where the reported figures are in hand, ask about THIS company's numbers:
+     a question naming a 24.7% margin and 8.1% growth is worth reading, and a
+     question that could be asked of any listed company is not. */
+  const numbered = [];
+  if (facts) {
+    const by = Object.fromEntries(facts.groups.flatMap(g => g.rows).map(r => [r.key, r.value]));
+    if (by.profitMargin && by.revenueGrowth) {
+      numbered.push(`Can ${label} hold a ${by.profitMargin} net margin with revenue growing ${by.revenueGrowth} a year?`);
+    } else if (by.profitMargin) {
+      numbered.push(`What would have to change for ${label} to keep a ${by.profitMargin} net margin?`);
+    }
+    if (by.forwardPE) {
+      numbered.push(`What growth does a ${by.forwardPE} forward multiple on ${ticker} already assume?`);
+    }
+    if (by.netDebtEbitda) {
+      numbered.push(`How would net debt at ${by.netDebtEbitda} EBITDA behave if earnings fell by a third?`);
+    }
+    if (by.dcfUpside) {
+      numbered.push(`Which of the model's assumptions is doing the work behind its ${by.dcfUpside.replace(/^[+−]/, "")} gap to the current ${ticker} price?`);
+    }
+  }
+
   return [
     tailored,
+    ...numbered,
     `Which risks would invalidate the investment thesis for ${ticker}?`,
     `How does ${ticker}'s valuation compare with its growth, quality, and closest alternatives?`,
   ];
@@ -140,8 +166,13 @@ async function fetchQuickQuote(ticker) {
   }
 }
 
-function renderPage(ticker, q) {
-  const name      = q ? String(q.name || ticker) : ticker;
+function renderPage(ticker, q, facts) {
+  /* `q.name` comes from the quote provider. When the providers are down the
+     page fell back to the bare symbol, so the title, the heading and the
+     description all degraded to "AAPL Stock Analysis" at exactly the moment
+     a crawler might be looking. The ticker index knows the name without a
+     network call; use it whenever the quote does not carry one. */
+  const name      = String((q && q.name) || nameFor(ticker) || ticker);
   const price     = q ? fmtPrice(q.price)   : "—";
   const chgPct    = q ? fmtPct(q.changePct) : "";
   const isUp      = q ? q.changePct >= 0    : true;
@@ -150,19 +181,47 @@ function renderPage(ticker, q) {
   const industry  = q ? esc(q.industry) : "";
   const exchange  = q ? esc(q.exchange) : "";
   const indexable = ACQUISITION_TICKER_SET.has(ticker);
-  const questions = researchQuestions(name, ticker, q?.industry);
+  const questions = researchQuestions(name, ticker, q?.industry, facts);
   const related   = relatedTickers(ticker);
   const quoteTiming = q?.asOf
     ? `${q.source || "Provider"} quote · as of ${new Date(q.asOf).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short", timeZone: "America/New_York" })} ET`
     : "Latest available provider quote";
 
-  const metaTitle = q
-    ? `${ticker} Stock Analysis — ${name} ${price} (${chgPct}) | ImpliedLens`
-    : `${ticker} Stock Analysis | ImpliedLens`;
+  /* Lead with the company name, which is what people type. "Apple stock" is
+     a search; "AAPL Stock Analysis" is our own jargon, and it was first in
+     the title on every page. Section 3 of the SEO plan asks for exactly this
+     shape. The name now survives a provider outage too, so the title cannot
+     quietly degrade to the bare symbol at the moment a crawler arrives. */
+  const named = name && name !== ticker;
+  const metaTitle = named
+    ? (q
+      ? `${name} (${ticker}) Stock Analysis — ${price} ${chgPct ? `(${chgPct})` : ""} | ImpliedLens`.replace(/\s+/g, " ")
+      : `${name} (${ticker}) Stock Analysis, Valuation & Financials | ImpliedLens`)
+    : (q
+      ? `${ticker} Stock Analysis — ${price} (${chgPct}) | ImpliedLens`
+      : `${ticker} Stock Analysis, Valuation & Financials | ImpliedLens`);
 
-  const metaDesc = q
+  /* The description is what shows under the title in results, so it should
+     say something only this page can say. When the reported figures are in
+     hand, lead with them; otherwise fall back to the generic line rather
+     than inventing a number to fill the slot. */
+  const factHeadline = (() => {
+    if (!facts) return null;
+    const byKey = Object.fromEntries(
+      facts.groups.flatMap(g => g.rows).map(r => [r.key, r.value])
+    );
+    const bits = [];
+    if (byKey.revenueGrowth) bits.push(`revenue ${byKey.revenueGrowth} YoY`);
+    if (byKey.profitMargin) bits.push(`${byKey.profitMargin} net margin`);
+    if (byKey.forwardPE) bits.push(`${byKey.forwardPE} forward P/E`);
+    return bits.length ? bits.slice(0, 3).join(", ") : null;
+  })();
+
+  const metaDesc = factHeadline && q
+    ? `${name} (${ticker}) at ${price} (${chgPct} today): ${factHeadline}. Source-attributed financials, valuation models and earnings history on ImpliedLens.`
+    : q
     ? `${name} (${ticker}) is trading at ${price} (${chgPct} today). Run a full DCF valuation, financial statement analysis, analyst targets, and more — free on ImpliedLens.`
-    : `Analyze ${ticker} with ImpliedLens — DCF valuation, financials, analyst targets, earnings history, and institutional data.`;
+    : `Analyze ${named ? `${name} (${ticker})` : ticker} with ImpliedLens — DCF valuation, financials, analyst targets, earnings history, and institutional data.`;
 
   const canonicalUrl = `${APP_URL}/stock/${ticker}`;
   const analyzeUrl   = `/?ticker=${ticker}&source=stock_landing`;
@@ -225,17 +284,24 @@ function renderPage(ticker, q) {
   <!-- Structured data -->
   <script type="application/ld+json">${schema}</script>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <!-- These pages used to pull DM Sans, DM Serif Display and DM Mono from
+       Google's font CDN. Two things were wrong with that. The site's CSP
+       allows neither that stylesheet host in style-src nor its font host in
+       font-src, so the request was blocked on every load and the page has
+       been rendering in a system fallback the whole time -- which is most of
+       why the stock pages never matched the rest of the site. And the brand
+       face is Plus Jakarta Sans, already self-hosted and already loaded by
+       the shared header below. Removed: one fewer blocked third-party
+       request on the critical path of every indexed page. -->
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'DM Sans',sans-serif;background:#08090D;color:rgba(220,225,232,.88);min-height:100vh}
+    body{font-family:var(--rp-sans,'Plus Jakarta Sans',system-ui,sans-serif);background:#08090D;color:rgba(220,225,232,.88);min-height:100vh}
     a{text-decoration:none;color:inherit}
 
     /* top bar */
     .top-bar{background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.06);
       padding:.8rem 2rem;display:flex;align-items:center;gap:1rem}
-    .logo{font-family:'DM Serif Display',serif;font-size:1.2rem;color:#fff}
+    .logo{font-family:var(--rp-sans,'Plus Jakarta Sans',system-ui,sans-serif);font-size:1.2rem;color:#fff}
     .logo em{color:#C8882A;font-style:italic}
     .top-bar .back{font-size:.78rem;color:rgba(220,225,232,.35);margin-left:auto}
     .top-bar .back:hover{color:#C8882A}
@@ -245,10 +311,10 @@ function renderPage(ticker, q) {
     .breadcrumb{font-size:.72rem;color:rgba(220,225,232,.35);margin-bottom:1.25rem}
     .breadcrumb a{color:rgba(220,225,232,.35)}
     .breadcrumb a:hover{color:#C8882A}
-    .ticker-badge{display:inline-block;font-family:'DM Mono',monospace;font-size:.75rem;font-weight:700;
+    .ticker-badge{display:inline-block;font-family:var(--rp-mono,'JetBrains Mono',ui-monospace,monospace);font-size:.75rem;font-weight:700;
       letter-spacing:.08em;background:rgba(200,136,42,.12);color:#C8882A;
       border:1px solid rgba(200,136,42,.25);border-radius:5px;padding:.2rem .6rem;margin-bottom:.75rem}
-    h1{font-family:'DM Serif Display',serif;font-size:2rem;color:#fff;line-height:1.2;margin-bottom:.5rem}
+    h1{font-family:var(--rp-sans,'Plus Jakarta Sans',system-ui,sans-serif);font-size:2rem;color:#fff;line-height:1.2;margin-bottom:.5rem}
     .exchange-tag{font-size:.75rem;color:rgba(220,225,232,.35);margin-bottom:2rem}
 
     /* quote card */
@@ -275,7 +341,7 @@ function renderPage(ticker, q) {
 
     /* what you get */
     .features{max-width:820px;margin:0 auto;padding:0 2rem 3rem}
-    h2{font-family:'DM Serif Display',serif;font-size:1.3rem;color:#fff;margin-bottom:1rem}
+    h2{font-family:var(--rp-sans,'Plus Jakarta Sans',system-ui,sans-serif);font-size:1.3rem;color:#fff;margin-bottom:1rem}
     .feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.75rem}
     .feat{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);
       border-radius:10px;padding:1rem 1.1rem}
@@ -294,7 +360,7 @@ function renderPage(ticker, q) {
     .pill-row{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.75rem}
     .ticker-pill{display:inline-block;padding:.35rem .85rem;border-radius:100px;
       background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);
-      font-size:.78rem;font-family:'DM Mono',monospace;font-weight:600;color:rgba(220,225,232,.7);
+      font-size:.78rem;font-family:var(--rp-mono,'JetBrains Mono',ui-monospace,monospace);font-weight:600;color:rgba(220,225,232,.7);
       transition:all .15s}
     .ticker-pill:hover{background:rgba(200,136,42,.1);border-color:rgba(200,136,42,.3);color:#C8882A}
 
@@ -331,6 +397,34 @@ function renderPage(ticker, q) {
     html:not([data-theme="dark"]) .ticker-pill{background:rgba(255,255,255,.58);border-color:rgba(42,35,24,.12)}
     html:not([data-theme="dark"]) .research-item{color:#3e392f;background:rgba(200,136,42,.08)}
     html:not([data-theme="dark"]) footer{border-color:rgba(42,35,24,.12)}
+
+    /* ── the per-ticker figures ───────────────────────────────────────────
+       Plain type and a rule under each row. The point of this block is that
+       every number is legible next to where it came from; anything more
+       decorated competes with the figures for attention. */
+    .ticker-facts{max-width:820px;margin:0 auto;padding:2.5rem 2rem 1rem}
+    .ticker-facts h2{font-size:1.35rem;font-weight:600;color:#fff;margin-bottom:1rem}
+    .ticker-facts h3{font-size:.78rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+      color:rgba(220,225,232,.45);margin:1.5rem 0 .5rem}
+    .tf-line{font-size:.95rem;line-height:1.65;color:rgba(220,225,232,.8);margin-bottom:.7rem}
+    .tf-table{width:100%;border-collapse:collapse;font-size:.88rem}
+    .tf-table th[scope=col]{text-align:left;font-weight:500;font-size:.72rem;letter-spacing:.05em;
+      text-transform:uppercase;color:rgba(220,225,232,.4);padding:.35rem 0;border-bottom:1px solid rgba(255,255,255,.08)}
+    .tf-table th[scope=row]{text-align:left;font-weight:400;color:rgba(220,225,232,.75);padding:.5rem 1rem .5rem 0;
+      border-bottom:1px solid rgba(255,255,255,.05)}
+    .tf-table td{padding:.5rem 1rem .5rem 0;border-bottom:1px solid rgba(255,255,255,.05);
+      color:rgba(220,225,232,.7)}
+    .tf-val{font-family:var(--rp-mono,'JetBrains Mono',ui-monospace,monospace);color:#fff;white-space:nowrap}
+    .tf-src{font-size:.72rem;color:rgba(220,225,232,.35);text-align:right}
+    .tf-table .up{color:#4ec98a}
+    .tf-table .dn{color:#e8756a}
+    .tf-note{font-size:.75rem;line-height:1.6;color:rgba(220,225,232,.38);margin-top:1.25rem;
+      padding-top:1rem;border-top:1px solid rgba(255,255,255,.06)}
+    @media(max-width:640px){
+      .ticker-facts{padding:2rem 1.25rem 1rem}
+      .tf-src{display:none}
+      .tf-table{font-size:.82rem}
+    }
   </style>
   ${siteHeader.styles}
 </head>
@@ -349,7 +443,7 @@ function renderPage(ticker, q) {
       <a href="/">ImpliedLens</a> › <a href="/stock/${esc(ticker)}">${esc(ticker)}</a>
     </div>
     <div class="ticker-badge">${esc(ticker)}</div>
-    <h1>${esc(name)} Stock Analysis</h1>
+    <h1>${esc(named ? `${name} (${ticker}) Stock Analysis` : `${ticker} Stock Analysis`)}</h1>
     ${exchange || industry ? `<div class="exchange-tag">${[exchange, industry].filter(Boolean).join(" · ")}</div>` : ""}
 
     ${q ? `
@@ -391,6 +485,50 @@ function renderPage(ticker, q) {
       <div class="cta-note">Guests get 2 analyses/day. <a id="landing-signup-cta" href="${esc(signupUrl)}">Create a free account for 5/day</a>.</div>
     </div>
   </div>
+
+  ${facts ? `
+  <div class="ticker-facts">
+    <h2>${esc(name)} by the reported numbers</h2>
+    ${facts.narrative.map(line => `<p class="tf-line">${esc(line)}</p>`).join("\n    ")}
+
+    ${facts.groups.map(group => `
+    <div class="tf-group">
+      <h3>${esc(group.label)}</h3>
+      <table class="tf-table">
+        <tbody>
+        ${group.rows.map(row => `<tr>
+          <th scope="row">${esc(row.label)}</th>
+          <td class="tf-val">${esc(row.value)}</td>
+          <td class="tf-src">${esc([row.source, row.asOf].filter(Boolean).join(" · "))}</td>
+        </tr>`).join("")}
+        </tbody>
+      </table>
+    </div>`).join("")}
+
+    ${facts.earnings.length ? `
+    <div class="tf-group">
+      <h3>Reported earnings per share</h3>
+      <table class="tf-table">
+        <thead><tr><th scope="col">Quarter</th><th scope="col">Reported</th><th scope="col">Estimate</th><th scope="col">Surprise</th></tr></thead>
+        <tbody>
+        ${facts.earnings.map(row => `<tr>
+          <th scope="row">${esc(row.period || "—")}</th>
+          <td class="tf-val">$${esc(row.actual)}</td>
+          <td>${row.estimate ? "$" + esc(row.estimate) : "—"}</td>
+          <td class="${row.beat === null ? "" : row.beat ? "up" : "dn"}">${esc(row.surprise || "—")}</td>
+        </tr>`).join("")}
+        </tbody>
+      </table>
+    </div>` : ""}
+
+    <p class="tf-note">
+      Every figure above carries the source it came from and the date it was
+      reported.${facts.reportedAsOf ? ` Company filings as of ${esc(facts.reportedAsOf)}.` : ""}
+      ${facts.stale ? " Some company evidence is stale and was excluded where no current provider metric was available." : ""}
+      Figures are reported and derived data, not advice, and the valuation model
+      is one set of assumptions you can change.
+    </p>
+  </div>` : ""}
 
   <div class="features">
     <h2>What you get with ImpliedLens</h2>
@@ -493,14 +631,80 @@ function renderPage(ticker, q) {
 }
 
 // ── Route ─────────────────────────────────────────────────────
+/* A 404 that is still a page: the site header, what went wrong, and a way
+   onward. Plain text told a visitor who mistyped a symbol nothing, and told a
+   crawler to spend its next request elsewhere on the site rather than here. */
+function notFound(res, attempted) {
+  const shown = String(attempted || "").slice(0, 15);
+  const suggestions = ["AAPL", "MSFT", "NVDA", "AMZN", "GOOGL", "META"];
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Ticker not found | ImpliedLens</title>
+  <meta name="description" content="ImpliedLens does not have an analysis page for that symbol.">
+  <meta name="robots" content="noindex,follow">
+  ${siteHeader.styles}
+</head>
+<body class="il-static-page il-stock-page">
+  <a class="il-skip-link" href="#public-main">Skip to content</a>
+  ${siteHeader.nav}
+  <main id="public-main">
+    <div class="hero">
+      <h1>No analysis page for ${shown ? esc(shown) : "that symbol"}</h1>
+      <p style="margin:1rem 0 1.5rem;line-height:1.7;color:rgba(220,225,232,.7)">
+        We could not match that to a listed security. It may be mistyped, delisted,
+        or an instrument ImpliedLens cannot analyze.
+      </p>
+      <div class="pill-row">
+        ${suggestions.map(t => `<a href="/stock/${t}" class="ticker-pill">${t}</a>`).join("")}
+      </div>
+      <div class="cta-section">
+        <a href="/" class="cta-btn">Search any ticker →</a>
+      </div>
+    </div>
+  </main>
+  ${siteHeader.scripts}
+</body>
+</html>`;
+  res.status(404);
+  res.setHeader("Content-Type", "text/html; charset=utf-8");
+  res.setHeader("Cache-Control", "public, max-age=300");
+  return res.send(stampHtml(html));
+}
+
 router.get("/stock/:ticker", async (req, res) => {
   const raw = String(req.params.ticker || "").trim().toUpperCase();
-  if (!TICKER_RE.test(raw)) return res.status(404).type("text/plain").send("Ticker page not found.");
+  if (!TICKER_RE.test(raw)) return notFound(res, raw);
 
   // Fetch live quote data (best-effort — page renders without it)
   const q = await fetchQuickQuote(raw);
 
-  const html = renderPage(raw, q);
+  /* ── does this security exist? ──────────────────────────────────────────
+     /stock/ZZZZ and /stock/NOTAREAL123 both answered 200 with a full page
+     headed "ZZZZ Stock Analysis" and a market-cap row of dashes. Every typo
+     and every crawler probe got a page that looked real, which is what
+     section 1 of the SEO plan means by "invalid or unsupported tickers
+     should return a real 404 rather than a blank analysis screen".
+
+     Three ways to be satisfied it is a real symbol, cheapest first:
+       - it is one of the curated pages we publish;
+       - the ticker index knows a company name for it (seed list plus every
+         SEC registrant, in memory);
+       - a provider answered with a price, which covers ETFs and anything
+         listed that never files with the SEC.
+     None of the three, and there is nothing here to put on a page. */
+  const curated = ACQUISITION_TICKER_SET.has(raw);
+  if (!curated && !nameFor(raw) && !q) return notFound(res, raw);
+
+  /* Cached; null on a cold ticker and refreshed in the background, so the
+     first crawl of a page renders without this section rather than waiting
+     on the SEC. Only for pages we actually publish — a crawler walking
+     arbitrary symbols must not queue research for each one. */
+  const facts = curated ? landingFacts(raw) : null;
+
+  const html = renderPage(raw, q, facts);
   res.setHeader("Content-Type", "text/html; charset=utf-8");
   // Cache for 5 minutes on CDN, 60s stale-while-revalidate
   res.setHeader("Cache-Control", "public, max-age=300, stale-while-revalidate=60");

@@ -8,4 +8,18 @@ Disallow: /reset-password
 Disallow: /reset-password.html
 Disallow: /api/
 
+# Internal and account surfaces. /admin-analytics was reachable, had no
+# noindex, and is an internal dashboard; the rest are per-user views that
+# would be either useless or private in a search result.
+Disallow: /admin-analytics
+Disallow: /admin-analytics.html
+Disallow: /?account=
+Disallow: /?review=
+Disallow: /?upgraded=
+Disallow: /?checkout=
+Disallow: /*?*resume_analysis=
+
+# Crawl the analysis pages, not every filter combination behind them.
+Disallow: /*?*workspace_tab=
+
 Sitemap: https://impliedlens.com/sitemap.xml

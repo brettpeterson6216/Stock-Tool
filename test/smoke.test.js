@@ -193,9 +193,33 @@ test("Ticker landing pages explain free allowances and protect uncurated pages f
   assert.match(curatedHtml, /<meta name="twitter:card"\s+content="summary_large_image">/);
   assert.match(curatedHtml, /<meta name="twitter:image"\s+content="[^"]+\/social-card\.png\?v=[^"]+">/);
 
-  const uncurated = await req("/stock/NOTREAL");
+  /* A REAL security that we simply do not publish a curated page for. INTC is
+     in the ticker index and not in the acquisition set, which is the case this
+     assertion is about: it renders, and it is kept out of the index.
+
+     This used to use "NOTREAL", which is not a security at all. That passed
+     only because every symbol rendered a page -- the behaviour fixed below. */
+  const uncurated = await req("/stock/INTC");
   assert.equal(uncurated.status, 200);
   assert.match(await uncurated.text(), /<meta name="robots" content="noindex,follow">/);
+});
+
+test("A symbol that is not a security gets a 404, not a page about itself", async () => {
+  /* /stock/ZZZZ answered 200 with "<h1>ZZZZ Stock Analysis</h1>" and a table
+     of dashes. Every typo and every crawler probe produced a page that looked
+     like a real one, which is the "blank analysis screen" the SEO plan says
+     must be a 404 instead. */
+  for (const symbol of ["ZZZZ", "NOTREAL", "QQQQQQQQQQ", "ZZ.Z"]) {
+    const res = await req(`/stock/${symbol}`);
+    assert.equal(res.status, 404, `${symbol} should not have a page`);
+    const html = await res.text();
+    assert.doesNotMatch(html, new RegExp(`<h1[^>]*>[^<]*${symbol}[^<]*Stock Analysis`),
+      "the 404 still presents itself as an analysis page");
+    assert.match(html, /<meta name="robots" content="noindex,follow">/);
+    // Still a real page, not a plain-text dead end: header, links, a way on.
+    assert.match(html, /id="main-nav"/);
+    assert.match(html, /\/stock\/AAPL/);
+  }
 });
 
 test("Ticker landing pages reject malformed symbols instead of creating junk pages", async () => {

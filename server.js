@@ -557,6 +557,14 @@ if (require.main === module) {
       console.log(ok ? `Ticker index: ${tickerIndex.size()} symbols from SEC.`
                      : `Ticker index: seed only (${tickerIndex.size()} symbols).`);
     });
+    /* Fill the landing-page research cache slowly, so the first crawl of an
+       indexed ticker page sees the full figures rather than the shell. One
+       ticker every 20s; the whole published set is warm in about 35 minutes. */
+    setTimeout(() => {
+      const { startLandingWarmup } = require("./lib/stock-landing-facts");
+      const { ACQUISITION_TICKERS } = require("./lib/acquisition-tickers");
+      startLandingWarmup(ACQUISITION_TICKERS);
+    }, 45 * 1000);
     setTimeout(runReviewDigests, 90 * 1000);               // shortly after boot
     setInterval(runReviewDigests, 6 * 60 * 60 * 1000);     // then every 6 hours
   }).catch(err => { console.error("DB init failed:", err); process.exit(1); });
