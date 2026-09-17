@@ -77,7 +77,7 @@ function researchQuestions(name, ticker, industry, facts) {
   if (facts) {
     const by = Object.fromEntries(facts.groups.flatMap(g => g.rows).map(r => [r.key, r.value]));
     if (by.profitMargin && by.revenueGrowth) {
-      numbered.push(`Can ${label} hold a ${by.profitMargin} net margin with revenue growing ${by.revenueGrowth} a year?`);
+      numbered.push(`Can ${label} hold a ${by.profitMargin} net margin with revenue growing ${by.revenueGrowth.replace(/^\+/, "")} a year?`);
     } else if (by.profitMargin) {
       numbered.push(`What would have to change for ${label} to keep a ${by.profitMargin} net margin?`);
     }
@@ -702,7 +702,7 @@ router.get("/stock/:ticker", async (req, res) => {
      first crawl of a page renders without this section rather than waiting
      on the SEC. Only for pages we actually publish — a crawler walking
      arbitrary symbols must not queue research for each one. */
-  const facts = curated ? landingFacts(raw) : null;
+  const facts = curated ? landingFacts(raw, (q && q.name) || nameFor(raw) || null) : null;
 
   const html = renderPage(raw, q, facts);
   res.setHeader("Content-Type", "text/html; charset=utf-8");

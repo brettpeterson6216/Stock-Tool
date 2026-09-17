@@ -176,3 +176,25 @@ test("a primed ticker is served from cache and not re-fetched", () => {
   facts.primeLandingFacts("EXMP", summary);
   assert.equal(facts.landingFacts("EXMP"), summary);
 });
+
+test("the prose names the company, whatever shape the bundle carries it in", () => {
+  /* bundle.company is a STRING in stock-research.js, not an object. Reading
+     .name off it returned undefined, so every sentence on every live page
+     opened "AAPL shows revenue up 16.4%" rather than naming the company —
+     which is the one thing the prose is for. Caught by reading the deployed
+     page, not by any test that existed. */
+  const withString = { ...FIXTURE, company: "Example Corporation" };
+  assert.match(facts.summarize(withString, "EXMP").narrative[0], /Example Corporation \(EXMP\)/);
+
+  const withObject = { ...FIXTURE, company: { name: "Example Corporation" } };
+  assert.match(facts.summarize(withObject, "EXMP").narrative[0], /Example Corporation \(EXMP\)/);
+
+  // An explicit hint from the route wins over both.
+  const hinted = facts.summarize(withString, "EXMP", "Hinted Name");
+  assert.match(hinted.narrative[0], /Hinted Name \(EXMP\)/);
+
+  // And with nothing at all it degrades to the symbol rather than "undefined".
+  const bare = facts.summarize({ ...FIXTURE, company: undefined }, "EXMP");
+  assert.match(bare.narrative[0], /^On the most recently reported figures, EXMP shows/);
+  assert.doesNotMatch(bare.narrative.join(" "), /undefined/);
+});
