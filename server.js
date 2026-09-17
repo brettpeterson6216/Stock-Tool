@@ -557,14 +557,22 @@ if (require.main === module) {
       console.log(ok ? `Ticker index: ${tickerIndex.size()} symbols from SEC.`
                      : `Ticker index: seed only (${tickerIndex.size()} symbols).`);
     });
-    /* Fill the landing-page research cache slowly, so the first crawl of an
-       indexed ticker page sees the full figures rather than the shell. One
-       ticker every 20s; the whole published set is warm in about 35 minutes. */
-    setTimeout(() => {
-      const { startLandingWarmup } = require("./lib/stock-landing-facts");
-      const { ACQUISITION_TICKERS } = require("./lib/acquisition-tickers");
-      startLandingWarmup(ACQUISITION_TICKERS);
-    }, 45 * 1000);
+    /* The landing-page warm-up used to start here. It is off, and the reason
+       is worth keeping next to the code rather than in a commit message.
+
+       buildResearchBundle -> loadCompanyFacts caches the ENTIRE SEC
+       companyfacts JSON per CIK for 30 minutes, and those documents run to
+       tens of megabytes parsed. The research cache caps at 300 ENTRIES, not
+       bytes, so nothing evicts them. Walking 103 tickers in 35 minutes -- all
+       of it inside that 30-minute TTL -- therefore held roughly a hundred of
+       those blobs in memory at once and took the process out.
+
+       Before the warm-up that cache only ever filled from real research
+       traffic: a few tickers at a time, well inside the memory budget. The
+       sweep is what changed, and the sweep is what is gone.
+
+       Landing facts are hydrated on request instead, behind a cap, and only
+       for pages we publish. See lib/stock-landing-facts.js. */
     setTimeout(runReviewDigests, 90 * 1000);               // shortly after boot
     setInterval(runReviewDigests, 6 * 60 * 60 * 1000);     // then every 6 hours
   }).catch(err => { console.error("DB init failed:", err); process.exit(1); });

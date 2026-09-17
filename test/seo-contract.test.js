@@ -154,20 +154,31 @@ test("earnings rows report the surprise against the estimate", () => {
   assert.match(latest.surprise, /^−2\.5%$/);
 });
 
-test("the warm-up walks the published set without stacking requests", async () => {
+test("hydration is capped, because the uncapped version took production down", async () => {
   facts.clearLandingFacts();
-  /* The point of the walk is that the FIRST crawl of a page sees the full
-     figures. The point of the interval is that filling 103 pages does not
-     arrive at the providers as 103 simultaneous requests. */
-  const timer = facts.startLandingWarmup(["AAA", "BBB", "CCC"], { intervalMs: 5 });
-  assert.ok(timer, "no warm-up was scheduled");
-  await new Promise(r => setTimeout(r, 120));
-  clearInterval(timer);
-  // Every lookup failed (no network in tests) and nothing threw; failures are
-  // remembered so a crawl does not re-queue the same dead ticker forever.
-  assert.equal(facts.landingFacts("AAA"), null);
+  /* The warm-up walked all 103 published tickers at one every 20 seconds.
+     buildResearchBundle -> loadCompanyFacts caches the whole SEC companyfacts
+     JSON per CIK for thirty minutes — tens of megabytes each — and the
+     research cache caps at 300 ENTRIES rather than bytes, so the walk held
+     about a hundred of them at once and OOMed the server roughly twenty
+     minutes after every deploy.
 
-  assert.equal(facts.startLandingWarmup([]), null, "an empty universe still scheduled work");
+     The walk is gone and on-demand hydration is capped, so a crawler reading
+     the whole sitemap in one pass cannot reproduce it. */
+  for (let i = 0; i < 40; i += 1) facts.landingFacts(`T${i}`);
+  await new Promise(r => setTimeout(r, 50));
+
+  const attempted = [...Array(40).keys()].filter(i => facts.landingFacts(`T${i}`) !== undefined).length;
+  assert.equal(attempted, 40, "every request should still answer, cap or no cap");
+  assert.ok(facts.hydrationsInLastHour() <= 10,
+    `hydration cap exceeded: ${facts.hydrationsInLastHour()} in the last hour`);
+
+  /* And the walk itself must stay gone rather than being quietly restored. */
+  assert.equal(facts.startLandingWarmup(["AAA", "BBB"]), null,
+    "the warm-up is back; see why it was removed");
+  const server = fs.readFileSync(path.join(ROOT, "server.js"), "utf8");
+  assert.doesNotMatch(server, /^\s*startLandingWarmup\(/m,
+    "server.js calls the warm-up again");
 });
 
 test("a primed ticker is served from cache and not re-fetched", () => {
