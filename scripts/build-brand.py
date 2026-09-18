@@ -131,8 +131,8 @@ for n in (34, 68, 102):
 b64 = base64.b64encode(png_bytes(mark(128))).decode()
 svg = (
     '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" '
-    'viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="Implied Lens">'
-    "<title>Implied Lens</title>"
+    'viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="ImpliedLens">'
+    "<title>ImpliedLens</title>"
     f'<image width="128" height="128" xlink:href="data:image/png;base64,{b64}"/>'
     "</svg>"
 )
