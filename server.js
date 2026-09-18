@@ -163,6 +163,19 @@ app.get("/sitemap.xml", (_req, res) => {
 const publicAssets = express.static(path.join(__dirname, "public"), {
   maxAge: "7d",
   etag: true,
+  /* express.static redirects a bare directory request to the trailing-slash
+     form by default. public/learn/ is a directory, so /learn answered 301 to
+     /learn/ and never reached the named route below that serves learn.html.
+
+     Google logged that as "Page with redirect" and declined to index it, and
+     the three signals disagreed in a way that has no fixed point: the sitemap
+     publishes /learn, the page's own canonical says /learn, and /learn sent
+     the crawler to /learn/. Following that canonical leads back to a redirect.
+
+     Nothing here should be served by directory listing anyway — bundles,
+     vendor and learn are all reached by file name — so a bare directory
+     request falls through to the routes, which is where /learn belongs. */
+  redirect: false,
   setHeaders(res, filePath) {
     if (filePath.endsWith(".html"))       res.setHeader("Cache-Control", "no-cache, must-revalidate");
     if (filePath.endsWith(".svg"))        res.setHeader("Content-Type", "image/svg+xml");

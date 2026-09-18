@@ -209,3 +209,62 @@ test("the prose names the company, whatever shape the bundle carries it in", () 
   assert.match(bare.narrative[0], /^On the most recently reported figures, EXMP shows/);
   assert.doesNotMatch(bare.narrative.join(" "), /undefined/);
 });
+
+/* ── every URL we publish must answer 200 directly ──────────────────────────
+   Search Console logged "Page with redirect" against /learn and declined to
+   index it. express.static redirects a bare directory request to the
+   trailing-slash form by default, public/learn/ is a directory, so /learn
+   answered 301 to /learn/ and never reached the route that serves learn.html.
+
+   The three signals disagreed in a way with no fixed point: the sitemap
+   publishes /learn, the page's canonical says /learn, and /learn sent the
+   crawler to /learn/. Following the canonical leads back to the redirect.
+
+   A sitemap URL that redirects is a URL we are asking Google to index and
+   then telling it to go somewhere else, so this asserts the whole published
+   set answers directly. */
+test("no sitemap URL redirects, 404s or errors", async () => {
+  const { buildSitemapXml } = require("../lib/acquisition-tickers");
+  const app = require("../server");
+  const server = await new Promise((resolve, reject) => {
+    const s = app.listen(0, "127.0.0.1", () => resolve(s));
+    s.once("error", reject);
+  });
+  const base = `http://127.0.0.1:${server.address().port}`;
+  try {
+    const locs = [...buildSitemapXml("http://x").matchAll(/<loc>([^<]+)<\/loc>/g)]
+      .map(m => m[1].replace("http://x", "") || "/");
+    const problems = [];
+    for (const p of locs) {
+      const res = await fetch(base + p, { redirect: "manual" });
+      if (res.status !== 200) {
+        problems.push(`${p} -> ${res.status}${res.headers.get("location") ? " => " + res.headers.get("location") : ""}`);
+      }
+    }
+    assert.deepEqual(problems, [], "these published URLs do not answer 200 directly");
+    assert.ok(locs.length > 100, `only ${locs.length} URLs published`);
+  } finally {
+    await new Promise(r => server.close(r));
+  }
+});
+
+test("static assets still resolve with the directory redirect off", async () => {
+  /* redirect:false on express.static is what fixes /learn. Nothing under
+     public/ is reached by directory listing — bundles, vendor and learn are
+     all addressed by file name — but the assets themselves must still serve. */
+  const app = require("../server");
+  const server = await new Promise((resolve, reject) => {
+    const s = app.listen(0, "127.0.0.1", () => resolve(s));
+    s.once("error", reject);
+  });
+  const base = `http://127.0.0.1:${server.address().port}`;
+  try {
+    for (const asset of ["/robots.txt", "/sitemap.xml", "/favicon.ico",
+                         "/vendor/fonts/tabler-icons.woff2", "/app-legacy.js"]) {
+      const res = await fetch(base + asset, { redirect: "manual" });
+      assert.equal(res.status, 200, `${asset} stopped resolving`);
+    }
+  } finally {
+    await new Promise(r => server.close(r));
+  }
+});
