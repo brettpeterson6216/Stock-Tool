@@ -2367,11 +2367,17 @@ function trialDays(){
   return (cfg && cfg.trial && cfg.trial.days) || 30;
 }
 function trialCtaLabel(){ return 'Start ' + trialDays() + '-day free trial \u2192'; }
+/* The fallbacks below are the only prices on this page that are not read from
+   the catalog, and they are reached only when the il-product meta embed is
+   missing or unparseable. They must equal lib/product-config.js's defaults or
+   a failed embed quotes a price Stripe does not charge -- the annual figure
+   sat at 5999 while Stripe billed 6000, which is exactly the drift the embed
+   exists to prevent. test/product-config.test.js pins them to the catalog. */
 function pricingPlan(){
   var cfg = ilProduct() || {};
   var p = cfg.pricing || null;
   var monthly = (p && p.monthly && p.monthly.unitAmountCents) || 799;
-  var annual  = (p && p.annual  && p.annual.unitAmountCents)  || 5999;
+  var annual  = (p && p.annual  && p.annual.unitAmountCents)  || 6000;
 
   var savings = Math.max(0, Math.round((1 - annual / (monthly * 12)) * 100));
   return {
