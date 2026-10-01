@@ -428,6 +428,7 @@ function renderPage(ticker, q, facts) {
     }
   </style>
   ${siteHeader.styles}
+<script defer src="/ambient-bg.js?v=20261001-1"></script>
 </head>
 <body class="il-static-page il-stock-page">
   <a class="il-skip-link" href="#public-main">Skip to content</a>
@@ -647,6 +648,7 @@ function notFound(res, attempted) {
   <meta name="description" content="ImpliedLens does not have an analysis page for that symbol.">
   <meta name="robots" content="noindex,follow">
   ${siteHeader.styles}
+<script defer src="/ambient-bg.js?v=20261001-1"></script>
 </head>
 <body class="il-static-page il-stock-page">
   <a class="il-skip-link" href="#public-main">Skip to content</a>

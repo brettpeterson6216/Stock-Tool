@@ -656,3 +656,31 @@ html:not([data-theme="dark"]) #landing-page .lx-lens canvas.lx-globe { opacity: 
 html:not([data-theme="dark"]) #landing-page .lx-lens canvas.lx-globe { opacity: .75 !important; }
 #landing-page .il-landing-hero { overflow: visible !important; }
 #landing-page, body.il-product-page { overflow-x: clip !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   V7 — AMBIENT BACKGROUND (public/ambient-bg.js, "market silk")
+   One living backdrop shared by every public page, replacing the hero
+   globe and the per-page lens rings. It scrolls away with the top of the
+   page and fades out downward so it never sits under dense content.
+   ═══════════════════════════════════════════════════════════════════════════ */
+#il-ambient {
+  position: absolute !important; top: 0 !important; left: 0 !important; z-index: -1 !important;
+  width: 100% !important; pointer-events: none !important; display: block;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%);
+  animation: il-ambient-in 1.6s ease both;
+}
+@keyframes il-ambient-in { from { opacity: 0; } to { opacity: 1; } }
+/* Quieter behind working pages and long reading. */
+body.il-auth-page #il-ambient, .il-home-member ~ * #il-ambient { opacity: .8; }
+body:has(.lxl-lesson) #il-ambient, body:has(.il-home-member:not([hidden])) #il-ambient { opacity: .6; }
+body.il-tool-active #il-ambient { display: none !important; }
+html { overflow-x: clip; }
+
+/* The rings it replaces. */
+:is(.il-static-page .hero, .il-static-page section.hero, .il-static-page section.intro, .lxp-hero, .lxl:not(.lxl-lesson) .lxl-hero, #public-main > .hero)::before,
+.il-auth-page main::before, #view-tool .result-header::after { content: none !important; }
+#landing-page .lx-lens { display: none !important; }
+#landing-page .il-landing-copy :is(.il-display, > p, .lx-assure) { text-shadow: none !important; }
+/* The home view painted its own solid ground over the backdrop. */
+#view-home, #landing-page, #landing-page.il-landing, .il-home-member { background: transparent !important; background-color: transparent !important; }

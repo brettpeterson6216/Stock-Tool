@@ -108,6 +108,7 @@
      A meta attribute, not an inline script: script-src has no
      'unsafe-inline', so an inline block would never run. -->
 <meta name="il-product" content="{{PUBLIC_PRODUCT_CONFIG_ATTR}}">
+<script defer src="/ambient-bg.js?v=20261001-1"></script>
 </head>
 <body class="il-product-page">
 <a href="#main-content" class="skip-link">Skip to content</a>
@@ -177,7 +178,6 @@
 <script defer src="/ticker-search.js"></script>
 <script defer src="/landing-market.js?v=20260905-15"></script>
 <script defer src="/landing-demo.js?v=20261001-1"></script>
-<script defer src="/hero-globe.js?v=20261001-1"></script>
 <span id="main-content" tabindex="-1"></span>
 <!-- ══════════ VIEW: HOME ══════════ -->
 <div id="view-home" role="main">
@@ -325,14 +325,6 @@
 
 <section class="il-landing" id="landing-page" aria-label="ImpliedLens landing page">
   <div class="il-landing-hero">
-    <div class="lx-lens" aria-hidden="true">
-      <svg viewBox="0 0 600 600"><defs><linearGradient id="lxLensG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fbe3a1"/><stop offset=".5" stop-color="#e9b44c"/><stop offset="1" stop-color="#9a6614"/></linearGradient></defs>
-        <circle cx="300" cy="300" r="290" fill="none" stroke="url(#lxLensG)" stroke-width="1" opacity=".55"/>
-        <circle cx="300" cy="300" r="230" fill="none" stroke="url(#lxLensG)" stroke-width="1" stroke-dasharray="2 10" opacity=".7"/>
-        <circle cx="300" cy="300" r="170" fill="none" stroke="url(#lxLensG)" stroke-width="1" opacity=".4"/>
-        <path d="M300 0v80M300 520v80M0 300h80M520 300h80" stroke="url(#lxLensG)" stroke-width="1" opacity=".5"/>
-      </svg>
-    </div>
     <!-- Live market hero. Every number here comes from
          /api/market/landing-summary (real Yahoo chart data, cached 5 min, no
          login and no quota). What it replaced was an illustration of a
