@@ -472,3 +472,14 @@ html:has(body.il-auth-page), body.il-auth-page { height: auto !important; }
   .lxl-seq .lxl-next { grid-column: 1 !important; }
 }
 .lxl .lxl-body { background: transparent !important; border: 0 !important; box-shadow: none !important; padding: 0 !important; border-radius: 0 !important; }
+
+/* The research workspace is a full-height app with its own scroller. The
+   site footer underneath it made the document taller than the window, so a
+   wheel over the chart scrolled the page and slid the footer over the
+   workspace. The footer's links are one click away on every other page. */
+body.il-tool-active > footer { display: none !important; }
+/* The body already reserves the header's height (padding-top), so a
+   100vh workspace ran 63px past the bottom of the window. */
+body.il-tool-active #view-tool { height: calc(100dvh - 63px) !important; min-height: 0 !important; }
+body.il-tool-active #view-tool .app-shell { height: 100% !important; min-height: 0 !important; }
+body.il-tool-active #view-tool .app-sidebar { height: 100% !important; }
