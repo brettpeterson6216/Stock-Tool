@@ -686,24 +686,21 @@ html { overflow-x: clip; }
 #view-home, #landing-page, #landing-page.il-landing, .il-home-member { background: transparent !important; background-color: transparent !important; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   V9 — IL CONSTELLATION (public/il-constellation.js)
-   A slow gold node field behind each hero: hairlines, a few labelled
-   nodes, one softly pulsing "live" node. Full-bleed, faded top and
-   bottom, and kept clear of the copy by the script. Plus a whisper of
-   film grain over the whole site for the printed, editorial feel.
+   V10 — IL RIBBON (public/il-ribbon.js)
+   One glowing gold wireframe tube, square in section, snaking behind each
+   hero: rails, evenly spaced frames, a slow twist. It draws itself in on
+   first view, then drifts. Full-bleed and kept thin where the copy sits.
    ═══════════════════════════════════════════════════════════════════════════ */
-#il-ambient { display: none !important; }
-.il-has-constellation { position: relative !important; isolation: isolate !important; }
-.il-constellation {
+#il-ambient, .il-constellation { display: none !important; }
+.il-has-ribbon { position: relative !important; isolation: isolate !important; }
+.il-ribbon {
   position: absolute !important; top: 0; bottom: 0; left: 0; width: 100%;
   z-index: -1 !important; pointer-events: none !important; overflow: hidden !important;
-  opacity: 0; transition: opacity 1.8s ease;
 }
-.il-constellation.is-ready { opacity: 1; }
-.il-constellation canvas { display: block !important; }
-.il-constellation-hero { top: -96px !important; bottom: -24px !important; }
-#landing-page .il-landing-hero > .il-constellation-hero { top: -120px !important; bottom: 8% !important; }
-html:not([data-theme="dark"]) .il-constellation { filter: saturate(1.1) brightness(.92); }
+.il-ribbon canvas { display: block !important; }
+.il-ribbon-hero { top: -96px !important; bottom: -40px !important; }
+#landing-page .il-landing-hero > .il-ribbon-hero { top: -120px !important; bottom: 0 !important; }
+#landing-page .il-has-ribbon .il-landing-copy :is(.il-display, > p) { text-shadow: 0 0 24px var(--rp-bg), 0 0 2px var(--rp-bg) !important; }
 
 /* Film grain: static, tiny, and barely there. */
 html::after {
