@@ -1,0 +1,322 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   THEME V4 — "Obsidian & Gold". One look for every page.
+
+   Compiled LAST into the premium cascade layer (scripts/build-styles.js), so
+   its !important declarations beat every heritage-layer rule regardless of
+   specificity. Everything is driven by the --rp-* tokens, which
+   research-premium.css already bridges into the older --il-* / --lp-*
+   families, so retuning the tokens recolours the legacy surfaces too.
+
+   The rules of the system:
+   - Warm obsidian grounds in dark, warm ivory in light. Never pure black or
+     pure white.
+   - Gold is light, not paint: gradients on primary actions, hairlines on
+     panels, an italic serif accent on headlines. Green and red stay reserved
+     for market direction.
+   - One panel recipe, one button recipe, one input recipe, one radius scale
+     (10 / 14 / 18).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Tokens ──────────────────────────────────────────────────────────── */
+:root {
+  --rp-bg: #f7f3ea !important;
+  --rp-panel: #fffdf8 !important;
+  --rp-raised: #ffffff !important;
+  --rp-inset: #f1ebdd !important;
+  --rp-ink: #1b1712 !important;
+  --rp-copy: #4d463b !important;
+  --rp-muted: #6f6758 !important;
+  --rp-line: rgba(70, 52, 22, .12) !important;
+  --rp-line-strong: rgba(70, 52, 22, .24) !important;
+  --rp-gold: #87590c !important;
+  --rp-gold-accent: #b07d1e !important;
+  --rp-gold-bright: #d9a542 !important;
+  --rp-gold-deep: #6e470d !important;
+  --rp-gold-fill: #e3b448 !important;
+  --rp-gold-grad: linear-gradient(135deg, #f5d98a 0%, #e0aa45 48%, #b37b1d 100%) !important;
+  --rp-gold-text: linear-gradient(100deg, #a8741a 0%, #c99233 45%, #8a5b0e 100%) !important;
+  --rp-gold-glow: 0 8px 24px -10px rgba(176, 125, 30, .55) !important;
+  --rp-gold-ring: rgba(176, 125, 30, .34) !important;
+  --rp-gold-soft: rgba(176, 125, 30, .09) !important;
+  --rp-on-gold: #1f1607 !important;
+  --rp-green: #13723f !important;
+  --rp-red: #b42f33 !important;
+  --rp-shadow: 0 1px 2px rgba(60, 44, 16, .04), 0 22px 48px -32px rgba(60, 44, 16, .22) !important;
+  --rp-panel-grad: linear-gradient(180deg, #fffefb 0%, #fffaf0 100%) !important;
+  --rp-panel-edge: inset 0 1px 0 rgba(255, 255, 255, .9) !important;
+  --rp-aurora:
+    radial-gradient(1100px 520px at 18% -10%, rgba(224, 170, 69, .16), transparent 62%),
+    radial-gradient(900px 480px at 92% 0%, rgba(201, 146, 51, .10), transparent 66%) !important;
+  --rp-serif: "Instrument Serif", "Iowan Old Style", Georgia, serif !important;
+  --rp-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace !important;
+}
+html[data-theme="dark"] {
+  --rp-bg: #0a0908 !important;
+  --rp-panel: #13110e !important;
+  --rp-raised: #1a1713 !important;
+  --rp-inset: #0e0c0a !important;
+  --rp-ink: #f7f0e1 !important;
+  --rp-copy: #cdc4b2 !important;
+  --rp-muted: #9a917f !important;
+  --rp-line: rgba(240, 214, 160, .10) !important;
+  --rp-line-strong: rgba(240, 214, 160, .20) !important;
+  --rp-gold: #f0be5a !important;
+  --rp-gold-accent: #e3ad48 !important;
+  --rp-gold-bright: #f8dc95 !important;
+  --rp-gold-deep: #9a6614 !important;
+  --rp-gold-fill: #e9b44c !important;
+  --rp-gold-grad: linear-gradient(135deg, #fbe3a1 0%, #e9b44c 45%, #b9821f 100%) !important;
+  --rp-gold-text: linear-gradient(100deg, #fff0c4 0%, #f2c464 40%, #d29a32 100%) !important;
+  --rp-gold-glow: 0 10px 30px -10px rgba(233, 180, 76, .55) !important;
+  --rp-gold-ring: rgba(233, 180, 76, .36) !important;
+  --rp-gold-soft: rgba(233, 180, 76, .09) !important;
+  --rp-on-gold: #1a1205 !important;
+  --rp-green: #52d08b !important;
+  --rp-red: #f26a6e !important;
+  --rp-shadow: 0 1px 0 rgba(0, 0, 0, .3), 0 28px 60px -36px rgba(0, 0, 0, .85) !important;
+  --rp-panel-grad: linear-gradient(180deg, #17140f 0%, #110f0c 100%) !important;
+  --rp-panel-edge: inset 0 1px 0 rgba(255, 228, 170, .06) !important;
+  --rp-aurora:
+    radial-gradient(1100px 560px at 18% -12%, rgba(233, 180, 76, .13), transparent 62%),
+    radial-gradient(900px 520px at 95% -4%, rgba(185, 130, 31, .09), transparent 66%),
+    radial-gradient(1200px 700px at 50% 120%, rgba(233, 180, 76, .05), transparent 70%) !important;
+}
+
+/* ── 2. Ground ──────────────────────────────────────────────────────────── */
+html, html[data-theme="dark"] { background-color: var(--rp-bg) !important; }
+/* The body stays clear so the fixed aurora (z-index -1) shows through. */
+body, html[data-theme="dark"] body { background: transparent !important; }
+body {
+  color: var(--rp-ink) !important;
+  font-family: var(--rp-sans) !important;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+body:is(.il-product-page, .il-static-page, .il-auth-page)::after {
+  content: "" !important; position: fixed !important; inset: 0 !important; z-index: -1 !important;
+  pointer-events: none !important; background: var(--rp-aurora) !important;
+}
+::selection { background: var(--rp-gold-ring) !important; color: var(--rp-ink) !important; }
+
+/* ── 3. Header: glass over the aurora, one gold hairline ────────────────── */
+#main-nav.il-global-nav {
+  background: color-mix(in srgb, var(--rp-bg) 78%, transparent) !important;
+  -webkit-backdrop-filter: saturate(140%) blur(16px) !important;
+  backdrop-filter: saturate(140%) blur(16px) !important;
+  border-bottom: 1px solid transparent !important;
+  border-image: linear-gradient(90deg, transparent, var(--rp-gold-ring) 25%, var(--rp-gold-ring) 75%, transparent) 1 !important;
+  box-shadow: none !important;
+}
+#main-nav .il-global-tab { color: var(--rp-copy) !important; }
+#main-nav .il-global-tab:hover { color: var(--rp-ink) !important; }
+#main-nav .il-global-tab.active-tab { color: var(--rp-gold) !important; }
+#main-nav .il-global-trial,
+#main-nav #nav-upgrade {
+  background: var(--rp-gold-grad) !important; color: var(--rp-on-gold) !important;
+  border: 0 !important; box-shadow: var(--rp-gold-glow) !important;
+}
+#main-nav .il-global-login {
+  background: transparent !important; color: var(--rp-ink) !important;
+  border: 1px solid var(--rp-line-strong) !important;
+}
+#main-nav .il-global-search,
+#main-nav .il-global-search input {
+  background: color-mix(in srgb, var(--rp-inset) 80%, transparent) !important;
+  border-color: var(--rp-line) !important; color: var(--rp-ink) !important;
+}
+.il-wordmark-b { color: var(--rp-gold) !important; }
+
+/* ── 4. Headlines: the serif accent ─────────────────────────────────────── */
+:is(.il-display .il-d2 em, .lxp-hero h1 em, .lxl-hero h1 em, .il-static-page .hero h1 em, .auth-title em, .il-auth-page .auth-title em, #lab-main h1 em, #lab-main h1 span[class*="gold"]) {
+  font-family: var(--rp-serif) !important; font-style: italic !important; font-weight: 400 !important;
+  letter-spacing: -.01em !important;
+  background: var(--rp-gold-text) !important;
+  -webkit-background-clip: text !important; background-clip: text !important;
+  -webkit-text-fill-color: transparent !important; color: transparent !important;
+  padding-right: .06em !important;
+}
+#landing-page .il-display .il-d2 { color: var(--rp-ink) !important; -webkit-text-fill-color: currentColor; }
+#landing-page .il-display .il-d2 em { font-size: 1.08em !important; }
+:is(.il-static-page, .il-auth-page) :is(h1, h2, h3) { color: var(--rp-ink) !important; letter-spacing: -.02em !important; }
+.il-static-page .hero h1 { font-weight: 750 !important; }
+.lx-section h2, .lxp h2, .lxl h2 { letter-spacing: -.025em !important; }
+
+/* ── 5. Panels: one recipe everywhere ───────────────────────────────────── */
+:is(
+  /* landing, pricing, academy */
+  #landing-page .lx-demo-card, #landing-page .lx-path, #landing-page .lx-plan, #landing-page .lx-how-grid li,
+  #landing-page .lx-faq-list details, .lxp-plan, .lxp-why-grid > div, .lxp-faq details, .lxp-table-wrap,
+  .lxl-level, .lxl-quiz,
+  /* signed-out and member home */
+  .il-hero-live, .ilm-card, .ihm-panel,
+  /* research workspace */
+  #view-tool .result-header, #view-tool .metrics-grid, #view-tool .chart-wrap, #view-tool .sidebar-card,
+  #view-tool .panel-box, #view-tool .scenario-input-card, #view-tool .il-lens-context, #view-tool .pro-gate-card,
+  #view-tool .il-proj-evidence, #view-tool .il-proj-review, #view-tool .il-projection-explain,
+  /* static pages */
+  .il-static-page .feat, .il-static-page .source-card, .il-static-page .caveat, .il-static-page .process,
+  .il-static-page .principle, .il-static-page .panel, .il-static-page .results, .il-static-page .guide,
+  .il-static-page .note,
+  /* stock pages */
+  .quote-card, .feat,
+  /* auth */
+  .il-auth-page .auth-card,
+  /* LensToolkit */
+  #lab-main .score-card, #lab-main .lens-card, #lab-main .decision-card, #lab-main .next-move,
+  #lab-main .search-shell, #lab-main .diligence-rail
+) {
+  background: var(--rp-panel-grad) !important;
+  border: 1px solid var(--rp-line) !important;
+  border-radius: 18px !important;
+  box-shadow: var(--rp-panel-edge), var(--rp-shadow) !important;
+}
+/* A gold hairline on the panels that carry the product's headline numbers. */
+:is(.il-hero-live, #landing-page .lx-demo-card, #view-tool .result-header, #lab-main .score-card, .quote-card, .il-auth-page .auth-card) {
+  position: relative !important;
+}
+:is(.il-hero-live, #landing-page .lx-demo-card, #view-tool .result-header, #lab-main .score-card, .quote-card, .il-auth-page .auth-card)::before {
+  content: "" !important; position: absolute !important; left: 24px !important; right: 24px !important; top: -1px !important;
+  height: 1px !important; border-radius: 1px !important; pointer-events: none !important; z-index: 1 !important;
+  background: linear-gradient(90deg, transparent, var(--rp-gold-accent), transparent) !important; opacity: .75 !important;
+}
+/* Cards nested inside panels are quieter: inset, no shadow. */
+:is(#view-tool .metrics-grid .metric-card, #view-tool .risk-stat, .il-static-page .step, .il-static-page .result, #lab-main .company-nav) {
+  background: var(--rp-inset) !important; border: 1px solid var(--rp-line) !important;
+  border-radius: 12px !important; box-shadow: none !important;
+}
+#view-tool .metrics-grid { gap: 1px !important; overflow: hidden !important; }
+#view-tool .metrics-grid .metric-card { border-radius: 0 !important; border: 0 !important; }
+
+/* ── 6. Buttons ─────────────────────────────────────────────────────────── */
+:is(.lx-btn-gold, .lxp-btn-gold, .lxl-btn-gold, .btn-primary, .pgc-btn, .cta-btn, .il-cta-solid,
+   #landing-page .il-landing-search button, .il-auth-page button[type="submit"], .auth-card .btn-primary,
+   #view-tool .main-search-btn, #view-tool button.btn-gold, #lab-main .ticker-form button[type="submit"]) {
+  background: var(--rp-gold-grad) !important; color: var(--rp-on-gold) !important;
+  -webkit-text-fill-color: var(--rp-on-gold) !important;
+  border: 0 !important; box-shadow: var(--rp-gold-glow) !important; font-weight: 700 !important;
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease !important;
+}
+:is(.lx-btn-gold, .lxp-btn-gold, .lxl-btn-gold, .btn-primary, .pgc-btn, .cta-btn, .il-cta-solid):hover {
+  filter: brightness(1.06) !important; transform: translateY(-1px) !important;
+}
+:is(.lx-btn-ghost, .lxp-btn-ghost, .lxl-btn-ghost, .btn-ghost, .il-cta-ghost) {
+  background: color-mix(in srgb, var(--rp-panel) 60%, transparent) !important;
+  color: var(--rp-ink) !important; -webkit-text-fill-color: var(--rp-ink) !important;
+  border: 1px solid var(--rp-line-strong) !important; box-shadow: none !important;
+}
+:is(.lx-btn-ghost, .lxp-btn-ghost, .lxl-btn-ghost, .btn-ghost, .il-cta-ghost):hover { border-color: var(--rp-gold-accent) !important; }
+
+/* ── 7. Inputs ──────────────────────────────────────────────────────────── */
+:is(.il-auth-page .field input, #landing-page .il-landing-search, #lab-main .ticker-form input,
+   #view-tool input[type="text"], #view-tool input[type="number"], #view-tool select,
+   .il-static-page input[type="number"], .il-static-page input[type="text"]) {
+  background: var(--rp-inset) !important; color: var(--rp-ink) !important;
+  border: 1px solid var(--rp-line-strong) !important; border-radius: 12px !important;
+}
+:is(.il-auth-page .field input, #lab-main .ticker-form input, #view-tool input, #view-tool select, .il-static-page input):focus {
+  outline: none !important; border-color: var(--rp-gold-accent) !important;
+  box-shadow: 0 0 0 3px var(--rp-gold-soft) !important;
+}
+#landing-page .il-landing-search input { background: transparent !important; border: 0 !important; }
+
+/* ── 8. Data: numbers in mono, tables quiet ─────────────────────────────── */
+:is(#view-tool .m-val, #view-tool .price-big, #view-tool #r-price, .q-price, .lx-price strong, .lxp-price strong) {
+  font-variant-numeric: tabular-nums !important;
+}
+:is(#view-tool table, .il-static-page table, .tf-table) th { color: var(--rp-muted) !important; }
+:is(#view-tool table, .il-static-page table, .tf-table) :is(td, th) { border-color: var(--rp-line) !important; }
+
+/* ── 9. Research workspace chrome ───────────────────────────────────────── */
+#view-tool .app-sidebar {
+  background: color-mix(in srgb, var(--rp-bg) 92%, var(--rp-panel)) !important;
+  border-right: 1px solid var(--rp-line) !important;
+}
+#view-tool .sb-item { color: var(--rp-copy) !important; border-radius: 10px !important; }
+#view-tool .sb-item:hover { background: var(--rp-gold-soft) !important; color: var(--rp-ink) !important; }
+#view-tool .sb-item.active {
+  background: linear-gradient(90deg, var(--rp-gold-soft), transparent) !important;
+  color: var(--rp-gold) !important; box-shadow: inset 2px 0 0 var(--rp-gold-accent) !important;
+}
+#view-tool .sb-pro-card {
+  background: radial-gradient(120% 140% at 0% 0%, var(--rp-gold-soft), transparent 60%), var(--rp-panel) !important;
+  border: 1px solid var(--rp-gold-ring) !important; border-radius: 14px !important;
+}
+
+/* ── 10. Footer ─────────────────────────────────────────────────────────── */
+body > footer {
+  background: transparent !important;
+  border-top: 1px solid var(--rp-line) !important;
+  color: var(--rp-muted) !important;
+}
+body > footer a { color: var(--rp-copy) !important; }
+body > footer a:hover { color: var(--rp-gold) !important; }
+
+/* ── 11. Motion: restrained ─────────────────────────────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  :is(.lx-section, .lxl-level, .lxp-plans) { animation: rp-rise .6s cubic-bezier(.2, .7, .2, 1) both; }
+  @keyframes rp-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+}
+
+/* Hero second line: ink, so the serif gold word is the only accent. */
+#landing-page .il-display .il-d2 {
+  background: none !important; -webkit-text-fill-color: var(--rp-ink) !important; color: var(--rp-ink) !important;
+}
+#landing-page .il-display .il-d2 em { -webkit-text-fill-color: transparent !important; }
+/* The market strip is a row of panels, not a panel holding panels. */
+#landing-page > .il-market-strip,
+#landing-page > .il-market-strip > .il-ms-inner {
+  background: transparent !important; border: 0 !important; box-shadow: none !important;
+}
+#landing-page > .il-market-strip::before, #landing-page > .il-market-strip::after { content: none !important; }
+#landing-page .il-ms-inner { display: grid !important; grid-template-columns: 1.2fr 1fr 1fr 1.3fr !important; gap: 16px !important; }
+#landing-page .il-ms-inner > .ilm-card { padding: 18px 20px !important; min-width: 0 !important; }
+@media (max-width: 1080px) { #landing-page .il-ms-inner { grid-template-columns: 1fr 1fr !important; } }
+@media (max-width: 600px) { #landing-page .il-ms-inner { grid-template-columns: 1fr !important; } }
+
+/* ── 12. Research workspace: one header per fact ────────────────────────────
+   With a company loaded, the name, price, market cap and P/E appeared three
+   times above the chart (context strip, result header, stats footer) and the
+   source twice (a "VERIFIED SOURCE" row under chips that already name it).
+   The result header keeps them; the duplicates go. */
+#view-tool.has-stock .il-shell-ticker { display: none !important; }
+#view-tool #quote-source { display: none !important; }
+#view-tool .il-shell-top { border: 0 !important; background: transparent !important; box-shadow: none !important; }
+#view-tool .result-header { padding: 26px 28px !important; }
+#view-tool #r-price { font-family: var(--rp-sans) !important; font-weight: 750 !important; letter-spacing: -.03em !important; }
+#view-tool #r-name { letter-spacing: -.025em !important; }
+#view-tool .app-section-hdr {
+  background: color-mix(in srgb, var(--rp-bg) 85%, transparent) !important;
+  -webkit-backdrop-filter: blur(12px) !important; backdrop-filter: blur(12px) !important;
+  border-bottom: 1px solid var(--rp-line) !important;
+}
+#view-tool .app-stats-footer {
+  background: color-mix(in srgb, var(--rp-bg) 88%, transparent) !important;
+  -webkit-backdrop-filter: blur(12px) !important; backdrop-filter: blur(12px) !important;
+  border-top: 1px solid var(--rp-line) !important;
+}
+#view-tool #limit-counter { color: var(--rp-muted) !important; }
+/* The section header already says where you are and already has Save. */
+#view-tool .il-shell-top > div:first-child:not(.il-shell-search) { display: none !important; }
+#view-tool .il-shell-top [data-il-save] { display: none !important; }
+#view-tool .il-shell-top { padding-top: 6px !important; padding-bottom: 6px !important; }
+/* Member home: the tool list was squeezed to the column's height and its
+   last links were clipped. Panels keep their content height. */
+.il-home-member :is(.ihm-col-tools, .ihm-col-side) > .ihm-panel { flex-shrink: 0 !important; overflow: visible !important; }
+
+/* ── 13. Upgrade and sign-in gates ──────────────────────────────────────── */
+.pro-gate-card .pgc-badge {
+  display: inline-flex !important; align-items: center !important; gap: 6px !important;
+  background: var(--rp-gold-soft) !important; color: var(--rp-gold) !important;
+  -webkit-text-fill-color: var(--rp-gold) !important;
+  border: 1px solid var(--rp-gold-ring) !important; border-radius: 999px !important;
+  padding: 5px 11px !important; font: 700 12px/1.2 var(--rp-sans) !important;
+}
+.pro-gate-card .pgc-title { color: var(--rp-ink) !important; font: 750 20px/1.25 var(--rp-sans) !important; letter-spacing: -.015em !important; }
+.pro-gate-card .pgc-bullets li { color: var(--rp-copy) !important; }
+.pro-gate-card .pgc-note { color: var(--rp-muted) !important; }
+.pro-gate-card .pgc-body > a[href="/signup"] {
+  background: var(--rp-gold-grad) !important; color: var(--rp-on-gold) !important;
+  -webkit-text-fill-color: var(--rp-on-gold) !important; box-shadow: var(--rp-gold-glow) !important;
+  border-radius: 12px !important;
+}
+.pro-gate-card .pgc-body a[href="/login"] { color: var(--rp-gold) !important; }
