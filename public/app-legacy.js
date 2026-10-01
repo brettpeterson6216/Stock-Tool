@@ -496,11 +496,14 @@ function openSection(id, skipProCheck) {
   if (!sec || !bod) return;
   document.getElementById('view-tool')?.setAttribute('data-active-section', id);
   const gatedSection = PRO_SECTIONS.includes(id) || ACCOUNT_SECTIONS.includes(id);
-  if (gatedSection && !PRO_SECTION_CONTENT[id] && !bod.querySelector('.pro-gate-card')) {
+  // A gated body may hold a gate card or, while sign-in is still resolving,
+  // a bare spinner. Neither is real content: never save it, always restore over it.
+  const placeholder = bod.querySelector('.pro-gate-card, :scope > .sec-state-wrap');
+  if (gatedSection && !PRO_SECTION_CONTENT[id] && !placeholder) {
     PRO_SECTION_CONTENT[id] = bod.innerHTML;
   }
   const entitled = ACCOUNT_SECTIONS.includes(id) ? S.loggedIn : isPro();
-  if (gatedSection && entitled && PRO_SECTION_CONTENT[id] && bod.querySelector('.pro-gate-card')) {
+  if (gatedSection && entitled && PRO_SECTION_CONTENT[id] && placeholder) {
     bod.innerHTML = PRO_SECTION_CONTENT[id];
   }
   sec.classList.add('open');
@@ -1664,7 +1667,7 @@ const crosshairPlugin = {
     // Axis labels (price + date) only on charts that opt in
     if(chart._crosshairAxes){
       const yScale = chart.scales.y, xScale = chart.scales.x;
-      ctx.font = "600 10px 'DM Mono', monospace";
+      ctx.font = "600 10px 'JetBrains Mono', monospace";
       ctx.textBaseline = 'middle';
       // price label on right edge
       if(cy!=null && cy>=area.top && cy<=area.bottom && yScale){
@@ -1713,7 +1716,7 @@ const crosshairPlugin = {
   }
 };
 Chart.register(crosshairPlugin);
-Chart.defaults.font.family = "'DM Sans', system-ui, sans-serif";
+Chart.defaults.font.family = "'Plus Jakarta Sans', system-ui, sans-serif";
 Chart.defaults.font.size = 11;
 Chart.defaults.font.weight = '500';
 Chart.defaults.color = ct().text;
@@ -1785,13 +1788,13 @@ const baseOpts = (extraScales={}) => {
         backgroundColor:t.ttBg, titleColor:t.ttTitle, bodyColor:t.ttBody,
         borderColor:t.ttBorder, borderWidth:1, padding:12, caretSize:6,
         cornerRadius:10, displayColors:true, boxWidth:8, boxHeight:8, usePointStyle:true,
-        titleFont:{family:'DM Mono',size:11,weight:'600'},bodyFont:{family:'DM Sans',size:12,weight:'600'},
+        titleFont:{family:'JetBrains Mono',size:11,weight:'600'},bodyFont:{family:'Plus Jakarta Sans',size:12,weight:'600'},
         callbacks:{ label: ctx => ` ${ctx.dataset.label||''}: ${ctx.parsed?.y != null ? Number(ctx.parsed.y).toLocaleString('en-US', { maximumFractionDigits: 2 }) : ctx.formattedValue}` }
       }
     },
     scales:{
-      x:{ ...xExtra, border:{display:false,...(xExtra.border||{})}, title:{...(xExtra.title||{}),display:false}, ticks:{color:t.text,font:{family:'DM Mono',size:compact?9:10,weight:'600'},maxTicksLimit:compact?4:8,padding:8,autoSkip:true,...(xExtra.ticks||{})}, grid:{display:false,color:t.grid,drawTicks:false,...(xExtra.grid||{})} },
-      y:{ ...yExtra, border:{display:false,...(yExtra.border||{})}, title:{...(yExtra.title||{}),display:false}, ticks:{color:t.text,font:{family:'DM Mono',size:compact?9:10,weight:'600'},padding:8,maxTicksLimit:compact?5:8,...(yExtra.ticks||{})}, grid:{color:t.grid,lineWidth:1,drawTicks:false,...(yExtra.grid||{})} }
+      x:{ ...xExtra, border:{display:false,...(xExtra.border||{})}, title:{...(xExtra.title||{}),display:false}, ticks:{color:t.text,font:{family:'JetBrains Mono',size:compact?9:10,weight:'600'},maxTicksLimit:compact?4:8,padding:8,autoSkip:true,...(xExtra.ticks||{})}, grid:{display:false,color:t.grid,drawTicks:false,...(xExtra.grid||{})} },
+      y:{ ...yExtra, border:{display:false,...(yExtra.border||{})}, title:{...(yExtra.title||{}),display:false}, ticks:{color:t.text,font:{family:'JetBrains Mono',size:compact?9:10,weight:'600'},padding:8,maxTicksLimit:compact?5:8,...(yExtra.ticks||{})}, grid:{color:t.grid,lineWidth:1,drawTicks:false,...(yExtra.grid||{})} }
     }
   };
 };
@@ -1901,14 +1904,14 @@ function expandChart(chartId, title) {
       },
       plugins: {
         ...(srcCfg.options?.plugins||{}),
-        legend: { display: !compact, labels: { color:theme.text, font:{family:'DM Sans',size:11,weight:'500'}, boxWidth:20, boxHeight:2, padding:16, usePointStyle:false } },
+        legend: { display: !compact, labels: { color:theme.text, font:{family:'Plus Jakarta Sans',size:11,weight:'500'}, boxWidth:20, boxHeight:2, padding:16, usePointStyle:false } },
         tooltip: {
           enabled: window.__ilTipOn !== false,
           mode:'index', intersect:false,
           backgroundColor:ttbg(), titleColor:theme.muted, bodyColor:ttbody(),
           borderColor:ttborder(), borderWidth:1, padding:12, caretSize:6,
           cornerRadius:10, displayColors:true, boxWidth:8, boxHeight:8, usePointStyle:true,
-          titleFont:{family:'DM Mono',size:11,weight:'600'},bodyFont:{family:'DM Sans',size:12,weight:'600'},
+          titleFont:{family:'JetBrains Mono',size:11,weight:'600'},bodyFont:{family:'Plus Jakarta Sans',size:12,weight:'600'},
           callbacks:{
             title:items=>items[0]?.label||'',
             label:ctx=>{
@@ -1938,7 +1941,7 @@ function expandChart(chartId, title) {
         ...(srcCfg.options?.scales||{}),
         x: {
           ...(srcCfg.options?.scales?.x||{}),
-          ticks:{...(srcCfg.options?.scales?.x?.ticks||{}),color:theme.text,font:{family:'DM Mono',size:compact?9:11,weight:'500'},maxTicksLimit:compact?4:10,maxRotation:0,minRotation:0,autoSkip:true,padding:compact?8:10},
+          ticks:{...(srcCfg.options?.scales?.x?.ticks||{}),color:theme.text,font:{family:'JetBrains Mono',size:compact?9:11,weight:'500'},maxTicksLimit:compact?4:10,maxRotation:0,minRotation:0,autoSkip:true,padding:compact?8:10},
           grid:{color:gcol()}
         },
         y: {
@@ -1947,7 +1950,7 @@ function expandChart(chartId, title) {
           beginAtZero:false,
           position:isPriceChart?'right':(srcCfg.options?.scales?.y?.position||'left'),
           title:{...(srcCfg.options?.scales?.y?.title||{}),display:false},
-          ticks:{...(srcCfg.options?.scales?.y?.ticks||{}),color:theme.text,font:{family:'DM Mono',size:compact?9:11,weight:'500'},maxTicksLimit:compact?6:8,padding:compact?6:8,callback:isPriceChart?(value=>fmtChartAxisPrice(value)):(srcCfg.options?.scales?.y?.ticks?.callback)},
+          ticks:{...(srcCfg.options?.scales?.y?.ticks||{}),color:theme.text,font:{family:'JetBrains Mono',size:compact?9:11,weight:'500'},maxTicksLimit:compact?6:8,padding:compact?6:8,callback:isPriceChart?(value=>fmtChartAxisPrice(value)):(srcCfg.options?.scales?.y?.ticks?.callback)},
           grid:{color:gcol()}
         }
       }
@@ -2300,8 +2303,8 @@ function renderStock(result, ticker) {
         if (btn && btn.parentNode) {
           const b = document.createElement('div');
           b.id = 'proj-est-badge';
-          b.style.cssText = 'font-size:11px;color:var(--il-gold-ink,var(--gold));font-family:var(--mono);margin-bottom:.5rem;letter-spacing:.04em;';
-          b.textContent = '\u2736 Base case seeded from analyst consensus; Bear and Bull stay custom';
+          b.className = 'il-proj-note';
+          b.textContent = 'Base case seeded from analyst consensus. Bear and Bull stay yours to set.';
           btn.parentNode.insertBefore(b, btn);
         }
       }
@@ -3228,13 +3231,11 @@ async function loadAnalyst(ticker) {
     if (mean) {
       const curPrice = S.meta ? S.meta.regularMarketPrice : null;
       const upside = curPrice ? ((mean - curPrice) / curPrice * 100).toFixed(1) : null;
+      const up = upside !== null && parseFloat(upside) >= 0;
       ptHtml = `
-        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
-          <span style="font-size:.72rem;color:var(--text4);">Analyst Price Target</span>
-          <span style="font-size:1.05rem;font-weight:700;color:var(--il-gold-ink,var(--gold));">$${mean.toFixed(2)}</span>
-        </div>
-        ${upside!==null?`<div style="font-size:11px;color:${parseFloat(upside)>=0?'var(--market-up)':'var(--market-down)'};margin-bottom:8px;">${parseFloat(upside)>=0?'▲':'▼'} ${Math.abs(upside)}% from current price</div>`:''}
-        ${high||low?`<div style="font-size:11px;color:var(--text5);margin-bottom:10px;">Range: ${low?'$'+low.toFixed(2):'—'} – ${high?'$'+high.toFixed(2):'—'}</div>`:''}`;
+        <div class="il-an-head"><span class="il-card-kicker">Analyst price target</span></div>
+        <div class="il-an-target"><span class="il-an-price">$${mean.toFixed(2)}</span>${upside!==null?`<span class="il-chip ${up?'is-up':'is-down'}">${up?'▲':'▼'} ${Math.abs(upside)}%</span>`:''}</div>
+        ${high||low?`<div class="il-an-range"><span>Low ${low?'$'+low.toFixed(2):'—'}</span><span>High ${high?'$'+high.toFixed(2):'—'}</span></div>`:''}`;
     } else {
       // Provider doesn't include street targets — say so, and offer the model instead
       ptHtml = `<div style="font-size:11px;color:var(--text5);margin-bottom:10px;line-height:1.5;">Street price targets aren't included by the current data provider. Use the <a href="#" onclick="openSection('dcf');return false;" style="color:var(--il-gold-ink,var(--gold));">intrinsic-value model</a> or <a href="#" onclick="openSection('projection');return false;" style="color:var(--il-gold-ink,var(--gold));">Scenario Lab</a> to build your own range.</div>`;
@@ -3257,25 +3258,26 @@ async function loadAnalyst(ticker) {
       if (bullPct >= 80) { consensus = 'Strong Buy'; consColor = palette.positive; }
       if (bearPct >= 50) { consensus = 'Sell'; consColor = palette.negative; }
 
+      const tone = consColor === palette.positive ? 'is-up' : consColor === palette.negative ? 'is-down' : 'is-neutral';
       barHtml = `
-        <div style="font-size:11px;color:var(--text4);margin-bottom:4px;">Analyst Consensus <span style="float:right;font-weight:700;color:${consColor};">${consensus}</span></div>
-        <div class="consensus-bar-row">
-          ${pSB>0?`<div style="flex:${pSB};background:${palette.positive};border-radius:3px;" title="Strong Buy ${pSB}%"></div>`:''}
-          ${pB>0?`<div style="flex:${pB};background:${colorAlpha(palette.positive,.72)};border-radius:3px;" title="Buy ${pB}%"></div>`:''}
-          ${pH>0?`<div style="flex:${pH};background:${palette.price};border-radius:3px;" title="Hold ${pH}%"></div>`:''}
-          ${pS>0?`<div style="flex:${pS};background:${colorAlpha(palette.negative,.72)};border-radius:3px;" title="Sell ${pS}%"></div>`:''}
-          ${pSS>0?`<div style="flex:${pSS};background:${palette.negative};border-radius:3px;" title="Strong Sell ${pSS}%"></div>`:''}
+        <div class="il-an-cons"><span class="il-card-kicker">Consensus</span><span class="il-chip ${tone}">${consensus}</span></div>
+        <div class="consensus-bar-row il-an-bar">
+          ${pSB>0?`<div class="seg sb" style="flex:${pSB}" title="Strong Buy ${pSB}%"></div>`:''}
+          ${pB>0?`<div class="seg b" style="flex:${pB}" title="Buy ${pB}%"></div>`:''}
+          ${pH>0?`<div class="seg h" style="flex:${pH}" title="Hold ${pH}%"></div>`:''}
+          ${pS>0?`<div class="seg s" style="flex:${pS}" title="Sell ${pS}%"></div>`:''}
+          ${pSS>0?`<div class="seg ss" style="flex:${pSS}" title="Strong Sell ${pSS}%"></div>`:''}
         </div>
-        <div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--text5);margin-top:3px;">
-          <span>🟢 ${counts.strongBuy+counts.buy} Buy</span>
-          <span>🟡 ${counts.hold} Hold</span>
-          <span>🔴 ${counts.sell+counts.strongSell} Sell</span>
+        <div class="il-an-legend">
+          <span><i class="dot b"></i>${counts.strongBuy+counts.buy} Buy</span>
+          <span><i class="dot h"></i>${counts.hold} Hold</span>
+          <span><i class="dot s"></i>${counts.sell+counts.strongSell} Sell</span>
         </div>
-        <div style="font-size:.62rem;color:var(--text5);margin-top:4px;">Based on ${totalRec} analyst ratings</div>`;
+        <div class="il-card-foot">Based on ${totalRec} analyst ratings</div>`;
     }
 
     if (ptHtml || barHtml) {
-      sideEl.innerHTML = `<div class="sidebar-card">${ptHtml}${barHtml}</div>`;
+      sideEl.innerHTML = `<div class="sidebar-card il-analyst-card">${ptHtml}${barHtml}</div>`;
     }
   } catch (_) {}
 }
@@ -4127,14 +4129,15 @@ function renderRiskPanel(closes, meta) {
   const sideRiskContent = document.getElementById('sidebar-risk-content');
   if (sideRisk && sideRiskContent) {
     sideRisk.style.display = 'block';
-    sideRiskContent.innerHTML = `
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:.72rem;">
-        <div><div style="color:var(--text5);">Ann. Volatility</div><div style="font-weight:700;color:${parseFloat(annualVol)<25?'#46b184':'#d96a70'};">${annualVol}%</div></div>
-        <div><div style="color:var(--text5);">Ann. Return</div><div style="font-weight:700;color:${parseFloat(annualReturn)>=0?'#46b184':'#d96a70'};">${annualReturn}%</div></div>
-        <div><div style="color:var(--text5);">Max Drawdown</div><div style="font-weight:700;color:${parseFloat(maxDD)>-20?'#46b184':'#d96a70'};">${maxDD}%</div></div>
-        <div><div style="color:var(--text5);">Sharpe</div><div style="font-weight:700;color:${parseFloat(sharpe)>0.5?'#46b184':parseFloat(sharpe)<0?'#d96a70':'#C6A052'};">${sharpe}</div></div>
-        <div><div style="color:var(--text5);">Beta</div><div style="font-weight:700;">${beta}</div></div>
-        <div><div style="color:var(--text5);">VaR 95%</div><div style="font-weight:700;color:#d96a70;">${var95}%</div></div>
+    const t = (good, bad) => good ? 'is-up' : bad ? 'is-down' : 'is-neutral';
+    const cell = (label, val, tone) => `<div class="il-mini-stat"><span>${label}</span><b class="${tone||''}">${val}</b></div>`;
+    sideRiskContent.innerHTML = `<div class="il-mini-grid">
+        ${cell('Ann. volatility', annualVol+'%', t(parseFloat(annualVol)<25, parseFloat(annualVol)>=45))}
+        ${cell('Ann. return', annualReturn+'%', t(parseFloat(annualReturn)>=0, parseFloat(annualReturn)<0))}
+        ${cell('Max drawdown', maxDD+'%', t(parseFloat(maxDD)>-20, parseFloat(maxDD)<=-20))}
+        ${cell('Sharpe', sharpe, t(parseFloat(sharpe)>0.5, parseFloat(sharpe)<0))}
+        ${cell('Beta', beta, '')}
+        ${cell('VaR 95%', var95+'%', 'is-down')}
       </div>`;
   }
   const col = v => parseFloat(v) >= 0 ? 'var(--market-up)' : 'var(--market-down)';
@@ -4143,14 +4146,15 @@ function renderRiskPanel(closes, meta) {
   const rating = ['High Risk','Moderate Risk','Moderate','Low–Moderate Risk'][ratingScore] || 'Moderate';
   const ratingColor = ['var(--market-down)','#C6A052','#C6A052','var(--market-up)'][ratingScore] || '#C6A052';
 
+  const toneOf = c => /market-up|46b184/.test(c) ? 'is-up' : /market-down|d96a70/.test(c) ? 'is-down' : /C6A052|gold/.test(c) ? 'is-warn' : 'is-neutral';
   const stat = (label, val, valColor, note='') =>
     `<div class="risk-stat">
-      <div class="risk-stat-label">${label}${note?`<span style="font-size:.6rem;color:var(--text5);margin-left:4px;">${note}</span>`:''}</div>
-      <div class="risk-stat-val" style="color:${valColor}">${val}</div>
+      <div class="risk-stat-label">${label}${note?`<span class="risk-stat-note">${note}</span>`:''}</div>
+      <div class="risk-stat-val ${toneOf(valColor)}">${val}</div>
     </div>`;
 
   el.innerHTML = `
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+    <div class="risk-grid">
       ${stat('Annual Volatility', annualVol+'%', parseFloat(annualVol)<25?'#46b184':parseFloat(annualVol)<45?'#C6A052':'#d96a70')}
       ${stat('Annual Return', annualReturn+'%', posCol(annualReturn), 'est.')}
       ${stat('Beta', beta, betaRaw!=null?(betaRaw<0.8?'#46b184':betaRaw>1.4?'#d96a70':'var(--gold)'):'var(--text4)')}
@@ -4189,9 +4193,10 @@ async function renderNews(ticker, name) {
       else if (item.sentiment === 'negative' || NEG_WORDS.test(h)) cls = 'news-neg';
       const url = safeExternalUrl(item.url);
       if (!url) return '';
+      const when = item.datetime ? new Date(item.datetime * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
       return `<a class="news-item ${cls}" href="${url}" target="_blank" rel="noopener noreferrer">
+        <div class="news-meta"><span class="news-src">${escapeHtml(item.source || '')}</span>${when ? `<span class="news-date">${when}</span>` : ''}</div>
         <div class="news-headline">${escapeHtml(h)}</div>
-        <div class="news-meta">${escapeHtml(item.source || '')} · ${item.datetime ? new Date(item.datetime * 1000).toLocaleDateString() : ''}</div>
       </a>`;
     }).join('');
   } catch(e) {

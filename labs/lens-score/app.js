@@ -1340,6 +1340,10 @@
 
   applySavedTheme();
   bindEvents();
+  // On wide screens the scenario view has room for the assumptions beside
+  // the price test, so show them instead of a lone collapsed bar.
+  const assumptions = document.querySelector("#assumption-form details");
+  if (assumptions && window.matchMedia && window.matchMedia("(min-width: 1000px)").matches) assumptions.open = true;
   const initialParams = new URLSearchParams(window.location.search);
   const initialTicker = initialParams.get("ticker");
   showView(initialParams.get("view") || "snapshot");

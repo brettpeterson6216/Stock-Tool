@@ -140,6 +140,7 @@
       var edge = smooth(-40, H * 0.1, y) * smooth(H + 40, H * 0.9, y) * smooth(-60, W * 0.04, x) * smooth(W + 60, W * 0.96, x);
       var nx = (x - W / 2) / Math.min(W * 0.36, 520), ny = (y - H * 0.46) / (H * 0.42);
       if (pathName === "sweep") { nx = (x - W * 0.32) / (W * 0.3); ny = (y - H * 0.5) / (H * 0.45); }
+      if (pathName === "sweep" && W < 700) return edge * 0.24; // phones: copy spans the width
       var d = Math.sqrt(nx * nx + ny * ny);
       return edge * (W < 700 ? 0.5 + 0.5 * smooth(0.55, 1.0, d) : 0.32 + 0.68 * smooth(0.7, 1.15, d));
     }
@@ -234,7 +235,7 @@
     start();
   }
 
-  var HEROES = "#landing-page .il-landing-hero, .il-static-page .hero, .il-static-page section.hero, .il-static-page section.intro, .lxp-hero, .lxl:not(.lxl-lesson) .lxl-hero, #public-main > .hero";
+  var HEROES = "#lab-main > .search-shell, #landing-page .il-landing-hero, .il-static-page .hero, .il-static-page section.hero, .il-static-page section.intro, .lxp-hero, .lxl:not(.lxl-lesson) .lxl-hero, #public-main > .hero";
   function init() {
     readTheme();
     document.querySelectorAll(HEROES).forEach(function (h, i) {

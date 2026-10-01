@@ -175,7 +175,7 @@
       layout: {
         background: { type: "solid", color: "transparent" },
         textColor: p.text,
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+        fontFamily: '"Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
         fontSize: 12,
         panes: { separatorColor: p.border, separatorHoverColor: p.crosshair, enableResize: true }
       },
