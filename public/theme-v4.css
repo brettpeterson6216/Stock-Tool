@@ -632,43 +632,27 @@ html:not([data-theme="dark"]) {
 html:not([data-theme="dark"]) #landing-page .lx-lens canvas.lx-globe { opacity: .75; }
 /* Keep the headline readable over the globe. */
 #landing-page .il-landing-copy :is(.il-display, > p) { text-shadow: 0 2px 24px var(--rp-bg) !important; }
-/* Globe hero layout: the globe is a feature, not wallpaper, so it gets its
-   own column on wide screens and sits above the copy on small ones. */
-html body #landing-page .il-landing-hero {
-  display: grid !important; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr) !important;
-  grid-template-areas: "copy globe" !important; align-items: center !important; gap: clamp(16px, 3vw, 48px) !important;
-  text-align: left !important; padding-top: clamp(40px, 6vw, 88px) !important;
+
+
+/* Globe as background: large, centred behind the copy, quiet. */
+#landing-page .il-landing-hero .lx-lens {
+  position: absolute !important; z-index: -1 !important; pointer-events: none !important;
+  left: 50% !important; top: 50% !important; transform: translate(-50%, -50%) !important;
+  width: min(1040px, 150vw) !important; max-width: none !important; aspect-ratio: 1 !important;
+  -webkit-mask-image: radial-gradient(closest-side, #000 78%, transparent 100%) !important;
+  mask-image: radial-gradient(closest-side, #000 78%, transparent 100%) !important;
 }
-html body #landing-page .il-landing-hero .lx-lens {
-  grid-area: globe !important; position: relative !important; left: auto !important; top: auto !important; transform: none !important;
-  width: 100% !important; max-width: 640px !important; justify-self: center !important; z-index: 0 !important;
-  -webkit-mask-image: none !important; mask-image: none !important;
+#landing-page .lx-lens canvas.lx-globe { opacity: .62 !important; }
+html:not([data-theme="dark"]) #landing-page .lx-lens canvas.lx-globe { opacity: .55 !important; }
+#landing-page .il-landing-copy :is(.il-display, > p, .lx-assure) { text-shadow: 0 1px 18px var(--rp-bg), 0 0 2px var(--rp-bg) !important; }
+@media (max-width: 700px) {
+  #landing-page .il-landing-hero .lx-lens { top: 34% !important; width: 165vw !important; }
 }
-html body #landing-page .il-landing-hero .il-landing-copy { grid-area: copy !important; text-align: left !important; margin: 0 !important; max-width: 640px !important; }
-html body #landing-page .il-landing-hero .il-landing-copy .il-display,
-html body #landing-page .il-landing-hero .il-landing-copy > p,
-html body #landing-page .il-landing-hero .il-trust,
-html body #landing-page .il-landing-hero .lx-assure { text-align: left !important; margin-left: 0 !important; margin-right: 0 !important; justify-content: flex-start !important; }
-html body #landing-page .il-landing-hero .il-landing-copy .il-display { font-size: clamp(44px, 5.6vw, 84px) !important; }
-html body #landing-page .il-landing-hero .il-landing-actions,
-html body #landing-page .il-landing-hero .lx-chips { justify-content: flex-start !important; }
-html body #landing-page .il-landing-hero .il-landing-search { margin-left: 0 !important; margin-right: 0 !important; }
-html body #landing-page .il-landing-hero .il-trust .il-trust-lead { text-align: left !important; }
-#landing-page .il-landing-copy :is(.il-display, > p) { text-shadow: none !important; }
-@media (max-width: 1000px) {
-  html body #landing-page .il-landing-hero { grid-template-columns: 1fr !important; grid-template-areas: "globe" "copy" !important; text-align: center !important; }
-  html body #landing-page .il-landing-hero .lx-lens { max-width: min(340px, 82vw) !important; margin: -24px auto -36px !important; }
-  html body #landing-page .il-landing-hero .il-landing-copy { margin: 0 auto !important; text-align: center !important; }
-  html body #landing-page .il-landing-hero .il-landing-copy .il-display,
-  html body #landing-page .il-landing-hero .il-landing-copy > p,
-  html body #landing-page .il-landing-hero .il-trust,
-  html body #landing-page .il-landing-hero .lx-assure { text-align: center !important; margin-left: auto !important; margin-right: auto !important; justify-content: center !important; }
-  html body #landing-page .il-landing-hero .il-landing-actions,
-  html body #landing-page .il-landing-hero .lx-chips { justify-content: center !important; }
-  html body #landing-page .il-landing-hero .il-landing-search { margin-left: auto !important; margin-right: auto !important; }
-  html body #landing-page .il-landing-hero .il-trust .il-trust-lead { text-align: center !important; }
+/* Offset to the right so most of the globe sits clear of the centred copy. */
+@media (min-width: 701px) {
+  #landing-page .il-landing-hero .lx-lens { left: 74% !important; top: 56% !important; width: min(980px, 95vw) !important; }
 }
-@media (max-width: 520px) { html body #landing-page .il-landing-hero .il-landing-copy .il-display { font-size: 12vw !important; } }
-@media (min-width: 1001px) {
-  html body #landing-page .il-landing-hero .il-display > span { text-align: left !important; margin-left: 0 !important; margin-right: 0 !important; }
-}
+#landing-page .lx-lens canvas.lx-globe { opacity: .85 !important; }
+html:not([data-theme="dark"]) #landing-page .lx-lens canvas.lx-globe { opacity: .75 !important; }
+#landing-page .il-landing-hero { overflow: visible !important; }
+#landing-page, body.il-product-page { overflow-x: clip !important; }
