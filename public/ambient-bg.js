@@ -8,7 +8,7 @@
    living backdrop, and it is never shown in the research workspace,
    where the charts are the point.
 
-   Canvas 2D, ~30fps, devicePixelRatio capped at 1.5, paused in background
+   Canvas 2D, ~20fps, devicePixelRatio capped at 1.5, paused in background
    tabs and while the top of the page is scrolled away, one still frame
    under prefers-reduced-motion, colours read from the theme tokens. */
 (function () {
@@ -40,7 +40,7 @@
         f: (0.0016 + rnd() * 0.004) * (1 + k * 0.9),
         a: (0.04 + rnd() * 0.05) / (1 + k * 0.8),
         p: rnd() * Math.PI * 2,
-        s: (0.00009 + rnd() * 0.00016) * (k % 2 ? -1 : 1)
+        s: (0.000025 + rnd() * 0.00005) * (k % 2 ? -1 : 1)   // radians per ms: one swell every 1.5–4 minutes
       });
     }
     strands.push({
@@ -76,7 +76,7 @@
     var v = s.base + s.trend * (x / W - 0.5);
     for (var k = 0; k < s.waves.length; k++) {
       var w = s.waves[k];
-      v += w.a * Math.sin(x * w.f + w.p + t * w.s * 60);
+      v += w.a * Math.sin(x * w.f + w.p + t * w.s);
     }
     return v * H;
   }
@@ -118,7 +118,7 @@
         ctx.restore();
 
         var hx = W * 0.72, hy = yAt(s, hx, t);
-        var pulse = (t % 2600) / 2600;
+        var pulse = (t % 4200) / 4200;
         var glow = ctx.createRadialGradient(hx, hy, 0, hx, hy, 26);
         glow.addColorStop(0, "rgba(" + gold + "," + (0.45 * mult).toFixed(3) + ")");
         glow.addColorStop(1, "rgba(" + gold + ",0)");
@@ -137,8 +137,8 @@
   function loop(now) {
     raf = 0;
     if (!running) return;
-    if (now - last >= 33) {                       // ~30fps is plenty for a drift
-      clock += Math.min(66, last ? now - last : 33);
+    if (now - last >= 50) {                       // 20fps is plenty for a drift this slow
+      clock += Math.min(100, last ? now - last : 50);
       last = now;
       draw(clock);
     }
