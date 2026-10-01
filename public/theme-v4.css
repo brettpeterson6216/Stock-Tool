@@ -320,3 +320,211 @@ body > footer a:hover { color: var(--rp-gold) !important; }
   border-radius: 12px !important;
 }
 .pro-gate-card .pgc-body a[href="/login"] { color: var(--rp-gold) !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   V5 — PERSONALITY PASS
+   The page read as a template: every section was kicker + bold sans heading
+   + card grid, the hero's only visual was an index chart, and nothing moved.
+   This pass gives the brand a motif (the lens: concentric gold rings), puts
+   the real product in the hero as a framed window, sets a serif accent in
+   every heading, and adds restrained motion that rewards attention.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Grain: a whisper of texture so the dark ground reads as material. */
+body.il-product-page::before, body.il-static-page::before, body.il-auth-page::before {
+  content: "" !important; position: fixed !important; inset: 0 !important; z-index: -1 !important; pointer-events: none !important;
+  opacity: .035 !important; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>") !important;
+}
+
+/* ── Hero: centred, big, the lens behind it ─────────────────────────────── */
+#landing-page .il-landing-hero {
+  position: relative !important; display: block !important; text-align: center !important;
+  padding-top: clamp(56px, 9vw, 120px) !important; padding-bottom: clamp(24px, 4vw, 48px) !important;
+  overflow: visible !important; isolation: isolate !important;
+}
+#landing-page .il-landing-hero > :is(.il-hero-live, .il-hero-live-mobile) { display: none !important; }
+#landing-page .lx-lens {
+  position: absolute !important; z-index: -1 !important; left: 50% !important; top: -40px !important;
+  width: min(760px, 120vw) !important; aspect-ratio: 1 !important; transform: translateX(-50%) !important; pointer-events: none !important;
+  -webkit-mask-image: radial-gradient(closest-side, #000 55%, transparent 100%); mask-image: radial-gradient(closest-side, #000 55%, transparent 100%);
+}
+#landing-page .lx-lens svg { width: 100% !important; height: 100% !important; animation: lx-spin 120s linear infinite; }
+#landing-page .lx-lens::after {
+  content: "" !important; position: absolute !important; inset: 22% !important; border-radius: 50% !important;
+  background: radial-gradient(closest-side, var(--rp-gold-soft), transparent 70%) !important; filter: blur(10px) !important;
+}
+@keyframes lx-spin { to { transform: rotate(360deg); } }
+#landing-page .il-landing-copy { max-width: 860px !important; margin: 0 auto !important; text-align: center !important; }
+#landing-page .il-landing-kicker {
+  display: inline-flex !important; align-items: center !important; gap: 8px !important;
+  padding: 7px 14px !important; border-radius: 999px !important;
+  background: color-mix(in srgb, var(--rp-panel) 70%, transparent) !important;
+  border: 1px solid var(--rp-gold-ring) !important; color: var(--rp-gold) !important;
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+}
+#landing-page .il-display {
+  font: 800 clamp(44px, 7.4vw, 104px)/.98 var(--rp-sans) !important; letter-spacing: -.045em !important;
+  margin: 22px auto 22px !important; color: var(--rp-ink) !important;
+}
+#landing-page .il-display .il-d1, #landing-page .il-display .il-d2 { display: block !important; }
+#landing-page .il-display .il-d2 em { font-size: 1.12em !important; line-height: .9 !important; }
+#landing-page .il-landing-copy > p {
+  max-width: 620px !important; margin: 0 auto !important; font: 400 clamp(16px, 1.5vw, 19px)/1.6 var(--rp-sans) !important; color: var(--rp-copy) !important;
+}
+#landing-page .il-landing-copy .il-landing-actions { justify-content: center !important; margin: 30px 0 0 !important; }
+#landing-page .il-landing-copy .il-landing-actions > * { min-height: 52px !important; padding: 0 26px !important; font-size: 16px !important; border-radius: 14px !important; }
+#landing-page .il-landing-search {
+  max-width: 560px !important; margin: 26px auto 0 !important; border-radius: 16px !important;
+  background: color-mix(in srgb, var(--rp-panel) 82%, transparent) !important;
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  border: 1px solid var(--rp-line-strong) !important; box-shadow: var(--rp-shadow) !important;
+}
+#landing-page .il-landing-search:focus-within { border-color: var(--rp-gold-accent) !important; box-shadow: 0 0 0 4px var(--rp-gold-soft), var(--rp-shadow) !important; }
+#landing-page .lx-chips, #landing-page .lx-assure, #landing-page .il-trust { justify-content: center !important; }
+#landing-page .il-trust { display: flex !important; flex-wrap: wrap !important; gap: 6px 14px !important; opacity: .8 !important; }
+
+/* ── The product window ─────────────────────────────────────────────────── */
+#landing-page > .lx-demo { padding-top: clamp(24px, 4vw, 48px) !important; }
+#landing-page .lx-demo .lx-head { margin-inline: auto !important; text-align: center !important; }
+#landing-page .lx-demo .lx-head p { margin-inline: auto !important; }
+#landing-page .lx-window {
+  position: relative !important; border-radius: 22px !important; padding: 1px !important;
+  background: linear-gradient(160deg, var(--rp-gold-ring), transparent 35%, transparent 65%, var(--rp-gold-ring)) !important;
+  box-shadow: 0 60px 120px -50px rgba(0, 0, 0, .7), 0 0 0 1px var(--rp-line) !important;
+}
+#landing-page .lx-window::before {
+  content: "" !important; position: absolute !important; z-index: -1 !important; inset: -60px 10% auto !important; height: 70% !important;
+  background: radial-gradient(closest-side, var(--rp-gold-soft), transparent) !important; filter: blur(30px) !important;
+}
+#landing-page .lx-window-bar {
+  display: flex !important; align-items: center !important; gap: 14px !important;
+  padding: 12px 16px !important; border-radius: 21px 21px 0 0 !important;
+  background: color-mix(in srgb, var(--rp-inset) 92%, transparent) !important; border-bottom: 1px solid var(--rp-line) !important;
+}
+#landing-page .lx-dots { display: inline-flex !important; gap: 6px !important; flex: 0 0 auto !important; }
+#landing-page .lx-dots i { width: 11px !important; height: 11px !important; border-radius: 50% !important; background: var(--rp-line-strong) !important; display: block !important; }
+#landing-page .lx-dots i:first-child { background: color-mix(in srgb, var(--rp-gold-accent) 70%, transparent) !important; }
+#landing-page .lx-window-bar .lx-demo-tabs { margin: 0 !important; flex: 1 1 auto !important; justify-content: center !important; gap: 4px !important; }
+#landing-page .lx-window-bar .lx-demo-tabs button { padding: 7px 12px !important; border-radius: 9px !important; border-color: transparent !important; font-size: 12.5px !important; }
+#landing-page .lx-window-bar .lx-demo-tabs button:hover { color: var(--rp-ink) !important; background: var(--rp-gold-soft) !important; }
+#landing-page .lx-url {
+  flex: 0 0 auto !important; display: inline-flex !important; align-items: center !important; gap: 6px !important;
+  font: 500 12px/1 var(--rp-mono) !important; color: var(--rp-muted) !important;
+  padding: 7px 12px !important; border-radius: 999px !important; background: var(--rp-panel) !important; border: 1px solid var(--rp-line) !important;
+}
+#landing-page .lx-window .lx-demo-card { border-radius: 0 0 21px 21px !important; border: 0 !important; box-shadow: none !important; }
+#landing-page .lx-window .lx-demo-card::before { content: none !important; }
+#landing-page .lx-live-dot {
+  display: inline-block !important; width: 8px !important; height: 8px !important; border-radius: 50% !important; margin-right: 8px !important;
+  background: var(--rp-green) !important; box-shadow: 0 0 0 0 color-mix(in srgb, var(--rp-green) 60%, transparent) !important;
+  animation: lx-pulse 2s ease-out infinite; vertical-align: 1px !important;
+}
+@keyframes lx-pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--rp-green) 55%, transparent); } 100% { box-shadow: 0 0 0 10px transparent; } }
+#landing-page .lx-dial { box-shadow: 0 0 40px -6px var(--rp-gold-ring) !important; }
+#landing-page .lx-demo-line { stroke-dasharray: 2400; stroke-dashoffset: 0; }
+#landing-page .lx-demo-card.is-drawing .lx-demo-line { animation: lx-draw 1.4s cubic-bezier(.3, .7, .2, 1) both; }
+@keyframes lx-draw { from { stroke-dashoffset: 2400; } to { stroke-dashoffset: 0; } }
+
+/* ── Stats band ─────────────────────────────────────────────────────────── */
+#landing-page > .lx-stats {
+  display: grid !important; grid-template-columns: repeat(4, 1fr) !important; gap: 0 !important;
+  padding-top: clamp(48px, 6vw, 80px) !important;
+}
+#landing-page .lx-stat { padding: 8px 24px !important; border-left: 1px solid var(--rp-line) !important; text-align: left !important; }
+#landing-page .lx-stat:first-child { border-left: 0 !important; }
+#landing-page .lx-stat strong {
+  display: block !important; font: 400 clamp(44px, 5vw, 68px)/1 var(--rp-serif) !important; letter-spacing: -.01em !important;
+  background: var(--rp-gold-text) !important; -webkit-background-clip: text !important; background-clip: text !important;
+  -webkit-text-fill-color: transparent !important; color: transparent !important; margin-bottom: 8px !important;
+}
+#landing-page .lx-stat span { font: 500 14.5px/1.45 var(--rp-sans) !important; color: var(--rp-copy) !important; }
+@media (max-width: 800px) {
+  #landing-page > .lx-stats { grid-template-columns: 1fr 1fr !important; row-gap: 28px !important; }
+  #landing-page .lx-stat:nth-child(3) { border-left: 0 !important; }
+}
+
+/* ── Serif accents in every section heading ─────────────────────────────── */
+:is(#landing-page .lx-section h2, #landing-page .lx-strip-title, .lxp h1, .lxp h2, .lxl-hero h1) em {
+  font-family: var(--rp-serif) !important; font-style: italic !important; font-weight: 400 !important;
+  font-size: 1.08em !important; letter-spacing: -.005em !important;
+  background: var(--rp-gold-text) !important; -webkit-background-clip: text !important; background-clip: text !important;
+  -webkit-text-fill-color: transparent !important; color: transparent !important; padding-right: .05em !important;
+}
+#landing-page .lx-section h2 { font-size: clamp(32px, 4.2vw, 56px) !important; line-height: 1.04 !important; letter-spacing: -.035em !important; }
+#landing-page .lx-strip-title {
+  margin: 0 auto 18px !important; font: 750 clamp(24px, 2.4vw, 32px)/1.1 var(--rp-sans) !important; letter-spacing: -.025em !important; color: var(--rp-ink) !important;
+}
+#landing-page > .il-market-strip { padding-top: clamp(56px, 7vw, 96px) !important; }
+#landing-page .lx-kicker { display: inline-flex !important; align-items: center !important; }
+
+/* ── Interaction: things respond to you ─────────────────────────────────── */
+:is(#landing-page .lx-path, #landing-page .lx-how-grid li, #landing-page .lx-plan, .lxp-plan, .lxl-level, .ilm-card, .ihm-panel, .il-static-page .feat, .il-static-page .source-card, #view-tool .chart-wrap, #view-tool .sidebar-card) {
+  transition: transform .25s cubic-bezier(.2, .7, .2, 1), border-color .25s ease, box-shadow .25s ease !important;
+}
+:is(#landing-page .lx-path, #landing-page .lx-how-grid li, #landing-page .lx-plan, .lxp-plan, .il-static-page .feat, .il-static-page .source-card):hover {
+  transform: translateY(-3px) !important; border-color: var(--rp-gold-ring) !important;
+  box-shadow: var(--rp-panel-edge), 0 30px 60px -34px rgba(0, 0, 0, .75), 0 0 0 1px var(--rp-gold-soft) !important;
+}
+/* A sheen that crosses gold buttons on hover. */
+:is(.lx-btn-gold, .lxp-btn-gold, .lxl-btn-gold, .il-cta-solid, .pgc-btn, #main-nav .il-global-trial) { position: relative !important; overflow: hidden !important; isolation: isolate !important; }
+:is(.lx-btn-gold, .lxp-btn-gold, .lxl-btn-gold, .il-cta-solid, .pgc-btn, #main-nav .il-global-trial)::after {
+  content: "" !important; position: absolute !important; z-index: -1 !important; top: 0 !important; bottom: 0 !important; left: -60% !important; width: 40% !important;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .45), transparent) !important; transform: skewX(-18deg) !important;
+  transition: left .6s ease !important; pointer-events: none !important;
+}
+:is(.lx-btn-gold, .lxp-btn-gold, .lxl-btn-gold, .il-cta-solid, .pgc-btn, #main-nav .il-global-trial):hover::after { left: 120% !important; }
+#landing-page .lx-chips button:hover { box-shadow: 0 0 0 4px var(--rp-gold-soft) !important; }
+
+/* Scroll reveal (landing-demo.js adds .lx-in). Without JS everything is visible. */
+.js-reveal #landing-page :is(.lx-section, .il-market-strip) { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s cubic-bezier(.2, .7, .2, 1); }
+.js-reveal #landing-page :is(.lx-section, .il-market-strip).lx-in { opacity: 1; transform: none; }
+:is(.lx-section, .lxl-level, .lxp-plans) { animation: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  #landing-page .lx-lens svg, #landing-page .lx-live-dot, #landing-page .lx-demo-card.is-drawing .lx-demo-line { animation: none !important; }
+  .js-reveal #landing-page :is(.lx-section, .il-market-strip) { opacity: 1 !important; transform: none !important; }
+}
+@media (max-width: 700px) {
+  #landing-page .lx-url { display: none !important; }
+  #landing-page .lx-window-bar .lx-demo-tabs { justify-content: flex-start !important; overflow-x: auto !important; flex-wrap: nowrap !important; }
+}
+#landing-page #il-hero-live, #landing-page #il-hero-live-mobile, #landing-page .il-landing-hero .il-hero-live { display: none !important; }
+#landing-page .il-landing-hero .il-landing-copy, #landing-page .il-landing-hero .il-display,
+#landing-page .il-landing-hero .il-display > span { text-align: center !important; margin-left: auto !important; margin-right: auto !important; }
+#landing-page .il-landing-hero { grid-template-columns: 1fr !important; }
+#landing-page .il-trust .il-trust-lead { flex-basis: 100% !important; text-align: center !important; }
+/* Mobile hero: older mobile rules shrink and left-align it. */
+html body #landing-page .il-landing-hero .il-landing-copy .il-display { font-size: clamp(44px, 12vw, 104px) !important; line-height: .98 !important; }
+html body #landing-page .il-landing-hero .il-landing-copy > p,
+html body #landing-page .il-landing-hero .il-trust,
+html body #landing-page .il-landing-hero .lx-assure { text-align: center !important; margin-left: auto !important; margin-right: auto !important; justify-content: center !important; }
+@media (max-width: 700px) {
+  html body #landing-page .il-landing-hero .lx-assure { flex-direction: column !important; align-items: center !important; }
+  html body #landing-page .il-landing-hero .il-landing-copy > p { font-size: 16.5px !important; }
+}
+
+/* ── Research: the empty state is the first thing a visitor sees ────────── */
+#view-tool:not(.has-stock) .il-tool-shell { display: none !important; }
+#view-tool .tool-welcome .tw-kicker { color: var(--rp-gold) !important; font: 700 13.5px/1.2 var(--rp-sans) !important; }
+#view-tool .tool-welcome .tw-title { font: 800 clamp(36px, 4vw, 58px)/1.02 var(--rp-sans) !important; letter-spacing: -.04em !important; color: var(--rp-ink) !important; }
+#view-tool .tool-welcome .tw-title em {
+  font-family: var(--rp-serif) !important; font-style: italic !important; font-weight: 400 !important; font-size: 1.08em !important;
+  background: var(--rp-gold-text) !important; -webkit-background-clip: text !important; background-clip: text !important;
+  -webkit-text-fill-color: transparent !important; color: transparent !important; padding-right: .05em !important;
+}
+#view-tool .tool-welcome .search-row {
+  border-radius: 16px !important; background: color-mix(in srgb, var(--rp-panel) 82%, transparent) !important;
+  border: 1px solid var(--rp-line-strong) !important; box-shadow: var(--rp-shadow) !important; padding: 6px !important;
+}
+#view-tool .tool-welcome .search-row:focus-within { border-color: var(--rp-gold-accent) !important; box-shadow: 0 0 0 4px var(--rp-gold-soft), var(--rp-shadow) !important; }
+#view-tool .tool-welcome .search-row .ticker-input { border: 0 !important; background: transparent !important; box-shadow: none !important; }
+#view-tool .tool-welcome .btn-search { background: var(--rp-gold-grad) !important; color: var(--rp-on-gold) !important; border-radius: 12px !important; border: 0 !important; box-shadow: var(--rp-gold-glow) !important; }
+#view-tool #featured-grid { gap: 10px !important; }
+#view-tool #featured-grid > * {
+  border-radius: 14px !important; background: var(--rp-panel-grad) !important; border: 1px solid var(--rp-line) !important;
+  box-shadow: var(--rp-panel-edge) !important; transition: transform .2s ease, border-color .2s ease !important; cursor: pointer !important;
+}
+#view-tool #featured-grid > *:hover { transform: translateY(-2px) !important; border-color: var(--rp-gold-ring) !important; }
+#view-tool .fg-label { border: 0 !important; background: transparent !important; }
+#view-tool .tw-market > * { border-radius: 14px !important; background: var(--rp-panel-grad) !important; border: 1px solid var(--rp-line) !important; }

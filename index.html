@@ -324,6 +324,14 @@
 
 <section class="il-landing" id="landing-page" aria-label="ImpliedLens landing page">
   <div class="il-landing-hero">
+    <div class="lx-lens" aria-hidden="true">
+      <svg viewBox="0 0 600 600"><defs><linearGradient id="lxLensG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fbe3a1"/><stop offset=".5" stop-color="#e9b44c"/><stop offset="1" stop-color="#9a6614"/></linearGradient></defs>
+        <circle cx="300" cy="300" r="290" fill="none" stroke="url(#lxLensG)" stroke-width="1" opacity=".55"/>
+        <circle cx="300" cy="300" r="230" fill="none" stroke="url(#lxLensG)" stroke-width="1" stroke-dasharray="2 10" opacity=".7"/>
+        <circle cx="300" cy="300" r="170" fill="none" stroke="url(#lxLensG)" stroke-width="1" opacity=".4"/>
+        <path d="M300 0v80M300 520v80M0 300h80M520 300h80" stroke="url(#lxLensG)" stroke-width="1" opacity=".5"/>
+      </svg>
+    </div>
     <!-- Live market hero. Every number here comes from
          /api/market/landing-summary (real Yahoo chart data, cached 5 min, no
          login and no quota). What it replaced was an illustration of a
@@ -421,50 +429,27 @@
     </div>
   </div>
 
-  <!-- Live market strip. Every value comes from /api/market/movers. -->
-  <section class="il-market-strip" aria-label="Live market movers">
-    <div class="il-ms-inner">
-      <div class="ilm-card ilm-overview-card" id="il-movers">
-        <div class="ilm-head"><span class="ilm-title">Market overview</span><span class="ilm-status" id="ilm-market-status">Live</span></div>
-        <div class="ilm-overview-label">S&amp;P 500</div>
-        <div class="ilm-overview-quote"><strong id="ilm-index-price">—</strong><span id="ilm-index-change">—</span></div>
-        <svg class="ilm-market-spark" viewBox="0 0 260 62" preserveAspectRatio="none" aria-label="S&amp;P 500 one-month price trend"><path class="ilm-market-fill" d=""/><path class="ilm-market-line" d=""/></svg>
-        <div class="ilm-list" aria-live="polite" aria-busy="true" hidden></div>
-      </div>
-      <div class="ilm-card ilm-sector-card" aria-label="Live sector ETF performance">
-        <div class="ilm-head"><span class="ilm-title">Sector performance</span><span class="ilm-badge live">1D</span></div>
-        <div class="ilm-sector-list" id="ilm-sector-list" aria-live="polite"><span class="ilm-loading-line"></span><span class="ilm-loading-line"></span><span class="ilm-loading-line"></span><span class="ilm-loading-line"></span><span class="ilm-loading-line"></span></div>
-      </div>
-      <div class="ilm-card ilm-sentiment-card" aria-label="Live sector breadth sentiment">
-        <div class="ilm-head"><span class="ilm-title">Market sentiment</span><span class="ilm-badge live">Sector breadth</span></div>
-        <div class="ilm-gauge-wrap">
-          <div class="ilm-gauge" id="ilm-gauge"><div><strong id="ilm-breadth-score">—</strong><span id="ilm-breadth-label">Loading</span></div></div>
-          <div class="ilm-breadth-copy"><strong id="ilm-breadth-count">—</strong><span>sectors advancing</span></div>
-        </div>
-      </div>
-      <div class="ilm-card ilm-news-card" aria-label="Recent market news">
-        <div class="ilm-head"><span class="ilm-title">Recent news</span><span class="ilm-badge live" id="ilm-source-label">Verified feed</span></div>
-        <div class="ilm-news-list" id="ilm-news-list" aria-live="polite"><span class="ilm-loading-line"></span><span class="ilm-loading-line"></span><span class="ilm-loading-line"></span></div>
-      </div>
-    </div>
-  </section>
-
   <!-- Live LensScore demo. Every value comes from /api/lens-score/:ticker
        with preview=1 (the curated preview tickers cost no daily credit).
        public/landing-demo.js renders it; nothing here is invented. -->
   <section class="lx-section lx-demo" id="lx-demo" aria-labelledby="lx-demo-title">
     <div class="lx-head">
-      <span class="lx-kicker">Live, not a mockup</span>
-      <h2 id="lx-demo-title">One score. Every reason behind it.</h2>
+      <span class="lx-kicker"><span class="lx-live-dot" aria-hidden="true"></span>Live data, not a mockup</span>
+      <h2 id="lx-demo-title">One score. <em>Every reason</em> behind it.</h2>
       <p>Pick a company. LensScore grades the business, the valuation and the chart separately, then tells you in plain English what helps the case and what could break it.</p>
     </div>
-    <div class="lx-demo-tabs" role="tablist" aria-label="Choose a company">
-      <button type="button" role="tab" data-demo="NVDA" aria-selected="true">NVDA</button>
-      <button type="button" role="tab" data-demo="AAPL" aria-selected="false">AAPL</button>
-      <button type="button" role="tab" data-demo="MSFT" aria-selected="false">MSFT</button>
-      <button type="button" role="tab" data-demo="AMZN" aria-selected="false">AMZN</button>
-      <button type="button" role="tab" data-demo="META" aria-selected="false">META</button>
-      <button type="button" role="tab" data-demo="TSLA" aria-selected="false">TSLA</button>
+    <div class="lx-window">
+    <div class="lx-window-bar">
+      <span class="lx-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+      <div class="lx-demo-tabs" role="tablist" aria-label="Choose a company">
+        <button type="button" role="tab" data-demo="NVDA" aria-selected="true">NVDA</button>
+        <button type="button" role="tab" data-demo="AAPL" aria-selected="false">AAPL</button>
+        <button type="button" role="tab" data-demo="MSFT" aria-selected="false">MSFT</button>
+        <button type="button" role="tab" data-demo="AMZN" aria-selected="false">AMZN</button>
+        <button type="button" role="tab" data-demo="META" aria-selected="false">META</button>
+        <button type="button" role="tab" data-demo="TSLA" aria-selected="false">TSLA</button>
+      </div>
+      <span class="lx-url" aria-hidden="true"><i class="ti ti-shield-check"></i>impliedlens.com/research</span>
     </div>
     <div class="lx-demo-card" id="lx-demo-card" aria-live="polite" aria-busy="true">
       <div class="lx-demo-main">
@@ -493,12 +478,49 @@
         <p class="lx-fine" id="lx-demo-asof">Educational research, not a recommendation.</p>
       </aside>
     </div>
+    </div>
+  </section>
+
+  <section class="lx-section lx-stats" aria-label="What you get">
+    <div class="lx-stat"><strong>20</strong><span>free lessons, beginner to valuation</span></div>
+    <div class="lx-stat"><strong>0&ndash;10</strong><span>LensScore with every reason shown</span></div>
+    <div class="lx-stat"><strong>3</strong><span>scenarios on every model: Bear, Base, Bull</span></div>
+    <div class="lx-stat"><strong>$0</strong><span>to start. No card, no time limit</span></div>
+  </section>
+
+  <!-- Live market strip. Every value comes from /api/market/movers. -->
+  <section class="il-market-strip" aria-label="Live market movers">
+    <h2 class="lx-strip-title">Today in the <em>market</em></h2>
+    <div class="il-ms-inner">
+      <div class="ilm-card ilm-overview-card" id="il-movers">
+        <div class="ilm-head"><span class="ilm-title">Market overview</span><span class="ilm-status" id="ilm-market-status">Live</span></div>
+        <div class="ilm-overview-label">S&amp;P 500</div>
+        <div class="ilm-overview-quote"><strong id="ilm-index-price">—</strong><span id="ilm-index-change">—</span></div>
+        <svg class="ilm-market-spark" viewBox="0 0 260 62" preserveAspectRatio="none" aria-label="S&amp;P 500 one-month price trend"><path class="ilm-market-fill" d=""/><path class="ilm-market-line" d=""/></svg>
+        <div class="ilm-list" aria-live="polite" aria-busy="true" hidden></div>
+      </div>
+      <div class="ilm-card ilm-sector-card" aria-label="Live sector ETF performance">
+        <div class="ilm-head"><span class="ilm-title">Sector performance</span><span class="ilm-badge live">1D</span></div>
+        <div class="ilm-sector-list" id="ilm-sector-list" aria-live="polite"><span class="ilm-loading-line"></span><span class="ilm-loading-line"></span><span class="ilm-loading-line"></span><span class="ilm-loading-line"></span><span class="ilm-loading-line"></span></div>
+      </div>
+      <div class="ilm-card ilm-sentiment-card" aria-label="Live sector breadth sentiment">
+        <div class="ilm-head"><span class="ilm-title">Market sentiment</span><span class="ilm-badge live">Sector breadth</span></div>
+        <div class="ilm-gauge-wrap">
+          <div class="ilm-gauge" id="ilm-gauge"><div><strong id="ilm-breadth-score">—</strong><span id="ilm-breadth-label">Loading</span></div></div>
+          <div class="ilm-breadth-copy"><strong id="ilm-breadth-count">—</strong><span>sectors advancing</span></div>
+        </div>
+      </div>
+      <div class="ilm-card ilm-news-card" aria-label="Recent market news">
+        <div class="ilm-head"><span class="ilm-title">Recent news</span><span class="ilm-badge live" id="ilm-source-label">Verified feed</span></div>
+        <div class="ilm-news-list" id="ilm-news-list" aria-live="polite"><span class="ilm-loading-line"></span><span class="ilm-loading-line"></span><span class="ilm-loading-line"></span></div>
+      </div>
+    </div>
   </section>
 
   <section class="lx-section lx-paths" aria-labelledby="lx-paths-title">
     <div class="lx-head">
       <span class="lx-kicker">Built for where you are</span>
-      <h2 id="lx-paths-title">Start as a beginner. Finish with a process.</h2>
+      <h2 id="lx-paths-title">Start as a beginner. <em>Finish with a process.</em></h2>
       <p>Most tools either bury you in data or dumb it down. ImpliedLens teaches the method and gives you the professional tools to use it.</p>
     </div>
     <div class="lx-path-grid">
@@ -532,7 +554,7 @@
   <section class="lx-section lx-how" aria-labelledby="lx-how-title">
     <div class="lx-head">
       <span class="lx-kicker">How it works</span>
-      <h2 id="lx-how-title">Four questions, every company.</h2>
+      <h2 id="lx-how-title">Four questions, <em>every company.</em></h2>
     </div>
     <ol class="lx-how-grid">
       <li><span class="lx-num">1</span><b>What does the business actually do?</b><p>Price, revenue, margins, cash flow, debt and dilution, each with its source and date.</p></li>
@@ -545,7 +567,7 @@
   <section class="lx-section lx-pricing" id="landing-pricing" aria-labelledby="lx-pricing-title">
     <div class="lx-head">
       <span class="lx-kicker">Pricing</span>
-      <h2 id="lx-pricing-title">Free to learn. Pro when you are ready.</h2>
+      <h2 id="lx-pricing-title">Free to learn. <em>Pro when you&rsquo;re ready.</em></h2>
     </div>
     <div class="lx-plan-grid">
       <article class="lx-plan">
@@ -583,7 +605,7 @@
   <section class="lx-section lx-faq" aria-labelledby="lx-faq-title">
     <div class="lx-head">
       <span class="lx-kicker">Questions</span>
-      <h2 id="lx-faq-title">Before you sign up</h2>
+      <h2 id="lx-faq-title">Before you <em>sign up</em></h2>
     </div>
     <div class="lx-faq-list">
       <details><summary>I have never bought a stock. Is this for me?</summary><p>Yes. Start with the free lessons, then open any company and follow the same four questions. Every metric has a plain-English explanation one click away, and the free plan is not a trial: it does not expire.</p></details>
@@ -595,7 +617,7 @@
   </section>
 
   <section class="lx-section lx-final" aria-labelledby="lx-final-title">
-    <h2 id="lx-final-title">Your next stock deserves more than a headline.</h2>
+    <h2 id="lx-final-title">Your next stock deserves <em>more than a headline.</em></h2>
     <p>Create a free account in under a minute. No card needed.</p>
     <div class="lx-final-actions">
       <a class="lx-btn lx-btn-gold" href="/signup?source=landing_final">Create free account <i class="ti ti-arrow-right" aria-hidden="true"></i></a>
@@ -1114,7 +1136,7 @@
 <div class="tool-welcome" id="tool-welcome">
             <div class="tw-welcome-copy">
               <div class="tw-kicker">ImpliedLens terminal</div>
-              <div class="tw-title">Find what the price already assumes.</div>
+              <div class="tw-title">Find what the price <em>already assumes.</em></div>
               <div class="tw-sub">Start with a company, then move from reported fundamentals to priced-in expectations, technical setup, scenarios, valuation, and a saved decision.</div>
               <div class="search-row">
                 <input class="ticker-input" id="main-ticker" type="text" aria-label="Company ticker" placeholder="Try AAPL, TSLA, NVDA, SPY…" value="">

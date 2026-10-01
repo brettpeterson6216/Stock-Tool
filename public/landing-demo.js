@@ -76,6 +76,30 @@
     return change;
   }
 
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function countUp(el, to) {
+    if (!el) return;
+    if (reduce || !Number.isFinite(to)) { el.textContent = Number.isFinite(to) ? to.toFixed(1) : "–"; return; }
+    var start = performance.now(), dur = 900;
+    (function step(now) {
+      var k = Math.min(1, (now - start) / dur), e = 1 - Math.pow(1 - k, 3);
+      el.textContent = (to * e).toFixed(1);
+      if (k < 1) requestAnimationFrame(step);
+    })(start);
+  }
+
+  function wireReveal() {
+    var targets = document.querySelectorAll("#landing-page > .lx-section, #landing-page > .il-market-strip");
+    if (!targets.length || !("IntersectionObserver" in window) || reduce) return;
+    document.documentElement.classList.add("js-reveal");
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("lx-in"); io.unobserve(e.target); } });
+    }, { rootMargin: "0px 0px -8% 0px", threshold: 0.05 });
+    targets.forEach(function (t) { io.observe(t); });
+    // Anything already on screen, or reached by an anchor jump, shows at once.
+    setTimeout(function () { targets.forEach(function (t) { if (t.getBoundingClientRect().top < innerHeight) t.classList.add("lx-in"); }); }, 50);
+  }
+
   function render(t, d) {
     var card = $("lx-demo-card");
     if (card) { card.setAttribute("aria-busy", "false"); card.classList.remove("is-error"); }
@@ -88,7 +112,8 @@
     var yr = drawChart(s.technical && s.technical.bars);
     var price = Number(s.price);
     setText("lx-demo-price", fmtPrice(price) + (Number.isFinite(yr) ? "  ·  " + (yr >= 0 ? "+" : "") + yr.toFixed(1) + "% over 1 year" : ""));
-    setText("lx-demo-score", Number(s.score).toFixed(1));
+    countUp(document.getElementById("lx-demo-score"), Number(s.score));
+    if (card) { card.classList.remove("is-drawing"); void card.offsetWidth; card.classList.add("is-drawing"); }
     var dial = $("lx-dial"); if (dial) dial.style.setProperty("--lx-score", String(Number(s.score) * 10));
     setText("lx-demo-label", (s.label || "") + (s.confidence ? " · " + s.confidence + " confidence" : ""));
     var v = lenses.value && Number(lenses.value.score), st = lenses.setup && Number(lenses.setup.score);
@@ -144,7 +169,7 @@
     } else start();
   }
 
-  function init() { wireSearch(); wireDemo(); }
+  function init() { wireSearch(); wireDemo(); wireReveal(); }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
   else init();
 })();
