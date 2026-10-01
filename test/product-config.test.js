@@ -30,13 +30,15 @@ test("canonical product configuration matches the repository-backed offer", () =
      to Stripe as trial_period_days on every checkout, so changing it changes
      what customers are actually granted, and that should not pass silently. */
   assert.deepEqual(PRODUCT_CONFIG.trial, { days: 30, requiresCard: true });
-  assert.deepEqual(PRODUCT_CONFIG.analysisLimits, { guestDaily: 2, registeredFreeDaily: 5 });
+  assert.deepEqual(PRODUCT_CONFIG.analysisLimits, { guestDaily: 3, registeredFreeDaily: 10 });
   assert.equal(PRODUCT_CONFIG.checkout.allowPromotionCodes, true);
   assert.deepEqual(PRODUCT_CONFIG.proSections, [...PRO_SECTIONS]);
   assert.deepEqual(PRODUCT_CONFIG.proSections, [
-    "financials", "advmetrics", "projection", "dcf", "screener", "earnings",
+    "advmetrics", "projection", "dcf", "screener",
     "secfilings", "institutional", "analyst", "darkpool", "calls",
   ]);
+  /* Freemium: the reported record is free with an account. */
+  assert.deepEqual(PRODUCT_CONFIG.accountSections, ["financials", "earnings"]);
   assert.equal(Object.isFrozen(PRODUCT_CONFIG.pricing.monthly), true);
   assert.equal(Object.isFrozen(PRODUCT_CONFIG.proSections), true);
 });

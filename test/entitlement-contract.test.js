@@ -73,7 +73,7 @@ test("discount-code sales work through Stripe Checkout without replacing the tri
 test("protected sections wait for authoritative auth state before gating", () => {
   assert.match(html, /window\.IL_AUTH_READY = new Promise/);
   assert.match(html, /authReady: false/);
-  assert.match(html, /PRO_SECTIONS\.includes\(id\) && !S\.authReady/);
+  assert.match(html, /\(PRO_SECTIONS\.includes\(id\) \|\| ACCOUNT_SECTIONS\.includes\(id\)\) && !S\.authReady/);
   assert.match(html, /window\.IL_AUTH_READY\?\.then/);
   assert.match(html, /if \(limitCounter && pro\) limitCounter\.style\.display = 'none'/);
   assert.match(html, /if \(window\.IL_AUTH_READY\) await window\.IL_AUTH_READY/);

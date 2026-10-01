@@ -16,7 +16,7 @@ const express = require("express");
 
 const { FINNHUB_KEY }  = require("../lib/config");
 const { db }           = require("../lib/db");
-const { requirePro, reconcileEffectivePlan, normalizeTicker, FREE_DAILY_LIMIT, GUEST_DAILY_LIMIT } = require("../lib/plan");
+const { requirePro, requireAccount, reconcileEffectivePlan, normalizeTicker, FREE_DAILY_LIMIT, GUEST_DAILY_LIMIT } = require("../lib/plan");
 const { deriveEarnings, loadCompanyFacts, loadFinnhubResearch, loadPriceHistory } = require("../lib/stock-research");
 
 const router = express.Router();
@@ -90,7 +90,7 @@ router.get("/me/limit", async (req, res) => {
 // ============================================================
 //  GET /api/financials/:ticker  (Pro)
 // ============================================================
-router.get("/financials/:ticker", requirePro, async (req, res) => {
+router.get("/financials/:ticker", requireAccount, async (req, res) => {
   const ticker = requestTicker(req, res);
   if (!ticker) return;
 
@@ -387,7 +387,7 @@ router.get("/financials/:ticker", requirePro, async (req, res) => {
 // ============================================================
 //  GET /api/earnings/:ticker  (Pro)
 // ============================================================
-router.get("/earnings/:ticker", requirePro, async (req, res) => {
+router.get("/earnings/:ticker", requireAccount, async (req, res) => {
   const ticker = requestTicker(req, res);
   if (!ticker) return;
   try {

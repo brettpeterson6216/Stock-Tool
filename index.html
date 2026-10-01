@@ -149,7 +149,7 @@
     <button class="prime-nav-menu" type="button" aria-label="Open navigation" onclick="_toggleMobileMenu()"><span aria-hidden="true">&#9776;</span></button>
     <button class="nav-acct-mobile" id="nav-acct-mobile" type="button" aria-label="Account" onclick="navAccountTap()"><i class="ti ti-user-circle"></i></button>
     <a class="btn-nav-outline il-global-login" id="nav-login" href="/login">Log in</a>
-    <a class="btn-nav il-global-trial" id="nav-signup" href="/signup?next=%2F%3Fpricing%3D1&amp;source=nav_trial">Start trial</a>
+    <a class="btn-nav il-global-trial" id="nav-signup" href="/signup?source=nav_free">Sign up free</a>
     <a class="btn-nav" id="nav-upgrade" href="/signup" hidden>Upgrade to Pro</a>
     <div class="nav-acct-wrap" id="nav-acct-wrap" style="display:none;">
       <button class="nav-acct-btn" id="nav-acct-btn">
@@ -176,6 +176,7 @@
 <script defer src="/app-navigation.js?v=20260906-4"></script>
 <script defer src="/ticker-search.js"></script>
 <script defer src="/landing-market.js?v=20260905-15"></script>
+<script defer src="/landing-demo.js?v=20261001-1"></script>
 <span id="main-content" tabindex="-1"></span>
 <!-- ══════════ VIEW: HOME ══════════ -->
 <div id="view-home" role="main">
@@ -322,13 +323,6 @@
 </section>
 
 <section class="il-landing" id="landing-page" aria-label="ImpliedLens landing page">
-  <aside class="il-landing-rail" aria-label="Home page sections">
-    <div class="il-rail-label">Home</div>
-    <a href="#" class="active" onclick="landingScrollTo('top',this);return false;"><i class="ti ti-home"></i><span>Overview</span></a>
-    <a href="#" onclick="landingScrollTo('.il-capabilities',this);return false;"><i class="ti ti-route"></i><span>Research Flow</span></a>
-    <a href="#" onclick="landingScrollTo('.il-workflow-visual',this);return false;"><i class="ti ti-route"></i><span>How It Works</span></a>
-    <a href="#" onclick="landingScrollTo('#landing-pricing',this);return false;"><i class="ti ti-tag"></i><span>Pricing</span></a>
-  </aside>
   <div class="il-landing-hero">
     <!-- Live market hero. Every number here comes from
          /api/market/landing-summary (real Yahoo chart data, cached 5 min, no
@@ -395,88 +389,37 @@
       <div class="ihl-foot"><span id="ihl-asof-m">&mdash;</span></div>
     </div>
     <div class="il-landing-copy">
-      <span class="il-landing-kicker">Independent research. Clearer decisions.</span>
-      <h1 class="il-display"><span class="il-d1">Find the edge.</span> <span class="il-d2">See the <em>bigger picture.</em></span></h1>
-      <p>Understand the business. Read what the price implies. Build a thesis with clear charts, sourced financials, and scenarios you control.</p>
+      <span class="il-landing-kicker"><i class="ti ti-sparkles" aria-hidden="true"></i> Stock research for every level</span>
+      <h1 class="il-display"><span class="il-d1">Research stocks</span> <span class="il-d2">like a <em>professional.</em></span></h1>
+      <p>Free lessons take you from your first stock to a full valuation model. Then put it to work on any company with SEC financials, a transparent 0&ndash;10 LensScore, and Bear/Base/Bull scenarios you control.</p>
       <div class="il-landing-actions il-cta-pair">
-        <a class="il-landing-secondary il-cta-solid" id="il-hero-secondary" href="/signup?next=%2F%3Fpricing%3D1&amp;source=hero_trial">Start free trial <i class="ti ti-arrow-right" aria-hidden="true"></i></a>
-        <button type="button" id="il-hero-primary" class="il-landing-primary il-cta-ghost" onclick="heroLoadTicker('AAPL')"><i class="ti ti-player-play" aria-hidden="true"></i> See how it works</button>
+        <a class="il-landing-secondary il-cta-solid" id="il-hero-secondary" href="/signup?source=hero_free">Create free account <i class="ti ti-arrow-right" aria-hidden="true"></i></a>
+        <a class="il-landing-primary il-cta-ghost" id="il-hero-primary" href="#lx-demo"><i class="ti ti-player-play" aria-hidden="true"></i> See it on a real stock</a>
       </div>
       <div class="il-landing-search" role="search">
         <i class="ti ti-search" aria-hidden="true"></i>
-        <input type="text" id="landing-search" aria-label="Enter a ticker symbol to analyze" placeholder="Research a ticker, e.g. AAPL" autocomplete="off" spellcheck="false" onkeydown="if(event.key==='Enter'){landingSearch()}">
-        <button type="button" onclick="landingSearch()">Analyze</button>
+        <input type="text" id="landing-search" aria-label="Enter a ticker symbol to analyze" placeholder="Try any ticker, e.g. NVDA" autocomplete="off" spellcheck="false">
+        <button type="button" id="landing-search-go">Analyze</button>
       </div>
-      <div class="il-trust" aria-label="Data sources and terms">
-        <span class="il-trust-lead">Built on verified sources</span>
-        <!-- Badges come from lib/provider-registry.js, and the trial line from
-             lib/product-config.js. Hardcoded, this row named a provider the
-             product does not use and promised "No credit card to start" beside
-             a trial Stripe is configured to require a card for. -->
+      <div class="lx-chips" aria-label="Popular companies">
+        <span>Popular:</span>
+        <button type="button" data-lx-ticker="NVDA">NVDA</button>
+        <button type="button" data-lx-ticker="AAPL">AAPL</button>
+        <button type="button" data-lx-ticker="MSFT">MSFT</button>
+        <button type="button" data-lx-ticker="TSLA">TSLA</button>
+        <button type="button" data-lx-ticker="AMZN">AMZN</button>
+      </div>
+      <ul class="lx-assure" aria-label="Plan terms">
+        <li><i class="ti ti-check" aria-hidden="true"></i>Free plan, no card</li>
+        <li><i class="ti ti-check" aria-hidden="true"></i>{{GUEST_DAILY_LIMIT}} analyses a day without signing up</li>
+        <li><i class="ti ti-check" aria-hidden="true"></i>Cancel Pro anytime</li>
+      </ul>
+      <div class="il-trust" aria-label="Data sources">
+        <span class="il-trust-lead">Data from</span>
         {{HOMEPAGE_PROVIDER_BADGES}}
-        <span class="il-trust-dot" id="il-trust-nocard-dot" aria-hidden="true">·</span>
-        <span id="il-trust-nocard"><i class="ti ti-clock"></i>{{TRIAL_CARD_SHORT}} · {{TRIAL_DAYS}}-day trial</span>
-      </div>
-      <div class="il-offer-card" aria-label="Introductory offer">
-        <strong>Discount codes accepted</strong>
-        <span>Apply a code in Stripe Checkout for limited offers like a $0.99 paid month.</span>
       </div>
     </div>
-  
-      <div class="il-rail" aria-label="What ImpliedLens does">
-        <div class="il-rail-item">
-          <i class="ti ti-radar" aria-hidden="true"></i>
-          <b>Market Scanners</b>
-          <span>Filter companies by valuation, size, and momentum.</span>
-        </div>
-        <div class="il-rail-item">
-          <i class="ti ti-chart-arrows-vertical" aria-hidden="true"></i>
-          <b>Deep Analysis</b>
-          <span>Charts, models, and context that help you understand what moves markets.</span>
-        </div>
-        <div class="il-rail-item">
-          <i class="ti ti-news" aria-hidden="true"></i>
-          <b>Company Research</b>
-          <span>Financial statements, earnings, and filings with sources attached.</span>
-        </div>
-        <div class="il-rail-item">
-          <i class="ti ti-bookmark" aria-hidden="true"></i>
-          <b>Watchlists</b>
-          <span>Keep your thesis, key levels, and next review together.</span>
-        </div>
-      </div>
-    </div>
-  <!-- Three ways in, stated plainly. A first-time visitor arriving at a
-       research tool needs to be told where to start; the feature strip above
-       says what exists, not what to do first. -->
-  <!-- These were numbered 01 / 02 / 03 under "Three ways to start", which read
-       as an onboarding sequence you were meant to work through. They are not a
-       sequence - they are three doors into the same product, and a visitor
-       picks one. The numerals are icons now and the heading says what the
-       doors are rather than counting them. -->
-  <section class="il-startpaths" aria-label="Ways to start">
-    <h2 class="il-startpaths-title">Start with one company, or the whole market.</h2>
-    <div class="il-startpaths-grid">
-      <a class="il-startpath" href="/?view=tool&amp;section=analyze">
-        <span class="isp-n"><i class="ti ti-search" aria-hidden="true"></i></span>
-        <b>Look up a company</b>
-        <span class="isp-d">Price, fundamentals, filings and a 0&ndash;10 LensScore for any ticker. Two free analyses a day, no account.</span>
-        <span class="isp-go">Analyze a ticker &rarr;</span>
-      </a>
-      <a class="il-startpath" href="/?view=tool&amp;section=screener">
-        <span class="isp-n"><i class="ti ti-filter" aria-hidden="true"></i></span>
-        <b>Scan the market</b>
-        <span class="isp-d">Filter by value, size and momentum to find candidates worth the work, instead of starting from a headline.</span>
-        <span class="isp-go">Open the screener &rarr;</span>
-      </a>
-      <a class="il-startpath" href="/lens-score">
-        <span class="isp-n"><i class="ti ti-player-play" aria-hidden="true"></i></span>
-        <b>See the method first</b>
-        <span class="isp-d">Watch one company scored end to end, and decide whether the process is one you would actually follow.</span>
-        <span class="isp-go">See a worked example &rarr;</span>
-      </a>
-    </div>
-  </section>
+  </div>
 
   <!-- Live market strip. Every value comes from /api/market/movers. -->
   <section class="il-market-strip" aria-label="Live market movers">
@@ -506,66 +449,159 @@
     </div>
   </section>
 
-  <!-- Product areas — each supports the same end-to-end research decision. -->
-  <div class="il-capabilities" aria-label="What ImpliedLens can do">
-    <div class="il-cap-head">
-      <span class="il-landing-kicker">One connected research system</span>
-      <h2>Four questions. One decision-ready workflow.</h2>
-      <p>Every product area moves the same company thesis forward. The evidence, assumptions, and outputs stay connected so the result can be explained and revisited.</p>
+  <!-- Live LensScore demo. Every value comes from /api/lens-score/:ticker
+       with preview=1 (the curated preview tickers cost no daily credit).
+       public/landing-demo.js renders it; nothing here is invented. -->
+  <section class="lx-section lx-demo" id="lx-demo" aria-labelledby="lx-demo-title">
+    <div class="lx-head">
+      <span class="lx-kicker">Live, not a mockup</span>
+      <h2 id="lx-demo-title">One score. Every reason behind it.</h2>
+      <p>Pick a company. LensScore grades the business, the valuation and the chart separately, then tells you in plain English what helps the case and what could break it.</p>
     </div>
-    <div class="il-cap-grid">
-      <a class="il-cap-card" href="/?view=tool&section=analyze&symbol=AAPL"><i class="ti ti-building"></i><strong>1. Understand the Company</strong><span>Start with the business, price action, SEC financials, growth, margins, cash flow, balance-sheet strength, dilution, earnings, and ownership.</span></a>
-      <a class="il-cap-card il-cap-score" href="/lens-score"><i class="ti ti-focus-2"></i><strong>2. Read Market Expectations</strong><span>Use LensScore and reverse valuation to see the technical setup, long-term quality and value, and what future performance the current price appears to require.</span></a>
-      <a class="il-cap-card" href="/?view=tool&section=projection&symbol=AAPL"><i class="ti ti-timeline"></i><strong>3. Build Scenarios</strong><span>Construct Bear, Base, and Bull paths with clearly labeled historical data, sourced estimates, ImpliedLens defaults, and your own editable assumptions.</span></a>
-      <a class="il-cap-card" href="/?view=tool&section=workspace"><i class="ti ti-briefcase"></i><strong>4. Value, Save &amp; Monitor</strong><span>Compare valuation methods, record the thesis and downside, save the model, and set the evidence or price change that should trigger a review.</span></a>
+    <div class="lx-demo-tabs" role="tablist" aria-label="Choose a company">
+      <button type="button" role="tab" data-demo="NVDA" aria-selected="true">NVDA</button>
+      <button type="button" role="tab" data-demo="AAPL" aria-selected="false">AAPL</button>
+      <button type="button" role="tab" data-demo="MSFT" aria-selected="false">MSFT</button>
+      <button type="button" role="tab" data-demo="AMZN" aria-selected="false">AMZN</button>
+      <button type="button" role="tab" data-demo="META" aria-selected="false">META</button>
+      <button type="button" role="tab" data-demo="TSLA" aria-selected="false">TSLA</button>
     </div>
-  </div>
-  <div class="il-workflow-visual" aria-label="How ImpliedLens works">
-    <div class="il-workflow-copy">
-      <span class="il-landing-kicker">From ticker to monitored thesis</span>
-      <h2>A complete investment question, not a pile of disconnected widgets.</h2>
-      <p>Move from reported evidence to priced-in expectations, then test scenarios and save a decision with a visible assumptions trail.</p>
-    </div>
-    <div class="il-workflow-panels" aria-label="The four-stage ImpliedLens research loop">
-      <div class="il-wf-panel">
-        <div class="il-wf-head"><i class="ti ti-search" aria-hidden="true"></i><strong>1 · Understand</strong></div>
-        <div class="il-wf-mockrow"><span class="il-wf-input">NVDA</span><span class="il-wf-btn">Research →</span></div>
-        <p>Search a company, understand how it makes money, and inspect the operating record before forming a view.</p>
+    <div class="lx-demo-card" id="lx-demo-card" aria-live="polite" aria-busy="true">
+      <div class="lx-demo-main">
+        <div class="lx-demo-id">
+          <span class="lx-demo-sym" id="lx-demo-sym">&nbsp;</span>
+          <strong class="lx-demo-name" id="lx-demo-name">Loading a live read&hellip;</strong>
+          <span class="lx-demo-price" id="lx-demo-price">&nbsp;</span>
+        </div>
+        <div class="lx-demo-chart"><svg viewBox="0 0 600 150" preserveAspectRatio="none" aria-hidden="true"><path id="lx-demo-area" class="lx-demo-area" d=""/><path id="lx-demo-line" class="lx-demo-line" d=""/></svg></div>
+        <div class="lx-demo-lists">
+          <div><h3><i class="ti ti-circle-check" aria-hidden="true"></i> Working for it</h3><ul id="lx-demo-strengths"></ul></div>
+          <div><h3><i class="ti ti-alert-triangle" aria-hidden="true"></i> Watch out for</h3><ul id="lx-demo-concerns"></ul></div>
+        </div>
       </div>
-      <div class="il-wf-panel">
-        <div class="il-wf-head"><i class="ti ti-focus-2" aria-hidden="true"></i><strong>2 · Expectations</strong></div>
-        <div class="il-wf-notes" aria-hidden="true"><span></span><span class="w70"></span><span class="w45"></span></div>
-        <p>Identify what growth, margins, earnings, or cash flow the current price appears to imply.</p>
-      </div>
-      <div class="il-wf-panel">
-        <div class="il-wf-head"><i class="ti ti-adjustments" aria-hidden="true"></i><strong>3 · Scenarios</strong></div>
-        <div class="il-wf-band" aria-hidden="true"><i></i></div>
-        <p>Test Bear, Base, and Bull assumptions. Sourced facts and user inputs remain visibly distinct.</p>
-      </div>
-      <div class="il-wf-panel">
-        <div class="il-wf-head"><i class="ti ti-notes" aria-hidden="true"></i><strong>4 · Decide</strong></div>
-        <div class="il-wf-notes" aria-hidden="true"><span></span><span class="w70"></span><span class="w45"></span></div>
-        <p>Compare implied value with price, save the thesis and model, then monitor the evidence that could change it.</p>
-      </div>
+      <aside class="lx-demo-score" aria-label="LensScore">
+        <div class="lx-dial" id="lx-dial" style="--lx-score:0"><div><strong id="lx-demo-score">&ndash;</strong><span>/ 10</span></div></div>
+        <span class="lx-demo-label" id="lx-demo-label">&nbsp;</span>
+        <dl class="lx-lenses">
+          <div><dt>Long-term value</dt><dd id="lx-lens-value">&ndash;</dd><span class="lx-bar"><i id="lx-bar-value"></i></span></div>
+          <div><dt>Trade setup</dt><dd id="lx-lens-setup">&ndash;</dd><span class="lx-bar"><i id="lx-bar-setup"></i></span></div>
+          <div><dt>Fundamentals</dt><dd id="lx-comp-fund">&ndash;</dd><span class="lx-bar"><i id="lx-bar-fund"></i></span></div>
+          <div><dt>Valuation</dt><dd id="lx-comp-val">&ndash;</dd><span class="lx-bar"><i id="lx-bar-val"></i></span></div>
+          <div><dt>Risk control</dt><dd id="lx-comp-risk">&ndash;</dd><span class="lx-bar"><i id="lx-bar-risk"></i></span></div>
+        </dl>
+        <a class="lx-btn lx-btn-gold" id="lx-demo-open" href="/?view=tool&amp;section=analyze&amp;symbol=NVDA">Open the full analysis <i class="ti ti-arrow-right" aria-hidden="true"></i></a>
+        <p class="lx-fine" id="lx-demo-asof">Educational research, not a recommendation.</p>
+      </aside>
     </div>
-  </div>
-  <div class="il-landing-band">
-    <div>
-      <span class="il-landing-kicker">Market dashboard</span>
-      <h2>Want the live market page?</h2>
-      <p>Open the market dashboard when you need indexes, watchlist context, movers, and breadth. It stays separate so the first visit is focused on starting research.</p>
+  </section>
+
+  <section class="lx-section lx-paths" aria-labelledby="lx-paths-title">
+    <div class="lx-head">
+      <span class="lx-kicker">Built for where you are</span>
+      <h2 id="lx-paths-title">Start as a beginner. Finish with a process.</h2>
+      <p>Most tools either bury you in data or dumb it down. ImpliedLens teaches the method and gives you the professional tools to use it.</p>
     </div>
-    <button type="button" onclick="showMarketPage()"><i class="ti ti-chart-area"></i>Open market dashboard</button>
-  </div>
-  <div class="il-landing-pricing" id="landing-pricing">
-    <span class="il-landing-kicker">Try the full workflow</span>
-    <h2>Start with a {{TRIAL_DAYS}}-day Pro trial.</h2>
-    <p>Use the full Pro workflow before you commit. Discount codes can be entered in Stripe Checkout for limited offers like a $0.99 paid month.</p>
-    <div class="il-landing-actions centered">
-      <a class="il-landing-primary" href="/signup">Start {{TRIAL_DAYS}}-day free trial</a>
-      <a class="il-landing-secondary" href="/signup">Create free account</a>
+    <div class="lx-path-grid">
+      <article class="lx-path">
+        <span class="lx-path-tag"><i class="ti ti-school" aria-hidden="true"></i> New to investing</span>
+        <h3>Learn the method, free.</h3>
+        <p>Short, plain-English lessons with real examples. No jargon you are expected to already know, nothing locked behind a paywall.</p>
+        <ol class="lx-steps">
+          <li><b>Read a chart</b><span>Trend, support, resistance and what volume is telling you.</span></li>
+          <li><b>Read the financials</b><span>Revenue, margins, cash flow and debt from the company&rsquo;s own SEC filings.</span></li>
+          <li><b>Value a business</b><span>What the price already assumes, and what it could be worth.</span></li>
+          <li><b>Write a thesis</b><span>The reasons you own it, and the evidence that would make you sell.</span></li>
+        </ol>
+        <a class="lx-link" href="/learn">Start the free lessons <i class="ti ti-arrow-right" aria-hidden="true"></i></a>
+      </article>
+      <article class="lx-path lx-path-pro">
+        <span class="lx-path-tag"><i class="ti ti-chart-candle" aria-hidden="true"></i> Experienced investor</span>
+        <h3>Do the full work, faster.</h3>
+        <p>Everything sourced, every assumption editable, every output explainable. Built to defend a decision, not to make one for you.</p>
+        <ul class="lx-feats">
+          <li><i class="ti ti-file-certificate" aria-hidden="true"></i><b>SEC-sourced financials</b><span>Income, balance sheet and cash flow straight from EDGAR XBRL.</span></li>
+          <li><i class="ti ti-focus-2" aria-hidden="true"></i><b>LensScore, decomposed</b><span>Separate value and setup lenses with every component visible.</span></li>
+          <li><i class="ti ti-adjustments" aria-hidden="true"></i><b>Scenario valuation</b><span>Bear, Base and Bull projections and an operating-model valuation you control.</span></li>
+          <li><i class="ti ti-filter" aria-hidden="true"></i><b>Screener and ownership</b><span>Find candidates, then check institutions, analysts and off-exchange volume.</span></li>
+        </ul>
+        <a class="lx-link" href="/?view=tool&amp;section=analyze&amp;symbol=NVDA">Open the research workspace <i class="ti ti-arrow-right" aria-hidden="true"></i></a>
+      </article>
     </div>
-  </div>
+  </section>
+
+  <section class="lx-section lx-how" aria-labelledby="lx-how-title">
+    <div class="lx-head">
+      <span class="lx-kicker">How it works</span>
+      <h2 id="lx-how-title">Four questions, every company.</h2>
+    </div>
+    <ol class="lx-how-grid">
+      <li><span class="lx-num">1</span><b>What does the business actually do?</b><p>Price, revenue, margins, cash flow, debt and dilution, each with its source and date.</p></li>
+      <li><span class="lx-num">2</span><b>What is the price already assuming?</b><p>LensScore and reverse valuation show the growth the current price needs to be right.</p></li>
+      <li><span class="lx-num">3</span><b>What has to happen from here?</b><p>Build Bear, Base and Bull cases. Reported facts and your own assumptions stay clearly separate.</p></li>
+      <li><span class="lx-num">4</span><b>What would change your mind?</b><p>Save the thesis, the downside and a review trigger, so next quarter you can check it, not guess.</p></li>
+    </ol>
+  </section>
+
+  <section class="lx-section lx-pricing" id="landing-pricing" aria-labelledby="lx-pricing-title">
+    <div class="lx-head">
+      <span class="lx-kicker">Pricing</span>
+      <h2 id="lx-pricing-title">Free to learn. Pro when you are ready.</h2>
+    </div>
+    <div class="lx-plan-grid">
+      <article class="lx-plan">
+        <h3>Free</h3>
+        <div class="lx-price"><strong>$0</strong><span>forever</span></div>
+        <p class="lx-plan-sub">Everything a beginner needs to learn and practise.</p>
+        <ul>
+          <li><i class="ti ti-check" aria-hidden="true"></i>{{FREE_DAILY_LIMIT}} company analyses a day</li>
+          <li><i class="ti ti-check" aria-hidden="true"></i>Charts, key stats and LensScore</li>
+          <li><i class="ti ti-check" aria-hidden="true"></i>Full financial statements and earnings history</li>
+          <li><i class="ti ti-check" aria-hidden="true"></i>Every lesson in the Academy</li>
+          <li><i class="ti ti-check" aria-hidden="true"></i>Watchlists and saved research</li>
+        </ul>
+        <a class="lx-btn lx-btn-ghost" href="/signup?source=landing_pricing_free">Create free account</a>
+      </article>
+      <article class="lx-plan lx-plan-pro">
+        <span class="lx-plan-badge">Most complete</span>
+        <h3>Pro</h3>
+        <div class="lx-price"><strong>{{PLAN_MONTHLY_PRICE}}</strong><span>/ month</span></div>
+        <p class="lx-plan-sub">or {{PLAN_ANNUAL_PRICE}} billed yearly, and save {{PLAN_ANNUAL_SAVINGS_PERCENT}}%</p>
+        <ul>
+          <li><i class="ti ti-check" aria-hidden="true"></i>Everything in Free, with unlimited analyses</li>
+          <li><i class="ti ti-check" aria-hidden="true"></i>Projection Lab and scenario valuation models</li>
+          <li><i class="ti ti-check" aria-hidden="true"></i>Stock screener and advanced risk metrics</li>
+          <li><i class="ti ti-check" aria-hidden="true"></i>SEC filings, institutional holders, analyst targets</li>
+          <li><i class="ti ti-check" aria-hidden="true"></i>Earnings-call research and off-exchange volume</li>
+        </ul>
+        <a class="lx-btn lx-btn-gold" href="/signup?next=%2F%3Fpricing%3D1&amp;source=landing_pricing_pro">Start {{TRIAL_DAYS}}-day free trial</a>
+        <p class="lx-fine">{{TRIAL_CARD_SHORT}} for the trial. Cancel anytime before it ends and you pay nothing. Discount codes can be entered in Checkout, for offers like a $0.99 paid month.</p>
+      </article>
+    </div>
+    <p class="lx-center"><a class="lx-link" href="/pricing">Compare every feature <i class="ti ti-arrow-right" aria-hidden="true"></i></a></p>
+  </section>
+
+  <section class="lx-section lx-faq" aria-labelledby="lx-faq-title">
+    <div class="lx-head">
+      <span class="lx-kicker">Questions</span>
+      <h2 id="lx-faq-title">Before you sign up</h2>
+    </div>
+    <div class="lx-faq-list">
+      <details><summary>I have never bought a stock. Is this for me?</summary><p>Yes. Start with the free lessons, then open any company and follow the same four questions. Every metric has a plain-English explanation one click away, and the free plan is not a trial: it does not expire.</p></details>
+      <details><summary>Does ImpliedLens tell me what to buy?</summary><p>No. It shows you the evidence, what the price implies and where the risks are, so you can make and defend your own decision. Nothing here is a buy or sell recommendation or personal financial advice.</p></details>
+      <details><summary>Where does the data come from?</summary><p>Financial statements come from the company&rsquo;s own SEC filings (EDGAR XBRL). Prices and market data come from {{MARKET_PROVIDER_NAMES}}. Every figure shows its source and as-of date, and missing data is shown as missing rather than estimated.</p></details>
+      <details><summary>How is this different from TradingView or a stock-picking newsletter?</summary><p>TradingView is built around charts; newsletters hand you picks. ImpliedLens connects the chart to the business underneath it and to a valuation you can edit, so you understand why a stock might work, not just that someone likes it.</p></details>
+      <details><summary>What happens after the Pro trial?</summary><p>Your {{TRIAL_DAYS}}-day trial converts to Pro at {{PLAN_MONTHLY_PRICE}} a month (or {{PLAN_ANNUAL_PRICE}} a year) unless you cancel. Cancel from Subscription &amp; billing in one click. If you cancel, you keep the free plan and your saved research.</p></details>
+    </div>
+  </section>
+
+  <section class="lx-section lx-final" aria-labelledby="lx-final-title">
+    <h2 id="lx-final-title">Your next stock deserves more than a headline.</h2>
+    <p>Create a free account in under a minute. No card needed.</p>
+    <div class="lx-final-actions">
+      <a class="lx-btn lx-btn-gold" href="/signup?source=landing_final">Create free account <i class="ti ti-arrow-right" aria-hidden="true"></i></a>
+      <a class="lx-btn lx-btn-ghost" href="/learn">Browse the lessons</a>
+    </div>
+  </section>
 </section>
 
 <div class="home-shell" id="market-page" style="display:none;">
@@ -1977,7 +2013,7 @@
   </div>
   <div class="mmenu-grid mmenu-acct-row">
     <a href="/login" class="mmenu-item" id="mmenu-login"><i class="ti ti-login-2"></i><span>Log in</span></a>
-    <a href="/signup?next=%2F%3Fpricing%3D1&amp;source=nav_trial" class="mmenu-item" id="mmenu-signup"><i class="ti ti-user-plus"></i><span>Start trial</span></a>
+    <a href="/signup?source=mobile_menu_free" class="mmenu-item" id="mmenu-signup"><i class="ti ti-user-plus"></i><span>Sign up free</span></a>
     <a href="#" class="mmenu-item" id="mmenu-account" style="display:none;" onclick="_mobileAccount();return false;"><i class="ti ti-user-circle"></i><span>Account</span></a>
     <a href="#" class="mmenu-item" id="mmenu-logout" style="display:none;" onclick="var b=document.getElementById('nav-acct-logout');if(b){b.click();}_toggleMobileMenu();return false;"><i class="ti ti-logout-2"></i><span>Log out</span></a>
   </div>

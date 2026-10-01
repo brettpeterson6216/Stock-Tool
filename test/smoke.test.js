@@ -185,8 +185,8 @@ test("Ticker landing pages explain free allowances and protect uncurated pages f
   assert.equal(curated.status, 200);
   const curatedHtml = await curated.text();
   assert.match(curatedHtml, /<meta name="robots" content="index,follow">/);
-  assert.match(curatedHtml, /Guests get 2 analyses\/day/);
-  assert.match(curatedHtml, /Create a free account for 5\/day/);
+  assert.match(curatedHtml, /Free to try, no account needed/);
+  assert.match(curatedHtml, /Create a free account<\/a> for 10 analyses a day/);
   assert.match(curatedHtml, /landing_page_view/);
   assert.match(curatedHtml, /Questions to answer before investing in AAPL/);
   assert.match(curatedHtml, /<meta property="og:image"\s+content="[^"]+\/social-card\.png\?v=[^"]+">/);
@@ -805,12 +805,18 @@ test("Anonymous funnel analytics use a stable hashed guest actor", async () => {
 // ═══════════════════════════════════════════════════════════════
 //  3. Pro gate — free users get 403 on Pro endpoints
 // ═══════════════════════════════════════════════════════════════
-test("Free user gets 403 on /api/financials/:ticker", async () => {
+test("Free account is not Pro-gated on /api/financials/:ticker", async () => {
   const { cookie } = await makeSession("pro_gate_user", "progate@test.com");
   const res = await req("/api/financials/AAPL", { headers: { cookie } });
-  assert.equal(res.status, 403, "free user should get 403 on Pro-gated financials");
-  const body = await res.json();
-  assert.ok(body.requiresPro, "response should indicate Pro required");
+  assert.notEqual(res.status, 403, "free accounts get reported financials");
+  assert.notEqual(res.status, 401);
+});
+
+test("Free user gets 403 on Pro-gated valuation inputs", async () => {
+  const { cookie } = await makeSession("pro_gate_user2", "progate2@test.com");
+  const res = await req("/api/metrics/AAPL", { headers: { cookie } });
+  assert.equal(res.status, 403);
+  assert.ok((await res.json()).requiresPro);
 });
 
 test("Earnings-call research is Pro-gated", async () => {
@@ -1007,20 +1013,20 @@ test("Quota dedup: different tickers each cost one credit", async () => {
   assert.equal(Number(r3.headers.get("X-Analyses-Used")), 3, "3rd ticker → 3 used");
 });
 
-test("Free user is locked out after exactly 5 distinct tickers", async () => {
+test("Free user is locked out after exactly 10 distinct tickers", async () => {
   const { cookie } = await makeSession("quota_exact", "quotaexact@test.com");
   const { _dedupCache } = require("../lib/plan");
   _dedupCache.clear();
 
-  const tickers = ["A", "B", "C", "D", "E", "F"];
+  const tickers = ["A", "B", "C", "D", "E", "G", "H", "I", "J", "K", "F"];
   const statuses = [];
   for (const t of tickers) {
     const r = await req(`/api/quote/${t}?range=1y`, { headers: { cookie } });
     statuses.push(r.status);
   }
-  // First 5 should not be 429; 6th should be 429
-  assert.ok(statuses.slice(0, 5).every(s => s !== 429), "First 5 analyses should not be blocked");
-  assert.equal(statuses[5], 429, "6th distinct ticker should return 429");
+  // First 10 should not be 429; 11th should be 429
+  assert.ok(statuses.slice(0, 10).every(s => s !== 429), "First 10 analyses should not be blocked");
+  assert.equal(statuses[10], 429, "11th distinct ticker should return 429");
 });
 
 test("Free user can reopen an already-counted ticker after reaching the limit", async () => {

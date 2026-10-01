@@ -20,6 +20,7 @@ const {
 const { loadPriceHistory } = require("../lib/stock-research");
 const { nameFor } = require("../lib/ticker-index");
 const { landingFacts } = require("../lib/stock-landing-facts");
+const { PRODUCT_CONFIG } = require("../lib/product-config");
 
 const router = express.Router();
 const TICKER_RE = /^[A-Z0-9.^-]{1,15}$/;
@@ -451,7 +452,7 @@ function renderPage(ticker, q, facts) {
       <div class="q-main">
         <div class="q-price">${price}</div>
         <div class="q-chg ${isUp ? "up" : "dn"}">${chgSign} ${chgPct}</div>
-        <div class="q-label">${esc(quoteTiming)} · no synthetic replacement</div>
+        <div class="q-label">${esc(quoteTiming)}</div>
       </div>
       <div class="q-stats">
         <div class="q-stat">
@@ -482,7 +483,7 @@ function renderPage(ticker, q, facts) {
 
     <div class="cta-section">
       <a id="analyze-cta" href="${esc(analyzeUrl)}" class="cta-btn">Analyze ${esc(ticker)} in depth →</a>
-      <div class="cta-note">Guests get 2 analyses/day. <a id="landing-signup-cta" href="${esc(signupUrl)}">Create a free account for 5/day</a>.</div>
+      <div class="cta-note">Free to try, no account needed. <a id="landing-signup-cta" href="${esc(signupUrl)}">Create a free account</a> for ${PRODUCT_CONFIG.analysisLimits.registeredFreeDaily} analyses a day, financial statements and watchlists.</div>
     </div>
   </div>
 

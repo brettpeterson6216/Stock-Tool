@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <script src="/theme-bootstrap.js?v=20260906-4"></script>
   <title>Pricing — ImpliedLens</title>
-  <meta name="description" content="What ImpliedLens costs, what that pays for, and how it compares with the terminals built for institutions.">
+  <meta name="description" content="ImpliedLens is free to start: charts, SEC financials, LensScore and every lesson. Pro adds valuation models, a screener and professional data.">
   <link rel="canonical" href="https://impliedlens.com/pricing">
   <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" type="image/svg+xml" href="/logo.svg">
@@ -118,7 +118,7 @@
     <button class="prime-nav-menu" type="button" aria-label="Open navigation" onclick="_toggleMobileMenu()"><span aria-hidden="true">&#9776;</span></button>
     <button class="nav-acct-mobile" id="nav-acct-mobile" type="button" aria-label="Account" onclick="navAccountTap()"><i class="ti ti-user-circle"></i></button>
     <a class="btn-nav-outline il-global-login" id="nav-login" href="/login">Log in</a>
-    <a class="btn-nav il-global-trial" id="nav-signup" href="/signup?next=%2F%3Fpricing%3D1&amp;source=nav_trial">Start trial</a>
+    <a class="btn-nav il-global-trial" id="nav-signup" href="/signup?source=nav_free">Sign up free</a>
     <a class="btn-nav" id="nav-upgrade" href="/signup" hidden>Upgrade to Pro</a>
     <div class="nav-acct-wrap" id="nav-acct-wrap" style="display:none;">
       <button class="nav-acct-btn" id="nav-acct-btn">
@@ -153,53 +153,97 @@
   <a href="/terms">Terms</a>
 </aside>
 
-  <div class="hero" id="pricing-main" role="main">
-    <div class="tagline">Priced for the person doing their own work.</div>
-    <h1>What it costs, and <em>what that pays for</em>.</h1>
-    <p class="hero-sub">A real research tool has real running costs — market data, SEC filings, fundamentals, earnings transcripts, servers. Here is what those are, what you get, and how the number compares with the terminals built for institutions.</p>
-  </div>
+  <main class="lxp" id="pricing-main">
+    <header class="lxp-hero">
+      <span class="lxp-kicker">Pricing</span>
+      <h1>Free to learn. <em>Pro when you&rsquo;re ready.</em></h1>
+      <p>Start free with no card and no time limit. Upgrade when you want the valuation models and the professional data, and cancel any time.</p>
+    </header>
 
-  <div class="prose">
-    <h2>The number</h2>
-    <p>Pro is <strong>{{PLAN_MONTHLY_PRICE}}</strong> a month, or <strong>{{PLAN_ANNUAL_PRICE}}</strong> a year — {{PLAN_ANNUAL_SAVINGS_PERCENT}}% less than paying monthly. There is a free tier that is genuinely usable, and a {{TRIAL_DAYS}}-day trial. {{TRIAL_CARD_COPY}}</p>
-    <p>You can cancel in two clicks from your account menu, any time, and keep access until the period you have paid for runs out. Nothing is retained on cancellation that you cannot export first: your saved cases, theses and watchlists all download as CSV.</p>
+    <section class="lxp-plans" aria-label="Plans">
+      <article class="lxp-plan">
+        <h2>Free</h2>
+        <div class="lxp-price"><strong>$0</strong><span>forever</span></div>
+        <p class="lxp-sub">For learning the method and researching your first companies.</p>
+        <ul>
+          <li><i class="ti ti-check" aria-hidden="true"></i>{{FREE_DAILY_LIMIT}} company analyses a day</li>
+          <li><i class="ti ti-check" aria-hidden="true"></i>Charts, key stats and LensScore</li>
+          <li><i class="ti ti-check" aria-hidden="true"></i>Financial statements and earnings history</li>
+          <li><i class="ti ti-check" aria-hidden="true"></i>Every Academy lesson</li>
+          <li><i class="ti ti-check" aria-hidden="true"></i>Watchlists and saved research</li>
+        </ul>
+        <a class="lxp-btn lxp-btn-ghost" href="/signup?source=pricing_free">Create free account</a>
+        <p class="lxp-fine">No card. Or try {{GUEST_DAILY_LIMIT}} analyses a day without an account.</p>
+      </article>
+      <article class="lxp-plan lxp-plan-pro">
+        <span class="lxp-badge">Most complete</span>
+        <h2>Pro</h2>
+        <div class="lxp-price"><strong>{{PLAN_MONTHLY_PRICE}}</strong><span>/ month</span></div>
+        <p class="lxp-sub">or <strong>{{PLAN_ANNUAL_PRICE}} a year</strong>, billed yearly. Save {{PLAN_ANNUAL_SAVINGS_PERCENT}}%.</p>
+        <ul>
+          <li><i class="ti ti-check" aria-hidden="true"></i>Everything in Free, unlimited</li>
+          <li><i class="ti ti-check" aria-hidden="true"></i>Projection Lab and Valuation Lab</li>
+          <li><i class="ti ti-check" aria-hidden="true"></i>Stock screener and advanced risk metrics</li>
+          <li><i class="ti ti-check" aria-hidden="true"></i>Filings, institutional holders and analyst targets</li>
+          <li><i class="ti ti-check" aria-hidden="true"></i>Earnings-call research and off-exchange volume</li>
+        </ul>
+        <a class="lxp-btn lxp-btn-gold" href="/?pricing=1">Start {{TRIAL_DAYS}}-day free trial</a>
+        <p class="lxp-fine">The {{TRIAL_DAYS}}-day trial includes everything in Pro. {{TRIAL_CARD_COPY}} Cancel before the trial ends and you pay nothing. {{PROMOTION_COPY}}</p>
+      </article>
+    </section>
 
-    <h2>Where the money goes</h2>
-    <p>None of this is free to run, and pretending otherwise would mean paying for it another way — by selling your attention, your data, or order flow. The subscription is the whole business model, which is the point.</p>
-    <ul>
-      <li><strong>Market data.</strong> Live and historical prices, indexes and volume.</li>
-      <li><strong>Fundamentals and estimates.</strong> Statements, ratios, analyst figures, institutional holdings.</li>
-      <li><strong>Filings and transcripts.</strong> SEC EDGAR documents and earnings-call research.</li>
-      <li><strong>Infrastructure.</strong> Servers, storage and the work of keeping it correct.</li>
-    </ul>
-    <p>Every figure the tool shows names the provider it came from and the date it was pulled. That is on the <a href="/data-sources">data sources</a> page, and it is checkable rather than asserted.</p>
+    <section class="lxp-compare" aria-labelledby="lxp-compare-title">
+      <h2 id="lxp-compare-title">Compare every feature</h2>
+      <div class="lxp-table-wrap">
+        <table class="lxp-table">
+          <thead><tr><th scope="col">Feature</th><th scope="col">Free</th><th scope="col">Pro</th></tr></thead>
+          <tbody>
+          <tr><th scope="row">Company analyses</th><td>{{FREE_DAILY_LIMIT}} a day</td><td><strong>Unlimited</strong></td></tr>
+          <tr><th scope="row">Price charts and technical indicators</th><td class="lxp-yes"><i class="ti ti-check" aria-label="Included"></i></td><td class="lxp-yes"><i class="ti ti-check" aria-label="Included"></i></td></tr>
+          <tr><th scope="row">LensScore with value and setup lenses</th><td class="lxp-yes"><i class="ti ti-check" aria-label="Included"></i></td><td class="lxp-yes"><i class="ti ti-check" aria-label="Included"></i></td></tr>
+          <tr><th scope="row">Financial statements from SEC filings</th><td class="lxp-yes"><i class="ti ti-check" aria-label="Included"></i></td><td class="lxp-yes"><i class="ti ti-check" aria-label="Included"></i></td></tr>
+          <tr><th scope="row">Earnings history and surprises</th><td class="lxp-yes"><i class="ti ti-check" aria-label="Included"></i></td><td class="lxp-yes"><i class="ti ti-check" aria-label="Included"></i></td></tr>
+          <tr><th scope="row">Every Academy lesson</th><td class="lxp-yes"><i class="ti ti-check" aria-label="Included"></i></td><td class="lxp-yes"><i class="ti ti-check" aria-label="Included"></i></td></tr>
+          <tr><th scope="row">Watchlists and saved research</th><td class="lxp-yes"><i class="ti ti-check" aria-label="Included"></i></td><td class="lxp-yes"><i class="ti ti-check" aria-label="Included"></i></td></tr>
+          <tr><th scope="row">Projection Lab: Bear, Base and Bull cases</th><td class="lxp-no"><span aria-label="Not included">&ndash;</span></td><td class="lxp-yes"><i class="ti ti-check" aria-label="Included"></i></td></tr>
+          <tr><th scope="row">Valuation Lab: operating-model valuation</th><td class="lxp-no"><span aria-label="Not included">&ndash;</span></td><td class="lxp-yes"><i class="ti ti-check" aria-label="Included"></i></td></tr>
+          <tr><th scope="row">Stock screener</th><td class="lxp-no"><span aria-label="Not included">&ndash;</span></td><td class="lxp-yes"><i class="ti ti-check" aria-label="Included"></i></td></tr>
+          <tr><th scope="row">Advanced risk metrics: Sharpe, Sortino, beta, VaR</th><td class="lxp-no"><span aria-label="Not included">&ndash;</span></td><td class="lxp-yes"><i class="ti ti-check" aria-label="Included"></i></td></tr>
+          <tr><th scope="row">SEC filings browser</th><td class="lxp-no"><span aria-label="Not included">&ndash;</span></td><td class="lxp-yes"><i class="ti ti-check" aria-label="Included"></i></td></tr>
+          <tr><th scope="row">Institutional holders</th><td class="lxp-no"><span aria-label="Not included">&ndash;</span></td><td class="lxp-yes"><i class="ti ti-check" aria-label="Included"></i></td></tr>
+          <tr><th scope="row">Analyst estimates and price targets</th><td class="lxp-no"><span aria-label="Not included">&ndash;</span></td><td class="lxp-yes"><i class="ti ti-check" aria-label="Included"></i></td></tr>
+          <tr><th scope="row">Off-exchange (FINRA OTC) volume</th><td class="lxp-no"><span aria-label="Not included">&ndash;</span></td><td class="lxp-yes"><i class="ti ti-check" aria-label="Included"></i></td></tr>
+          <tr><th scope="row">Earnings-call research</th><td class="lxp-no"><span aria-label="Not included">&ndash;</span></td><td class="lxp-yes"><i class="ti ti-check" aria-label="Included"></i></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
 
-    <h2>What the alternatives cost</h2>
-    <p>A professional terminal runs into the tens of thousands of dollars a year, per seat. That is not a criticism of those products — they are built for desks with compliance departments and dedicated data budgets, and they earn it. But it does mean the research advantage they provide has effectively been priced out of reach for anyone doing this with their own money.</p>
-    <p>The gap that creates is the reason this exists. An individual investor is competing for the same information as institutions, with a fraction of the tooling and none of the staff. Closing some of that gap for the price of a couple of coffees a month is the entire ambition.</p>
-    <p>We are not going to tell you what any competitor charges today — those numbers move, and a page that quotes them goes stale and starts misleading people. Go and look, then come back.</p>
+    <section class="lxp-why" aria-labelledby="lxp-why-title">
+      <h2 id="lxp-why-title">Why it costs what it costs</h2>
+      <div class="lxp-why-grid">
+        <div><i class="ti ti-database" aria-hidden="true"></i><b>Real data has real costs</b><p>Market data, SEC filings, fundamentals and servers. The subscription pays for them, so we never sell your data or your attention. <a href="/data-sources">See every source</a>.</p></div>
+        <div><i class="ti ti-building-bank" aria-hidden="true"></i><b>Priced for individuals</b><p>Institutional terminals cost thousands a year per seat. Pro costs less than a couple of coffees a month.</p></div>
+        <div><i class="ti ti-shield-check" aria-hidden="true"></i><b>Leave whenever you like</b><p>Cancel in two clicks from your account menu. You keep access to the end of the period and keep the free plan after.</p></div>
+      </div>
+    </section>
 
-    <h2>What free gets you</h2>
-    <p>Enough to decide whether the paid tier is worth it, which is the only honest reason to have a free tier. Charts, company financials, filings and a limited number of full analyses per day. The <a href="/?view=tool&amp;section=education">lessons</a> are free and stay free — learning how to read a balance sheet should not be behind a paywall.</p>
+    <section class="lxp-faq" aria-labelledby="lxp-faq-title">
+      <h2 id="lxp-faq-title">Questions</h2>
+      <details><summary>Is the free plan really free?</summary><p>Yes. It does not expire and needs no card. It includes {{FREE_DAILY_LIMIT}} company analyses a day, financial statements, earnings history, LensScore, watchlists and every lesson.</p></details>
+      <details><summary>What happens when the trial ends?</summary><p>Your trial becomes a Pro subscription at {{PLAN_MONTHLY_PRICE}} a month, or {{PLAN_ANNUAL_PRICE}} a year if you chose annual, unless you cancel first. If you cancel, you move to the free plan and keep your saved research.</p></details>
+      <details><summary>Can I switch between monthly and annual?</summary><p>Yes, from Subscription &amp; billing in your account menu. Stripe handles the proration.</p></details>
+      <details><summary>Is this investment advice?</summary><p>No. ImpliedLens is not investment advice. It provides market data, models and education for your own research, and nothing on the site is a recommendation to buy or sell any security.</p></details>
+    </section>
 
-    <h2>What Pro adds</h2>
-    <ul>
-      <li>Unlimited analyses, rather than a daily allowance.</li>
-      <li>The Projection Lab with saved, named cases you can revisit and revise.</li>
-      <li>The Valuation Lab, LensScore, and the comparison tools.</li>
-      <li>Earnings-call research and institutional holdings.</li>
-      <li>A workspace that keeps your thesis, your positions and your review dates together.</li>
-    </ul>
-
-    <h2>Why it keeps improving</h2>
-    <p>Subscriptions are what pay for the next thing being built, and the work is continuous rather than finished. If something is wrong or missing, <a href="mailto:support@impliedlens.com">say so</a> — that mail goes to a person, and a good proportion of what is on the site started as someone pointing out a problem.</p>
-
-    <div class="cta-row" style="margin-top:2rem;">
-      <a href="/signup" class="btn-primary">Start free — no card</a>
-      <a href="/about" class="btn-ghost">What the tool actually does</a>
-    </div>
-    <p style="margin-top:1.25rem;font-size:.9rem;opacity:.7;">ImpliedLens provides market data and modelling tools for research and education. It is not investment advice, and no figure on the site is a recommendation to buy or sell anything.</p>
-  </div>
+    <section class="lxp-final">
+      <h2>Start with the free plan today.</h2>
+      <div class="lxp-final-actions">
+        <a class="lxp-btn lxp-btn-gold" href="/signup?source=pricing_final">Create free account</a>
+        <a class="lxp-btn lxp-btn-ghost" href="/?view=tool&amp;section=analyze&amp;symbol=NVDA">Try a stock first</a>
+      </div>
+    </section>
+  </main>
 
   <footer>
     <a href="/privacy">Privacy Policy</a>

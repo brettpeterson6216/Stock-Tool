@@ -299,7 +299,7 @@
         '<a href="/?pricing=1"><span aria-hidden="true">◇</span>Pricing</a>' +
         '<a href="/about"><span aria-hidden="true">ⓘ</span>About</a>' +
         '<a class="lp-guest-link" href="/login"><span aria-hidden="true">→</span>Log in</a>' +
-        '<a class="lp-guest-link" href="/signup?next=%2F%3Fpricing%3D1&amp;source=mobile_trial"><span aria-hidden="true">＋</span>Start trial</a>' +
+        '<a class="lp-guest-link" href="/signup?source=mobile_free"><span aria-hidden="true">＋</span>Sign up free</a>' +
         '<a class="lp-account-link" href="/?view=tool&amp;section=reports"><span aria-hidden="true">◉</span>Account</a>' +
       '</nav>' +
     '</div>';

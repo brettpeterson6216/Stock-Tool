@@ -96,8 +96,12 @@ window.S = S;  // alias so external modules (Projection Lab, Valuation Lab) can 
 const COLORS = ['#16C784','#3B82F6','#A78BFA','#F5B83D'];
 // Keep this list in sync with the requirePro-gated API routes in routes/financials.js
 // and routes/market-data.js (screener).
-const PRO_SECTIONS = ['financials','advmetrics','projection','dcf','screener',
-  'earnings','secfilings','institutional','analyst','darkpool'];
+const PRO_SECTIONS = ['advmetrics','projection','dcf','screener',
+  'secfilings','institutional','analyst','darkpool'];
+// Free-account sections: any signed-in user (routes/financials.js requireAccount).
+const ACCOUNT_SECTIONS = ['financials','earnings'];
+function freeDailyLimit(){ var c=ilProduct(); return (c&&c.analysisLimits&&c.analysisLimits.registeredFreeDaily)||10; }
+function guestDailyLimit(){ var c=ilProduct(); return (c&&c.analysisLimits&&c.analysisLimits.guestDaily)||3; }
 const PRO_SECTION_CONTENT = {};
 
 function isPro() { return S.userPlan === 'pro' || S.userPlan === 'trial'; }
@@ -391,9 +395,10 @@ function handleSectionError(e, sectionId, container) {
       <div class="pgc-badge" style="background:var(--ink2)">🔒 Sign in required</div>
       <div class="pgc-title" style="font-size:1rem">Create a free account to continue</div>
       <ul class="pgc-bullets">
-        <li>Free account: 5 analyses per day, price charts, projections</li>
-        <li>Cloud-saved analyses that sync across all your devices</li>
-        <li>Upgrade to Pro anytime for full access — no pressure</li>
+        <li>Free forever: ${freeDailyLimit()} company analyses a day, charts and LensScore</li>
+        <li>Full financial statements and earnings history from SEC filings</li>
+        <li>Watchlists and saved research that sync across your devices</li>
+        <li>No card needed. Upgrade to Pro only if you want the valuation models</li>
       </ul>
       <a href="/signup" onclick="startGuestSignup('pro_gate_login_required');return false;" style="display:block;background:var(--ink);color:var(--cream);border-radius:9px;padding:.8rem 1.6rem;font-size:.9rem;font-weight:700;text-decoration:none;text-align:center;margin-bottom:.5rem;">Create free account →</a>
       <div style="font-size:.75rem;color:var(--ink4);text-align:center">Already have an account? <a href="/login" onclick="startGuestLogin('pro_gate_login_required');return false;" style="color:var(--il-gold-ink,var(--gold));font-weight:600;">Sign in</a></div>
@@ -402,10 +407,10 @@ function handleSectionError(e, sectionId, container) {
   } else if (e.code === 'LIMIT_REACHED') {
     container.innerHTML = `<div class="pro-gate-card"><div class="pgc-body">
       <div class="pgc-badge">⚡ Daily limit reached</div>
-      <div class="pgc-title">You've used your 5 free analyses today</div>
+      <div class="pgc-title">You've used today's free analyses</div>
       <ul class="pgc-bullets">
         <li>Unlimited stock analyses — no daily cap, ever</li>
-        <li>All Pro sections: Financials, intrinsic value, Screener, SEC filings &amp; more</li>
+        <li>All Pro tools: valuation models, intrinsic value, Screener, SEC filings &amp; more</li>
         <li>Advanced projections, institutional data, and analyst targets</li>
         <li>Comes back tomorrow free, or unlock everything now</li>
       </ul>
@@ -490,10 +495,12 @@ function openSection(id, skipProCheck) {
   const bod = document.getElementById('body-' + id);
   if (!sec || !bod) return;
   document.getElementById('view-tool')?.setAttribute('data-active-section', id);
-  if (PRO_SECTIONS.includes(id) && !PRO_SECTION_CONTENT[id] && !bod.querySelector('.pro-gate-card')) {
+  const gatedSection = PRO_SECTIONS.includes(id) || ACCOUNT_SECTIONS.includes(id);
+  if (gatedSection && !PRO_SECTION_CONTENT[id] && !bod.querySelector('.pro-gate-card')) {
     PRO_SECTION_CONTENT[id] = bod.innerHTML;
   }
-  if (PRO_SECTIONS.includes(id) && isPro() && PRO_SECTION_CONTENT[id] && bod.querySelector('.pro-gate-card')) {
+  const entitled = ACCOUNT_SECTIONS.includes(id) ? S.loggedIn : isPro();
+  if (gatedSection && entitled && PRO_SECTION_CONTENT[id] && bod.querySelector('.pro-gate-card')) {
     bod.innerHTML = PRO_SECTION_CONTENT[id];
   }
   sec.classList.add('open');
@@ -511,7 +518,7 @@ function openSection(id, skipProCheck) {
   if (scroll) scroll.scrollTop = 0;
   // Auto-load data tabs
   const t = S.ticker;
-  if (PRO_SECTIONS.includes(id) && !S.authReady) {
+  if ((PRO_SECTIONS.includes(id) || ACCOUNT_SECTIONS.includes(id)) && !S.authReady) {
     bod.innerHTML = sectionLoadingHtml();
     history.replaceState(null, '', '/?view=tool&section=' + encodeURIComponent(id));
     window.IL_AUTH_READY?.then(() => {
@@ -519,7 +526,11 @@ function openSection(id, skipProCheck) {
     });
     return;
   }
-  if (!isPro() && PRO_SECTIONS.includes(id) && id !== 'reports') {
+  if (!S.loggedIn && ACCOUNT_SECTIONS.includes(id)) {
+    const gateBody = document.getElementById('body-' + id);
+    if (gateBody) { const e = new Error('LOGIN_REQUIRED'); e.code = 'LOGIN_REQUIRED'; handleSectionError(e, id, gateBody); }
+    track('account_gate_viewed', { section: id, ticker: S.ticker || null });
+  } else if (!isPro() && PRO_SECTIONS.includes(id) && id !== 'reports') {
     // Show contextual gate card inline — user can dismiss and see upgrade options
     const gateBody = document.getElementById('body-' + id);
     if (gateBody) { gateBody.innerHTML = sectionProGateHtml(id); gateBody.style.display = 'block'; }
@@ -1397,7 +1408,7 @@ function updateLimitUI(remaining, limit, plan) {
       <div style="height:100%;width:${pct}%;background:${color};border-radius:2px;transition:width .3s;"></div>
     </div>
     ${isGuest
-      ? `<button onclick="startGuestSignup('analysis_limit_counter')" style="font-size:11px;padding:.22rem .61rem;background:var(--gold);color:#17100A;border:none;border-radius:999px;cursor:pointer;font-weight:700;">Create free account for 5/day</button>`
+      ? `<button onclick="startGuestSignup('analysis_limit_counter')" style="font-size:11px;padding:.22rem .61rem;background:var(--gold);color:#17100A;border:none;border-radius:999px;cursor:pointer;font-weight:700;">Create free account for ${freeDailyLimit()}/day</button>`
       : remaining === 0 ? `<button onclick="showUpgradeModal()" style="font-size:11px;padding:.15rem .45rem;background:var(--gold);color:var(--ink);border:none;border-radius:4px;cursor:pointer;font-weight:700;">Upgrade</button>` : ''}
   `;
 }
@@ -1422,7 +1433,7 @@ function showDataSource(elementId, meta, fallbackSource, fallbackAsOf) {
         : `as of ${parsed.toLocaleString('en-US', { dateStyle:'medium', timeStyle:'short' })}`;
     }
   }
-  element.textContent = `${source} · ${asOf} · no synthetic replacement`;
+  element.textContent = `${source} · ${asOf}`;
   element.style.display = 'flex';
 }
 function fmtPct(n) { return n==null?'—':`${n>=0?'+':''}${n.toFixed(2)}%`; }
@@ -1552,8 +1563,24 @@ async function ensureMALookback(ticker){
     if(S.ticker===ticker && document.getElementById('price-chart')){ try{ rebuildPriceChart(); }catch(e){} }
   }catch(e){ /* fallback to visible-window SMA */ }
 }
+/* Wilder's RSI, the same formula as lib/technical-analysis.js and every
+   charting platform. Missing closes (a provider gap, or today's unfinished
+   bar) are skipped rather than read as zero: the old windowed version
+   subtracted a null from the last close and printed NVDA at RSI 8 "Oversold"
+   a few percent under its 52-week high. Output stays index-aligned. */
 function rsi(c,p=14) {
-  return c.map((_,i)=>{ if(i<p)return null; let g=0,l=0; for(let j=i-p+1;j<=i;j++){const d=c[j]-c[j-1]; if(d>0)g+=d; else l-=d;} const rs=g/(l||.0001); return 100-100/(1+rs); });
+  const out=Array(c.length).fill(null);
+  let prev=null, n=0, g=0, l=0;
+  for(let i=0;i<c.length;i++){
+    const v=c[i];
+    if(v==null||!Number.isFinite(v)) continue;
+    if(prev==null){ prev=v; continue; }
+    const d=v-prev; prev=v; n++;
+    if(n<=p){ if(d>0)g+=d; else l-=d; if(n===p){ g/=p; l/=p; out[i]=l===0?100:100-100/(1+g/l); } continue; }
+    g=(g*(p-1)+Math.max(d,0))/p; l=(l*(p-1)+Math.max(-d,0))/p;
+    out[i]=l===0?100:100-100/(1+g/l);
+  }
+  return out;
 }
 function ema(d,p) {
   const arr=Array(d.length).fill(null);
@@ -2119,15 +2146,16 @@ function renderStock(result, ticker) {
   chgEl.className='price-chg '+(chg>=0?'up':'dn');
   const providerAsOf = provenance?.asOf ? new Date(provenance.asOf) : null;
   document.getElementById('r-time').textContent=providerAsOf && !Number.isNaN(providerAsOf.getTime())
-    ? `Provider observation · ${providerAsOf.toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZoneName:'short'})}`
-    : 'Provider observation time unavailable';
+    ? `As of ${providerAsOf.toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZoneName:'short'})}`
+    : 'Time unavailable';
   showDataSource('quote-source', provenance, provenance?.source || 'Market data provider', provenance?.asOf);
 
-  // metrics
-  const c=closes;
-  const rsiVals=rsi(c); const rsiNow=rsiVals[rsiVals.length-1];
-  const ma50v=sma(c,50); const ma50Now=ma50v[ma50v.length-1];
-  const ma200v=sma(c,200); const ma200Now=ma200v[ma200v.length-1];
+  // metrics: computed on the closes that exist. A missing bar is a gap in
+  // the record, not a price of zero.
+  const c=closes.filter(Number.isFinite);
+  const rsiVals=rsi(c); const rsiNow=[...rsiVals].reverse().find(v=>v!=null);
+  const ma50v=sma(c,50); const ma50Now=[...ma50v].reverse().find(v=>v!=null);
+  const ma200v=sma(c,200); const ma200Now=[...ma200v].reverse().find(v=>v!=null);
   const returns=c.map((v,i)=>i===0?0:(v-c[i-1])/c[i-1]*100);
   const stdDev=ImpliedLensMath.annualizedVolatility(c,252)*100;
   const h52=meta.fiftyTwoWeekHigh; const l52=meta.fiftyTwoWeekLow;
@@ -3647,7 +3675,7 @@ function buildCompareTable(tickers, results, analystArr=[]) {
   const prevs=metas.map(m=>m.previousClose||0);
   const dayChg=prices.map((p,i)=>((p-(prevs[i]||p))/(prevs[i]||p)*100));
   const yr1=closes.map(c=>c.length>1?((c[c.length-1]-c[0])/c[0]*100):0);
-  const rsiVals=closes.map(c=>{const v=rsi(c);return v[v.length-1];});
+  const rsiVals=closes.map(c=>{const v=rsi(c).filter(x=>x!=null);return v[v.length-1];});
   const stdDevs=closes.map(c=>ImpliedLensMath.annualizedVolatility(c,252)*100);
   // Merge analyst/Yahoo fundamental data per ticker
   const afds = analystArr.map(a => a.yahooFd || {});
@@ -3712,7 +3740,7 @@ function buildRadarChart(tickers, results, analystArr=[]) {
   const closes=results.map(r=>r.indicators.quote[0].close.filter(x=>x!=null));
   // Normalize 0-100: 1Y return, RSI, inverse volatility, inverse P/E, market cap rank
   const yr1=closes.map(c=>c.length>1?((c[c.length-1]-c[0])/c[0]*100):0);
-  const rsiVals=closes.map(c=>{const v=rsi(c);return v[v.length-1]||50;});
+  const rsiVals=closes.map(c=>{const v=rsi(c).filter(x=>x!=null);return v[v.length-1]??50;});
   const vols=closes.map(c=>ImpliedLensMath.annualizedVolatility(c,252)*100);
   const afdsR=analystArr.map(a=>a.yahooFd||{});
   const caps=metas.map((m,i)=>afdsR[i].marketCap||m.marketCap||0);

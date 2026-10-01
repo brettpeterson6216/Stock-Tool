@@ -145,7 +145,10 @@ test("the dashboard offers places to go, not a lecture on how to use it", () => 
   for (const tool of ["Valuation Lab", "LensToolkit", "Compare", "Screener"]) {
     assert.ok(html.includes(">" + tool + "<"), `the ${tool} link is missing from the tool rail`);
   }
-  assert.match(html, /class="il-startpaths"/, "the visitor page needs its three ways in");
+  /* The three start-path cards were replaced by a ticker search with popular
+     chips in the hero and a live LensScore demo directly below it. */
+  assert.match(html, /data-lx-ticker="NVDA"/, "the visitor page needs its quick ways in");
+  assert.match(html, /id="lx-demo"/, "the visitor page needs its live demo");
 });
 
 test("the tools, the market and the favourites each get their own column", () => {

@@ -1559,7 +1559,7 @@ body.il-static-page .feat-icon { font-size: 18px !important; }
    rail as everything above and below it.
    ═══════════════════════════════════════════════════════════════════════════ */
 #landing-page > :is(.il-landing-hero, .il-startpaths, .il-capabilities,
-  .il-workflow-visual, .il-landing-band, .il-landing-pricing, .il-market-teaser, .il-rail) {
+  .il-workflow-visual, .il-landing-band, .il-landing-pricing, .il-market-teaser, .il-rail, .lx-section) {
   max-width: 1320px !important;
   margin-inline: auto !important;
   padding-inline: clamp(20px, 3.5vw, 48px) !important;

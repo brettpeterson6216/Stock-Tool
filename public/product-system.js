@@ -434,7 +434,7 @@
     const interval = provenance?.interval || "Provider default";
     const latest = trustDateLabel(provenance?.latestTimestamp, "Latest observation unavailable");
     const retrieved = trustDateLabel(provenance?.retrievedAt, "Retrieved in this session");
-    host.textContent = `Provider observation · ${latest}`;
+    host.textContent = `As of ${latest}`;
     let row = document.getElementById("il-trust-row");
     if (!row) {
       row = document.createElement("div");

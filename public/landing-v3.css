@@ -1,0 +1,365 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   LANDING V3 — the signed-out home page sections added for conversion.
+   Compiled into the premium cascade layer after research-premium.css
+   (scripts/build-styles.js), so its !important declarations win over the
+   heritage layer without specificity hacks. Every colour is an --rp-* token,
+   so light and dark both work. All selectors are .lx-* and scoped to
+   #landing-page; nothing here touches the app.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+#landing-page {
+  --lx-radius: 16px;
+  --lx-gap: clamp(16px, 2vw, 24px);
+}
+
+/* ── Hero additions ─────────────────────────────────────────────────────── */
+#landing-page .il-landing-actions #il-hero-primary {
+  display: inline-flex !important; align-items: center !important; gap: 8px !important; text-decoration: none !important;
+}
+#landing-page .il-landing-kicker i { font-size: 14px !important; margin-right: 4px !important; vertical-align: -2px !important; }
+#landing-page .lx-chips {
+  display: flex !important; flex-wrap: wrap !important; align-items: center !important;
+  gap: 8px !important; margin: 14px 0 0 !important;
+  font-size: 13px !important; color: var(--rp-muted) !important;
+}
+#landing-page .lx-chips span { margin-right: 2px !important; }
+#landing-page .lx-chips button {
+  font: 600 12.5px/1 var(--rp-mono, "JetBrains Mono", ui-monospace, monospace) !important;
+  letter-spacing: .02em !important;
+  padding: 7px 11px !important; border-radius: 999px !important;
+  border: 1px solid var(--rp-line-strong) !important;
+  background: var(--rp-panel) !important; color: var(--rp-ink) !important;
+  cursor: pointer !important; transition: border-color .15s ease, color .15s ease, transform .15s ease !important;
+}
+#landing-page .lx-chips button:hover,
+#landing-page .lx-chips button:focus-visible {
+  border-color: var(--rp-gold-accent) !important; color: var(--rp-gold) !important; transform: translateY(-1px) !important;
+}
+#landing-page .lx-assure {
+  list-style: none !important; display: flex !important; flex-wrap: wrap !important;
+  gap: 6px 18px !important; margin: 18px 0 0 !important; padding: 0 !important;
+  font-size: 13px !important; color: var(--rp-copy) !important;
+}
+#landing-page .lx-assure li { display: inline-flex !important; align-items: center !important; gap: 6px !important; margin: 0 !important; }
+#landing-page .lx-assure i { color: var(--rp-green) !important; font-size: 15px !important; }
+#landing-page .il-trust { margin-top: 14px !important; }
+
+/* ── Shared section frame ───────────────────────────────────────────────── */
+#landing-page > .lx-section {
+  padding-block: clamp(56px, 7vw, 96px) 0 !important;
+  background: transparent !important;
+}
+#landing-page > .lx-final { padding-bottom: clamp(56px, 7vw, 96px) !important; }
+#landing-page .lx-head { max-width: 720px !important; margin: 0 0 clamp(24px, 3vw, 36px) !important; }
+#landing-page .lx-kicker {
+  display: inline-block !important; margin: 0 0 10px !important;
+  font: 700 13.5px/1.2 var(--rp-sans) !important; letter-spacing: .01em !important;
+  color: var(--rp-gold) !important;
+}
+#landing-page .lx-section h2 {
+  margin: 0 0 12px !important;
+  font: 750 clamp(28px, 3.4vw, 44px)/1.08 var(--rp-sans) !important; letter-spacing: -.025em !important;
+  color: var(--rp-ink) !important; text-wrap: balance;
+}
+#landing-page .lx-head p,
+#landing-page .lx-final p {
+  margin: 0 !important; max-width: 62ch !important;
+  font: 400 clamp(15px, 1.25vw, 17px)/1.6 var(--rp-sans) !important; color: var(--rp-copy) !important;
+}
+#landing-page .lx-center { text-align: center !important; margin: 24px 0 0 !important; }
+
+/* Buttons and links */
+#landing-page .lx-btn {
+  display: inline-flex !important; align-items: center !important; justify-content: center !important; gap: 8px !important;
+  min-height: 46px !important; padding: 0 22px !important; border-radius: 12px !important;
+  font: 700 15px/1 var(--rp-sans) !important; text-decoration: none !important; cursor: pointer !important;
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease !important;
+}
+#landing-page .lx-btn-gold {
+  background: var(--rp-gold-grad) !important; color: var(--rp-on-gold) !important; border: 0 !important;
+  box-shadow: var(--rp-gold-glow) !important;
+}
+#landing-page .lx-btn-gold:hover { transform: translateY(-1px) !important; }
+#landing-page .lx-btn-ghost {
+  background: transparent !important; color: var(--rp-ink) !important;
+  border: 1px solid var(--rp-line-strong) !important;
+}
+#landing-page .lx-btn-ghost:hover { border-color: var(--rp-gold-accent) !important; }
+#landing-page .lx-link {
+  display: inline-flex !important; align-items: center !important; gap: 6px !important;
+  font: 700 15px/1.2 var(--rp-sans) !important; color: var(--rp-gold) !important; text-decoration: none !important;
+}
+#landing-page .lx-link:hover { text-decoration: underline !important; text-underline-offset: 3px !important; }
+#landing-page .lx-fine { margin: 12px 0 0 !important; font: 400 12.5px/1.5 var(--rp-sans) !important; color: var(--rp-muted) !important; }
+
+/* Panels */
+#landing-page :is(.lx-demo-card, .lx-path, .lx-plan, .lx-how-grid li, .lx-faq-list details) {
+  background: var(--rp-panel) !important;
+  border: 1px solid var(--rp-line) !important;
+  border-radius: var(--lx-radius) !important;
+  box-shadow: var(--rp-shadow) !important;
+}
+
+/* ── Live demo ──────────────────────────────────────────────────────────── */
+#landing-page .lx-demo-tabs {
+  display: flex !important; flex-wrap: wrap !important; gap: 8px !important; margin: 0 0 16px !important;
+}
+#landing-page .lx-demo-tabs button {
+  font: 700 13px/1 var(--rp-mono, "JetBrains Mono", ui-monospace, monospace) !important;
+  padding: 10px 16px !important; border-radius: 10px !important; cursor: pointer !important;
+  border: 1px solid var(--rp-line-strong) !important; background: transparent !important; color: var(--rp-copy) !important;
+}
+#landing-page .lx-demo-tabs button[aria-selected="true"] {
+  background: var(--rp-gold-soft) !important; border-color: var(--rp-gold-accent) !important; color: var(--rp-gold) !important;
+}
+#landing-page .lx-demo-card {
+  display: grid !important; grid-template-columns: minmax(0, 1fr) 340px !important;
+  overflow: hidden !important; transition: opacity .2s ease !important;
+}
+#landing-page .lx-demo-card[aria-busy="true"] { opacity: .6 !important; }
+#landing-page .lx-demo-main { padding: clamp(20px, 2.4vw, 32px) !important; min-width: 0 !important; }
+#landing-page .lx-demo-id { display: flex !important; flex-wrap: wrap !important; align-items: baseline !important; gap: 4px 14px !important; }
+#landing-page .lx-demo-sym {
+  font: 700 12px/1 var(--rp-mono, "JetBrains Mono", monospace) !important; letter-spacing: .08em !important;
+  color: var(--rp-gold) !important; padding: 5px 8px !important; border-radius: 6px !important; background: var(--rp-gold-soft) !important;
+}
+#landing-page .lx-demo-name { font: 750 clamp(20px, 2vw, 26px)/1.2 var(--rp-sans) !important; color: var(--rp-ink) !important; letter-spacing: -.015em !important; }
+#landing-page .lx-demo-price { flex-basis: 100% !important; font: 500 14px/1.4 var(--rp-mono, "JetBrains Mono", monospace) !important; color: var(--rp-copy) !important; }
+#landing-page .lx-demo-chart { height: 150px !important; margin: 18px 0 20px !important; }
+#landing-page .lx-demo-chart svg { width: 100% !important; height: 100% !important; display: block !important; overflow: visible !important; }
+#landing-page .lx-demo-line { fill: none !important; stroke: var(--rp-gold-accent) !important; stroke-width: 2.2 !important; vector-effect: non-scaling-stroke; stroke-linejoin: round !important; }
+#landing-page .lx-demo-area { fill: var(--rp-gold-soft) !important; stroke: none !important; }
+#landing-page .lx-demo-card[data-dir="up"] .lx-demo-line { stroke: var(--rp-green) !important; }
+#landing-page .lx-demo-card[data-dir="down"] .lx-demo-line { stroke: var(--rp-red) !important; }
+#landing-page .lx-demo-lists { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: var(--lx-gap) !important; }
+#landing-page .lx-demo-lists h3 {
+  display: flex !important; align-items: center !important; gap: 6px !important; margin: 0 0 8px !important;
+  font: 700 13px/1.3 var(--rp-sans) !important; color: var(--rp-ink) !important; text-transform: none !important; letter-spacing: 0 !important;
+}
+#landing-page .lx-demo-lists div:first-child h3 i { color: var(--rp-green) !important; }
+#landing-page .lx-demo-lists div:last-child h3 i { color: var(--rp-gold-accent) !important; }
+#landing-page .lx-demo-lists ul { margin: 0 !important; padding: 0 0 0 18px !important; }
+#landing-page .lx-demo-lists li { margin: 0 0 6px !important; font: 400 14px/1.5 var(--rp-sans) !important; color: var(--rp-copy) !important; }
+#landing-page .lx-demo-score {
+  padding: clamp(20px, 2.4vw, 30px) !important; border-left: 1px solid var(--rp-line) !important;
+  background: var(--rp-inset) !important; display: flex !important; flex-direction: column !important; align-items: stretch !important; gap: 14px !important;
+}
+#landing-page .lx-dial {
+  --lx-score: 0;
+  width: 132px !important; height: 132px !important; margin: 0 auto !important; border-radius: 50% !important;
+  background: conic-gradient(var(--rp-gold-accent) calc(var(--lx-score) * 1%), var(--rp-line) 0) !important;
+  display: grid !important; place-items: center !important; transition: background .4s ease !important;
+}
+#landing-page .lx-dial > div {
+  width: 108px !important; height: 108px !important; border-radius: 50% !important; background: var(--rp-inset) !important;
+  display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important;
+}
+#landing-page .lx-dial strong { font: 750 38px/1 var(--rp-sans) !important; color: var(--rp-ink) !important; letter-spacing: -.03em !important; }
+#landing-page .lx-dial span { font: 500 12px/1.4 var(--rp-sans) !important; color: var(--rp-muted) !important; }
+#landing-page .lx-demo-label { text-align: center !important; font: 700 14px/1.3 var(--rp-sans) !important; color: var(--rp-gold) !important; }
+#landing-page .lx-lenses { margin: 0 !important; display: grid !important; gap: 10px !important; }
+#landing-page .lx-lenses > div { display: grid !important; grid-template-columns: 1fr auto !important; gap: 4px 8px !important; align-items: center !important; }
+#landing-page .lx-lenses dt { font: 500 13px/1.3 var(--rp-sans) !important; color: var(--rp-copy) !important; }
+#landing-page .lx-lenses dd { margin: 0 !important; font: 700 13px/1.3 var(--rp-mono, "JetBrains Mono", monospace) !important; color: var(--rp-ink) !important; }
+#landing-page .lx-bar { grid-column: 1 / -1 !important; height: 6px !important; border-radius: 999px !important; background: var(--rp-line) !important; overflow: hidden !important; }
+#landing-page .lx-bar i { display: block !important; height: 100% !important; width: 0; border-radius: inherit !important; background: var(--rp-gold-accent) !important; transition: width .5s ease !important; }
+#landing-page .lx-bar i[data-tone="good"] { background: var(--rp-green) !important; }
+#landing-page .lx-bar i[data-tone="weak"] { background: var(--rp-red) !important; }
+#landing-page .lx-demo-score .lx-btn { width: 100% !important; margin-top: 4px !important; }
+#landing-page .lx-demo-score .lx-fine { text-align: center !important; margin: 0 !important; }
+
+/* ── Two paths ──────────────────────────────────────────────────────────── */
+#landing-page .lx-path-grid { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: var(--lx-gap) !important; }
+#landing-page .lx-path { padding: clamp(22px, 2.6vw, 36px) !important; display: flex !important; flex-direction: column !important; }
+#landing-page .lx-path-pro { border-color: var(--rp-gold-ring) !important; }
+#landing-page .lx-path-tag {
+  align-self: flex-start !important; display: inline-flex !important; align-items: center !important; gap: 6px !important;
+  font: 700 12.5px/1 var(--rp-sans) !important; color: var(--rp-gold) !important;
+  padding: 7px 11px !important; border-radius: 999px !important; background: var(--rp-gold-soft) !important; margin: 0 0 16px !important;
+}
+#landing-page .lx-path h3 { margin: 0 0 8px !important; font: 750 clamp(22px, 2vw, 28px)/1.15 var(--rp-sans) !important; color: var(--rp-ink) !important; letter-spacing: -.02em !important; }
+#landing-page .lx-path > p { margin: 0 0 20px !important; font: 400 15px/1.6 var(--rp-sans) !important; color: var(--rp-copy) !important; }
+#landing-page .lx-steps { list-style: none !important; counter-reset: lx !important; margin: 0 0 22px !important; padding: 0 !important; display: grid !important; gap: 12px !important; }
+#landing-page .lx-steps li { counter-increment: lx !important; position: relative !important; padding-left: 44px !important; margin: 0 !important; }
+#landing-page .lx-steps li::before {
+  content: counter(lx) !important; position: absolute !important; left: 0 !important; top: 1px !important;
+  width: 30px !important; height: 30px !important; border-radius: 50% !important; display: grid !important; place-items: center !important;
+  font: 700 13px/1 var(--rp-sans) !important; color: var(--rp-gold) !important; border: 1px solid var(--rp-gold-ring) !important;
+}
+#landing-page :is(.lx-steps, .lx-feats) b { display: block !important; font: 700 15px/1.35 var(--rp-sans) !important; color: var(--rp-ink) !important; }
+#landing-page :is(.lx-steps, .lx-feats) span { display: block !important; font: 400 14px/1.5 var(--rp-sans) !important; color: var(--rp-copy) !important; }
+#landing-page .lx-feats { list-style: none !important; margin: 0 0 22px !important; padding: 0 !important; display: grid !important; gap: 14px !important; }
+#landing-page .lx-feats li { display: grid !important; grid-template-columns: 30px 1fr !important; column-gap: 14px !important; margin: 0 !important; }
+#landing-page .lx-feats i { grid-row: span 2 !important; font-size: 22px !important; color: var(--rp-gold-accent) !important; padding-top: 2px !important; }
+#landing-page .lx-path .lx-link { margin-top: auto !important; }
+
+/* ── How it works ───────────────────────────────────────────────────────── */
+#landing-page .lx-how-grid { list-style: none !important; margin: 0 !important; padding: 0 !important; display: grid !important; grid-template-columns: repeat(4, 1fr) !important; gap: var(--lx-gap) !important; }
+#landing-page .lx-how-grid li { padding: 24px !important; margin: 0 !important; }
+#landing-page .lx-num {
+  display: grid !important; place-items: center !important; width: 36px !important; height: 36px !important; border-radius: 10px !important;
+  background: var(--rp-gold-soft) !important; color: var(--rp-gold) !important; font: 750 16px/1 var(--rp-sans) !important; margin: 0 0 16px !important;
+}
+#landing-page .lx-how-grid b { display: block !important; margin: 0 0 8px !important; font: 700 17px/1.3 var(--rp-sans) !important; color: var(--rp-ink) !important; }
+#landing-page .lx-how-grid p { margin: 0 !important; font: 400 14.5px/1.55 var(--rp-sans) !important; color: var(--rp-copy) !important; }
+
+/* ── Pricing ────────────────────────────────────────────────────────────── */
+#landing-page .lx-plan-grid { display: grid !important; grid-template-columns: repeat(2, minmax(0, 440px)) !important; gap: var(--lx-gap) !important; }
+#landing-page .lx-plan { position: relative !important; padding: clamp(24px, 2.6vw, 34px) !important; display: flex !important; flex-direction: column !important; }
+#landing-page .lx-plan-pro { border: 1.5px solid var(--rp-gold-accent) !important; box-shadow: var(--rp-shadow), 0 0 0 4px var(--rp-gold-soft) !important; }
+#landing-page .lx-plan-badge {
+  position: absolute !important; top: -12px !important; right: 24px !important;
+  font: 700 12px/1 var(--rp-sans) !important; letter-spacing: .01em !important;
+  padding: 7px 10px !important; border-radius: 999px !important; background: var(--rp-gold-grad) !important; color: var(--rp-on-gold) !important;
+}
+#landing-page .lx-plan h3 { margin: 0 0 10px !important; font: 750 20px/1.2 var(--rp-sans) !important; color: var(--rp-ink) !important; }
+#landing-page .lx-price { display: flex !important; align-items: baseline !important; gap: 6px !important; }
+#landing-page .lx-price strong { font: 800 44px/1 var(--rp-sans) !important; letter-spacing: -.03em !important; color: var(--rp-ink) !important; }
+#landing-page .lx-price span { font: 500 15px/1 var(--rp-sans) !important; color: var(--rp-muted) !important; }
+#landing-page .lx-plan-sub { margin: 10px 0 18px !important; font: 400 14px/1.5 var(--rp-sans) !important; color: var(--rp-copy) !important; min-height: 2.6em !important; }
+#landing-page .lx-plan ul { list-style: none !important; margin: 0 0 24px !important; padding: 0 !important; display: grid !important; gap: 10px !important; }
+#landing-page .lx-plan li { display: flex !important; gap: 10px !important; margin: 0 !important; font: 400 14.5px/1.45 var(--rp-sans) !important; color: var(--rp-ink) !important; }
+#landing-page .lx-plan li i { color: var(--rp-green) !important; font-size: 17px !important; flex: 0 0 auto !important; padding-top: 1px !important; }
+#landing-page .lx-plan .lx-btn { margin-top: auto !important; width: 100% !important; }
+
+/* ── FAQ ────────────────────────────────────────────────────────────────── */
+#landing-page .lx-faq-list { display: grid !important; gap: 10px !important; max-width: 880px !important; }
+#landing-page .lx-faq-list details { padding: 0 !important; }
+#landing-page .lx-faq-list summary {
+  list-style: none !important; cursor: pointer !important; padding: 18px 22px !important; position: relative !important; padding-right: 52px !important;
+  font: 700 16px/1.4 var(--rp-sans) !important; color: var(--rp-ink) !important;
+}
+#landing-page .lx-faq-list summary::-webkit-details-marker { display: none !important; }
+#landing-page .lx-faq-list summary::after {
+  content: "+" !important; position: absolute !important; right: 22px !important; top: 50% !important; transform: translateY(-50%) !important;
+  font: 400 22px/1 var(--rp-sans) !important; color: var(--rp-gold) !important;
+}
+#landing-page .lx-faq-list details[open] summary::after { content: "–" !important; }
+#landing-page .lx-faq-list details p { margin: 0 !important; padding: 0 22px 20px !important; font: 400 15px/1.65 var(--rp-sans) !important; color: var(--rp-copy) !important; max-width: 72ch !important; }
+
+/* ── Final CTA ──────────────────────────────────────────────────────────── */
+#landing-page > .lx-final { text-align: center !important; }
+#landing-page .lx-final h2 { max-width: 760px !important; margin-inline: auto !important; }
+#landing-page .lx-final p { margin-inline: auto !important; }
+#landing-page .lx-final-actions { display: flex !important; flex-wrap: wrap !important; justify-content: center !important; gap: 12px !important; margin-top: 24px !important; }
+
+/* ── Responsive ─────────────────────────────────────────────────────────── */
+@media (max-width: 1080px) {
+  #landing-page .lx-how-grid { grid-template-columns: repeat(2, 1fr) !important; }
+}
+@media (max-width: 900px) {
+  #landing-page .lx-demo-card { grid-template-columns: 1fr !important; }
+  #landing-page .lx-demo-score { border-left: 0 !important; border-top: 1px solid var(--rp-line) !important; }
+  #landing-page .lx-path-grid,
+  #landing-page .lx-plan-grid { grid-template-columns: 1fr !important; }
+}
+@media (max-width: 600px) {
+  #landing-page .lx-demo-lists,
+  #landing-page .lx-how-grid { grid-template-columns: 1fr !important; }
+  #landing-page .lx-demo-chart { height: 110px !important; }
+  #landing-page .lx-final-actions .lx-btn { width: 100% !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #landing-page :is(.lx-btn, .lx-chips button, .lx-bar i, .lx-dial) { transition: none !important; }
+}
+
+/* Pricing and FAQ sit on the page's centre line: two cards and a narrow list
+   left-aligned on a 1320px rail leave a dead right half. */
+#landing-page :is(.lx-pricing, .lx-faq) .lx-head { margin-inline: auto !important; text-align: center !important; }
+#landing-page :is(.lx-pricing, .lx-faq) .lx-head p { margin-inline: auto !important; }
+#landing-page .lx-plan-grid { justify-content: center !important; }
+#landing-page .lx-faq-list { margin-inline: auto !important; }
+#landing-page .lx-demo-card[data-dir="up"] .lx-demo-area { fill: color-mix(in srgb, var(--rp-green) 12%, transparent) !important; }
+#landing-page .lx-demo-card[data-dir="down"] .lx-demo-area { fill: color-mix(in srgb, var(--rp-red) 12%, transparent) !important; }
+#landing-page .il-landing-actions #il-hero-primary,
+#landing-page .il-landing-actions #il-hero-primary * { color: var(--rp-ink) !important; -webkit-text-fill-color: currentColor !important; }
+#landing-page .il-landing-actions #il-hero-primary { background: transparent !important; border: 1px solid var(--rp-line-strong) !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PRICING PAGE (.lxp) — public/pricing.html
+   ═══════════════════════════════════════════════════════════════════════════ */
+.lxp {
+  display: block !important; max-width: 1080px !important; margin: 0 auto !important;
+  padding: clamp(40px, 6vw, 80px) clamp(16px, 3vw, 32px) clamp(56px, 7vw, 96px) !important;
+  color: var(--rp-ink) !important; font-family: var(--rp-sans) !important; text-align: left !important;
+}
+.lxp h1, .lxp h2 { color: var(--rp-ink) !important; font-family: var(--rp-sans) !important; letter-spacing: -.025em !important; }
+.lxp p { color: var(--rp-copy) !important; }
+.lxp-hero { text-align: center !important; max-width: 720px !important; margin: 0 auto clamp(32px, 4vw, 48px) !important; }
+.lxp-kicker { display: inline-block !important; font: 700 13.5px/1.2 var(--rp-sans) !important; color: var(--rp-gold) !important; margin: 0 0 12px !important; }
+.lxp-hero h1 { font: 800 clamp(34px, 5vw, 58px)/1.04 var(--rp-sans) !important; margin: 0 0 16px !important; }
+.lxp-hero h1 em { font-style: normal !important; color: var(--rp-gold) !important; }
+.lxp-hero p { font: 400 clamp(15px, 1.4vw, 18px)/1.6 var(--rp-sans) !important; margin: 0 auto !important; max-width: 60ch !important; }
+
+.lxp-plans { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 20px !important; max-width: 900px !important; margin: 0 auto !important; }
+.lxp-plan {
+  position: relative !important; display: flex !important; flex-direction: column !important;
+  padding: clamp(24px, 3vw, 36px) !important; border-radius: 18px !important;
+  background: var(--rp-panel) !important; border: 1px solid var(--rp-line) !important; box-shadow: var(--rp-shadow) !important;
+}
+.lxp-plan-pro { border: 1.5px solid var(--rp-gold-accent) !important; box-shadow: var(--rp-shadow), 0 0 0 4px var(--rp-gold-soft) !important; }
+.lxp-badge { position: absolute !important; top: -12px !important; right: 24px !important; padding: 7px 11px !important; border-radius: 999px !important; font: 700 12px/1 var(--rp-sans) !important; background: var(--rp-gold-grad) !important; color: var(--rp-on-gold) !important; }
+.lxp-plan h2 { font: 750 21px/1.2 var(--rp-sans) !important; margin: 0 0 10px !important; text-align: left !important; }
+.lxp-price { display: flex !important; align-items: baseline !important; gap: 6px !important; }
+.lxp-price strong { font: 800 48px/1 var(--rp-sans) !important; letter-spacing: -.03em !important; color: var(--rp-ink) !important; }
+.lxp-price span { font: 500 15px/1 var(--rp-sans) !important; color: var(--rp-muted) !important; }
+.lxp-sub { margin: 12px 0 20px !important; font: 400 14.5px/1.5 var(--rp-sans) !important; min-height: 2.9em !important; }
+.lxp-sub strong { color: var(--rp-ink) !important; }
+.lxp-plan ul { list-style: none !important; margin: 0 0 26px !important; padding: 0 !important; display: grid !important; gap: 11px !important; }
+.lxp-plan li { display: flex !important; gap: 10px !important; margin: 0 !important; font: 400 15px/1.45 var(--rp-sans) !important; color: var(--rp-ink) !important; }
+.lxp-plan li i { color: var(--rp-green) !important; font-size: 18px !important; flex: 0 0 auto !important; }
+.lxp-btn {
+  display: inline-flex !important; align-items: center !important; justify-content: center !important; gap: 8px !important;
+  min-height: 48px !important; padding: 0 22px !important; border-radius: 12px !important;
+  font: 700 15px/1 var(--rp-sans) !important; text-decoration: none !important; cursor: pointer !important;
+}
+.lxp-plan .lxp-btn { margin-top: auto !important; width: 100% !important; }
+.lxp-btn-gold { background: var(--rp-gold-grad) !important; color: var(--rp-on-gold) !important; border: 0 !important; box-shadow: var(--rp-gold-glow) !important; }
+.lxp-btn-ghost { background: transparent !important; color: var(--rp-ink) !important; border: 1px solid var(--rp-line-strong) !important; }
+.lxp-btn:hover { text-decoration: none !important; transform: translateY(-1px) !important; }
+.lxp-fine { margin: 12px 0 0 !important; font: 400 12.5px/1.5 var(--rp-sans) !important; color: var(--rp-muted) !important; }
+
+.lxp-compare, .lxp-why, .lxp-faq, .lxp-final { margin: clamp(56px, 7vw, 88px) auto 0 !important; max-width: 900px !important; }
+.lxp-compare h2, .lxp-why h2, .lxp-faq h2, .lxp-final h2 { font: 750 clamp(26px, 3vw, 36px)/1.1 var(--rp-sans) !important; margin: 0 0 22px !important; text-align: center !important; }
+.lxp-table-wrap { overflow-x: auto !important; border: 1px solid var(--rp-line) !important; border-radius: 16px !important; background: var(--rp-panel) !important; }
+.lxp-table { width: 100% !important; border-collapse: collapse !important; font: 400 14.5px/1.4 var(--rp-sans) !important; }
+.lxp-table th, .lxp-table td { padding: 13px 18px !important; border-bottom: 1px solid var(--rp-line) !important; text-align: center !important; color: var(--rp-ink) !important; background: transparent !important; }
+.lxp-table th[scope="row"], .lxp-table thead th:first-child { text-align: left !important; font-weight: 500 !important; }
+.lxp-table thead th { font: 700 14px/1.2 var(--rp-sans) !important; color: var(--rp-muted) !important; background: var(--rp-inset) !important; }
+.lxp-table thead th:last-child { color: var(--rp-gold) !important; }
+.lxp-table tbody tr:last-child > * { border-bottom: 0 !important; }
+.lxp-table td:last-child { background: var(--rp-gold-soft) !important; }
+.lxp-yes i { color: var(--rp-green) !important; font-size: 18px !important; }
+.lxp-no { color: var(--rp-muted) !important; }
+
+.lxp-why-grid { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 16px !important; }
+.lxp-why-grid > div { padding: 22px !important; border-radius: 14px !important; background: var(--rp-panel) !important; border: 1px solid var(--rp-line) !important; }
+.lxp-why-grid i { font-size: 24px !important; color: var(--rp-gold-accent) !important; }
+.lxp-why-grid b { display: block !important; margin: 10px 0 6px !important; font: 700 16px/1.3 var(--rp-sans) !important; color: var(--rp-ink) !important; }
+.lxp-why-grid p { margin: 0 !important; font: 400 14px/1.55 var(--rp-sans) !important; }
+
+.lxp-faq details { margin: 0 0 10px !important; border-radius: 14px !important; background: var(--rp-panel) !important; border: 1px solid var(--rp-line) !important; }
+.lxp-faq summary { list-style: none !important; cursor: pointer !important; padding: 17px 52px 17px 22px !important; position: relative !important; font: 700 16px/1.4 var(--rp-sans) !important; color: var(--rp-ink) !important; }
+.lxp-faq summary::-webkit-details-marker { display: none !important; }
+.lxp-faq summary::after { content: "+" !important; position: absolute !important; right: 22px !important; top: 50% !important; transform: translateY(-50%) !important; font: 400 22px/1 var(--rp-sans) !important; color: var(--rp-gold) !important; }
+.lxp-faq details[open] summary::after { content: "–" !important; }
+.lxp-faq details p { margin: 0 !important; padding: 0 22px 18px !important; font: 400 15px/1.65 var(--rp-sans) !important; }
+.lxp-final { text-align: center !important; }
+.lxp-final-actions { display: flex !important; flex-wrap: wrap !important; justify-content: center !important; gap: 12px !important; }
+
+@media (max-width: 760px) {
+  .lxp-plans, .lxp-why-grid { grid-template-columns: 1fr !important; }
+  .lxp-table th, .lxp-table td { padding: 11px 12px !important; font-size: 13.5px !important; }
+  .lxp-final-actions .lxp-btn { width: 100% !important; }
+}
+
+/* Signup: what the free account includes, stated before the form. */
+.lxs-perks { list-style: none !important; display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 8px 14px !important; margin: -6px 0 22px !important; padding: 0 !important; }
+.lxs-perks li { display: flex !important; gap: 7px !important; align-items: flex-start !important; margin: 0 !important; font: 500 13px/1.4 var(--rp-sans) !important; color: var(--rp-copy) !important; }
+.lxs-perks i { color: var(--rp-green) !important; font-size: 15px !important; flex: 0 0 auto !important; padding-top: 1px !important; }
+@media (max-width: 480px) { .lxs-perks { grid-template-columns: 1fr !important; } }
+/* A card taller than the viewport, centred in a fixed-height flex column,
+   overflowed upward under the header and downward over the footer. Let the
+   page grow with the card instead. */
+html:has(body.il-auth-page), body.il-auth-page { height: auto !important; }
+.il-auth-page main { flex: 1 0 auto !important; align-items: flex-start !important; padding-top: clamp(28px, 5vh, 64px) !important; }
