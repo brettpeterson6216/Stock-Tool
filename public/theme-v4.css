@@ -686,52 +686,30 @@ html { overflow-x: clip; }
 #view-home, #landing-page, #landing-page.il-landing, .il-home-member { background: transparent !important; background-color: transparent !important; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   V8 — IL TRACE (public/il-trace.js): the signature line
-   Replaces the full-page "market silk" canvas. One crisp gold price line
-   with a soft area, three quiet guide lines and the opening level as a
-   dashed reference; it draws itself once when seen, then only the
-   last-price dot breathes. It sits UNDER content, never behind text.
+   V9 — IL CONSTELLATION (public/il-constellation.js)
+   A slow gold node field behind each hero: hairlines, a few labelled
+   nodes, one softly pulsing "live" node. Full-bleed, faded top and
+   bottom, and kept clear of the copy by the script. Plus a whisper of
+   film grain over the whole site for the printed, editorial feel.
    ═══════════════════════════════════════════════════════════════════════════ */
 #il-ambient { display: none !important; }
-.il-trace {
-  position: relative !important; display: block !important; width: 100% !important;
-  height: var(--il-trace-h, 120px) !important; margin: 0 !important; pointer-events: none !important;
-  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 9%, #000 100%);
-  mask-image: linear-gradient(90deg, transparent 0, #000 9%, #000 100%);
+.il-has-constellation { position: relative !important; isolation: isolate !important; }
+.il-constellation {
+  position: absolute !important; top: 0; bottom: 0; left: 0; width: 100%;
+  z-index: -1 !important; pointer-events: none !important; overflow: hidden !important;
+  opacity: 0; transition: opacity 1.8s ease;
 }
-.il-trace svg { position: absolute !important; inset: 0 !important; width: 100% !important; height: 100% !important; overflow: visible !important; }
-.il-trace .il-trace-grid { stroke: var(--rp-line) !important; stroke-width: 1 !important; vector-effect: non-scaling-stroke; stroke-dasharray: 2 6; }
-.il-trace .il-trace-open { stroke: var(--rp-muted) !important; stroke-opacity: .35 !important; stroke-width: 1 !important; vector-effect: non-scaling-stroke; stroke-dasharray: 5 5; }
-.il-trace .il-trace-line {
-  fill: none !important; stroke: var(--rp-gold-accent) !important; stroke-width: 1.6 !important;
-  vector-effect: non-scaling-stroke; stroke-linejoin: round; stroke-linecap: round;
-  stroke-dasharray: 1; stroke-dashoffset: 0;
-}
-.il-trace .il-trace-fill-a { stop-color: var(--rp-gold-accent); stop-opacity: .16; }
-.il-trace .il-trace-fill-b { stop-color: var(--rp-gold-accent); stop-opacity: 0; }
-.il-trace .il-trace-area { opacity: 1; }
-.il-trace-dot {
-  position: absolute !important; right: 0 !important; width: 7px !important; height: 7px !important; margin: -3.5px -3.5px 0 0 !important;
-  border-radius: 50% !important; background: var(--rp-gold-accent) !important;
-  box-shadow: 0 0 0 0 var(--rp-gold-ring), 0 0 14px var(--rp-gold-ring) !important;
-}
-@media (prefers-reduced-motion: no-preference) {
-  .il-trace.is-ready:not(.is-drawn) .il-trace-line { stroke-dashoffset: 1; }
-  .il-trace.is-ready:not(.is-drawn) :is(.il-trace-area, .il-trace-dot) { opacity: 0; }
-  .il-trace.is-drawn .il-trace-line { animation: il-trace-draw 2.2s cubic-bezier(.45, .05, .2, 1) both; }
-  .il-trace.is-drawn .il-trace-area { animation: il-trace-fade 1s ease 2s both; }
-  .il-trace.is-drawn .il-trace-dot { animation: il-trace-fade .5s ease 2.1s both, il-trace-breathe 3.2s ease-in-out 2.6s infinite; }
-}
-@keyframes il-trace-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
-@keyframes il-trace-fade { from { opacity: 0; } to { opacity: 1; } }
-@keyframes il-trace-breathe {
-  0%, 100% { box-shadow: 0 0 0 0 var(--rp-gold-ring), 0 0 14px var(--rp-gold-ring); }
-  50% { box-shadow: 0 0 0 7px transparent, 0 0 18px var(--rp-gold-ring); }
-}
+.il-constellation.is-ready { opacity: 1; }
+.il-constellation canvas { display: block !important; }
+.il-constellation-hero { top: -96px !important; bottom: -24px !important; }
+#landing-page .il-landing-hero > .il-constellation-hero { top: -120px !important; bottom: 8% !important; }
+html:not([data-theme="dark"]) .il-constellation { filter: saturate(1.1) brightness(.92); }
 
-/* Placement: the line is the floor the hero stands on. */
-#landing-page .il-landing-hero > .il-trace-hero { margin-top: clamp(36px, 5vw, 64px) !important; }
-:is(.il-static-page .hero, .il-static-page section.hero, .il-static-page section.intro, .lxp-hero, .lxl-hero, #public-main > .hero) > .il-trace-hero {
-  margin-top: clamp(24px, 3.5vw, 40px) !important; max-width: 100% !important;
+/* Film grain: static, tiny, and barely there. */
+html::after {
+  content: "" !important; position: fixed !important; inset: 0 !important; z-index: 2147483000 !important; pointer-events: none !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: .045;
 }
-.lxp-hero > .il-trace-hero { max-width: 900px !important; margin-left: auto !important; margin-right: auto !important; }
+html:not([data-theme="dark"])::after { opacity: .03; }
+html:has(body.il-tool-active)::after { display: none; }
