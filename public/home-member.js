@@ -424,7 +424,18 @@
       name = first ? first.charAt(0).toUpperCase() + first.slice(1) : "";
     }
     var g = document.getElementById("ihm-greeting");
-    if (g) g.textContent = greet(name);
+    if (g) {
+      // The name carries the serif accent, as headings do across the site.
+      var text = greet(name);
+      if (name) {
+        var cut = text.lastIndexOf(name);
+        g.textContent = text.slice(0, cut);
+        var em = document.createElement("em");
+        em.textContent = name;
+        g.appendChild(em);
+        g.appendChild(document.createTextNode(text.slice(cut + name.length)));
+      } else g.textContent = text;
+    }
 
     Promise.allSettled([json("/api/workspace/summary"), json("/api/saves")])
       .then(function (results) {

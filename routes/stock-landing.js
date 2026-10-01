@@ -444,7 +444,7 @@ function renderPage(ticker, q, facts) {
       <a href="/">ImpliedLens</a> › <a href="/stock/${esc(ticker)}">${esc(ticker)}</a>
     </div>
     <div class="ticker-badge">${esc(ticker)}</div>
-    <h1>${esc(named ? `${name} (${ticker}) Stock Analysis` : `${ticker} Stock Analysis`)}</h1>
+    <h1>${esc(named ? `${name} (${ticker})` : ticker)} <em>Stock Analysis</em></h1>
     ${exchange || industry ? `<div class="exchange-tag">${[exchange, industry].filter(Boolean).join(" · ")}</div>` : ""}
 
     ${q ? `

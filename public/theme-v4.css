@@ -533,3 +533,90 @@ html body #landing-page .il-landing-hero .il-landing-copy { max-width: 1120px !i
 html body #landing-page .il-landing-hero .il-display { max-width: none !important; width: auto !important; overflow: visible !important; }
 html body #landing-page .il-landing-hero .il-trust .il-trust-lead { flex: 0 0 100% !important; width: 100% !important; text-align: center !important; margin: 0 !important; }
 html body #landing-page .il-landing-hero .il-trust .il-trust-lead { display: block !important; justify-content: center !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   V6 — CARRY THE FEEL THROUGH THE SITE (with restraint)
+   Three signatures from the homepage, applied everywhere a page has a hero:
+   the lens (static here — only the homepage turns), the pill kicker, and the
+   serif accent. Working screens get calm versions of the same.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root {
+  --rp-lens: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 600'><g fill='none' stroke='%23e9b44c'><circle cx='300' cy='300' r='290' stroke-opacity='.45'/><circle cx='300' cy='300' r='230' stroke-dasharray='2 10' stroke-opacity='.6'/><circle cx='300' cy='300' r='170' stroke-opacity='.3'/><path d='M300 0v80M300 520v80M0 300h80M520 300h80' stroke-opacity='.4'/></g></svg>");
+}
+html:not([data-theme="dark"]) {
+  --rp-lens: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 600'><g fill='none' stroke='%23b07d1e'><circle cx='300' cy='300' r='290' stroke-opacity='.35'/><circle cx='300' cy='300' r='230' stroke-dasharray='2 10' stroke-opacity='.45'/><circle cx='300' cy='300' r='170' stroke-opacity='.22'/><path d='M300 0v80M300 520v80M0 300h80M520 300h80' stroke-opacity='.3'/></g></svg>");
+}
+
+/* ── The lens behind every page hero ────────────────────────────────────── */
+:is(.il-static-page .hero, .il-static-page section.hero, .il-static-page section.intro, .lxp-hero, .lxl:not(.lxl-lesson) .lxl-hero, #public-main > .hero) {
+  position: relative !important; isolation: isolate !important;
+}
+:is(.il-static-page .hero, .il-static-page section.hero, .il-static-page section.intro, .lxp-hero, .lxl:not(.lxl-lesson) .lxl-hero, #public-main > .hero)::before {
+  content: "" !important; position: absolute !important; z-index: -1 !important; pointer-events: none !important;
+  width: min(620px, 110vw) !important; aspect-ratio: 1 !important; left: 50% !important; top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  background: radial-gradient(closest-side, var(--rp-gold-soft), transparent 70%), var(--rp-lens) center / contain no-repeat !important;
+  -webkit-mask-image: radial-gradient(closest-side, #000 50%, transparent 100%); mask-image: radial-gradient(closest-side, #000 50%, transparent 100%);
+  opacity: .9 !important;
+}
+/* Left-aligned heroes carry the lens off to the right instead. */
+:is(.lxl:not(.lxl-lesson) .lxl-hero, .il-static-page section.intro, #public-main > .hero)::before { left: 78% !important; }
+/* Sign-in: the card sits on the lens. */
+.il-auth-page main { position: relative !important; isolation: isolate !important; }
+.il-auth-page main::before {
+  content: "" !important; position: absolute !important; z-index: -1 !important; pointer-events: none !important;
+  width: min(760px, 130vw) !important; aspect-ratio: 1 !important; left: 50% !important; top: 40px !important; transform: translateX(-50%) !important;
+  background: radial-gradient(closest-side, var(--rp-gold-soft), transparent 70%), var(--rp-lens) center / contain no-repeat !important;
+  -webkit-mask-image: radial-gradient(closest-side, #000 55%, transparent 100%); mask-image: radial-gradient(closest-side, #000 55%, transparent 100%);
+}
+
+/* ── Pill kickers ───────────────────────────────────────────────────────── */
+:is(.il-static-page .tagline, .il-static-page .eyebrow, .lxp-kicker, .lxl:not(.lxl-lesson) .lxl-kicker, .il-auth-page .auth-eyebrow, #lab-main .eyebrow, #lab-main [class*="kicker"]) {
+  display: inline-flex !important; align-items: center !important; gap: 8px !important; width: auto !important;
+  padding: 6px 13px !important; border-radius: 999px !important;
+  background: color-mix(in srgb, var(--rp-panel) 70%, transparent) !important;
+  border: 1px solid var(--rp-gold-ring) !important; color: var(--rp-gold) !important;
+  font: 700 12.5px/1.2 var(--rp-sans) !important; letter-spacing: .01em !important; text-transform: none !important;
+}
+
+/* ── Serif accents wherever a page headline has an <em> ─────────────────── */
+:is(.il-static-page h1, #public-main h1, .il-auth-page .auth-title) em {
+  font-family: var(--rp-serif) !important; font-style: italic !important; font-weight: 400 !important; font-size: 1.08em !important;
+  background: var(--rp-gold-text) !important; -webkit-background-clip: text !important; background-clip: text !important;
+  -webkit-text-fill-color: transparent !important; color: transparent !important; padding-right: .05em !important;
+}
+:is(.il-static-page h1, #public-main h1) { letter-spacing: -.035em !important; line-height: 1.04 !important; }
+
+/* ── Working screens: calm versions of the same ─────────────────────────── */
+/* Research result header: the price is the hero, the lens sits in the corner. */
+#view-tool .result-header { overflow: hidden !important; isolation: isolate !important; }
+#view-tool .result-header::after {
+  content: "" !important; position: absolute !important; z-index: -1 !important; pointer-events: none !important;
+  width: 420px !important; height: 420px !important; right: -140px !important; top: -170px !important;
+  background: radial-gradient(closest-side, var(--rp-gold-soft), transparent 70%), var(--rp-lens) center / contain no-repeat !important;
+  opacity: .55 !important;
+}
+#view-tool #r-price { font-size: clamp(40px, 3.6vw, 54px) !important; }
+#view-tool #r-ticker { color: var(--rp-gold) !important; }
+/* Section titles in the workspace get the serif for the subject, not the label. */
+#view-tool .app-section-hdr h1, #view-tool .app-section-hdr .ash-title { letter-spacing: -.02em !important; }
+/* Panels in the workspace lift a touch when you work in them. */
+#view-tool :is(.chart-wrap, .panel-box, .sidebar-card):hover { border-color: var(--rp-line-strong) !important; }
+/* Member home greeting: same scale and weight as the public hero. */
+.il-home-member .ihm-greeting { font-weight: 800 !important; letter-spacing: -.035em !important; }
+.il-home-member .ihm-greeting::first-letter { color: inherit !important; }
+/* LensToolkit score ring glows like the homepage dial. */
+#lab-main .score-ring { filter: drop-shadow(0 0 22px var(--rp-gold-ring)) !important; }
+
+/* Gentle entrance for page heroes (once, on load). */
+@media (prefers-reduced-motion: no-preference) {
+  :is(.il-static-page .hero, .il-static-page section.hero, .il-static-page section.intro, .lxp-hero, .lxl-hero, .il-auth-page .auth-card, #public-main > .hero) {
+    animation: rp-enter .7s cubic-bezier(.2, .7, .2, 1) both;
+  }
+  @keyframes rp-enter { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+}
+.il-home-member .ihm-greeting em {
+  font-family: var(--rp-serif) !important; font-style: italic !important; font-weight: 400 !important; font-size: 1.1em !important;
+  background: var(--rp-gold-text) !important; -webkit-background-clip: text !important; background-clip: text !important;
+  -webkit-text-fill-color: transparent !important; color: transparent !important; padding-right: .04em !important;
+}
