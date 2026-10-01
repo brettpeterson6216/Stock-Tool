@@ -495,7 +495,8 @@ body.il-product-page::before, body.il-static-page::before, body.il-auth-page::be
 #landing-page .il-landing-hero { grid-template-columns: 1fr !important; }
 #landing-page .il-trust .il-trust-lead { flex-basis: 100% !important; text-align: center !important; }
 /* Mobile hero: older mobile rules shrink and left-align it. */
-html body #landing-page .il-landing-hero .il-landing-copy .il-display { font-size: clamp(44px, 12vw, 104px) !important; line-height: .98 !important; }
+html body #landing-page .il-landing-hero .il-landing-copy .il-display { font-size: clamp(44px, 7.6vw, 104px) !important; line-height: .98 !important; }
+@media (max-width: 520px) { html body #landing-page .il-landing-hero .il-landing-copy .il-display { font-size: 12vw !important; } }
 html body #landing-page .il-landing-hero .il-landing-copy > p,
 html body #landing-page .il-landing-hero .il-trust,
 html body #landing-page .il-landing-hero .lx-assure { text-align: center !important; margin-left: auto !important; margin-right: auto !important; justify-content: center !important; }
@@ -528,3 +529,7 @@ html body #landing-page .il-landing-hero .lx-assure { text-align: center !import
 #view-tool #featured-grid > *:hover { transform: translateY(-2px) !important; border-color: var(--rp-gold-ring) !important; }
 #view-tool .fg-label { border: 0 !important; background: transparent !important; }
 #view-tool .tw-market > * { border-radius: 14px !important; background: var(--rp-panel-grad) !important; border: 1px solid var(--rp-line) !important; }
+html body #landing-page .il-landing-hero .il-landing-copy { max-width: 1120px !important; width: 100% !important; }
+html body #landing-page .il-landing-hero .il-display { max-width: none !important; width: auto !important; overflow: visible !important; }
+html body #landing-page .il-landing-hero .il-trust .il-trust-lead { flex: 0 0 100% !important; width: 100% !important; text-align: center !important; margin: 0 !important; }
+html body #landing-page .il-landing-hero .il-trust .il-trust-lead { display: block !important; justify-content: center !important; }
