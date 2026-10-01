@@ -483,3 +483,11 @@ body.il-tool-active > footer { display: none !important; }
 body.il-tool-active #view-tool { height: calc(100dvh - 63px) !important; min-height: 0 !important; }
 body.il-tool-active #view-tool .app-shell { height: 100% !important; min-height: 0 !important; }
 body.il-tool-active #view-tool .app-sidebar { height: 100% !important; }
+
+/* Demo retry: a calm, obvious way back when live data blips. */
+#landing-page .lx-demo-retry {
+  margin-top: 6px; padding: 8px 14px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--rp-gold-ring, rgba(201,162,74,.4)); background: transparent;
+  color: var(--rp-gold-text, #d9b25f); font: 600 13px/1 var(--rp-sans, inherit);
+}
+#landing-page .lx-demo-retry:hover { background: var(--rp-gold-soft, rgba(201,162,74,.12)); }

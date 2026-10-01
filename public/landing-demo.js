@@ -125,15 +125,24 @@
     list("lx-demo-strengths", s.strengths, "No standout strengths on the current evidence.");
     list("lx-demo-concerns", (s.concerns || []).concat(s.caps || []).map(function (c) { return typeof c === "string" ? c : (c && (c.reason || c.label)) || ""; }).filter(Boolean), "No active warnings on the current evidence.");
     var open = $("lx-demo-open"); if (open) open.href = "/?view=tool&section=analyze&symbol=" + encodeURIComponent(t);
-    setText("lx-demo-asof", "Live data · " + new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" }) + " · Educational research, not a recommendation.");
+    setText("lx-demo-asof", (d.servedStale ? "Most recent read · " : "Live data · ") + new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" }) + " · Educational research, not a recommendation.");
   }
 
   function renderError(t, msg) {
     var card = $("lx-demo-card");
     if (card) { card.setAttribute("aria-busy", "false"); card.classList.add("is-error"); }
     setText("lx-demo-sym", t);
-    setText("lx-demo-name", msg || "Live data is unavailable right now.");
-    setText("lx-demo-price", "Try again in a moment, or open the full analysis.");
+    setText("lx-demo-name", msg || "Live data is taking longer than usual.");
+    var price = $("lx-demo-price");
+    if (price) {
+      price.textContent = "";
+      var retry = document.createElement("button");
+      retry.type = "button";
+      retry.className = "lx-demo-retry";
+      retry.textContent = "Try again";
+      retry.addEventListener("click", function () { delete cache[t]; load(t); });
+      price.appendChild(retry);
+    }
     setText("lx-demo-score", "–");
     var dial = $("lx-dial"); if (dial) dial.style.setProperty("--lx-score", "0");
     list("lx-demo-strengths", [], "–"); list("lx-demo-concerns", [], "–");
@@ -147,10 +156,30 @@
     });
     var card = $("lx-demo-card"); if (card) card.setAttribute("aria-busy", "true");
     if (cache[t]) return render(t, cache[t]);
-    fetch("/api/lens-score/" + encodeURIComponent(t) + "?preview=1", { credentials: "same-origin" })
+    setText("lx-demo-sym", t);
+    setText("lx-demo-name", "Loading a live read…");
+    fetchScore(t, 0);
+  }
+
+  // A cold server or a provider blip should never leave the card spinning:
+  // every attempt times out, and we retry twice before showing "Try again".
+  function fetchScore(t, attempt) {
+    var ctrl = "AbortController" in window ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 20000);
+    fetch("/api/lens-score/" + encodeURIComponent(t) + "?preview=1", { credentials: "same-origin", signal: ctrl ? ctrl.signal : undefined })
       .then(function (r) { if (!r.ok) throw new Error(String(r.status)); return r.json(); })
-      .then(function (d) { cache[t] = d; if (current === t) render(t, d); })
-      .catch(function () { if (current === t) renderError(t); });
+      .then(function (d) {
+        clearTimeout(timer);
+        if (!d || !d.score || d.score.status !== "graded") throw new Error("not graded");
+        cache[t] = d;
+        if (current === t) render(t, d);
+      })
+      .catch(function () {
+        clearTimeout(timer);
+        if (current !== t) return;
+        if (attempt < 2) return setTimeout(function () { if (current === t) fetchScore(t, attempt + 1); }, attempt ? 4000 : 1500);
+        renderError(t);
+      });
   }
 
   function wireDemo() {
@@ -161,6 +190,9 @@
     });
     var started = false;
     function start() { if (started) return; started = true; load("NVDA"); }
+    // The demo is the next section down, so fetch early rather than relying
+    // only on the scroll observer (which some browsers delay or skip).
+    setTimeout(start, 2500);
     if ("IntersectionObserver" in window) {
       var io = new IntersectionObserver(function (entries) {
         if (entries.some(function (e) { return e.isIntersecting; })) { start(); io.disconnect(); }

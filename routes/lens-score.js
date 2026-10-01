@@ -10,6 +10,10 @@ const responseCache = new Map();
 const inFlight = new Map();
 const RESPONSE_TTL_MS = 2 * 60 * 1000;
 const RESPONSE_CACHE_LIMIT = 100;
+// Last good payload per ticker. If a provider blips, we serve this (real,
+// dated data, flagged as stale) instead of a hard error.
+const lastGood = new Map();
+const LAST_GOOD_TTL_MS = 12 * 60 * 60 * 1000;
 
 function cachedPayload(ticker) {
   const entry = responseCache.get(ticker);
@@ -27,6 +31,10 @@ function storePayload(ticker, payload) {
   const complete = (payload.provenance?.sources || []).every(source => source.status === "available");
   const ttlMs = complete ? RESPONSE_TTL_MS : 15 * 1000;
   responseCache.set(ticker, { expiresAt: Date.now() + ttlMs, payload });
+  if (payload?.score?.status === "graded") {
+    if (lastGood.size >= RESPONSE_CACHE_LIMIT && !lastGood.has(ticker)) lastGood.delete(lastGood.keys().next().value);
+    lastGood.set(ticker, { at: Date.now(), payload });
+  }
   return payload;
 }
 
@@ -113,6 +121,12 @@ router.get("/lens-score/:ticker", checkAnalysisLimit, async (req, res) => {
   } catch (error) {
     const message = String(error?.message || "Research data unavailable.").slice(0, 240);
     console.error(`[lens-score] ${ticker}:`, message);
+    const good = lastGood.get(ticker);
+    if (good && Date.now() - good.at < LAST_GOOD_TTL_MS && !/invalid ticker/i.test(message)) {
+      res.setHeader("X-LensScore-Cache", "STALE");
+      const stale = { ...good.payload, servedStale: true, staleReason: message };
+      return res.json(req.query.compact === "1" ? { ...compactPayload(good.payload), servedStale: true } : stale);
+    }
     return res.status(/invalid ticker/i.test(message) ? 400 : 503).json({
       ticker,
       status: "not-rated",
