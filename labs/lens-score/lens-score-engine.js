@@ -928,27 +928,27 @@
     const resistance = technical.zones.resistance[0] || null;
     const strengths = [];
     const concerns = [];
-    if (components.fundamentals >= 72) strengths.push("Business fundamentals are a positive contributor.");
-    else if (components.fundamentals < 45) concerns.push("Business fundamentals materially weaken the setup.");
-    if (components.valuation >= 72) strengths.push("Price and modeled expectations provide an attractive valuation contribution.");
-    else if (components.valuation < 45) concerns.push("Current valuation requires demanding assumptions.");
-    if (components.technical >= 72) strengths.push("Price structure and trend are constructive.");
-    else if (components.technical < 45) concerns.push("Trend and price structure remain unfavorable.");
+    if (components.fundamentals >= 72) strengths.push("The business is strong: growth, cash generation and returns on capital score well.");
+    else if (components.fundamentals < 45) concerns.push("The business itself is weak on growth, cash generation or returns on capital.");
+    if (components.valuation >= 72) strengths.push("The price looks reasonable for what the business is expected to earn.");
+    else if (components.valuation < 45) concerns.push("The price already assumes a lot: the company has to deliver strong growth to justify it.");
+    if (components.technical >= 72) strengths.push("The chart is healthy: price is trending up with higher lows.");
+    else if (components.technical < 45) concerns.push("The chart is weak: the trend is down or price structure is breaking.");
     if (technical.trendRegime.trendScore >= 6.5 && technical.trendRegime.agreement >= 4) {
-      strengths.push(`${technical.trendRegime.agreement} of ${technical.trendRegime.total} trend signals confirm an uptrend.`);
+      strengths.push(`${technical.trendRegime.agreement} of ${technical.trendRegime.total} trend checks point up.`);
     } else if (technical.trendRegime.trendScore <= 3.5 && technical.trendRegime.agreement >= 4) {
-      concerns.push(`${technical.trendRegime.agreement} of ${technical.trendRegime.total} trend signals confirm a downtrend.`);
+      concerns.push(`${technical.trendRegime.agreement} of ${technical.trendRegime.total} trend checks point down.`);
     }
-    if (technical.timing.timingScore >= 7.5) strengths.push("LensTiming shows favorable buyer-side entry pressure.");
-    else if (technical.timing.timingScore <= 2.5) concerns.push("LensTiming shows an extended, seller-dominated entry.");
+    if (technical.timing.timingScore >= 7.5) strengths.push("Entry timing is favorable: the stock has pulled back without breaking its trend.");
+    else if (technical.timing.timingScore <= 2.5) concerns.push("Entry timing is poor: the stock is stretched or sellers are in control.");
     if (technical.setupSignals.length) strengths.push(technical.setupSignals[0]);
     if (technical.setupGuardrails.length) concerns.push(technical.setupGuardrails[0]);
-    if (components.momentum >= 68) strengths.push("Momentum and volume are confirming the move.");
-    else if (components.momentum < 42) concerns.push("Momentum or volume confirmation is weak.");
-    if (components.risk >= 72) strengths.push("Measured downside and balance-sheet risk are contained.");
-    else if (components.risk < 45) concerns.push("Downside or balance-sheet risk requires caution.");
-    if (support) strengths.push(`Nearest support is ${Math.abs(support.distancePct).toFixed(1)}% below price.`);
-    if (resistance && Math.abs(resistance.distancePct) < 5) concerns.push("Price is close to a confirmed resistance zone.");
+    if (components.momentum >= 68) strengths.push("Momentum and trading volume back up the move.");
+    else if (components.momentum < 42) concerns.push("Momentum or volume is not backing up the move.");
+    if (components.risk >= 72) strengths.push("Downside risk looks contained, with a solid balance sheet.");
+    else if (components.risk < 45) concerns.push("Downside or balance-sheet risk is high. Size carefully.");
+    if (support) strengths.push(`Nearest support (where buyers stepped in before) is ${Math.abs(support.distancePct).toFixed(1)}% below the price.`);
+    if (resistance && Math.abs(resistance.distancePct) < 5) concerns.push("Price is near resistance, a level where sellers have stepped in before.");
     if (goldenLensActive) strengths.unshift("Golden Lens: long-term value and tactical entry quality are exceptionally aligned.");
 
     return {
