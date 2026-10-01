@@ -720,14 +720,37 @@ router.get("/estimates/:ticker", requirePro, async (req, res) => {
 // ============================================================
 //  GET /api/analyst/:ticker  (Pro)
 // ============================================================
+// Finnhub profiles carry an industry ("Semiconductors", "Banking"); the
+// sector benchmarks are keyed by sector. Map the one onto the other.
+const INDUSTRY_SECTORS = [
+  [/semiconductor|software|technology|hardware|electronic|it services|internet|computer/i, "Technology"],
+  [/pharma|biotech|health|medical|life science/i, "Healthcare"],
+  [/bank|financial|insurance|capital market|credit|asset management/i, "Financial Services"],
+  [/retail|automobile|auto |hotel|restaurant|leisure|textile|apparel|consumer products|homebuild|e-commerce/i, "Consumer Cyclical"],
+  [/food|beverage|tobacco|household|personal products|consumer staples/i, "Consumer Defensive"],
+  [/aerospace|defense|machinery|industrial|logistics|airline|construction|transport|electrical equipment|building/i, "Industrials"],
+  [/energy|oil|gas|coal/i, "Energy"],
+  [/utilit/i, "Utilities"],
+  [/real estate|reit/i, "Real Estate"],
+  [/media|telecom|communication|entertainment/i, "Communication"],
+  [/chemical|metal|mining|material|packaging|paper|steel/i, "Basic Materials"],
+];
+function sectorForIndustry(industry) {
+  if (!industry) return null;
+  const hit = INDUSTRY_SECTORS.find(([re]) => re.test(industry));
+  return hit ? hit[1] : null;
+}
+
 router.get("/analyst/:ticker", requirePro, async (req, res) => {
   const ticker = requestTicker(req, res);
   if (!ticker) return;
   try {
-    const [ptResp, recResp] = await Promise.all([
+    const [ptResp, recResp, profResp] = await Promise.all([
       fetchWithTimeout(`https://finnhub.io/api/v1/stock/price-target?symbol=${ticker}&token=${FINNHUB_KEY}`),
       fetchWithTimeout(`https://finnhub.io/api/v1/stock/recommendation?symbol=${ticker}&token=${FINNHUB_KEY}`),
+      fetchWithTimeout(`https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${FINNHUB_KEY}`, {}, 5000).catch(() => null),
     ]);
+    const profile = profResp?.ok ? await profResp.json().catch(() => ({})) : {};
     if (!ptResp.ok && !recResp.ok) {
       return res.status(503).json({ error: "Analyst data is unavailable from the configured provider.", synthetic: false });
     }
@@ -769,6 +792,8 @@ router.get("/analyst/:ticker", requirePro, async (req, res) => {
     res.json({
       priceTarget: merged,
       recommendations: rec,
+      industry: profile.finnhubIndustry || null,
+      sector: sectorForIndustry(profile.finnhubIndustry),
       yahooFd,
       impliedLens: sourceMeta("Finnhub analyst data", { asOf: merged.lastUpdated }),
     });
@@ -785,10 +810,21 @@ router.get("/institutional/:ticker", requirePro, async (req, res) => {
   const ticker = requestTicker(req, res);
   if (!ticker) return;
   try {
-    const r    = await fetchWithTimeout(`https://finnhub.io/api/v1/stock/ownership?symbol=${ticker}&limit=10&token=${FINNHUB_KEY}`);
+    const [r, profResp] = await Promise.all([
+      fetchWithTimeout(`https://finnhub.io/api/v1/stock/ownership?symbol=${ticker}&limit=10&token=${FINNHUB_KEY}`),
+      fetchWithTimeout(`https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${FINNHUB_KEY}`, {}, 5000).catch(() => null),
+    ]);
     if (!r.ok) return res.status(503).json({ error: "Institutional ownership is currently unavailable.", synthetic: false });
     const data = await r.json();
-    res.json({ ...data, impliedLens: sourceMeta("Finnhub institutional ownership") });
+    const profile = profResp?.ok ? await profResp.json().catch(() => ({})) : {};
+    // Finnhub reports shares outstanding in millions.
+    const sharesOut = Number(profile.shareOutstanding) > 0 ? Number(profile.shareOutstanding) * 1e6 : null;
+    const ownership = (Array.isArray(data.ownership) ? data.ownership : []).map(h => ({
+      ...h,
+      reportDate: h.reportDate || h.filingDate || null,
+      percentOfShares: sharesOut && Number.isFinite(Number(h.share)) ? Number(h.share) / sharesOut : null,
+    }));
+    res.json({ ...data, ownership, sharesOutstanding: sharesOut, impliedLens: sourceMeta("Finnhub institutional ownership") });
   } catch (e) {
     console.error("institutional proxy error:", e.message);
     res.status(503).json({ error: "Failed to fetch institutional data.", synthetic: false });

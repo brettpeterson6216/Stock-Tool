@@ -4489,12 +4489,13 @@ async function loadInstitutional(ticker) {
     const siPct     = si.shortPercentOfFloat   ? (si.shortPercentOfFloat*100).toFixed(2)+'%' : null;
     const siDate    = si.dateShortInterest     || null;
 
+    // Short-interest cards only appear when the provider actually sent them.
     const siCards = [
-      { lbl:'Short % Float',   val: siPct    || '—', color: siPct && parseFloat(siPct)>15 ? '#d96a70' : '#C6A052' },
-      { lbl:'Shares Short',    val: siShares || '—', color:'var(--text)' },
-      { lbl:'Short Ratio',     val: siRatio  || '—', color:'var(--text)' },
-      { lbl:'SI Date',         val: siDate   || '—', color:'var(--text5)' },
-    ];
+      { lbl:'Short % Float',   val: siPct,    color: siPct && parseFloat(siPct)>15 ? 'var(--market-down)' : 'var(--text)' },
+      { lbl:'Shares Short',    val: siShares, color:'var(--text)' },
+      { lbl:'Short Ratio',     val: siRatio,  color:'var(--text)' },
+      { lbl:'SI Date',         val: siDate,   color:'var(--text5)' },
+    ].filter(c => c.val);
 
     if(dpCards) {
       const dpKpi = dp.length ? [
@@ -4544,7 +4545,8 @@ async function loadInstitutional(ticker) {
       } else {
         instTbl.innerHTML = holders.map(h => {
           const shares    = h.share          != null ? fmtShares(h.share)       : '—';
-          const pct       = h.percentageHeld != null ? (h.percentageHeld*100).toFixed(2)+'%' : '—';
+          const frac      = h.percentOfShares != null ? h.percentOfShares : h.percentageHeld;
+          const pct       = frac != null ? (frac*100).toFixed(2)+'%' : '—';
           const change    = h.change         != null ? h.change : null;
           const chgColor  = change>0?'var(--market-up)':change<0?'var(--market-down)':'var(--text4)';
           const chgStr    = change!=null ? `<span style="color:${chgColor}">${change>0?'+':change<0?'−':''}${fmtShares(Math.abs(change))}</span>` : '—';

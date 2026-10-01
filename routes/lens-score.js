@@ -8,7 +8,7 @@ const LensScoreEngine = require("../lib/lens-score-engine");
 const router = express.Router();
 const responseCache = new Map();
 const inFlight = new Map();
-const RESPONSE_TTL_MS = 2 * 60 * 1000;
+const RESPONSE_TTL_MS = 10 * 60 * 1000;
 const RESPONSE_CACHE_LIMIT = 100;
 // Last good payload per ticker. If a provider blips, we serve this (real,
 // dated data, flagged as stale) instead of a hard error.
@@ -138,4 +138,26 @@ router.get("/lens-score/:ticker", checkAnalysisLimit, async (req, res) => {
   }
 });
 
+// Popular tickers are scored in the background so the homepage demo and the
+// LensToolkit open instantly instead of computing five years of research on
+// the visitor's click. Started by server.js only (never in tests); timers are
+// unref'd so they never hold the process open.
+const WARM_TICKERS = ["AAPL", "NVDA", "MSFT", "TSLA", "AMZN", "META", "GOOGL"];
+function startWarmup({ firstDelayMs = 20 * 1000, everyMs = 9 * 60 * 1000 } = {}) {
+  let running = false;
+  async function warm() {
+    if (running) return;
+    running = true;
+    for (const ticker of WARM_TICKERS) {
+      try { await getPayload(ticker); } catch (error) {
+        console.warn(`[lens-score] warm-up ${ticker}:`, String(error?.message || error).slice(0, 160));
+      }
+    }
+    running = false;
+  }
+  setTimeout(warm, firstDelayMs).unref?.();
+  setInterval(warm, everyMs).unref?.();
+}
+
 module.exports = router;
+module.exports.startWarmup = startWarmup;

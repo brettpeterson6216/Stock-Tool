@@ -562,7 +562,10 @@ async function runReviewDigests() {
 
 if (require.main === module) {
   initDb().then(() => {
-    app.listen(PORT, () => console.log(`ImpliedLens running on port ${PORT}`));
+    app.listen(PORT, () => {
+      console.log(`ImpliedLens running on port ${PORT}`);
+      if (process.env.NODE_ENV !== "test" && typeof lensScoreRouter.startWarmup === "function") lensScoreRouter.startWarmup();
+    });
     // Company-name search answers from memory. The seed list in
     // lib/ticker-index.js serves the first few seconds; this pulls the full
     // SEC registrant list behind it and refreshes daily. It can fail freely —

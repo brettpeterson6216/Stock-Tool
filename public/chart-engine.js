@@ -754,29 +754,37 @@
     var p = palette();
     var lines = [];
 
-    function add(price, color, title, style, width) {
+    function tint(hex, a) {
+      var m = String(hex || "").match(/^#?([0-9a-f]{6})$/i);
+      if (!m) return hex;
+      var n = parseInt(m[1], 16);
+      return "rgba(" + (n >> 16 & 255) + "," + (n >> 8 & 255) + "," + (n & 255) + "," + a + ")";
+    }
+    function add(price, color, title, style, width, label) {
       if (price == null || !isFinite(Number(price))) return;
       try {
         lines.push(instance.series.price.createPriceLine({
           price: Number(price), color: color, lineWidth: width || 1,
           lineStyle: style == null ? 2 : style,
-          axisLabelVisible: true, title: title
+          axisLabelVisible: !!label, title: label ? title : ""
         }));
       } catch (e) {}
     }
 
+    /* Only the nearest buy and sell zones are labelled; deeper levels and the
+       retracement band are faint guides, so the chart stays readable. */
     var z = setup.zones || {};
     (z.buyer || []).slice(0, 3).forEach(function (g, i) {
-      add(g.price, p.up, i === 0 ? "Buyers" : "Buyers " + (i + 1), 2, i === 0 ? 2 : 1);
+      add(g.price, i === 0 ? p.up : tint(p.up, .38), "Buy zone", 2, 1, i === 0);
     });
     (z.seller || []).slice(0, 3).forEach(function (g, i) {
-      add(g.price, p.down, i === 0 ? "Sellers" : "Sellers " + (i + 1), 2, i === 0 ? 2 : 1);
+      add(g.price, i === 0 ? p.down : tint(p.down, .38), "Sell zone", 2, 1, i === 0);
     });
 
     var fib = setup.retracement;
     if (fib) {
-      add(fib.upper, p.band, "0.5", 3);
-      add(fib.lower, p.band, "0.618", 3);
+      add(fib.upper, tint(p.gold, .35), "", 3, 1, false);
+      add(fib.lower, tint(p.gold, .35), "", 3, 1, false);
     }
     instance._ilZoneLines = lines;
 
@@ -796,7 +804,7 @@
         position: kind === "bullish" ? "belowBar" : "aboveBar",
         color: kind === "bullish" ? p.up : p.down,
         shape: kind === "bullish" ? "arrowUp" : "arrowDown",
-        text: kind === "bullish" ? "Bull div" : "Bear div"
+        text: kind === "bullish" ? "Div" : "Div"
       });
     }
     if (div.bullish) markAt(div.bullish.toIndex, "bullish");
