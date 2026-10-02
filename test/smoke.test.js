@@ -522,7 +522,11 @@ test("homepage executable scripts are external and CSP blocks inline script bloc
     .filter(match => !/\bsrc=/.test(match[0]) && match[1].trim());
   assert.equal(executableInline.length, 0);
   assert.match(html, /src="\/app-navigation\.js/);
-  assert.match(html, /src="\/app-legacy\.js/);
+  // A signed-out visitor on "/" gets the lite copy (lib/home-lite.js); the app
+  // itself is on every URL that asks for it.
+  assert.match(html, /src="\/home-lite\.js/);
+  const app = await (await req("/?view=tool")).text();
+  assert.match(app, /src="\/app-legacy\.js/);
 
   const csp = res.headers.get("content-security-policy") || "";
   const scriptSource = csp.split(";").find(part => part.trim().startsWith("script-src ")) || "";

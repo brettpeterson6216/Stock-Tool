@@ -78,6 +78,9 @@
 <link href="/workspace-system.css?v=20260907-16" rel="stylesheet">
 <link href="/research-system.css?v=20260907-16" rel="stylesheet">
 <!-- defer: this was the only render-blocking script on the page, 201KB before first paint -->
+<!-- il:app-bundle  The application scripts. A signed-out visitor on the plain
+     home page gets lib/home-lite.js's copy of this page, where everything
+     between these markers is held back until they head into the app. -->
 <script defer src="/vendor/chart.umd.min.js?v=4.4.1"></script>
 <script defer src="/vendor/hammer.min.js?v=2.0.8"></script>
 <script defer src="/vendor/chartjs-plugin-zoom.min.js?v=2.2.0"></script>
@@ -85,6 +88,7 @@
 <script defer src="/projection-lab.js?v=20260825-6"></script>
 <script defer src="/valuation-lab.js?v=20260825-6"></script>
 <script defer src="/vendor/lightweight-charts.standalone.production.js?v=5.2.1"></script>
+<!-- /il:app-bundle -->
 <link href="/legacy-app.css?v=20260907-16" rel="stylesheet">
 <link href="/premium.css?v=20260907-16" rel="stylesheet">
 <link href="/release-polish.css?v=20260907-16" rel="stylesheet">
@@ -1958,6 +1962,8 @@
   <button onclick="document.getElementById('verif-banner').style.display='none';document.body.classList.remove('has-verif-banner')" style="background:none;border:none;color:rgba(237,232,224,.35);cursor:pointer;font-size:15px;line-height:1;padding:0 .25rem;">✕</button>
 </div>
 
+<script defer src="/il-icons.js?v=20261002-1"></script>
+<!-- il:app-bundle -->
 <script defer src="/app-legacy.js?v=20260904-1"></script>
 <!-- Enhancement modules depend on the application controller. Deferred
      scripts execute in document order, before DOMContentLoaded. -->
@@ -1968,11 +1974,11 @@
 <script defer src="/chart-analysis.js?v=20260825-6"></script>
 <script defer src="/hero-chart.js?v=20260825-6"></script>
 <script defer src="/tool-launch.js?v=20260904-1"></script>
-<script defer src="/il-icons.js?v=20261002-1"></script>
 <script defer src="/lessons-data.js?v=20261002-1"></script>
 <script defer src="/academy-panel.js?v=20261002-1"></script>
 <script defer src="/research-flow.js?v=20261002-1"></script>
 <script defer src="/share-studio.js?v=20260827-2"></script>
+<!-- /il:app-bundle -->
 
 <!-- ── Mobile Bottom Navigation ── -->
 <nav class="mobile-bottom-nav" id="mobile-bottom-nav" aria-label="Mobile navigation">

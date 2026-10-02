@@ -56,7 +56,7 @@ const { PORT, SESSION_SECRET } = cfg;
 }());
 
 const path    = require("path");
-const { sendPage, stampHtml } = require("./lib/asset-stamp");
+const { sendPage, stampHtml, readStamped } = require("./lib/asset-stamp");
 const fs      = require("fs");
 const crypto  = require("crypto");
 const express = require("express");
@@ -255,7 +255,22 @@ app.use("/api",         logoRouter);         // /api/logo/:ticker
 // ============================================================
 //  Static HTML pages
 // ============================================================
-app.get("/", (_req, res) => sendPage(res, path.join(__dirname, "index.html")));
+const { wantsLite, liteHtml } = require("./lib/home-lite");
+let liteHomeCache;
+app.get("/", (req, res) => {
+  const indexPath = path.join(__dirname, "index.html");
+  /* The same URL serves two documents depending on the session cookie, so no
+     shared cache may hand one visitor's copy to another. */
+  res.setHeader("Vary", "Cookie");
+  if (wantsLite(req)) {
+    if (liteHomeCache === undefined) liteHomeCache = liteHtml(readStamped(indexPath));
+    if (liteHomeCache) {
+      res.setHeader("Cache-Control", "no-cache, must-revalidate");
+      return res.type("html").send(liteHomeCache);
+    }
+  }
+  return sendPage(res, indexPath);
+});
 
 app.get(["/login",  "/login.html"],  (req, res) => sendPage(res, path.join(__dirname, "public", "login.html")));
 app.get(["/signup", "/signup.html"], (req, res) => sendPage(res, path.join(__dirname, "public", "signup.html")));
