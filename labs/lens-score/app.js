@@ -65,7 +65,9 @@
     .slice(0, 15);
   const SESSION_CACHE_PREFIX = "il:lens-score:v3:";
   const SESSION_CACHE_INDEX = `${SESSION_CACHE_PREFIX}index`;
-  const SESSION_CACHE_TTL_MS = 15 * 60 * 1000;
+  // Short enough that a price never trails the market by much; the server
+  // caches as well, so this only saves a round trip when flipping tickers.
+  const SESSION_CACHE_TTL_MS = 3 * 60 * 1000;
 
   function decodeBars(rows) {
     return (rows || []).map(row => Array.isArray(row)

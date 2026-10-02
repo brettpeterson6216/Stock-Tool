@@ -12,6 +12,7 @@
 //    GET /api/institutional/:ticker
 //    GET /api/darkpool/:ticker (legacy path; returns FINRA OTC activity)
 // ============================================================
+const { ttmFromFacts, latestSharesFromFacts } = require("../lib/ttm");
 const express = require("express");
 
 const { FINNHUB_KEY }  = require("../lib/config");
@@ -170,6 +171,9 @@ router.get("/financials/:ticker", requireAccount, async (req, res) => {
         .sort((a, b) => a.end < b.end ? 1 : -1)   // newest first
         .slice(0, 4);
     }
+
+    const ttmValue = concepts => ttmFromFacts(gaap, concepts);
+    const latestShares = () => latestSharesFromFacts(facts);
 
     const revSeries    = annualSeries(["Revenues","RevenueFromContractWithCustomerExcludingAssessedTax","SalesRevenueNet","RevenueFromContractWithCustomerIncludingAssessedTax"]);
     const cogsSeries   = annualSeries(["CostOfGoodsAndServicesSold","CostOfRevenue","CostOfGoodsSold"]);
@@ -375,6 +379,18 @@ router.get("/financials/:ticker", requireAccount, async (req, res) => {
         cashflowStatementHistoryQuarterly: { cashflowStatements:      []   },
         defaultKeyStatistics,
         financialData,
+        trailingTwelveMonths: (() => {
+          const rev = ttmValue(["Revenues","RevenueFromContractWithCustomerExcludingAssessedTax","SalesRevenueNet","RevenueFromContractWithCustomerIncludingAssessedTax"]);
+          const ni = ttmValue(["NetIncomeLoss","ProfitLoss"]);
+          const sh = latestShares();
+          return {
+            revenue: rev ? { raw: rev.val } : null,
+            netIncome: ni ? { raw: ni.val } : null,
+            asOf: rev ? rev.asOf : null,
+            basis: rev ? rev.basis : null,
+            sharesOutstanding: sh ? { raw: sh.val } : null,
+          };
+        })(),
       }]},
     });
 

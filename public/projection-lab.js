@@ -1127,6 +1127,19 @@
       var mcap = rawNum(meta.marketCap);
       if (Number.isFinite(mcap) && mcap > 0 && Number.isFinite(price) && price > 0) shares = mcap / price;
     }
+    // Prefer the trailing twelve months from the newest 10-Q over the last
+    // annual report, which can be most of a year old.
+    var ttm = r && r.trailingTwelveMonths;
+    if (ttm && ttm.basis === "ttm") {
+      var tRev = rawNum(ttm.revenue), tNi = rawNum(ttm.netIncome);
+      if (Number.isFinite(tRev) && tRev > 0 && Number.isFinite(tNi)) {
+        revenue = tRev; netIncome = tNi;
+        var d = new Date(String(ttm.asOf) + "T00:00:00Z");
+        if (!isNaN(d)) fyLabel = "12 months to " + d.toLocaleString("en-US", { month: "short", year: "numeric", timeZone: "UTC" }) + " ·";
+      }
+    }
+    var tShares = ttm ? rawNum(ttm.sharesOutstanding) : NaN;
+    if (Number.isFinite(tShares) && tShares > 0) shares = tShares;
     if (Number.isFinite(shares) && shares > 0) seed.dilutedShares = shares;
     if (Number.isFinite(revenue) && revenue > 0) { seed.baseRevenue = revenue; seed.seeded = true; }
     // Deterministic net-income priority: statement net income first; else derive from EPS × shares and flag it.
@@ -1139,8 +1152,28 @@
         seed.netIncomeDerived = true;
       }
     }
-    seed.source = seed.seeded ? ((fyLabel ? fyLabel + " " : "") + "reported financials") : "market quote (partial)";
+    seed.source = seed.seeded ? ((fyLabel ? fyLabel + " " : "") + (fyLabel.indexOf("months") >= 0 ? "SEC filings" : "reported financials")) : "market quote (partial)";
     return seed;
+  }
+
+  /* A saved model keeps the user's assumptions, but anything they did not
+     type themselves follows the latest data: today's price, and the newest
+     revenue, earnings and share count once statements are loaded. */
+  var BASE_KEYS = ["startPrice", "dilutedShares", "baseRevenue", "baseNetIncome"];
+  function refreshUnedited(model, seed) {
+    if (!model || !seed) return false;
+    var edited = model.userEdited || {}, changed = false;
+    var complete = seedComplete(seed);
+    BASE_KEYS.forEach(function (k) {
+      if (edited[k]) return;
+      if (k !== "startPrice" && !complete) return;
+      var v = Number(seed[k]);
+      if (!Number.isFinite(v) || v <= 0 && k !== "baseNetIncome") return;
+      if (model[k] !== v) { model[k] = v; changed = true; }
+      if (model.seed && model.seed.values) model.seed.values[k] = v;
+    });
+    if (changed && complete && model.seed) model.seed.source = seed.source;
+    return changed;
   }
 
   function seedComplete(seed) { return !!seed.seeded && Number.isFinite(Number(seed.baseNetIncome)); }
@@ -1222,6 +1255,7 @@
         var saved = loadSaved(ticker);
         if (saved) {
           PL.model = saved;
+          refreshUnedited(saved, readSeedFromApp());
           PL.savedJson = JSON.stringify(saved);
         } else {
           PL.model = math.plCreateModel(readSeedFromApp());
@@ -1267,8 +1301,13 @@
         PL.model = M().plCreateModel(s2);
         render();
       } else {
-        PL.seedHintShown = true; // offer, never overwrite
-        renderStatus(PL.lastOutlook);
+        // Untyped base figures follow the new data; the user's own edits and
+        // scenario assumptions are left exactly as they were.
+        var wasSaved = PL.savedJson && PL.savedJson === JSON.stringify(PL.model);
+        if (refreshUnedited(PL.model, s2)) {
+          if (wasSaved) PL.savedJson = JSON.stringify(PL.model);
+          render();
+        } else renderStatus(PL.lastOutlook);
       }
     });
   }

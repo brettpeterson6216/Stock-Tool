@@ -14,6 +14,16 @@ const RESPONSE_CACHE_LIMIT = 100;
 // dated data, flagged as stale) instead of a hard error.
 const lastGood = new Map();
 const LAST_GOOD_TTL_MS = 12 * 60 * 60 * 1000;
+// While US markets trade, a score's price should be minutes old, not ten.
+const MARKET_HOURS_TTL_MS = 2 * 60 * 1000;
+function usMarketOpen(now = new Date()) {
+  const parts = Object.fromEntries(new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/New_York", weekday: "short", hour: "numeric", minute: "numeric", hour12: false,
+  }).formatToParts(now).map(p => [p.type, p.value]));
+  if (parts.weekday === "Sat" || parts.weekday === "Sun") return false;
+  const mins = (Number(parts.hour) % 24) * 60 + Number(parts.minute);
+  return mins >= 9 * 60 + 30 && mins < 16 * 60 + 5;
+}
 
 function cachedPayload(ticker) {
   const entry = responseCache.get(ticker);
@@ -29,7 +39,7 @@ function storePayload(ticker, payload) {
     responseCache.delete(responseCache.keys().next().value);
   }
   const complete = (payload.provenance?.sources || []).every(source => source.status === "available");
-  const ttlMs = complete ? RESPONSE_TTL_MS : 15 * 1000;
+  const ttlMs = complete ? (usMarketOpen() ? MARKET_HOURS_TTL_MS : RESPONSE_TTL_MS) : 15 * 1000;
   responseCache.set(ticker, { expiresAt: Date.now() + ttlMs, payload });
   if (payload?.score?.status === "graded") {
     if (lastGood.size >= RESPONSE_CACHE_LIMIT && !lastGood.has(ticker)) lastGood.delete(lastGood.keys().next().value);
@@ -160,4 +170,5 @@ function startWarmup({ firstDelayMs = 20 * 1000, everyMs = 9 * 60 * 1000 } = {})
 }
 
 module.exports = router;
+module.exports.usMarketOpen = usMarketOpen;
 module.exports.startWarmup = startWarmup;
