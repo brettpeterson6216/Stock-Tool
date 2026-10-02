@@ -480,7 +480,7 @@ function renderPage(ticker, q, facts) {
       </div>
     </div>` : `
     <div class="quote-card" style="justify-content:center;padding:2rem">
-      <div style="color:rgba(220,225,232,.4);font-size:.9rem">Open the analyzer for the latest available market context.</div>
+      <div class="il-quote-empty">Open the analyzer for the latest available market context.</div>
     </div>`}
 
     <div class="cta-section">
