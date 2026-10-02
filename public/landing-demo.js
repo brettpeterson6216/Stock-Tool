@@ -193,10 +193,11 @@
     // is on screen, not behind the research or dashboard views.
     function landingShown() {
       var lp = document.getElementById("landing-page");
-      return !!(lp && lp.getClientRects().length && !document.hidden);
+      return !!(lp && lp.getClientRects().length);
     }
     function start() { if (started || !landingShown()) return; started = true; load("NVDA"); }
     window.addEventListener("il:viewchange", function () { setTimeout(start, 600); });
+    document.addEventListener("visibilitychange", function () { if (!document.hidden) start(); });
     // The demo is the next section down, so fetch early rather than relying
     // only on the scroll observer (which some browsers delay or skip).
     setTimeout(start, 2500);
