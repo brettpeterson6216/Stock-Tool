@@ -126,6 +126,10 @@
     };
   }
 
+  // The indicator charts (Chart.js, app-legacy.js) read this so every chart
+  // on the page shares one palette.
+  window.ILChartPalette = palette;
+
   /* ── state ─────────────────────────────────────────────────────────────── */
   var view = {
     scale: "normal",       // normal | log | percent

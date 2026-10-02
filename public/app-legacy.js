@@ -93,7 +93,14 @@ const S = {
 };
 window.IL_STATE = S;
 window.S = S;  // alias so external modules (Projection Lab, Valuation Lab) can read app state
-const COLORS = ['#16C784','#3B82F6','#A78BFA','#F5B83D'];
+/* Compare series: gold, blue, aqua, orange. Checked with the dataviz
+   validator: all four pass the adjacent-pair CVD and normal-vision floors in
+   both themes (line chart); the first three also pass all-pairs (radar), so
+   the radar is capped at three. Light steps sit under 3:1 on cream, which is
+   why the legend and the table carry every value as text. */
+const SERIES_COLORS = { dark: ['#c98500','#3987e5','#199e70','#d95926'], light: ['#eda100','#2a78d6','#1baf7a','#eb6834'] };
+function seriesColor(i){ const d=document.documentElement.getAttribute('data-theme')==='dark'; return (d?SERIES_COLORS.dark:SERIES_COLORS.light)[i%4]; }
+const COLORS = SERIES_COLORS.dark;
 // Keep this list in sync with the requirePro-gated API routes in routes/financials.js
 // and routes/market-data.js (screener).
 const PRO_SECTIONS = ['advmetrics','projection','dcf','screener',
@@ -1961,6 +1968,14 @@ function expandChart(chartId, title) {
   syncExpandedTypeToggle();
 }
 function cp() {
+  // One palette for every chart: the price chart's (chart-engine.js). Older
+  // stylesheets still redefine the --chart-* variables in green, which is
+  // why the indicators used to disagree with the price chart.
+  const hex=v=>typeof v==='string'&&/^#[0-9a-f]{3,8}$/i.test(v.trim());
+  const e=typeof window.ILChartPalette==='function'?window.ILChartPalette():null;
+  if(e&&[e.gold,e.up,e.down,e.ma50,e.ma200,e.ema].every(hex)){
+    return {price:e.gold.trim(),positive:e.up.trim(),negative:e.down.trim(),ma50:e.ma50,ma200:e.ma200,bands:e.ema,neutral:hex(e.text)?e.text.trim():'#9A968D'};
+  }
   const styles=getComputedStyle(document.documentElement);
   const get=(name,fallback)=>styles.getPropertyValue(name).trim()||fallback;
   return {
@@ -3470,7 +3485,7 @@ function buildVolChart(vols,timestamps,closes) {
   const t=ct();
   const p=cp();
   const labels=chartXLabels(timestamps);
-  const bg=vols.map((_,i)=>closes[i]>=closes[i-1]?colorAlpha(p.positive,.46):colorAlpha(p.negative,.46));
+  const bg=vols.map((_,i)=>closes[i]>=closes[i-1]?colorAlpha(p.positive,.38):colorAlpha(p.negative,.38));
   S.charts['vol-chart']=new Chart(document.getElementById('vol-chart'),{
     type:'bar',
     data:{labels,datasets:[{label:'Volume',data:vols,backgroundColor:bg,borderWidth:0,borderRadius:1}]},
@@ -3712,7 +3727,7 @@ function buildCompareTable(tickers, results, analystArr=[]) {
     {l:'Exchange',vals:metas.map(m=>m.exchangeName||'—'),nums:null,hi:false},
   ];
   let html='<thead><tr><th>Metric</th>';
-  tickers.forEach((t,i)=>{ html+=`<th class="cmp-hdr"><span class="t-dot" style="background:${COLORS[i]}"></span>${t}</th>`; });
+  tickers.forEach((t,i)=>{ html+=`<th class="cmp-hdr"><span class="t-dot" style="background:${seriesColor(i)}"></span>${t}</th>`; });
   html+='</tr></thead><tbody>';
   rows.forEach(row=>{
     html+=`<tr><td>${row.l}</td>`;
@@ -3737,7 +3752,7 @@ function buildPerfChart(tickers,results) {
   const datasets=tickers.map((t,i)=>{
     const c=allCloses[i].slice(-minLen);
     const base=c[0];
-    return{label:t,data:c.map(v=>parseFloat(((v-base)/base*100).toFixed(2))),borderColor:COLORS[i],borderWidth:2,pointRadius:0,fill:false,tension:.2};
+    return{label:t,data:c.map(v=>parseFloat(((v-base)/base*100).toFixed(2))),borderColor:seriesColor(i),borderWidth:2,pointRadius:0,pointHoverRadius:5,fill:false,tension:.2};
   });
   const _pt=ct();
   var perfOpts=baseOpts({
@@ -3762,12 +3777,18 @@ function buildRadarChart(tickers, results, analystArr=[]) {
   const pes=metas.map((m,i)=>afdsR[i].trailingPE||m.trailingPE||50);
   const norm=(arr,invert=false)=>{const mn=Math.min(...arr),mx=Math.max(...arr);return arr.map(v=>mx===mn?50:invert?(1-(v-mn)/(mx-mn))*100:((v-mn)/(mx-mn))*100);};
   const nYr1=norm(yr1); const nRsi=norm(rsiVals); const nVol=norm(vols,true); const nCap=norm(caps); const nPe=norm(pes,true);
-  const datasets=tickers.map((t,i)=>({
+  // Overlapping shapes need every pair distinguishable; the palette clears
+  // that for three series, so the radar shows the first three.
+  const datasets=tickers.slice(0,3).map((t,i)=>({
     label:t,
     data:[nYr1[i],nRsi[i],nVol[i],nCap[i],nPe[i]].map(v=>Math.round(v)),
-    borderColor:COLORS[i],backgroundColor:colorAlpha(COLORS[i],.12),
-    borderWidth:2,pointRadius:3,
+    borderColor:seriesColor(i),backgroundColor:colorAlpha(seriesColor(i),.10),
+    borderWidth:2,pointRadius:4,pointBackgroundColor:seriesColor(i),
   }));
+  const wrap=el.closest('.h200')||el.parentElement;
+  let note=wrap&&wrap.parentElement&&wrap.parentElement.querySelector('.il-radar-note');
+  if(wrap&&!note){note=document.createElement('p');note.className='il-radar-note';wrap.after(note);}
+  if(note){note.textContent=tickers.length>3?'The radar shows the first three companies; the table and performance chart include all four.':'';note.hidden=tickers.length<=3;}
   S.charts['cmp-radar-chart']=new Chart(el,{
     type:'radar',data:{labels:['1Y Return','RSI','Low Vol','Mkt Cap','Value (P/E)'],datasets},
     options:{responsive:true,maintainAspectRatio:false,

@@ -1507,3 +1507,4 @@ html body.il-static-page .feat .feat-icon i.il-ic-host { font-size: 28px !import
   .il-ribbon.il-ribbon-hero { opacity: .5 !important; }
   #landing-page .il-ribbon.il-ribbon-hero { opacity: .78 !important; }
 }
+#body-compare .il-radar-note { margin: 10px 0 0 !important; font: 500 12.5px/1.5 var(--rp-sans) !important; color: var(--rp-muted) !important; }
