@@ -112,6 +112,22 @@ function compactPayload(payload) {
   };
 }
 
+// The homepage demo card shows the score, its parts, the reasons and a
+// one-year line. The full payload is ~770KB of JSON (5 years of bars,
+// regime and timing series); this is a few KB.
+function cardPayload(payload) {
+  const score = payload.score || {};
+  const tech = score.technical || {};
+  const { timing, trendRegime, zones, bars, ...techRest } = tech;
+  return {
+    schemaVersion: payload.schemaVersion,
+    ticker: payload.ticker,
+    company: payload.company,
+    score: { ...score, technical: { ...techRest, bars: (bars || []).slice(-252).map(bar => ({ close: bar.close })) } },
+    provenance: { asOf: payload.provenance?.asOf, retrievedAt: payload.provenance?.retrievedAt },
+  };
+}
+
 router.get("/lens-score/:ticker", checkAnalysisLimit, async (req, res) => {
   const ticker = normalizeTicker(req.params.ticker);
   if (!ticker) return res.status(400).json({ error: "Invalid ticker." });
@@ -123,6 +139,10 @@ router.get("/lens-score/:ticker", checkAnalysisLimit, async (req, res) => {
     res.setHeader("X-Data-Retrieved-At", payload.provenance.retrievedAt);
     res.setHeader("X-Market-As-Of", payload.provenance.asOf.market || "");
     res.setHeader("X-Fundamentals-As-Of", payload.provenance.asOf.fundamentals || "");
+    if (req.query.card === "1") {
+      res.setHeader("X-LensScore-Mode", "card");
+      return res.json(cardPayload(payload));
+    }
     if (req.query.compact === "1") {
       res.setHeader("X-LensScore-Mode", "compact");
       return res.json(compactPayload(payload));
@@ -135,6 +155,7 @@ router.get("/lens-score/:ticker", checkAnalysisLimit, async (req, res) => {
     if (good && Date.now() - good.at < LAST_GOOD_TTL_MS && !/invalid ticker/i.test(message)) {
       res.setHeader("X-LensScore-Cache", "STALE");
       const stale = { ...good.payload, servedStale: true, staleReason: message };
+      if (req.query.card === "1") return res.json({ ...cardPayload(good.payload), servedStale: true });
       return res.json(req.query.compact === "1" ? { ...compactPayload(good.payload), servedStale: true } : stale);
     }
     return res.status(/invalid ticker/i.test(message) ? 400 : 503).json({
@@ -171,4 +192,5 @@ function startWarmup({ firstDelayMs = 20 * 1000, everyMs = 9 * 60 * 1000 } = {})
 
 module.exports = router;
 module.exports.usMarketOpen = usMarketOpen;
+module.exports.cardPayload = cardPayload;
 module.exports.startWarmup = startWarmup;

@@ -166,7 +166,7 @@
   function fetchScore(t, attempt) {
     var ctrl = "AbortController" in window ? new AbortController() : null;
     var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 20000);
-    fetch("/api/lens-score/" + encodeURIComponent(t) + "?preview=1", { credentials: "same-origin", signal: ctrl ? ctrl.signal : undefined })
+    fetch("/api/lens-score/" + encodeURIComponent(t) + "?preview=1&card=1", { credentials: "same-origin", signal: ctrl ? ctrl.signal : undefined })
       .then(function (r) { if (!r.ok) throw new Error(String(r.status)); return r.json(); })
       .then(function (d) {
         clearTimeout(timer);
@@ -189,7 +189,14 @@
       b.addEventListener("click", function () { load(b.getAttribute("data-demo")); });
     });
     var started = false;
-    function start() { if (started) return; started = true; load("NVDA"); }
+    // index.html holds the app views too; only fetch when the homepage itself
+    // is on screen, not behind the research or dashboard views.
+    function landingShown() {
+      var lp = document.getElementById("landing-page");
+      return !!(lp && lp.getClientRects().length && !document.hidden);
+    }
+    function start() { if (started || !landingShown()) return; started = true; load("NVDA"); }
+    window.addEventListener("il:viewchange", function () { setTimeout(start, 600); });
     // The demo is the next section down, so fetch early rather than relying
     // only on the scroll observer (which some browsers delay or skip).
     setTimeout(start, 2500);
