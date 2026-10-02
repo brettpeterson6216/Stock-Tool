@@ -1579,50 +1579,27 @@
           </div><!-- /sec-reports -->
 
           <div class="app-section" id="sec-education"><div class="acc-body" id="body-education" style="display:none;">
-            <div class="edu-hero">
-              <div>
-                <div class="edu-kicker">ImpliedLens Learn</div>
-                <h2>Learn the product. Read the evidence. Make a decision.</h2>
-                <p>Five practical modules explain the ImpliedLens workflow, score, charts, financials, vocabulary, and thesis process.</p>
+            <!-- The Academy, in the app. Lessons live in public/lessons-data.js and
+                 read at /learn/<slug>; progress is the same browser-stored list the
+                 lesson pages tick (il-academy-done). academy-panel.js fills this. -->
+            <section class="il-academy" id="il-academy" aria-label="ImpliedLens Academy">
+              <div class="il-ac-top">
+                <div class="il-ac-progress">
+                  <div class="il-ac-count"><b id="il-ac-done">0</b> of <span id="il-ac-total">20</span> lessons done</div>
+                  <div class="il-ac-bar" aria-hidden="true"><span id="il-ac-fill"></span></div>
+                </div>
+                <a class="il-ac-next" id="il-ac-next" href="/learn">Open the Academy <span aria-hidden="true">&rarr;</span></a>
               </div>
-              <div class="edu-progress-card">
-                <div class="edu-progress-top"><span>Course progress</span><strong id="edu-progress-label">0 / 5</strong></div>
-                <div class="edu-progress-track"><div id="edu-progress-fill"></div></div>
-                <small>Completed lessons are saved on this device.</small>
+              <div class="il-ac-levels" id="il-ac-levels">
+                <p class="il-ac-fallback">Twenty short lessons in five levels, from your first stock to a full valuation. <a href="/learn">Open the Academy</a>.</p>
               </div>
-            </div>
+              <div class="il-ac-practice">
+                <div><strong>Practice: build a thesis</strong><span>A guided worksheet that turns a ticker into a falsifiable case.</span></div>
+                <button type="button" class="il-ac-practice-btn" id="il-ac-workshop">Open the worksheet</button>
+              </div>
+            </section>
 
-            <div class="edu-path-grid">
-              <button class="edu-path" data-lesson="site-tour" onclick="openLesson(this)">
-                <span class="edu-path-num">01</span><i class="ti ti-route"></i>
-                <strong>Use the research workflow</strong><span>Move from a ticker to a sourced, saved decision without getting lost.</span>
-                <em>6 min · Start here</em>
-              </button>
-              <button class="edu-path" data-lesson="lens-score" onclick="openLesson(this)">
-                <span class="edu-path-num">02</span><i class="ti ti-focus-2"></i>
-                <strong>Read LensScore</strong><span>Understand LensValue, LensSetup, Golden Lens, confidence, and caps.</span>
-                <em>8 min · Core metric</em>
-              </button>
-              <button class="edu-path" data-lesson="charts" onclick="openLesson(this)">
-                <span class="edu-path-num">03</span><i class="ti ti-chart-candle"></i>
-                <strong>Read charts and zones</strong><span>Use support, resistance, trend, momentum, volume, and volatility together.</span>
-                <em>9 min · Technical</em>
-              </button>
-              <button class="edu-path" data-lesson="financials" onclick="openLesson(this)">
-                <span class="edu-path-num">04</span><i class="ti ti-report-money"></i>
-                <strong>Read financials and value</strong><span>Separate reported facts, derived metrics, modeled value, and scenarios.</span>
-                <em>9 min · Fundamental</em>
-              </button>
-              <button class="edu-path" data-lesson="thesis" onclick="openLesson(this)">
-                <span class="edu-path-num">05</span><i class="ti ti-bulb"></i>
-                <strong>Build a stock thesis</strong><span>Turn a ticker into a clear, falsifiable investment case.</span>
-                <em>12 min · Foundation</em>
-              </button>
-            </div>
-
-            <div id="edu-workshop" class="il-learn-workshop">
-              <div id="edu-lesson-panel"><div class="edu-panel-empty"><i class="ti ti-school"></i><strong>Select a lesson to begin.</strong></div></div>
-            </div>
+            <div id="edu-workshop" class="il-learn-workshop"></div>
 
             <div class="edu-glossary">
               <div class="edu-glossary-head"><div><div class="edu-kicker">Quick reference</div><h3>Investor glossary</h3></div><input id="edu-glossary-search" placeholder="Filter concepts..." oninput="filterGlossary(this.value)"></div>
@@ -1992,6 +1969,8 @@
 <script defer src="/hero-chart.js?v=20260825-6"></script>
 <script defer src="/tool-launch.js?v=20260904-1"></script>
 <script defer src="/il-icons.js?v=20261002-1"></script>
+<script defer src="/lessons-data.js?v=20261002-1"></script>
+<script defer src="/academy-panel.js?v=20261002-1"></script>
 <script defer src="/research-flow.js?v=20261002-1"></script>
 <script defer src="/share-studio.js?v=20260827-2"></script>
 
