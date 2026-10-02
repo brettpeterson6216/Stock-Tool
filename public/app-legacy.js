@@ -3698,16 +3698,16 @@ function buildCompareTable(tickers, results, analystArr=[]) {
   const getForwardPE = (m,afd) => afd.forwardPE || m.forwardPE || null;
   const getPS = (m,afd) => afd.priceToSales || null;
   const rows=[
-    {l:'Price',vals:prices.map(p=>`$${p.toFixed(2)}`),nums:prices,hi:true},
-    {l:'Day Change',vals:dayChg.map(fmtPct),nums:dayChg,hi:true},
+    {l:'Price',vals:prices.map(p=>`$${p.toFixed(2)}`),nums:null,hi:false},
+    {l:'Day Change',vals:dayChg.map(fmtPct),nums:null,hi:false},
     {l:'1Y Return',vals:yr1.map(fmtPct),nums:yr1,hi:true},
-    {l:'Market Cap',vals:metas.map((m,i)=>{const c=getMarketCap(m,afds[i]);return c?fmtBig(c):'—';}),nums:metas.map((m,i)=>getMarketCap(m,afds[i])||0),hi:true},
+    {l:'Market Cap',vals:metas.map((m,i)=>{const c=getMarketCap(m,afds[i]);return c?fmtBig(c):'—';}),nums:null,hi:false},
     {l:'52W High',vals:metas.map(m=>m.fiftyTwoWeekHigh?`$${m.fiftyTwoWeekHigh.toFixed(2)}`:'—'),nums:null,hi:false},
     {l:'52W Low',vals:metas.map(m=>m.fiftyTwoWeekLow?`$${m.fiftyTwoWeekLow.toFixed(2)}`:'—'),nums:null,hi:false},
     {l:'P/E (TTM)',vals:metas.map((m,i)=>{const pe=getPE(m,afds[i]);return pe?pe.toFixed(1)+'x':'—';}),nums:metas.map((m,i)=>{const pe=getPE(m,afds[i]);return pe||999;}),hi:false},
     {l:'Fwd P/E',vals:metas.map((m,i)=>{const pe=getForwardPE(m,afds[i]);return pe?pe.toFixed(1)+'x':'—';}),nums:metas.map((m,i)=>{const pe=getForwardPE(m,afds[i]);return pe||999;}),hi:false},
     {l:'P/S Ratio',vals:metas.map((m,i)=>{const ps=getPS(m,afds[i]);return ps?ps.toFixed(2)+'x':'—';}),nums:metas.map((m,i)=>{const ps=getPS(m,afds[i]);return ps||999;}),hi:false},
-    {l:'RSI (14)',vals:rsiVals.map(r=>r?r.toFixed(1):'—'),nums:rsiVals.map(r=>r||50),hi:false},
+    {l:'RSI (14)',vals:rsiVals.map(r=>r?r.toFixed(1):'—'),nums:null,hi:false},
     {l:'Volatility',vals:stdDevs.map(v=>`${v.toFixed(1)}%`),nums:stdDevs,hi:false},
     {l:'Exchange',vals:metas.map(m=>m.exchangeName||'—'),nums:null,hi:false},
   ];
@@ -3718,7 +3718,8 @@ function buildCompareTable(tickers, results, analystArr=[]) {
     html+=`<tr><td>${row.l}</td>`;
     row.vals.forEach((v,i)=>{
       let cls='';
-      if(row.nums){const nums=row.nums.filter(x=>x&&x>0&&x<900);const best=row.hi?Math.max(...nums):Math.min(...nums);const worst=row.hi?Math.min(...nums):Math.max(...nums);if(row.nums[i]===best)cls='td-best';else if(row.nums[i]===worst)cls='td-worst';}
+      // Best/worst only where a direction is meaningful (returns up, multiples and volatility down), only among real values, and not on a tie.
+      if(row.nums){const nums=row.nums.filter(x=>Number.isFinite(x)&&x!==999&&(row.hi||x>0));const best=row.hi?Math.max(...nums):Math.min(...nums);const worst=row.hi?Math.min(...nums):Math.max(...nums);const shown=row.vals.filter((v,j)=>row.nums[j]===best||row.nums[j]===worst);if(nums.length>1&&best!==worst&&new Set(shown).size>1){if(row.nums[i]===best)cls='td-best';else if(row.nums[i]===worst)cls='td-worst';}}
       html+=`<td class="${cls}">${v}</td>`;
     });
     html+='</tr>';

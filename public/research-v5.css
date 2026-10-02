@@ -784,7 +784,7 @@ html[data-theme="dark"]:has(#lab-main) { --green: #4fd18b !important; --red: #f2
    Big headline figures, quiet labels, one table style, one tile style.
    ═══════════════════════════════════════════════════════════════════════════ */
 /* One typeface. Monospace survives only for tickers and symbols. */
-#view-tool .app-section:not(#sec-analyze) .acc-body :not(.ti):not(i):not(code):not([class*="sym"]):not([class*="ticker"]):not(em, .advm-val, .dp-card-val, .dcf-val, .risk-stat-val, .il-mini-stat b, .il-ws-stat strong) {
+#view-tool .app-section:not(#sec-analyze) .acc-body :not(.ti):not(i):not(code):not([class*="sym"]):not([class*="ticker"]):not(em, .advm-val, .dp-card-val, .dcf-val, .risk-stat-val, .il-mini-stat b, .il-ws-stat strong, .il-wealth-result strong, .plab2-tk, .plab2-oc-range, .plab2-card-px, .plab2-exp-v, .plab2-oc-nm) {
   font-family: var(--rp-sans) !important; font-variant-numeric: tabular-nums !important; letter-spacing: normal !important; text-transform: none !important;
 }
 #view-tool .app-section:not(#sec-analyze) .acc-body { font-size: 14px !important; color: var(--rp-copy) !important; }
@@ -1214,7 +1214,7 @@ html:not([data-theme="dark"]) #upgrade-modal-bg { background: rgba(40, 32, 18, .
 .il-firstrun .il-fr-head { display: flex !important; align-items: flex-end !important; justify-content: space-between !important; gap: 28px !important; margin-bottom: 22px !important; }
 .il-firstrun .il-fr-kicker {
   display: inline-flex !important; align-items: center !important; gap: 7px !important; padding: 5px 12px !important; border-radius: 999px !important;
-  border: 1px solid var(--rp-gold-ring) !important; background: var(--rp-gold-soft) !important; color: var(--rp-gold-text) !important;
+  border: 1px solid var(--rp-gold-ring) !important; background: var(--rp-gold-soft) !important; color: var(--rp-gold) !important;
   font: 650 12.5px/1 var(--rp-sans) !important; letter-spacing: .01em !important;
 }
 .il-firstrun .il-fr-kicker .ti { font-size: 14px !important; }
@@ -1228,7 +1228,7 @@ html:not([data-theme="dark"]) #upgrade-modal-bg { background: rgba(40, 32, 18, .
 .il-firstrun .il-fr-sub { margin: 0 !important; color: var(--rp-muted) !important; font: 450 15px/1.5 var(--rp-sans) !important; max-width: 60ch !important; }
 .il-firstrun .il-fr-meta { display: grid !important; justify-items: end !important; gap: 9px !important; flex: none !important; min-width: 200px !important; }
 .il-firstrun .il-fr-count { font: 500 13px/1 var(--rp-sans) !important; color: var(--rp-muted) !important; }
-.il-firstrun .il-fr-count b { font: 400 26px/1 var(--rp-serif) !important; color: var(--rp-gold-text) !important; margin-right: 3px !important; }
+.il-firstrun .il-fr-count b { font: 400 26px/1 var(--rp-serif) !important; color: var(--rp-gold) !important; margin-right: 3px !important; }
 .il-firstrun .il-fr-bar { display: block !important; width: 200px !important; height: 4px !important; border-radius: 4px !important; background: var(--rp-inset, rgba(255,255,255,.06)) !important; overflow: hidden !important; }
 .il-firstrun .il-fr-bar > span { display: block !important; height: 100% !important; border-radius: inherit !important; background: var(--rp-gold-grad) !important; transition: width .6s ease !important; }
 .il-firstrun .il-fr-dismiss {
@@ -1246,18 +1246,18 @@ html:not([data-theme="dark"]) #upgrade-modal-bg { background: rgba(40, 32, 18, .
 .il-firstrun .il-fr-step.is-done { opacity: .62 !important; }
 .il-firstrun .il-fr-num {
   width: 32px !important; height: 32px !important; border-radius: 50% !important; display: grid !important; place-items: center !important;
-  border: 1px solid var(--rp-gold-ring) !important; color: var(--rp-gold-text) !important; font: 400 17px/1 var(--rp-serif) !important;
+  border: 1px solid var(--rp-gold-ring) !important; color: var(--rp-gold) !important; font: 400 17px/1 var(--rp-serif) !important;
 }
 .il-firstrun .il-fr-step.is-next .il-fr-num { background: var(--rp-gold-grad) !important; color: var(--rp-on-gold) !important; border-color: transparent !important; }
 .il-firstrun .il-fr-step.is-done .il-fr-num { background: var(--rp-gold-soft) !important; }
 .il-firstrun .il-fr-num .ti { font-size: 16px !important; }
 .il-firstrun .il-fr-body { display: grid !important; gap: 6px !important; flex: 1 !important; align-content: start !important; }
 .il-firstrun .il-fr-body b { display: flex !important; align-items: center !important; gap: 7px !important; color: var(--rp-ink) !important; font: 650 15px/1.3 var(--rp-sans) !important; letter-spacing: -.01em !important; }
-.il-firstrun .il-fr-body b .ti { color: var(--rp-gold-text) !important; font-size: 16px !important; flex: none !important; }
+.il-firstrun .il-fr-body b .ti { color: var(--rp-gold) !important; font-size: 16px !important; flex: none !important; }
 .il-firstrun .il-fr-body span { color: var(--rp-muted) !important; font: 450 13px/1.5 var(--rp-sans) !important; }
 #il-home-member .il-firstrun .il-fr-cta {
   align-self: flex-start !important; display: inline-flex !important; align-items: center !important; gap: 6px !important;
-  color: var(--rp-gold-text) !important; font: 650 13.5px/1 var(--rp-sans) !important; text-decoration: none !important; padding: 4px 0 !important;
+  color: var(--rp-gold) !important; font: 650 13.5px/1 var(--rp-sans) !important; text-decoration: none !important; padding: 4px 0 !important;
 }
 #il-home-member .il-firstrun .il-fr-step.is-next .il-fr-cta {
   padding: 10px 14px !important; border-radius: 10px !important; background: var(--rp-gold-grad) !important; color: var(--rp-on-gold) !important;
@@ -1283,3 +1283,110 @@ html:not([data-theme="dark"]) #upgrade-modal-bg { background: rgba(40, 32, 18, .
   .il-firstrun .il-fr-step.is-next .il-fr-cta { margin-left: 44px !important; }
 }
 @media (prefers-reduced-motion: reduce) { .il-firstrun .il-fr-bar > span { transition: none !important; } }
+
+
+/* ═══ VALUATION LAB — editorial pass ══════════════════════════════════════
+   The lab's own stylesheet sizes labels from .6rem (about 9px). Everything
+   readable comes up to 12-13px, labels lose their capitals, and the
+   headline figures (outlook range, case prices, expected value) take the
+   homepage's serif numerals. The section opener already says what the lab
+   does, so the old paragraph above it goes. */
+#sec-projection .tool-intro, #sec-dcf .tool-intro { display: none !important; }
+#il-projlab-mount :is(.plab2-kicker, .plab2-panel-h, .plab2-flabel, .plab2-fstate, .plab2-oc-kicker, .plab2-horizon, .plab2-chart-h, .plab2-rowlbl, .plab2-exp-t, .plab2-dtag) {
+  text-transform: none !important; letter-spacing: 0 !important;
+}
+#il-projlab-mount :is(.plab2-kicker, .plab2-chip, .plab2-fstate, .plab2-panel-sub, .plab2-dhint, .plab2-oc-flag, .plab2-horizon, .plab2-chart-leg, .plab2-sfx, .plab2-card-yr, .plab2-card-sum, .plab2-exp-edit, .plab2-ferr) {
+  font-size: 12px !important;
+}
+#il-projlab-mount :is(.plab2-flabel, .plab2-panel-h, .plab2-oc-kicker, .plab2-chart-h, .plab2-exp-t, .plab2-card-stats, .plab2-exp-w, .plab2-wtotal, .plab2-scen-desc, .plab2-how summary, .plab2-how-body, .plab2-note, .plab2-oc-stats) {
+  font-size: 13px !important;
+}
+#il-projlab-mount .plab2-derived { font-size: 13px !important; }
+#il-projlab-mount .plab2-rowlbl { font-size: 14px !important; font-weight: 600 !important; color: var(--rp-copy) !important; }
+#il-projlab-mount .plab2-panel-h, #il-projlab-mount .plab2-chart-h { color: var(--rp-ink) !important; font-weight: 650 !important; }
+#il-projlab-mount :is(.plab2-flabel, .plab2-fstate) { color: var(--rp-muted) !important; font-weight: 550 !important; }
+#il-projlab-mount .plab2-co { font-size: 15px !important; color: var(--rp-copy) !important; }
+#il-projlab-mount .plab2-oc-mid, #il-projlab-mount .plab2-oc-cagr { font-size: 14px !important; }
+#il-projlab-mount :is(.plab2-tk, .plab2-oc-range, .plab2-card-px, .plab2-exp-v, .plab2-oc-nm) {
+  font-family: var(--rp-serif) !important; font-weight: 400 !important; letter-spacing: -.005em !important;
+}
+#il-projlab-mount .plab2-tk { font-size: 44px !important; color: var(--rp-gold) !important; }
+#il-projlab-mount .plab2-oc-range {
+  font-size: clamp(38px, 3.6vw, 50px) !important; line-height: 1.05 !important;
+  background: var(--rp-gold-grad) !important; -webkit-background-clip: text !important; background-clip: text !important;
+  -webkit-text-fill-color: transparent !important; color: transparent !important;
+}
+#il-projlab-mount .plab2-card-px { font-size: 26px !important; color: var(--rp-ink) !important; }
+#il-projlab-mount .plab2-exp-v { font-size: 28px !important; color: var(--rp-gold) !important; }
+#il-projlab-mount .plab2-cin { font-size: 14px !important; font-family: var(--rp-mono) !important; font-weight: 500 !important; width: 70px !important; }
+#il-projlab-mount .plab2-yr { font-size: 13px !important; }
+
+/* ═══ COMPARE ═════════════════════════════════════════════════════════════ */
+#body-compare .cmp-table :is(td, th) { padding-top: 11px !important; padding-bottom: 11px !important; }
+#body-compare .cmp-table td:not(:first-child) { font-family: var(--rp-mono) !important; font-size: 14px !important; font-variant-numeric: tabular-nums !important; }
+#body-compare .cmp-table td.td-best { color: var(--rp-gold) !important; font-weight: 650 !important; }
+#body-compare .cmp-table td.td-best::after { content: "best"; padding-left: 8px !important; font: 600 11px/1 var(--rp-sans); color: var(--rp-gold); opacity: .75; }
+#body-compare .cmp-table td.td-worst { color: var(--rp-muted) !important; }
+#body-compare .chart-header { background: transparent !important; border: 0 !important; padding: 0 0 10px !important; }
+#body-compare .chart-title { font: 650 17px/1.2 var(--rp-sans) !important; color: var(--rp-ink) !important; }
+#body-compare .g2 > div { padding: 20px !important; border: 1px solid var(--rp-line) !important; border-radius: 16px !important; background: var(--il-card-bg, var(--rp-panel)) !important; }
+#body-compare .chart-save-btn {
+  display: inline-flex !important; align-items: center !important; gap: 6px !important; padding: 8px 14px !important; border-radius: 999px !important;
+  border: 1px solid var(--rp-line-strong) !important; background: transparent !important; color: var(--rp-copy) !important; font: 600 13px/1 var(--rp-sans) !important;
+}
+#body-compare .chart-save-btn:hover { border-color: var(--rp-gold-ring) !important; color: var(--rp-gold) !important; }
+
+/* ═══ WORKSPACE ═══════════════════════════════════════════════════════════
+   One opener, a four-figure strip under it (not four tall empty columns),
+   a quiet progress line instead of a row of green chips, and plain
+   subheads instead of a gold pill on every block. */
+#sec-workspace .il-ws-hero {
+  display: grid !important; grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: 0 !important;
+  border: 0 !important; background: transparent !important; box-shadow: none !important; padding: 0 !important;
+}
+#sec-workspace .il-ws-hero::before, #sec-workspace .il-ws-hero::after { display: none !important; }
+#sec-workspace .il-ws-intro { grid-column: 1 / -1 !important; padding: 0 0 26px !important; border: 0 !important; background: transparent !important; box-shadow: none !important; }
+#sec-workspace .il-ws-intro::before { display: none !important; }
+#sec-workspace .il-ws-stat {
+  min-height: 0 !important; padding: 18px 22px !important; background: var(--il-card-bg, var(--rp-panel)) !important;
+  border: 1px solid var(--rp-line) !important; border-right-width: 0 !important; border-radius: 0 !important; box-shadow: none !important;
+}
+#sec-workspace .il-ws-stat:nth-child(2) { border-radius: 16px 0 0 16px !important; }
+#sec-workspace .il-ws-stat:last-child { border-right-width: 1px !important; border-radius: 0 16px 16px 0 !important; }
+#sec-workspace .il-ws-stat::before { display: none !important; }
+#sec-workspace .il-ws-stat span { font: 550 13px/1.2 var(--rp-sans) !important; color: var(--rp-muted) !important; text-transform: none !important; letter-spacing: 0 !important; }
+#sec-workspace .il-ws-stat strong { display: block !important; margin-top: 8px !important; font: 400 36px/1 var(--rp-serif) !important; color: var(--rp-gold) !important; }
+#sec-workspace .il-ws-activation .il-ws-kicker, #sec-workspace .il-ws-review-head .il-ws-kicker { display: none !important; }
+#sec-workspace .il-ws-activation { padding: 18px 22px !important; border-radius: 16px !important; }
+#sec-workspace .il-ws-activation h3 { font: 650 16px/1.3 var(--rp-sans) !important; color: var(--rp-ink) !important; margin: 0 0 4px !important; }
+#sec-workspace .il-ws-checks button {
+  border: 1px solid var(--rp-line) !important; background: transparent !important; color: var(--rp-muted) !important;
+  font: 550 13px/1 var(--rp-sans) !important; padding: 8px 12px !important; border-radius: 999px !important;
+}
+#sec-workspace .il-ws-checks button.done { color: var(--rp-copy) !important; border-color: var(--rp-line) !important; }
+#sec-workspace .il-ws-checks button.done .ti { color: var(--rp-gold) !important; }
+#sec-workspace .il-ws-checks button:not(.done) { border-color: var(--rp-gold-ring) !important; color: var(--rp-gold) !important; background: var(--rp-gold-soft) !important; }
+#sec-workspace .il-ws-review-kicker-row .il-ws-kicker {
+  display: block !important; padding: 0 !important; border: 0 !important; background: transparent !important; border-radius: 0 !important;
+  font: 650 16px/1.3 var(--rp-sans) !important; color: var(--rp-ink) !important; letter-spacing: -.01em !important; text-transform: none !important;
+}
+#sec-workspace .il-ws-review-head { border-left: 0 !important; }
+#sec-workspace .il-ws-review-head h3 { font: 700 22px/1.2 var(--rp-sans) !important; letter-spacing: -.02em !important; color: var(--rp-ink) !important; }
+@media (max-width: 760px) {
+  #sec-workspace .il-ws-hero { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  #sec-workspace .il-ws-stat { border-right-width: 1px !important; border-radius: 0 !important; }
+  #sec-workspace .il-ws-stat:nth-child(2) { border-radius: 14px 0 0 0 !important; }
+  #sec-workspace .il-ws-stat:nth-child(3) { border-radius: 0 14px 0 0 !important; }
+  #sec-workspace .il-ws-stat:nth-child(4) { border-radius: 0 0 0 14px !important; }
+  #sec-workspace .il-ws-stat:last-child { border-radius: 0 0 14px 0 !important; }
+  #sec-workspace .il-ws-stat strong { font-size: 30px !important; }
+}
+
+/* ═══ WEALTH PLANNER ══════════════════════════════════════════════════════ */
+#sec-wealth .il-wealth-result span { font: 550 13px/1.2 var(--rp-sans) !important; color: var(--rp-muted) !important; text-transform: none !important; letter-spacing: 0 !important; }
+#sec-wealth .il-wealth-result strong { display: block !important; margin-top: 6px !important; font: 400 30px/1.05 var(--rp-serif) !important; color: var(--rp-ink) !important; letter-spacing: -.005em !important; }
+html body #view-tool #sec-wealth .il-wealth-result.base strong { color: var(--rp-gold) !important; -webkit-text-fill-color: var(--rp-gold) !important; }
+/* Light theme: the pale gradient washes out on cream, so the range is solid gold there. */
+html:not([data-theme="dark"]) #il-projlab-mount .plab2-oc-range {
+  background: none !important; -webkit-text-fill-color: var(--rp-gold) !important; color: var(--rp-gold) !important;
+}
