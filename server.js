@@ -560,11 +560,26 @@ async function runReviewDigests() {
   } catch (e) { console.error("[review-digest] error:", (e && (e.stack || e.message)) || e); }
 }
 
+// Render's free plan sleeps a service after 15 minutes without inbound
+// traffic. While awake, visit our own public URL every 10 minutes: the
+// request leaves and re-enters through Render's router, so it counts as
+// traffic. Render sets RENDER_EXTERNAL_URL; nothing runs locally or in
+// tests. A scheduled GitHub Action (.github/workflows/keep-awake.yml) wakes
+// the service if it ever does sleep. Remove both on a paid instance.
+function startKeepAwake() {
+  const base = String(process.env.RENDER_EXTERNAL_URL || "").replace(/\/+$/, "");
+  if (!base || process.env.NODE_ENV === "test" || process.env.KEEP_AWAKE === "0") return;
+  const ping = () => fetch(`${base}/api/version`, { signal: AbortSignal.timeout(20000) })
+    .catch(error => console.warn("[keep-awake]", String(error?.message || error).slice(0, 120)));
+  setInterval(ping, 10 * 60 * 1000).unref?.();
+}
+
 if (require.main === module) {
   initDb().then(() => {
     app.listen(PORT, () => {
       console.log(`ImpliedLens running on port ${PORT}`);
       if (process.env.NODE_ENV !== "test" && typeof lensScoreRouter.startWarmup === "function") lensScoreRouter.startWarmup();
+      startKeepAwake();
     });
     // Company-name search answers from memory. The seed list in
     // lib/ticker-index.js serves the first few seconds; this pulls the full
