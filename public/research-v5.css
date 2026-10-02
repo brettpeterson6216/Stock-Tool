@@ -913,7 +913,8 @@ html[data-theme="dark"] #view-tool .earn-badge:is(.miss, [class*="miss"]) { colo
 }
 #view-tool :is(.il-research-hero, .il-ws-hero) { background: transparent !important; border: 0 !important; box-shadow: none !important; padding: 0 !important; }
 /* The section's old one-line description is now said by the opener. */
-#view-tool .app-section:has(> .il-sec-hero) .acc-body > div:not([class]):not([id]) { display: none !important; }
+/* Only text-only lines: a wrapper holding a form or table must stay (Compare's inputs live in one). */
+#view-tool .app-section:has(> .il-sec-hero) .acc-body > div:not([class]):not([id]):not(:has(:is(div, input, select, button, table, canvas, form, label))) { display: none !important; }
 
 /* Serif headline figures, like the homepage stats */
 #view-tool :is(.price-big, .il-an-price, .m-val, .advm-val, .dp-card-val, .risk-stat-val, .twm-val, .fstock-price, .dcf-val, .il-mini-stat b, .il-ws-stat strong, .ilr-price),

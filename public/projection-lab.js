@@ -481,6 +481,8 @@
 
   /* ═══════════════════════ RECOMPUTE (one source of truth) ═══════════════════════ */
   function recompute() {
+    // Fill the editable cells from the model (the one being typed in is skipped).
+    syncTableInputs();
     var outlook = M().plCalculateOutlook(PL.model);
     var errBox = q("#plab2-error");
     if (!outlook.ok) {
