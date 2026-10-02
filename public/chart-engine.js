@@ -116,8 +116,14 @@
       upFill: d ? "rgba(47,217,140,.5)" : "rgba(11,122,76,.45)",
       downFill: d ? "rgba(240,92,106,.5)" : "rgba(190,58,75,.45)",
       gold: token("--rp-gold", d ? "#D6AC64" : "#966D2B"),
-      ma50: d ? "#7FB2E5" : "#2F6FA8",
-      ma200: d ? "#C79BE8" : "#6D46A0",
+      /* The 50-day takes the product's gold on candles, where nothing else
+         is gold; on the line and area views the price itself is gold, so the
+         average steps to orange there. The 200-day is blue either way. */
+      ma50: ((window.S && S.chartType) || "candle") === "candle"
+        ? token("--rp-gold", d ? "#F0BE5A" : "#87590C")
+        : (d ? "#E8794A" : "#C4561F"),
+      ma200: d ? "#7FB2E5" : "#2F6FA8",
+      rsi: d ? "#C79BE8" : "#6D46A0",
       ema: d ? "#EDCB84" : "#B8892F",
       vwap: d ? "#7ED9C8" : "#127C6C",
       band: d ? "rgba(214,172,100,.42)" : "rgba(150,109,43,.4)",
@@ -309,7 +315,7 @@
     /* oscillator pane */
     if (view.osc === "rsi" && !opts.compact) {
       series.rsi = chart.addSeries(LWC.LineSeries, {
-        color: p.gold, lineWidth: 1.5, priceLineVisible: false,
+        color: p.rsi, lineWidth: 1.5, priceLineVisible: false,
         priceFormat: { type: "price", precision: 1, minMove: 0.1 }
       }, paneIdx);
       series.rsi.setData(pair(TA.rsi(closes, 14)));
@@ -333,7 +339,7 @@
       }, paneIdx);
       series.macdLine.setData(pair(m.line));
       series.macdSignal = chart.addSeries(LWC.LineSeries, {
-        color: p.ma50, lineWidth: 1.5, priceLineVisible: false, lastValueVisible: false
+        color: p.ma200, lineWidth: 1.5, priceLineVisible: false, lastValueVisible: false
       }, paneIdx);
       series.macdSignal.setData(pair(m.signal));
       paneIdx++;
@@ -524,10 +530,45 @@
 
   /* ── markers: earnings + news ──────────────────────────────────────────── */
   var markerCache = {};
+
+  /* Golden and death crosses: where the 50-day average crosses the 200-day.
+     Shown when both averages are on, so the marker always sits on the two
+     lines it describes. ILChartCrosses is also read by chart-reads.js. */
+  function findCrosses(rows) {
+    var closes = rows.map(function (r) { return r.close; });
+    var a = TA.sma(closes, 50), b = TA.sma(closes, 200), out = [];
+    for (var i = 1; i < rows.length; i++) {
+      if (a[i - 1] == null || b[i - 1] == null || a[i] == null || b[i] == null) continue;
+      if (a[i - 1] <= b[i - 1] && a[i] > b[i]) out.push({ time: rows[i].time, kind: "golden", index: i });
+      else if (a[i - 1] >= b[i - 1] && a[i] < b[i]) out.push({ time: rows[i].time, kind: "death", index: i });
+    }
+    return out;
+  }
+  window.ILChartCrosses = findCrosses;
+  function crossMarkers(instance) {
+    var S_ = window.S || {};
+    if (!S_.inds || !S_.inds.ma50 || !S_.inds.ma200 || !instance.rows) return [];
+    var p = palette();
+    return findCrosses(instance.rows).map(function (c) {
+      return {
+        time: c.time, position: c.kind === "golden" ? "belowBar" : "aboveBar",
+        color: c.kind === "golden" ? p.up : p.down, shape: "circle", size: 1,
+        text: c.kind === "golden" ? "Golden cross" : "Death cross"
+      };
+    });
+  }
+  function setMarkers(instance, markers) {
+    markers.sort(function (a, b) { return a.time - b.time; });
+    try {
+      if (instance._markers) instance._markers.setMarkers(markers);
+      else if (markers.length) instance._markers = LWC.createSeriesMarkers(instance.series.price, markers);
+    } catch (e) {}
+  }
+
   function applyMarkers(instance) {
     if (!window.S || !S.ticker) return;
     if (!view.pins.earnings && !view.pins.news) {
-      if (instance._markers) { instance._markers.setMarkers([]); }
+      setMarkers(instance, crossMarkers(instance));
       return;
     }
     var ticker = S.ticker;
@@ -585,18 +626,14 @@
         markers.push({
           time: best,
           position: m.kind === "earnings" ? "belowBar" : "aboveBar",
-          color: m.kind === "earnings" ? p.gold : p.ma50,
+          color: m.kind === "earnings" ? p.gold : p.ma200,
           shape: m.kind === "earnings" ? "arrowUp" : "circle",
           text: m.kind === "earnings" ? "E" : "N",
           size: 1,
           _tip: m.text
         });
       });
-      markers.sort(function (a, b) { return a.time - b.time; });
-      try {
-        if (instance._markers) instance._markers.setMarkers(markers);
-        else instance._markers = LWC.createSeriesMarkers(instance.series.price, markers);
-      } catch (e) {}
+      setMarkers(instance, markers.concat(crossMarkers(instance)));
     });
   }
 

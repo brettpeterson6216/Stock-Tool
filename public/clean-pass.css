@@ -1863,9 +1863,9 @@ html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilx-plot 
   width: 100% !important;
   height: 372px !important;
 }
-/* Lightweight Charts is Apache-2.0 and its terms ask for the attribution link
-   in a prominent place. The library injects it; it is left at full strength. */
-html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilx-plot a[href*="tradingview"] { opacity: 1 !important; }
+/* Lens Charts draws the plot at its measured size; the older 172px rule for
+   svg in .ihm-chart must not squash it. */
+html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-chart svg.lc-svg { height: auto !important; }
 
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilx-legend {
   display: flex !important; flex-wrap: wrap !important; gap: 8px !important;

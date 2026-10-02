@@ -1207,6 +1207,25 @@
                 <div class="h240"><canvas id="price-chart"></canvas></div>
               </div>
 
+              <!-- Plain-English reads and the valuation range (chart-reads.js) -->
+              <section class="il-reads" id="il-chart-reads" aria-labelledby="il-reads-title" hidden>
+                <div class="il-reads-head">
+                  <h3 id="il-reads-title">Read the chart</h3>
+                  <span>Plain English, from the same prices</span>
+                </div>
+                <div class="il-reads-grid" id="il-reads-grid"></div>
+              </section>
+              <section class="il-worth" id="il-worth" aria-labelledby="il-worth-title" hidden>
+                <div class="il-worth-head">
+                  <div>
+                    <h3 id="il-worth-title">What is it worth? Four ways to look</h3>
+                    <p>Each bar is a range of estimates, not a prediction. The tick marks the middle case.</p>
+                  </div>
+                  <a class="il-worth-link" href="/?view=tool&amp;section=projection" onclick="navGoTo('projection');return false;">Build your own in Valuation Lab <span aria-hidden="true">&rarr;</span></a>
+                </div>
+                <div class="il-worth-chart" id="il-worth-chart"></div>
+              </section>
+
 <!-- analyst-panel moved to sidebar -->
 
               <!-- RSI + MACD -->
@@ -1339,6 +1358,13 @@
             <div id="fin-error" style="color:#d96a70;font-size:12px;display:none;"></div>
             <div id="fin-content" style="display:none;">
               <div id="fin-source" class="il-data-source-line"></div>
+              <div class="il-fin-glance" id="fin-glance" hidden>
+                <section class="il-fg-card" aria-labelledby="fin-glance-title">
+                  <div class="il-fg-head"><h3 id="fin-glance-title">Revenue by year</h3><span class="il-fg-chip" id="fin-glance-growth"></span></div>
+                  <div class="il-fg-chart" id="fin-glance-bars"></div>
+                </section>
+                <div class="il-fg-tiles" id="fin-glance-tiles"></div>
+              </div>
               <div style="display:flex;gap:.5rem;margin-bottom:1.25rem;flex-wrap:wrap;">
                 <button class="fin-tab-btn active" onclick="showFinTab('income',this)">Income Statement</button>
                 <button class="fin-tab-btn" onclick="showFinTab('balance',this)">Balance Sheet</button>
@@ -1964,6 +1990,7 @@
 
 <script defer src="/il-icons.js?v=20261002-1"></script>
 <!-- il:app-bundle -->
+<script defer src="/lens-charts.js?v=20261002-1"></script>
 <script defer src="/app-legacy.js?v=20260904-1"></script>
 <!-- Enhancement modules depend on the application controller. Deferred
      scripts execute in document order, before DOMContentLoaded. -->
@@ -1978,6 +2005,8 @@
 <script defer src="/academy-panel.js?v=20261002-1"></script>
 <script defer src="/research-flow.js?v=20261002-1"></script>
 <script defer src="/share-studio.js?v=20260827-2"></script>
+<script defer src="/fin-glance.js?v=20261002-1"></script>
+<script defer src="/chart-reads.js?v=20261002-1"></script>
 <!-- /il:app-bundle -->
 
 <!-- ── Mobile Bottom Navigation ── -->

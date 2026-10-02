@@ -2279,6 +2279,7 @@ function renderStock(result, ticker) {
       }
 
       S.estimates = est;
+      try { document.dispatchEvent(new CustomEvent('il-estimates')); } catch (e) {}
 
       // ── DCF: auto-fill EPS + WACC + growth ──
       if (est.nextYearEPS) {
@@ -4354,6 +4355,8 @@ async function loadFinancials(ticker) {
 
     if(loading) loading.style.display='none';
     if(cont)    cont.style.display='block';
+    // After the content is visible, so the charts can measure their space.
+    try { if (window.ILFinGlance) window.ILFinGlance.render(r); } catch (e) { console.warn('fin glance', e); }
   } catch(e) {
     if(loading) loading.style.display='none';
     handleSectionError(e, 'financials', cont);

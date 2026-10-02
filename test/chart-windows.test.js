@@ -99,8 +99,12 @@ test("a month is drawn from intraday bars, and a year is not", () => {
 test("the index chart labels the axis by span, not by bar spacing", () => {
   // With 1M on hourly bars, "bars are an hour apart" stopped meaning "one
   // session" — keyed to bar spacing, a month of hourly bars would print 09:30
-  // and 10:30 across thirty days.
+  // and 10:30 across thirty days. Lens Charts picks clock times only when the
+  // whole window fits inside one day, and dates otherwise.
+  const lc = fs.readFileSync(path.join(__dirname, "..", "public", "lens-charts.js"), "utf8");
+  assert.match(lc, /var oneDay = new Date\(t0\)\.toDateString\(\) === new Date\(t1\)\.toDateString\(\)/,
+    "intraday labels are no longer decided by the window's span");
+  // And closed hours take no width on intraday data.
   const chart = fs.readFileSync(path.join(__dirname, "..", "public", "index-chart.js"), "utf8");
-  assert.match(chart, /timeVisible:\s*intraday/, "the axis no longer consults the intraday flag");
-  assert.match(chart, /var intraday = span/, "intraday is not derived from the series span");
+  assert.match(chart, /ordinal: intraday/, "intraday bars are spaced by clock time again");
 });

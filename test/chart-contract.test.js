@@ -103,32 +103,27 @@ test("the series palette is validated, and light mode actually gets it", () => {
   );
 });
 
-test("the dashboard chart runs on the same engine as the rest of the site", () => {
-  /* This was a hand-rolled SVG renderer until it turned out Lightweight
-     Charts was already vendored and already driving the Analysis page - so
-     the dashboard was maintaining a second, worse chart engine for no
-     additional bytes. It is an adapter now, not a plotting library. */
-  assert.match(chart, /window\.LightweightCharts/, "the dashboard chart is off the shared engine again");
-  assert.match(chart, /LWC\.createChart\(plot,/, "no chart is being created");
-  assert.match(chart, /LWC\.LineSeries/, "the index lines are gone");
-  assert.ok(fs.existsSync(path.join(ROOT, "public/vendor/lightweight-charts.standalone.production.js")),
-    "the vendored library is missing, and nothing else draws this chart");
+test("the dashboard chart runs on Lens Charts, the site's own chart kit", () => {
+  /* It ran on Lightweight Charts, which put TradingView's logo on the first
+     chart a member sees. It is an adapter over public/lens-charts.js now, the
+     same kit as the Financials and valuation charts. */
+  assert.match(chart, /window\.LensCharts\.lines\(plot,/, "the dashboard chart is not drawn with Lens Charts");
+  assert.doesNotMatch(chart, /LightweightCharts|createChart/, "the dashboard chart is back on the vendor engine");
+  assert.match(html, /src="\/lens-charts\.js\?v=/, "lens-charts.js is not on the page");
+  const lc = read("public/lens-charts.js");
+  for (const kind of ["bars", "lines", "range", "spark"]) {
+    assert.match(lc, new RegExp(kind + ": function \\(host, opts\\)"), `LensCharts.${kind} is missing`);
+  }
 
-  // Three indexes can only share an axis in percentage terms: the Dow near
-  // 41,000 and the S&P near 5,800 have no common absolute scale.
-  assert.match(chart, /mode: LWC\.PriceScaleMode\.Percentage/,
-    "the price scale is back on absolute levels, which flattens two of three lines");
-
-  // A dashboard chart that swallows the wheel traps the reader mid-page.
-  assert.match(chart, /handleScroll: \{ mouseWheel: false/, "the chart is eating the page's scroll");
-  assert.match(chart, /handleScale: \{ mouseWheel: false/, "the chart is eating the page's scroll");
+  // Three indexes only share an axis in percentage terms: each series is
+  // measured from its own first point.
+  assert.match(chart, /\(c \/ base - 1\) \* 100/, "the series are no longer normalised to percent change");
 
   // A null close is not a price, and Number(null) is 0, which is finite.
   assert.match(chart, /c <= 0/, "a bar that never printed can plot as a -100% cliff again");
-  // Lightweight Charts drops a whole series given out-of-order timestamps.
   assert.match(chart, /at <= lastAt/, "timestamps are no longer forced ascending and unique");
 
-  // One chart per host, or a timeframe click stacks canvases.
+  // One chart per host, or a timeframe click stacks charts.
   assert.match(chart, /host\.ilxChart\.remove\(\)/, "the previous chart is not torn down");
 
   // The renderer changed; the seam did not.
@@ -141,7 +136,8 @@ test("the TradingView attribution is present and not dimmed away", () => {
      attribution plus a link to tradingview.com "in a prominent place". The
      library injects the link itself; CSS was scaling it to 62% at 28% opacity
      on the landing page and 35% on the analysis chart. */
-  assert.match(chart, /attributionLogo: true/, "the attribution logo is switched off");
+  // The research chart still runs on Lightweight Charts, so its logo stays on.
+  assert.doesNotMatch(read("public/chart-engine.js"), /attributionLogo:\s*false/, "the attribution logo is switched off");
 
   const engineCss = read("public/chart-engine.css");
   const dimming = engineCss.match(/a\[href\*="tradingview"\][^}]*\}/g) || [];
