@@ -1453,3 +1453,15 @@ html body.il-static-page .feat .feat-icon {
 }
 html body.il-static-page .feat .feat-icon::before { content: none !important; display: none !important; }
 html body.il-static-page .feat .feat-icon i.il-ic-host { font-size: 28px !important; width: 28px !important; height: 28px !important; color: var(--rp-gold) !important; }
+
+/* ═══ PHONE PASS ══════════════════════════════════════════════════════════ */
+/* Below 900px the shell stacks (display:block) but kept its fixed height and
+   overflow:hidden from the desktop layout, while the inner scroller grew to
+   the full page height. Nothing could scroll on a phone. The shell is the
+   scroller there instead. */
+@media (max-width: 900px) {
+  html body.il-tool-active #view-tool .app-shell {
+    overflow-x: hidden !important; overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important; overscroll-behavior-y: contain !important;
+  }
+}
