@@ -132,7 +132,7 @@
   display: none !important;
   margin-bottom: 17px !important;
   color: var(--prime-gold) !important;
-  font: 650 11.5px/1.2 "JetBrains Mono", ui-monospace, monospace !important;
+  font: 650 11.5px/1.2 'IBM Plex Sans', ui-monospace, monospace !important;
   letter-spacing: .02em !important;
   text-transform:none;
 }
@@ -189,7 +189,7 @@
 }
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #landing-page .il-trust-lead {
   color: #9aa39f !important;
-  font: 600 11px/1.2 "JetBrains Mono", ui-monospace, monospace !important;
+  font: 600 11px/1.2 'IBM Plex Sans', ui-monospace, monospace !important;
   letter-spacing: .02em !important;
   text-transform:none;
 }
@@ -228,7 +228,7 @@
 }
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #landing-page .il-preview-caption span,
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #landing-page .il-preview-caption strong {
-  font: 600 11px/1 "JetBrains Mono", ui-monospace, monospace !important;
+  font: 600 11px/1 'IBM Plex Sans', ui-monospace, monospace !important;
   letter-spacing: .02em !important;
   text-transform:none;
 }
@@ -300,7 +300,7 @@
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #landing-page .ilm-card:last-child { border-right: 0 !important; }
 :is(#lens-prime-v2, html) :is(#lens-prime-v2, body.il-product-page) #landing-page .ilm-title {
   color: #9da6a2 !important;
-  font: 650 11px/1.2 "JetBrains Mono",ui-monospace,monospace !important;
+  font: 650 11px/1.2 'IBM Plex Sans',ui-monospace,monospace !important;
   letter-spacing: .02em !important;
   text-transform:none;
 }
@@ -421,7 +421,7 @@
   .prime-side-section {
     padding: 10px 11px 7px;
     color: #515c58;
-    font: 650 11px/1 "JetBrains Mono",ui-monospace,monospace;
+    font: 650 11px/1 'IBM Plex Sans',ui-monospace,monospace;
     letter-spacing: .02em;
     text-transform:none;
   }

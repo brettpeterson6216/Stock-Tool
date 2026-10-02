@@ -883,7 +883,7 @@ html[data-theme="dark"] .il-product-page .app-section-hdr {
 }
 /* <code> was falling through to whatever the platform calls monospace. */
 code, kbd, samp, pre {
-  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace !important;
+  font-family: 'IBM Plex Sans', ui-monospace, SFMono-Regular, Menlo, monospace !important;
 }
 /* Mono labels a value, not a heading. Card titles and badges are words. */
 :is(.ilm-title,.ilm-badge,.il-shell-title,.ash-title,.app-section-hdr) {

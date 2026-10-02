@@ -55,8 +55,12 @@ html:not([data-theme="dark"]) { --chart-ma50: #2f6fa8; --chart-ma200: #6d46a0; }
 }
 #view-tool .app-sidebar .sb-item:hover { background: var(--rp-gold-soft) !important; color: var(--rp-ink) !important; }
 #view-tool .app-sidebar .sb-item.active, #view-tool .app-sidebar .sb-item[aria-current="page"] {
-  background: var(--rp-gold-soft) !important; color: var(--rp-ink) !important;
-  border-color: var(--rp-gold-ring) !important; box-shadow: none !important;
+  background: linear-gradient(90deg, var(--rp-gold-soft), transparent 85%) !important; color: var(--rp-ink) !important;
+  border-color: transparent !important; box-shadow: none !important; position: relative !important;
+}
+#view-tool .app-sidebar .sb-item.active::before {
+  content: "" !important; position: absolute !important; left: 0 !important; top: 9px !important; bottom: 9px !important;
+  width: 2px !important; border-radius: 2px !important; background: var(--rp-gold) !important;
 }
 #view-tool .app-sidebar .sb-item i { color: var(--rp-muted) !important; font-size: 17px !important; }
 #view-tool .app-sidebar .sb-item.active i { color: var(--rp-gold-accent) !important; }
@@ -699,13 +703,6 @@ html[data-theme="dark"]:has(#lab-main) { --green: #4fd18b !important; --red: #f2
 
 /* ── Icons: weightier strokes, set in tiles ─────────────────────────────── */
 #view-tool .ti, #lab-main .ti { -webkit-text-stroke: .35px currentColor !important; }
-#view-tool .app-sidebar .sb-item i {
-  width: 28px !important; height: 28px !important; display: inline-grid !important; place-items: center !important; flex: none !important;
-  border-radius: 8px !important; font-size: 16px !important; background: var(--rp-inset) !important; border: 1px solid var(--rp-line) !important;
-}
-#view-tool .app-sidebar .sb-item.active i { background: var(--rp-gold-grad) !important; color: var(--rp-on-gold) !important; border-color: transparent !important; }
-#view-tool .app-sidebar .sb-item:hover i { color: var(--rp-gold-accent) !important; border-color: var(--rp-gold-ring) !important; }
-#view-tool .app-section-hdr .ash-icon { background: var(--rp-gold-grad) !important; color: var(--rp-on-gold) !important; border: 0 !important; box-shadow: var(--rp-gold-glow) !important; }
 /* The full Risk & Volatility section below covers this; no duplicate card. */
 #view-tool .il-insights > #sidebar-risk { display: none !important; }
 #view-tool .il-news-card .news-section, #view-tool .il-news-card #news-items { background: transparent !important; border: 0 !important; box-shadow: none !important; padding: 0 !important; }
@@ -747,9 +744,9 @@ html[data-theme="dark"]:has(#lab-main) { --green: #4fd18b !important; --red: #f2
     conic-gradient(var(--score-color) calc(var(--score-progress, 0) * 1%), var(--rp-line) 0) !important;
   box-shadow: 0 30px 70px -40px color-mix(in srgb, var(--score-color) 80%, transparent) !important;
 }
-#lab-main .score-ring strong { font: 400 76px/0.9 var(--rp-serif) !important; letter-spacing: -.02em !important; }
+#lab-main .score-ring strong { font: 600 58px/0.95 var(--rp-num) !important; letter-spacing: -.03em !important; }
 #lab-main .score-ring span { font: 500 13px/1 var(--rp-sans) !important; margin-top: 6px !important; }
-#lab-main .lens-card-score strong { font: 400 52px/1 var(--rp-serif) !important; letter-spacing: -.01em !important; }
+#lab-main .lens-card-score strong { font: 600 40px/1 var(--rp-num) !important; letter-spacing: -.03em !important; }
 #lab-main #market-price { font-size: 32px !important; }
 #lab-main .golden-lens-signal { border: 0 !important; border-top: 1px solid var(--rp-line) !important; border-radius: 0 !important; padding-top: 16px !important; }
 #lab-main .lens-card { background: transparent !important; border: 0 !important; border-top: 2px solid var(--rp-gold-accent) !important; border-radius: 0 !important; padding: 18px 2px 4px !important; }
@@ -784,7 +781,7 @@ html[data-theme="dark"]:has(#lab-main) { --green: #4fd18b !important; --red: #f2
    Big headline figures, quiet labels, one table style, one tile style.
    ═══════════════════════════════════════════════════════════════════════════ */
 /* One typeface. Monospace survives only for tickers and symbols. */
-#view-tool .app-section:not(#sec-analyze) .acc-body :not(.ti):not(i):not(code):not([class*="sym"]):not([class*="ticker"]):not(em, .advm-val, .dp-card-val, .dcf-val, .risk-stat-val, .il-mini-stat b, .il-ws-stat strong, .il-wealth-result strong, .plab2-tk, .plab2-oc-range, .plab2-card-px, .plab2-exp-v, .plab2-oc-nm) {
+#view-tool .app-section:not(#sec-analyze) .acc-body :not(.ti):not(i):not(code):not([class*="sym"]):not([class*="ticker"]):not(em, .advm-val, .dp-card-val, .dcf-val, .risk-stat-val, .il-mini-stat b, .il-ws-stat strong, .il-wealth-result strong, .plab2-tk, .plab2-oc-range, .plab2-card-px, .plab2-exp-v, .plab2-oc-nm, td:not(:first-child), .plab2-out, .plab2-cin, .plab2-basecol, .il-num) {
   font-family: var(--rp-sans) !important; font-variant-numeric: tabular-nums !important; letter-spacing: normal !important; text-transform: none !important;
 }
 #view-tool .app-section:not(#sec-analyze) .acc-body { font-size: 14px !important; color: var(--rp-copy) !important; }
@@ -916,12 +913,12 @@ html[data-theme="dark"] #view-tool .earn-badge:is(.miss, [class*="miss"]) { colo
 /* Only text-only lines: a wrapper holding a form or table must stay (Compare's inputs live in one). */
 #view-tool .app-section:has(> .il-sec-hero) .acc-body > div:not([class]):not([id]):not(:has(:is(div, input, select, button, table, canvas, form, label))) { display: none !important; }
 
-/* Serif headline figures, like the homepage stats */
+/* Headline figures: IBM Plex Sans, tabular, one weight across the product */
 #view-tool :is(.price-big, .il-an-price, .m-val, .advm-val, .dp-card-val, .risk-stat-val, .twm-val, .fstock-price, .dcf-val, .il-mini-stat b, .il-ws-stat strong, .ilr-price),
 .ihm-stat strong, #ihm-mkt-price, #lab-main :is(#market-price, #buy-zone) {
-  font-family: var(--rp-serif) !important; font-weight: 400 !important; letter-spacing: -.01em !important; font-variant-numeric: lining-nums !important;
+  font-family: var(--rp-num) !important; font-weight: 600 !important; letter-spacing: -.02em !important; font-variant-numeric: tabular-nums lining-nums !important;
 }
-#view-tool .price-big { font-size: clamp(52px, 6vw, 80px) !important; line-height: .95 !important; }
+#view-tool .price-big { font-size: clamp(40px, 4.4vw, 58px) !important; line-height: 1 !important; }
 #view-tool .price-big, #view-tool .il-an-price, #lab-main #buy-zone, #ihm-mkt-price {
   background: var(--rp-gold-text) !important; -webkit-background-clip: text !important; background-clip: text !important;
   -webkit-text-fill-color: transparent !important; color: transparent !important;
@@ -1018,7 +1015,7 @@ html[data-theme="dark"] #view-tool .earn-badge:is(.miss, [class*="miss"]) { colo
 @media (max-width: 560px) { .il-static-page .features .feat-grid { grid-template-columns: 1fr !important; } }
 .il-static-page :is(.research, .related) { margin-top: clamp(40px, 5vw, 72px) !important; }
 .il-static-page .research-item { font: 500 15px/1.5 var(--rp-sans) !important; color: var(--rp-copy) !important; padding: 16px 18px !important; border-radius: 14px !important; }
-.il-static-page .research-item strong { font-family: var(--rp-serif) !important; font-weight: 400 !important; font-size: 22px !important; color: var(--rp-gold) !important; margin-right: 12px !important; }
+.il-static-page .research-item strong { font-family: var(--rp-num) !important; font-weight: 600 !important; font-size: 20px !important; color: var(--rp-gold) !important; margin-right: 12px !important; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    CONVERSION PATH — sign up, sign in, upgrade, gates. The homepage voice at
@@ -1070,7 +1067,7 @@ body.il-auth-page main.il-auth-split > .il-ribbon {
 .il-auth-stats > div { flex: 1 !important; padding: 0 18px !important; border-left: 1px solid var(--rp-line) !important; }
 .il-auth-stats > div:first-child { padding-left: 0 !important; border-left: 0 !important; }
 .il-auth-stats strong {
-  display: block !important; font: 400 clamp(36px, 3.6vw, 48px)/1 var(--rp-serif) !important; margin-bottom: 6px !important;
+  display: block !important; font: 600 clamp(30px, 3vw, 40px)/1 var(--rp-num) !important; letter-spacing: -.025em !important; margin-bottom: 8px !important;
   background: var(--rp-gold-text) !important; -webkit-background-clip: text !important; background-clip: text !important; -webkit-text-fill-color: transparent !important; color: transparent !important;
 }
 .il-auth-stats span { font: 500 13.5px/1.4 var(--rp-sans) !important; color: var(--rp-copy) !important; }
@@ -1134,7 +1131,7 @@ html:not([data-theme="dark"]) #upgrade-modal-bg { background: rgba(40, 32, 18, .
 #upgrade-modal-bg .plan-opt.sel { border-color: var(--rp-gold-accent) !important; box-shadow: 0 0 0 4px var(--rp-gold-soft) !important; background: var(--rp-panel) !important; }
 #upgrade-modal-bg .plan-opt-name { font: 700 14px/1.2 var(--rp-sans) !important; color: var(--rp-ink) !important; display: flex !important; align-items: center !important; gap: 8px !important; flex-wrap: wrap !important; text-transform: none !important; letter-spacing: 0 !important; }
 .il-up-save { font: 800 11px/1 var(--rp-sans) !important; letter-spacing: .03em !important; padding: 4px 7px !important; border-radius: 999px !important; background: var(--rp-gold-grad) !important; color: var(--rp-on-gold) !important; }
-#upgrade-modal-bg .plan-opt-price { margin: 10px 0 4px !important; font: 400 42px/1 var(--rp-serif) !important; color: var(--rp-ink) !important; letter-spacing: -.01em !important; }
+#upgrade-modal-bg .plan-opt-price { margin: 10px 0 4px !important; font: 600 34px/1 var(--rp-num) !important; letter-spacing: -.025em !important; color: var(--rp-ink) !important; letter-spacing: -.01em !important; }
 #upgrade-modal-bg .plan-opt-per { font: 500 14px/1 var(--rp-sans) !important; color: var(--rp-muted) !important; margin-left: 3px !important; }
 #upgrade-modal-bg .plan-opt-sub { font: 500 13px/1.3 var(--rp-sans) !important; color: var(--rp-muted) !important; }
 .il-up-feats { list-style: none !important; margin: 0 0 24px !important; padding: 0 !important; display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 10px 18px !important; }
@@ -1228,7 +1225,7 @@ html:not([data-theme="dark"]) #upgrade-modal-bg { background: rgba(40, 32, 18, .
 .il-firstrun .il-fr-sub { margin: 0 !important; color: var(--rp-muted) !important; font: 450 15px/1.5 var(--rp-sans) !important; max-width: 60ch !important; }
 .il-firstrun .il-fr-meta { display: grid !important; justify-items: end !important; gap: 9px !important; flex: none !important; min-width: 200px !important; }
 .il-firstrun .il-fr-count { font: 500 13px/1 var(--rp-sans) !important; color: var(--rp-muted) !important; }
-.il-firstrun .il-fr-count b { font: 400 26px/1 var(--rp-serif) !important; color: var(--rp-gold) !important; margin-right: 3px !important; }
+.il-firstrun .il-fr-count b { font: 600 22px/1 var(--rp-num) !important; color: var(--rp-gold) !important; margin-right: 3px !important; }
 .il-firstrun .il-fr-bar { display: block !important; width: 200px !important; height: 4px !important; border-radius: 4px !important; background: var(--rp-inset, rgba(255,255,255,.06)) !important; overflow: hidden !important; }
 .il-firstrun .il-fr-bar > span { display: block !important; height: 100% !important; border-radius: inherit !important; background: var(--rp-gold-grad) !important; transition: width .6s ease !important; }
 .il-firstrun .il-fr-dismiss {
@@ -1246,7 +1243,7 @@ html:not([data-theme="dark"]) #upgrade-modal-bg { background: rgba(40, 32, 18, .
 .il-firstrun .il-fr-step.is-done { opacity: .62 !important; }
 .il-firstrun .il-fr-num {
   width: 32px !important; height: 32px !important; border-radius: 50% !important; display: grid !important; place-items: center !important;
-  border: 1px solid var(--rp-gold-ring) !important; color: var(--rp-gold) !important; font: 400 17px/1 var(--rp-serif) !important;
+  border: 1px solid var(--rp-gold-ring) !important; color: var(--rp-gold) !important; font: 600 14px/1 var(--rp-num) !important;
 }
 .il-firstrun .il-fr-step.is-next .il-fr-num { background: var(--rp-gold-grad) !important; color: var(--rp-on-gold) !important; border-color: transparent !important; }
 .il-firstrun .il-fr-step.is-done .il-fr-num { background: var(--rp-gold-soft) !important; }
@@ -1308,16 +1305,16 @@ html:not([data-theme="dark"]) #upgrade-modal-bg { background: rgba(40, 32, 18, .
 #il-projlab-mount .plab2-co { font-size: 15px !important; color: var(--rp-copy) !important; }
 #il-projlab-mount .plab2-oc-mid, #il-projlab-mount .plab2-oc-cagr { font-size: 14px !important; }
 #il-projlab-mount :is(.plab2-tk, .plab2-oc-range, .plab2-card-px, .plab2-exp-v, .plab2-oc-nm) {
-  font-family: var(--rp-serif) !important; font-weight: 400 !important; letter-spacing: -.005em !important;
+  font-family: var(--rp-num) !important; font-weight: 600 !important; letter-spacing: -.02em !important; font-variant-numeric: tabular-nums !important;
 }
-#il-projlab-mount .plab2-tk { font-size: 44px !important; color: var(--rp-gold) !important; }
+#il-projlab-mount .plab2-tk { font-size: 34px !important; color: var(--rp-gold) !important; }
 #il-projlab-mount .plab2-oc-range {
-  font-size: clamp(38px, 3.6vw, 50px) !important; line-height: 1.05 !important;
+  font-size: clamp(32px, 3vw, 42px) !important; line-height: 1.05 !important;
   background: var(--rp-gold-grad) !important; -webkit-background-clip: text !important; background-clip: text !important;
   -webkit-text-fill-color: transparent !important; color: transparent !important;
 }
-#il-projlab-mount .plab2-card-px { font-size: 26px !important; color: var(--rp-ink) !important; }
-#il-projlab-mount .plab2-exp-v { font-size: 28px !important; color: var(--rp-gold) !important; }
+#il-projlab-mount .plab2-card-px { font-size: 22px !important; color: var(--rp-ink) !important; }
+#il-projlab-mount .plab2-exp-v { font-size: 24px !important; color: var(--rp-gold) !important; }
 #il-projlab-mount .plab2-cin { font-size: 14px !important; font-family: var(--rp-mono) !important; font-weight: 500 !important; width: 70px !important; }
 #il-projlab-mount .plab2-yr { font-size: 13px !important; }
 
@@ -1355,7 +1352,7 @@ html:not([data-theme="dark"]) #upgrade-modal-bg { background: rgba(40, 32, 18, .
 #sec-workspace .il-ws-stat:last-child { border-right-width: 1px !important; border-radius: 0 16px 16px 0 !important; }
 #sec-workspace .il-ws-stat::before { display: none !important; }
 #sec-workspace .il-ws-stat span { font: 550 13px/1.2 var(--rp-sans) !important; color: var(--rp-muted) !important; text-transform: none !important; letter-spacing: 0 !important; }
-#sec-workspace .il-ws-stat strong { display: block !important; margin-top: 8px !important; font: 400 36px/1 var(--rp-serif) !important; color: var(--rp-gold) !important; }
+#sec-workspace .il-ws-stat strong { display: block !important; margin-top: 8px !important; font: 600 28px/1 var(--rp-num) !important; letter-spacing: -.02em !important; color: var(--rp-gold) !important; }
 #sec-workspace .il-ws-activation .il-ws-kicker, #sec-workspace .il-ws-review-head .il-ws-kicker { display: none !important; }
 #sec-workspace .il-ws-activation { padding: 18px 22px !important; border-radius: 16px !important; }
 #sec-workspace .il-ws-activation h3 { font: 650 16px/1.3 var(--rp-sans) !important; color: var(--rp-ink) !important; margin: 0 0 4px !important; }
@@ -1384,9 +1381,75 @@ html:not([data-theme="dark"]) #upgrade-modal-bg { background: rgba(40, 32, 18, .
 
 /* ═══ WEALTH PLANNER ══════════════════════════════════════════════════════ */
 #sec-wealth .il-wealth-result span { font: 550 13px/1.2 var(--rp-sans) !important; color: var(--rp-muted) !important; text-transform: none !important; letter-spacing: 0 !important; }
-#sec-wealth .il-wealth-result strong { display: block !important; margin-top: 6px !important; font: 400 30px/1.05 var(--rp-serif) !important; color: var(--rp-ink) !important; letter-spacing: -.005em !important; }
+#sec-wealth .il-wealth-result strong { display: block !important; margin-top: 6px !important; font: 600 24px/1.1 var(--rp-num) !important; color: var(--rp-ink) !important; letter-spacing: -.005em !important; }
 html body #view-tool #sec-wealth .il-wealth-result.base strong { color: var(--rp-gold) !important; -webkit-text-fill-color: var(--rp-gold) !important; }
 /* Light theme: the pale gradient washes out on cream, so the range is solid gold there. */
 html:not([data-theme="dark"]) #il-projlab-mount .plab2-oc-range {
   background: none !important; -webkit-text-fill-color: var(--rp-gold) !important; color: var(--rp-gold) !important;
 }
+
+
+/* ═══ NUMBERS ═════════════════════════════════════════════════════════════
+   Every figure in IBM Plex Sans with tabular digits so columns line up:
+   prices, stat values, table cells, model outputs. Labels and headlines
+   stay in Plus Jakarta Sans. */
+#view-tool :is(.acc-body td:not(:first-child), .plab2-out, .plab2-cin, .plab2-basecol, .il-num, .m-val, .stat-val, .ihm-stat-n),
+#landing-page :is(.lx-demo-price, .lx-comp dd, .lx-lens dd, [id^="lx-comp-"], [id^="lx-lens-"], .lx-plan-price, .plan-price),
+:is(.il-static-page, .il-pricing) :is(.plan-price, .price, .amount),
+.ihm-pop-price, .ihm-pop-chg, .ihm-fav-price, .ihm-fav-chg, .ihm-idx-price, .ihm-idx-chg, #ihm-mkt-change, .ihm-stat-n {
+  font-family: var(--rp-num) !important; font-variant-numeric: tabular-nums !important;
+}
+html body :is(#view-tool, #view-home, #landing-page, #lab-main, #il-home-member, main, #upgrade-modal-bg, footer, nav) :is(#r-price, #r-change, .asf-v, #ihm-mkt-price, #ihm-mkt-change, .ihm-pop-txt span, .ihm-pop-txt i, .ihm-fav-q b, .ihm-fav-q i, .ihm-index-txt b, .ihm-index-txt i, .ihm-sector i, .ihm-stat-n, .il-an-target .il-chip, .plab2-card-cagr, .lx-price strong, .lxp-price strong, .plan-opt-price, .il-fr-count b, #score-value, #market-price, #buy-zone, .lx-stat strong, .il-auth-stats strong) {
+  font-family: var(--rp-num) !important; font-variant-numeric: tabular-nums !important;
+}
+html body :is(#view-tool, #landing-page, main) :is(#r-price, .lx-price strong, .lxp-price strong) { font-weight: 600 !important; letter-spacing: -.025em !important; }
+
+
+/* ═══ IMPLIEDLENS ICONS ═══════════════════════════════════════════════════
+   public/il-icons.js draws the product's own thin-line icons inside the
+   original <i class="ti …"> hosts. No tiles, no boxes: the menu carries a
+   muted icon that turns gold when active, and tool cards carry the icon in
+   gold on its own. */
+.il-ic-host::before { content: none !important; display: none !important; }
+.il-ic-host { display: inline-grid !important; place-items: center !important; -webkit-text-stroke: 0 !important; line-height: 1 !important; }
+.il-ic-host > svg.il-ic { width: 1em !important; height: 1em !important; display: block !important; overflow: visible !important; }
+
+/* Side menus */
+html body #view-tool .app-sidebar .sb-item i.il-ic-host,
+html body .hs-sidebar :is(.hsb-item, .prime-dash-nav a) i.il-ic-host {
+  width: 20px !important; height: 20px !important; flex: none !important; font-size: 19px !important;
+  background: transparent !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important;
+  color: var(--rp-muted) !important; transition: color .15s ease !important;
+}
+html body #view-tool .app-sidebar .sb-item:hover i.il-ic-host,
+html body .hs-sidebar :is(.hsb-item, .prime-dash-nav a):hover i.il-ic-host { color: var(--rp-ink) !important; }
+html body #view-tool .app-sidebar .sb-item.active i.il-ic-host,
+html body .hs-sidebar :is(.hsb-item.active, .prime-dash-nav a.active) i.il-ic-host { color: var(--rp-gold) !important; }
+#view-tool .app-sidebar .sb-item { gap: 12px !important; }
+
+/* Section header: the icon stands on its own in gold */
+html body #view-tool .app-section-hdr .ash-icon.il-ic-host {
+  width: 28px !important; height: 28px !important; font-size: 26px !important; border-radius: 0 !important;
+  background: transparent !important; border: 0 !important; box-shadow: none !important; color: var(--rp-gold) !important;
+}
+
+/* Tool cards and feature lists */
+html body .ihm-tool i.il-ic-host { font-size: 22px !important; width: 22px !important; height: 22px !important; color: var(--rp-gold) !important; background: transparent !important; border: 0 !important; box-shadow: none !important; }
+html body #landing-page .lx-feats i.il-ic-host { font-size: 24px !important; color: var(--rp-gold) !important; padding-top: 0 !important; }
+html body #landing-page .lx-path-tag i.il-ic-host { font-size: 15px !important; }
+html body #upgrade-modal-bg .il-up-feats i.il-ic-host { font-size: 19px !important; color: var(--rp-gold) !important; }
+html body .il-static-page :is(.feat, .research-item) i.il-ic-host {
+  font-size: 28px !important; width: 30px !important; height: 30px !important; color: var(--rp-gold) !important;
+  background: transparent !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important;
+}
+html body .il-sec-kicker i.il-ic-host { font-size: 15px !important; }
+/* Plex digits run wider than the old serif: the stat strip steps down a size. */
+html body #view-tool .metric-card .m-val { font-size: clamp(22px, 1.9vw, 28px) !important; white-space: nowrap !important; }
+html body #view-tool .app-sidebar .sb-item.active { border: 0 !important; outline: 0 !important; }
+/* Stock pages: the feature icon stands alone in gold, no tile */
+html body.il-static-page .feat .feat-icon {
+  width: auto !important; height: auto !important; background: transparent !important; border: 0 !important; box-shadow: none !important;
+  border-radius: 0 !important; padding: 0 !important; filter: none !important; justify-content: flex-start !important; margin-bottom: 14px !important;
+}
+html body.il-static-page .feat .feat-icon::before { content: none !important; display: none !important; }
+html body.il-static-page .feat .feat-icon i.il-ic-host { font-size: 28px !important; width: 28px !important; height: 28px !important; color: var(--rp-gold) !important; }

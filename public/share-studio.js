@@ -169,12 +169,12 @@
     ctx.fillText("IMPLIEDLENS", 126, 90);
     ctx.letterSpacing = "0px";
     ctx.fillStyle = accent.main;
-    ctx.font = '600 13px "JetBrains Mono", Consolas';
+    ctx.font = '600 13px "IBM Plex Sans", Consolas';
     ctx.fillText("RESEARCH FRAME", 126, 115);
 
     ctx.textAlign = "right";
     ctx.fillStyle = "#7D8581";
-    ctx.font = '500 13px "JetBrains Mono", Consolas';
+    ctx.font = '500 13px "IBM Plex Sans", Consolas';
     ctx.fillText(`${String(state.range).toUpperCase()} · ${state.asOf}`, W - 74, 86);
     ctx.fillStyle = accent.main;
     ctx.fillText("IMPLIEDLENS.COM", W - 74, 112);
@@ -186,16 +186,16 @@
 
     fillRound(ctx, 72, 292, 456, 142, 16, "rgba(14,20,22,.92)", "rgba(255,255,255,.10)");
     ctx.fillStyle = accent.main;
-    ctx.font = '700 17px "JetBrains Mono", Consolas';
+    ctx.font = '700 17px "IBM Plex Sans", Consolas';
     ctx.fillText(state.ticker || "TICKER", 96, 330);
     ctx.fillStyle = "#8F9894";
     ctx.font = '500 15px "Plus Jakarta Sans", Arial';
     ctx.fillText(state.company, 96, 358);
     ctx.fillStyle = "#F4F1EA";
-    ctx.font = '500 40px "JetBrains Mono", Consolas';
+    ctx.font = '500 40px "IBM Plex Sans", Consolas';
     ctx.fillText(state.price, 96, 408);
     ctx.fillStyle = /-|▼|down/i.test(state.change) ? "#F06A75" : "#45D590";
-    ctx.font = '600 16px "JetBrains Mono", Consolas';
+    ctx.font = '600 16px "IBM Plex Sans", Consolas';
     ctx.fillText(state.change, 318, 405);
 
     const chart = chartCanvas();
@@ -231,10 +231,10 @@
       const x = 72 + i * (boxW + boxGap);
       fillRound(ctx, x, 744, boxW, 86, 12, "rgba(13,18,20,.9)", "rgba(255,255,255,.08)");
       ctx.fillStyle = "#6F7874";
-      ctx.font = '600 11px "JetBrains Mono", Consolas';
+      ctx.font = '600 11px "IBM Plex Sans", Consolas';
       ctx.fillText(metric.label.toUpperCase().slice(0, 22), x + 16, 774);
       ctx.fillStyle = "#EDEBE5";
-      ctx.font = '600 20px "JetBrains Mono", Consolas';
+      ctx.font = '600 20px "IBM Plex Sans", Consolas';
       ctx.fillText(metric.value.slice(0, 16), x + 16, 808);
     });
 

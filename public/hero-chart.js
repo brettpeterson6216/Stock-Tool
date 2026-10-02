@@ -64,7 +64,7 @@
       layout: {
         background: { type: "solid", color: "transparent" },
         textColor: text,
-        fontFamily: '"JetBrains Mono", ui-monospace, monospace',
+        fontFamily: '"IBM Plex Sans", ui-monospace, monospace',
         fontSize: 9,
         panes: { separatorColor: "transparent", enableResize: false }
       },

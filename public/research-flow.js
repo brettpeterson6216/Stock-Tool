@@ -101,7 +101,7 @@
     institutional:["ti-building-bank", "Ownership", "Who owns it,", "and who is moving.", "The largest institutional holders and weekly off-exchange volume."],
     compare:      ["ti-arrows-diff", "Compare", "Side by side,", "on equal terms.", "Up to four companies with normalized performance and fundamentals."],
     screener:     ["ti-filter", "Screener", "Find the candidates", "worth a closer look.", "Filter the market by value, size, income and momentum."],
-    projection:   ["ti-adjustments-horizontal", "Valuation Lab", "What could it", "be worth?", "Bear, Base and Bull projections with every assumption editable."],
+    projection:   ["ti-calculator", "Valuation Lab", "What could it", "be worth?", "Bear, Base and Bull projections with every assumption editable."],
     dcf:          ["ti-calculator", "Valuation Lab", "What could it", "be worth?", "A discounted-cash-flow model with every assumption editable."],
     reports:      ["ti-bookmark", "Saved research", "Everything you have", "worked on.", "Saved analyses, models and notes, ready to pick back up."],
     education:    ["ti-school", "Academy", "Learn the method,", "one lesson at a time.", "Short, plain-English lessons with real examples and quick checks."]

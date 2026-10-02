@@ -48,7 +48,8 @@
     radial-gradient(1100px 520px at 18% -10%, rgba(224, 170, 69, .16), transparent 62%),
     radial-gradient(900px 480px at 92% 0%, rgba(201, 146, 51, .10), transparent 66%) !important;
   --rp-serif: "Instrument Serif", "Iowan Old Style", Georgia, serif !important;
-  --rp-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace !important;
+  --rp-num: "IBM Plex Sans", "Plus Jakarta Sans", system-ui, sans-serif !important;
+  --rp-mono: 'IBM Plex Sans', ui-monospace, SFMono-Regular, Menlo, monospace !important;
 }
 html[data-theme="dark"] {
   --rp-bg: #0a0908 !important;
@@ -434,7 +435,7 @@ body.il-product-page::before, body.il-static-page::before, body.il-auth-page::be
 #landing-page .lx-stat { padding: 8px 24px !important; border-left: 1px solid var(--rp-line) !important; text-align: left !important; }
 #landing-page .lx-stat:first-child { border-left: 0 !important; }
 #landing-page .lx-stat strong {
-  display: block !important; font: 400 clamp(44px, 5vw, 68px)/1 var(--rp-serif) !important; letter-spacing: -.01em !important;
+  display: block !important; font: 600 clamp(38px, 4.2vw, 54px)/1 var(--rp-num) !important; letter-spacing: -.025em !important; font-variant-numeric: tabular-nums !important;
   background: var(--rp-gold-text) !important; -webkit-background-clip: text !important; background-clip: text !important;
   -webkit-text-fill-color: transparent !important; color: transparent !important; margin-bottom: 8px !important;
 }

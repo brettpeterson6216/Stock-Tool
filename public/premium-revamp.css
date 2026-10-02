@@ -150,7 +150,7 @@ html[data-theme="light"] {
   /* Type stacks */
   --il-display: "Instrument Serif", "Plus Jakarta Sans", Georgia, serif;
   --il-sans: "Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --il-mono: "JetBrains Mono", "SF Mono", ui-monospace, Menlo, monospace;
+  --il-mono: 'IBM Plex Sans', "SF Mono", ui-monospace, Menlo, monospace;
 
   /* NOTE: legacy --serif means "display sans" throughout the older layers and
      is used for card titles and labels. It must stay a sans, or product UI
@@ -3270,7 +3270,7 @@ html #view-tool .mobile-sec-tabs {
 
 :root {
   --il-sans: "Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --il-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --il-mono: 'IBM Plex Sans', ui-monospace, "SF Mono", Menlo, monospace;
   --il-display: "Instrument Serif", Georgia, serif;
   --sans: var(--il-sans);
   --mono: var(--il-mono);

@@ -24,7 +24,7 @@
 }
 #landing-page .lx-chips span { margin-right: 2px !important; }
 #landing-page .lx-chips button {
-  font: 600 12.5px/1 var(--rp-mono, "JetBrains Mono", ui-monospace, monospace) !important;
+  font: 600 12.5px/1 var(--rp-mono, 'IBM Plex Sans', ui-monospace, monospace) !important;
   letter-spacing: .02em !important;
   padding: 7px 11px !important; border-radius: 999px !important;
   border: 1px solid var(--rp-line-strong) !important;
@@ -105,7 +105,7 @@
   display: flex !important; flex-wrap: wrap !important; gap: 8px !important; margin: 0 0 16px !important;
 }
 #landing-page .lx-demo-tabs button {
-  font: 700 13px/1 var(--rp-mono, "JetBrains Mono", ui-monospace, monospace) !important;
+  font: 700 13px/1 var(--rp-mono, 'IBM Plex Sans', ui-monospace, monospace) !important;
   padding: 10px 16px !important; border-radius: 10px !important; cursor: pointer !important;
   border: 1px solid var(--rp-line-strong) !important; background: transparent !important; color: var(--rp-copy) !important;
 }
@@ -120,11 +120,11 @@
 #landing-page .lx-demo-main { padding: clamp(20px, 2.4vw, 32px) !important; min-width: 0 !important; }
 #landing-page .lx-demo-id { display: flex !important; flex-wrap: wrap !important; align-items: baseline !important; gap: 4px 14px !important; }
 #landing-page .lx-demo-sym {
-  font: 700 12px/1 var(--rp-mono, "JetBrains Mono", monospace) !important; letter-spacing: .08em !important;
+  font: 700 12px/1 var(--rp-mono, 'IBM Plex Sans', monospace) !important; letter-spacing: .08em !important;
   color: var(--rp-gold) !important; padding: 5px 8px !important; border-radius: 6px !important; background: var(--rp-gold-soft) !important;
 }
 #landing-page .lx-demo-name { font: 750 clamp(20px, 2vw, 26px)/1.2 var(--rp-sans) !important; color: var(--rp-ink) !important; letter-spacing: -.015em !important; }
-#landing-page .lx-demo-price { flex-basis: 100% !important; font: 500 14px/1.4 var(--rp-mono, "JetBrains Mono", monospace) !important; color: var(--rp-copy) !important; }
+#landing-page .lx-demo-price { flex-basis: 100% !important; font: 500 14px/1.4 var(--rp-mono, 'IBM Plex Sans', monospace) !important; color: var(--rp-copy) !important; }
 #landing-page .lx-demo-chart { height: 150px !important; margin: 18px 0 20px !important; }
 #landing-page .lx-demo-chart svg { width: 100% !important; height: 100% !important; display: block !important; overflow: visible !important; }
 #landing-page .lx-demo-line { fill: none !important; stroke: var(--rp-gold-accent) !important; stroke-width: 2.2 !important; vector-effect: non-scaling-stroke; stroke-linejoin: round !important; }
@@ -160,7 +160,7 @@
 #landing-page .lx-lenses { margin: 0 !important; display: grid !important; gap: 10px !important; }
 #landing-page .lx-lenses > div { display: grid !important; grid-template-columns: 1fr auto !important; gap: 4px 8px !important; align-items: center !important; }
 #landing-page .lx-lenses dt { font: 500 13px/1.3 var(--rp-sans) !important; color: var(--rp-copy) !important; }
-#landing-page .lx-lenses dd { margin: 0 !important; font: 700 13px/1.3 var(--rp-mono, "JetBrains Mono", monospace) !important; color: var(--rp-ink) !important; }
+#landing-page .lx-lenses dd { margin: 0 !important; font: 700 13px/1.3 var(--rp-mono, 'IBM Plex Sans', monospace) !important; color: var(--rp-ink) !important; }
 #landing-page .lx-bar { grid-column: 1 / -1 !important; height: 6px !important; border-radius: 999px !important; background: var(--rp-line) !important; overflow: hidden !important; }
 #landing-page .lx-bar i { display: block !important; height: 100% !important; width: 0; border-radius: inherit !important; background: var(--rp-gold-accent) !important; transition: width .5s ease !important; }
 #landing-page .lx-bar i[data-tone="good"] { background: var(--rp-green) !important; }

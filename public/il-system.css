@@ -228,7 +228,7 @@
   .fstock-price, .fstock-chg, .ht-price, .wl-price, .p-amount,
   .il-shell-ticker strong, .score-value, .lens-score-value, td.num, .num
 ) {
-  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace !important;
+  font-family: 'IBM Plex Sans', ui-monospace, SFMono-Regular, monospace !important;
   font-variant-numeric: tabular-nums !important;
   font-feature-settings: "tnum" 1, "zero" 1 !important;
   letter-spacing: -.01em !important;
@@ -1099,7 +1099,7 @@
 /* A slot with no data behind it says so, rather than showing invented numbers. */
 :is(#il-system, html) :is(#il-system, body) .il-rail-item > b em {
   font-style: normal !important;
-  font-family: "JetBrains Mono", ui-monospace, monospace !important;
+  font-family: 'IBM Plex Sans', ui-monospace, monospace !important;
   font-size: 11.5px !important;
   letter-spacing: .02em !important;
   text-transform:none;
@@ -1194,7 +1194,7 @@
   margin-bottom: 12px !important;
 }
 :is(#il-system, html) :is(#il-system, body) .ilm-title {
-  font-family: "JetBrains Mono", ui-monospace, monospace !important;
+  font-family: 'IBM Plex Sans', ui-monospace, monospace !important;
   font-size: 11px !important;
   letter-spacing: .02em !important;
   text-transform:none;
@@ -1230,7 +1230,7 @@
 }
 :is(#il-system, html) :is(#il-system, body) .ilm-row:first-child { border-top: 0 !important; }
 :is(#il-system, html) :is(#il-system, body) .ilm-sym {
-  font-family: "JetBrains Mono", ui-monospace, monospace !important;
+  font-family: 'IBM Plex Sans', ui-monospace, monospace !important;
   font-size: 12px !important;
   font-weight: 700 !important;
   color: var(--ink, #F2F0EB) !important;
@@ -1246,7 +1246,7 @@
 }
 :is(#il-system, html) :is(#il-system, body) .ilm-price,
 :is(#il-system, html) :is(#il-system, body) .ilm-chg {
-  font-family: "JetBrains Mono", ui-monospace, monospace !important;
+  font-family: 'IBM Plex Sans', ui-monospace, monospace !important;
   font-size: 12px !important;
   text-align: right !important;
 }
@@ -1288,7 +1288,7 @@ html[data-theme="light"] :is(#il-system, body) .ilm-chg.is-dn { color:#A3352A !i
   text-decoration: none !important;
 }
 :is(#il-system, html) :is(#il-system, body) .ilm-badge {
-  font-family: "JetBrains Mono", ui-monospace, monospace !important;
+  font-family: 'IBM Plex Sans', ui-monospace, monospace !important;
   font-size: 11.5px !important;
   letter-spacing: .02em !important;
   text-transform:none;
@@ -1376,7 +1376,7 @@ html[data-theme="light"] :is(#il-system, body) .ilm-chg.is-dn { color:#A3352A !i
   gap: 2px !important;
 }
 :is(#il-system, html) :is(#il-system, body) .ihx-f-lbl {
-  font-family: "JetBrains Mono", ui-monospace, monospace !important;
+  font-family: 'IBM Plex Sans', ui-monospace, monospace !important;
   font-size: 11px !important; letter-spacing: .02em !important; text-transform:none;
   color: rgba(232,226,214,.60) !important; -webkit-text-fill-color: rgba(232,226,214,.60) !important;
 }
@@ -1400,7 +1400,7 @@ html[data-theme="light"] :is(#il-system, body) .ilm-chg.is-dn { color:#A3352A !i
 }
 :is(#il-system, html) :is(#il-system, body) .ihx-r-top { display: flex !important; align-items: baseline !important; gap: 7px !important; }
 :is(#il-system, html) :is(#il-system, body) .ihx-r-sym {
-  font-family: "JetBrains Mono", ui-monospace, monospace !important;
+  font-family: 'IBM Plex Sans', ui-monospace, monospace !important;
   font-size: 13px !important; font-weight: 700 !important;
   color: #F4F1EA !important; -webkit-text-fill-color: #F4F1EA !important;
 }
@@ -1413,7 +1413,7 @@ html[data-theme="light"] :is(#il-system, body) .ilm-chg.is-dn { color:#A3352A !i
   color: #F4F1EA !important; -webkit-text-fill-color: #F4F1EA !important;
 }
 :is(#il-system, html) :is(#il-system, body) .ihx-r-chg {
-  font-family: "JetBrains Mono", ui-monospace, monospace !important;
+  font-family: 'IBM Plex Sans', ui-monospace, monospace !important;
   font-size: 11px !important; margin-bottom: 10px !important;
   color: #6FBE95 !important; -webkit-text-fill-color: #6FBE95 !important;
 }
@@ -1423,7 +1423,7 @@ html[data-theme="light"] :is(#il-system, body) .ilm-chg.is-dn { color:#A3352A !i
   border-top: 1px solid rgba(255,255,255,.07) !important;
 }
 :is(#il-system, html) :is(#il-system, body) .ihx-r-row > span {
-  font-family: "JetBrains Mono", ui-monospace, monospace !important;
+  font-family: 'IBM Plex Sans', ui-monospace, monospace !important;
   font-size: 11px !important; letter-spacing: .02em !important; text-transform:none;
   color: rgba(232,226,214,.50) !important; -webkit-text-fill-color: rgba(232,226,214,.50) !important;
 }
@@ -1433,7 +1433,7 @@ html[data-theme="light"] :is(#il-system, body) .ilm-chg.is-dn { color:#A3352A !i
 }
 :is(#il-system, html) :is(#il-system, body) .ihx-r-foot {
   margin-top: auto !important; padding-top: 9px !important;
-  font-family: "JetBrains Mono", ui-monospace, monospace !important;
+  font-family: 'IBM Plex Sans', ui-monospace, monospace !important;
   font-size: 11px !important; letter-spacing: .02em !important; text-transform:none;
   color: rgba(232,226,214,.40) !important; -webkit-text-fill-color: rgba(232,226,214,.40) !important;
 }
@@ -1641,7 +1641,7 @@ body.il-product-page #view-tool .app-section-hdr {
   background: color-mix(in srgb, var(--il-bg) 94%, transparent) !important;
 }
 body.il-product-page #view-tool .ash-title {
-  font-family: "JetBrains Mono", ui-monospace, monospace !important;
+  font-family: 'IBM Plex Sans', ui-monospace, monospace !important;
   font-size: 11px !important;
   letter-spacing: .02em !important;
   text-transform:none;
@@ -1750,7 +1750,7 @@ body.il-product-page #body-analyze:not(.has-stock) > .fg-label {
   background: var(--il-surface) !important;
 }
 body.il-product-page #body-analyze:not(.has-stock) > .fg-label span {
-  font-family: "JetBrains Mono", ui-monospace, monospace !important;
+  font-family: 'IBM Plex Sans', ui-monospace, monospace !important;
   font-size: 11px !important;
   letter-spacing: .02em !important;
   text-transform:none;
@@ -1806,7 +1806,7 @@ body.il-product-page #stock-result .result-header {
     #0B1113 !important;
 }
 body.il-product-page #stock-result .res-ticker-lbl {
-  font-family: "JetBrains Mono", ui-monospace, monospace !important;
+  font-family: 'IBM Plex Sans', ui-monospace, monospace !important;
   font-size: 11px !important;
   letter-spacing: .11em !important;
 }
@@ -1817,7 +1817,7 @@ body.il-product-page #stock-result .res-name {
   font-weight: 400 !important;
 }
 body.il-product-page #stock-result .price-big {
-  font-family: "JetBrains Mono", ui-monospace, monospace !important;
+  font-family: 'IBM Plex Sans', ui-monospace, monospace !important;
   font-size: 34px !important;
 }
 body.il-product-page #stock-result .il-data-source-line {
@@ -1942,7 +1942,7 @@ body.share-studio-open { overflow: hidden !important; }
 }
 .share-studio-kicker {
   color: #D6A34A;
-  font: 600 12px/1.3 "JetBrains Mono",ui-monospace,monospace;
+  font: 600 12px/1.3 'IBM Plex Sans',ui-monospace,monospace;
   letter-spacing: .02em;
   text-transform:none;
 }
@@ -1974,7 +1974,7 @@ body.share-studio-open { overflow: hidden !important; }
   display: block;
   margin-bottom: 8px;
   color: #8A9490;
-  font: 600 11.5px/1.2 "JetBrains Mono",ui-monospace,monospace;
+  font: 600 11.5px/1.2 'IBM Plex Sans',ui-monospace,monospace;
   letter-spacing: .02em;
   text-transform:none;
 }
@@ -2250,7 +2250,7 @@ body.share-studio-open { overflow: hidden !important; }
 :is(#il-system, html) :is(#il-system, body) .ts-sym {
   flex: 0 0 auto;
   min-width: 54px;
-  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: 'IBM Plex Sans', ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: var(--t-small);
   font-weight: var(--w-bold);
   color: var(--ts-ink);

@@ -30,7 +30,8 @@ const SUBSETS = ['latin', 'latin-ext'];
 const FAMILIES = {
   'plus-jakarta-sans': { name: 'Plus Jakarta Sans', weights: [400, 500, 600, 700, 800], italics: [400, 600] },
   'jetbrains-mono':    { name: 'JetBrains Mono',    weights: [400, 500, 600, 700],      italics: [] },
-  'instrument-serif':  { name: 'Instrument Serif',  weights: [400],                     italics: [400] }
+  'instrument-serif':  { name: 'Instrument Serif',  weights: [400],                     italics: [400] },
+  'ibm-plex-sans':     { name: 'IBM Plex Sans',     weights: [400, 500, 600, 700],      italics: [] }
 };
 
 let out = `/* ═══════════════════════════════════════════════════════════════════════

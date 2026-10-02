@@ -429,6 +429,7 @@ function renderPage(ticker, q, facts) {
   </style>
   ${siteHeader.styles}
 <script defer src="/il-ribbon.js?v=20261001-3"></script>
+<script defer src="/il-icons.js?v=20261002-1"></script>
 </head>
 <body class="il-static-page il-stock-page">
   <a class="il-skip-link" href="#public-main">Skip to content</a>
@@ -650,6 +651,7 @@ function notFound(res, attempted) {
   <meta name="robots" content="noindex,follow">
   ${siteHeader.styles}
 <script defer src="/il-ribbon.js?v=20261001-3"></script>
+<script defer src="/il-icons.js?v=20261002-1"></script>
 </head>
 <body class="il-static-page il-stock-page">
   <a class="il-skip-link" href="#public-main">Skip to content</a>

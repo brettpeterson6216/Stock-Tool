@@ -1394,7 +1394,7 @@ html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-stat-
   color: var(--lp-text, #f2eee5) !important; -webkit-text-fill-color: currentColor !important;
 }
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ihm-stat-n {
-  font-family: var(--lpf-mono, 'JetBrains Mono', monospace) !important;
+  font-family: var(--lpf-mono, 'IBM Plex Sans', monospace) !important;
   font-size: 15px !important; font-weight: 600 !important;
   color: var(--lp-text, #f2eee5) !important; -webkit-text-fill-color: currentColor !important;
 }
@@ -1488,7 +1488,7 @@ html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-startp
   border-color: var(--lp-border-gold, rgba(216,164,63,.34)) !important;
 }
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .isp-n {
-  font-family: var(--lpf-mono, 'JetBrains Mono', monospace) !important; font-size: 11px !important;
+  font-family: var(--lpf-mono, 'IBM Plex Sans', monospace) !important; font-size: 11px !important;
   color: var(--il-gold-ink) !important; -webkit-text-fill-color: currentColor !important;
 }
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .il-startpath b {
@@ -1890,7 +1890,7 @@ html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilx-key-n
   color: var(--il-muted-ink, var(--lp-muted, #929c9c)) !important; -webkit-text-fill-color: currentColor !important;
 }
 html:not(#cp1):not(#cp2):not(#cp3):not(#cp4):not(#cp5) body:not(#cp6) .ilx-key-val {
-  font-family: var(--lpf-mono, 'JetBrains Mono', monospace) !important;
+  font-family: var(--lpf-mono, 'IBM Plex Sans', monospace) !important;
   font-weight: 600 !important; min-width: 54px !important; text-align: right !important;
   font-variant-numeric: tabular-nums !important;
   color: var(--lp-text, #f2eee5) !important; -webkit-text-fill-color: currentColor !important;

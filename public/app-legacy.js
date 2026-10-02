@@ -1667,7 +1667,7 @@ const crosshairPlugin = {
     // Axis labels (price + date) only on charts that opt in
     if(chart._crosshairAxes){
       const yScale = chart.scales.y, xScale = chart.scales.x;
-      ctx.font = "600 10px 'JetBrains Mono', monospace";
+      ctx.font = "600 10px 'IBM Plex Sans', monospace";
       ctx.textBaseline = 'middle';
       // price label on right edge
       if(cy!=null && cy>=area.top && cy<=area.bottom && yScale){
@@ -1788,13 +1788,13 @@ const baseOpts = (extraScales={}) => {
         backgroundColor:t.ttBg, titleColor:t.ttTitle, bodyColor:t.ttBody,
         borderColor:t.ttBorder, borderWidth:1, padding:12, caretSize:6,
         cornerRadius:10, displayColors:true, boxWidth:8, boxHeight:8, usePointStyle:true,
-        titleFont:{family:'JetBrains Mono',size:11,weight:'600'},bodyFont:{family:'Plus Jakarta Sans',size:12,weight:'600'},
+        titleFont:{family:'IBM Plex Sans',size:11,weight:'600'},bodyFont:{family:'Plus Jakarta Sans',size:12,weight:'600'},
         callbacks:{ label: ctx => ` ${ctx.dataset.label||''}: ${ctx.parsed?.y != null ? Number(ctx.parsed.y).toLocaleString('en-US', { maximumFractionDigits: 2 }) : ctx.formattedValue}` }
       }
     },
     scales:{
-      x:{ ...xExtra, border:{display:false,...(xExtra.border||{})}, title:{...(xExtra.title||{}),display:false}, ticks:{color:t.text,font:{family:'JetBrains Mono',size:compact?9:10,weight:'600'},maxTicksLimit:compact?4:8,padding:8,autoSkip:true,...(xExtra.ticks||{})}, grid:{display:false,color:t.grid,drawTicks:false,...(xExtra.grid||{})} },
-      y:{ ...yExtra, border:{display:false,...(yExtra.border||{})}, title:{...(yExtra.title||{}),display:false}, ticks:{color:t.text,font:{family:'JetBrains Mono',size:compact?9:10,weight:'600'},padding:8,maxTicksLimit:compact?5:8,...(yExtra.ticks||{})}, grid:{color:t.grid,lineWidth:1,drawTicks:false,...(yExtra.grid||{})} }
+      x:{ ...xExtra, border:{display:false,...(xExtra.border||{})}, title:{...(xExtra.title||{}),display:false}, ticks:{color:t.text,font:{family:'IBM Plex Sans',size:compact?9:10,weight:'600'},maxTicksLimit:compact?4:8,padding:8,autoSkip:true,...(xExtra.ticks||{})}, grid:{display:false,color:t.grid,drawTicks:false,...(xExtra.grid||{})} },
+      y:{ ...yExtra, border:{display:false,...(yExtra.border||{})}, title:{...(yExtra.title||{}),display:false}, ticks:{color:t.text,font:{family:'IBM Plex Sans',size:compact?9:10,weight:'600'},padding:8,maxTicksLimit:compact?5:8,...(yExtra.ticks||{})}, grid:{color:t.grid,lineWidth:1,drawTicks:false,...(yExtra.grid||{})} }
     }
   };
 };
@@ -1911,7 +1911,7 @@ function expandChart(chartId, title) {
           backgroundColor:ttbg(), titleColor:theme.muted, bodyColor:ttbody(),
           borderColor:ttborder(), borderWidth:1, padding:12, caretSize:6,
           cornerRadius:10, displayColors:true, boxWidth:8, boxHeight:8, usePointStyle:true,
-          titleFont:{family:'JetBrains Mono',size:11,weight:'600'},bodyFont:{family:'Plus Jakarta Sans',size:12,weight:'600'},
+          titleFont:{family:'IBM Plex Sans',size:11,weight:'600'},bodyFont:{family:'Plus Jakarta Sans',size:12,weight:'600'},
           callbacks:{
             title:items=>items[0]?.label||'',
             label:ctx=>{
@@ -1941,7 +1941,7 @@ function expandChart(chartId, title) {
         ...(srcCfg.options?.scales||{}),
         x: {
           ...(srcCfg.options?.scales?.x||{}),
-          ticks:{...(srcCfg.options?.scales?.x?.ticks||{}),color:theme.text,font:{family:'JetBrains Mono',size:compact?9:11,weight:'500'},maxTicksLimit:compact?4:10,maxRotation:0,minRotation:0,autoSkip:true,padding:compact?8:10},
+          ticks:{...(srcCfg.options?.scales?.x?.ticks||{}),color:theme.text,font:{family:'IBM Plex Sans',size:compact?9:11,weight:'500'},maxTicksLimit:compact?4:10,maxRotation:0,minRotation:0,autoSkip:true,padding:compact?8:10},
           grid:{color:gcol()}
         },
         y: {
@@ -1950,7 +1950,7 @@ function expandChart(chartId, title) {
           beginAtZero:false,
           position:isPriceChart?'right':(srcCfg.options?.scales?.y?.position||'left'),
           title:{...(srcCfg.options?.scales?.y?.title||{}),display:false},
-          ticks:{...(srcCfg.options?.scales?.y?.ticks||{}),color:theme.text,font:{family:'JetBrains Mono',size:compact?9:11,weight:'500'},maxTicksLimit:compact?6:8,padding:compact?6:8,callback:isPriceChart?(value=>fmtChartAxisPrice(value)):(srcCfg.options?.scales?.y?.ticks?.callback)},
+          ticks:{...(srcCfg.options?.scales?.y?.ticks||{}),color:theme.text,font:{family:'IBM Plex Sans',size:compact?9:11,weight:'500'},maxTicksLimit:compact?6:8,padding:compact?6:8,callback:isPriceChart?(value=>fmtChartAxisPrice(value)):(srcCfg.options?.scales?.y?.ticks?.callback)},
           grid:{color:gcol()}
         }
       }
