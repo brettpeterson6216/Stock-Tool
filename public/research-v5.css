@@ -1465,3 +1465,45 @@ html body.il-static-page .feat .feat-icon i.il-ic-host { font-size: 28px !import
     -webkit-overflow-scrolling: touch !important; overscroll-behavior-y: contain !important;
   }
 }
+@media (max-width: 900px) {
+  /* Saved work and lessons are not company pages: no company tab strip. */
+  #view-tool:is([data-nav-group="saved"], [data-nav-group="learn"]) #mobile-sec-tabs { display: none !important; }
+  /* The key stats sit straight under the company header, as on desktop. */
+  body.il-product-page #view-tool #stock-result > .metrics-grid { order: 2 !important; }
+  /* Section context line: copy on one row, the link under it. */
+  #view-tool .acc-body .il-lens-context.il-lens-context { flex-direction: column !important; align-items: flex-start !important; gap: 8px !important; }
+}
+@media (max-width: 700px) {
+  /* Key stats: two tight columns. */
+  html body #view-tool .metrics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  html body #view-tool .metrics-grid .metric-card { padding: 12px 14px !important; }
+  #view-tool .m-lbl { margin-bottom: 4px !important; }
+  #view-tool .m-lbl .il-metric-learn { display: none !important; }
+  html body #view-tool .metric-card .m-val { font-size: 22px !important; }
+  #view-tool .metric-card .m-sub { font-size: 12px !important; margin-top: 2px !important; }
+
+  /* Compare: tickers two to a row, full width, button underneath. */
+  html body #body-compare .cmp-inputs { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 12px !important; padding: 16px !important; }
+  html body #body-compare .cmp-ig { width: auto !important; min-width: 0 !important; margin: 0 !important; display: flex !important; flex-direction: column !important; gap: 6px !important; }
+  html body #body-compare .cmp-ig input { width: 100% !important; }
+  html body #body-compare .cmp-inputs .btn-search { grid-column: 1 / -1 !important; width: 100% !important; }
+
+  /* Advanced metrics: two cards to a row. */
+  html body #view-tool .advm-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  html body #view-tool .advm-card { padding: 14px !important; }
+  html body #view-tool .advm-val { font-size: 22px !important; }
+
+  /* Tables: tighter rows, the label column narrower. */
+  html body #view-tool .app-section:not(#sec-analyze) .acc-body table :is(td, th) { padding: 10px 12px !important; font-size: 13.5px !important; }
+
+  /* Workspace figures fit their cells. */
+  html body #view-tool #sec-workspace .il-ws-stat strong { font-size: clamp(18px, 5.4vw, 24px) !important; white-space: nowrap !important; }
+  html body #view-tool #sec-workspace .il-ws-stat { padding: 14px 16px !important; min-width: 0 !important; }
+
+  /* Stock pages: a headline that fits a phone. */
+  body.il-static-page .hero h1, body.il-static-page section.hero h1 { font-size: clamp(32px, 9vw, 40px) !important; line-height: 1.05 !important; }
+
+  /* The ribbon steps back behind copy on small screens. */
+  .il-ribbon.il-ribbon-hero { opacity: .5 !important; }
+  #landing-page .il-ribbon.il-ribbon-hero { opacity: .78 !important; }
+}
