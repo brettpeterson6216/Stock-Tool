@@ -58,7 +58,7 @@
   var SCOPE = [
     ".sb-item i.ti", ".hsb-item i.ti", ".prime-dash-nav i.ti", "i#ash-icon",
     ".il-sec-kicker i.ti", ".ihm-tool i.ti", ".lx-feats i.ti", ".lx-path-tag i.ti",
-    ".il-up-feats i.ti", ".il-static-page .feat i.ti", ".il-static-page .research-item i.ti"
+    ".il-up-feats i.ti", ".il-mm-item i.ti", ".il-static-page .feat i.ti", ".il-static-page .research-item i.ti"
   ].join(",");
 
   function svg(name) {

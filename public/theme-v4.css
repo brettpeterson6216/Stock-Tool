@@ -99,11 +99,13 @@ body:is(.il-product-page, .il-static-page, .il-auth-page)::after {
 }
 ::selection { background: var(--rp-gold-ring) !important; color: var(--rp-ink) !important; }
 
-/* ── 3. Header: glass over the aurora, one gold hairline ────────────────── */
+/* ── 3. Header: solid, one gold hairline ────────────────────────────────────
+   It was 78% glass. On a phone that let the page show through behind the
+   logo as it scrolled, so the header read as broken. */
 #main-nav.il-global-nav {
-  background: color-mix(in srgb, var(--rp-bg) 78%, transparent) !important;
-  -webkit-backdrop-filter: saturate(140%) blur(16px) !important;
-  backdrop-filter: saturate(140%) blur(16px) !important;
+  background: var(--rp-bg) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
   border-bottom: 1px solid transparent !important;
   border-image: linear-gradient(90deg, transparent, var(--rp-gold-ring) 25%, var(--rp-gold-ring) 75%, transparent) 1 !important;
   box-shadow: none !important;

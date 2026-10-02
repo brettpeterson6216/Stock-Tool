@@ -166,47 +166,104 @@
      fallbacks they threw ReferenceError on tap. */
   if (typeof window._toggleMobileMenu !== "function") {
     window._toggleMobileMenu = function () {
+      var drawer = document.getElementById("mobile-more-menu");
+      if (drawer) { drawer.classList.toggle("open"); return; }
       var toggle = nav.querySelector(".lp-static-menu-toggle");
       if (toggle) toggle.click();
     };
   }
-  // The application drawer is a disclosure, so focus may leave it normally.
-  // Keep every trigger in sync, including when navigation closes the drawer.
+  /* ── the mobile menu (#mobile-more-menu in index.html) ─────────────────
+     A sheet under the header. Opening it focuses the sheet, never the search
+     field: on a phone focusing an input raises the keyboard, and on iOS a
+     focused input under 16px zooms the whole page and leaves it zoomed. */
   var appDrawer = document.getElementById("mobile-more-menu");
   if (appDrawer) {
     var triggers = document.querySelectorAll(".prime-nav-menu, .prime-mobile-appbar button, #mbn-more");
+    var sheet = appDrawer.querySelector(".il-mm-sheet") || appDrawer;
     var lastTrigger = null;
     var wasOpen = false;
-    appDrawer.setAttribute("role", "region");
-    appDrawer.setAttribute("aria-label", "Research navigation");
+    function closeDrawer() { appDrawer.classList.remove("open"); }
     function syncAppDrawer() {
       var open = appDrawer.classList.contains("open");
       appDrawer.setAttribute("aria-hidden", String(!open));
+      root.classList.toggle("il-mm-open", open);
       triggers.forEach(function (trigger) {
         trigger.setAttribute("aria-controls", "mobile-more-menu");
         trigger.setAttribute("aria-expanded", String(open));
       });
       if (open && !wasOpen) {
         lastTrigger = document.activeElement;
-        var input = appDrawer.querySelector('input:not([type="hidden"]), a[href], button');
-        if (input) input.focus();
+        sheet.scrollTop = 0;
+        try { sheet.focus({ preventScroll: true }); } catch (e) { sheet.focus(); }
+      }
+      if (!open && wasOpen) {
+        var q = document.getElementById("mmenu-ticker");
+        if (q && document.activeElement === q) q.blur();
       }
       wasOpen = open;
     }
     syncAppDrawer();
     new MutationObserver(syncAppDrawer).observe(appDrawer, { attributes: true, attributeFilter: ["class"] });
+
+    /* Every row is a real link, so it works on any page and before the app has
+       loaded. On the app itself, sections open in place instead. */
+    appDrawer.addEventListener("click", function (e) {
+      var t = e.target;
+      if (!t || !t.closest) return;
+      if (t.closest("[data-mm-close]")) { e.preventDefault(); closeDrawer(); return; }
+      var item = t.closest(".il-mm-item");
+      if (!item) return;
+      var onApp = location.pathname === "/";
+      var sec = item.getAttribute("data-mm-sec");
+      if (sec && onApp && typeof window.navGoTo === "function" && document.getElementById("sec-" + sec)) {
+        e.preventDefault(); closeDrawer(); window.navGoTo(sec); window.scrollTo(0, 0); return;
+      }
+      if (item.hasAttribute("data-mm-market") && onApp && typeof window.showMarketPage === "function") {
+        e.preventDefault(); closeDrawer(); window.showMarketPage(); window.scrollTo(0, 0); return;
+      }
+      if (item.hasAttribute("data-mm-lensscore") && typeof window.navGoLensScore === "function") {
+        closeDrawer(); if (window.navGoLensScore(item, e) === false) e.preventDefault(); return;
+      }
+      if (item.hasAttribute("data-mm-feedback")) {
+        e.preventDefault(); closeDrawer();
+        if (typeof window.openFeedbackPrompt === "function") window.openFeedbackPrompt();
+        else location.href = "mailto:support@impliedlens.com?subject=ImpliedLens%20feedback";
+        return;
+      }
+      if (item.hasAttribute("data-mm-account")) {
+        e.preventDefault(); closeDrawer();
+        var settings = document.getElementById("nav-acct-settings");
+        if (settings) settings.click(); else location.href = "/login";
+        return;
+      }
+      if (item.hasAttribute("data-mm-logout")) {
+        e.preventDefault(); closeDrawer();
+        var out = document.querySelector("#nav-acct-menu a[id$=\"-logout\"]");
+        if (out) out.click(); else location.href = "/login";
+        return;
+      }
+      closeDrawer();   // a plain link: let it navigate
+    });
+
+    var mmForm = appDrawer.querySelector(".il-mm-search");
+    if (mmForm) mmForm.addEventListener("submit", function (e) {
+      var input = document.getElementById("mmenu-ticker");
+      var v = input && input.value ? input.value.trim().toUpperCase() : "";
+      if (!v) { e.preventDefault(); if (input) input.focus(); return; }
+      input.value = v;
+      if (location.pathname === "/" && typeof window.heroLoadTicker === "function") {
+        e.preventDefault(); input.blur(); input.value = ""; closeDrawer(); window.heroLoadTicker(v);
+      }
+    });
+
     document.addEventListener("keydown", function (event) {
       if (event.key !== "Escape" || !appDrawer.classList.contains("open")) return;
       event.preventDefault();
-      appDrawer.classList.remove("open");
+      closeDrawer();
       if (lastTrigger && typeof lastTrigger.focus === "function") lastTrigger.focus();
     });
-    document.addEventListener("focusin", function (event) {
-      if (!appDrawer.classList.contains("open") || appDrawer.contains(event.target)) return;
-      if (Array.prototype.indexOf.call(triggers, event.target) === -1) appDrawer.classList.remove("open");
-    });
     window.addEventListener("resize", function () {
-      if (window.innerWidth > 900) appDrawer.classList.remove("open");
+      if (window.innerWidth > 900) closeDrawer();
     });
   }
   if (typeof window.navAccountTap !== "function") {

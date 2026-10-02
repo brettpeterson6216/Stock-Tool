@@ -1075,9 +1075,9 @@ async function openAccountModal() {
 
     const planEl = document.getElementById('am-plan');
     if (user.effectivePlan === 'pro') {
-      planEl.innerHTML = '<span style="color:var(--gold-d);">✦ Pro</span>';
+      planEl.innerHTML = '<span class="il-acct-gold">Pro</span>';
     } else if (user.effectivePlan === 'trial') {
-      planEl.innerHTML = '<span style="color:var(--gold-d);">Trial</span>';
+      planEl.innerHTML = '<span class="il-acct-gold">Pro trial</span>';
       const trialRow = document.getElementById('am-trial-row');
       const trialInfo = document.getElementById('am-trial-info');
       if (trialRow && user.trial_ends_at) {
@@ -1085,8 +1085,8 @@ async function openAccountModal() {
         const days = Math.max(0, Math.ceil((end - Date.now()) / 86400000));
         const expiry = end.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
         trialInfo.innerHTML = days > 0
-          ? `<span style="color:${days<=3?'#e67e22':'var(--ink2)'};">${days} day${days!==1?'s':''} remaining — expires <strong>${expiry}</strong></span>`
-          : `<span style="color:#c0392b;">Trial expired on ${expiry}</span>`;
+          ? `<span class="${days<=3?'il-acct-warn':''}">${days} day${days!==1?'s':''} left, ends <strong>${expiry}</strong></span>`
+          : `<span class="il-acct-err">Trial ended on ${expiry}</span>`;
         trialRow.style.display = 'block';
       }
       // Legacy trial rows may not have a Stripe customer yet.
@@ -1096,7 +1096,7 @@ async function openAccountModal() {
       planEl.textContent = 'Free';
       // Swap button to upgrade CTA
       const subBtn = document.getElementById('am-sub-btn');
-      if (subBtn) { subBtn.textContent = '⭐ Upgrade to Pro'; subBtn.href='#'; subBtn.onclick=function(e){e.preventDefault();closeAccountModal();showUpgradeModal();}; }
+      if (subBtn) { subBtn.textContent = 'Upgrade to Pro'; subBtn.href='#'; subBtn.onclick=function(e){e.preventDefault();closeAccountModal();showUpgradeModal();}; }
     }
   } catch(_) {}
 }
@@ -1109,10 +1109,10 @@ async function submitUsernameChange() {
   const input = document.getElementById('am-new-username');
   const msg   = document.getElementById('am-username-msg');
   const val   = input.value.trim().toLowerCase();
-  if (!val)           { msg.style.color='#c0392b'; msg.textContent='Please enter a new username.'; return; }
-  if (val.length < 3) { msg.style.color='#c0392b'; msg.textContent='Username must be at least 3 characters.'; return; }
-  if (!/^[a-z0-9_.-]+$/.test(val)) { msg.style.color='#c0392b'; msg.textContent='Only letters, numbers, _ . and - are allowed.'; return; }
-  msg.style.color='var(--ink3)'; msg.textContent='Updating…';
+  if (!val)           { msg.className='il-acct-msg is-err'; msg.textContent='Please enter a new username.'; return; }
+  if (val.length < 3) { msg.className='il-acct-msg is-err'; msg.textContent='Username must be at least 3 characters.'; return; }
+  if (!/^[a-z0-9_.-]+$/.test(val)) { msg.className='il-acct-msg is-err'; msg.textContent='Only letters, numbers, _ . and - are allowed.'; return; }
+  msg.className='il-acct-msg'; msg.textContent='Updating…';
   try {
     const r = await fetch('/api/auth/change-username', {
       method:'POST', credentials:'same-origin',
@@ -1121,7 +1121,7 @@ async function submitUsernameChange() {
     });
     const data = await r.json();
     if (data.ok) {
-      msg.style.color='#27ae60'; msg.textContent='Username updated successfully.';
+      msg.className='il-acct-msg is-ok'; msg.textContent='Username updated successfully.';
       input.value = '';
       document.getElementById('am-username').textContent = val;
       const navName = document.getElementById('nav-acct-name');
@@ -1129,9 +1129,9 @@ async function submitUsernameChange() {
       if (navName) navName.textContent = val;
       if (hdrName) hdrName.textContent = val;
     } else {
-      msg.style.color='#c0392b'; msg.textContent = data.error || 'Update failed.';
+      msg.className='il-acct-msg is-err'; msg.textContent = data.error || 'Update failed.';
     }
-  } catch(_) { msg.style.color='#c0392b'; msg.textContent='Network error. Please try again.'; }
+  } catch(_) { msg.className='il-acct-msg is-err'; msg.textContent='Network error. Please try again.'; }
 }
 
 async function submitPasswordChange() {
@@ -1140,12 +1140,12 @@ async function submitPasswordChange() {
   const conf = document.getElementById('am-confirm-pw').value;
   const msg  = document.getElementById('am-pw-msg');
 
-  if (!cur || !nw || !conf) { msg.style.color='#c0392b'; msg.textContent='Please fill in all fields.'; return; }
-  if (nw.length < 8)         { msg.style.color='#c0392b'; msg.textContent='New password must be at least 8 characters.'; return; }
-  if (nw.length > 200)       { msg.style.color='#c0392b'; msg.textContent='New password must be 200 characters or fewer.'; return; }
-  if (nw !== conf)           { msg.style.color='#c0392b'; msg.textContent='New passwords do not match.'; return; }
+  if (!cur || !nw || !conf) { msg.className='il-acct-msg is-err'; msg.textContent='Please fill in all fields.'; return; }
+  if (nw.length < 8)         { msg.className='il-acct-msg is-err'; msg.textContent='New password must be at least 8 characters.'; return; }
+  if (nw.length > 200)       { msg.className='il-acct-msg is-err'; msg.textContent='New password must be 200 characters or fewer.'; return; }
+  if (nw !== conf)           { msg.className='il-acct-msg is-err'; msg.textContent='New passwords do not match.'; return; }
 
-  msg.style.color='var(--ink3)'; msg.textContent='Updating…';
+  msg.className='il-acct-msg'; msg.textContent='Updating…';
   try {
     const r = await fetch('/api/auth/change-password', {
       method:'POST', credentials:'same-origin',
@@ -1155,12 +1155,12 @@ async function submitPasswordChange() {
     const data = await r.json();
     if (data.ok) {
       if (data.csrfToken) S.csrfToken = data.csrfToken;
-      msg.style.color='#27ae60'; msg.textContent='Password updated successfully.';
+      msg.className='il-acct-msg is-ok'; msg.textContent='Password updated successfully.';
       ['am-cur-pw','am-new-pw','am-confirm-pw'].forEach(id => { document.getElementById(id).value=''; });
     } else {
-      msg.style.color='#c0392b'; msg.textContent = data.error || 'Update failed.';
+      msg.className='il-acct-msg is-err'; msg.textContent = data.error || 'Update failed.';
     }
-  } catch(_) { msg.style.color='#c0392b'; msg.textContent='Network error. Please try again.'; }
+  } catch(_) { msg.className='il-acct-msg is-err'; msg.textContent='Network error. Please try again.'; }
 }
 
 async function openBillingPortal() {

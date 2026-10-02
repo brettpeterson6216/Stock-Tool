@@ -1866,63 +1866,49 @@
 </div>
 
 <!-- Account Settings modal -->
-<div class="modal-bg" id="acct-modal-bg" onclick="if(event.target===this)closeAccountModal()">
-  <div class="modal" style="max-width:500px;">
-    <button class="modal-close" onclick="closeAccountModal()">✕</button>
-    <div style="font-family:var(--mono);font-size:11px;color:var(--gold-d);text-transform:uppercase;letter-spacing:.14em;margin-bottom:.4rem;">Account</div>
-    <h3 style="margin-bottom:1.5rem;">Account Settings</h3>
-
-    <!-- User info -->
-    <div style="background:var(--cream2);border:1px solid var(--border2);border-radius:var(--r2);padding:1rem 1.25rem;margin-bottom:1.5rem;">
-      <div class="modal-2col" style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
-        <div>
-          <div style="font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);margin-bottom:.25rem;">Username</div>
-          <div style="font-size:14px;font-weight:600;color:var(--ink);" id="am-username">—</div>
-        </div>
-        <div>
-          <div style="font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);margin-bottom:.25rem;">Email</div>
-          <div style="font-size:14px;color:var(--ink2);word-break:break-all;" id="am-email">—</div>
-        </div>
-        <div>
-          <div style="font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);margin-bottom:.25rem;">Plan</div>
-          <div style="font-size:14px;font-weight:600;" id="am-plan">—</div>
-        </div>
-        <div>
-          <div style="font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);margin-bottom:.25rem;">Member Since</div>
-          <div style="font-size:14px;color:var(--ink2);" id="am-since">—</div>
-        </div>
+<div class="modal-bg il-acct" id="acct-modal-bg" onclick="if(event.target===this)closeAccountModal()">
+  <div class="modal il-acct-modal" role="dialog" aria-modal="true" aria-labelledby="am-title">
+    <div class="il-acct-head">
+      <div>
+        <p class="il-acct-kicker">Your account</p>
+        <h3 id="am-title">Account settings</h3>
       </div>
-      <div id="am-trial-row" style="display:none;margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--border2);">
-        <div style="font-size:11px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);margin-bottom:.25rem;">Trial Status</div>
-        <div style="font-size:13px;" id="am-trial-info"></div>
-      </div>
+      <button type="button" class="il-acct-close" onclick="closeAccountModal()" aria-label="Close account settings"><i class="ti ti-x" aria-hidden="true"></i></button>
     </div>
 
-    <!-- Subscription button -->
-    <a href="#" onclick="openBillingPortal();return false;" style="display:block;text-align:center;background:var(--ink);color:var(--cream);padding:.6rem 1rem;border-radius:var(--r);font-size:13px;font-weight:500;text-decoration:none;margin-bottom:1.5rem;transition:background .15s;" id="am-sub-btn">💳 Manage Subscription</a>
+    <dl class="il-acct-facts">
+      <div><dt>Username</dt><dd id="am-username">—</dd></div>
+      <div><dt>Email</dt><dd id="am-email">—</dd></div>
+      <div><dt>Plan</dt><dd id="am-plan">—</dd></div>
+      <div><dt>Member since</dt><dd id="am-since">—</dd></div>
+      <div class="il-acct-wide" id="am-trial-row" style="display:none;"><dt>Trial</dt><dd id="am-trial-info"></dd></div>
+    </dl>
 
-    <!-- Divider -->
-    <div style="border-top:1px solid var(--border2);margin-bottom:1.25rem;"></div>
+    <a href="#" id="am-sub-btn" class="il-acct-primary" onclick="openBillingPortal();return false;">Manage subscription and billing</a>
 
-    <!-- Change username -->
-    <div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:.75rem;">Change Username</div>
-    <div style="display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.5rem;">
-      <input type="text" id="am-new-username" placeholder="New username" class="input-light" autocomplete="username" style="text-transform:lowercase;">
-      <div id="am-username-msg" style="font-size:12px;min-height:1rem;"></div>
-      <button id="am-submit-username" style="align-self:flex-start;background:var(--ink);color:var(--cream);border:none;padding:.61rem 1.25rem;border-radius:var(--r2);font-size:12px;font-weight:500;cursor:pointer;transition:background .15s;letter-spacing:.01em;">Update Username</button>
-    </div>
+    <section class="il-acct-sec" aria-labelledby="am-un-title">
+      <h4 id="am-un-title">Change username</h4>
+      <label class="il-acct-label" for="am-new-username">New username</label>
+      <input type="text" id="am-new-username" class="il-acct-input" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="letters, numbers, _ . -">
+      <div id="am-username-msg" class="il-acct-msg" role="status"></div>
+      <button type="button" id="am-submit-username" class="il-acct-btn">Update username</button>
+    </section>
 
-    <!-- Divider -->
-    <div style="border-top:1px solid var(--border2);margin-bottom:1.25rem;"></div>
+    <section class="il-acct-sec" aria-labelledby="am-pw-title">
+      <h4 id="am-pw-title">Change password</h4>
+      <label class="il-acct-label" for="am-cur-pw">Current password</label>
+      <input type="password" id="am-cur-pw" class="il-acct-input" autocomplete="current-password">
+      <label class="il-acct-label" for="am-new-pw">New password <span>(at least 8 characters)</span></label>
+      <input type="password" id="am-new-pw" class="il-acct-input" autocomplete="new-password">
+      <label class="il-acct-label" for="am-confirm-pw">Confirm new password</label>
+      <input type="password" id="am-confirm-pw" class="il-acct-input" autocomplete="new-password">
+      <div id="am-pw-msg" class="il-acct-msg" role="status"></div>
+      <button type="button" id="am-submit-password" class="il-acct-btn">Update password</button>
+    </section>
 
-    <!-- Change password -->
-    <div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:.75rem;">Change Password</div>
-    <div style="display:flex;flex-direction:column;gap:.6rem;">
-      <input type="password" id="am-cur-pw" placeholder="Current password" class="input-light">
-      <input type="password" id="am-new-pw" placeholder="New password (min 8 characters)" class="input-light">
-      <input type="password" id="am-confirm-pw" placeholder="Confirm new password" class="input-light">
-      <div id="am-pw-msg" style="font-size:12px;min-height:1rem;"></div>
-      <button id="am-submit-password" style="align-self:flex-start;background:var(--ink);color:var(--cream);border:none;padding:.61rem 1.25rem;border-radius:var(--r2);font-size:12px;font-weight:500;cursor:pointer;transition:background .15s;letter-spacing:.01em;">Update Password</button>
+    <div class="il-acct-foot">
+      <a href="mailto:support@impliedlens.com?subject=ImpliedLens%20support">Contact support</a>
+      <button type="button" class="il-acct-logout" onclick="closeAccountModal();var b=document.getElementById('nav-acct-logout');if(b){b.click();}">Log out</button>
     </div>
   </div>
 </div>
@@ -2028,32 +2014,61 @@
   </a>
 </nav>
 
-<!-- ── Mobile More Menu (slide-up) ── -->
-<div class="mobile-more-menu" id="mobile-more-menu">
-  <div class="mmenu-close"><div class="mmenu-close-bar"></div></div>
-  <div class="mmenu-search">
-    <i class="ti ti-search" aria-hidden="true"></i>
-    <input id="mmenu-ticker" type="text" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Enter a ticker to analyze" placeholder="Enter a ticker — AAPL, NVDA…" onkeydown="if(event.key==='Enter'){mobileTickerGo()}">
-    <button type="button" onclick="mobileTickerGo()">Go</button>
-  </div>
-  <div class="mmenu-grid">
-    <a href="#" class="mmenu-item" onclick="showMarketPage();_toggleMobileMenu();return false;"><i class="ti ti-chart-area"></i><span>Market</span></a>
-    <a href="/lens-score" class="mmenu-item" onclick="_toggleMobileMenu();return navGoLensScore(this,event);"><i class="ti ti-focus-2"></i><span>LensScore</span></a>
-    <a href="#" class="mmenu-item" onclick="navGoTo('financials');_setMobileNav('financials');_toggleMobileMenu();return false;"><i class="ti ti-table"></i><span>Financials</span></a>
-    <a href="#" class="mmenu-item" onclick="navGoTo('advmetrics');_setMobileNav('advmetrics');_toggleMobileMenu();return false;"><i class="ti ti-report-analytics"></i><span>Metrics</span></a>
-    <a href="#" class="mmenu-item" onclick="navGoTo('earnings');_setMobileNav('earnings');_toggleMobileMenu();return false;"><i class="ti ti-trending-up"></i><span>Earnings</span></a>
-    <a href="#" class="mmenu-item" onclick="navGoTo('compare');_setMobileNav('compare');_toggleMobileMenu();return false;"><i class="ti ti-arrows-split-2"></i><span>Compare</span></a>
-    <a href="#" class="mmenu-item" onclick="navGoTo('dcf');_setMobileNav('dcf');_toggleMobileMenu();return false;"><i class="ti ti-calculator"></i><span>Intrinsic Value</span></a>
-    <a href="#" class="mmenu-item" onclick="navGoTo('education');_setMobileNav('education');_toggleMobileMenu();return false;"><i class="ti ti-school"></i><span>Learn</span></a>
-    <a href="#" class="mmenu-item" onclick="navGoTo('projection');_setMobileNav('projection');_toggleMobileMenu();return false;"><i class="ti ti-timeline"></i><span>Projection</span></a>
-    <a href="#" class="mmenu-item" onclick="navGoTo('secfilings');_setMobileNav('secfilings');_toggleMobileMenu();return false;"><i class="ti ti-file-text"></i><span>SEC</span></a>
-    <a href="#" class="mmenu-item" onclick="navGoTo('institutional');_setMobileNav('institutional');_toggleMobileMenu();return false;"><i class="ti ti-building-bank"></i><span>Inst.</span></a>
-  </div>
-  <div class="mmenu-grid mmenu-acct-row">
-    <a href="/login" class="mmenu-item" id="mmenu-login"><i class="ti ti-login-2"></i><span>Log in</span></a>
-    <a href="/signup?source=mobile_menu_free" class="mmenu-item" id="mmenu-signup"><i class="ti ti-user-plus"></i><span>Sign up free</span></a>
-    <a href="#" class="mmenu-item" id="mmenu-account" style="display:none;" onclick="_mobileAccount();return false;"><i class="ti ti-user-circle"></i><span>Account</span></a>
-    <a href="#" class="mmenu-item" id="mmenu-logout" style="display:none;" onclick="var b=document.getElementById('nav-acct-logout');if(b){b.click();}_toggleMobileMenu();return false;"><i class="ti ti-logout-2"></i><span>Log out</span></a>
+<!-- ── Mobile menu (site-nav.js wires it; phones and small tablets only) ──
+     A sheet under the header: search, then every destination in labelled
+     groups. Links are real URLs, so each one works even before the app has
+     loaded; site-nav.js turns them into in-page navigation when it can. -->
+<div class="il-mm" id="mobile-more-menu" aria-hidden="true">
+  <div class="il-mm-backdrop" data-mm-close></div>
+  <div class="il-mm-sheet" role="dialog" aria-modal="true" aria-labelledby="il-mm-title" tabindex="-1">
+    <div class="il-mm-head">
+      <span class="il-mm-title" id="il-mm-title">Menu</span>
+      <button type="button" class="il-mm-close" data-mm-close aria-label="Close menu"><i class="ti ti-x" aria-hidden="true"></i></button>
+    </div>
+    <form class="il-mm-search" action="/" method="get" role="search">
+      <input type="hidden" name="view" value="tool">
+      <input type="hidden" name="section" value="analyze">
+      <i class="ti ti-search" aria-hidden="true"></i>
+      <input id="mmenu-ticker" name="symbol" type="search" inputmode="search" enterkeyhint="search" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Search for a company or ticker" placeholder="Search a company or ticker">
+      <button type="submit" class="il-mm-go">Go</button>
+    </form>
+    <div class="il-mm-nav" role="navigation" aria-label="All pages">
+      <div class="il-mm-group">
+        <p class="il-mm-label">Research a company</p>
+        <a class="il-mm-item" href="/?view=tool&amp;section=analyze" data-mm-sec="analyze"><i class="ti ti-chart-candle" aria-hidden="true"></i><span>Chart &amp; analysis</span></a>
+        <a class="il-mm-item" href="/?view=tool&amp;section=financials" data-mm-sec="financials"><i class="ti ti-table" aria-hidden="true"></i><span>Financials</span></a>
+        <a class="il-mm-item" href="/?view=tool&amp;section=advmetrics" data-mm-sec="advmetrics"><i class="ti ti-report-analytics" aria-hidden="true"></i><span>Key metrics</span></a>
+        <a class="il-mm-item" href="/?view=tool&amp;section=earnings" data-mm-sec="earnings"><i class="ti ti-trending-up" aria-hidden="true"></i><span>Earnings</span></a>
+        <a class="il-mm-item" href="/?view=tool&amp;section=calls" data-mm-sec="calls"><i class="ti ti-headphones" aria-hidden="true"></i><span>Earnings calls</span></a>
+        <a class="il-mm-item" href="/?view=tool&amp;section=secfilings" data-mm-sec="secfilings"><i class="ti ti-file-text" aria-hidden="true"></i><span>SEC filings</span></a>
+        <a class="il-mm-item" href="/?view=tool&amp;section=institutional" data-mm-sec="institutional"><i class="ti ti-building-bank" aria-hidden="true"></i><span>Institutions</span></a>
+      </div>
+      <div class="il-mm-group">
+        <p class="il-mm-label">Find and compare</p>
+        <a class="il-mm-item" href="/?view=tool&amp;section=screener" data-mm-sec="screener"><i class="ti ti-filter" aria-hidden="true"></i><span>Screener</span></a>
+        <a class="il-mm-item" href="/?view=tool&amp;section=compare" data-mm-sec="compare"><i class="ti ti-arrows-diff" aria-hidden="true"></i><span>Compare</span></a>
+        <a class="il-mm-item" href="/lens-score" data-mm-lensscore><i class="ti ti-focus-2" aria-hidden="true"></i><span>LensScore</span></a>
+        <a class="il-mm-item" href="/?market=1" data-mm-market><i class="ti ti-globe" aria-hidden="true"></i><span>Market today</span></a>
+      </div>
+      <div class="il-mm-group">
+        <p class="il-mm-label">Model and plan</p>
+        <a class="il-mm-item" href="/?view=tool&amp;section=projection" data-mm-sec="projection"><i class="ti ti-calculator" aria-hidden="true"></i><span>Valuation Lab</span></a>
+        <a class="il-mm-item" href="/?view=tool&amp;section=wealth" data-mm-sec="wealth"><i class="ti ti-route" aria-hidden="true"></i><span>Wealth Planner</span></a>
+      </div>
+      <div class="il-mm-group">
+        <p class="il-mm-label">Learn</p>
+        <a class="il-mm-item" href="/?view=tool&amp;section=education" data-mm-sec="education"><i class="ti ti-school" aria-hidden="true"></i><span>Academy</span></a>
+      </div>
+      <div class="il-mm-group">
+        <p class="il-mm-label">You</p>
+        <a class="il-mm-item" href="/?view=tool&amp;section=workspace" data-mm-sec="workspace"><i class="ti ti-bookmark" aria-hidden="true"></i><span>Watchlists &amp; saved</span></a>
+        <a class="il-mm-item" href="#" id="mmenu-account" data-mm-account style="display:none;"><i class="ti ti-user-circle" aria-hidden="true"></i><span>Account &amp; billing</span></a>
+        <a class="il-mm-item" href="#" data-mm-feedback><i class="ti ti-message-star" aria-hidden="true"></i><span>Send feedback</span></a>
+        <a class="il-mm-item" href="/login" id="mmenu-login"><i class="ti ti-login-2" aria-hidden="true"></i><span>Log in</span></a>
+        <a class="il-mm-item il-mm-cta" href="/signup?source=mobile_menu_free" id="mmenu-signup"><i class="ti ti-user-plus" aria-hidden="true"></i><span>Create a free account</span></a>
+        <a class="il-mm-item" href="#" id="mmenu-logout" data-mm-logout style="display:none;"><i class="ti ti-login-2" aria-hidden="true"></i><span>Log out</span></a>
+      </div>
+    </div>
   </div>
 </div>
   <script defer src="/index-chart.js?v=20260907-16"></script>
