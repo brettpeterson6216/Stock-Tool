@@ -220,6 +220,12 @@
        Everything here is drawn from /api/market/landing-summary, /api/quote,
        /api/workspace/* - no placeholder rows, and each panel states its own
        failure rather than rendering a dash that reads like a value. -->
+  <!-- First run: five steps that take a new member from "signed up" to a
+       working research habit. Each step is checked off from real account
+       state (saves, watchlist, theses, lessons, plan), so it disappears on
+       its own once it has done its job, or when dismissed. -->
+  <section class="il-firstrun" id="il-firstrun" aria-labelledby="il-fr-title" hidden></section>
+
   <div class="ihm-grid">
 
     <aside class="ihm-col-tools" aria-label="Your work and tools">
@@ -1052,9 +1058,10 @@
       </div>
 
       <div class="sb-bottom">
-        <div class="sb-pro-card" id="sb-pro-card">
-          <div class="sb-pro-title">⚡ Go Pro</div>
-          <div class="sb-pro-sub">Unlimited access</div>
+        <div class="sb-pro-card" id="sb-pro-card" role="button" tabindex="0">
+          <div class="sb-pro-title"><i class="ti ti-sparkles" aria-hidden="true"></i>Try Pro <em>free</em></div>
+          <div class="sb-pro-sub">Valuation models, screener, filings and unlimited analyses.</div>
+          <span class="sb-pro-cta">Start free trial →</span>
         </div>
       </div>
     </div><!-- /app-sidebar -->
@@ -1915,43 +1922,43 @@
 
 <!-- Upgrade modal -->
 <div class="modal-bg" id="upgrade-modal-bg" onclick="if(event.target===this)closeUpgradeModal()">
-  <div class="modal" style="max-width:480px;">
-    <button class="modal-close" id="upgrade-modal-close-btn">✕</button>
-    <div style="font-family:var(--mono);font-size:11px;color:var(--gold-d);text-transform:uppercase;letter-spacing:.14em;margin-bottom:.5rem;">Pro Plan</div>
-    <h3 style="font-family:var(--serif);font-size:24px;letter-spacing:-.01em;margin-bottom:.5rem;">Unlock <em style="color:var(--gold-d);font-style:italic;">all</em> the tools.</h3>
-    <p style="font-size:14px;color:var(--ink4);margin-bottom:1.5rem;">{{TRIAL_DAYS}}-day free trial. Have a discount code? Enter it in Checkout for offers like a $0.99 paid month.</p>
+  <div class="modal il-upgrade" style="max-width:560px;">
+    <button class="modal-close" id="upgrade-modal-close-btn" aria-label="Close">✕</button>
+    <div class="il-up-kicker"><i class="ti ti-sparkles" aria-hidden="true"></i>ImpliedLens Pro</div>
+    <h3 class="il-up-title">Every tool, <em>every company.</em></h3>
+    <p class="il-up-sub">Try everything free for {{TRIAL_DAYS}} days. Cancel any time before it ends and you pay nothing.</p>
 
-    <div class="modal-2col" style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1.25rem;">
-      <div id="plan-monthly" class="plan-opt sel" onclick="selectUpgradePlan('monthly')" style="cursor:pointer;">
+    <div class="modal-2col il-up-plans">
+      <div id="plan-monthly" class="plan-opt sel" onclick="selectUpgradePlan('monthly')" role="button" tabindex="0">
         <div class="plan-opt-name">Monthly</div>
         <div class="plan-opt-price">{{PLAN_MONTHLY_PRICE}}<span class="plan-opt-per">/mo</span></div>
         <div class="plan-opt-sub">Billed monthly</div>
       </div>
-      <div id="plan-annual" class="plan-opt" onclick="selectUpgradePlan('annual')" style="cursor:pointer;">
-        <div class="plan-opt-name">Annual <span style="font-size:11px;background:var(--gold);color:#fff;border-radius:3px;padding:1px 5px;">SAVE {{PLAN_ANNUAL_SAVINGS_PERCENT}}%</span></div>
+      <div id="plan-annual" class="plan-opt" onclick="selectUpgradePlan('annual')" role="button" tabindex="0">
+        <div class="plan-opt-name">Annual <span class="il-up-save">SAVE {{PLAN_ANNUAL_SAVINGS_PERCENT}}%</span></div>
         <div class="plan-opt-price">{{PLAN_ANNUAL_EQUIVALENT}}<span class="plan-opt-per">/mo</span></div>
         <div class="plan-opt-sub">{{PLAN_ANNUAL_PRICE}} billed yearly</div>
       </div>
     </div>
 
-    <ul class="modal-2col" style="list-style:none;margin-bottom:1.25rem;display:grid;grid-template-columns:1fr 1fr;gap:.3rem .75rem;">
-      <li style="font-size:12px;color:var(--ink3);">✓ EPS intrinsic-value model</li>
-      <li style="font-size:12px;color:var(--ink3);">✓ Advanced Projection</li>
-      <li style="font-size:12px;color:var(--ink3);">✓ Stock Screener</li>
-      <li style="font-size:12px;color:var(--ink3);">✓ PDF Report export</li>
-      <li style="font-size:12px;color:var(--ink3);">✓ 4-stock comparison</li>
-      <li style="font-size:12px;color:var(--ink3);">✓ Risk dashboard</li>
+    <ul class="modal-2col il-up-feats">
+      <li><i class="ti ti-chart-candle" aria-hidden="true"></i>Unlimited company analyses</li>
+      <li><i class="ti ti-adjustments-horizontal" aria-hidden="true"></i>Valuation Lab and DCF models</li>
+      <li><i class="ti ti-filter" aria-hidden="true"></i>Stock screener</li>
+      <li><i class="ti ti-chart-arrows-vertical" aria-hidden="true"></i>Advanced risk and quality metrics</li>
+      <li><i class="ti ti-file-search" aria-hidden="true"></i>SEC filings and institutional holders</li>
+      <li><i class="ti ti-target" aria-hidden="true"></i>Analyst targets and earnings-call research</li>
     </ul>
 
     <button id="upgrade-cta-btn" class="btn-modal-cta" onclick="handleUpgradeClick()">Start {{TRIAL_DAYS}}-day free trial →</button>
-    <div class="modal-note" style="margin-top:.75rem;">Card required. You won't be charged during the {{TRIAL_DAYS}}-day trial. Discount codes can be entered in Checkout.</div>
+    <div class="modal-note">Card required for the trial. You won't be charged until it ends. Discount codes can be entered in Checkout.</div>
 
     <!-- Shown instead of CTA when user is not logged in -->
-    <div id="upgrade-modal-auth" style="display:none;margin-top:.75rem;">
-      <div style="font-size:12px;color:var(--ink4);margin-bottom:.75rem;text-align:center;">Create a free account to start your trial.</div>
+    <div id="upgrade-modal-auth" class="il-up-auth" style="display:none;">
+      <div class="il-up-auth-lead">Create a free account first, then start your trial.</div>
       <div style="display:flex;flex-direction:column;gap:.5rem;">
         <a id="upgrade-signup-btn" href="/signup" class="btn-modal-cta" style="text-align:center;text-decoration:none;">Create free account →</a>
-        <a id="upgrade-login-btn" href="/login" style="display:block;text-align:center;font-size:12px;color:var(--gold-d);margin-top:.25rem;">Already have an account? Sign in</a>
+        <a id="upgrade-login-btn" href="/login" class="il-up-login">Already have an account? Sign in</a>
       </div>
       <div class="modal-note" style="margin-top:.75rem;">Free to join · No card required for the free plan</div>
     </div>
@@ -2035,7 +2042,7 @@
   </div>
 </div>
   <script defer src="/index-chart.js?v=20260907-16"></script>
-  <script defer src="/home-member.js?v=20260907-1"></script>
+  <script defer src="/home-member.js?v=20261002-1"></script>
   <script defer src="/site-nav.js?v=20260905-2"></script>
 </body>
 </html>

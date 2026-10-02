@@ -60,6 +60,78 @@
     }).join("") + (failed ? '<span class="ihm-none">Your counts are unavailable right now.</span>' : "");
   }
 
+  /* ── First run ─────────────────────────────────────────────────────────
+     A new member lands on a dashboard with zeros everywhere. This card turns
+     that into a path: five steps, each checked off from real account state,
+     ordered the way the Academy teaches the method. It hides itself when
+     every step is done or when the member dismisses it. */
+  var FR_KEY = "il-firstrun-dismissed";
+  function stored(key) { try { return localStorage.getItem(key); } catch (_) { return null; } }
+  function lessonsDone() {
+    try { var v = JSON.parse(stored("il-academy-done") || "[]"); return Array.isArray(v) ? v.length : 0; } catch (_) { return 0; }
+  }
+  function renderFirstRun(counts, user) {
+    var box = document.getElementById("il-firstrun");
+    if (!box || stored(FR_KEY) === "1") return;
+    var plan = String((user && user.plan) || "free").toLowerCase();
+    var steps = [
+      { done: lessonsDone() > 0, title: "Learn what you are buying",
+        text: "Lesson one explains what a share is and why its price moves. Five minutes.",
+        cta: "Start lesson one", href: "/learn/what-is-a-stock" },
+      { done: !!counts.analyzed || !!stored("il-first-analysis") || counts.saves > 0, title: "Research your first company",
+        text: "Open Apple's chart, financials and analyst targets, with a plain-English read.",
+        cta: "Analyze AAPL", href: "/?view=tool&section=analyze&symbol=AAPL" },
+      { done: counts.watchlist > 0, title: "Start a watchlist",
+        text: "Keep the companies you want to follow in one list, on every device.",
+        cta: "Open workspace", href: "/?view=tool&section=workspace" },
+      { done: counts.theses > 0, title: "Write your first thesis",
+        text: "Why you would own it, what would change your mind, and when to check.",
+        cta: "Write a thesis", href: "/?view=tool&section=workspace" },
+      { done: plan === "pro" || plan === "trial", title: "Unlock every tool",
+        text: "Valuation Lab, screener, filings and advanced metrics. Free for 30 days.",
+        cta: "Start free trial", href: "/pricing", upgrade: true }
+    ];
+    var done = steps.filter(function (s) { return s.done; }).length;
+    if (done === steps.length) { box.hidden = true; return; }
+    var next = steps.findIndex(function (s) { return !s.done; });
+    box.innerHTML =
+      '<div class="il-fr-head">' +
+        '<div class="il-fr-id">' +
+          '<span class="il-fr-kicker"><i class="ti ti-route" aria-hidden="true"></i>Start here</span>' +
+          '<h2 class="il-fr-title" id="il-fr-title">Your first <em>five moves.</em></h2>' +
+          '<p class="il-fr-sub">The same order the professionals work in: understand it, research it, track it, decide.</p>' +
+        '</div>' +
+        '<div class="il-fr-meta">' +
+          '<span class="il-fr-count"><b>' + done + '</b> of ' + steps.length + ' done</span>' +
+          '<span class="il-fr-bar" aria-hidden="true"><span style="width:' + Math.round(done / steps.length * 100) + '%"></span></span>' +
+          '<button type="button" class="il-fr-dismiss">Hide this</button>' +
+        '</div>' +
+      '</div>' +
+      '<ol class="il-fr-steps">' + steps.map(function (s, i) {
+        return '<li class="il-fr-step' + (s.done ? " is-done" : "") + (i === next ? " is-next" : "") + '">' +
+          '<span class="il-fr-num" aria-hidden="true">' + (s.done ? '<i class="ti ti-check"></i>' : String(i + 1)) + '</span>' +
+          '<div class="il-fr-body"><b>' + esc(s.title) + '</b>' +
+          '<span>' + esc(s.text) + '</span></div>' +
+          (s.done ? '<span class="il-fr-ok">Done</span>'
+                  : '<a class="il-fr-cta" href="' + s.href + '"' + (s.upgrade ? ' data-upgrade="1"' : "") + '>' + esc(s.cta) + ' <span aria-hidden="true">&rarr;</span></a>') +
+        '</li>';
+      }).join("") + '</ol>';
+    box.hidden = false;
+    box.querySelector(".il-fr-dismiss").addEventListener("click", function () {
+      try { localStorage.setItem(FR_KEY, "1"); } catch (_) {}
+      box.hidden = true;
+    });
+    var up = box.querySelector("[data-upgrade]");
+    if (up) up.addEventListener("click", function (e) {
+      if (typeof window.showUpgradeModal === "function") { e.preventDefault(); window.showUpgradeModal(false, "first_run"); }
+    });
+    // A brand-new account gets a welcome rather than "welcome back".
+    if (done <= 1) {
+      var sub = document.getElementById("ihm-sub");
+      if (sub) sub.textContent = "Welcome to ImpliedLens. Here is where to begin.";
+    }
+  }
+
   function renderRecent(saves) {
     var wrap = document.getElementById("ihm-recent");
     var list = document.getElementById("ihm-recent-list");
@@ -431,9 +503,10 @@
         var cut = text.lastIndexOf(name);
         g.textContent = text.slice(0, cut);
         var em = document.createElement("em");
-        em.textContent = name;
+        // The full stop rides inside the accent so the italic overhang does
+        // not leave a gap before it.
+        em.textContent = text.slice(cut);
         g.appendChild(em);
-        g.appendChild(document.createTextNode(text.slice(cut + name.length)));
       } else g.textContent = text;
     }
 
@@ -448,6 +521,8 @@
           saves: Array.isArray(saves) ? saves.length : NaN
         };
         renderTiles(counts, !summary && !saves);
+        counts.analyzed = !!(summary && summary.activation && summary.activation.analyzed);
+        renderFirstRun(counts, user);
         renderRecent(saves);
       });
     loadDashboard();

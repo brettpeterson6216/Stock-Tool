@@ -309,10 +309,10 @@ function sectionProGateHtml(id) {
 
   if (!cfg) {
     return `<div class="pro-gate-card"><div class="pgc-body">
-      <div class="pgc-badge">⚡ Pro Feature</div>
-      <div class="pgc-title">Pro Feature${titleSuffix}</div>
+      <div class="pgc-badge"><i class="ti ti-sparkles" aria-hidden="true"></i>Included with Pro</div>
+      <div class="pgc-title">Unlock this <em>with Pro.</em></div>
       <button class="pgc-btn js-pgc-upgrade">${trialCtaLabel()}</button>
-      <div class="pgc-note">${trialDays()}-day free trial · Discount codes accepted in Checkout</div>
+      ${trialTermsHtml()}
     </div></div>`;
   }
 
@@ -326,13 +326,13 @@ function sectionProGateHtml(id) {
   return `<div class="pro-gate-card">
     ${previewHtml}
     <div class="pgc-body">
-      <div class="pgc-badge">⚡ Pro Feature</div>
-      <div class="pgc-title">${cfg.title}${titleSuffix}</div>
+      <div class="pgc-badge"><i class="ti ti-sparkles" aria-hidden="true"></i>Included with Pro${ticker ? ' \u00b7 ' + escapeHtml(ticker) : ''}</div>
+      <div class="pgc-title">${cfg.title}</div>
       <ul class="pgc-bullets">
         ${cfg.bullets.map(b => `<li>${b}</li>`).join('\n        ')}
       </ul>
       <button class="pgc-btn js-pgc-upgrade">${trialCtaLabel()}</button>
-      <div class="pgc-note">${trialDays()}-day free trial · Discount codes accepted in Checkout</div>
+      ${trialTermsHtml()}
     </div>
   </div>`;
 }
@@ -391,23 +391,23 @@ function handleSectionError(e, sectionId, container) {
     container.style.display = 'block';
     track('pro_gate_viewed', { section: sectionId, ticker: S.ticker || null });
   } else if (e.code === 'LOGIN_REQUIRED') {
-    container.innerHTML = `<div class="pro-gate-card"><div class="pgc-body" style="padding:1.5rem 1.75rem">
-      <div class="pgc-badge" style="background:var(--ink2)">🔒 Sign in required</div>
-      <div class="pgc-title" style="font-size:1rem">Create a free account to continue</div>
+    container.innerHTML = `<div class="pro-gate-card pgc-account"><div class="pgc-body">
+      <div class="pgc-badge"><i class="ti ti-user-plus" aria-hidden="true"></i>Free account</div>
+      <div class="pgc-title">Create a free account <em>to see this.</em></div>
       <ul class="pgc-bullets">
         <li>Free forever: ${freeDailyLimit()} company analyses a day, charts and LensScore</li>
         <li>Full financial statements and earnings history from SEC filings</li>
         <li>Watchlists and saved research that sync across your devices</li>
         <li>No card needed. Upgrade to Pro only if you want the valuation models</li>
       </ul>
-      <a href="/signup" onclick="startGuestSignup('pro_gate_login_required');return false;" style="display:block;background:var(--ink);color:var(--cream);border-radius:9px;padding:.8rem 1.6rem;font-size:.9rem;font-weight:700;text-decoration:none;text-align:center;margin-bottom:.5rem;">Create free account →</a>
-      <div style="font-size:.75rem;color:var(--ink4);text-align:center">Already have an account? <a href="/login" onclick="startGuestLogin('pro_gate_login_required');return false;" style="color:var(--il-gold-ink,var(--gold));font-weight:600;">Sign in</a></div>
+      <a href="/signup" class="pgc-btn" onclick="startGuestSignup('pro_gate_login_required');return false;">Create free account \u2192</a>
+      <div class="pgc-note">Takes under a minute. Already have an account? <a href="/login" class="pgc-compare" onclick="startGuestLogin('pro_gate_login_required');return false;">Sign in</a></div>
     </div></div>`;
     container.style.display = 'block';
   } else if (e.code === 'LIMIT_REACHED') {
     container.innerHTML = `<div class="pro-gate-card"><div class="pgc-body">
-      <div class="pgc-badge">⚡ Daily limit reached</div>
-      <div class="pgc-title">You've used today's free analyses</div>
+      <div class="pgc-badge"><i class="ti ti-clock" aria-hidden="true"></i>Daily limit reached</div>
+      <div class="pgc-title">You've used today's free analyses. <em>Keep going with Pro.</em></div>
       <ul class="pgc-bullets">
         <li>Unlimited stock analyses — no daily cap, ever</li>
         <li>All Pro tools: valuation models, intrinsic value, Screener, SEC filings &amp; more</li>
@@ -415,7 +415,7 @@ function handleSectionError(e, sectionId, container) {
         <li>Comes back tomorrow free, or unlock everything now</li>
       </ul>
       <button class="pgc-btn js-pgc-upgrade">${trialCtaLabel()}</button>
-      <div class="pgc-note">${trialDays()}-day free trial · Discount codes accepted in Checkout</div>
+      ${trialTermsHtml()}
     </div></div>`;
     container.style.display = 'block';
   } else {
@@ -2090,6 +2090,7 @@ async function fetchAndRender() {
   try {
     const result=await yahooFetch(ticker,S.range);
     S.ticker=ticker; S.data=result; S.analystTarget=null;
+    try { if (!localStorage.getItem('il-first-analysis')) localStorage.setItem('il-first-analysis', ticker); } catch (_) {}
     renderStock(result,ticker);
     if(requestedDataSection !== 'analyze' && typeof window.navGoTo === 'function') {
       window.navGoTo(requestedDataSection);
@@ -2398,6 +2399,17 @@ function trialDays(){
   return (cfg && cfg.trial && cfg.trial.days) || 30;
 }
 function trialCtaLabel(){ return 'Start ' + trialDays() + '-day free trial \u2192'; }
+function monthlyPriceLabel(){
+  var cfg = ilProduct();
+  var m = cfg && cfg.pricing && cfg.pricing.monthly;
+  return (m && m.formatted) || '';
+}
+/* The line under every upgrade button: what happens after the trial. */
+function trialTermsHtml(){
+  var price = monthlyPriceLabel();
+  return '<div class="pgc-note">Free for ' + trialDays() + ' days' + (price ? ', then ' + price + '/mo' : '') +
+    '. Cancel anytime. <a href="/pricing" class="pgc-compare">Compare plans</a></div>';
+}
 /* The fallbacks below are the only prices on this page that are not read from
    the catalog, and they are reached only when the il-product meta embed is
    missing or unparseable. They must equal lib/product-config.js's defaults or
