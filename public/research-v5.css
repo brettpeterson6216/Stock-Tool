@@ -784,7 +784,7 @@ html[data-theme="dark"]:has(#lab-main) { --green: #4fd18b !important; --red: #f2
    Big headline figures, quiet labels, one table style, one tile style.
    ═══════════════════════════════════════════════════════════════════════════ */
 /* One typeface. Monospace survives only for tickers and symbols. */
-#view-tool .app-section:not(#sec-analyze) .acc-body :not(.ti):not(i):not(code):not([class*="sym"]):not([class*="ticker"]) {
+#view-tool .app-section:not(#sec-analyze) .acc-body :not(.ti):not(i):not(code):not([class*="sym"]):not([class*="ticker"]):not(em, .advm-val, .dp-card-val, .dcf-val, .risk-stat-val, .il-mini-stat b, .il-ws-stat strong) {
   font-family: var(--rp-sans) !important; font-variant-numeric: tabular-nums !important; letter-spacing: normal !important; text-transform: none !important;
 }
 #view-tool .app-section:not(#sec-analyze) .acc-body { font-size: 14px !important; color: var(--rp-copy) !important; }
@@ -877,3 +877,144 @@ html[data-theme="dark"] #view-tool .earn-badge:is(.miss, [class*="miss"]) { colo
 #view-tool .app-section:not(#sec-analyze) :is(input, select, textarea):focus { outline: none !important; border-color: var(--rp-gold-accent) !important; box-shadow: 0 0 0 3px var(--rp-gold-soft) !important; }
 
 #view-tool .app-section:not(#sec-analyze) .il-data-source-line { font: 500 12px/1.5 var(--rp-sans) !important; color: var(--rp-muted) !important; margin: 12px 2px 0 !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LANDING LANGUAGE, EVERYWHERE
+   The homepage's recipes, carried into the product: section openers (gold
+   pill, display headline, serif-italic accent), serif headline figures,
+   warm gradient cards with a gold hairline, bigger type, more air.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root {
+  --il-card-bg: linear-gradient(90deg, transparent, color-mix(in srgb, var(--rp-gold-accent) 75%, transparent), transparent) center top / calc(100% - 56px) 1px no-repeat, var(--rp-panel-grad);
+}
+
+/* Section openers */
+.il-sec-hero, #view-tool :is(.il-research-hero, .il-ws-hero) { margin: 4px 0 30px !important; }
+.il-sec-hero { max-width: 760px !important; padding: 0 !important; }
+:is(.il-sec-kicker, #view-tool .il-research-kicker, #view-tool .il-ws-kicker, .ihm-kicker) {
+  display: inline-flex !important; align-items: center !important; gap: 8px !important; margin: 0 0 16px !important;
+  padding: 7px 14px !important; border-radius: 999px !important; border: 1px solid var(--rp-gold-ring) !important;
+  background: color-mix(in srgb, var(--rp-panel) 70%, transparent) !important; color: var(--rp-gold) !important;
+  font: 700 13px/1.2 var(--rp-sans) !important; letter-spacing: .01em !important; text-transform: none !important;
+}
+.il-sec-kicker i { font-size: 15px !important; }
+:is(.il-sec-title, #view-tool .il-research-hero h2, #view-tool .il-ws-intro h2, .il-static-page .features h2, .il-static-page .research h2, .il-static-page .related h2) {
+  margin: 0 0 12px !important; font: 750 clamp(30px, 3.4vw, 46px)/1.07 var(--rp-sans) !important;
+  letter-spacing: -.03em !important; color: var(--rp-ink) !important; text-wrap: balance;
+}
+:is(.il-sec-title, #view-tool .il-research-hero h2, #view-tool .il-ws-intro h2, .il-static-page .features h2, .il-static-page .research h2, .il-static-page .related h2) em,
+#view-tool .ihm-greeting em, .ihm-greeting em {
+  font-family: var(--rp-serif) !important; font-style: italic !important; font-weight: 400 !important; letter-spacing: -.005em !important;
+  background: var(--rp-gold-text) !important; -webkit-background-clip: text !important; background-clip: text !important;
+  -webkit-text-fill-color: transparent !important; color: transparent !important; padding-right: .06em !important;
+}
+:is(.il-sec-sub, #view-tool .il-research-hero p, #view-tool .il-ws-intro p) {
+  margin: 0 !important; max-width: 62ch !important; font: 400 clamp(15px, 1.2vw, 17px)/1.6 var(--rp-sans) !important; color: var(--rp-copy) !important;
+}
+#view-tool :is(.il-research-hero, .il-ws-hero) { background: transparent !important; border: 0 !important; box-shadow: none !important; padding: 0 !important; }
+/* The section's old one-line description is now said by the opener. */
+#view-tool .app-section:has(> .il-sec-hero) .acc-body > div:not([class]):not([id]) { display: none !important; }
+
+/* Serif headline figures, like the homepage stats */
+#view-tool :is(.price-big, .il-an-price, .m-val, .advm-val, .dp-card-val, .risk-stat-val, .twm-val, .fstock-price, .dcf-val, .il-mini-stat b, .il-ws-stat strong, .ilr-price),
+.ihm-stat strong, #ihm-mkt-price, #lab-main :is(#market-price, #buy-zone) {
+  font-family: var(--rp-serif) !important; font-weight: 400 !important; letter-spacing: -.01em !important; font-variant-numeric: lining-nums !important;
+}
+#view-tool .price-big { font-size: clamp(52px, 6vw, 80px) !important; line-height: .95 !important; }
+#view-tool .price-big, #view-tool .il-an-price, #lab-main #buy-zone, #ihm-mkt-price {
+  background: var(--rp-gold-text) !important; -webkit-background-clip: text !important; background-clip: text !important;
+  -webkit-text-fill-color: transparent !important; color: transparent !important;
+}
+#view-tool .il-an-price { font-size: 44px !important; }
+#view-tool .m-val { font-size: clamp(26px, 2.2vw, 32px) !important; }
+#view-tool :is(.advm-val, .dp-card-val, .dcf-val) { font-size: clamp(30px, 2.6vw, 38px) !important; }
+#view-tool .risk-stat-val { font-size: 30px !important; }
+#view-tool .il-mini-stat b { font-size: 26px !important; }
+#view-tool .ilr-price { font-size: 34px !important; }
+#view-tool :is(.twm-val, .fstock-price) { font-size: 28px !important; }
+#view-tool .il-ws-stat strong, .ihm-stat strong { font-size: 34px !important; }
+#lab-main #market-price { font-size: 40px !important; }
+#lab-main #buy-zone { font-size: 34px !important; }
+
+/* Company name as a display headline */
+#view-tool .res-name { font: 750 clamp(36px, 4.2vw, 56px)/1.02 var(--rp-sans) !important; letter-spacing: -.035em !important; }
+
+/* Landing cards: warm gradient, gold hairline, generous padding */
+#view-tool :is(.chart-wrap, .il-ind-panel, .panel-box, .sidebar-card, .advm-grid, .il-research-panel, .result-header, .metrics-grid),
+#view-tool .app-section:not(#sec-analyze) :is(.table-wrap, .fin-table-wrap, .scr-table-wrap, .inst-table-wrap, .earn-table-wrap):has(table),
+.ihm-panel, #lab-main :is(.score-card, .decision-card, .panel) {
+  background: var(--il-card-bg) !important; box-shadow: var(--rp-panel-edge), var(--rp-shadow) !important;
+}
+#view-tool #stock-result .result-header {
+  background: radial-gradient(120% 140% at 100% 0%, var(--rp-gold-soft) 0%, transparent 55%), var(--il-card-bg) !important;
+}
+#view-tool :is(.chart-wrap, .il-ind-panel, .panel-box, .sidebar-card, .il-research-panel) { padding: clamp(20px, 1.9vw, 28px) !important; }
+
+/* Card titles in the landing h3 voice */
+#view-tool :is(.chart-title, .sidebar-card-title, .panel-box-title, .il-ind-title, .news-lbl, .il-research-panel h3),
+.ihm-panel-title {
+  font: 750 clamp(18px, 1.4vw, 21px)/1.2 var(--rp-sans) !important; letter-spacing: -.02em !important; color: var(--rp-ink) !important; text-transform: none !important;
+}
+#view-tool .il-card-kicker { font: 700 13px/1.2 var(--rp-sans) !important; color: var(--rp-gold) !important; }
+#view-tool :is(.advm-section-title) { font: 750 22px/1.2 var(--rp-sans) !important; letter-spacing: -.02em !important; margin: 34px 0 14px !important; }
+
+/* Bigger reading type */
+#view-tool :is(.il-plain-list li, .news-headline) { font-size: 15px !important; }
+#view-tool .app-section:not(#sec-analyze) td { font-size: 15px !important; padding: 15px 18px !important; }
+#view-tool .app-section:not(#sec-analyze) th { font-size: 13px !important; padding: 15px 18px !important; }
+#view-tool .m-lbl, #view-tool :is(.advm-lbl, .dp-card-lbl, .risk-stat-label) { font-size: 13px !important; }
+
+/* Links in the landing voice */
+/* (lens-context link already carries its own arrow icon) */
+
+/* More air between blocks */
+#view-tool { --r5-gap: 18px; }
+#view-tool .app-content-scroll { padding-top: clamp(24px, 2.6vw, 40px) !important; }
+
+/* ── Member dashboard ───────────────────────────────────────────────────── */
+.ihm-head { align-items: flex-end !important; gap: 24px !important; margin-bottom: clamp(24px, 3vw, 40px) !important; }
+.ihm-greeting { font: 750 clamp(36px, 4.4vw, 58px)/1.04 var(--rp-sans) !important; letter-spacing: -.035em !important; color: var(--rp-ink) !important; }
+.ihm-sub { font: 400 clamp(15px, 1.2vw, 17px)/1.6 var(--rp-sans) !important; color: var(--rp-copy) !important; margin-top: 10px !important; }
+.ihm-grid { gap: 18px !important; }
+.ihm-panel { border: 1px solid var(--rp-line) !important; border-radius: 18px !important; padding: clamp(18px, 1.6vw, 24px) !important; }
+.ihm-panel-head { margin-bottom: 14px !important; }
+.ihm-panel-note { font: 500 13px/1.3 var(--rp-sans) !important; color: var(--rp-muted) !important; }
+.ihm-panel-link, .ihm-head-link { font: 700 14px/1.2 var(--rp-sans) !important; color: var(--rp-gold) !important; text-decoration: none !important; }
+.ihm-panel-link::after, .ihm-head-link::after { content: " →" !important; }
+.ihm-panel :is(li, a, p, span):not(.ihm-panel-title):not(.ihm-panel-note):not(.ihm-panel-link) { font-size: max(1em, 14px); }
+.ihm-tf { font: 600 13px/1 var(--rp-sans) !important; border-radius: 9px !important; }
+.ihm-tf.on, .ihm-tf[aria-pressed="true"] { background: var(--rp-gold-grad) !important; color: var(--rp-on-gold) !important; border-color: transparent !important; }
+
+/* ── Stock pages ────────────────────────────────────────────────────────── */
+.il-static-page .features { max-width: 1100px !important; }
+.il-static-page .features .feat-grid { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)) !important; gap: 16px !important; }
+.il-static-page .il-sec-kicker-plain { display: inline-block !important; margin: 0 0 10px !important; font: 700 13.5px/1.2 var(--rp-sans) !important; color: var(--rp-gold) !important; }
+.il-static-page .feat { padding: 24px !important; border-radius: 18px !important; background: var(--il-card-bg) !important; border: 1px solid var(--rp-line) !important; box-shadow: var(--rp-panel-edge), var(--rp-shadow) !important; }
+.il-static-page .feat-icon {
+  width: 40px !important; height: 40px !important; border-radius: 11px !important; display: grid !important; place-items: center !important;
+  background: var(--rp-gold-soft) !important; color: var(--rp-gold-accent) !important; font-size: 21px !important; margin-bottom: 16px !important;
+}
+.il-static-page .feat-title { font: 700 17px/1.3 var(--rp-sans) !important; color: var(--rp-ink) !important; margin-bottom: 6px !important; }
+.il-static-page .feat-desc { font: 400 14.5px/1.55 var(--rp-sans) !important; color: var(--rp-copy) !important; }
+.il-static-page :is(.research, .related) { max-width: 1100px !important; }
+/* Source lines read as a footnote with a gold dot, not a monospace banner. */
+#view-tool .il-data-source-line {
+  border: 0 !important; background: transparent !important; padding: 0 2px !important; margin: 0 0 18px !important;
+  font: 500 13px/1.5 var(--rp-sans) !important; color: var(--rp-muted) !important;
+}
+#view-tool .il-data-source-line::before {
+  content: "" !important; display: inline-block !important; width: 6px !important; height: 6px !important; border-radius: 50% !important;
+  background: var(--rp-gold-accent) !important; margin-right: 9px !important; vertical-align: 2px !important; font-size: 0 !important;
+}
+#view-tool .il-data-basis-note { font: 500 13px/1.5 var(--rp-sans) !important; color: var(--rp-muted) !important; }
+
+#view-tool .il-research-shell { background: transparent !important; border: 0 !important; box-shadow: none !important; padding: 0 !important; }
+#view-tool .il-research-hero { display: flex !important; align-items: flex-end !important; justify-content: space-between !important; gap: 24px !important; }
+.il-static-page .features { display: block !important; grid-template-columns: none !important; padding-top: clamp(40px, 6vw, 80px) !important; }
+.il-static-page .features > h2 { max-width: none !important; margin-bottom: 24px !important; }
+.il-static-page .features .feat-grid { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+@media (max-width: 900px) { .il-static-page .features .feat-grid { grid-template-columns: 1fr 1fr !important; } }
+@media (max-width: 560px) { .il-static-page .features .feat-grid { grid-template-columns: 1fr !important; } }
+.il-static-page :is(.research, .related) { margin-top: clamp(40px, 5vw, 72px) !important; }
+.il-static-page .research-item { font: 500 15px/1.5 var(--rp-sans) !important; color: var(--rp-copy) !important; padding: 16px 18px !important; border-radius: 14px !important; }
+.il-static-page .research-item strong { font-family: var(--rp-serif) !important; font-weight: 400 !important; font-size: 22px !important; color: var(--rp-gold) !important; margin-right: 12px !important; }

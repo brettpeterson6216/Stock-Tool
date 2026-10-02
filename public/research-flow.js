@@ -89,6 +89,54 @@
     select(start);
   }
 
+
+  /* ── Landing-style section intros ─────────────────────────────────────
+     Every section opens the way the homepage does: a gold label, a big
+     headline with a serif-italic accent, and one line of context. */
+  var INTROS = {
+    financials:   ["ti-report-money", "Financials", "What the business", "actually earns.", "Four years of income, balance sheet and cash flow, straight from SEC filings."],
+    advmetrics:   ["ti-report-analytics", "Metrics", "Quality, price and", "the balance sheet.", "Valuation multiples, margins, returns and leverage in one view."],
+    earnings:     ["ti-chart-arrows-vertical", "Earnings", "Promises versus", "results.", "Consensus estimates against reported earnings, quarter by quarter."],
+    secfilings:   ["ti-file-search", "SEC filings", "Read the source,", "not the summary.", "Annual, quarterly and current reports direct from SEC EDGAR."],
+    institutional:["ti-building-bank", "Ownership", "Who owns it,", "and who is moving.", "The largest institutional holders and weekly off-exchange volume."],
+    compare:      ["ti-arrows-diff", "Compare", "Side by side,", "on equal terms.", "Up to four companies with normalized performance and fundamentals."],
+    screener:     ["ti-filter", "Screener", "Find the candidates", "worth a closer look.", "Filter the market by value, size, income and momentum."],
+    projection:   ["ti-adjustments-horizontal", "Valuation Lab", "What could it", "be worth?", "Bear, Base and Bull projections with every assumption editable."],
+    dcf:          ["ti-calculator", "Valuation Lab", "What could it", "be worth?", "A discounted-cash-flow model with every assumption editable."],
+    reports:      ["ti-bookmark", "Saved research", "Everything you have", "worked on.", "Saved analyses, models and notes, ready to pick back up."],
+    education:    ["ti-school", "Academy", "Learn the method,", "one lesson at a time.", "Short, plain-English lessons with real examples and quick checks."]
+  };
+  // Sections that already open with their own headline get the serif accent.
+  var ACCENTS = [
+    ["#sec-calls .il-research-hero h2", "Listen for changes,", "not confidence."],
+    ["#sec-wealth .il-research-hero h2", "Model the range,", "not a fantasy."],
+    ["#sec-workspace .il-ws-intro h2", "Turn research into", "a reviewable decision."]
+  ];
+
+  function tickerNow() {
+    try { return (window.S && S.ticker) || (window.IL_STATE && IL_STATE.ticker) || ""; } catch (e) { return ""; }
+  }
+
+  function intros() {
+    Object.keys(INTROS).forEach(function (id) {
+      var sec = document.getElementById("sec-" + id);
+      if (!sec) return;
+      var c = INTROS[id], hero = sec.querySelector(":scope > .il-sec-hero");
+      if (!hero) {
+        hero = el("header", "il-sec-hero");
+        hero.innerHTML = '<span class="il-sec-kicker"><i class="ti ' + c[0] + '" aria-hidden="true"></i><span class="il-sec-label"></span></span>' +
+          '<h2 class="il-sec-title">' + c[2] + ' <em>' + c[3] + '</em></h2><p class="il-sec-sub">' + c[4] + '</p>';
+        sec.insertBefore(hero, sec.firstChild);
+      }
+      var t = tickerNow();
+      hero.querySelector(".il-sec-label").textContent = c[1] + (t && id !== "screener" && id !== "reports" && id !== "education" ? " \u00b7 " + t : "");
+    });
+    ACCENTS.forEach(function (a) {
+      var h = document.querySelector(a[0]);
+      if (h && !h.querySelector("em")) h.innerHTML = a[1] + " <em>" + a[2] + "</em>";
+    });
+  }
+
   function build() {
     var layout = document.querySelector("#stock-result .dash-layout");
     if (!layout || layout.classList.contains("il-flow")) return;
@@ -135,8 +183,13 @@
 
   function init() {
     build();
+    intros();
+    var tool = document.getElementById("view-tool");
+    if (tool && "MutationObserver" in window) {
+      new MutationObserver(function () { intros(); }).observe(tool, { attributes: true, attributeFilter: ["data-active-section"] });
+    }
     // A defensive second pass for late-built markup.
-    setTimeout(build, 1500);
+    setTimeout(function () { build(); intros(); }, 1500);
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
   else init();

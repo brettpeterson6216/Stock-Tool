@@ -533,14 +533,15 @@ function renderPage(ticker, q, facts) {
   </div>` : ""}
 
   <div class="features">
-    <h2>What you get with ImpliedLens</h2>
+    <span class="il-sec-kicker-plain">Everything in one place</span>
+    <h2>What you get with <em>ImpliedLens.</em></h2>
     <div class="feat-grid">
-      <div class="feat"><div class="feat-icon">📊</div><div class="feat-title">Financial statements</div><div class="feat-desc">Income, balance sheet, cash flow from SEC filings with 30+ calculated ratios.</div></div>
-      <div class="feat"><div class="feat-icon">🧮</div><div class="feat-title">DCF valuation</div><div class="feat-desc">Customizable discounted cash flow model with live inputs.</div></div>
-      <div class="feat"><div class="feat-icon">🎯</div><div class="feat-title">Analyst targets</div><div class="feat-desc">Price targets, recommendation breakdowns, earnings surprises.</div></div>
-      <div class="feat"><div class="feat-icon">🏦</div><div class="feat-title">Institutional context</div><div class="feat-desc">Ownership data and aggregated FINRA OTC activity.</div></div>
-      <div class="feat"><div class="feat-icon">📋</div><div class="feat-title">SEC filings</div><div class="feat-desc">Direct links to 10-K, 10-Q, 8-K, and proxy statements.</div></div>
-      <div class="feat"><div class="feat-icon">📈</div><div class="feat-title">Projection models</div><div class="feat-desc">Bull/base/bear scenario modeling with editable assumptions.</div></div>
+      <div class="feat"><div class="feat-icon"><i class="ti ti-report-money" aria-hidden="true"></i></div><div class="feat-title">Financial statements</div><div class="feat-desc">Income, balance sheet, cash flow from SEC filings with 30+ calculated ratios.</div></div>
+      <div class="feat"><div class="feat-icon"><i class="ti ti-calculator" aria-hidden="true"></i></div><div class="feat-title">DCF valuation</div><div class="feat-desc">Customizable discounted cash flow model with live inputs.</div></div>
+      <div class="feat"><div class="feat-icon"><i class="ti ti-target" aria-hidden="true"></i></div><div class="feat-title">Analyst targets</div><div class="feat-desc">Price targets, recommendation breakdowns, earnings surprises.</div></div>
+      <div class="feat"><div class="feat-icon"><i class="ti ti-building-bank" aria-hidden="true"></i></div><div class="feat-title">Institutional context</div><div class="feat-desc">Ownership data and aggregated FINRA OTC activity.</div></div>
+      <div class="feat"><div class="feat-icon"><i class="ti ti-file-text" aria-hidden="true"></i></div><div class="feat-title">SEC filings</div><div class="feat-desc">Direct links to 10-K, 10-Q, 8-K, and proxy statements.</div></div>
+      <div class="feat"><div class="feat-icon"><i class="ti ti-chart-line" aria-hidden="true"></i></div><div class="feat-title">Projection models</div><div class="feat-desc">Bull/base/bear scenario modeling with editable assumptions.</div></div>
     </div>
   </div>
 
@@ -552,7 +553,7 @@ function renderPage(ticker, q, facts) {
   </div>
 
   <div class="related">
-    <h2>Analyze another ticker</h2>
+    <h2>Analyze <em>another ticker.</em></h2>
     <div class="pill-row">
       ${related
         .map(t => `<a href="/stock/${t}" class="ticker-pill">${t}</a>`)
