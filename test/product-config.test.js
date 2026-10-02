@@ -249,3 +249,15 @@ test("app-legacy's fallback prices still equal the catalog", () => {
   assert.ok(trial, "could not find the trial-days fallback in app-legacy.js");
   assert.equal(Number(trial[1]), PRODUCT_CONFIG.trial.days);
 });
+
+test("the catalog check reports whether each price is live or test mode", async () => {
+  clearStripeCatalogVerifierCache();
+  const stripe = { prices: { retrieve: async (id) => ({
+    id, currency: "usd", active: true, livemode: id.includes("month"),
+    unit_amount: id.includes("month") ? 799 : 6000,
+    recurring: { interval: id.includes("month") ? "month" : "year", interval_count: 1 },
+  }) } };
+  const result = await verifyStripeCatalog({ stripe, priceIds: { monthly: "price_month_x", annual: "price_year_x" }, cacheTtlMs: 0 });
+  assert.equal(result.prices.monthly.observed.livemode, true);
+  assert.equal(result.prices.annual.observed.livemode, false);
+});
