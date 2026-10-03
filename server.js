@@ -433,6 +433,7 @@ app.get("/verify-email", (req, res) => {
 // ============================================================
 app.get(["/privacy", "/privacy.html"],         (_req, res) => sendPage(res, path.join(__dirname, "public", "privacy.html")));
 app.get(["/terms",   "/terms.html"],            (_req, res) => sendPage(res, path.join(__dirname, "public", "terms.html")));
+app.get(["/support", "/support.html"],          (_req, res) => sendPage(res, path.join(__dirname, "public", "support.html")));
 app.get(["/data-sources", "/data-sources.html"],(_req, res) => sendPage(res, path.join(__dirname, "public", "data-sources.html")));
 
 // Every other static page has an extension-less route; this one was missed, so

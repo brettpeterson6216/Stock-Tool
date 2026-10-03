@@ -255,7 +255,8 @@ router.post("/stripe/webhook", async (req, res) => {
         // or past_due. Access is updated from customer.subscription.updated.
         const invoice = event.data.object;
         const customerId = stripeId(invoice.customer);
-        const subscriptionId = stripeId(invoice.subscription);
+        // Newer Stripe API versions (2025+) moved this under parent.subscription_details.
+        const subscriptionId = stripeId(invoice.subscription || invoice.parent?.subscription_details?.subscription);
         const userId = await findUserIdForStripeEvent({
           customerId,
           subscriptionId,
