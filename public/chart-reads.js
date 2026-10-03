@@ -139,7 +139,18 @@
     });
   }
 
+  /* On a phone the time-range strip scrolls sideways; keep the selected range
+     in view (1Y, the default, otherwise sits off the right edge). */
+  function centerRange() {
+    var strip = document.getElementById("app-tf-strip");
+    var on = strip && (strip.querySelector('.tf-pill[aria-pressed="true"]') || strip.querySelector(".tf-pill.active"));
+    if (!strip || !on || strip.scrollWidth <= strip.clientWidth) return;
+    var sr = strip.getBoundingClientRect(), ar = on.getBoundingClientRect();
+    strip.scrollLeft = Math.max(0, strip.scrollLeft + (ar.left - sr.left) - (sr.width - ar.width) / 2);
+  }
+
   document.addEventListener("il-chart-rendered", function (e) {
+    try { centerRange(); } catch (err) {}
     lastRows = e.detail && e.detail.rows;
     try { reads(lastRows); } catch (err) {}
     try { worth(); } catch (err) {}

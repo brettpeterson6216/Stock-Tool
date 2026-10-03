@@ -1276,7 +1276,7 @@
                   <div id="sidebar-risk-content"></div>
                 </div>
                 <!-- Quick DCF in sidebar -->
-                <div class="sidebar-card">
+                <div class="sidebar-card il-desk-extra" id="il-quick-eps">
                   <div class="sidebar-card-title">Quick EPS Value Estimate</div>
                   <div class="proj-controls" style="grid-template-columns:1fr 1fr;gap:6px 10px;">
                     <div><label class="fc-label">Starting EPS ($)</label><input class="fc-input" type="number" id="qdcf-eps" value="" step="0.01" placeholder="e.g. 5.20"></div>
@@ -1299,7 +1299,7 @@
               </div><!-- /dash-layout -->
 
               <!-- Custom Projection -->
-              <div class="panel-box" style="margin-bottom:14px;">
+              <div class="panel-box il-desk-extra" id="il-custom-proj" style="margin-bottom:14px;">
                 <div class="panel-box-title">Custom Bear, Base &amp; Bull Projection</div>
                 <div style="font-size:11px;line-height:1.5;color:var(--text5);margin:-.35rem 0 .85rem;">Set each case independently. Open the Valuation Lab for a full year-by-year revenue-to-price model with editable growth, margins, and P/E — and a DCF on the same company.</div>
                 <div class="proj-controls projection-shared">
@@ -1406,12 +1406,12 @@
           </div><!-- /sec-earnings -->
 
           <div class="app-section" id="sec-secfilings"><div class="acc-body" id="body-secfilings" style="display:none;">
-              <div id="sec-nostock" style="color:rgba(237,232,224,.35);font-size:13px;padding:.5rem 0;">Search for a stock in the Research tab first.</div>
+              <div id="sec-nostock" style="color:var(--rp-muted);font-size:13px;padding:.5rem 0;">Search for a stock in the Research tab first.</div>
               <div id="sec-loading" style="display:none;color:rgba(237,232,224,.4);font-size:12px;">Loading filings...</div>
               <div id="sec-error" style="display:none;" class="error-msg"></div>
               <div id="sec-content" style="display:none;">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.75rem;">
-                  <div style="font-family:var(--mono);font-size:11px;color:rgba(237,232,224,.35);letter-spacing:.05em;" id="sec-entity-label"></div>
+                  <div style="font-family:var(--mono);font-size:11px;color:var(--rp-muted);letter-spacing:.05em;" id="sec-entity-label"></div>
                   <div style="display:flex;gap:.4rem;flex-wrap:wrap;" id="sec-filter-row">
                     <button class="sec-filter-btn active" data-form="ALL" onclick="filterSecFilings('ALL')">All</button>
                     <button class="sec-filter-btn" data-form="10-K" onclick="filterSecFilings('10-K')">10-K</button>
@@ -1421,7 +1421,6 @@
                   </div>
                 </div>
                 <div id="sec-filings-list" style="display:flex;flex-direction:column;gap:.5rem;"></div>
-                <div style="margin-top:1.25rem;font-size:11px;color:rgba(237,232,224,.22);font-family:var(--mono);">Data sourced from SEC EDGAR. Links open official filings in a new tab.</div>
               </div>
             </div><!-- /body-secfilings -->
           </div><!-- /sec-secfilings -->

@@ -42,3 +42,12 @@ test("account settings has no emoji, shouting labels or unlabeled fields", () =>
   assert.doesNotMatch(modal, /text-transform:uppercase|💳|⭐|✦/);
   for (const id of ["am-new-username", "am-cur-pw", "am-new-pw", "am-confirm-pw"]) assert.match(modal, new RegExp('for="' + id + '"'), id + " has no label");
 });
+
+test("the research pages have a phone layout pass", () => {
+  for (const sel of [".ilr-ohlc", ".risk-grid", ".il-trust-grid", ".earn-table", ".il-research-hero", ".sec-filing-desc", ".dp-card-val", "#app-stats-footer", ".plab2-exp-v"]) {
+    assert.ok(v5.includes(sel), `no phone rule for ${sel}`);
+  }
+  const legacy = fs.readFileSync(P("public", "app-legacy.js"), "utf8");
+  assert.match(legacy, /function centerMobileTab\(\)/, "the phone section strip no longer keeps the current tab in view");
+  assert.doesNotMatch(html, /color:rgba\(237,232,224,\.2\d\)/, "near-invisible text is back");
+});

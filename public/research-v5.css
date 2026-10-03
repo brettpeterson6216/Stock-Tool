@@ -1746,3 +1746,62 @@ html body #acct-modal-bg .il-acct-logout { min-height: 44px !important; padding:
 /* Mobile menu rows the app hides for the signed-in/out state. */
 html body .il-mm .il-mm-item[style*="none"] { display: none !important; }
 html body #acct-modal-bg section.il-acct-sec { padding: 16px 0 0 !important; margin: 0 !important; min-height: 0 !important; background: none !important; border-radius: 0 !important; box-shadow: none !important; width: auto !important; max-width: none !important; }
+
+/* ═══ PHONE PASS: research pages ════════════════════════════════════════════
+   From a 390px walk through every section. High-specificity prefix because
+   several of these elements carry id-weighted heritage rules. */
+@media (max-width: 600px) {
+  /* Chart: the O/H/L/C readout wraps instead of running off the card. */
+  html:not(#il-p1):not(#il-p2):not(#il-p3):not(#il-p4):not(#il-p5):not(#il-p6):not(#il-p7) body .ilr-ohlc { flex-wrap: wrap !important; overflow: visible !important; row-gap: 2px !important; column-gap: 12px !important; }
+  /* Risk metrics: two per row, not one giant tile each. */
+  html:not(#il-p1):not(#il-p2):not(#il-p3):not(#il-p4):not(#il-p5):not(#il-p6):not(#il-p7) body .risk-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; }
+  html:not(#il-p1):not(#il-p2):not(#il-p3):not(#il-p4):not(#il-p5):not(#il-p6):not(#il-p7) body .risk-stat { padding: 10px 12px !important; min-height: 0 !important; }
+  html:not(#il-p1):not(#il-p2):not(#il-p3):not(#il-p4):not(#il-p5):not(#il-p6):not(#il-p7) body .risk-stat-val { font-size: 20px !important; line-height: 1.2 !important; }
+  /* Evidence quality: no grey slab; a tidy two-column list. */
+  html:not(#il-p1):not(#il-p2):not(#il-p3):not(#il-p4):not(#il-p5):not(#il-p6):not(#il-p7) body .il-trust-grid { background: transparent !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 10px 14px !important; padding: 4px 0 !important; border: 0 !important; }
+  html:not(#il-p1):not(#il-p2):not(#il-p3):not(#il-p4):not(#il-p5):not(#il-p6):not(#il-p7) body .il-trust-field { background: transparent !important; border: 0 !important; padding: 0 !important; }
+  /* Source lines: a footnote that wraps cleanly, never over the next paragraph. */
+  html:not(#il-p1):not(#il-p2):not(#il-p3):not(#il-p4):not(#il-p5):not(#il-p6):not(#il-p7) body #view-tool .il-data-source-line:not(#quote-source) { display: block !important; height: auto !important; min-height: 0 !important; margin: 0 0 14px !important; font-size: 12.5px !important; line-height: 1.5 !important; }
+  /* Earnings history: the four columns that matter, fitted to the screen. */
+  html:not(#il-p1):not(#il-p2):not(#il-p3):not(#il-p4):not(#il-p5):not(#il-p6):not(#il-p7) body .earn-table :is(th, td):nth-child(4),
+  html:not(#il-p1):not(#il-p2):not(#il-p3):not(#il-p4):not(#il-p5):not(#il-p6):not(#il-p7) body .earn-table :is(th, td):nth-child(6) { display: none !important; }
+  html:not(#il-p1):not(#il-p2):not(#il-p3):not(#il-p4):not(#il-p5):not(#il-p6):not(#il-p7) body .earn-table :is(th, td) { padding: 10px 6px !important; font-size: 13px !important; }
+  html:not(#il-p1):not(#il-p2):not(#il-p3):not(#il-p4):not(#il-p5):not(#il-p6):not(#il-p7) body .earn-table th { white-space: normal !important; line-height: 1.25 !important; vertical-align: bottom !important; }
+  html:not(#il-p1):not(#il-p2):not(#il-p3):not(#il-p4):not(#il-p5):not(#il-p6):not(#il-p7) body .earn-table td:first-child,
+  html:not(#il-p1):not(#il-p2):not(#il-p3):not(#il-p4):not(#il-p5):not(#il-p6):not(#il-p7) body .earn-table td:first-child * { white-space: nowrap !important; }
+  html:not(#il-p1):not(#il-p2):not(#il-p3):not(#il-p4):not(#il-p5):not(#il-p6):not(#il-p7) body .earn-table td:first-child { font-size: 13px !important; padding-left: 4px !important; }
+  /* Calls, Wealth: the hero's buttons sit under the text, full width. */
+  html:not(#il-p1):not(#il-p2):not(#il-p3):not(#il-p4):not(#il-p5):not(#il-p6):not(#il-p7) body #view-tool .il-research-hero { flex-direction: column !important; align-items: stretch !important; gap: 16px !important; }
+  html:not(#il-p1):not(#il-p2):not(#il-p3):not(#il-p4):not(#il-p5):not(#il-p6):not(#il-p7) body #view-tool .il-research-actions { display: flex !important; flex-direction: row !important; flex-wrap: wrap !important; gap: 8px !important; width: 100% !important; }
+  html:not(#il-p1):not(#il-p2):not(#il-p3):not(#il-p4):not(#il-p5):not(#il-p6):not(#il-p7) body #view-tool .il-research-actions .il-research-btn { flex: 1 1 140px !important; justify-content: center !important; min-height: 44px !important; white-space: nowrap !important; }
+  /* Call list: title on its own line, date under it, Read beside. */
+  html:not(#il-p1):not(#il-p2):not(#il-p3):not(#il-p4):not(#il-p5):not(#il-p6):not(#il-p7) body .il-call-title { font-size: 14px !important; }
+  html:not(#il-p1):not(#il-p2):not(#il-p3):not(#il-p4):not(#il-p5):not(#il-p6):not(#il-p7) body .il-call-row { row-gap: 4px !important; align-items: center !important; }
+  html:not(#il-p1):not(#il-p2):not(#il-p3):not(#il-p4):not(#il-p5):not(#il-p6):not(#il-p7) body .il-call-period { margin: 0 !important; }
+  html:not(#il-p1):not(#il-p2):not(#il-p3):not(#il-p4):not(#il-p5):not(#il-p6):not(#il-p7) body .il-call-title span { display: block !important; white-space: nowrap !important; margin-top: 3px !important; font-size: 12px !important; }
+  /* SEC filings: the description gets its own line instead of an ellipsis. */
+  html:not(#il-p1):not(#il-p2):not(#il-p3):not(#il-p4):not(#il-p5):not(#il-p6):not(#il-p7) body .sec-filing-row { flex-wrap: wrap !important; row-gap: 6px !important; }
+  html:not(#il-p1):not(#il-p2):not(#il-p3):not(#il-p4):not(#il-p5):not(#il-p6):not(#il-p7) body .sec-filing-desc { order: 3 !important; flex: 1 1 100% !important; white-space: normal !important; overflow: visible !important; text-overflow: clip !important; font-size: 13.5px !important; line-height: 1.4 !important; }
+  html:not(#il-p1):not(#il-p2):not(#il-p3):not(#il-p4):not(#il-p5):not(#il-p6):not(#il-p7) body .sec-filing-arrow { margin-left: auto !important; }
+  /* Ownership: big numbers shrink to fit their card. */
+  html:not(#il-p1):not(#il-p2):not(#il-p3):not(#il-p4):not(#il-p5):not(#il-p6):not(#il-p7) body .dp-card-val { font-size: clamp(20px, 6.4vw, 26px) !important; overflow-wrap: anywhere !important; }
+}
+/* Phones: the Chart page drops the panels that repeat what is above them or
+   live in full in Valuation Lab (Plain-English read repeats "Read the chart";
+   Quick EPS and the custom projection are Valuation Lab's job, linked from
+   "What is it worth?"). Desktop keeps them in the sidebar. */
+@media (max-width: 600px) {
+  html:not(#il-p1):not(#il-p2):not(#il-p3):not(#il-p4):not(#il-p5):not(#il-p6):not(#il-p7) body #view-tool :is(#il-plain-read, .il-desk-extra) { display: none !important; }
+}
+@media (max-width: 600px) {
+  /* The pinned stats footer (Open, High, Low…) is nine columns in 390px and
+     repeats the stat grid at the top of the Chart page. */
+  html:not(#il-p1):not(#il-p2):not(#il-p3):not(#il-p4):not(#il-p5):not(#il-p6):not(#il-p7) body #app-stats-footer { display: none !important; }
+}
+@media (max-width: 600px) {
+  /* Valuation Lab: "Expected 2031 value $337.53 12.4% annualized" stacks as
+     label, number, rate instead of three squeezed columns. */
+  html:not(#il-p1):not(#il-p2):not(#il-p3):not(#il-p4):not(#il-p5):not(#il-p6):not(#il-p7) body .plab2-exp-v { display: flex !important; flex-wrap: wrap !important; align-items: baseline !important; gap: 4px 10px !important; font-size: 15px !important; line-height: 1.3 !important; }
+  html:not(#il-p1):not(#il-p2):not(#il-p3):not(#il-p4):not(#il-p5):not(#il-p6):not(#il-p7) body .plab2-exp-v strong { font-size: 30px !important; flex-basis: 100% !important; order: 2 !important; }
+  html:not(#il-p1):not(#il-p2):not(#il-p3):not(#il-p4):not(#il-p5):not(#il-p6):not(#il-p7) body .plab2-exp-v span { order: 3 !important; font-size: 13px !important; }
+}

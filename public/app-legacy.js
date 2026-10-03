@@ -491,6 +491,7 @@ function openSection(id, skipProCheck) {
     const sec = b.getAttribute('data-sec');
     b.classList.toggle('active', sec === id || (sec === 'dcf' && id === 'projection'));
   });
+  centerMobileTab();
   // Top-bar active tab follows the section's nav group; the left panel shows
   // only that group's options and can never change the top tab.
   const navGroup = navGroupOf(id);
@@ -4905,6 +4906,37 @@ function _setMobileNav(id) {
     b.classList.toggle('active', sec === id || (sec === 'dcf' && id === 'projection'));
   });
 }
+// The phone section strip scrolls sideways; keep the current section's tab in
+// view, or on Calls or Wealth the strip shows four tabs and none of them lit.
+function centerMobileTab() {
+  const strip = document.getElementById('mobile-sec-tabs');
+  const act = strip && strip.querySelector('.mst-btn.active');
+  if (!strip || !act || strip.scrollWidth <= strip.clientWidth) return;
+  const sr = strip.getBoundingClientRect(), ar = act.getBoundingClientRect();
+  const left = strip.scrollLeft + (ar.left - sr.left) - (sr.width - ar.width) / 2;
+  try { strip.scrollTo({ left: Math.max(0, left), behavior: 'smooth' }); } catch (e) { strip.scrollLeft = Math.max(0, left); }
+}
+document.addEventListener('DOMContentLoaded', function(){ setTimeout(function(){
+  // Calls, Wealth and Workspace add their tabs after the first section opens.
+  const params = new URLSearchParams(location.search), sec = params.get('section');
+  if (sec && document.querySelector('.mst-btn[data-sec="' + sec.replace(/[^a-z]/gi, '') + '"]')) document.querySelectorAll('.mst-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-sec') === sec));
+  centerMobileTab();
+  const strip = document.getElementById('mobile-sec-tabs');
+  if (strip && 'MutationObserver' in window) {
+    let pending = false;
+    new MutationObserver(function () {
+      if (pending) return; pending = true;
+      setTimeout(function () {
+        pending = false;
+        const s2 = new URLSearchParams(location.search).get('section');
+        if (s2 && !strip.querySelector('.mst-btn.active') && strip.querySelector('.mst-btn[data-sec="' + s2.replace(/[^a-z]/gi, '') + '"]')) {
+          strip.querySelector('.mst-btn[data-sec="' + s2.replace(/[^a-z]/gi, '') + '"]').classList.add('active');
+        }
+        centerMobileTab();
+      }, 120);
+    }).observe(strip, { childList: true });
+  }
+}, 1600); });
 function setMobileTab(btn) {
   document.querySelectorAll('.mst-btn').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
