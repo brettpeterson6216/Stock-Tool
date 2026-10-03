@@ -58,8 +58,9 @@ test("discount-code sales work through Stripe Checkout without replacing the tri
      spell it out any more, so match what the catalog renders rather than a
      literal that would have to be chased on the next change. */
   assert.match(html, new RegExp(`Start ${PRODUCT_CONFIG.trial.days}-day free trial`));
-  assert.match(html, /Discount codes can be entered in Checkout/);
-  assert.match(html, /\$0\.99 paid month/);
+  assert.match(html, /Have a discount code\? Enter it in Checkout\./);
+  /* The $0.99 live price was archived at go-live, so no page may promise it. */
+  assert.doesNotMatch(html, /\$0\.99 paid month/);
   assert.doesNotMatch(billingSource, /firstMonthDiscounts/);
   assert.doesNotMatch(billingSource, /\$0\.99 first-month offer is not configured yet/);
   assert.match(billingSource, /trialDays: PRODUCT_CONFIG\.trial\.days/);

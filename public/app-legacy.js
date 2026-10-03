@@ -2430,14 +2430,13 @@ function trialTermsHtml(){
 /* The fallbacks below are the only prices on this page that are not read from
    the catalog, and they are reached only when the il-product meta embed is
    missing or unparseable. They must equal lib/product-config.js's defaults or
-   a failed embed quotes a price Stripe does not charge -- the annual figure
-   sat at 5999 while Stripe billed 6000, which is exactly the drift the embed
+   a failed embed quotes a price Stripe does not charge -- the drift the embed
    exists to prevent. test/product-config.test.js pins them to the catalog. */
 function pricingPlan(){
   var cfg = ilProduct() || {};
   var p = cfg.pricing || null;
   var monthly = (p && p.monthly && p.monthly.unitAmountCents) || 799;
-  var annual  = (p && p.annual  && p.annual.unitAmountCents)  || 6000;
+  var annual  = (p && p.annual  && p.annual.unitAmountCents)  || 5999;
 
   var savings = Math.max(0, Math.round((1 - annual / (monthly * 12)) * 100));
   return {
@@ -2459,7 +2458,7 @@ function setPricingPeriod(period){
   if(per)per.textContent=annual?'/year':'/month';
   if(note)note.textContent=annual
     ?('Equivalent to about '+plan.perMonthAnnual+'/month. Save '+plan.savings+'% versus monthly billing. Discount codes can be entered in Checkout.')
-    :('Start with a '+plan.trialDays+'-day free trial. Have a discount code? Enter it in Stripe Checkout for offers like a $0.99 paid month.');
+    :('Start with a '+plan.trialDays+'-day free trial. Have a discount code? Enter it in Checkout.');
   if(btn)btn.textContent=annual?'Start annual Pro \u2192':trialCtaLabel();
 }
 
