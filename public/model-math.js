@@ -529,6 +529,29 @@
     };
   }
 
+  /* Bear and Bull rebuilt around a user's own Base, with the same offsets the
+     defaults use. In the field test an analyst edited Base and the wings kept
+     their seeded values, so the weighted value mixed two different views. */
+  function plDeriveWingsFromBase(model) {
+    var base = model.scenarios.base, out = {};
+    ["bear", "bull"].forEach(function (kind) {
+      var sc = { revGrowth: [], netMargin: [], peLow: [], peHigh: [], shareChange: [] };
+      for (var i = 0; i < PL_MAX_YEARS; i += 1) {
+        var g = Number(base.revGrowth[i]), mm = Number(base.netMargin[i]);
+        var lo = Number(base.peLow[i]), hi = Number(base.peHigh[i]);
+        sc.revGrowth.push(plR1(kind === "bear" ? g - Math.max(2, Math.abs(g) * 0.4) : g + Math.max(2, Math.abs(g) * 0.3)));
+        sc.netMargin.push(plR1(mm > 0 ? (kind === "bear" ? mm * 0.85 : Math.min(mm * 1.12, mm + 8, 80)) : mm + (kind === "bear" ? -2 : 2)));
+        sc.peLow.push(plR1(kind === "bear" ? lo * 0.8 : hi));
+        sc.peHigh.push(plR1(kind === "bear" ? lo : hi * 1.2));
+        sc.shareChange.push(Number(base.shareChange[i]) || 0);
+      }
+      out[kind] = plNewScenario(sc);
+    });
+    model.scenarios.bear = out.bear;
+    model.scenarios.bull = out.bull;
+    return model;
+  }
+
   // Migrate any previously saved model (v1 or malformed) to the canonical v2 shape.
   function plMigrateSavedModel(raw) {
     if (!raw || typeof raw !== "object") return null;
@@ -1061,5 +1084,5 @@
 
   return { cagr, cumulativeDividends, projectScenario, projectCases, asDecimalRate, validateProjectionContext, projectionSensitivity, explainProjection, buildProjection, projectRevenueModel, projectRevenueScenarios, projectOperatingModel, valueOperatingModel, runValuation, runValuationScenarios, reverseSolveValuation, valuationSensitivityGrid, epsDcf, annualizedVolatility, futureValue, compoundScenarios,
     PL_MODEL_VERSION, PL_SCENARIO_KEYS, PL_MAX_YEARS, PL_HORIZONS,
-    plParseNumber, plCreateModel, plMigrateSavedModel, plBaseDerived, plCalculateProjection, plCalculateOutlook, plBuildCsv };
+    plParseNumber, plCreateModel, plDeriveWingsFromBase, plMigrateSavedModel, plBaseDerived, plCalculateProjection, plCalculateOutlook, plBuildCsv };
 });

@@ -238,6 +238,16 @@
     });
     ctrl.appendChild(tabs);
     ctrl.appendChild(el("div", "plab2-scen-desc", esc(SCEN_DESC[m.selectedScenario])));
+    var wings = el("button", "plab2-btn plab2-wings", '<i class="ti ti-arrows-split-2" aria-hidden="true"></i> Rebuild Bear &amp; Bull from Base');
+    wings.type = "button";
+    wings.title = "Set Bear and Bull as offsets of your Base: slower/faster growth, margins 15% lower/12% higher, lower/higher exit multiples.";
+    wings.onclick = function () {
+      M().plDeriveWingsFromBase(PL.model);
+      PL.model.userEditedScenarios = true;
+      touch(); render();
+      toastPL("Bear and Bull now sit around your Base case");
+    };
+    ctrl.appendChild(wings);
     var horiz = el("div", "plab2-horizon");
     horiz.setAttribute("role", "group");
     horiz.setAttribute("aria-label", "Projection horizon");
@@ -1183,7 +1193,9 @@
     var pe = rawNum(meta.trailingPE);
     if (Number.isFinite(pe) && pe > 0) seed.currentPE = pe;
 
-    var r = S.financialsRaw;
+    // Only statements fetched for THIS ticker; a cache from the previous
+    // company must never seed this one.
+    var r = S.financialsRaw && (!S.financialsTicker || S.financialsTicker === S.ticker) ? S.financialsRaw : null;
     var shares = NaN, netIncome = NaN, revenue = NaN, fyLabel = "";
     if (r) {
       var inc = (r.incomeStatementHistory && r.incomeStatementHistory.incomeStatementHistory) || [];

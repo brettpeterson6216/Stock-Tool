@@ -366,7 +366,7 @@
       institutional: ["Feeds Evidence", "Ownership context is supporting evidence, not a standalone buy signal.", "drivers"],
       screener: ["Candidate workflow", "Screen broadly, then validate timing, trend, zones and value in one toolkit.", "snapshot"],
       projection: ["Next step", "Check this valuation against the stock's LensScore, which also weighs quality, trend and risk.", "scenario"],
-      dcf: ["Feeds LensValue", "Use modeled value as one input alongside quality, expectations and downside.", "value"],
+      dcf: ["Next step", "Use this value as one input alongside the stock's LensScore, which also weighs quality, trend and risk.", "value"],
       reports: ["Decision memory", "Reopen saved LensScore scenarios with their original score, price and assumptions.", "snapshot"],
     };
     Object.entries(contexts).forEach(([section, [eyebrow, copy, view]]) => {

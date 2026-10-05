@@ -2110,6 +2110,9 @@ async function fetchAndRender() {
   track('analyze_started', { ticker });
   try {
     const result=await yahooFetch(ticker,S.range);
+    /* Company-specific caches belong to one ticker. Switching NVDA after AAPL
+       used to seed NVDA's Valuation Lab with Apple's statements. */
+    if(S.ticker!==ticker){ S.financialsRaw=null; S.financialsTicker=null; S.estimates=null; S.sector=null; }
     S.ticker=ticker; S.data=result; S.analystTarget=null;
     try { if (!localStorage.getItem('il-first-analysis')) localStorage.setItem('il-first-analysis', ticker); } catch (_) {}
     renderStock(result,ticker);
@@ -4279,7 +4282,7 @@ async function loadFinancials(ticker) {
 
     const r    = data.quoteSummary && data.quoteSummary.result && data.quoteSummary.result[0];
     if (!r) throw new Error('No data');
-    if (window.S) S.financialsRaw = r;   // cache for Projection Lab seeding
+    if (window.S) { S.financialsRaw = r; S.financialsTicker = ticker; }   // cache for Projection Lab seeding
     if (document.getElementById('sec-projection')?.classList.contains('open')) { try { mountProjectionLab(); } catch(e){} }
     const inc  = (r.incomeStatementHistory  && r.incomeStatementHistory.incomeStatementHistory  && r.incomeStatementHistory.incomeStatementHistory.length  ? r.incomeStatementHistory.incomeStatementHistory  : (r.incomeStatementHistoryQuarterly  && r.incomeStatementHistoryQuarterly.incomeStatementHistory))  || [];
     const bal  = (r.balanceSheetHistory     && r.balanceSheetHistory.balanceSheetStatements     && r.balanceSheetHistory.balanceSheetStatements.length     ? r.balanceSheetHistory.balanceSheetStatements     : (r.balanceSheetHistoryQuarterly     && r.balanceSheetHistoryQuarterly.balanceSheetStatements))     || [];

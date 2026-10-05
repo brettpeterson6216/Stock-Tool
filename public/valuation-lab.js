@@ -27,7 +27,9 @@
 
   /* ---- seeding from the app ---- */
   function readSeed() {
-    var S = window.S || {}, meta = (S.data && S.data.meta) || {}, r = S.financialsRaw;
+    var S = window.S || {}, meta = (S.data && S.data.meta) || {};
+    // Statements for THIS ticker only (a previous company's cache must not seed it).
+    var r = S.financialsRaw && (!S.financialsTicker || S.financialsTicker === S.ticker) ? S.financialsRaw : null;
     var seed = { ticker: S.ticker || meta.symbol || "—", seeded: false };
     var price = raw(meta.regularMarketPrice); if (price > 0) seed.currentPrice = price;
     var pe = raw(meta.trailingPE); if (pe > 0) seed.trailingPE = pe;
@@ -50,7 +52,28 @@
       if (cf.length) { var c = cf[0]; var dep = raw(c.depreciation), capex = Math.abs(raw(c.capitalExpenditures)); if (seed.startRevenue > 0) { if (Number.isFinite(dep)) seed.daPct = dep / seed.startRevenue; if (Number.isFinite(capex)) seed.capexPct = capex / seed.startRevenue; } }
       var sh = raw(ks.sharesOutstanding); if (sh > 0) seed.startShares = sh;
       var eb = raw(ks.ebitda); if (eb > 0 && seed.startRevenue > 0) seed.ebitdaMargin = eb / seed.startRevenue;
+      /* Same base as the Projection tab: the latest twelve months from SEC
+         filings, diluted shares and their trend, and the recent growth trend
+         against the last annual report's real end date. */
+      var ttm = r.trailingTwelveMonths;
+      if (ttm && ttm.basis === "ttm") {
+        var tRev = raw(ttm.revenue), tNi = raw(ttm.netIncome);
+        if (tRev > 0) {
+          if (seed.opMarginStart != null && seed.startRevenue > 0) { /* keep the annual op margin; TTM op income is not in the feed */ }
+          seed.startRevenue = tRev; seed.seeded = true;
+          if (Number.isFinite(tNi)) seed.ttmNetMargin = tNi / tRev;
+          var ar = ttm.annualRevenue, months = ar && ar.asOf ? (Date.parse(String(ttm.asOf) + "T00:00:00Z") - Date.parse(String(ar.asOf) + "T00:00:00Z")) / (30.44 * 864e5) : NaN;
+          if (months >= 3 && raw(ar) > 0) seed.ttmTrend = Math.pow(tRev / raw(ar), 12 / months) - 1;
+        }
+      }
+      var dil = ttm && ttm.dilutedShares;
+      if (dil && raw(dil) > 0) seed.startShares = raw(dil);
+      if (dil && Number.isFinite(Number(dil.cagr3))) seed.shareCagr = Number(dil.cagr3);
     }
+    var est = S.estimates;
+    if (est && est.estimatesAvailable !== false && Number.isFinite(Number(est.revenueGrowth))) seed.consensusGrowth = Number(est.revenueGrowth) / 100;
+    if (est && Number(est.suggestedWACC) > 0) seed.suggestedWACC = Number(est.suggestedWACC);
+    seed.financialSector = /financ|bank|insur/i.test(S.sector || "");
     if (!(seed.startShares > 0) && raw(meta.marketCap) > 0 && seed.currentPrice > 0) seed.startShares = raw(meta.marketCap) / seed.currentPrice;
     return seed;
   }
@@ -60,20 +83,37 @@
   function baseInputs(seed) {
     var gm = Number.isFinite(seed.grossMargin) ? seed.grossMargin : 0.6;
     var om = Number.isFinite(seed.opMarginStart) ? seed.opMarginStart : 0.15;
-    var g = Number.isFinite(seed.histGrowth) ? clamp(seed.histGrowth, -0.1, 0.6) : 0.12;
+    /* Defaults follow the Projection tab's rules (Oct 2026 field test): start
+       from recent growth or consensus, capped at 40%, fading to ~4%; no
+       automatic margin expansion; exit P/E halfway from today's toward a
+       long-run 20x (13x financials); buybacks/dilution from the 3-year trend. */
+    var srcs = Number.isFinite(seed.consensusGrowth) ? [seed.consensusGrowth] : [seed.ttmTrend, seed.histGrowth].filter(Number.isFinite);
+    var g1 = srcs.length ? clamp(srcs.reduce(function (a, b) { return a + b; }, 0) / srcs.length, -0.15, 0.4) : 0.08;
+    var gT = g1 >= 0.04 ? 0.04 : Math.max(g1, 0.03);
+    var g = (g1 + gT) / 2;   // average of a straight fade over years 1-5
+    var pe = seed.trailingPE > 0 ? seed.trailingPE : NaN;
+    if (Number.isFinite(seed.ttmNetMargin) && seed.ttmNetMargin > 0 && seed.currentPrice > 0 && seed.startShares > 0 && seed.startRevenue > 0) pe = seed.currentPrice / (seed.startRevenue * seed.ttmNetMargin / seed.startShares);
+    else if (Number.isFinite(seed.ttmNetMargin) && seed.ttmNetMargin <= 0) pe = NaN;
+    var norm = seed.financialSector ? 13 : 20;
+    var exitPE = Number.isFinite(pe) && pe > 0 ? clamp(0.5 * Math.min(pe, 80) + 0.5 * norm, 8, 40) : norm;
+    var lossMaker = om <= 0;
     return {
       startRevenue: seed.startRevenue > 0 ? seed.startRevenue : 1e9,
-      revGrowthEarly: +(g * 100).toFixed(1), revGrowthLate: +(g * 0.6 * 100).toFixed(1),
+      revGrowthEarly: +(g * 100).toFixed(1), revGrowthLate: +(gT * 100).toFixed(1),
       grossMargin: +(gm * 100).toFixed(1),
-      opMarginStart: +(om * 100).toFixed(1), opMarginTargetY5: +(clamp(om + 0.05, -0.2, 0.5) * 100).toFixed(1), opMarginLongTerm: +(clamp(om + 0.06, -0.2, 0.5) * 100).toFixed(1),
+      // Margins hold at today's level (the old default always added 5-6 points).
+      // A loss-maker ramps toward a modest 12% operating margin, labelled as a turnaround.
+      opMarginStart: +(om * 100).toFixed(1),
+      opMarginTargetY5: +((lossMaker ? 0.85 * 0.12 : om) * 100).toFixed(1),
+      opMarginLongTerm: +((lossMaker ? 0.12 : om) * 100).toFixed(1),
       taxRate: Number.isFinite(seed.taxRate) ? +(seed.taxRate * 100).toFixed(1) : 21,
-      dilution: 1.5,
+      dilution: Number.isFinite(seed.shareCagr) ? +clamp(seed.shareCagr * 100, -5, 5).toFixed(1) : 1,
       capexPct: Number.isFinite(seed.capexPct) ? +(seed.capexPct * 100).toFixed(1) : 4,
       daPct: Number.isFinite(seed.daPct) ? +(seed.daPct * 100).toFixed(1) : 5,
       wcPct: 2, sbcPct: 3, interestRate: 5,
       startCash: seed.startCash > 0 ? Math.round(seed.startCash) : 0,
       startDebt: seed.startDebt > 0 ? Math.round(seed.startDebt) : 0,
-      discountRate: 9, terminalGrowth: 3, exitPE: seed.trailingPE > 0 ? Math.round(clamp(seed.trailingPE, 8, 40)) : 20, exitEVEBITDA: 15,
+      discountRate: seed.suggestedWACC > 0 ? seed.suggestedWACC : 9, terminalGrowth: 3, exitPE: Math.round(exitPE), exitEVEBITDA: 15,
       currentPrice: seed.currentPrice > 0 ? +seed.currentPrice.toFixed(2) : 100,
       currentDilutedShares: seed.startShares > 0 ? Math.round(seed.startShares) : 1e9,
       revGrowthPerYear: null, opMarginPerYear: null,
@@ -82,8 +122,13 @@
   function deriveScenario(baseRaw, kind) {
     var base = {}; Object.keys(baseRaw).forEach(function (k) { var v = baseRaw[k]; base[k] = (v !== null && v !== "" && !isNaN(v) && !Array.isArray(v)) ? Number(v) : v; });
     var s = Object.assign({}, base);
-    if (kind === "bear") { s.revGrowthEarly = +(base.revGrowthEarly * 0.55).toFixed(1); s.revGrowthLate = +(base.revGrowthLate * 0.55).toFixed(1); s.opMarginTargetY5 = +(base.opMarginTargetY5 - 6).toFixed(1); s.opMarginLongTerm = +(base.opMarginLongTerm - 6).toFixed(1); s.exitPE = Math.max(6, Math.round(base.exitPE * 0.7)); s.exitEVEBITDA = Math.max(4, Math.round(base.exitEVEBITDA * 0.7)); s.discountRate = base.discountRate + 2; s.dilution = base.dilution + 1; }
-    else if (kind === "bull") { s.revGrowthEarly = +(base.revGrowthEarly * 1.4).toFixed(1); s.revGrowthLate = +(base.revGrowthLate * 1.4).toFixed(1); s.opMarginTargetY5 = +(base.opMarginTargetY5 + 6).toFixed(1); s.opMarginLongTerm = +(base.opMarginLongTerm + 6).toFixed(1); s.exitPE = Math.round(base.exitPE * 1.3); s.exitEVEBITDA = Math.round(base.exitEVEBITDA * 1.3); s.discountRate = Math.max(5, base.discountRate - 1); s.dilution = Math.max(0, base.dilution - 0.5); }
+    /* Offsets keep bear <= base <= bull even when growth or margins are
+       negative, and move margins by percentage so a thin-margin business
+       does not flip to a loss (the old -6 points did that to Costco). */
+    function gOff(v, sign) { return +(v + sign * Math.max(2, Math.abs(v) * (sign < 0 ? 0.4 : 0.3))).toFixed(1); }
+    function mOff(v, sign) { return v > 0 ? +(sign < 0 ? v * 0.85 : Math.min(v * 1.12, v + 8)).toFixed(1) : +(v + sign * 2).toFixed(1); }
+    if (kind === "bear") { s.revGrowthEarly = gOff(base.revGrowthEarly, -1); s.revGrowthLate = gOff(base.revGrowthLate, -1); s.opMarginTargetY5 = mOff(base.opMarginTargetY5, -1); s.opMarginLongTerm = mOff(base.opMarginLongTerm, -1); s.exitPE = Math.max(6, Math.round(base.exitPE * 0.8)); s.exitEVEBITDA = Math.max(4, Math.round(base.exitEVEBITDA * 0.8)); s.discountRate = +(base.discountRate + 1).toFixed(1); s.dilution = +(base.dilution + 0.5).toFixed(1); }
+    else if (kind === "bull") { s.revGrowthEarly = gOff(base.revGrowthEarly, 1); s.revGrowthLate = gOff(base.revGrowthLate, 1); s.opMarginTargetY5 = mOff(base.opMarginTargetY5, 1); s.opMarginLongTerm = mOff(base.opMarginLongTerm, 1); s.exitPE = Math.round(base.exitPE * 1.2); s.exitEVEBITDA = Math.round(base.exitEVEBITDA * 1.2); s.discountRate = +Math.max(5, base.discountRate - 0.5).toFixed(1); s.dilution = +(base.dilution - 0.5).toFixed(1); }
     return s;
   }
   function defaultState(seed) {
@@ -270,11 +315,11 @@
     if (st.mode === "advanced") {
       var s = st.scenarios[scKey];
       if (!Array.isArray(s.revGrowthPerYear) || s.revGrowthPerYear.length < st.years) { var arr = []; for (var y = 0; y < st.years; y++) arr.push(y < 5 ? s.revGrowthEarly : s.revGrowthLate); s.revGrowthPerYear = arr; }
-      revRows = inputRow(scKey, "startRevenue", "Starting revenue ($)", "", "Latest annual revenue (auto-filled).", "1000000") +
+      revRows = inputRow(scKey, "startRevenue", "Starting revenue ($)", "", "Latest twelve months of revenue from SEC filings (auto-filled).", "1000000") +
         '<div class="vlab-peryear"><span>Revenue growth by year</span><div class="vlab-yrgrid">' +
         s.revGrowthPerYear.slice(0, st.years).map(function (v, i) { return '<label>Y' + (i + 1) + '<input type="number" step="0.5" data-yk="1" data-arr="revGrowthPerYear" data-yi="' + i + '" value="' + v + '"></label>'; }).join("") + '</div></div>';
     } else {
-      revRows = inputRow(scKey, "startRevenue", "Starting revenue ($)", "", "Latest annual revenue (auto-filled).", "1000000") +
+      revRows = inputRow(scKey, "startRevenue", "Starting revenue ($)", "", "Latest twelve months of revenue from SEC filings (auto-filled).", "1000000") +
         inputRow(scKey, "revGrowthEarly", "Revenue growth Yr 1–5", "%", "Annual revenue growth for the first five years.", "0.5") +
         inputRow(scKey, "revGrowthLate", "Revenue growth Yr 6–10", "%", "Annual revenue growth for years six to ten.", "0.5");
     }

@@ -95,3 +95,15 @@ test("share change compounds into EPS", () => {
   assert.ok(Math.abs(r.rows[1].shares - 1e8 * 0.81) < 1);
   assert.ok(Math.abs(r.rows[1].eps - 1e8 / (1e8 * 0.81)) < 1e-9);
 });
+
+test("Rebuild Bear & Bull from Base keeps the order around a user's own Base", () => {
+  const m = M.plCreateModel({ baseRevenue: 1e10, baseNetIncome: 1e9, histGrowth: 0.1, currentPE: 25, startPrice: 50, dilutedShares: 1e9, seeded: true });
+  m.scenarios.base.revGrowth.fill(6); m.scenarios.base.netMargin.fill(20); m.scenarios.base.peLow.fill(18); m.scenarios.base.peHigh.fill(24);
+  M.plDeriveWingsFromBase(m);
+  assert.equal(m.scenarios.bear.revGrowth[0], 3.6);
+  assert.equal(m.scenarios.bull.revGrowth[0], 8);
+  assert.equal(m.scenarios.bear.netMargin[0], 17);
+  assert.equal(m.scenarios.bull.peHigh[0], 28.8);
+  const o = M.plCalculateOutlook(m);
+  assert.ok(o.scenarios.bear.terminal.priceMid < o.scenarios.base.terminal.priceMid && o.scenarios.base.terminal.priceMid < o.scenarios.bull.terminal.priceMid);
+});
