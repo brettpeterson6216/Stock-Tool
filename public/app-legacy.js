@@ -1516,10 +1516,15 @@ function chartViewNote() {
   const host=document.querySelector('[data-il-visible-bars]');
   const shown=Number(host&&host.dataset.ilVisibleBars||0);
   const total=Number(host&&host.dataset.ilTotalBars||0);
-  return shown&&total&&shown<total-1
-    ? `Showing the last ${shown} of ${total} sessions, at full candle width. Drag left for the rest.`
-    : 'Zoom out at full view to load more price history';
+  const touch=window.matchMedia&&window.matchMedia('(pointer: coarse)').matches;
+  const how=touch?'Drag to pan, pinch to zoom':'Drag to pan · click the chart, then scroll to zoom';
+  const count=shown&&total&&shown<total-1?`Showing the last ${shown} of ${total} bars · `:'';
+  return `${count}${how} · earlier bars load as you pan back`;
 }
+document.addEventListener('il:chart-history',()=>{
+  const note=document.getElementById('chart-data-note');
+  if(note&&!note.classList.contains('warn')) note.textContent=chartViewNote();
+});
 
 /* The bar count is only known once the chart has laid out, which happens after
    the render pass that writes this caption. */

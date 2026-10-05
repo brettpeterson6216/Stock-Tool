@@ -64,7 +64,11 @@
   function name() { var m = state.model; return (m.companyName || m.ticker || "This company").replace(/,? (Inc|Corp|Corporation|Incorporated|Ltd|plc|Co)\.?$/i, ""); }
 
   /* ── canvas helpers ─────────────────────────────────────────────────────── */
-  function font(g, weight, size, family) { g.font = weight + " " + Math.round(size) + "px " + family; }
+  /* The brand sans has a very narrow word space; widen it a touch on canvas. */
+  function font(g, weight, size, family) {
+    g.font = weight + " " + Math.round(size) + "px " + family;
+    if ("wordSpacing" in g) g.wordSpacing = size < 30 ? Math.round(size * 0.12) + "px" : Math.round(size * 0.04) + "px";
+  }
   function rr(g, x, y, w, h, r) {
     r = Math.min(r, w / 2, h / 2);
     g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r);
@@ -583,10 +587,10 @@
           '<div class="ilpc-stage"><canvas class="ilpc-canvas" aria-label="Preview of the image"></canvas></div>' +
           '<div class="ilpc-actions">' +
             '<button type="button" class="ilpc-btn is-gold" data-act="download"><i class="ti ti-download" aria-hidden="true"></i> Download PNG</button>' +
-            '<button type="button" class="ilpc-btn" data-act="copy"><i class="ti ti-copy" aria-hidden="true"></i> Copy image</button>' +
-            '<button type="button" class="ilpc-btn ilpc-share" data-act="share" hidden><i class="ti ti-share" aria-hidden="true"></i> Share</button>' +
+            '<button type="button" class="ilpc-btn" data-act="copy"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8.5" y="8.5" width="11" height="11" rx="2"/><path d="M15.5 8.5V6.5a2 2 0 00-2-2h-7a2 2 0 00-2 2v7a2 2 0 002 2h2"/></svg> Copy image</button>' +
+            '<button type="button" class="ilpc-btn ilpc-share" data-act="share" hidden><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M7.5 8.5L12 4l4.5 4.5"/><path d="M5 13v5a2 2 0 002 2h10a2 2 0 002-2v-5"/></svg> Share</button>' +
             '<label class="ilpc-group ilpc-postwrap"><span class="ilpc-lbl">Suggested post</span><textarea class="ilpc-post" rows="4"></textarea></label>' +
-            '<button type="button" class="ilpc-btn" data-act="text"><i class="ti ti-clipboard-text" aria-hidden="true"></i> Copy post text</button>' +
+            '<button type="button" class="ilpc-btn" data-act="text"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 6h14M5 11h14M5 16h9"/></svg> Copy post text</button>' +
           '</div>' +
         '</div>' +
       '</div>';

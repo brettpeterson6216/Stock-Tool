@@ -89,5 +89,6 @@ test("the chart publishes how much of the range it put on screen", () => {
   const app = read("public/app-legacy.js");
   assert.match(app, /ilVisibleBars/, "the caption does not read the opening window");
   assert.match(app, /il:chart-view/, "the caption is never refreshed once the chart lays out");
-  assert.match(app, /Showing the last \$\{shown\} of \$\{total\} sessions/, "the caption no longer states the numbers");
+  assert.match(app, /Showing the last \$\{shown\} of \$\{total\} bars/, "the caption no longer states the numbers");
+  assert.match(app, /earlier bars load as you pan back/, "the caption no longer says how to reach older history");
 });

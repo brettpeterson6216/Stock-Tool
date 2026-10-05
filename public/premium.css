@@ -1156,11 +1156,12 @@ html[data-theme="dark"] .il-source-note a{ color:var(--brand-gold); }
 
 /* ════════════════════════════════════════════════════════════════════════════
    PASSIVE INLINE CHARTS + FULL-CONTROL EXPANDED VIEW
-   Inline charts are pure visuals: the page always scrolls, and no hover
-   crosshair/tooltip boxes cover the data. All interaction — zoom, pan,
-   tooltips, markup, chart type, overlays, ranges — lives in the expanded view.
+   Inline Chart.js charts are pure visuals: the page always scrolls over them.
+   The price chart (Lightweight Charts) is the exception — it pans, zooms and
+   takes drawings in place. This rule used to swallow its pointer events too,
+   which is why the inline price chart could not be dragged.
    ════════════════════════════════════════════════════════════════════════════ */
-#view-tool .chart-wrap canvas{ pointer-events:none!important; }
+#view-tool .chart-wrap canvas:not(.tv-lightweight-charts canvas){ pointer-events:none!important; }
 #view-tool .chart-wrap{ cursor:default; }
 
 /* expanded-view control row: everything on one screen */

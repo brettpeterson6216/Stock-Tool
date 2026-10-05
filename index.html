@@ -1805,45 +1805,6 @@
   </div>
 </div>
 
-<!-- ══ SHARE STUDIO ══ -->
-<div id="share-studio" class="share-studio" role="dialog" aria-modal="true" aria-labelledby="share-studio-title" hidden>
-  <div class="share-studio-shell">
-    <header class="share-studio-head">
-      <div>
-        <span class="share-studio-kicker">ImpliedLens Studio</span>
-        <h2 id="share-studio-title">Turn the chart into a publishable idea.</h2>
-      </div>
-      <button type="button" class="share-studio-close" onclick="closeShareStudio()" aria-label="Close Share Studio"><i class="ti ti-x"></i></button>
-    </header>
-    <div class="share-studio-body">
-      <aside class="share-studio-controls">
-        <label for="share-studio-caption">Chart headline</label>
-        <input id="share-studio-caption" type="text" maxlength="82" value="Price, trend, and expectations in one view" oninput="renderShareStudio()">
-        <span class="share-control-note">Keep it educational and specific. The source and as-of line are added automatically.</span>
-        <fieldset>
-          <legend>Accent</legend>
-          <div class="share-accent-row" id="share-accent-row">
-            <button type="button" class="share-accent active" data-accent="gold" onclick="setShareAccent('gold',this)" aria-label="Gold accent"></button>
-            <button type="button" class="share-accent" data-accent="emerald" onclick="setShareAccent('emerald',this)" aria-label="Emerald accent"></button>
-            <button type="button" class="share-accent" data-accent="cobalt" onclick="setShareAccent('cobalt',this)" aria-label="Cobalt accent"></button>
-            <button type="button" class="share-accent" data-accent="violet" onclick="setShareAccent('violet',this)" aria-label="Violet accent"></button>
-          </div>
-        </fieldset>
-        <div class="share-studio-spec">
-          <span>Output</span><strong>1600 × 900 PNG</strong>
-          <span>Best for</span><strong>X / education posts</strong>
-          <span>Data</span><strong>Current loaded research</strong>
-        </div>
-        <button type="button" class="share-download" onclick="downloadShareStudio()"><i class="ti ti-download"></i> Download PNG</button>
-        <button type="button" class="share-refresh" onclick="renderShareStudio()"><i class="ti ti-refresh"></i> Refresh preview</button>
-      </aside>
-      <div class="share-studio-preview">
-        <canvas id="share-studio-canvas" width="1600" height="900" aria-label="Preview of the branded chart image"></canvas>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- FOOTER (home view) -->
   <footer>
     <div class="footer-inner">
@@ -1991,14 +1952,15 @@
 <script defer src="/research-system.js?v=20260825-6"></script>
 <script defer src="/product-system.js?v=20260825-6"></script>
 <script defer src="/workspace-system.js?v=20260825-6"></script>
-<script defer src="/chart-engine.js?v=20260825-6"></script>
+<script defer src="/chart-tools.js?v=20261005-1"></script>
+<script defer src="/chart-engine.js?v=20261005-1"></script>
 <script defer src="/chart-analysis.js?v=20260825-6"></script>
 <script defer src="/hero-chart.js?v=20260825-6"></script>
 <script defer src="/tool-launch.js?v=20260904-1"></script>
 <script defer src="/lessons-data.js?v=20261002-1"></script>
 <script defer src="/academy-panel.js?v=20261002-1"></script>
 <script defer src="/research-flow.js?v=20261002-1"></script>
-<script defer src="/share-studio.js?v=20260827-2"></script>
+<script defer src="/share-studio.js?v=20261005-1"></script>
 <script defer src="/fin-glance.js?v=20261002-1"></script>
 <script defer src="/chart-reads.js?v=20261002-1"></script>
 <!-- /il:app-bundle -->

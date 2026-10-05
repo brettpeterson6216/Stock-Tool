@@ -152,8 +152,7 @@ canvas.il-chart-mirror {
   overflow: hidden;
 }
 
-.il-chart-host-expanded + .il-chart-readout,
-.cex-workspace .il-chart-readout { top: 16px; left: 20px; }
+.cex-workspace .il-chart-readout { top: 0; left: 0; }
 
 /* ── Toolbar keys for the added overlays ───────────────────────────────── */
 .chart-key.key-ema { background: var(--il-brass-bright, #EDCB84) !important; }
@@ -600,7 +599,7 @@ html:not([data-theme="dark"]) .chart-key.key-vwap { background: #127C6C !importa
 
 /* the modal's own readout strip should not eat plot height */
 #chart-expand-modal.il-lwc .il-chart-readout {
-  margin: 10px 16px 6px;
+  margin: 4px 4px 8px;
   flex: 0 0 auto;
 }
 

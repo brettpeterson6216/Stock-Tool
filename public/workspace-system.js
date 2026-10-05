@@ -842,15 +842,26 @@
 
 /* ── Scroll guarantee over inline charts ──────────────────────────────────────
    Capture-phase guard at the document level: when the expand modal is closed,
-   wheel events over any inline chart card are stopped before ANY chart library
-   listener can see them (and declared passive), so the browser's native page
-   scroll always runs. Nothing — cached scripts included — can hijack it. */
+   wheel events over an inline chart card are stopped before any chart library
+   sees them, so scrolling the page past a chart never gets trapped.
+   The price chart opts in cooperatively, like an embedded map: once you click
+   or drag on it (.il-engaged, set by chart-tools.js) the wheel zooms it until
+   the pointer leaves; pinch (ctrl+wheel) and sideways trackpad swipes always
+   reach it. A first plain scroll over it shows a one-line hint. */
 (function () {
+  let hinted = 0;
   document.addEventListener("wheel", function (e) {
     const modal = document.getElementById("chart-expand-modal");
     if (modal && modal.classList.contains("open")) return; // expanded view keeps zoom
     const t = e.target;
-    if (t && t.closest && t.closest("#view-tool .chart-wrap")) e.stopPropagation();
+    if (!t || !t.closest || !t.closest("#view-tool .chart-wrap")) return;
+    const slot = t.closest(".il-chart-slot");
+    if (slot && (slot.classList.contains("il-engaged") || e.ctrlKey || Math.abs(e.deltaX) > Math.abs(e.deltaY))) return;
+    e.stopPropagation();
+    if (slot && Date.now() - hinted > 4000) {
+      hinted = Date.now();
+      slot.dispatchEvent(new CustomEvent("il:wheel-hint"));
+    }
   }, { capture: true, passive: true });
 }());
 

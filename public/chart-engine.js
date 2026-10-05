@@ -170,17 +170,84 @@
     if (v >= 1e3) return (v / 1e3).toFixed(0) + "K";
     return String(v);
   }
-  function intraday() { return window.S && (S.range === "1d" || S.range === "5d"); }
+  /* ── time & interval ───────────────────────────────────────────────────── */
+  var INTERVAL_LABEL = { "1m": "1 min", "2m": "2 min", "5m": "5 min", "15m": "15 min", "30m": "30 min",
+    "60m": "Hourly", "90m": "90 min", "1h": "Hourly", "1d": "Daily", "5d": "5 day", "1wk": "Weekly",
+    "1mo": "Monthly", "3mo": "Quarterly" };
+  var AUTO_INTERVAL = { "1d": "5m", "5d": "30m", "1mo": "1d", "3mo": "1d", "6mo": "1d", "ytd": "1d",
+    "1y": "1d", "2y": "1d", "5y": "1wk", "10y": "1wk", "max": "1mo" };
+  function frameInterval(result) {
+    var g = String((result && result.meta && result.meta.dataGranularity) || "").toLowerCase();
+    if (INTERVAL_LABEL[g]) return g;
+    return AUTO_INTERVAL[(window.S && S.range) || "1y"] || "1d";
+  }
+  function isIntraInterval(iv) { return /^\d+(m|h)$/.test(iv || ""); }
+  function currentInterval() { return lastFrame ? lastFrame.interval : AUTO_INTERVAL[(window.S && S.range) || "1y"]; }
+  function intraday() { return isIntraInterval(currentInterval()); }
+  function exchangeTz() {
+    var m = lastFrame && lastFrame.result && lastFrame.result.meta;
+    return (m && m.exchangeTimezoneName) || "America/New_York";
+  }
+  var dtfCache = {};
+  function dtf(opts) {
+    var k = JSON.stringify(opts);
+    if (!dtfCache[k]) {
+      try { dtfCache[k] = new Intl.DateTimeFormat("en-US", opts); }
+      catch (e) { var o = Object.assign({}, opts); delete o.timeZone; dtfCache[k] = new Intl.DateTimeFormat("en-US", o); }
+    }
+    return dtfCache[k];
+  }
+  /* Bars carry UTC timestamps. Lightweight Charts prints them in UTC, which put
+     the NYSE open at "13:30" on the axis. Format every label in the exchange's
+     own time zone instead. */
+  function fmtBarTime(t, long) {
+    var d = new Date(t * 1000), tz = exchangeTz();
+    if (intraday()) {
+      return dtf({ timeZone: tz, weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(d);
+    }
+    return dtf(long
+      ? { timeZone: tz, weekday: "short", month: "short", day: "numeric", year: "numeric" }
+      : { timeZone: tz, month: "short", day: "numeric", year: "2-digit" }).format(d);
+  }
+  function tickLabel(time, type) {
+    if (typeof time !== "number") return null;
+    var d = new Date(time * 1000), tz = exchangeTz();
+    if (type === 0) return dtf({ timeZone: tz, year: "numeric" }).format(d);
+    if (type === 1) return dtf({ timeZone: tz, month: "short" }).format(d);
+    if (type === 2) return intraday() ? dtf({ timeZone: tz, month: "short", day: "numeric" }).format(d)
+                                      : dtf({ timeZone: tz, day: "numeric" }).format(d);
+    return dtf({ timeZone: tz, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(d);
+  }
+
+  /* Moving averages on a short range need bars from before the range starts:
+     a 50-day average on a one-month chart is otherwise blank for its first 49
+     days. app-legacy.js keeps two years of daily closes in S.maLookback; when
+     the chart is daily, prepend the older ones for the maths only. */
+  function extendedCloses(rows) {
+    var closes = rows.map(function (r) { return r.close; });
+    var lb = window.S && S.maLookback;
+    if (!lb || !lb.ts || lb.ticker !== S.ticker || rows.length < 2 || isIntraInterval(currentInterval())) return { pre: 0, closes: closes };
+    var gaps = [];
+    for (var i = 1; i < Math.min(rows.length, 30); i++) gaps.push(rows[i].time - rows[i - 1].time);
+    gaps.sort(function (a, b) { return a - b; });
+    var med = gaps[gaps.length >> 1] || 0;
+    if (!(med > 0 && med < 86400 * 2.5)) return { pre: 0, closes: closes };
+    var first = rows[0].time - 3600, pre = [];
+    for (var j = 0; j < lb.ts.length; j++) if (lb.ts[j] < first) pre.push(lb.close[j]);
+    return { pre: pre.length, closes: pre.concat(closes) };
+  }
+  function trim(ext, arr) { return ext.pre ? arr.slice(ext.pre) : arr; }
 
   /* ── build ─────────────────────────────────────────────────────────────── */
+  var MIN_SPACING = 0.5;     // px per bar at the widest zoom-out
+
   function buildInstance(host, rows, opts) {
     opts = opts || {};
     var p = palette();
     var type = (window.S && S.chartType) || "candle";
-    /* Candles need physical room or the bodies collapse into a smear. Lines can
-       run much tighter. These two numbers are what stop "squished candles". */
+    /* Candles open at a legible width; the user can zoom out as far as half a
+       pixel per bar, the way every desktop charting tool lets you. */
     var seed = type === "candle" ? 8 : 4;
-    var floorSpacing = type === "candle" ? 3.5 : 1;
     var chart = LWC.createChart(host, {
       layout: {
         background: { type: "solid", color: "transparent" },
@@ -188,6 +255,10 @@
         fontFamily: '"IBM Plex Sans", "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
         fontSize: 12,
         panes: { separatorColor: p.border, separatorHoverColor: p.crosshair, enableResize: true }
+      },
+      localization: {
+        locale: "en-US",
+        timeFormatter: function (t) { return typeof t === "number" ? fmtBarTime(t, false) : String(t); }
       },
       grid: { vertLines: { visible: false }, horzLines: { color: p.grid } },
       rightPriceScale: {
@@ -201,17 +272,22 @@
         secondsVisible: false,
         rightOffset: 6,
         barSpacing: seed,
-        minBarSpacing: floorSpacing,
+        minBarSpacing: MIN_SPACING,
+        fixLeftEdge: true,
         shiftVisibleRangeOnNewBar: true,
-        lockVisibleTimeRangeOnResize: true
+        lockVisibleTimeRangeOnResize: true,
+        tickMarkFormatter: tickLabel
       },
       crosshair: {
         mode: opts.magnet === false ? 0 : 1,
         vertLine: { color: p.crosshair, width: 1, style: 2, labelBackgroundColor: p.gold },
         horzLine: { color: p.crosshair, width: 1, style: 2, labelBackgroundColor: p.gold }
       },
-      handleScroll: { mouseWheel: false, pressedMouseMove: true, horzTouchDrag: true, vertTouchDrag: false },
-      handleScale: { mouseWheel: false, pinch: true, axisPressedMouseMove: true, axisDoubleClickReset: true },
+      /* Wheel zooms and trackpads pan. On the research page the chart only takes
+         the wheel once it has been clicked (see the guard in workspace-system.js)
+         so scrolling the page past it still works. */
+      handleScroll: { mouseWheel: true, pressedMouseMove: true, horzTouchDrag: true, vertTouchDrag: false },
+      handleScale: { mouseWheel: true, pinch: true, axisPressedMouseMove: { time: true, price: true }, axisDoubleClickReset: true },
       autoSize: true
     });
 
@@ -225,72 +301,45 @@
         wickUpColor: p.up, wickDownColor: p.down,
         priceLineVisible: true, priceLineColor: p.gold, priceLineStyle: 2, priceLineWidth: 1
       }, 0);
-      series.price.setData(rows.map(function (r) {
-        return { time: r.time, open: r.open, high: r.high, low: r.low, close: r.close };
-      }));
+    } else if (type === "area") {
+      series.price = chart.addSeries(LWC.AreaSeries, {
+        lineColor: p.gold, lineWidth: 2,
+        topColor: isDark() ? "rgba(224,186,104,.16)" : "rgba(132,96,24,.12)",
+        bottomColor: "rgba(0,0,0,0)",
+        priceLineVisible: true, priceLineColor: p.gold, priceLineStyle: 2, priceLineWidth: 1,
+        crosshairMarkerRadius: 4, crosshairMarkerBorderWidth: 2,
+        crosshairMarkerBorderColor: isDark() ? "#0B0D11" : "#FFFFFF",
+        crosshairMarkerBackgroundColor: p.gold
+      }, 0);
     } else {
-      /* Direction lives in the readout; the line keeps the product's gold. */
-      var base = rows.length ? rows[0].close : 0;
-      var last = rows.length ? rows[rows.length - 1].close : 0;
-      var rising = last >= base;
-      var stroke = p.gold;
-
-      if (type === "area") {
-        series.price = chart.addSeries(LWC.AreaSeries, {
-          lineColor: stroke, lineWidth: 2,
-          topColor: isDark() ? "rgba(224,186,104,.16)" : "rgba(132,96,24,.12)",
-          bottomColor: "rgba(0,0,0,0)",
-          priceLineVisible: true, priceLineColor: stroke, priceLineStyle: 2, priceLineWidth: 1,
-          crosshairMarkerRadius: 4, crosshairMarkerBorderWidth: 2,
-          crosshairMarkerBorderColor: isDark() ? "#0B0D11" : "#FFFFFF",
-          crosshairMarkerBackgroundColor: stroke
-        }, 0);
-      } else {
-        series.price = chart.addSeries(LWC.LineSeries, {
-          color: stroke, lineWidth: 2,
-          priceLineVisible: true, priceLineColor: stroke, priceLineStyle: 2, priceLineWidth: 1,
-          crosshairMarkerRadius: 4, crosshairMarkerBorderWidth: 2,
-          crosshairMarkerBorderColor: isDark() ? "#0B0D11" : "#FFFFFF",
-          crosshairMarkerBackgroundColor: stroke
-        }, 0);
-      }
-      series.price.setData(rows.map(function (r) { return { time: r.time, value: r.close }; }));
+      series.price = chart.addSeries(LWC.LineSeries, {
+        color: p.gold, lineWidth: 2,
+        priceLineVisible: true, priceLineColor: p.gold, priceLineStyle: 2, priceLineWidth: 1,
+        crosshairMarkerRadius: 4, crosshairMarkerBorderWidth: 2,
+        crosshairMarkerBorderColor: isDark() ? "#0B0D11" : "#FFFFFF",
+        crosshairMarkerBackgroundColor: p.gold
+      }, 0);
     }
 
-    var closes = rows.map(function (r) { return r.close; });
     var line = function (color, width, style) {
       return chart.addSeries(LWC.LineSeries, {
         color: color, lineWidth: width || 1, lineStyle: style || 0,
         priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false
       }, 0);
     };
-    var pair = function (vals) {
-      return rows.map(function (r, i) {
-        return vals[i] == null ? null : { time: r.time, value: vals[i] };
-      }).filter(Boolean);
-    };
 
     var S_ = window.S || { inds: {} };
-    if (S_.inds && S_.inds.ma50) { series.ma50 = line(p.ma50, 1.5); series.ma50.setData(pair(TA.sma(closes, 50))); }
-    if (S_.inds && S_.inds.ma200) { series.ma200 = line(p.ma200, 1.5); series.ma200.setData(pair(TA.sma(closes, 200))); }
-    if (view.ema21) { series.ema21 = line(p.ema, 1.5); series.ema21.setData(pair(TA.ema(closes, 21))); }
-    if (view.vwap) {
-      series.vwap = line(p.vwap, 1.5, 2);
-      series.vwap.setData(pair(TA.vwap(
-        rows.map(function (r) { return r.high; }),
-        rows.map(function (r) { return r.low; }),
-        closes,
-        rows.map(function (r) { return r.volume; })
-      )));
-    }
+    if (S_.inds && S_.inds.ma50) series.ma50 = line(p.ma50, 1.5);
+    if (S_.inds && S_.inds.ma200) series.ma200 = line(p.ma200, 1.5);
+    if (view.ema21) series.ema21 = line(p.ema, 1.5);
+    if (view.vwap) series.vwap = line(p.vwap, 1.5, 2);
     if (S_.inds && S_.inds.bb) {
-      var bb = TA.bollinger(closes, 20, 2);
-      series.bbU = line(p.band, 1, 2); series.bbU.setData(pair(bb.upper));
-      series.bbL = line(p.band, 1, 2); series.bbL.setData(pair(bb.lower));
-      series.bbM = line(p.band, 1, 3); series.bbM.setData(pair(bb.mid));
+      series.bbU = line(p.band, 1, 2);
+      series.bbL = line(p.band, 1, 2);
+      series.bbM = line(p.band, 1, 3);
     }
 
-    /* analyst target lines, carried over from the previous chart */
+    /* analyst target line */
     if (S_.analystTarget && S_.analystTarget.mean && rows.length) {
       series.price.createPriceLine({
         price: S_.analystTarget.mean, color: p.gold, lineWidth: 1, lineStyle: 2,
@@ -299,26 +348,17 @@
     }
 
     var paneIdx = 1;
-
-    /* volume pane */
     if (view.volume && !opts.compact) {
       series.volume = chart.addSeries(LWC.HistogramSeries, {
         priceFormat: { type: "volume" }, priceLineVisible: false, lastValueVisible: false
       }, paneIdx);
-      series.volume.setData(rows.map(function (r, i) {
-        var up = i === 0 ? r.close >= r.open : r.close >= rows[i - 1].close;
-        return { time: r.time, value: r.volume || 0, color: up ? p.volUp : p.volDown };
-      }));
       paneIdx++;
     }
-
-    /* oscillator pane */
     if (view.osc === "rsi" && !opts.compact) {
       series.rsi = chart.addSeries(LWC.LineSeries, {
         color: p.rsi, lineWidth: 1.5, priceLineVisible: false,
         priceFormat: { type: "price", precision: 1, minMove: 0.1 }
       }, paneIdx);
-      series.rsi.setData(pair(TA.rsi(closes, 14)));
       [70, 30].forEach(function (lvl) {
         series.rsi.createPriceLine({
           price: lvl, color: lvl === 70 ? p.down : p.up,
@@ -327,22 +367,79 @@
       });
       paneIdx++;
     } else if (view.osc === "macd" && !opts.compact) {
-      var m = TA.macd(closes);
       series.macdHist = chart.addSeries(LWC.HistogramSeries, { priceLineVisible: false }, paneIdx);
-      series.macdHist.setData(rows.map(function (r, i) {
-        return m.hist[i] == null ? null : {
-          time: r.time, value: m.hist[i], color: m.hist[i] >= 0 ? p.volUp : p.volDown
-        };
-      }).filter(Boolean));
       series.macdLine = chart.addSeries(LWC.LineSeries, {
         color: p.gold, lineWidth: 1.5, priceLineVisible: false, lastValueVisible: false
       }, paneIdx);
-      series.macdLine.setData(pair(m.line));
       series.macdSignal = chart.addSeries(LWC.LineSeries, {
         color: p.ma200, lineWidth: 1.5, priceLineVisible: false, lastValueVisible: false
       }, paneIdx);
-      series.macdSignal.setData(pair(m.signal));
       paneIdx++;
+    }
+
+    /* Everything that depends on the bars lives here, so older history can be
+       prepended in place without rebuilding the chart (a rebuild would drop a
+       drag that is still in progress). */
+    function fill(rs) {
+      var ext = extendedCloses(rs);
+      var closes = rs.map(function (r) { return r.close; });
+      var pair = function (vals) {
+        var out = [];
+        for (var i = 0; i < rs.length; i++) if (vals[i] != null && isFinite(vals[i])) out.push({ time: rs[i].time, value: vals[i] });
+        return out;
+      };
+      if (type === "candle") {
+        series.price.setData(rs.map(function (r) {
+          return { time: r.time, open: r.open, high: r.high, low: r.low, close: r.close };
+        }));
+      } else {
+        series.price.setData(rs.map(function (r) { return { time: r.time, value: r.close }; }));
+      }
+      if (series.ma50) series.ma50.setData(pair(trim(ext, TA.sma(ext.closes, 50))));
+      if (series.ma200) series.ma200.setData(pair(trim(ext, TA.sma(ext.closes, 200))));
+      if (series.ema21) series.ema21.setData(pair(trim(ext, TA.ema(ext.closes, 21))));
+      if (series.vwap) {
+        series.vwap.setData(pair(TA.vwap(
+          rs.map(function (r) { return r.high; }), rs.map(function (r) { return r.low; }),
+          closes, rs.map(function (r) { return r.volume; })
+        )));
+      }
+      if (series.bbU) {
+        var bb = TA.bollinger(ext.closes, 20, 2);
+        series.bbU.setData(pair(trim(ext, bb.upper)));
+        series.bbL.setData(pair(trim(ext, bb.lower)));
+        series.bbM.setData(pair(trim(ext, bb.mid)));
+      }
+      if (series.volume) {
+        series.volume.setData(rs.map(function (r, i) {
+          var up = i === 0 ? r.close >= r.open : r.close >= rs[i - 1].close;
+          return { time: r.time, value: r.volume || 0, color: up ? p.volUp : p.volDown };
+        }));
+      }
+      if (series.rsi) series.rsi.setData(pair(trim(ext, TA.rsi(ext.closes, 14))));
+      if (series.macdHist) {
+        var m = TA.macd(ext.closes);
+        var hist = trim(ext, m.hist);
+        series.macdHist.setData(rs.map(function (r, i) {
+          return hist[i] == null ? null : { time: r.time, value: hist[i], color: hist[i] >= 0 ? p.volUp : p.volDown };
+        }).filter(Boolean));
+        series.macdLine.setData(pair(trim(ext, m.line)));
+        series.macdSignal.setData(pair(trim(ext, m.signal)));
+      }
+    }
+    fill(rows);
+
+    /* A faint ticker watermark: the plot always says what it is, including
+       in screenshots and exports. */
+    if (LWC.createTextWatermark && window.S && S.ticker) {
+      try {
+        var wm = isDark() ? "rgba(242,240,235,.045)" : "rgba(20,22,26,.05)";
+        LWC.createTextWatermark(chart.panes()[0], {
+          horzAlign: "center", vertAlign: "center",
+          lines: [{ text: S.ticker, color: wm, fontSize: 84, fontStyle: "700",
+                    fontFamily: '"Plus Jakarta Sans", "IBM Plex Sans", sans-serif' }]
+        });
+      } catch (e) {}
     }
 
     /* Pane proportions: price dominates. Height must be measured after layout,
@@ -353,11 +450,9 @@
         if (panes.length < 2) return;
         var h = host.clientHeight;
         if (!h) return;
-        var axis = 26;                        // time axis lives inside the last pane
+        var axis = 26;
         var usable = h - axis;
         var extra = panes.length - 1;
-        /* 44px was not enough for an oscillator: the 30/50/70 axis labels
-           collided with each other and with the pane separator. */
         var small = Math.max(58, Math.min(104, Math.round(usable * 0.18)));
         for (var i = 1; i < panes.length; i++) panes[i].setHeight(small);
         panes[0].setHeight(Math.max(140, usable - small * extra));
@@ -371,51 +466,72 @@
       chart._ilResizeObserver = ro;
     }
 
-    /* fitContent() crushes every bar in the series into the viewport, which is
-       exactly the "candles get squished" complaint: a 5y daily series is 1250
-       bars in 900px, i.e. 0.7px per candle. Instead pick a bar count that keeps
-       each candle legible at the current width and show the most recent slice
-       of the series. Panning left still reaches the whole history. */
+    var instance = {
+      chart: chart, series: series, rows: rows, host: host,
+      sizePanes: sizePanes, barType: type, floorSpacing: MIN_SPACING
+    };
+
+    /* Open on the most recent slice at a legible candle width rather than
+       crushing the whole range into the viewport. */
     function applyInitialView() {
+      var rs = instance.rows;
       var width = host.clientWidth || 900;
-      var target = type === "candle" ? 9 : 4.5;   // px per bar we want to see
-      var gutter = 64;                            // price axis + right offset
-      var visible = Math.max(24, Math.min(rows.length, Math.floor((width - gutter) / target)));
+      var target = type === "candle" ? 9 : 4.5;
+      var gutter = 64;
+      var visible = Math.max(24, Math.min(rs.length, Math.floor((width - gutter) / target)));
       var ts = chart.timeScale();
       try {
-        ts.applyOptions({ barSpacing: Math.max(floorSpacing, (width - gutter) / visible) });
-        ts.setVisibleLogicalRange({ from: rows.length - visible, to: rows.length + 3 });
+        ts.applyOptions({ barSpacing: Math.max(MIN_SPACING, (width - gutter) / visible) });
+        ts.setVisibleLogicalRange({ from: rs.length - visible, to: rs.length + 3 });
       } catch (e) { try { ts.fitContent(); } catch (e2) {} }
-      /* Say how much of the range is on screen. The range pills load a year of
-         data but the opening view is the most recent slice of it, so a chart
-         labelled 1Y opens showing about three months - which reads as the
-         chart being wrong rather than zoomed. Nothing else can know this
-         number: it depends on the rendered width. */
       try {
-        host.dataset.ilVisibleBars = String(Math.min(visible, rows.length));
-        host.dataset.ilTotalBars = String(rows.length);
+        host.dataset.ilVisibleBars = String(Math.min(visible, rs.length));
+        host.dataset.ilTotalBars = String(rs.length);
         document.dispatchEvent(new CustomEvent("il:chart-view", {
-          detail: { visible: Math.min(visible, rows.length), total: rows.length },
+          detail: { visible: Math.min(visible, rs.length), total: rs.length }
         }));
       } catch (e) {}
     }
-    /* Run once now (so the first paint is right) and once after layout settles
-       (so autoSize has the real width). The second pass must stand down if the
-       caller has meanwhile restored a saved viewport, or flipping candle→line
-       would silently throw the user's zoom away. */
+    instance.applyInitialView = applyInitialView;
+
+    /* Replace the bars in place. `prepended` older bars keep the same view. */
+    instance.setRows = function (rs, prepended) {
+      var ts = chart.timeScale();
+      var before = null;
+      try { before = ts.getVisibleLogicalRange(); } catch (e) {}
+      instance.rows = rs;
+      fill(rs);
+      if (before && prepended) {
+        try {
+          var now = ts.getVisibleLogicalRange();
+          var want = { from: before.from + prepended, to: before.to + prepended };
+          if (!now || Math.abs(now.from - want.from) > 0.5) ts.setVisibleLogicalRange(want);
+        } catch (e) {}
+      }
+      try { host.dataset.ilTotalBars = String(rs.length); } catch (e) {}
+      if (instance.onRows) instance.onRows(rs);
+    };
+
     requestAnimationFrame(function () {
       requestAnimationFrame(function () { if (!chart._ilViewLocked) applyInitialView(); });
     });
     applyInitialView();
 
-    return {
-      chart: chart, series: series, rows: rows, host: host,
-      sizePanes: sizePanes, applyInitialView: applyInitialView,
-      barType: type, floorSpacing: floorSpacing
-    };
+    /* Reaching the left edge loads the next block of older bars at the same
+       interval: pan back from a 1D chart and yesterday's candles appear. */
+    var edgeFrame = null;
+    chart.timeScale().subscribeVisibleLogicalRangeChange(function (r) {
+      if (!r || edgeFrame || instance.disposed) return;
+      edgeFrame = requestAnimationFrame(function () {
+        edgeFrame = null;
+        if (r.from < 10 && instance.frame) loadOlder(instance.frame);
+      });
+    });
+
+    return instance;
   }
 
-  /* ── scrub readout ─────────────────────────────────────────────────────── */
+  /* ── scrub readout + legend ────────────────────────────────────────────── */
   function buildReadout(wrap) {
     var scope = wrap.parentElement || wrap;
     var el = scope.querySelector(".il-chart-readout");
@@ -423,63 +539,91 @@
     el = document.createElement("div");
     el.className = "il-chart-readout";
     el.innerHTML =
+      '<div class="ilr-sym"><b class="ilr-tk"></b><span class="ilr-nm"></span><span class="ilr-meta"></span></div>' +
       '<div class="ilr-main"><span class="ilr-price">—</span><span class="ilr-chg">—</span></div>' +
       '<div class="ilr-ohlc">' +
       '<span><i>O</i><b data-k="o">—</b></span><span><i>H</i><b data-k="h">—</b></span>' +
       '<span><i>L</i><b data-k="l">—</b></span><span><i>C</i><b data-k="c">—</b></span>' +
       '<span><i>Vol</i><b data-k="v">—</b></span></div>' +
       '<div class="ilr-date">—</div>';
-    /* Sit ABOVE the plot, not on top of it. As a floating overlay this box
-       covered the top-left of every chart — which is exactly where the last
-       few months of a rising series live. */
-    /* Sit ABOVE the plot, not on top of it. As a floating overlay this box
-       covered the top-left of every chart — which is exactly where the last
-       few months of a rising series live. `wrap` is the fixed-height plot
-       slot, so the strip goes in its parent, immediately before it. */
+    /* A strip above the plot, not a box on top of it: as an overlay it hid the
+       top-left of the series, where the last few months of a riser live. */
     var parent = wrap.parentElement;
     if (parent) parent.insertBefore(el, wrap); else wrap.appendChild(el);
     return el;
   }
 
+  function companyName() {
+    var n = document.getElementById("r-name");
+    var t = (n && n.textContent || "").trim();
+    return t && window.S && t !== S.ticker ? t : "";
+  }
+  function exchangeName() {
+    var m = lastFrame && lastFrame.result && lastFrame.result.meta;
+    var x = (m && (m.fullExchangeName || m.exchangeName)) || "";
+    return { NMS: "NASDAQ", NGM: "NASDAQ", NCM: "NASDAQ", NYQ: "NYSE", ASE: "NYSE American", PCX: "NYSE Arca", BTS: "Cboe" }[x] || x;
+  }
+  function rangeLabel() {
+    var r = (window.S && S.range) || "1y";
+    return r === "max" ? "Max" : r === "ytd" ? "YTD" : r.toUpperCase();
+  }
+  function legendText() {
+    return {
+      ticker: (window.S && S.ticker) || "",
+      name: companyName(),
+      meta: [exchangeName(), rangeLabel(), INTERVAL_LABEL[currentInterval()] || ""].filter(Boolean).join(" · ")
+    };
+  }
+  window.ILChartLegend = legendText;
+
   function wireReadout(instance, wrap) {
     var el = buildReadout(wrap);
-    var rows = instance.rows;
-    var byTime = {};
-    rows.forEach(function (r) { byTime[r.time] = r; });
-    var base = rows.length ? rows[0].close : 0;
+    var lg = legendText();
+    el.querySelector(".ilr-tk").textContent = lg.ticker;
+    el.querySelector(".ilr-nm").textContent = lg.name;
+    el.querySelector(".ilr-meta").textContent = lg.meta;
+    el.querySelector(".ilr-sym").title = [lg.ticker, lg.name, lg.meta].filter(Boolean).join(" · ");
+
+    var byTime = null, byRows = null;
+    function at(t) {
+      if (byRows !== instance.rows) {
+        byTime = {}; byRows = instance.rows;
+        byRows.forEach(function (r) { byTime[r.time] = r; });
+      }
+      return byTime[t];
+    }
+    function latest() { return instance.rows[instance.rows.length - 1]; }
 
     function paint(r, isLive) {
       if (!r) return;
+      var base = (instance.frame && instance.frame.base) || (instance.rows[0] && instance.rows[0].close) || 0;
       var chg = r.close - base;
       var pct = base ? (chg / base) * 100 : 0;
       var pos = chg >= 0;
       el.querySelector(".ilr-price").textContent = fmtPrice(r.close);
       var c = el.querySelector(".ilr-chg");
-      c.textContent = (pos ? "▲ " : "▼ ") + fmtPrice(Math.abs(chg)).replace("$", "$") +
+      c.textContent = (pos ? "▲ " : "▼ ") + fmtPrice(Math.abs(chg)) +
         "  (" + (pos ? "+" : "−") + Math.abs(pct).toFixed(2) + "%)";
       c.className = "ilr-chg " + (pos ? "pos" : "neg");
+      c.title = "Change from the first bar of the " + rangeLabel() + " range";
       el.querySelector('[data-k="o"]').textContent = fmtPrice(r.open);
       el.querySelector('[data-k="h"]').textContent = fmtPrice(r.high);
       el.querySelector('[data-k="l"]').textContent = fmtPrice(r.low);
       el.querySelector('[data-k="c"]').textContent = fmtPrice(r.close);
       el.querySelector('[data-k="v"]').textContent = fmtVol(r.volume);
-      var d = new Date(r.time * 1000);
-      el.querySelector(".ilr-date").textContent = intraday()
-        ? d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })
-        : d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" });
+      el.querySelector(".ilr-date").textContent = fmtBarTime(r.time, true) + (intraday() ? " ET" : "");
       el.classList.toggle("live", !!isLive);
     }
 
-    paint(rows[rows.length - 1], true);
+    paint(latest(), true);
 
     instance.chart.subscribeCrosshairMove(function (param) {
-      if (!param || param.time == null) return;      // leave handled by mouseleave
-      paint(byTime[param.time] || rows[rows.length - 1], false);
+      if (!param || param.time == null) return;
+      paint(at(param.time) || latest(), false);
     });
 
-    /* The crosshair subscription only reports when the pointer is over a
-       series point. Drive the readout from raw pointer position as well so
-       scrubbing is continuous across gaps, sub-panes, and the axis gutter. */
+    /* Drive the readout from raw pointer position as well so scrubbing is
+       continuous across gaps, sub-panes and the axis gutter. */
     var ts = instance.chart.timeScale();
     var host = instance.host;
     var frame = null;
@@ -495,6 +639,7 @@
           if (logical != null) idx = Math.round(logical);
         } catch (e) {}
         if (idx == null) return;
+        var rows = instance.rows;
         idx = Math.max(0, Math.min(rows.length - 1, idx));
         paint(rows[idx], false);
       });
@@ -503,9 +648,10 @@
 
     function onLeave() {
       if (frame) { cancelAnimationFrame(frame); frame = null; }
-      paint(rows[rows.length - 1], true);
+      paint(latest(), true);
     }
     host.addEventListener("mouseleave", onLeave, { passive: true });
+    instance.paintReadout = function (r) { paint(r || latest(), !r); };
     instance.disposeReadout = function () {
       if (frame) cancelAnimationFrame(frame);
       host.removeEventListener("mousemove", onMove);
@@ -534,9 +680,9 @@
   /* Golden and death crosses: where the 50-day average crosses the 200-day.
      Shown when both averages are on, so the marker always sits on the two
      lines it describes. ILChartCrosses is also read by chart-reads.js. */
-  function findCrosses(rows) {
-    var closes = rows.map(function (r) { return r.close; });
-    var a = TA.sma(closes, 50), b = TA.sma(closes, 200), out = [];
+  function findCrosses(rows, useLookback) {
+    var ext = useLookback ? extendedCloses(rows) : { pre: 0, closes: rows.map(function (r) { return r.close; }) };
+    var a = trim(ext, TA.sma(ext.closes, 50)), b = trim(ext, TA.sma(ext.closes, 200)), out = [];
     for (var i = 1; i < rows.length; i++) {
       if (a[i - 1] == null || b[i - 1] == null || a[i] == null || b[i] == null) continue;
       if (a[i - 1] <= b[i - 1] && a[i] > b[i]) out.push({ time: rows[i].time, kind: "golden", index: i });
@@ -549,7 +695,7 @@
     var S_ = window.S || {};
     if (!S_.inds || !S_.inds.ma50 || !S_.inds.ma200 || !instance.rows) return [];
     var p = palette();
-    return findCrosses(instance.rows).map(function (c) {
+    return findCrosses(instance.rows, true).map(function (c) {
       return {
         time: c.time, position: c.kind === "golden" ? "belowBar" : "aboveBar",
         color: c.kind === "golden" ? p.up : p.down, shape: "circle", size: 1,
@@ -637,6 +783,118 @@
     });
   }
 
+  /* Zoom by a factor, keeping the latest bar pinned to the right the way
+     charting desktops do. Shared by the toolbar buttons in both views. */
+  function zoomInstance(instance, f) {
+    if (!instance) return;
+    try {
+      var ts = instance.chart.timeScale();
+      var r = ts.getVisibleLogicalRange();
+      if (!r) return;
+      var width = Math.max(200, (instance.host.clientWidth || 900) - 64);
+      var next = (r.to - r.from) / f;
+      next = Math.max(12, Math.min(Math.floor(width / MIN_SPACING), next));
+      var to = Math.min(r.to, instance.rows.length + 6);
+      ts.setVisibleLogicalRange({ from: to - next, to: to });
+      if (f < 1 && to - next < 10 && instance.frame) loadOlder(instance.frame);
+    } catch (e) {}
+  }
+
+  /* ── older history on demand ───────────────────────────────────────────── */
+  /* Each interval steps through longer Yahoo ranges at the SAME bar size, so a
+     5-minute chart backfills with 5-minute bars rather than switching to daily.
+     Yahoo keeps about 60 days of 5/30-minute bars and two years of hourly. */
+  var LADDER = {
+    "1m": ["1d", "5d"], "2m": ["1d", "5d", "1mo"], "5m": ["1d", "5d", "1mo"], "15m": ["1d", "5d", "1mo"],
+    "30m": ["5d", "1mo"], "90m": ["5d", "1mo"],
+    "60m": ["5d", "1mo", "3mo", "6mo", "1y", "2y"], "1h": ["5d", "1mo", "3mo", "6mo", "1y", "2y"],
+    "1d": ["1mo", "3mo", "6mo", "1y", "2y", "5y", "10y", "max"],
+    "1wk": ["1y", "2y", "5y", "10y", "max"], "1mo": ["max"], "3mo": ["max"]
+  };
+  var SPAN_DAYS = { "1d": 1, "5d": 5, "1mo": 31, "3mo": 92, "6mo": 183, "1y": 366, "2y": 731, "5y": 1827, "10y": 3653, "max": 1e9 };
+
+  function liveInstances(frame) {
+    var out = [];
+    if (inst && inst.frame === frame && !inst.disposed) out.push(inst);
+    var modal = document.getElementById("chart-expand-modal");
+    var ex = modal && modal._ilExpanded;
+    if (ex && ex.frame === frame && !ex.disposed) out.push(ex);
+    return out;
+  }
+  function setLoading(frame, on) {
+    liveInstances(frame).forEach(function (i) {
+      var slot = i.host.parentElement;
+      if (!slot) return;
+      var pill = slot.querySelector(".ilc-loading");
+      if (!pill) {
+        pill = document.createElement("div");
+        pill.className = "ilc-loading";
+        pill.innerHTML = '<span></span>Loading earlier bars…';
+        slot.appendChild(pill);
+      }
+      pill.classList.toggle("on", !!on);
+    });
+  }
+
+  function loadOlder(frame) {
+    if (!frame || frame.loading || frame.exhausted || !frame.rows.length) return;
+    var ladder = LADDER[frame.interval] || [];
+    var covered = (Date.now() / 1000 - frame.rows[0].time) / 86400;
+    var next = null;
+    for (var i = 0; i < ladder.length; i++) {
+      if (SPAN_DAYS[ladder[i]] > covered + 1 && frame.tried.indexOf(ladder[i]) < 0) { next = ladder[i]; break; }
+    }
+    if (!next) {
+      frame.exhausted = true;
+      if (!frame.toldEnd && isIntraInterval(frame.interval)) {
+        frame.toldEnd = true;
+        if (typeof window.toast === "function") {
+          window.toast("That is all the " + (INTERVAL_LABEL[frame.interval] || "intraday").toLowerCase() +
+            " history available. Pick 1M or longer for daily bars.", "ok");
+        }
+      }
+      return;
+    }
+    frame.loading = true;
+    frame.tried.push(next);
+    setLoading(frame, true);
+    var preview = /^(127\.0\.0\.1|localhost)$/.test(location.hostname) ? "&preview=1" : "";
+    fetch("/api/quote/" + encodeURIComponent(frame.ticker) + "?range=" + next + "&interval=" + frame.interval + preview,
+          { credentials: "same-origin" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        var res = d && d.chart && d.chart.result && d.chart.result[0];
+        var got = res ? rowsFrom(res) : [];
+        if (lastFrame !== frame) return;              // the user moved on
+        var first = frame.rows[0].time;
+        var older = got.filter(function (r) { return r.time < first - 30; });
+        frame.loading = false;
+        setLoading(frame, false);
+        if (!older.length) { loadOlder(frame); return; }  // try the next rung
+        frame.rows = older.concat(frame.rows);
+        liveInstances(frame).forEach(function (i) { i.setRows(frame.rows, older.length); });
+        document.dispatchEvent(new CustomEvent("il:chart-history", { detail: { added: older.length, total: frame.rows.length } }));
+      })
+      .catch(function () {
+        frame.loading = false;
+        setLoading(frame, false);
+      });
+  }
+  window.ilLoadOlderBars = function () { if (lastFrame) loadOlder(lastFrame); };
+
+  /* Hook for chart-tools.js (drawings, legend refresh). */
+  function attachTools(instance, mode) {
+    instance.mode = mode;
+    instance.onRows = function () {
+      applyMarkers(instance);
+      if (zonesOn) applyZones(instance);
+      if (instance.toolsOnRows) instance.toolsOnRows();
+    };
+    if (window.ILChartTools && window.ILChartTools.attach) {
+      try { window.ILChartTools.attach(instance, mode); } catch (e) { console.warn("[chart-tools]", e && e.message); }
+    }
+  }
+
   /* ── mount ─────────────────────────────────────────────────────────────── */
   function hostFor() {
     var canvas = document.getElementById("price-chart");
@@ -687,6 +945,7 @@
     if (!instance || instance.disposed) return;
     instance.disposed = true;
     if (instance.disposeReadout) instance.disposeReadout();
+    if (instance.disposeTools) instance.disposeTools();
     if (instance.chart._ilResizeObserver) instance.chart._ilResizeObserver.disconnect();
     try { instance.chart.remove(); } catch (_) {}
   }
@@ -701,9 +960,23 @@
       return;
     }
 
+    var interval = frameInterval(result);
+    var chartKey = window.S ? S.ticker + ":" + S.range + ":" + interval : "";
+    var frame = { rows: rows, result: result, base: rows[0].close, interval: interval,
+                  ticker: window.S ? S.ticker : "", key: chartKey, tried: [], loading: false, exhausted: false };
+    /* Re-rendering the same series (type flip, indicator toggle, theme) keeps
+       the older bars the user already panned back through. */
+    if (lastFrame && lastFrame.key === chartKey && lastFrame.rows.length) {
+      var firstNew = rows[0].time;
+      var older = lastFrame.rows.filter(function (r) { return r.time < firstNew - 30; });
+      if (older.length) frame.rows = rows = older.concat(rows);
+      frame.base = lastFrame.base;
+      frame.tried = lastFrame.tried.slice();
+      frame.exhausted = lastFrame.exhausted;
+    }
+
     var keepRange = null;
     var prevLength = inst ? inst._ilLength : null;
-    var chartKey = window.S ? S.ticker + ":" + S.range : "";
     var prevKey = inst ? inst._ilKey : null;
     if (inst && inst.chart) {
       try { keepRange = inst.chart.timeScale().getVisibleLogicalRange(); } catch (e) {}
@@ -711,18 +984,18 @@
       inst = null;
     }
     host.innerHTML = "";
+    lastFrame = frame;
 
     inst = buildInstance(host, rows);
+    inst.frame = frame;
     var rendered = inst;
-    lastFrame = { rows: rows, result: result };
     wireReadout(inst, host.parentElement);
+    attachTools(inst, "inline");
     applyMarkers(inst);
     if (zonesOn) fetchZones(function () { if (inst) applyZones(inst); });
 
-    /* Restore the user's zoom ONLY when the underlying bar count is unchanged —
-       i.e. they flipped candle→line or toggled an indicator. Changing timeframe
-       changes the bar count, and reusing the old logical range there is what made
-       the candle size appear frozen across timeframes. */
+    /* Restore the user's zoom only when the bars are the same — they flipped
+       candle→line or toggled an indicator. A new timeframe opens fresh. */
     if (keepRange && prevLength === rows.length && prevKey === chartKey) {
       inst.chart._ilViewLocked = true;
       try { inst.chart.timeScale().setVisibleLogicalRange(keepRange); } catch (e) {}
@@ -745,22 +1018,7 @@
         _il: true,
         destroy: function () { dispose(rendered); if (inst === rendered) inst = null; },
         resetZoom: function () { try { inst.applyInitialView(); } catch (e) { try { inst.chart.timeScale().fitContent(); } catch (e2) {} } },
-        zoom: function (f) {
-          try {
-            var ts = inst.chart.timeScale();
-            var r = ts.getVisibleLogicalRange();
-            if (!r) return;
-            var span = r.to - r.from;
-            var next = span / f;
-            /* Clamp both ends: never fewer than 12 bars (you lose all context)
-               and never so many that a candle drops under its legibility floor. */
-            var width = (inst.host.clientWidth || 900) - 64;
-            var maxBars = Math.max(40, Math.floor(width / inst.floorSpacing));
-            next = Math.max(12, Math.min(maxBars, next));
-            var mid = (r.from + r.to) / 2, half = next / 2;
-            ts.setVisibleLogicalRange({ from: mid - half, to: mid + half });
-          } catch (e) {}
-        },
+        zoom: function (f) { zoomInstance(inst, f); },
         update: function () {},
         resize: function () {},
         toBase64Image: function () {
@@ -978,6 +1236,20 @@
     set('[data-il-pin="news"]', view.pins.news);
   }
 
+  /* The full-screen header names the company, not "Price Chart". */
+  function setExpandedTitle(modal) {
+    var t = document.getElementById("cex-title");
+    if (!t) return;
+    var lg = legendText();
+    if (!lg.ticker) { t.textContent = modal.dataset.chartTitle || "Price chart"; return; }
+    t.innerHTML = "";
+    var b = document.createElement("b"); b.className = "ilc-title-tk"; b.textContent = lg.ticker;
+    var n = document.createElement("span"); n.className = "ilc-title-nm"; n.textContent = lg.name || "Price chart";
+    var m = document.createElement("span"); m.className = "ilc-title-meta"; m.textContent = lg.meta;
+    t.appendChild(b); t.appendChild(n); t.appendChild(m);
+    t.title = [lg.ticker, lg.name, lg.meta].filter(Boolean).join(" · ");
+  }
+
   /* ── take over the global entry points ─────────────────────────────────── */
   function install() {
     // A slow connection can fire the fallback timer before the legacy script
@@ -1001,15 +1273,7 @@
     };
 
     window.zoomPriceChart = function (factor) {
-      if (factor < 1 && typeof window.chartAtFullHistory === "function") {
-        try {
-          var ts = inst && inst.chart.timeScale();
-          var r = ts && ts.getVisibleLogicalRange();
-          if (r && r.from <= 0.5 && typeof window.loadMorePriceHistory === "function") {
-            return window.loadMorePriceHistory();
-          }
-        } catch (e) {}
-      }
+      if (inst) return zoomInstance(inst, factor);
       if (window.S && S.charts && S.charts["price-chart"]) S.charts["price-chart"].zoom(factor);
     };
     window.resetPriceZoom = function () {
@@ -1031,11 +1295,15 @@
          on them — they were still occupying layout and pushing the real chart
          host below the fold, which is why full screen came up blank. */
       modal.classList.add("il-lwc", "open");
-      var t = document.getElementById("cex-title");
-      if (t) t.textContent = modal.dataset.chartTitle;
+      /* Above the site navigation (z 2147482000), which otherwise covered the
+         modal header — and its Close button — on phones. Inline !important is
+         what outranks the bundled layers. */
+      modal.style.setProperty("z-index", "2147483050", "important");
+      setExpandedTitle(modal);
       document.body.style.overflow = "hidden";
 
-      buildExpandedControls(modal);
+      if (window.ILChartTools && window.ILChartTools.mountFullBar) window.ILChartTools.mountFullBar(modal);
+      else buildExpandedControls(modal);
       mountExpanded(modal);
       document.dispatchEvent(new CustomEvent("il-chart-expanded"));
     };
@@ -1046,20 +1314,27 @@
         dispose(modal._ilExpanded);
         modal._ilExpanded = null;
       }
+      var oldStage = slot.querySelector(".il-chart-stage");
+      if (oldStage) oldStage.remove();
       var old = slot.querySelector(".il-chart-host-expanded");
       if (old) old.remove();
+      var stage = document.createElement("div");
+      stage.className = "il-chart-stage";
       var host = document.createElement("div");
       host.className = "il-chart-host-expanded";
-      slot.appendChild(host);
+      stage.appendChild(host);
+      slot.appendChild(stage);
 
       /* The modal is display:none until .open lands, so the host measures 0x0
          on this frame. Building an LWC chart into a zero box produces a chart
          that never draws. Wait two frames for layout to settle. */
       requestAnimationFrame(function () {
         requestAnimationFrame(function () {
-          if (!document.body.contains(host)) return;
+          if (!document.body.contains(host) || !lastFrame) return;
           var ex = buildInstance(host, lastFrame.rows);
-          wireReadout(ex, host);
+          ex.frame = lastFrame;
+          wireReadout(ex, stage);
+          attachTools(ex, "full");
           applyMarkers(ex);
           applyZones(ex);
           modal._ilExpanded = ex;
@@ -1073,7 +1348,9 @@
     document.addEventListener("il-chart-rendered", function () {
       var modal = document.getElementById("chart-expand-modal");
       if (modal && modal.classList.contains("open") && modal.classList.contains("il-lwc")) {
-        buildExpandedControls(modal, true);
+        if (window.ILChartTools && window.ILChartTools.syncBars) window.ILChartTools.syncBars();
+        else buildExpandedControls(modal, true);
+        setExpandedTitle(modal);
         mountExpanded(modal);
       }
     });
@@ -1084,10 +1361,11 @@
       if (modal && modal._ilExpanded) {
         dispose(modal._ilExpanded);
         modal._ilExpanded = null;
-        var h = modal.querySelector(".il-chart-host-expanded");
+        var h = modal.querySelector(".il-chart-stage") || modal.querySelector(".il-chart-host-expanded");
         if (h) h.remove();
       }
       if (modal) modal.classList.remove("il-lwc");
+      if (window.ILChartTools && window.ILChartTools.releaseFull) window.ILChartTools.releaseFull(modal);
       if (typeof prevClose === "function") return prevClose.apply(this, arguments);
       if (modal) { modal.classList.remove("open"); document.body.style.overflow = ""; }
     };
@@ -1098,16 +1376,7 @@
       var modal = document.getElementById("chart-expand-modal");
       var ex = modal && modal._ilExpanded;
       if (!ex) return typeof prevZoomEx === "function" ? prevZoomEx.apply(this, arguments) : undefined;
-      try {
-        var ts = ex.chart.timeScale();
-        var r = ts.getVisibleLogicalRange();
-        if (!r) return;
-        var next = (r.to - r.from) / f;
-        var width = (ex.host.clientWidth || 1200) - 64;
-        next = Math.max(12, Math.min(Math.max(40, Math.floor(width / ex.floorSpacing)), next));
-        var mid = (r.from + r.to) / 2;
-        ts.setVisibleLogicalRange({ from: mid - next / 2, to: mid + next / 2 });
-      } catch (e) {}
+      zoomInstance(ex, f);
     };
     var prevResetEx = window.resetExpandZoom;
     window.resetExpandZoom = function () {
@@ -1160,7 +1429,7 @@
   window.ilTogglePins = function (kind, btn) {
     view.pins[kind] = !view.pins[kind]; persist();
     if (btn) { btn.classList.toggle("on", view.pins[kind]); btn.setAttribute("aria-pressed", String(view.pins[kind])); }
-    if (inst) applyMarkers(inst);
+    liveInstances(lastFrame).forEach(applyMarkers);
   };
 
   function syncToggleStates() {
@@ -1225,6 +1494,25 @@
 
     syncToggleStates();
   }
+
+  /* Integration surface for chart-tools.js and share-studio.js. */
+  window.ILChartEngine = {
+    instances: function () { return liveInstances(lastFrame); },
+    frame: function () { return lastFrame; },
+    legend: legendText,
+    palette: palette,
+    zoom: function (instance, f) { zoomInstance(instance, f); },
+    reset: function (instance) { try { instance.applyInitialView(); } catch (e) {} },
+    loadOlder: function () { if (lastFrame) loadOlder(lastFrame); },
+    fmtTime: fmtBarTime,
+    intraday: intraday,
+    intervalLabel: function () { return INTERVAL_LABEL[currentInterval()] || ""; },
+    rangeLabel: rangeLabel,
+    sma: function (rows, p) { var ext = extendedCloses(rows); return trim(ext, TA.sma(ext.closes, p)); },
+    ema: function (rows, p) { var ext = extendedCloses(rows); return trim(ext, TA.ema(ext.closes, p)); },
+    view: view,
+    zonesOn: function () { return zonesOn; }
+  };
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", install);
