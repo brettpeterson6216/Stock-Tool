@@ -2184,7 +2184,7 @@ function renderStock(result, ticker) {
     {l:'52W High',v:h52?`$${h52.toFixed(2)}`:'—',s:h52?fmtPct((price-h52)/h52*100)+' from high':'',c:h52?(price/h52<0.8?'dn':''):''},
     {l:'52W Low',v:l52?`$${l52.toFixed(2)}`:'—',s:l52?fmtPct((price-l52)/l52*100)+' from low':'',c:''},
     {l:'Market Cap',v:fmtBig(meta.marketCap),s:'',c:''},
-    {l:'Volume',v:meta.regularMarketVolume!=null?`${fmtShares(meta.regularMarketVolume)} sh`:'—',s:meta.averageDailyVolume3Month?`${(meta.regularMarketVolume/meta.averageDailyVolume3Month).toFixed(2)}x avg`:'',c:''},
+    {l:'Volume',v:meta.regularMarketVolume!=null?fmtShares(meta.regularMarketVolume):'—',s:meta.averageDailyVolume3Month?`${(meta.regularMarketVolume/meta.averageDailyVolume3Month).toFixed(2)}x avg`:'',c:''},
     {l:'RSI (14)',v:rsiNow?rsiNow.toFixed(1):'—',s:rsiNow?(rsiNow<30?'Oversold':rsiNow>70?'Overbought':'Neutral'):'',c:rsiNow?(rsiNow<30?'up':rsiNow>70?'dn':''):''},
     {l:'MA 50',v:ma50Now?`$${ma50Now.toFixed(2)}`:'—',s:ma50Now?(price>ma50Now?'Above (Bullish)':'Below (Bearish)'):'',c:ma50Now?(price>ma50Now?'up':'dn'):''},
     {l:'MA 200',v:ma200Now?`$${ma200Now.toFixed(2)}`:'—',s:ma200Now?(price>ma200Now?'Above (Bullish)':'Below (Bearish)'):'',c:ma200Now?(price>ma200Now?'up':'dn'):''},
@@ -4178,14 +4178,15 @@ function renderRiskPanel(closes, meta) {
   const col = v => parseFloat(v) >= 0 ? 'var(--market-up)' : 'var(--market-down)';
   const posCol = v => { const f=parseFloat(v); return isNaN(f)?'var(--text4)':f>=0?'var(--market-up)':'var(--market-down)'; };
   const ratingScore = [parseFloat(annualVol) < 25, maxDDraw > -20, parseFloat(sharpe) > 0.5].filter(Boolean).length;
-  const rating = ['High Risk','Moderate Risk','Moderate','Low–Moderate Risk'][ratingScore] || 'Moderate';
+  // Short words: the long labels wrapped onto three lines in a stat tile.
+  const rating = ['High','Elevated','Moderate','Low'][ratingScore] || 'Moderate';
   const ratingColor = ['var(--market-down)','#C6A052','#C6A052','var(--market-up)'][ratingScore] || '#C6A052';
 
   const toneOf = c => /market-up|46b184/.test(c) ? 'is-up' : /market-down|d96a70/.test(c) ? 'is-down' : /C6A052|gold/.test(c) ? 'is-warn' : 'is-neutral';
   const stat = (label, val, valColor, note='') =>
     `<div class="risk-stat">
       <div class="risk-stat-label">${label}${note?`<span class="risk-stat-note">${note}</span>`:''}</div>
-      <div class="risk-stat-val ${toneOf(valColor)}">${val}</div>
+      <div class="risk-stat-val ${toneOf(valColor)}${val === '--' || val === '—' ? ' is-empty' : ''}">${val === '--' ? '—' : val}</div>
     </div>`;
 
   el.innerHTML = `

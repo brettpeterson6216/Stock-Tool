@@ -228,11 +228,11 @@ function renderPage(ticker, q, facts) {
   const analyzeUrl   = `/?ticker=${ticker}&source=stock_landing`;
   const signupNext   = `/?view=tool&section=analyze&ticker=${ticker}&resume_analysis=1&source=stock_landing_signup`;
   const signupUrl    = `/signup?next=${encodeURIComponent(signupNext)}&source=stock_landing&ticker=${encodeURIComponent(ticker)}`;
-  const analyzeUrlJson = JSON.stringify(analyzeUrl).replace(/</g, "\\u003c");
   const landingContextJson = JSON.stringify({
     ticker,
     quote_available: !!q,
     industry: q?.industry || null,
+    analyzeUrl,
   }).replace(/</g, "\\u003c");
 
   // Schema.org FinancialProduct structured data
@@ -256,7 +256,7 @@ function renderPage(ticker, q, facts) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <script>(function(){if(localStorage.getItem('il-theme')==='dark')document.documentElement.setAttribute('data-theme','dark')})();</script>
+  <script src="/theme-bootstrap.js"></script>
   <title>${esc(metaTitle)}</title>
   <meta name="description" content="${esc(metaDesc)}">
   <meta name="robots" content="${indexable ? "index,follow" : "noindex,follow"}">
@@ -572,64 +572,11 @@ function renderPage(ticker, q, facts) {
   </footer>
 
   ${siteHeader.scripts}
-  <script>
-    const landingContext = ${landingContextJson};
-    function trackLanding(event, properties) {
-      let referrerHost = '';
-      try { referrerHost = document.referrer ? new URL(document.referrer).hostname : ''; } catch (_) {}
-      const params = new URLSearchParams(window.location.search);
-      fetch('/api/track', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({
-          event,
-          properties: {
-            ...landingContext,
-            ...properties,
-            referrer_host: referrerHost || null,
-            utm_source: params.get('utm_source'),
-            utm_medium: params.get('utm_medium'),
-            utm_campaign: params.get('utm_campaign'),
-          },
-        }),
-        keepalive: true,
-      }).catch(() => {});
-    }
-    const acquisitionParams = new URLSearchParams(window.location.search);
-    const acquisition = {
-      source: 'stock_landing',
-      utm_source: acquisitionParams.get('utm_source'),
-      utm_medium: acquisitionParams.get('utm_medium'),
-      utm_campaign: acquisitionParams.get('utm_campaign'),
-    };
-    try {
-      sessionStorage.setItem('ilAcquisitionContext', JSON.stringify(
-        Object.fromEntries(Object.entries(acquisition).filter(([, value]) => value))
-      ));
-    } catch (_) {}
-    ['analyze-cta','landing-signup-cta'].forEach(id => {
-      const link = document.getElementById(id);
-      if (!link) return;
-      const url = new URL(link.href, window.location.origin);
-      ['utm_source','utm_medium','utm_campaign'].forEach(key => {
-        if (acquisition[key]) url.searchParams.set(key, acquisition[key]);
-      });
-      link.href = url.toString();
-    });
-    trackLanding('landing_page_view', {});
-    document.getElementById('analyze-cta').addEventListener('click', () => {
-      trackLanding('landing_cta_clicked', { destination: 'analyzer' });
-    });
-    document.getElementById('landing-signup-cta').addEventListener('click', () => {
-      trackLanding('guest_signup_started', { source: 'stock_landing' });
-    });
-
-    // Auto-redirect to full analyzer after a short delay on CTA click
-    // (also handle ?autoload=1 for programmatic deep links)
-    if (new URLSearchParams(window.location.search).get('autoload') === '1') {
-      window.location.href = ${analyzeUrlJson};
-    }
-  </script>
+  <!-- Inline scripts are blocked by the Content-Security-Policy, so the
+       landing analytics (landing_page_view, landing_cta_clicked) live in
+       stock-landing.js and read their context from this JSON block. -->
+  <script type="application/json" id="il-landing-context">${landingContextJson}</script>
+  <script defer src="/stock-landing.js"></script>
 </body>
 </html>`;
 }

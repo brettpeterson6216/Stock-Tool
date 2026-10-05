@@ -187,7 +187,11 @@ test("Ticker landing pages explain free allowances and protect uncurated pages f
   assert.match(curatedHtml, /<meta name="robots" content="index,follow">/);
   assert.match(curatedHtml, /Free to try, no account needed/);
   assert.match(curatedHtml, /Create a free account<\/a> for 10 analyses a day/);
-  assert.match(curatedHtml, /landing_page_view/);
+  // Landing analytics run from an external file: the CSP blocks inline scripts.
+  assert.match(curatedHtml, /<script defer src="\/stock-landing\.js(\?v=[^"]+)?"><\/script>/);
+  assert.match(curatedHtml, /<script type="application\/json" id="il-landing-context">\{"ticker":"AAPL"/);
+  assert.doesNotMatch(curatedHtml.replace(/<script type="application\/(ld\+)?json"[\s\S]*?<\/script>/g, ""), /<script>(?!<\/script>)/, "an inline script would be blocked by the CSP");
+  assert.match(require("node:fs").readFileSync(require("node:path").join(__dirname, "..", "public", "stock-landing.js"), "utf8"), /landing_page_view/);
   assert.match(curatedHtml, /Questions to answer before investing in AAPL/);
   assert.match(curatedHtml, /<meta property="og:image"\s+content="[^"]+\/social-card\.png\?v=[^"]+">/);
   assert.match(curatedHtml, /<meta name="twitter:card"\s+content="summary_large_image">/);

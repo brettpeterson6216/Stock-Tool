@@ -1805,3 +1805,7 @@ html body #acct-modal-bg section.il-acct-sec { padding: 16px 0 0 !important; mar
   html:not(#il-p1):not(#il-p2):not(#il-p3):not(#il-p4):not(#il-p5):not(#il-p6):not(#il-p7) body .plab2-exp-v strong { font-size: 30px !important; flex-basis: 100% !important; order: 2 !important; }
   html:not(#il-p1):not(#il-p2):not(#il-p3):not(#il-p4):not(#il-p5):not(#il-p6):not(#il-p7) body .plab2-exp-v span { order: 3 !important; font-size: 13px !important; }
 }
+
+/* Risk tiles: a metric that cannot be computed reads as a quiet dash, not a
+   loud coloured "--". */
+#view-tool .risk-stat-val.is-empty { color: var(--rp-text-3, rgba(243,238,227,.4)) !important; font-weight: 500 !important; }

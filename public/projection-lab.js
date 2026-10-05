@@ -272,7 +272,7 @@
       '<button type="button" class="plab2-btn" id="plab2-cases" aria-label="Open, rename or delete saved cases for this ticker"><i class="ti ti-folder" aria-hidden="true"></i> Cases</button>' +
       '<button type="button" class="plab2-btn" id="plab2-save" aria-label="Save this projection case"><i class="ti ti-bookmark" aria-hidden="true"></i> Save</button>' +
       '<button type="button" class="plab2-btn" id="plab2-csv" aria-label="Export the full model as CSV"><i class="ti ti-table-export" aria-hidden="true"></i> CSV</button>' +
-      '<button type="button" class="plab2-btn plab2-btn-gold" id="plab2-img" aria-label="Export a shareable image of this projection"><i class="ti ti-photo-down" aria-hidden="true"></i> Export image</button>';
+      '<button type="button" class="plab2-btn plab2-btn-gold" id="plab2-img" aria-label="Make a shareable image of this projection"><i class="ti ti-photo-down" aria-hidden="true"></i> Share image</button>';
     root.appendChild(actions);
     var casesBox = el("div", "plab2-cases");
     casesBox.id = "plab2-cases-panel";
@@ -983,6 +983,9 @@
 
   /* ═══════════════════════ image export ═══════════════════════ */
   function exportImage() {
+    // The card studio (projection-cards.js) previews three designs in three
+    // sizes; the single fixed card below is the fallback if it did not load.
+    if (window.ILProjectionCards) { window.ILProjectionCards.open(PL.model); return; }
     var outlook = M().plCalculateOutlook(PL.model);
     if (!outlook.ok) { toastPL("Fix the model before exporting: " + outlook.error); return; }
     var m = PL.model;
