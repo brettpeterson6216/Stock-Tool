@@ -522,10 +522,12 @@
     var edgeFrame = null;
     chart.timeScale().subscribeVisibleLogicalRangeChange(function (r) {
       if (!r || edgeFrame || instance.disposed) return;
-      edgeFrame = requestAnimationFrame(function () {
+      /* A timer, not requestAnimationFrame: rAF is paused in background tabs,
+         and a range change made while hidden would never load its history. */
+      edgeFrame = setTimeout(function () {
         edgeFrame = null;
         if (r.from < 10 && instance.frame) loadOlder(instance.frame);
-      });
+      }, 30);
     });
 
     return instance;
