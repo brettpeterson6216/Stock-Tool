@@ -413,6 +413,9 @@ router.get("/financials/:ticker", requireAccount, async (req, res) => {
             basis: rev ? rev.basis : null,
             sharesOutstanding: sh ? { raw: sh.val } : null,
             dilutedShares: dil ? { raw: dil.val, asOf: dil.asOf, cagr3: dil.cagr3 } : null,
+            // The last annual report the TTM was built from, with its real end
+            // date (statement endDate is a Dec-31 placeholder for every company).
+            annualRevenue: rev && rev.annual ? { raw: rev.annual.val, asOf: rev.annual.asOf } : null,
           };
         })(),
       }]},

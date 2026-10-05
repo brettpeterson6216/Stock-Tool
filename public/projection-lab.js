@@ -583,7 +583,7 @@
     var d = M().plBaseDerived(m);
     var pe = d.eps > 0 ? m.startPrice / d.eps : null;
     parts.push("Today's P/E <strong>" + (pe ? pe.toFixed(1) + "×" : "n/m (loss)") + "</strong>");
-    if (n.exitPE) parts.push("Default exit P/E <strong>" + n.exitPE[0] + "–" + n.exitPE[1] + "×</strong> <span class='plab2-dhint'>halfway from today's to a long-run " + n.normPE + "×</span>");
+    if (n.exitPE) parts.push("Default exit P/E <strong>" + n.exitPE[0] + "–" + n.exitPE[1] + "×</strong> <span class='plab2-dhint'>" + (n.currentPE ? "halfway from today's to a long-run " + n.normPE + "×" : "around a long-run " + n.normPE + "×, since there is no current P/E") + "</span>");
     if (Number.isFinite(n.startGrowth)) parts.push("Growth <strong>" + n.startGrowth + "% → " + n.longRunGrowth + "%</strong> <span class='plab2-dhint'>from " + esc(n.growthFrom || "recent growth") + ", fading over 5 years</span>");
     if (Number.isFinite(n.shareChange) && n.shareChange !== 0) parts.push("Shares <strong>" + (n.shareChange > 0 ? "+" : "") + n.shareChange + "%/yr</strong> <span class='plab2-dhint'>3-year trend</span>");
     if (n.turnaround) parts.push("<span class='plab2-dturn'>Turnaround assumption: margin climbs toward " + (n.targetMargin || 10) + "% (sector norm) by year 5</span>");
@@ -822,7 +822,9 @@
     if (PL.seedHintShown) chips.push('<span class="plab2-chip plab2-chip-gold"><i class="ti ti-refresh" aria-hidden="true"></i> Fresh fundamentals available — use Re-seed</span>');
     if (m.dataAsOf) {
       var ageDays = (Date.now() - Date.parse(m.dataAsOf + "T00:00:00Z")) / 864e5;
-      if (ageDays > 100) chips.push('<span class="plab2-chip plab2-chip-warn" title="The newest SEC filing ends ' + esc(m.dataAsOf) + '. Companies often announce results weeks before filing them."><i class="ti ti-clock" aria-hidden="true"></i> Base data ends ' + esc(m.dataAsOf) + " — newer results may be out</span>");
+      // A quarter (91 days) plus the ~45 days a 10-Q can take to file.
+      var asOfTxt = new Date(m.dataAsOf + "T00:00:00Z").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
+      if (ageDays > 135) chips.push('<span class="plab2-chip plab2-chip-warn" title="The newest SEC filing ends ' + esc(asOfTxt) + '. Companies announce results weeks before filing them; type newer figures into the base inputs if you have them."><i class="ti ti-clock" aria-hidden="true"></i> Base data ends ' + esc(asOfTxt) + " — newer results may be out</span>");
     }
     if (hasUnsavedChanges()) chips.push('<span class="plab2-chip plab2-chip-unsaved">Unsaved changes</span>');
     else if (PL.savedJson) chips.push('<span class="plab2-chip plab2-chip-saved"><i class="ti ti-check" aria-hidden="true"></i> Saved</span>');
@@ -1223,10 +1225,12 @@
     if (dil && Number.isFinite(Number(dil.cagr3))) seed.shareCagr = Number(dil.cagr3);
     // Recent growth trend: the newest TTM against the last annual report,
     // annualised. It catches a turn that the last two annual reports miss.
-    if (ttm && ttm.basis === "ttm" && inc && inc.length) {
-      var fyEnd = rawNum(inc[0].endDate), fyRev = rawNum(inc[0].totalRevenue), tR = rawNum(ttm.revenue);
-      var asOfMs = Date.parse(String(ttm.asOf) + "T00:00:00Z");
-      var months = Number.isFinite(fyEnd) && Number.isFinite(asOfMs) ? (asOfMs - fyEnd * 1000) / (30.44 * 864e5) : NaN;
+    var ar = ttm && ttm.annualRevenue;
+    if (ttm && ttm.basis === "ttm" && ar && ar.asOf) {
+      // Statement endDate is a Dec-31 placeholder, so use the annual report's
+      // real end date that the server sends with the TTM.
+      var fyRev = rawNum(ar), tR = rawNum(ttm.revenue);
+      var months = (Date.parse(String(ttm.asOf) + "T00:00:00Z") - Date.parse(String(ar.asOf) + "T00:00:00Z")) / (30.44 * 864e5);
       if (months >= 3 && fyRev > 0 && tR > 0) seed.ttmTrend = Math.pow(tR / fyRev, 12 / months) - 1;
     }
     if (ttm && ttm.asOf) seed.dataAsOf = String(ttm.asOf);
