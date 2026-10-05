@@ -1728,6 +1728,11 @@ Chart.defaults.font.family = "'Plus Jakarta Sans', system-ui, sans-serif";
 Chart.defaults.font.size = 11;
 Chart.defaults.font.weight = '500';
 Chart.defaults.color = ct().text;
+// Smooth lines everywhere: monotone curves pass through every point without
+// overshooting, so short series stop looking like straight blocky segments.
+Chart.defaults.elements.line.cubicInterpolationMode = 'monotone';
+Chart.defaults.elements.line.tension = 0.4;
+Chart.defaults.elements.line.borderJoinStyle = 'round';
 
 function chartPriceValue(raw) {
   if (Array.isArray(raw)) return Number(raw[raw.length - 1]);

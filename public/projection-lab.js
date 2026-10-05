@@ -584,9 +584,17 @@
     function Y(v) { return padT + (1 - (v - lo) / (hi - lo)) * (H - padT - padB); }
     function pt(x, y) { return x.toFixed(1) + "," + y.toFixed(1); }
 
-    var bandTop = pts.map(function (p) { return pt(X(p.year), Y(p.high)); }).join(" ");
-    var bandBot = pts.slice().reverse().map(function (p) { return pt(X(p.year), Y(p.low)); }).join(" ");
-    var midLine = pts.map(function (p) { return pt(X(p.year), Y(p.mid)); }).join(" ");
+    /* Smooth monotone curves through the yearly values (lens-charts.js): they
+       pass through every modelled year and never overshoot between them. */
+    var LC = window.LensCharts;
+    function path(list, cont) {
+      return LC && LC.svgCurve ? LC.svgCurve(list, cont)
+        : list.map(function (q, i) { return (i || cont ? "L" : "M") + pt(q[0], q[1]).replace(",", " "); }).join("");
+    }
+    var topPts = pts.map(function (p) { return [X(p.year), Y(p.high)]; });
+    var botPts = pts.slice().reverse().map(function (p) { return [X(p.year), Y(p.low)]; });
+    var bandPath = path(topPts) + path(botPts, true) + "Z";
+    var midPath = path(pts.map(function (p) { return [X(p.year), Y(p.mid)]; }));
 
     var gridLines = "";
     var ticks = 4;
@@ -614,10 +622,10 @@
       '<div class="plab2-chart-h"><span>Valuation band · ' + SCEN_LABEL[m.selectedScenario] + " case</span><span class='plab2-chart-leg'><i class='plab2-leg-band'></i> low–high <i class='plab2-leg-mid'></i> midpoint <i class='plab2-leg-ref'></i> start price</span></div>" +
       '<svg viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="xMidYMid meet" aria-hidden="false" role="group" aria-label="Projected share-price band by year">' +
         gridLines +
-        '<polygon points="' + bandTop + " " + bandBot + '" class="plab2-cband"/>' +
-        '<polyline points="' + midLine + '" class="plab2-cmid"/>' +
+        '<path d="' + bandPath + '" class="plab2-cband"/>' +
+        '<path d="' + midPath + '" class="plab2-cmid" fill="none"/>' +
         '<line x1="' + padL + '" y1="' + refY + '" x2="' + (W - padR) + '" y2="' + refY + '" class="plab2-cref"/>' +
-        pts.map(function (p) { return '<circle cx="' + X(p.year) + '" cy="' + Y(p.mid) + '" r="3" class="plab2-cdot"/>'; }).join("") +
+        pts.map(function (p) { return '<circle cx="' + X(p.year) + '" cy="' + Y(p.mid) + '" r="2.6" class="plab2-cdot"/>'; }).join("") +
         '<g class="plab2-czones">' + hoverZones + "</g>" +
       "</svg>" +
       '<div class="plab2-ctt" hidden></div>';

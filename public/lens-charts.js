@@ -296,7 +296,7 @@
     // lines, emphasised last so it sits on top
     var order = series.slice().sort(function (a, b) { return (a.emphasis ? 1 : 0) - (b.emphasis ? 1 : 0); });
     order.forEach(function (s) {
-      var dstr = s.points.map(function (p, i) { return (i ? "L" : "M") + r1(x(p[0])) + " " + r1(y(p[1])); }).join("");
+      var dstr = svgCurve(s.points.map(function (p) { return [x(p[0]), y(p[1])]; }));
       svgEl("path", { d: dstr, "class": "lc-line" + (s.emphasis ? " lc-line-em" : ""), style: "stroke:" + s.color }, svg);
       var last = s.points[s.points.length - 1];
       svgEl("circle", { cx: r1(x(last[0])), cy: r1(y(last[1])), r: 3.5, style: "fill:" + s.color }, svg);
@@ -398,6 +398,44 @@
     srSummary(host, rows.map(function (r) { return r.name + " " + fmt(r.lo) + " to " + fmt(r.hi); }));
   }
 
+
+  /* ── smooth curves ───────────────────────────────────────────────────────
+     Monotone cubic interpolation (Fritsch–Carlson). The curve passes through
+     every real point and never bends above a peak or below a trough between
+     two of them, so it reads smooth without inventing values the data does
+     not have. Returns cubic Bézier segments; svgCurve and canvasCurve draw them. */
+  function curveSegs(pts) {
+    var n = pts.length, segs = [];
+    if (n < 2) return segs;
+    var dx = [], m = [], t = [];
+    for (var i = 0; i < n - 1; i++) { dx[i] = pts[i + 1][0] - pts[i][0]; m[i] = dx[i] ? (pts[i + 1][1] - pts[i][1]) / dx[i] : 0; }
+    t[0] = m[0]; t[n - 1] = m[n - 2];
+    for (var j = 1; j < n - 1; j++) t[j] = m[j - 1] * m[j] <= 0 ? 0 : (m[j - 1] + m[j]) / 2;
+    for (var k = 0; k < n - 1; k++) {
+      if (m[k] === 0) { t[k] = 0; t[k + 1] = 0; continue; }
+      var a = t[k] / m[k], b = t[k + 1] / m[k], q = a * a + b * b;
+      if (q > 9) { var r = 3 / Math.sqrt(q); t[k] = r * a * m[k]; t[k + 1] = r * b * m[k]; }
+    }
+    for (var s = 0; s < n - 1; s++) {
+      var h = dx[s] / 3;
+      segs.push([pts[s][0] + h, pts[s][1] + t[s] * h, pts[s + 1][0] - h, pts[s + 1][1] - t[s + 1] * h, pts[s + 1][0], pts[s + 1][1]]);
+    }
+    return segs;
+  }
+  // SVG path data; `cont` continues an existing path with L instead of M.
+  function svgCurve(pts, cont) {
+    if (!pts.length) return "";
+    var d = (cont ? "L" : "M") + r1(pts[0][0]) + " " + r1(pts[0][1]);
+    if (pts.length > 160) return d + pts.slice(1).map(function (p) { return "L" + r1(p[0]) + " " + r1(p[1]); }).join("");
+    curveSegs(pts).forEach(function (c) { d += "C" + r1(c[0]) + " " + r1(c[1]) + " " + r1(c[2]) + " " + r1(c[3]) + " " + r1(c[4]) + " " + r1(c[5]); });
+    return d;
+  }
+  function canvasCurve(g, pts, cont) {
+    if (!pts.length) return;
+    if (cont) g.lineTo(pts[0][0], pts[0][1]); else g.moveTo(pts[0][0], pts[0][1]);
+    curveSegs(pts).forEach(function (c) { g.bezierCurveTo(c[0], c[1], c[2], c[3], c[4], c[5]); });
+  }
+
   /* ── sparkline ───────────────────────────────────────────────────────── */
   function drawSpark(host, w, o) {
     var vals = (o.values || []).filter(Number.isFinite);
@@ -406,7 +444,7 @@
     if (vals.length < 2) return;
     var mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals);
     var pts = vals.map(function (v, i) { return [pad + i / (vals.length - 1) * (w - pad * 2), h - pad - (v - mn) / ((mx - mn) || 1) * (h - pad * 2)]; });
-    var line = pts.map(function (p, i) { return (i ? "L" : "M") + r1(p[0]) + " " + r1(p[1]); }).join("");
+    var line = svgCurve(pts);
     svgEl("path", { d: line + "L" + r1(pts[pts.length - 1][0]) + " " + h + "L" + r1(pts[0][0]) + " " + h + "Z", "class": "lc-spark-a" }, svg);
     svgEl("path", { d: line, "class": "lc-spark-l" }, svg);
     var e = pts[pts.length - 1];
@@ -414,6 +452,7 @@
   }
 
   window.LensCharts = {
+    curve: curveSegs, svgCurve: svgCurve, canvasCurve: canvasCurve,
     bars: function (host, opts) { return host ? mount(host, drawBars, opts || {}) : null; },
     lines: function (host, opts) { return host ? mount(host, drawLines, opts || {}) : null; },
     range: function (host, opts) { return host ? mount(host, drawRange, opts || {}) : null; },

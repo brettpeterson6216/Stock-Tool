@@ -150,9 +150,22 @@
 
   /* Band chart: start price, then low–high band and midpoint per year. */
   function bandChart(g, x, y, w, h, u, proj, startPrice, color) {
-    var pts = [{ year: proj.baseYear, low: startPrice, high: startPrice, mid: startPrice }];
-    proj.rows.forEach(function (r) { if (r.priceLow != null) pts.push({ year: r.year, low: r.priceLow, high: r.priceHigh, mid: r.priceMid }); });
-    if (pts.length < 2) return;
+    /* The card draws the compound path from today's price to the modelled
+       range: one point a month at the annual return each end implies. It lands
+       exactly on the model's low, midpoint and high, and reads as the smooth
+       fan it is, instead of a first-year jump while the multiple re-rates. */
+    var t = proj.terminal;
+    if (t.negativeEarnings || !(t.priceLow > 0)) return;
+    var yrs = proj.rows.length, months = yrs * 12, pts = [];
+    for (var mo = 0; mo <= months; mo++) {
+      var f = mo / months;
+      pts.push({
+        year: proj.baseYear + mo / 12,
+        low: startPrice * Math.pow(t.priceLow / startPrice, f),
+        high: startPrice * Math.pow(t.priceHigh / startPrice, f),
+        mid: startPrice * Math.pow(t.priceMid / startPrice, f),
+      });
+    }
     var lo = Infinity, hi = -Infinity;
     pts.forEach(function (p) { lo = Math.min(lo, p.low); hi = Math.max(hi, p.high); });
     var span = hi - lo || hi * 0.2 || 1; lo = Math.max(0, lo - span * 0.12); hi += span * 0.1;
@@ -170,23 +183,24 @@
     // band
     var grad = g.createLinearGradient(0, y, 0, y + ph);
     grad.addColorStop(0, hexA(color, 0.34)); grad.addColorStop(1, hexA(color, 0.08));
-    g.beginPath();
-    pts.forEach(function (p, i) { i ? g.lineTo(X(p.year), Y(p.high)) : g.moveTo(X(p.year), Y(p.high)); });
-    for (var j = pts.length - 1; j >= 0; j--) g.lineTo(X(pts[j].year), Y(pts[j].low));
+    var top = pts.map(function (p) { return [X(p.year), Y(p.high)]; });
+    var bot = pts.map(function (p) { return [X(p.year), Y(p.low)]; });
+    var mid = pts.map(function (p) { return [X(p.year), Y(p.mid)]; });
+    g.beginPath(); curve(g, top); curve(g, bot.slice().reverse(), true);
     g.closePath(); g.fillStyle = grad; g.fill();
     g.strokeStyle = hexA(color, 0.55); g.lineWidth = 1.5 * u;
-    g.beginPath(); pts.forEach(function (p, i) { i ? g.lineTo(X(p.year), Y(p.high)) : g.moveTo(X(p.year), Y(p.high)); }); g.stroke();
-    g.beginPath(); pts.forEach(function (p, i) { i ? g.lineTo(X(p.year), Y(p.low)) : g.moveTo(X(p.year), Y(p.low)); }); g.stroke();
+    g.beginPath(); curve(g, top); g.stroke();
+    g.beginPath(); curve(g, bot); g.stroke();
     // today line
     g.setLineDash([6 * u, 6 * u]); g.strokeStyle = C.lineStrong; g.lineWidth = 1.5 * u;
     g.beginPath(); g.moveTo(x, Y(startPrice)); g.lineTo(x + pw, Y(startPrice)); g.stroke(); g.setLineDash([]);
     // midpoint
     g.strokeStyle = color; g.lineWidth = 3.5 * u; g.lineJoin = "round";
-    g.beginPath(); pts.forEach(function (p, i) { i ? g.lineTo(X(p.year), Y(p.mid)) : g.moveTo(X(p.year), Y(p.mid)); }); g.stroke();
-    pts.forEach(function (p, i) {
-      g.beginPath(); g.arc(X(p.year), Y(p.mid), (i === pts.length - 1 ? 7 : 4.5) * u, 0, Math.PI * 2);
-      g.fillStyle = i === pts.length - 1 ? color : C.bg; g.fill(); g.strokeStyle = color; g.lineWidth = 2.5 * u; g.stroke();
-    });
+    g.beginPath(); curve(g, mid); g.stroke();
+    // only the end point is marked: dots on every year made the curve read as steps
+    var em = mid[mid.length - 1];
+    g.beginPath(); g.arc(em[0], em[1], 12 * u, 0, Math.PI * 2); g.fillStyle = hexA(color, 0.18); g.fill();
+    g.beginPath(); g.arc(em[0], em[1], 6.5 * u, 0, Math.PI * 2); g.fillStyle = color; g.fill();
     // end labels (kept apart)
     var e = pts[pts.length - 1], lx = X(e.year) + 16 * u;
     var ys = [Y(e.high), Y(e.mid), Y(e.low)];
@@ -204,9 +218,13 @@
     }
     // x axis
     g.textAlign = "center"; font(g, 500, 15 * u, F.num); g.fillStyle = C.faint;
-    var step = pts.length > 7 ? 2 : 1;
-    pts.forEach(function (p, i) { if (i % step === 0 || i === pts.length - 1) g.fillText(String(p.year), X(p.year), y + ph + 24 * u); });
+    var step = yrs > 6 ? 2 : 1;
+    for (var yi = 0; yi <= yrs; yi++) if (yi % step === 0 || yi === yrs) g.fillText(String(proj.baseYear + yi), X(proj.baseYear + yi), y + ph + 24 * u);
     g.textAlign = "left"; g.textBaseline = "alphabetic";
+  }
+  function curve(g, pts, cont) {
+    if (window.LensCharts && window.LensCharts.canvasCurve) return window.LensCharts.canvasCurve(g, pts, cont);
+    pts.forEach(function (p, i) { (i || cont) ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1]); });
   }
   function hexA(hex, a) {
     var n = parseInt(hex.slice(1), 16);
