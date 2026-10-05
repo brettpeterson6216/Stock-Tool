@@ -44,7 +44,7 @@ function suggestDiscountRate(beta, debtToEquityPct) {
   const wE = 1 / (1 + d), wD = d / (1 + d);
   const costDebtAfterTax = 5.5 * (1 - 0.21);
   const wacc = wE * costEquity + wD * costDebtAfterTax;
-  return Math.round(Math.max(6, Math.min(13, wacc)) * 10) / 10;
+  return Math.round(Math.max(6, Math.min(12, wacc)) * 10) / 10;   // capped at 12%: a raw CAPM rate for a high-beta megacap (NVDA ~13.5%) is harsher than practitioners use
 }
 
 function sourceMeta(source, { asOf = null, status = "available", note = null } = {}) {

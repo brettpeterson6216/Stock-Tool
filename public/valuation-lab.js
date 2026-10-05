@@ -42,6 +42,10 @@
         var a = inc[0];
         var rev = raw(a.totalRevenue), gp = raw(a.grossProfit), oi = raw(a.operatingIncome), pretax = raw(a.incomeBeforeTax), taxexp = raw(a.incomeTaxExpense), ni = raw(a.netIncome);
         if (rev > 0) { seed.startRevenue = rev; seed.seeded = true; }
+        // Gross profit is missing for some filers (Costco); derive it from cost
+        // of revenue rather than falling back to a generic 60%.
+        var cogs = raw(a.costOfRevenue);
+        if (!(gp > 0) && rev > 0 && cogs > 0 && cogs < rev) gp = rev - cogs;
         if (rev > 0 && gp > 0) seed.grossMargin = gp / rev;
         if (rev > 0 && Number.isFinite(oi)) seed.opMarginStart = oi / rev;
         if (Number.isFinite(pretax) && pretax !== 0 && Number.isFinite(taxexp)) seed.taxRate = Math.max(0, Math.min(0.5, taxexp / pretax));
@@ -81,8 +85,9 @@
   /* ---- default assumptions ---- */
   function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
   function baseInputs(seed) {
-    var gm = Number.isFinite(seed.grossMargin) ? seed.grossMargin : 0.6;
     var om = Number.isFinite(seed.opMarginStart) ? seed.opMarginStart : 0.15;
+    // Display only (gross profit and opex); the valuation runs on operating margin.
+    var gm = Number.isFinite(seed.grossMargin) ? seed.grossMargin : Math.min(0.9, Math.max(0.1, om + 0.2));
     /* Defaults follow the Projection tab's rules (Oct 2026 field test): start
        from recent growth or consensus, capped at 40%, fading to ~4%; no
        automatic margin expansion; exit P/E halfway from today's toward a
@@ -204,6 +209,14 @@
         VL.state = (saved && saved.scenarios) ? saved : defaultState(seed);
         VL.state.ticker = seed.ticker;
         render();
+        // Sector decides whether a DCF applies (banks/insurers do not fit it).
+        var S = window.S || {}, tk = seed.ticker;
+        if (!S.sector && tk && tk !== "—" && typeof fetch === "function") {
+          fetch("/api/analyst/" + encodeURIComponent(tk), { credentials: "same-origin" })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (d) { if (d && d.sector && window.S && window.S.ticker === tk) { window.S.sector = d.sector; if (/financ|bank|insur/i.test(d.sector)) render(); } })
+            .catch(function () {});
+        }
       } catch (e) { if (window.console) console.error("ValuationLab", e); VL.container.innerHTML = '<div class="vlab-err">Could not build the model. ' + (e && e.message || "") + '</div>'; }
     },
     reseed: function () { try { var seed = readSeed(); VL.state = defaultState(seed); render(); } catch (e) { } },
@@ -242,6 +255,20 @@
       '<div class="vlab-hz"><span>Horizon</span><button class="' + (st.years === 5 ? "active" : "") + '" data-yr="5">5y</button><button class="' + (st.years === 10 ? "active" : "") + '" data-yr="10">10y</button></div>' +
       '</div>';
     root.appendChild(head);
+
+    /* A cash-flow DCF does not fit banks and insurers: borrowing is their raw
+       material, not financing, so "free cash flow" is not meaningful. JPM
+       came out at -50% here. Say so plainly and point to the earnings model. */
+    if (/financ|bank|insur/i.test((window.S && window.S.sector) || "")) {
+      var fin = el("div", "vlab-finnote");
+      fin.innerHTML = '<strong>This model doesn\'t fit ' + st.ticker + '.</strong> Banks and insurers borrow as part of their business, so a free-cash-flow DCF gives a meaningless answer. Value them on earnings and book value instead: the Projection tab is set up for that.' +
+        ' <button type="button" class="vlab-btn vlab-gold" id="vlab-to-proj">Open the Projection tab</button>';
+      root.appendChild(fin);
+      VL.container.innerHTML = ""; VL.container.appendChild(root);
+      var go = root.querySelector("#vlab-to-proj");
+      if (go) go.onclick = function () { if (typeof window.navGoTo === "function") window.navGoTo("projection"); };
+      return;
+    }
 
     /* historical strip */
     if (st.hist && st.hist.length) {
@@ -582,6 +609,7 @@
       ".vlab-btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--vl-line);background:#0c0e10;color:#f5ebd7;font:700 .76rem var(--sans);padding:.5rem .9rem;border-radius:8px;cursor:pointer;}",
       ".vlab-btn.vlab-gold{background:var(--lens-gold,#d9b35e);color:#17130c;border-color:var(--lens-gold,#d9b35e);}",
       ".vlab-note{margin-top:10px;font:500 .66rem var(--sans);color:rgba(245,235,215,.4);line-height:1.5;}",
+      ".vlab-finnote{margin:14px 0;padding:16px 18px;border:1px solid rgba(227,169,69,.45);border-radius:12px;background:rgba(227,169,69,.07);font:500 .86rem/1.6 var(--sans);color:var(--text,#f3eee3);}.vlab-finnote .vlab-btn{margin-top:10px;display:inline-flex}",
       ".vlab-err{padding:.9rem;border:1px solid rgba(201,107,112,.4);background:rgba(201,107,112,.08);border-radius:10px;color:#e0a6a9;font:600 .82rem var(--sans);}",
       ".vlab-toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%) translateY(10px);background:#171411;color:#f5ebd7;border:1px solid var(--vl-line);padding:.6rem 1rem;border-radius:10px;font:600 .8rem var(--sans);opacity:0;transition:.2s;z-index:99999;}.vlab-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}",
       "@media(max-width:640px){.vlab-tk{font-size:1.35rem;}.vlab-weights{grid-template-columns:1fr;}.vlab-summary{gap:6px;}.vlab-scell{min-width:70px;}.vlab-scell strong{font-size:.9rem;}}",
