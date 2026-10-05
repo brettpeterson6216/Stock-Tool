@@ -83,7 +83,13 @@
   function isUserModified() {
     return PL.model && (Object.keys(PL.model.userEdited || {}).length > 0 || PL.model.userEditedScenarios);
   }
-  function hasUnsavedChanges() { return PL.model && JSON.stringify(PL.model) !== PL.savedJson; }
+  // A fresh model nobody has touched has nothing to save; it used to say
+  // "Unsaved changes" the moment the lab opened.
+  function hasUnsavedChanges() {
+    if (!PL.model) return false;
+    if (!PL.savedJson) return isUserModified();
+    return JSON.stringify(PL.model) !== PL.savedJson;
+  }
 
   /* ───────────────────────── field definitions ───────────────────────── */
   var FIELDS = [
@@ -125,6 +131,7 @@
     netMargin: "Net income as a percent of that year’s revenue. 18.5 means 18.5%.",
     peLow: "Conservative price-to-earnings multiple applied to that year’s EPS.",
     peHigh: "Optimistic price-to-earnings multiple applied to that year’s EPS.",
+    shareChange: "Yearly change in diluted shares. Buybacks shrink the count (−2.5 means 2.5% fewer shares a year), which lifts EPS; stock-based pay and new issuance grow it.",
     cagr: "Compound annual growth rate from the starting share price to that year’s modeled price.",
   };
 
@@ -137,6 +144,7 @@
         { key: "revGrowth", label: "Revenue growth", type: "in", suffix: "%", tip: ROW_TIPS.revGrowth },
         { key: "netIncome", label: "Net income", type: "out", fmt: function (r) { return fmtBig(r.netIncome); }, base: function (b) { return fmtBig(b.netIncome); } },
         { key: "netMargin", label: "Net margin", type: "in", suffix: "%", tip: ROW_TIPS.netMargin, baseOut: function (b) { return fmtPct1(b.netMargin); } },
+        { key: "shareChange", label: "Share change", type: "in", suffix: "%", tip: ROW_TIPS.shareChange },
         { key: "eps", label: "EPS", type: "out", fmt: function (r) { return fmtEps(r.eps); }, base: function (b) { return fmtEps(b.eps); } },
       ],
     },
@@ -187,7 +195,7 @@
     var top = el("div", "plab2-top");
     var found = el("section", "plab2-found");
     found.setAttribute("aria-label", "Model Foundation inputs");
-    var fh = el("div", "plab2-panel-h", '<span>Model Foundation</span><span class="plab2-panel-sub">Base year FY' + esc(m.baseYear) + '</span>');
+    var fh = el("div", "plab2-panel-h", '<span>Model Foundation</span><span class="plab2-panel-sub">Base: ' + esc(m.basePeriod || ("FY" + m.baseYear)) + '</span>');
     found.appendChild(fh);
     var grid = el("div", "plab2-fgrid");
     FIELDS.forEach(function (f) {
@@ -318,11 +326,11 @@
     var th0 = el("th", "plab2-rowlbl", "Metric");
     th0.scope = "col";
     hr.appendChild(th0);
-    var thBase = el("th", "plab2-basecol", '<span class="plab2-baseyr">' + m.baseYear + '</span><small>base year</small>');
+    var thBase = el("th", "plab2-basecol", '<span class="plab2-baseyr">' + esc(m.basePeriod ? m.basePeriod.replace(/^TTM to /, "") : String(m.baseYear)) + '</span><small>' + (m.basePeriod && /^TTM/.test(m.basePeriod) ? "last 12 months" : "base year") + '</small>');
     thBase.scope = "col";
     thBase.title = "Starting point — derived from the Model Foundation inputs";
     hr.appendChild(thBase);
-    years.forEach(function (y) { var th = el("th", null, String(y)); th.scope = "col"; hr.appendChild(th); });
+    years.forEach(function (y, i) { var th = el("th", null, String(y) + '<small class="plab2-yoff">+' + (i + 1) + "y</small>"); th.scope = "col"; hr.appendChild(th); });
     thead.appendChild(hr);
     table.appendChild(thead);
 
@@ -336,9 +344,15 @@
       sec.rows.forEach(function (row) {
         var tr = el("tr", "plab2-r plab2-r-" + row.key + (row.band ? " plab2-band-" + row.band : ""));
         var lblTd = el("td", "plab2-rowlbl");
-        lblTd.innerHTML = row.tip
+        lblTd.innerHTML = (row.tip
           ? '<span class="plab2-ftip plab2-rowtip" tabindex="0" role="note" aria-label="' + esc(row.tip) + '" data-tip="' + esc(row.tip) + '">' + esc(row.label) + '</span>'
-          : esc(row.label);
+          : esc(row.label)) +
+          (row.type === "in"
+            ? '<span class="plab2-rowtools">' +
+                '<button type="button" class="plab2-rt" data-fill="' + row.key + '" title="Copy the first year to every year" aria-label="Fill ' + esc(row.label) + ' right from the first year"><i class="ti ti-arrow-right" aria-hidden="true"></i></button>' +
+                '<button type="button" class="plab2-rt" data-fade="' + row.key + '" title="Straight line from the first year to the last year" aria-label="Fade ' + esc(row.label) + ' from the first year to the last"><i class="ti ti-trending-down" aria-hidden="true"></i></button>' +
+              "</span>"
+            : "");
         tr.appendChild(lblTd);
         var baseTd = el("td", "plab2-basecol");
         baseTd.setAttribute("data-basecell", row.key);
@@ -436,7 +450,30 @@
     if (inp) inp.parentElement.classList.toggle("invalid", !!msg);
   }
 
+  /* Fill right copies year 1 everywhere; Fade draws a straight line from
+     year 1 to the final year of the horizon. One case used to take 20 cell
+     edits; with these it takes a handful. */
+  function fillRow(field, mode) {
+    var arr = PL.model.scenarios[PL.model.selectedScenario][field];
+    var n = PL.model.selectedHorizon, a = Number(arr[0]), b = Number(arr[n - 1]);
+    if (!Number.isFinite(a)) return;
+    for (var i = 1; i < arr.length; i += 1) {
+      if (mode === "fill") arr[i] = a;
+      else if (i < n) arr[i] = +(a + (b - a) * i / Math.max(1, n - 1)).toFixed(2);
+      else arr[i] = b;
+    }
+    PL.model.userEditedScenarios = true;
+    touch();
+    recompute();
+  }
+
   function wireTable() {
+    qa(".plab2-rt").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var f = btn.getAttribute("data-fill"), d = btn.getAttribute("data-fade");
+        fillRow(f || d, f ? "fill" : "fade");
+      });
+    });
     qa(".plab2-cin").forEach(function (inp) {
       inp.addEventListener("input", function () {
         var field = inp.getAttribute("data-field");
@@ -535,7 +572,25 @@
       '<span>Base net margin <strong>' + fmtPct1(d.netMargin) + "</strong>" + derivedTag + "</span>" +
       '<span class="plab2-dsep" aria-hidden="true">·</span>' +
       "<span>Base EPS <strong>" + fmtEps(d.eps) + "</strong></span>" +
-      '<span class="plab2-dhint">calculated from the inputs above</span>';
+      '<span class="plab2-dhint">calculated from the inputs above</span>' + renderAnchors();
+  }
+
+  /* Reference points beside the inputs, so a default can be checked against
+     something: today's P/E on the same earnings, where the default came from,
+     and consensus or an analyst target when the data plan provides them. */
+  function renderAnchors() {
+    var m = PL.model, n = m.assumptionNotes || {}, S = window.S || {}, est = S.estimates || {}, parts = [];
+    var d = M().plBaseDerived(m);
+    var pe = d.eps > 0 ? m.startPrice / d.eps : null;
+    parts.push("Today's P/E <strong>" + (pe ? pe.toFixed(1) + "×" : "n/m (loss)") + "</strong>");
+    if (n.exitPE) parts.push("Default exit P/E <strong>" + n.exitPE[0] + "–" + n.exitPE[1] + "×</strong> <span class='plab2-dhint'>halfway from today's to a long-run " + n.normPE + "×</span>");
+    if (Number.isFinite(n.startGrowth)) parts.push("Growth <strong>" + n.startGrowth + "% → " + n.longRunGrowth + "%</strong> <span class='plab2-dhint'>from " + esc(n.growthFrom || "recent growth") + ", fading over 5 years</span>");
+    if (Number.isFinite(n.shareChange) && n.shareChange !== 0) parts.push("Shares <strong>" + (n.shareChange > 0 ? "+" : "") + n.shareChange + "%/yr</strong> <span class='plab2-dhint'>3-year trend</span>");
+    if (n.turnaround) parts.push("<span class='plab2-dturn'>Turnaround assumption: margin climbs toward " + (n.targetMargin || 10) + "% (sector norm) by year 5</span>");
+    if (est.estimatesAvailable !== false && Number.isFinite(Number(est.revenueGrowth))) parts.push("Consensus growth <strong>" + Number(est.revenueGrowth).toFixed(1) + "%</strong>");
+    var at = S.analystTarget;
+    if (at && at.mean > 0) parts.push("Analyst target <strong>" + fmtPrice(at.mean) + "</strong>");
+    return '<div class="plab2-anchors">' + parts.map(function (p) { return "<span>" + p + "</span>"; }).join('<span class="plab2-dsep" aria-hidden="true">·</span>') + "</div>";
   }
 
   function renderOutcome(active, outlook) {
@@ -560,7 +615,12 @@
       '<div class="plab2-oc-cagr">' + fmtPct0(t.cagrLow) + " – " + fmtPct0(t.cagrHigh) + " annualized · " + fmtPctSigned(upLow) + " to " + fmtPctSigned(upHigh) + " vs " + fmtPrice(m.startPrice) + "</div>" +
       '<div class="plab2-oc-stats">' +
         "<span>Revenue " + fmtBig(t.revenue) + "</span><span>EPS " + fmtEps(t.eps) + "</span><span>Net margin " + fmtPct1(t.netMargin) + "</span>" +
-      "</div>";
+      "</div>" +
+      // What the midpoint is worth today at a 10% required return: a future
+      // price is not a present value, and readers took it as one.
+      '<div class="plab2-oc-pv" title="Midpoint discounted at 10% a year back to today">Worth today at a 10% required return <strong>' +
+        fmtPrice(t.priceMid / Math.pow(1.1, t.yearsOut)) + "</strong> " +
+        (t.priceMid / Math.pow(1.1, t.yearsOut) >= m.startPrice ? "<span class='plab2-pv-up'>above</span>" : "<span class='plab2-pv-dn'>below</span>") + " today's price</div>";
   }
 
   /* ───────────────────────── chart (pure SVG, from the same rows) ───────────────────────── */
@@ -578,7 +638,7 @@
     var W = 760, H = 235, padL = 52, padR = 16, padT = 16, padB = 26;
     var lo = m.startPrice, hi = m.startPrice;
     pts.forEach(function (p) { lo = Math.min(lo, p.low); hi = Math.max(hi, p.high); });
-    var span = (hi - lo) || 1; lo -= span * 0.08; hi += span * 0.06;
+    var span = (hi - lo) || 1; lo = Math.max(0, lo - span * 0.08); hi += span * 0.06;
     var x0 = active.baseYear, x1 = rows[rows.length - 1].year;
     function X(yr) { return padL + (yr - x0) / (x1 - x0) * (W - padL - padR); }
     function Y(v) { return padT + (1 - (v - lo) / (hi - lo)) * (H - padT - padB); }
@@ -760,6 +820,10 @@
     if (isUserModified()) chips.push('<span class="plab2-chip plab2-chip-edit"><i class="ti ti-pencil" aria-hidden="true"></i> User modified</span>');
     if (PL.loadingSeed) chips.push('<span class="plab2-chip"><i class="ti ti-loader-2 plab2-spin" aria-hidden="true"></i> Loading fundamentals…</span>');
     if (PL.seedHintShown) chips.push('<span class="plab2-chip plab2-chip-gold"><i class="ti ti-refresh" aria-hidden="true"></i> Fresh fundamentals available — use Re-seed</span>');
+    if (m.dataAsOf) {
+      var ageDays = (Date.now() - Date.parse(m.dataAsOf + "T00:00:00Z")) / 864e5;
+      if (ageDays > 100) chips.push('<span class="plab2-chip plab2-chip-warn" title="The newest SEC filing ends ' + esc(m.dataAsOf) + '. Companies often announce results weeks before filing them."><i class="ti ti-clock" aria-hidden="true"></i> Base data ends ' + esc(m.dataAsOf) + " — newer results may be out</span>");
+    }
     if (hasUnsavedChanges()) chips.push('<span class="plab2-chip plab2-chip-unsaved">Unsaved changes</span>');
     else if (PL.savedJson) chips.push('<span class="plab2-chip plab2-chip-saved"><i class="ti ti-check" aria-hidden="true"></i> Saved</span>');
     if (m.lastUpdated) chips.push('<span class="plab2-chip plab2-chip-dim">Updated ' + fmtTimeAgo(m.lastUpdated) + "</span>");
@@ -1151,8 +1215,43 @@
     }
     var tShares = ttm ? rawNum(ttm.sharesOutstanding) : NaN;
     if (Number.isFinite(tShares) && tShares > 0) shares = tShares;
+    // Diluted weighted-average shares from the latest quarter beat the
+    // cover-page basic count when the filing has them.
+    var dil = ttm && ttm.dilutedShares;
+    var dShares = dil ? rawNum(dil) : NaN;
+    if (Number.isFinite(dShares) && dShares > 0) shares = dShares;
+    if (dil && Number.isFinite(Number(dil.cagr3))) seed.shareCagr = Number(dil.cagr3);
+    // Recent growth trend: the newest TTM against the last annual report,
+    // annualised. It catches a turn that the last two annual reports miss.
+    if (ttm && ttm.basis === "ttm" && inc && inc.length) {
+      var fyEnd = rawNum(inc[0].endDate), fyRev = rawNum(inc[0].totalRevenue), tR = rawNum(ttm.revenue);
+      var asOfMs = Date.parse(String(ttm.asOf) + "T00:00:00Z");
+      var months = Number.isFinite(fyEnd) && Number.isFinite(asOfMs) ? (asOfMs - fyEnd * 1000) / (30.44 * 864e5) : NaN;
+      if (months >= 3 && fyRev > 0 && tR > 0) seed.ttmTrend = Math.pow(tR / fyRev, 12 / months) - 1;
+    }
+    if (ttm && ttm.asOf) seed.dataAsOf = String(ttm.asOf);
     if (Number.isFinite(shares) && shares > 0) seed.dilutedShares = shares;
     if (Number.isFinite(revenue) && revenue > 0) { seed.baseRevenue = revenue; seed.seeded = true; }
+    /* P/E from the same TTM earnings and share count the model uses. The
+       quote feed's P/E was a year stale (NVDA 47x against 30x on TTM). */
+    if (Number.isFinite(price) && price > 0 && Number.isFinite(netIncome) && Number.isFinite(shares) && shares > 0) {
+      seed.currentPE = netIncome > 0 ? price / (netIncome / shares) : NaN;
+    }
+    var est = S.estimates;
+    if (est && est.estimatesAvailable !== false && Number.isFinite(Number(est.revenueGrowth))) seed.consensusGrowth = Number(est.revenueGrowth) / 100;
+    var sector = S.sector || (est && est.sector) || null;
+    if (sector) {
+      seed.financialSector = /financ|bank|insur/i.test(sector);
+      var bm = typeof window.getSectorBenchmark === "function" ? window.getSectorBenchmark(sector) : null;
+      if (bm && bm.netMargin) seed.targetMargin = bm.netMargin;
+    }
+    seed.basePeriod = fyLabel ? fyLabel.replace(/ ·$/, "").replace(/^12 months to /, "TTM to ") : null;
+    /* Year columns count from the data's own period: a FY2025 base projects
+       2026 onward (it used to jump from "FY2025" straight to 2027), and a TTM
+       base projects from the year its twelve months end. */
+    var fyMatch = /^FY(\d{4})/.exec(fyLabel);
+    if (fyMatch) seed.baseYear = Number(fyMatch[1]);
+    else if (seed.dataAsOf) seed.baseYear = Number(String(seed.dataAsOf).slice(0, 4)) || seed.baseYear;
     // Deterministic net-income priority: statement net income first; else derive from EPS × shares and flag it.
     if (Number.isFinite(netIncome)) {
       seed.baseNetIncome = netIncome;
@@ -1274,6 +1373,7 @@
         }
         render();
         maybeCompleteSeedAsync(ticker);
+        ensureSector(ticker);
       } else {
         PL.model = math.plCreateModel({});
         PL.savedJson = null;
@@ -1321,6 +1421,26 @@
         } else renderStatus(PL.lastOutlook);
       }
     });
+  }
+
+  /* Sector sets the long-run P/E norm (financials 13x, others 20x) and the
+     path-to-profit margin for loss-makers. It comes from the company profile,
+     fetched once per ticker; a pristine model is rebuilt when it arrives. */
+  function ensureSector(ticker) {
+    var S = window.S || {};
+    if (!ticker || S.sector || PL.sectorFetched === ticker || typeof fetch !== "function") return;
+    PL.sectorFetched = ticker;
+    fetch("/api/analyst/" + encodeURIComponent(ticker), { credentials: "same-origin" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || !d.sector || !window.S || window.S.ticker !== ticker) return;
+        window.S.sector = d.sector;
+        if (PL.model && PL.model.ticker === ticker && !isUserModified() && !PL.savedJson) {
+          var s2 = readSeedFromApp();
+          if (seedComplete(s2)) { s2.horizon = PL.model.selectedHorizon; PL.model = M().plCreateModel(s2); render(); }
+        }
+      })
+      .catch(function () {});
   }
 
   function seedFromApp(force) { if (force) performReseed(false); else if (window.S && window.S.ticker) mount(PL.container || "il-projlab-mount"); }
@@ -1389,6 +1509,15 @@
       ".plab2-ferr{font:600 .62rem var(--sans);color:var(--red);text-align:right;}" +
       ".plab2-derived{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;margin-top:12px;padding-top:10px;border-top:1px dashed var(--border2);font:500 .72rem var(--sans);color:var(--text4);}" +
       ".plab2-derived strong{color:var(--text);font-variant-numeric:tabular-nums;}" +
+      ".plab2-anchors{flex-basis:100%;display:flex;flex-wrap:wrap;gap:6px 8px;margin-top:6px;padding-top:8px;border-top:1px dashed var(--border2);}" +
+      ".plab2-dturn{color:var(--gold-bright);}" +
+      ".plab2-rowtools{display:inline-flex;gap:2px;margin-left:6px;vertical-align:middle;opacity:.55;transition:opacity .15s;}" +
+      ".plab2-r:hover .plab2-rowtools,.plab2-rowtools:focus-within{opacity:1;}" +
+      ".plab2-rt{width:22px;height:22px;display:inline-grid;place-items:center;border:1px solid var(--border2);border-radius:6px;background:transparent;color:var(--text3);cursor:pointer;font-size:12px;padding:0;}" +
+      ".plab2-rt:hover{color:var(--gold-bright);border-color:var(--gold-ring);}" +
+      ".plab2-yoff{display:block;font-size:.62rem;font-weight:500;color:var(--text5);}" +
+      ".plab2-oc-pv{font:500 .76rem var(--sans);color:var(--text4);margin-top:4px;}.plab2-oc-pv strong{color:var(--text);}" +
+      ".plab2-pv-up{color:var(--pl-bull);}.plab2-pv-dn{color:var(--pl-bear);}" +
       ".plab2-dsep{color:var(--text5);}" +
       ".plab2-dhint{font:500 .6rem var(--sans);color:var(--text5);margin-left:auto;}" +
       ".plab2-dtag{font:700 .61rem var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--gold-bright);border:1px solid var(--gold-ring);border-radius:4px;padding:0 4px;}" +

@@ -365,7 +365,7 @@
       secfilings: ["Feeds Evidence", "Primary-source evidence for quality, risk and score confidence.", "drivers"],
       institutional: ["Feeds Evidence", "Ownership context is supporting evidence, not a standalone buy signal.", "drivers"],
       screener: ["Candidate workflow", "Screen broadly, then validate timing, trend, zones and value in one toolkit.", "snapshot"],
-      projection: ["Feeds Scenario", "Send your valuation assumptions into the decision workflow and compare the two lenses.", "scenario"],
+      projection: ["Next step", "Check this valuation against the stock's LensScore, which also weighs quality, trend and risk.", "scenario"],
       dcf: ["Feeds LensValue", "Use modeled value as one input alongside quality, expectations and downside.", "value"],
       reports: ["Decision memory", "Reopen saved LensScore scenarios with their original score, price and assumptions.", "snapshot"],
     };
@@ -375,7 +375,7 @@
       const row = document.createElement("div");
       row.className = "il-lens-context";
       row.dataset.ilLensContext = section;
-      row.innerHTML = `<div><span>${escapeHtml(eyebrow)}</span><strong>${escapeHtml(copy)}</strong></div><a data-il-lens-link="${escapeHtml(view)}" href="/lens-score">Open Lens Toolkit <i class="ti ti-arrow-up-right"></i></a>`;
+      row.innerHTML = `<div><span>${escapeHtml(eyebrow)}</span><strong>${escapeHtml(copy)}</strong></div><a data-il-lens-link="${escapeHtml(view)}" href="/lens-score">Open LensScore <i class="ti ti-arrow-up-right"></i></a>`;
       body.insertAdjacentElement("afterbegin", row);
     });
     updateShellContext();

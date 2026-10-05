@@ -12,7 +12,7 @@
 //    GET /api/institutional/:ticker
 //    GET /api/darkpool/:ticker (legacy path; returns FINRA OTC activity)
 // ============================================================
-const { ttmFromFacts, latestSharesFromFacts } = require("../lib/ttm");
+const { ttmFromFacts, matchedTtm, latestDilutedShares, latestSharesFromFacts } = require("../lib/ttm");
 const express = require("express");
 
 const { FINNHUB_KEY }  = require("../lib/config");
@@ -27,6 +27,24 @@ function requestTicker(req, res) {
   const ticker = normalizeTicker(req.params.ticker);
   if (!ticker) res.status(400).json({ error: "Invalid ticker." });
   return ticker;
+}
+
+/* Discount rate for the DCF tools. Cost of equity from a Blume-adjusted beta
+   (raw betas overstate the extremes), a 4.3% risk-free rate and a 5% equity
+   premium, blended with an after-tax cost of debt by a debt/equity ratio.
+   The old formula used the raw beta alone and gave NVDA 16.9%. */
+function suggestDiscountRate(beta, debtToEquityPct) {
+  const b = Number(beta);
+  if (!Number.isFinite(b) || b <= 0) return null;
+  const adj = 0.67 * b + 0.33;
+  const costEquity = 4.3 + adj * 5;
+  const de = Number(debtToEquityPct);
+  // Capped at 1:1 so a bank's deposit funding cannot drag it to the floor.
+  const d = Number.isFinite(de) && de > 0 ? Math.min(de / 100, 1) : 0;
+  const wE = 1 / (1 + d), wD = d / (1 + d);
+  const costDebtAfterTax = 5.5 * (1 - 0.21);
+  const wacc = wE * costEquity + wD * costDebtAfterTax;
+  return Math.round(Math.max(6, Math.min(13, wacc)) * 10) / 10;
 }
 
 function sourceMeta(source, { asOf = null, status = "available", note = null } = {}) {
@@ -313,7 +331,7 @@ router.get("/financials/:ticker", requireAccount, async (req, res) => {
     const pct = v => (v != null && !isNaN(v)) ? { raw: v / 100 } : null;
 
     const defaultKeyStatistics = {
-      trailingPE:                   n(m.peNormalizedAnnual ?? m.peBasicExclExtraTTM ?? safeRatio(marketPrice, latestEps)),
+      trailingPE:                   n(m.peBasicExclExtraTTM ?? m.peNormalizedAnnual ?? safeRatio(marketPrice, latestEps)),
       forwardPE:                    null,
       priceToBook:                  n(m.pbQuarterly ?? (marketCap != null ? safeRatio(marketCap, latestEquity) : null)),
       priceToSalesTrailing12Months: n(m.psTTM ?? (marketCap != null ? safeRatio(marketCap, latestRevenue) : null)),
@@ -380,15 +398,21 @@ router.get("/financials/:ticker", requireAccount, async (req, res) => {
         defaultKeyStatistics,
         financialData,
         trailingTwelveMonths: (() => {
-          const rev = ttmValue(["Revenues","RevenueFromContractWithCustomerExcludingAssessedTax","SalesRevenueNet","RevenueFromContractWithCustomerIncludingAssessedTax"]);
-          const ni = ttmValue(["NetIncomeLoss","ProfitLoss"]);
+          const REV = ["Revenues","RevenueFromContractWithCustomerExcludingAssessedTax","SalesRevenueNet","RevenueFromContractWithCustomerIncludingAssessedTax","RevenuesNetOfInterestExpense"];
+          const NI = ["NetIncomeLoss","ProfitLoss"];
+          // Revenue and net income from the same twelve months, never one of each.
+          const both = matchedTtm(gaap, REV, NI);
+          const rev = both ? both.revenue : ttmValue(REV);
+          const ni = both ? both.netIncome : null;
           const sh = latestShares();
+          const dil = latestDilutedShares(facts);
           return {
             revenue: rev ? { raw: rev.val } : null,
             netIncome: ni ? { raw: ni.val } : null,
             asOf: rev ? rev.asOf : null,
             basis: rev ? rev.basis : null,
             sharesOutstanding: sh ? { raw: sh.val } : null,
+            dilutedShares: dil ? { raw: dil.val, asOf: dil.asOf, cagr3: dil.cagr3 } : null,
           };
         })(),
       }]},
@@ -657,7 +681,9 @@ router.get("/estimates/:ticker", requirePro, async (req, res) => {
     }
 
     const m         = met?.metric || {};
-    const forwardPE = m["peNormalizedAnnual"] || m["peBasicExclExtraTTM"] || null;
+    // Filled in below from a real forward EPS. The metric feed has no forward
+    // P/E, and its annual normalized figure is a year-old trailing number.
+    let forwardPE = null;
 
     const marginTrend = (() => {
       const mg3   = m["netProfitMargin3Y"]   || null;
@@ -699,13 +725,16 @@ router.get("/estimates/:ticker", requirePro, async (req, res) => {
     } catch (_) {}
 
     const beta = m["beta"] || m["betaAnnual"] || null;
-    let suggestedWACC = null;
-    if (beta) {
-      suggestedWACC = Math.round((4.5 + Number(beta) * 5.5) * 10) / 10;
-      suggestedWACC = Math.max(6, Math.min(20, suggestedWACC));
-    }
+    const suggestedWACC = suggestDiscountRate(beta, m["totalDebt/totalEquityQuarterly"] ?? m["totalDebt/totalEquityAnnual"]);
+    const price = Number(m["currentPrice"]) || null;
+    if (nextYearEPS > 0 && price > 0) forwardPE = Math.round(price / nextYearEPS * 10) / 10;
 
     const available = Boolean(rev || eps || met || pt || fwdQuarterly.length);
+    /* The estimate, EPS and target endpoints are a separate paid Finnhub
+       product. When they fail the response used to say "available" with every
+       field null, so the page drew empty cards. Say what is actually there. */
+    const hasEstimates = revenueGrowth != null || epsGrowth != null || nextYearEPS != null || !!priceTarget;
+    const upstream = { revenueEstimates: !!rev?.data, epsEstimates: !!eps?.data, priceTarget: !!pt && !pt.error };
     if (!available) {
       return res.status(503).json({
         error: "Analyst estimates are unavailable from the configured provider.",
@@ -722,9 +751,14 @@ router.get("/estimates/:ticker", requirePro, async (req, res) => {
       nextYearEPS,
       fwdQuarterly,
       suggestedWACC,
+      estimatesAvailable: hasEstimates,
+      upstream,
       impliedLens: sourceMeta("Finnhub analyst estimates", {
         asOf: null,
-        note: "Estimate periods are forecast periods, not source freshness dates.",
+        status: hasEstimates ? "available" : "unavailable",
+        note: hasEstimates
+          ? "Estimate periods are forecast periods, not source freshness dates."
+          : "Consensus estimates and price targets are not included in the current data plan.",
       }),
     });
   } catch (e) {
@@ -965,4 +999,5 @@ router.get("/darkpool/:ticker", requirePro, async (req, res) => {
   }
 });
 
+router.suggestDiscountRate = suggestDiscountRate;
 module.exports = router;

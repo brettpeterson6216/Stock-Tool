@@ -236,10 +236,14 @@ test("negative earnings never produce a positive valuation range", () => {
     assert.equal(row.cagrLow, null);
     assert.equal(row.negativeEarnings, true);
   });
-  // The blended expected value must refuse to average in a fake number.
+  // The blended expected value never averages in a fake price: the loss-making
+  // case counts at $0 and is named, instead of the whole value vanishing.
   const outlook = math.plCalculateOutlook(model);
   assert.equal(outlook.ok, true);
-  assert.equal(outlook.expected, null);
+  assert.deepEqual(outlook.expected.flooredAtZero, ["bear"]);
+  assert.equal(outlook.expected.midpoints.bear, 0);
+  const w = model.scenarioWeights;
+  near(outlook.expected.price, (outlook.scenarios.base.terminal.priceMid * w.base + outlook.scenarios.bull.terminal.priceMid * w.bull) / 100, 1e-6);
 });
 
 test("P/E low above P/E high is reordered with a warning, never silent", () => {
@@ -336,8 +340,8 @@ test("CSV export matches the canonical calculation exactly", () => {
   assert.ok(row, "base 2031 row present");
   const cells = row.split(",");
   assert.equal(Number(cells[2]), y2031.revenue);           // raw revenue
-  assert.equal(Number(cells[9]), +y2031.priceLow.toFixed(2));
-  assert.equal(Number(cells[10]), +y2031.priceHigh.toFixed(2));
+  assert.equal(Number(cells[11]), +y2031.priceLow.toFixed(2));
+  assert.equal(Number(cells[12]), +y2031.priceHigh.toFixed(2));
   const expLine = lines.find((l) => l.startsWith("Expected price (2031),"));
   assert.ok(expLine);
   near(Number(expLine.split(",")[1]), outlook.expected.price, 0.01);

@@ -2183,10 +2183,16 @@ function renderStock(result, ticker) {
   const ma200v=sma(c,200); const ma200Now=[...ma200v].reverse().find(v=>v!=null);
   const returns=c.map((v,i)=>i===0?0:(v-c[i-1])/c[i-1]*100);
   const stdDev=ImpliedLensMath.annualizedVolatility(c,252)*100;
-  const h52=meta.fiftyTwoWeekHigh; const l52=meta.fiftyTwoWeekLow;
+  /* The feed's 52-week range updates once a day, so a stock at a new high
+     read "+0.78% from high". Fold in today's price and the loaded closes. */
+  const last252=c.slice(-252).filter(v=>Number.isFinite(v)&&v>0);
+  const hiCands=[meta.fiftyTwoWeekHigh,price,...(last252.length?[Math.max(...last252)]:[])].filter(v=>Number.isFinite(v)&&v>0);
+  const loCands=[meta.fiftyTwoWeekLow,price,...(last252.length?[Math.min(...last252)]:[])].filter(v=>Number.isFinite(v)&&v>0);
+  const h52=hiCands.length?Math.max(...hiCands):null; const l52=loCands.length?Math.min(...loCands):null;
+  if(h52){meta.fiftyTwoWeekHigh=h52;} if(l52){meta.fiftyTwoWeekLow=l52;}
 
   const metrics=[
-    {l:'52W High',v:h52?`$${h52.toFixed(2)}`:'—',s:h52?fmtPct((price-h52)/h52*100)+' from high':'',c:h52?(price/h52<0.8?'dn':''):''},
+    {l:'52W High',v:h52?`$${h52.toFixed(2)}`:'—',s:h52?(price>=h52*0.9995?'At a 52-week high':fmtPct((price-h52)/h52*100)+' from high'):'',c:h52?(price/h52<0.8?'dn':''):''},
     {l:'52W Low',v:l52?`$${l52.toFixed(2)}`:'—',s:l52?fmtPct((price-l52)/l52*100)+' from low':'',c:''},
     {l:'Market Cap',v:fmtBig(meta.marketCap),s:'',c:''},
     {l:'Volume',v:meta.regularMarketVolume!=null?fmtShares(meta.regularMarketVolume):'—',s:meta.averageDailyVolume3Month?`${(meta.regularMarketVolume/meta.averageDailyVolume3Month).toFixed(2)}x avg`:'',c:''},
@@ -2364,18 +2370,19 @@ function renderStock(result, ticker) {
 
 // ── Sector benchmark data (industry medians) ──
 const SECTOR_BENCHMARKS = {
-  'Technology':        { pe:28, pb:6.5, ps:5.5, roe:22, grossMargin:55, debtEq:0.6 },
-  'Healthcare':        { pe:22, pb:4.2, ps:3.8, roe:16, grossMargin:58, debtEq:0.8 },
-  'Financial Services':{ pe:13, pb:1.4, ps:2.2, roe:12, grossMargin:65, debtEq:2.1 },
-  'Consumer Cyclical': { pe:20, pb:3.8, ps:1.2, roe:18, grossMargin:38, debtEq:1.1 },
-  'Consumer Defensive':{ pe:22, pb:4.5, ps:1.8, roe:20, grossMargin:42, debtEq:0.9 },
-  'Industrials':       { pe:20, pb:3.2, ps:1.6, roe:15, grossMargin:35, debtEq:1.0 },
-  'Energy':            { pe:12, pb:1.8, ps:1.2, roe:14, grossMargin:45, debtEq:0.6 },
-  'Utilities':         { pe:18, pb:1.6, ps:2.0, roe:10, grossMargin:40, debtEq:1.4 },
-  'Real Estate':       { pe:35, pb:2.0, ps:5.5, roe: 8, grossMargin:62, debtEq:1.5 },
-  'Communication':     { pe:18, pb:2.8, ps:2.2, roe:15, grossMargin:50, debtEq:0.9 },
-  'Basic Materials':   { pe:15, pb:2.2, ps:1.4, roe:12, grossMargin:30, debtEq:0.7 },
+  'Technology':        { pe:28, pb:6.5, ps:5.5, roe:22, grossMargin:55, debtEq:0.6 , netMargin:15 },
+  'Healthcare':        { pe:22, pb:4.2, ps:3.8, roe:16, grossMargin:58, debtEq:0.8 , netMargin:10 },
+  'Financial Services':{ pe:13, pb:1.4, ps:2.2, roe:12, grossMargin:65, debtEq:2.1 , netMargin:20 },
+  'Consumer Cyclical': { pe:20, pb:3.8, ps:1.2, roe:18, grossMargin:38, debtEq:1.1 , netMargin:7 },
+  'Consumer Defensive':{ pe:22, pb:4.5, ps:1.8, roe:20, grossMargin:42, debtEq:0.9 , netMargin:6 },
+  'Industrials':       { pe:20, pb:3.2, ps:1.6, roe:15, grossMargin:35, debtEq:1.0 , netMargin:9 },
+  'Energy':            { pe:12, pb:1.8, ps:1.2, roe:14, grossMargin:45, debtEq:0.6 , netMargin:10 },
+  'Utilities':         { pe:18, pb:1.6, ps:2.0, roe:10, grossMargin:40, debtEq:1.4 , netMargin:12 },
+  'Real Estate':       { pe:35, pb:2.0, ps:5.5, roe: 8, grossMargin:62, debtEq:1.5 , netMargin:15 },
+  'Communication':     { pe:18, pb:2.8, ps:2.2, roe:15, grossMargin:50, debtEq:0.9 , netMargin:12 },
+  'Basic Materials':   { pe:15, pb:2.2, ps:1.4, roe:12, grossMargin:30, debtEq:0.7 , netMargin:8 },
 };
+// netMargin: typical sector net margin, used as the Valuation Lab's path-to-profit target.
 function getSectorBenchmark(sector) {
   if (!sector) return null;
   const key = Object.keys(SECTOR_BENCHMARKS).find(k => sector.toLowerCase().includes(k.toLowerCase()));

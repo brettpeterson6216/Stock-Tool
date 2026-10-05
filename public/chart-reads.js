@@ -122,8 +122,18 @@
       if (mid && lo && hi && hi < price * 6) rows.push({ name: "Cash-flow model", lo: Math.min(lo, hi), mid: mid, hi: Math.max(lo, hi),
         note: "10-year EPS model around consensus growth of " + g.toFixed(0) + "%" });
     }
-    // Next year's earnings at the P/E range the market usually pays
-    if (eps > 0) rows.push({ name: "Earnings × 15–25 P/E", lo: eps * 15, mid: eps * 20, hi: eps * 25, note: "Next-year EPS $" + eps.toFixed(2) + " at 15×, 20× and 25×" });
+    /* Earnings at a multiple between today's and a long-run norm (13x for
+       financials, 20x otherwise), +-15%. A fixed 15-25x gave a bank and a
+       chipmaker the same multiple. Uses next-year EPS when consensus exists,
+       otherwise trailing EPS implied by the TTM P/E. */
+    var pe = Number(meta.trailingPE), ttmEps = pe > 0 && price > 0 ? price / pe : NaN;
+    var useEps = eps > 0 ? eps : ttmEps;
+    if (useEps > 0) {
+      var norm = /financ|bank|insur/i.test(S.sector || "") ? 13 : 20;
+      var mid = pe > 0 ? Math.max(8, Math.min(40, 0.5 * Math.min(pe, 80) + 0.5 * norm)) : norm;
+      rows.push({ name: "Earnings × " + Math.round(mid * 0.85) + "–" + Math.round(mid * 1.15) + " P/E", lo: useEps * mid * 0.85, mid: useEps * mid, hi: useEps * mid * 1.15,
+        note: (eps > 0 ? "Next-year" : "Trailing") + " EPS $" + useEps.toFixed(2) + " at a multiple halfway from today's to a long-run " + norm + "×" });
+    }
     // Wall Street price targets
     var at = S.analystTarget;
     if (at && at.low > 0 && at.high > 0) rows.push({ name: "Analyst targets", lo: at.low, mid: at.mean || null, hi: at.high });

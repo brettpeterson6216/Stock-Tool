@@ -1300,7 +1300,15 @@
               </div><!-- /dash-layout -->
 
               <!-- Custom Projection -->
-              <div class="panel-box il-desk-extra" id="il-custom-proj" style="margin-bottom:14px;">
+              <!-- The chart page used to carry a second Bear/Base/Bull calculator with
+                   its own seeds, which disagreed with the Valuation Lab. One model now:
+                   this card links to it; the old block stays hidden for its scripts. -->
+              <div class="panel-box il-lab-cta" style="margin-bottom:14px;">
+                <div class="panel-box-title">Bear, Base &amp; Bull for this company</div>
+                <p class="il-lab-cta-copy">Build three cases year by year, revenue to margin to earnings to price, seeded from the latest filings. Every assumption is editable, and you can turn the result into a share image.</p>
+                <button type="button" class="il-lab-cta-btn" onclick="navGoTo('projection')"><i class="ti ti-chart-line" aria-hidden="true"></i> Open the Valuation Lab</button>
+              </div>
+              <div class="panel-box il-desk-extra" id="il-custom-proj" style="margin-bottom:14px;" hidden>
                 <div class="panel-box-title">Custom Bear, Base &amp; Bull Projection</div>
                 <div style="font-size:11px;line-height:1.5;color:var(--text5);margin:-.35rem 0 .85rem;">Set each case independently. Open the Valuation Lab for a full year-by-year revenue-to-price model with editable growth, margins, and P/E — and a DCF on the same company.</div>
                 <div class="proj-controls projection-shared">

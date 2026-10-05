@@ -438,6 +438,12 @@
     var err = root.querySelector(".ilpc-err");
     if (!o.ok) { err.textContent = "Fix the model first: " + o.error; err.hidden = false; return; }
     err.hidden = true; state.outlook = o;
+    /* A card publishes the model. If the selected case implies a return far
+       outside anything a stock sustains for years, say so before it is shared. */
+    var tt = o.scenarios[state.scenario].terminal, warn = root.querySelector(".ilpc-warn");
+    var midCagr = tt.negativeEarnings ? null : Math.pow(tt.priceMid / state.model.startPrice, 1 / o.horizonYears) - 1;
+    warn.hidden = !(midCagr != null && (midCagr > 0.35 || midCagr < -0.25));
+    if (!warn.hidden) warn.textContent = "This case implies " + Math.round(midCagr * 100) + "% a year for " + o.horizonYears + " years, far outside what stocks usually sustain. Check the inputs before posting.";
     root.querySelectorAll("[data-ilpc]").forEach(function (b) {
       var p = b.getAttribute("data-ilpc").split(":");
       b.setAttribute("aria-pressed", String(state[p[0]] === p[1]));
@@ -542,6 +548,7 @@
     ".ilpc-btn.is-gold{background:var(--rp-gold,#e3a945);border-color:transparent;color:#17130c}" +
     ".ilpc-btn:focus-visible,.ilpc-type:focus-visible,.ilpc-seg button:focus-visible,.ilpc-x:focus-visible{outline:2px solid var(--rp-gold,#e3a945);outline-offset:2px}" +
     ".ilpc-err{margin:0;color:#e5735f;font:500 13px/1.4 var(--rp-sans,sans-serif)}" +
+    ".ilpc-warn{margin:0;padding:10px 12px;border-radius:10px;border:1px solid rgba(227,169,69,.45);background:rgba(227,169,69,.08);color:var(--rp-text,#f3eee3);font:500 13px/1.45 var(--rp-sans,sans-serif)}" +
     "@media (max-width:860px){.ilpc{padding:0;align-items:flex-end}.ilpc-sheet{max-height:94dvh;border-radius:20px 20px 0 0}" +
     ".ilpc-body{grid-template-columns:1fr;grid-template-areas:'s' 'c' 'a';padding:10px 16px 24px}.ilpc-head{padding:18px 16px 4px}" +
     ".ilpc-types{flex-direction:row}.ilpc-type{flex:1 1 0;min-width:0;padding:10px}.ilpc-type b{font-size:13.5px}.ilpc-type span{display:none}.ilpc-stage{padding:8px;min-height:0}.ilpc-canvas{max-height:46vh}" +
@@ -571,6 +578,7 @@
             '</div><span class="ilpc-size-note"></span></div>' +
             '<label class="ilpc-group"><span class="ilpc-lbl">Headline <em>optional</em></span><input class="ilpc-head-in" type="text" maxlength="80" autocomplete="off"></label>' +
             '<p class="ilpc-err" role="alert" hidden></p>' +
+            '<p class="ilpc-warn" role="status" hidden></p>' +
           '</div>' +
           '<div class="ilpc-stage"><canvas class="ilpc-canvas" aria-label="Preview of the image"></canvas></div>' +
           '<div class="ilpc-actions">' +

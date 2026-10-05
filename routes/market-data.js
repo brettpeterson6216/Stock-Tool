@@ -442,7 +442,10 @@ router.get("/quote/:ticker", checkAnalysisLimit, async (req, res) => {
                 averageDailyVolume3Month: m2["3MonthAverageTradingVolume"] ? m2["3MonthAverageTradingVolume"]*1e6 : null,
                 marketCap: shares2 && price2 ? shares2*price2 : null,
                 fiftyTwoWeekHigh: m2["52WeekHigh"]||null, fiftyTwoWeekLow: m2["52WeekLow"]||null,
-                trailingPE: m2.peNormalizedAnnual||m2.peBasicExclExtraTTM||null,
+                // TTM first: the annual figure lags a full fiscal year (NVDA read 47x vs 30x TTM).
+                trailingPE: m2.peBasicExclExtraTTM||m2.peNormalizedAnnual||null,
+                peBasis: m2.peBasicExclExtraTTM ? "ttm" : (m2.peNormalizedAnnual ? "annual" : null),
+                beta: Number.isFinite(Number(m2.beta)) ? Number(m2.beta) : null,
               }, timestamp: timestamps, indicators: {
                 quote: [{ open: opens, high: highs, low: lows, close: closes, volume: vols }],
                 adjclose: [{ adjclose: closes }],
@@ -487,7 +490,10 @@ router.get("/quote/:ticker", checkAnalysisLimit, async (req, res) => {
         result.meta.marketCap             = (shares && price) ? shares*price : result.meta.marketCap;
         result.meta.fiftyTwoWeekHigh      = m["52WeekHigh"]  || result.meta.fiftyTwoWeekHigh;
         result.meta.fiftyTwoWeekLow       = m["52WeekLow"]   || result.meta.fiftyTwoWeekLow;
-        result.meta.trailingPE            = m.peNormalizedAnnual || m.peBasicExclExtraTTM || result.meta.trailingPE;
+        // TTM first: the annual normalized P/E lags a full fiscal year.
+        result.meta.trailingPE            = m.peBasicExclExtraTTM || m.peNormalizedAnnual || result.meta.trailingPE;
+        result.meta.peBasis               = m.peBasicExclExtraTTM ? "ttm" : (m.peNormalizedAnnual ? "annual" : result.meta.peBasis || null);
+        if (result.meta.beta == null && Number.isFinite(Number(m.beta))) result.meta.beta = Number(m.beta);
         result.meta.averageDailyVolume3Month = m["3MonthAverageTradingVolume"]
           ? m["3MonthAverageTradingVolume"]*1e6 : result.meta.averageDailyVolume3Month;
       } catch (_) {}

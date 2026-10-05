@@ -404,6 +404,79 @@
       netMargin: plFill(spec.netMargin, PL_MAX_YEARS, 10),
       peLow: plFill(spec.peLow, PL_MAX_YEARS, 15),
       peHigh: plFill(spec.peHigh, PL_MAX_YEARS, 25),
+      // Yearly change in diluted shares, whole percent: buybacks negative.
+      shareChange: plFill(spec.shareChange, PL_MAX_YEARS, 0),
+    };
+  }
+
+  function plClamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+  function plR1(v) { return Math.round(v * 10) / 10; }
+
+  /* Default assumptions. The field test (Oct 2026) showed the old rules -
+     last year's growth held flat, margins moved by fixed points, exit
+     multiples at today's P/E - produced a $3,796 NVDA base case, a Costco
+     bear case with a loss, and nothing at all for Intel. These rules fade
+     growth toward a long-run rate, move margins by percentage, revert the
+     exit multiple halfway toward a long-run norm, and give loss-makers a path
+     to an industry margin. Every rule is visible and editable in the lab. */
+  function plDefaultAssumptions(seed) {
+    var pct = function (v) { var n = Number(v); return Number.isFinite(n) ? n * 100 : NaN; };
+    var growthSources = [pct(seed.consensusGrowth)].filter(Number.isFinite);
+    if (!growthSources.length) growthSources = [pct(seed.ttmTrend), pct(seed.histGrowth)].filter(Number.isFinite);
+    var g1 = growthSources.length ? growthSources.reduce(function (a, b) { return a + b; }, 0) / growthSources.length : 8;
+    g1 = plClamp(g1, -15, 40);
+    var gT = g1 >= 4 ? 4 : plR1(Math.max(g1, 3));
+    var fadeG = function (i) { return Math.min(i / 4, 1); };          // year 1 = g1, year 5 onward = gT
+    var fadeM = function (i) { return Math.min((i + 1) / 5, 1); };    // reaches target in year 5
+
+    var revenue = Number(seed.baseRevenue), ni = Number(seed.baseNetIncome);
+    var m = revenue > 0 && Number.isFinite(ni) ? plClamp(ni / revenue * 100, -80, 80) : 10;
+    var loss = m <= 0;
+    var target = Number(seed.targetMargin) > 0 ? Number(seed.targetMargin) : 10;
+
+    var cur = Number(seed.currentPE);
+    var hasPE = Number.isFinite(cur) && cur > 0;
+    var norm = seed.financialSector ? 13 : 20;
+    var exitMid = hasPE ? plClamp(0.5 * Math.min(cur, 80) + 0.5 * norm, 8, 40) : norm;
+    var baseLo = exitMid * 0.85, baseHi = exitMid * 1.15;
+    var startPE = hasPE ? plClamp(cur, 5, 80) : exitMid;
+
+    var shareChange = Number.isFinite(Number(seed.shareCagr)) ? plR1(plClamp(Number(seed.shareCagr) * 100, -5, 5)) : 0;
+
+    function build(kind) {
+      var out = { revGrowth: [], netMargin: [], peLow: [], peHigh: [], shareChange: [] };
+      var exitLo = kind === "bear" ? baseLo * 0.8 : kind === "bull" ? baseHi : baseLo;
+      var exitHi = kind === "bear" ? baseLo : kind === "bull" ? baseHi * 1.2 : baseHi;
+      for (var i = 0; i < PL_MAX_YEARS; i += 1) {
+        var g = g1 + (gT - g1) * fadeG(i);
+        if (kind === "bear") g -= Math.max(2, Math.abs(g) * 0.4);
+        if (kind === "bull") g += Math.max(2, Math.abs(g) * 0.3);
+        out.revGrowth.push(plR1(g));
+        var mm;
+        if (loss) {
+          // A recovery case: base gets most of the way to the sector's typical
+          // margin by year 5, bull a little past it, bear well short.
+          var tgt = target * (kind === "bear" ? 0.45 : kind === "bull" ? 1.25 : 0.85);
+          mm = m + (tgt - m) * fadeM(i);
+        } else {
+          mm = kind === "bear" ? m * 0.85 : kind === "bull" ? Math.min(m * 1.12, m + 8, 80) : m;
+        }
+        out.netMargin.push(plR1(mm));
+        // The multiple moves from today's toward the exit range over five years.
+        var f = Math.min((i + 1) / 5, 1);
+        out.peLow.push(plR1(Math.max(2, startPE * 0.92 + (exitLo - startPE * 0.92) * f)));
+        out.peHigh.push(plR1(Math.max(3, startPE * 1.08 + (exitHi - startPE * 1.08) * f)));
+        out.shareChange.push(shareChange);
+      }
+      return plNewScenario(out);
+    }
+    return {
+      scenarios: { bear: build("bear"), base: build("base"), bull: build("bull") },
+      notes: {
+        growthFrom: growthSources.length ? (Number.isFinite(pct(seed.consensusGrowth)) ? "consensus" : "recent growth") : "default",
+        startGrowth: plR1(g1), longRunGrowth: gT, exitPE: [plR1(baseLo), plR1(baseHi)], normPE: norm,
+        currentPE: hasPE ? plR1(cur) : null, turnaround: loss, targetMargin: loss ? target : null, shareChange: shareChange,
+      },
     };
   }
 
@@ -416,17 +489,11 @@
     var dilutedShares = Number(seed.dilutedShares) > 0 ? Number(seed.dilutedShares) : 1e9;
     var baseRevenue = Number(seed.baseRevenue) > 0 ? Number(seed.baseRevenue) : 1e9;
     var baseNetIncome = Number.isFinite(Number(seed.baseNetIncome)) ? Number(seed.baseNetIncome) : baseRevenue * 0.1;
-    var histGrowthPct = Number.isFinite(Number(seed.histGrowth)) ? Math.max(-20, Math.min(60, Number(seed.histGrowth) * 100)) : 12;
-    var marginPct = baseRevenue > 0 ? Math.max(-50, Math.min(60, baseNetIncome / baseRevenue * 100)) : 10;
-    var pe = Number(seed.currentPE) > 0 ? Math.min(80, Number(seed.currentPE)) : 22;
-    function scn(gMult, mDelta, peLoMult, peHiMult) {
-      return plNewScenario({
-        revGrowth: +(histGrowthPct * gMult).toFixed(1),
-        netMargin: +(Math.max(-50, Math.min(60, marginPct + mDelta))).toFixed(1),
-        peLow: Math.max(2, Math.round(pe * peLoMult)),
-        peHigh: Math.max(3, Math.round(pe * peHiMult)),
-      });
-    }
+    var defaults = plDefaultAssumptions({
+      baseRevenue: baseRevenue, baseNetIncome: baseNetIncome, currentPE: seed.currentPE,
+      histGrowth: seed.histGrowth, ttmTrend: seed.ttmTrend, consensusGrowth: seed.consensusGrowth,
+      targetMargin: seed.targetMargin, financialSector: seed.financialSector, shareCagr: seed.shareCagr,
+    });
     var seededValues = {
       startPrice: startPrice,
       dilutedShares: dilutedShares,
@@ -446,11 +513,10 @@
       selectedScenario: "base",
       selectedHorizon: PL_HORIZONS.indexOf(Number(seed.horizon)) >= 0 ? Number(seed.horizon) : 5,
       scenarioWeights: { bear: 25, base: 50, bull: 25 },
-      scenarios: {
-        bear: scn(0.45, -4, 0.55, 0.8),
-        base: scn(1.0, 0, 0.85, 1.2),
-        bull: scn(1.4, 4, 1.1, 1.6),
-      },
+      scenarios: defaults.scenarios,
+      assumptionNotes: defaults.notes,
+      basePeriod: seed.basePeriod || null,
+      dataAsOf: seed.dataAsOf || null,
       seed: {
         source: seed.source || (seed.seeded ? "company financials" : "defaults"),
         seededAt: new Date().toISOString(),
@@ -469,7 +535,7 @@
     if (raw.version === PL_MODEL_VERSION && raw.scenarios && raw.scenarios.base) {
       var model = plCreateModel({ ticker: raw.ticker });
       ["ticker", "companyName", "currency", "baseYear", "startPrice", "dilutedShares", "baseRevenue",
-        "baseNetIncome", "selectedScenario", "selectedHorizon", "lastUpdated", "userEditedScenarios"].forEach(function (k) {
+        "baseNetIncome", "selectedScenario", "selectedHorizon", "lastUpdated", "userEditedScenarios", "basePeriod", "dataAsOf", "assumptionNotes"].forEach(function (k) {
         if (raw[k] != null) model[k] = raw[k];
       });
       if (raw.scenarioWeights) model.scenarioWeights = { bear: Number(raw.scenarioWeights.bear) || 0, base: Number(raw.scenarioWeights.base) || 0, bull: Number(raw.scenarioWeights.bull) || 0 };
@@ -532,6 +598,7 @@
     var warnings = [];
     var rows = [];
     var revenue = baseRevenue;
+    var sharesNow = shares;
     for (var i = 1; i <= years; i += 1) {
       var yr = baseYear + i;
       var g = plPct(sc.revGrowth[i - 1]);
@@ -543,12 +610,16 @@
       if (!Number.isFinite(margin)) return { ok: false, error: "Enter a net margin for " + yr + "." };
       if (margin < -1 || margin > 1) return { ok: false, error: "Net margin must stay between −100% and 100% (" + yr + ")." };
       if (!Number.isFinite(peLoRaw) || peLoRaw <= 0 || !Number.isFinite(peHiRaw) || peHiRaw <= 0) return { ok: false, error: "P/E assumptions must be above zero (" + yr + ")." };
+      var shareChg = plPct((sc.shareChange || [])[i - 1]);
+      if (!Number.isFinite(shareChg)) shareChg = 0;
+      if (shareChg <= -0.5 || shareChg > 0.5) return { ok: false, error: "Share change must stay between −50% and +50% a year (" + yr + ")." };
       var peLo = Math.min(peLoRaw, peHiRaw);
       var peHi = Math.max(peLoRaw, peHiRaw);
       if (peLoRaw > peHiRaw) warnings.push("P/E low was above P/E high in " + yr + " — the range was reordered.");
       revenue = revenue * (1 + g);
+      sharesNow = sharesNow * (1 + shareChg);
       var netIncome = revenue * margin;
-      var eps = netIncome / shares;
+      var eps = netIncome / sharesNow;
       var profitable = eps > 0;
       // A negative EPS must never produce a fake positive price range.
       var priceLow = profitable ? eps * peLo : null;
@@ -561,7 +632,8 @@
         netIncome: netIncome,
         netMargin: margin,
         eps: eps,
-        shares: shares,
+        shares: sharesNow,
+        shareChange: shareChg,
         peLow: peLo,
         peHigh: peHi,
         priceLow: priceLow,
@@ -606,8 +678,11 @@
     }
     if (Math.abs(weightTotal - 100) > 0.01) return { ok: false, error: "Scenario weights must total 100% (currently " + (+weightTotal.toFixed(1)) + "%).", field: "weights", scenarios: out };
     var expected = null;
-    var mids = PL_SCENARIO_KEYS.map(function (k) { return out[k].terminal.priceMid; });
-    if (mids.every(function (m) { return Number.isFinite(m); })) {
+    /* A case with no profit used to wipe out the weighted value entirely
+       (Costco's bear case did). It now counts at $0 and is named. */
+    var floored = PL_SCENARIO_KEYS.filter(function (k) { return !Number.isFinite(out[k].terminal.priceMid); });
+    var mids = PL_SCENARIO_KEYS.map(function (k) { var v = out[k].terminal.priceMid; return Number.isFinite(v) ? v : 0; });
+    if (floored.length < PL_SCENARIO_KEYS.length) {
       var price = 0;
       PL_SCENARIO_KEYS.forEach(function (k, idx) { price += mids[idx] * (weights[k] / 100); });
       expected = {
@@ -617,6 +692,7 @@
         horizonYears: out.base.years,
         weights: weights,
         midpoints: { bear: mids[0], base: mids[1], bull: mids[2] },
+        flooredAtZero: floored,
       };
     }
     return {
@@ -656,12 +732,12 @@
     lines.push("Base net margin %," + (Number.isFinite(derived.netMargin) ? +(derived.netMargin * 100).toFixed(2) : ""));
     lines.push("Base EPS," + (Number.isFinite(derived.eps) ? +derived.eps.toFixed(4) : ""));
     lines.push("");
-    lines.push(["Scenario", "Year", "Revenue", "Revenue growth %", "Net income", "Net margin %", "EPS", "P/E low", "P/E high", "Price low", "Price high", "CAGR low %", "CAGR high %"].join(","));
+    lines.push(["Scenario", "Year", "Revenue", "Revenue growth %", "Net income", "Net margin %", "EPS", "Share change %", "Diluted shares", "P/E low", "P/E high", "Price low", "Price high", "CAGR low %", "CAGR high %"].join(","));
     PL_SCENARIO_KEYS.forEach(function (k) {
       outlook.scenarios[k].rows.forEach(function (r) {
         lines.push([
           k, r.year, r.revenue, +(r.revGrowth * 100).toFixed(2), r.netIncome, +(r.netMargin * 100).toFixed(2),
-          +r.eps.toFixed(4), r.peLow, r.peHigh,
+          +r.eps.toFixed(4), +((r.shareChange || 0) * 100).toFixed(2), Math.round(r.shares), r.peLow, r.peHigh,
           r.priceLow == null ? "" : +r.priceLow.toFixed(2),
           r.priceHigh == null ? "" : +r.priceHigh.toFixed(2),
           r.cagrLow == null ? "" : +(r.cagrLow * 100).toFixed(2),
@@ -672,6 +748,7 @@
     lines.push("");
     if (outlook.expected) {
       lines.push("Expected price (" + outlook.expected.year + ")," + +outlook.expected.price.toFixed(2));
+      if (outlook.expected.flooredAtZero && outlook.expected.flooredAtZero.length) lines.push("Counted at $0 (no profit)," + outlook.expected.flooredAtZero.join(" "));
       lines.push("Expected CAGR %," + (outlook.expected.cagr == null ? "" : +(outlook.expected.cagr * 100).toFixed(2)));
     } else {
       lines.push("Expected price,unavailable (negative earnings in a scenario)");
