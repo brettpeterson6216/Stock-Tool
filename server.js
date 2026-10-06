@@ -20,6 +20,8 @@
 // ============================================================
 
 const cfg = require("./lib/config"); // dotenv loaded here first
+// Cache, rate-limit and stale-on-error for every Finnhub call (lib/finnhub-gate.js).
+require("./lib/finnhub-gate").install();
 const { PORT, SESSION_SECRET } = cfg;
 
 // Validate env vars at startup.
@@ -493,6 +495,7 @@ app.get("/readyz", async (_req, res) => {
     ...readiness,
     stripeCatalog,
     stripeCatalogEnforced: /^(1|true|yes)$/i.test(String(process.env.STRIPE_CATALOG_ENFORCE || "")),
+    finnhubGate: require("./lib/finnhub-gate").snapshot(),
     ...buildInfo,
   });
 });

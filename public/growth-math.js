@@ -220,6 +220,13 @@
     var times = st.last.value / st.first.value;
     var mult = times >= 1.9 ? " — " + (times >= 10 ? Math.round(times) : times.toFixed(1)) + "× in " + span : "";
     var line = m.label + " went from " + first + " to " + last + basis + mult + (st.cagr != null ? ", about " + signedPct(st.cagr) + " a year" : "") + ".";
+    if (id === "netIncome" || id === "eps" || id === "netMargin") {
+      var li = rows.length - 1;
+      var ni = valueAt(rows, li, "netIncome", period), oi = valueAt(rows, li, "operatingIncome", period);
+      if (ni != null && oi != null && oi > 0 && ni > oi * 1.3) {
+        line += " Net income is well above operating income, so much of it came from outside the core business (investment gains or one-off items). Operating income is the cleaner trend here.";
+      }
+    }
     if (id === "fcfPerShare" || id === "eps") {
       var price = priceChange(rows, pts);
       if (price != null && st.cagr != null) {

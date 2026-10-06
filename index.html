@@ -1449,7 +1449,7 @@
                   <div class="dp-chart-wrap"><canvas id="dp-chart"></canvas></div>
                 </div>
                 <!-- Institutional Holders Table -->
-                <div class="analyst-box-title" style="margin-bottom:.65rem;">Top Institutional Holders</div>
+                <div class="analyst-box-title" id="inst-table-title" style="margin-bottom:.65rem;">Top Institutional Holders</div>
                 <div style="overflow-x:auto;">
                   <table class="inst-table" id="inst-table">
                     <thead><tr>
@@ -1541,7 +1541,7 @@
           <div class="app-section" id="sec-screener"><div class="acc-body" id="body-screener" style="display:none;">
 <div class="tool-intro"><div><strong>Market Screener</strong> narrows an actively traded U.S. equity universe using valuation, size, income, momentum, and sector filters.</div><div class="tool-intro-note">Yahoo Finance and optional Finnhub snapshots · refreshed automatically. Missing metrics remain unavailable rather than being treated as zero.</div></div>
 <div class="scr-filters">
-              <div class="scr-filter-group"><label>Sector</label><select id="scr-sector" onchange="applyScreener()" style="width:100%;background:var(--card);color:var(--text);border:1px solid var(--border2);border-radius:var(--r);padding:4px 6px;font-size:11px;margin-top:6px;"><option value="ALL">All Sectors</option><option value="Tech">Technology</option><option value="Health">Healthcare</option><option value="Finance">Financials</option><option value="Cons.Disc">Consumer Disc.</option><option value="Staples">Consumer Staples</option><option value="Energy">Energy</option><option value="Industrials">Industrials</option><option value="Materials">Materials</option><option value="Real Est.">Real Estate</option><option value="Utilities">Utilities</option><option value="ETF">ETFs</option></select></div>
+              <div class="scr-filter-group"><label>Sector</label><select id="scr-sector" onchange="applyScreener()" style="width:100%;background:var(--card);color:var(--text);border:1px solid var(--border2);border-radius:var(--r);padding:4px 6px;font-size:11px;margin-top:6px;"><option value="ALL">All Sectors</option><option value="Tech">Technology</option><option value="Comm.">Communication</option><option value="Health">Healthcare</option><option value="Finance">Financials</option><option value="Cons.Disc">Consumer Disc.</option><option value="Staples">Consumer Staples</option><option value="Energy">Energy</option><option value="Industrials">Industrials</option><option value="Materials">Materials</option><option value="Real Est.">Real Estate</option><option value="Utilities">Utilities</option><option value="ETF">ETFs</option></select></div>
               <div class="scr-filter-group"><label>Max P/E <span id="scr-pe-val">50x</span></label><input type="range" class="scr-slider" id="scr-pe" min="5" max="200" value="50" oninput="document.getElementById('scr-pe-val').textContent=this.value+'x';applyScreener()"></div>
               <div class="scr-filter-group"><label>Max P/B <span id="scr-pb-val">20x</span></label><input type="range" class="scr-slider" id="scr-pb" min="0" max="50" value="20" oninput="document.getElementById('scr-pb-val').textContent=this.value+'x';applyScreener()"></div>
               <div class="scr-filter-group"><label>Min Div Yield <span id="scr-div-val">0%</span></label><input type="range" class="scr-slider" id="scr-div" min="0" max="10" value="0" step="0.5" oninput="document.getElementById('scr-div-val').textContent=this.value+'%';applyScreener()"></div>
@@ -1946,7 +1946,7 @@
 <script defer src="/il-icons.js?v=20261002-1"></script>
 <!-- il:app-bundle -->
 <script defer src="/lens-charts.js?v=20261002-1"></script>
-<script defer src="/app-legacy.js?v=20260904-1"></script>
+<script defer src="/app-legacy.js?v=20261006-2"></script>
 <!-- Enhancement modules depend on the application controller. Deferred
      scripts execute in document order, before DOMContentLoaded. -->
 <script defer src="/research-system.js?v=20260825-6"></script>
@@ -1962,7 +1962,7 @@
 <script defer src="/research-flow.js?v=20261002-1"></script>
 <script defer src="/share-studio.js?v=20261005-1"></script>
 <script defer src="/fin-glance.js?v=20261002-1"></script>
-<script defer src="/growth-math.js?v=20261006-1"></script>
+<script defer src="/growth-math.js?v=20261006-2"></script>
 <script defer src="/growth-charts.js?v=20261006-1"></script>
 <script defer src="/chart-reads.js?v=20261002-1"></script>
 <!-- /il:app-bundle -->

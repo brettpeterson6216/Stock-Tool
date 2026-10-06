@@ -8,7 +8,8 @@ const { buildQuarterlyHistory, attachPrices, calendarLabel } = require("../lib/f
 const G = require("../public/growth-math.js");
 
 const close = (a, b, tol = 1e-6) => Math.abs(a - b) <= tol * Math.max(1, Math.abs(b));
-const rows = buildQuarterlyHistory(buildFacts());
+const SPLIT = [{ date: Date.parse("2024-06-10T00:00:00Z") / 1000, ratio: 10 }];
+const rows = buildQuarterlyHistory(buildFacts(), { splits: SPLIT, maxQuarters: 44 });
 const trueShares = i => 1e9 * Math.pow(0.995, i + 1);
 const trueRev = i => 1e9 * Math.pow(1.03, i + 1);
 
@@ -39,7 +40,7 @@ test("revenue survives a change of XBRL tag", () => {
   assert.ok(a.revenue > 0 && b.revenue > a.revenue);
 });
 
-test("a stock split is detected and earlier shares and EPS are restated", () => {
+test("a stock split restates every fact filed before it", () => {
   assert.deepEqual(rows.splits.map(s => s.ratio), [10]);
   rows.forEach((r, i) => {
     assert.ok(close(r.shares, trueShares(i), 1e-3), r.label + " shares");
@@ -51,6 +52,8 @@ test("quarter labels follow the calendar quarter the period ends in", () => {
   assert.equal(calendarLabel("2024-12-28").label, "Q4 2024");   // Apple-style 52/53-week quarter
   assert.equal(calendarLabel("2025-01-01").label, "Q4 2024");
   assert.equal(calendarLabel("2025-06-30").label, "Q2 2025");
+  assert.equal(calendarLabel("2026-07-26").label, "Jul 2026");     // NVIDIA's fiscal Q2
+  assert.equal(calendarLabel("2026-05-10").label, "May 2026");     // Costco's fiscal Q3
 });
 
 test("prices attach to the close on or before each quarter end", () => {
@@ -119,4 +122,20 @@ test("Q4 is recovered when 10-Qs carry only three-month figures", () => {
   const q = conceptQuarters(rows, true);
   assert.equal(q.get("2024-12-31").val, 17);
   assert.equal(q.get("2024-12-31").derived, true);
+});
+
+test("TTM revenue takes total net revenue, not a fee-income subset tag (SoFi)", () => {
+  const { matchedTtm } = require("../lib/ttm");
+  const row = (start, end, val, form) => ({ start, end, val, form, filed: end });
+  const gaap = {
+    RevenueFromContractWithCustomerExcludingAssessedTax: { units: { USD: [
+      row("2025-01-01", "2025-12-31", 0.6e9, "10-K"), row("2026-01-01", "2026-06-30", 0.28e9, "10-Q"), row("2025-01-01", "2025-06-30", 0.3e9, "10-Q")] } },
+    RevenuesNetOfInterestExpense: { units: { USD: [
+      row("2025-01-01", "2025-12-31", 3.6e9, "10-K"), row("2026-01-01", "2026-06-30", 2.32e9, "10-Q"), row("2025-01-01", "2025-06-30", 1.62e9, "10-Q")] } },
+    NetIncomeLoss: { units: { USD: [
+      row("2025-01-01", "2025-12-31", 0.5e9, "10-K"), row("2026-01-01", "2026-06-30", 0.32e9, "10-Q"), row("2025-01-01", "2025-06-30", 0.2e9, "10-Q")] } },
+  };
+  const t = matchedTtm(gaap, ["RevenueFromContractWithCustomerExcludingAssessedTax", "RevenuesNetOfInterestExpense"], ["NetIncomeLoss"]);
+  assert.equal(Math.round(t.revenue.val / 1e6), 4300);
+  assert.equal(t.asOf, "2026-06-30");
 });

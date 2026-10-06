@@ -4023,11 +4023,26 @@ async function loadScreener() {
     S.screenerData=await r.json();
     screenerLoaded=true;
     applyScreener();
+    /* Sector, growth, beta and RSI fill in on the server in the background
+       the first time after a restart; pick them up without a page reload. */
+    if(r.headers.get('X-Screener-Enriching')==='1') scheduleScreenerRefresh(0);
   } catch(e){ toast('Screener load failed','red'); }
   finally {
     loading=document.getElementById('scr-loading');
     if(loading) loading.style.display='none';
   }
+}
+function scheduleScreenerRefresh(n){
+  if(n>=8) return;
+  setTimeout(async function(){
+    try{
+      var r=await fetch('/api/screener');
+      if(!r.ok) return scheduleScreenerRefresh(n+1);
+      S.screenerData=await r.json();
+      applyScreener();
+      if(r.headers.get('X-Screener-Enriching')==='1') scheduleScreenerRefresh(n+1);
+    }catch(_){ scheduleScreenerRefresh(n+1); }
+  },30000);
 }
 function applyScreener() {
   if(!S.screenerData) return;
@@ -4597,8 +4612,32 @@ async function loadInstitutional(ticker) {
       if(!document.getElementById('dp-chart-empty')) dpCanvas.insertAdjacentHTML('afterend','<div id="dp-chart-empty" style="color:var(--text5);font-size:.78rem;padding:.5rem 0;">No weekly OTC volume data found for this ticker from FINRA.</div>');
     }
 
-    // ── Institutional table ──
-    if(instTbl) {
+    // ── Institutional table, or insider trades when holders aren't available ──
+    const instTitle = document.getElementById('inst-table-title');
+    const instHead = document.querySelector('#inst-table thead tr');
+    if(instTbl && !(instData.ownership||[]).length && Array.isArray(instData.insiders)) {
+      const sm = instData.insiderSummary || {};
+      const money = v => v>=1e9?'$'+(v/1e9).toFixed(2)+'B':v>=1e6?'$'+(v/1e6).toFixed(1)+'M':v>=1e3?'$'+Math.round(v/1e3)+'K':'$'+Math.round(v);
+      if(instTitle) instTitle.innerHTML = 'Insider buying and selling <span style="font-weight:500;color:var(--text5);font-size:12px;">last 12 months · open-market trades from SEC Form 4</span>';
+      if(instHead) instHead.innerHTML = '<th>Insider</th><th>Trade</th><th>Shares</th><th>Price</th><th>Date</th>';
+      const note = document.getElementById('inst-insider-note') || (()=>{ const d=document.createElement('p'); d.id='inst-insider-note'; d.style.cssText='font-size:12.5px;color:var(--text4);margin:-.25rem 0 .75rem;line-height:1.5;'; instTitle && instTitle.insertAdjacentElement('afterend', d); return d; })();
+      note.textContent = instData.insiders.length
+        ? `${sm.buys||0} open-market buy${sm.buys===1?'':'s'} (${money(sm.buyValue||0)}) and ${sm.sells||0} sale${sm.sells===1?'':'s'} (${money(sm.sellValue||0)}) by officers, directors and 10% owners. Insiders sell for many reasons; buys with their own money are the rarer, stronger signal. Top institutional holders need a data plan we don't have yet.`
+        : 'No open-market insider buys or sales in the last 12 months. Top institutional holders need a data plan we don\'t have yet.';
+      instTbl.innerHTML = instData.insiders.length ? instData.insiders.map(t => {
+        const buy = t.code === 'P';
+        return `<tr>
+          <td>${escapeHtml(t.name)}</td>
+          <td style="color:${buy?'var(--market-up)':'var(--market-down)'};font-weight:600;">${buy?'Buy':'Sell'}</td>
+          <td>${escapeHtml(fmtShares(Math.abs(t.change)))}</td>
+          <td>${t.price?'$'+Number(t.price).toFixed(2):'—'}</td>
+          <td style="font-size:11px;color:var(--text5);">${escapeHtml(t.date||'—')}</td>
+        </tr>`;
+      }).join('') : '<tr><td colspan="5" style="text-align:center;color:var(--text5);padding:1.5rem;">No open-market insider trades in the last 12 months.</td></tr>';
+    } else if(instTbl) {
+      if(instTitle) instTitle.textContent = 'Top Institutional Holders';
+      if(instHead) instHead.innerHTML = '<th>Institution</th><th>Shares Held</th><th>% of shares</th><th>Change</th><th>Filed</th>';
+      document.getElementById('inst-insider-note')?.remove();
       const holders = instData.ownership || [];
       if(!holders.length) {
         instTbl.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text5);padding:1.5rem;">No institutional holder data available.</td></tr>';

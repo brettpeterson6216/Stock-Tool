@@ -1,5 +1,9 @@
 "use strict";
 
+/* Yahoo spells share classes with a dash (BRK-B); SEC and most users use a
+   dot (BRK.B). Without this, Berkshire's quote and chart returned 404. */
+function yahooSymbol(t) { return String(t || "").replace(/^([A-Z]{1,5})\.([A-Z]{1,2})$/, "$1-$2"); }
+
 /* ═══════════════════════════════════════════════════════════════════════════
    GET /api/analysis/:ticker?range=1y
 
@@ -61,7 +65,7 @@ async function loadSeries(ticker, range, interval) {
   const hosts = ["query2", "query1"];
   for (const host of hosts) {
     try {
-      const url = `https://${host}.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}` +
+      const url = `https://${host}.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yahooSymbol(ticker))}` +
         `?interval=${interval}&range=${range}&includePrePost=false`;
       const r = await fetchWithTimeout(url);
       if (!r.ok) continue;

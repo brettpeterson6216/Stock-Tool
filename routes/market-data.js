@@ -226,67 +226,162 @@ async function loadYahooScreenerUniverse() {
   return [...byTicker.values()];
 }
 
+/* ── Screener enrichment ─────────────────────────────────────────────────
+   The screener used to be today's Yahoo most-actives/gainers/losers only,
+   with sector "Other" for 90% of rows and revenue growth, EPS growth, beta
+   and RSI blank for every row (audit 2026-10-06). Now: the curated large-cap
+   list plus today's movers, each filled in from Finnhub (sector, growth,
+   beta, valuation) and a Yahoo daily chart (price, 1D/1Y change, RSI-14).
+   A background job fills rows at low priority through lib/finnhub-gate, so
+   it never starves someone's stock page; results are kept for a day. */
+const { finnhubJson } = require("../lib/finnhub-gate");
+const ENRICH_TTL = 24 * 3600 * 1000, PRICE_TTL = 20 * 60 * 1000;
+const _enrich = new Map();   // ticker -> { at, priceAt, sector, revenueGrowth, ... }
+let _enrichRunning = false;
+
+function sectorFromIndustry(ind) {
+  const s = String(ind || "");
+  if (!s || s === "N/A") return null;
+  if (/utilit/i.test(s)) return "Utilities";
+  if (/real estate|reit/i.test(s)) return "Real Est.";
+  if (/pharma|biotech|health|life sciences|medical/i.test(s)) return "Health";
+  if (/semiconductor|technolog|software|internet|it services|electronic|communications|computer/i.test(s)) return "Tech";
+  if (/media|telecom|entertainment|interactive/i.test(s)) return "Comm.";
+  if (/bank|financ|insurance|capital markets|asset management/i.test(s)) return "Finance";
+  if (/beverage|food|tobacco|consumer products|household|personal products/i.test(s)) return "Staples";
+  if (/energy|oil|gas|coal/i.test(s)) return "Energy";
+  if (/chemical|metals|mining|paper|forest|packaging|steel|construction materials/i.test(s)) return "Materials";
+  if (/aerospace|defense|machinery|industrial|airline|logistics|transport|road|rail|marine|electrical|building|construction|commercial services|professional services|trading compan/i.test(s)) return "Industrials";
+  if (/retail|automobile|auto |hotel|restaurant|leisure|textile|apparel|luxury|diversified consumer|distributors|homebuild|consumer/i.test(s)) return "Cons.Disc";
+  return null;
+}
+function rsi14(closes) {
+  if (closes.length < 16) return null;
+  let g = 0, l = 0;
+  for (let i = 1; i <= 14; i++) { const d = closes[i] - closes[i - 1]; if (d > 0) g += d; else l -= d; }
+  g /= 14; l /= 14;
+  for (let i = 15; i < closes.length; i++) {
+    const d = closes[i] - closes[i - 1];
+    g = (g * 13 + Math.max(d, 0)) / 14; l = (l * 13 + Math.max(-d, 0)) / 14;
+  }
+  return l === 0 ? 100 : 100 - 100 / (1 + g / l);
+}
+async function yahooYear(ticker) {
+  try {
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yahooSymbol(ticker))}?interval=1d&range=1y&includePrePost=false`;
+    const r = await fetchWithTimeout(url, { headers: { "User-Agent": "Mozilla/5.0" } }, 8000);
+    if (!r.ok) return null;
+    const j = await r.json();
+    const res = j?.chart?.result?.[0];
+    const closes = (res?.indicators?.quote?.[0]?.close || []).filter(v => Number.isFinite(v) && v > 0);
+    if (closes.length < 20) return null;
+    const meta = res.meta || {};
+    const price = Number(meta.regularMarketPrice) || closes.at(-1);
+    const prev = closes.length >= 2 ? closes.at(-2) : null;
+    const lastIsToday = meta.regularMarketTime && Math.abs(meta.regularMarketTime - (res.timestamp || []).at(-1)) < 86400;
+    const base = lastIsToday ? prev : closes.at(-1);
+    return {
+      price, change1D: base ? (price / base - 1) * 100 : null,
+      change1Y: (price / closes[0] - 1) * 100, rsi: rsi14(closes.slice(-120)),
+      averageVolume: null, asOf: meta.regularMarketTime || null,
+      name: meta.longName || meta.shortName || null,
+    };
+  } catch (_) { return null; }
+}
+async function enrichOne(ticker) {
+  const prev = _enrich.get(ticker) || {};
+  const out = { ...prev };
+  const now = Date.now();
+  if (!prev.at || now - prev.at > ENRICH_TTL) {
+    const [profile, metric] = await Promise.all([
+      finnhubJson(`https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${FINNHUB_KEY}`),
+      finnhubJson(`https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FINNHUB_KEY}`),
+    ]);
+    const m = metric?.metric || {};
+    if (profile || metric) {
+      out.at = now;
+      out.sector = sectorFromIndustry(profile?.finnhubIndustry) || prev.sector || null;
+      out.name = profile?.name || prev.name || null;
+      out.marketCap = Number(profile?.marketCapitalization) > 0 ? Number(profile.marketCapitalization) * 1e6
+        : Number(m.marketCapitalization) > 0 ? Number(m.marketCapitalization) * 1e6 : prev.marketCap ?? null;
+      out.revenueGrowth = Number.isFinite(m.revenueGrowthTTMYoy) ? m.revenueGrowthTTMYoy : null;
+      out.epsGrowth = Number.isFinite(m.epsGrowthTTMYoy) ? m.epsGrowthTTMYoy : null;
+      out.beta = Number.isFinite(m.beta) ? m.beta : null;
+      out.pe = Number(m.peTTM || m.peBasicExclExtraTTM) || null;
+      out.pb = Number(m.pbQuarterly || m.pbAnnual) || null;
+      out.dividendYield = Number.isFinite(m.dividendYieldIndicatedAnnual) ? m.dividendYieldIndicatedAnnual : null;
+    }
+  }
+  if (!prev.priceAt || now - prev.priceAt > PRICE_TTL) {
+    const y = await yahooYear(ticker);
+    if (y) Object.assign(out, y, { priceAt: now, name: out.name || y.name });
+  }
+  _enrich.set(ticker, out);
+}
+function startEnrichment(tickers) {
+  if (_enrichRunning) return;
+  const todo = tickers.filter(t => {
+    const e = _enrich.get(t);
+    return !e || !e.at || Date.now() - e.at > ENRICH_TTL || !e.priceAt || Date.now() - e.priceAt > PRICE_TTL;
+  });
+  if (!todo.length) return;
+  _enrichRunning = true;
+  (async () => {
+    try {
+      const queue = todo.slice();
+      const worker = async () => { while (queue.length) { await enrichOne(queue.shift()); } };
+      await Promise.all([worker(), worker(), worker()]);
+    } catch (e) { console.warn("[screener] enrichment stopped:", e.message); }
+    finally { _enrichRunning = false; _screenerCache.ts = 0; }
+  })();
+}
+function screenerRow(ticker, base) {
+  const e = _enrich.get(ticker) || {};
+  const pick = (a, b) => (a !== null && a !== undefined ? a : b);
+  const row = {
+    ticker,
+    name: pick(base && base.name, e.name) || ticker,
+    sector: SCREENER_SECTOR[ticker] || e.sector || "Other",
+    price: pick(base && base.price, e.price) || 0,
+    change1D: pick(base && base.change1D, e.change1D),
+    change1Y: pick(base && base.change1Y, e.change1Y),
+    revenueGrowth: e.revenueGrowth ?? null,
+    marketCap: pick(base && base.marketCap, e.marketCap),
+    pe: pick(base && base.pe, e.pe),
+    pb: pick(base && base.pb, e.pb),
+    dividendYield: pick(base && base.dividendYield, e.dividendYield),
+    beta: pick(base && base.beta, e.beta),
+    rsi: e.rsi ?? null,
+    epsGrowth: e.epsGrowth ?? null,
+    averageVolume: pick(base && base.averageVolume, e.averageVolume),
+    asOf: pick(base && base.asOf, e.asOf),
+    source: base ? base.source : "Yahoo Finance chart + Finnhub fundamentals",
+    enriched: !!e.at,
+  };
+  return row;
+}
+
 router.get("/screener", requirePro, async (req, res) => {
   if (_screenerCache.data && Date.now() - _screenerCache.ts < SCREENER_TTL) {
+    res.setHeader("X-Screener-Enriching", _enrichRunning ? "1" : "0");
     return res.json(_screenerCache.data);
   }
   const started = Date.now();
+  let movers = [];
   try {
-    const yahooUniverse = await loadYahooScreenerUniverse();
-    if (yahooUniverse.length >= 10) {
-      _screenerCache = { data: yahooUniverse, ts: Date.now() };
-      recordProvider("Yahoo Finance", true, Date.now() - started, `${yahooUniverse.length} screener symbols`);
-      return res.json(yahooUniverse);
-    }
-    recordProvider("Yahoo Finance", false, Date.now() - started, "Screener universe was empty");
+    movers = await loadYahooScreenerUniverse();
+    recordProvider("Yahoo Finance", movers.length >= 10, Date.now() - started, `${movers.length} screener movers`);
   } catch (error) {
     recordProvider("Yahoo Finance", false, Date.now() - started, error.message);
   }
-  try {
-    const CHUNK     = 20;
-    const allStocks = [];
-    for (let i = 0; i < SCREENER_TICKERS.length; i += CHUNK) {
-      const chunk   = SCREENER_TICKERS.slice(i, i + CHUNK);
-      const results = await Promise.allSettled(
-        chunk.map(async (ticker) => {
-          const [qRes, mRes] = await Promise.all([
-            fetchWithTimeout(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_KEY}`),
-            fetchWithTimeout(`https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FINNHUB_KEY}`),
-          ]);
-          const [q, md] = await Promise.all([qRes.json(), mRes.json()]);
-          const m = md.metric || {};
-          return {
-            ticker,
-            sector:        SCREENER_SECTOR[ticker] || "Other",
-            price:         q.c || 0,
-            change1D:      q.pc > 0 ? ((q.c - q.pc) / q.pc * 100) : 0,
-            change1Y:      m["52WeekPriceReturnDaily"]     || null,
-            revenueGrowth: m["revenueGrowthTTMYoy"]        || null,
-            marketCap:     m.marketCapitalization ? m.marketCapitalization * 1e6 : null,
-            pe:            m.peBasicExclExtraTTM || m.peTTM || null,
-            pb:            m.pbQuarterly                   || null,
-            dividendYield: m.dividendYieldIndicatedAnnual  || 0,
-            beta:          m.beta                          || null,
-            rsi:           m.rsi14                         || null,
-            epsGrowth:     m.epsGrowthTTMYoy               || null,
-          };
-        })
-      );
-      allStocks.push(
-        ...results
-          .filter(r => r.status === "fulfilled" && r.value.price > 0)
-          .map(r => r.value)
-      );
-      if (i + CHUNK < SCREENER_TICKERS.length) {
-        await new Promise(r => setTimeout(r, 400)); // respect Finnhub rate limit
-      }
-    }
-    _screenerCache = { data: allStocks, ts: Date.now() };
-    res.json(allStocks);
-  } catch (e) {
-    console.error("screener error:", e);
-    res.status(500).json({ error: "Screener fetch failed" });
-  }
+  const byTicker = new Map(movers.map(m => [m.ticker, m]));
+  const universe = [...new Set([...SCREENER_TICKERS, ...byTicker.keys()])];
+  startEnrichment(universe);
+  const rows = universe.map(t => screenerRow(t, byTicker.get(t))).filter(r => r.price > 0);
+  if (!rows.length) return res.status(503).json({ error: "Screener data is warming up. Try again in a minute." });
+  _screenerCache = { data: rows, ts: Date.now() };
+  res.setHeader("X-Screener-Enriching", _enrichRunning ? "1" : "0");
+  res.json(rows);
 });
 
 // ============================================================
@@ -327,7 +422,7 @@ router.get("/quote/:ticker", checkAnalysisLimit, async (req, res) => {
 
     // Attempt 1: Yahoo Finance v8 chart (query2)
     try {
-      const u = `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=${interval}&range=${range}&includePrePost=false`;
+      const u = `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yahooSymbol(ticker))}?interval=${interval}&range=${range}&includePrePost=false`;
       const r = await fetchWithTimeout(u, { headers: YH }, 4000);
       if (r.ok) {
         const j = await r.json();
@@ -342,7 +437,7 @@ router.get("/quote/:ticker", checkAnalysisLimit, async (req, res) => {
     // Attempt 2: Yahoo Finance v8 chart (query1)
     if (!data) {
       try {
-        const u = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?interval=${interval}&range=${range}&includePrePost=false`;
+        const u = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yahooSymbol(ticker))}?interval=${interval}&range=${range}&includePrePost=false`;
         const r = await fetchWithTimeout(u, { headers: YH }, 4000);
         if (r.ok) {
           const j = await r.json();
@@ -363,7 +458,7 @@ router.get("/quote/:ticker", checkAnalysisLimit, async (req, res) => {
         // "max" → start at the epoch so we get the company's full listed history.
         const period1   = range === "max" ? 0 : now2 - (rangeSecs[range] || 365*86400);
         const csvInterval = (range === "5y" || range === "10y") ? "1wk" : (range === "max" ? "1mo" : "1d");
-        const csvUrl    = `https://query1.finance.yahoo.com/v7/finance/download/${encodeURIComponent(ticker)}?period1=${period1}&period2=${now2}&interval=${csvInterval}&events=history&includeAdjustedClose=true`;
+        const csvUrl    = `https://query1.finance.yahoo.com/v7/finance/download/${encodeURIComponent(yahooSymbol(ticker))}?period1=${period1}&period2=${now2}&interval=${csvInterval}&events=history&includeAdjustedClose=true`;
         const r         = await fetchWithTimeout(csvUrl, { headers: YH }, 4000);
         if (r.ok) {
           const csv   = await r.text();
@@ -820,3 +915,7 @@ router.get("/market/landing-summary", async (req, res) => {
 });
 
 module.exports = router;
+router._test = { sectorFromIndustry: (...a) => sectorFromIndustry(...a), rsi14: (...a) => rsi14(...a), yahooSymbol: (...a) => yahooSymbol(...a) };
+/* Yahoo spells share classes with a dash (BRK-B); SEC and most users use a
+   dot (BRK.B). Without this, Berkshire's quote and chart returned 404. */
+function yahooSymbol(t) { return String(t || "").replace(/^([A-Z]{1,5})\.([A-Z]{1,2})$/, "$1-$2"); }

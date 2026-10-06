@@ -167,7 +167,7 @@ router.get("/financials/:ticker", requireAccount, async (req, res) => {
     // a 10-K reports prior-year comparatives under the same fy, which used to
     // collapse the history into a single wrong year. EPS facts live under the
     // "USD/shares" unit. Duration facts must span a full year (skips quarters).
-    function annualSeries(concepts) {
+    function annualSeries(concepts, { pickMax = false } = {}) {
       // MERGE facts across all synonym concepts: companies change XBRL tags
       // over time (e.g. Apple moved Revenues -> RevenueFromContractWithCustomer
       // in 2018), so per-year we take the best fact from any listed concept.
@@ -183,7 +183,10 @@ router.get("/financials/:ticker", requireAccount, async (req, res) => {
             if (days < 300 || days > 400) continue; // annual duration only
           }
           const yr = u.end.slice(0, 4);
-          if (!byYear[yr] || (u.filed || "") > (byYear[yr].filed || "")) byYear[yr] = u;
+          const cur = byYear[yr];
+          /* Revenue: the largest figure for the year (total, not a subset tag). */
+          if (!cur || (pickMax && Number(u.val) > Number(cur.val) && u.end >= cur.end) || (!pickMax && (u.filed || "") > (cur.filed || ""))
+              || (pickMax && u.end > cur.end)) byYear[yr] = u;
         }
       }
       return Object.values(byYear)
@@ -194,7 +197,7 @@ router.get("/financials/:ticker", requireAccount, async (req, res) => {
     const ttmValue = concepts => ttmFromFacts(gaap, concepts);
     const latestShares = () => latestSharesFromFacts(facts);
 
-    const revSeries    = annualSeries(["Revenues","RevenueFromContractWithCustomerExcludingAssessedTax","SalesRevenueNet","RevenueFromContractWithCustomerIncludingAssessedTax"]);
+    const revSeries    = annualSeries(["Revenues","RevenueFromContractWithCustomerExcludingAssessedTax","SalesRevenueNet","RevenueFromContractWithCustomerIncludingAssessedTax","RevenuesNetOfInterestExpense"], { pickMax: true });
     const cogsSeries   = annualSeries(["CostOfGoodsAndServicesSold","CostOfRevenue","CostOfGoodsSold"]);
     const gpSeries     = annualSeries(["GrossProfit"]);
     const opexSeries   = annualSeries(["OperatingExpenses","CostsAndExpenses"]);
@@ -434,6 +437,12 @@ router.get("/financials/:ticker", requireAccount, async (req, res) => {
 /* Quarterly fundamentals history for the growth charts: one row per fiscal
    quarter from SEC XBRL, with the share price at each quarter end. */
 const historyCache = new Map();
+function hasOnlyAnnualForeignReports(facts) {
+  const g = facts?.facts?.["us-gaap"] || {}, ifrs = facts?.facts?.["ifrs-full"] || {};
+  const forms = new Set();
+  for (const tax of [g, ifrs]) for (const c of Object.values(tax).slice(0, 40)) for (const u of Object.values(c.units || {})) for (const f of u) forms.add(f.form);
+  return [...forms].some(f => /^(20-F|40-F)/.test(f)) && ![...forms].some(f => /^10-Q/.test(f));
+}
 router.get("/fundamentals/history/:ticker", requireAccount, async (req, res) => {
   const ticker = requestTicker(req, res);
   if (!ticker) return;
@@ -441,21 +450,28 @@ router.get("/fundamentals/history/:ticker", requireAccount, async (req, res) => 
   if (hit && Date.now() - hit.at < 6 * 3600 * 1000) return res.json(hit.body);
   try {
     const company = await loadCompanyFacts(ticker);
-    const quarters = buildQuarterlyHistory(company.facts);
+    /* Prices first: Yahoo's split events are what restate older per-share
+       figures (SEC filings only restate the last two or three years). */
+    let prices = null, priceNote = null;
+    try { prices = await loadPriceHistory(ticker, { range: "10y", interval: "1wk" }); }
+    catch (e) { priceNote = "Price history unavailable; valuation ratios are hidden."; }
+    const quarters = buildQuarterlyHistory(company.facts, { splits: prices ? prices.splits : [] });
     if (quarters.length < 4) {
-      return res.status(404).json({ error: "Quarterly statements are not available for this company.", noHistory: true });
+      const foreign = hasOnlyAnnualForeignReports(company.facts);
+      return res.status(404).json({
+        error: foreign
+          ? "This company files annual reports (Form 20-F) with the SEC, so quarterly figures aren't available here. The Financials tables below show its annual numbers."
+          : "Quarterly statements are not available for this company.",
+        noHistory: true,
+      });
     }
-    let priceNote = null;
-    try {
-      const prices = await loadPriceHistory(ticker, { range: "10y", interval: "1wk" });
-      attachPrices(quarters, prices.bars);
-    } catch (e) { priceNote = "Price history unavailable; valuation ratios are hidden."; }
+    if (prices) attachPrices(quarters, prices.bars);
     const body = {
       ticker,
       name: company.name || ticker,
       quarters,
       splits: quarters.splits || [],
-      calendar: "Quarters are labelled by the calendar quarter they end in.",
+      calendar: "Quarters that line up with the calendar are labelled Q1–Q4; others by the month they end.",
       priceNote,
       impliedLens: company.provenance || null,
     };
@@ -903,14 +919,20 @@ router.get("/analyst/:ticker", requirePro, async (req, res) => {
 router.get("/institutional/:ticker", requirePro, async (req, res) => {
   const ticker = requestTicker(req, res);
   if (!ticker) return;
+  /* Finnhub's institutional-ownership endpoint is not in our plan (it answers
+     403), so this tab was blank for every stock. Insider transactions are in
+     the plan: when holders can't be had, show who inside the company has been
+     buying and selling instead, and say plainly which one the table is. */
+  const from = new Date(Date.now() - 365 * 86400000).toISOString().slice(0, 10);
   try {
-    const [r, profResp] = await Promise.all([
-      fetchWithTimeout(`https://finnhub.io/api/v1/stock/ownership?symbol=${ticker}&limit=10&token=${FINNHUB_KEY}`),
+    const [r, profResp, insResp] = await Promise.all([
+      fetchWithTimeout(`https://finnhub.io/api/v1/stock/ownership?symbol=${ticker}&limit=10&token=${FINNHUB_KEY}`).catch(() => null),
       fetchWithTimeout(`https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${FINNHUB_KEY}`, {}, 5000).catch(() => null),
+      fetchWithTimeout(`https://finnhub.io/api/v1/stock/insider-transactions?symbol=${ticker}&from=${from}&token=${FINNHUB_KEY}`, {}, 6000).catch(() => null),
     ]);
-    if (!r.ok) return res.status(503).json({ error: "Institutional ownership is currently unavailable.", synthetic: false });
-    const data = await r.json();
+    const data = r && r.ok ? await r.json().catch(() => ({})) : {};
     const profile = profResp?.ok ? await profResp.json().catch(() => ({})) : {};
+    const insiderRaw = insResp?.ok ? await insResp.json().catch(() => ({})) : {};
     // Finnhub reports shares outstanding in millions.
     const sharesOut = Number(profile.shareOutstanding) > 0 ? Number(profile.shareOutstanding) * 1e6 : null;
     const ownership = (Array.isArray(data.ownership) ? data.ownership : []).map(h => ({
@@ -918,7 +940,29 @@ router.get("/institutional/:ticker", requirePro, async (req, res) => {
       reportDate: h.reportDate || h.filingDate || null,
       percentOfShares: sharesOut && Number.isFinite(Number(h.share)) ? Number(h.share) / sharesOut : null,
     }));
-    res.json({ ...data, ownership, sharesOutstanding: sharesOut, impliedLens: sourceMeta("Finnhub institutional ownership") });
+    /* Open-market buys (P) and sells (S) only; option exercises, gifts and
+       tax withholding say little about conviction. */
+    const insiders = (Array.isArray(insiderRaw.data) ? insiderRaw.data : [])
+      .filter(t => t && (t.transactionCode === "P" || t.transactionCode === "S") && Number.isFinite(Number(t.change)))
+      .map(t => ({
+        name: t.name || "—", change: Number(t.change), shares: Number(t.share) || null,
+        price: Number(t.transactionPrice) || null, date: t.transactionDate || t.filingDate || null,
+        filed: t.filingDate || null, code: t.transactionCode,
+      }))
+      .sort((a, b) => String(b.date).localeCompare(String(a.date)))
+      .slice(0, 40);
+    const buys = insiders.filter(t => t.code === "P"), sells = insiders.filter(t => t.code === "S");
+    const value = list => list.reduce((s, t) => s + Math.abs(t.change) * (t.price || 0), 0);
+    if (!ownership.length && !insiders.length && !(r && r.ok) && !(insResp && insResp.ok)) {
+      return res.status(503).json({ error: "Ownership and insider data are currently unavailable.", synthetic: false });
+    }
+    res.json({
+      ...data, ownership, sharesOutstanding: sharesOut,
+      ownershipAvailable: ownership.length > 0,
+      insiders,
+      insiderSummary: { buys: buys.length, sells: sells.length, buyValue: value(buys), sellValue: value(sells), since: from },
+      impliedLens: sourceMeta(ownership.length ? "Finnhub institutional ownership" : "Finnhub insider transactions (SEC Form 4)"),
+    });
   } catch (e) {
     console.error("institutional proxy error:", e.message);
     res.status(503).json({ error: "Failed to fetch institutional data.", synthetic: false });

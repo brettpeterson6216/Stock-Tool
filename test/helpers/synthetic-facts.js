@@ -8,7 +8,7 @@
 function iso(d) { return d.toISOString().slice(0, 10); }
 function addMonths(d, m) { const x = new Date(d); x.setUTCMonth(x.getUTCMonth() + m); return x; }
 
-function buildFacts({ startYear = 2015, endYear = 2025, quartersIntoLast = 2, splitYear = 2024 } = {}) {
+function buildFacts({ startYear = 2015, endYear = 2025, quartersIntoLast = 2, splitDate = "2024-06-10" } = {}) {
   const facts = {};
   const put = (concept, unit, row) => {
     facts[concept] = facts[concept] || { units: {} };
@@ -25,8 +25,9 @@ function buildFacts({ startYear = 2015, endYear = 2025, quartersIntoLast = 2, sp
       const rev = 1e9 * Math.pow(1.03, q);
       const ni = rev * 0.2;
       const ocf = rev * 0.25, capex = rev * 0.05;
-      /* Pre-split filings report 10x fewer shares and 10x higher EPS. */
-      const restated = fy >= splitYear - 1;
+      /* Filings made before the split report 10x fewer shares and 10x
+         higher EPS; later ones use post-split units. */
+      const restated = iso(addMonths(qe, 1)) >= splitDate;
       const sharesTrue = 1e9 * Math.pow(0.995, q);
       const shares = restated ? sharesTrue : sharesTrue / 10;
       const eps = ni / shares;
