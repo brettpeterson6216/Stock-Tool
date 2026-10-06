@@ -4378,6 +4378,8 @@ async function loadFinancials(ticker) {
     if(cont)    cont.style.display='block';
     // After the content is visible, so the charts can measure their space.
     try { if (window.ILFinGlance) window.ILFinGlance.render(r); } catch (e) { console.warn('fin glance', e); }
+    // Quarter-by-quarter growth charts (growth-charts.js), from their own SEC endpoint.
+    try { if (window.ILGrowth) window.ILGrowth.load(ticker); } catch (e) { console.warn('growth', e); }
   } catch(e) {
     if(loading) loading.style.display='none';
     handleSectionError(e, 'financials', cont);

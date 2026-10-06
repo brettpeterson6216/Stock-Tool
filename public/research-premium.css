@@ -2336,9 +2336,16 @@ html body .learn-warning { border-color: var(--rp-red) !important; }
    size, which the shared chrome happened to fall back to, and which any page
    that resets `button { font: inherit }` silently overrides.
    ═══════════════════════════════════════════════════════════════════════════ */
+/* On notched phones the bar also covers the status-bar inset. Inside X's
+   in-app browser and a home-screen bookmark that inset is ~47px; with a flat
+   62px height the logo and buttons were pushed below the bar's own box, so
+   they floated over the page with nothing behind them and the bar's bottom
+   hairline ran straight through them. */
 html body #main-nav {
-  --bar-h: 62px;
+  --bar-h: calc(62px + env(safe-area-inset-top, 0px));
   height: var(--bar-h) !important; min-height: var(--bar-h) !important;
+  box-sizing: border-box !important;
+  padding-top: env(safe-area-inset-top, 0px) !important;
   font-family: var(--rp-sans) !important;
 }
 /* The chrome sets its own type. Nothing inherits into it from the document. */

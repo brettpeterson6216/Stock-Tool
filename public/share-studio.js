@@ -351,6 +351,105 @@
     g.textBaseline = "alphabetic";
   }
 
+  /* ── growth-chart bars ─────────────────────────────────────────────────── */
+  function plotSeries(g, box, d, C, u) {
+    var pts = d.points, n = pts.length;
+    var axisW = 96 * u, axisH = 34 * u;
+    var px = box.x + 4 * u, py = box.y + 34 * u, pw = box.w - axisW - 8 * u, ph = box.h - axisH - 44 * u;
+    var vals = pts.map(function (p) { return p.value; }).filter(function (v) { return v != null && isFinite(v); });
+    var lo = Math.min(0, Math.min.apply(null, vals)), hi = Math.max(0, Math.max.apply(null, vals));
+    if (hi === lo) hi = lo + 1;
+    var step = niceStep(hi - lo, ph > 420 * u ? 5 : 4);
+    var top = Math.ceil(hi / step) * step, bottom = Math.floor(lo / step) * step;
+    function Y(v) { return py + (top - v) / (top - bottom) * ph; }
+    var slot = pw / n, bw = Math.max(2, Math.min(slot * 0.66, 64 * u));
+    var col = C.dark ? d.color.d : d.color.l;
+    font(g, 500, 15 * u, F.num); g.textBaseline = "middle";
+    for (var t = bottom; t <= top + 1e-9; t += step) {
+      var yy = Math.round(Y(t)) + .5;
+      g.strokeStyle = Math.abs(t) < 1e-9 ? C.line : C.grid; g.lineWidth = 1;
+      g.beginPath(); g.moveTo(px, yy); g.lineTo(px + pw, yy); g.stroke();
+      g.fillStyle = C.faint; g.fillText(d.formatCompact(t), px + pw + 16 * u, yy);
+    }
+    g.textBaseline = "alphabetic";
+    var zero = Y(0);
+    pts.forEach(function (p, i) {
+      if (p.value == null) return;
+      var x = px + i * slot + (slot - bw) / 2, y = Y(p.value), up = p.value >= 0;
+      var c = up ? col : C.down, yTop = up ? y : zero, h = Math.max(1, Math.abs(zero - y));
+      var grad = g.createLinearGradient(0, yTop, 0, yTop + h);
+      grad.addColorStop(up ? 0 : 1, hexA(c, i === n - 1 ? 1 : .92));
+      grad.addColorStop(up ? 1 : 0, hexA(c, .5));
+      rr(g, x, yTop, bw, h, Math.min(5 * u, bw / 2, h / 2));
+      g.fillStyle = grad; g.fill();
+    });
+    var last = pts[n - 1];
+    if (last && last.value != null) {
+      var lx = px + (n - 0.5) * slot, ly = last.value >= 0 ? Y(last.value) - 12 * u : Y(last.value) + 26 * u;
+      font(g, 700, 19 * u, F.num); g.fillStyle = C.ink; g.textAlign = lx > px + pw - 60 * u ? "right" : "center";
+      g.fillText(d.format(last.value), Math.min(lx + bw / 2, px + pw), ly);
+      g.textAlign = "left";
+    }
+    /* calendar years along the bottom */
+    var years = [];
+    pts.forEach(function (p, i) {
+      if (!years.length || years[years.length - 1].year !== p.year) years.push({ year: p.year, from: i, to: i });
+      else years[years.length - 1].to = i;
+    });
+    font(g, 500, 15 * u, F.num); g.fillStyle = C.faint; g.textAlign = "center";
+    var lastX = -1e9;
+    years.forEach(function (yr) {
+      var cx = px + (yr.from + yr.to + 1) / 2 * slot;
+      if ((yr.to - yr.from >= 2 || years.length < 4) && cx - lastX > 60 * u) { g.fillText(String(yr.year), cx, py + ph + 28 * u); lastX = cx; }
+    });
+    g.textAlign = "left";
+  }
+  function seriesTiles(d, st, C) {
+    var tone = function (v) { return d.neutral || v == null ? null : v >= 0 ? C.up : C.down; };
+    var p1 = function (v) { return (v >= 0 ? "+" : "−") + Math.abs(v).toFixed(Math.abs(v) >= 100 ? 0 : 1) + "%"; };
+    var pct = d.kindName === "pct" || d.kindName === "multiple";
+    return [
+      ["Latest (" + st.last.label + ")", d.format(st.last.value), null],
+      ["vs a year ago", st.yoy == null ? "—" : d.changeText(st.yoy), tone(st.yoy)],
+      pct ? ["Range shown", d.format(st.low.value) + " – " + d.format(st.high.value), null]
+          : ["Per year (" + Math.max(1, Math.round(st.years)) + "y)", st.cagr == null ? "—" : p1(st.cagr), tone(st.cagr)],
+      ["Since " + st.first.label, pct ? d.format(st.first.value) + " → " + d.format(st.last.value) : (st.total == null ? "—" : p1(st.total)), pct ? null : tone(st.total)]
+    ];
+  }
+  function seriesHeadline(o) {
+    var st = o.stats, who = o.short || o.ticker, lab = o.label.replace(/ \(.*\)$/, "").toLowerCase();
+    if (!st) return who + " " + lab;
+    if (o.kind === "multiple") return who + " trades at " + o.format(st.last.value) + " " + (o.metric === "pe" ? "earnings" : o.metric === "ps" ? "sales" : "free cash flow");
+    if (o.kind === "pct") return who + "'s " + lab + " is " + o.format(st.last.value);
+    if (o.metric === "shares") return st.total != null && st.total < -2 ? who + " has bought back " + Math.abs(st.total).toFixed(0) + "% of its shares" : who + "'s share count since " + st.first.label;
+    if (st.first.value > 0 && st.last.value > 0) {
+      var x = st.last.value / st.first.value, yrs = Math.max(1, Math.round(st.years));
+      if (x >= 1.9) return who + "'s " + lab + " is up " + (x >= 10 ? Math.round(x) : x.toFixed(1)) + "× in " + yrs + " year" + (yrs === 1 ? "" : "s");
+      if (st.cagr != null) return who + "'s " + lab + " has grown " + signedPct(st.cagr).replace("+", "") + " a year";
+    }
+    return who + "'s " + lab + " since " + st.first.label;
+  }
+  /* Called by growth-charts.js. */
+  function openSeries(o) {
+    if (!o || !o.points || o.points.length < 2 || !o.stats) { note("Nothing to share yet", false); return; }
+    if (!root) build();
+    data = {
+      kind: "series", metric: o.metric, label: o.label, period: o.period, points: o.points, stats: o.stats, read: o.read || "",
+      color: o.color || { d: "#E3A945", l: "#9C6C17" }, format: o.format, formatCompact: o.formatCompact || o.format,
+      changeText: o.changeText, neutral: o.kind === "multiple" || o.metric === "shares",
+      legend: { ticker: o.ticker, name: o.name, meta: "" }, drawings: [], ma: {}, headline: seriesHeadline(o)
+    };
+    data.kind = "series";
+    data.kindName = o.kind;
+    state.headline = "";
+    root.querySelector(".ilss-head-in").value = "";
+    root.hidden = false;
+    document.documentElement.classList.add("ilss-open");
+    root.querySelector(".ilss-sheet").focus({ preventScroll: true });
+    render();
+    ensureAssets().then(render);
+  }
+
   /* ── composition ───────────────────────────────────────────────────────── */
   function draw(target) {
     var sz = SIZES[state.size], cv = target || canvas;
@@ -358,7 +457,7 @@
     cv.width = sz.w; cv.height = sz.h;
     var g = cv.getContext("2d"), W = sz.w, H = sz.h, C = SCHEMES[state.scheme];
     var wide = W / H > 1.4, u = wide ? 1 : W / 1180;
-    var d = data, st = stats(d);
+    var d = data, series = d.kind === "series", st = series ? d.stats : stats(d);
     var P = (wide ? 64 : 60) * u;
 
     /* background */
@@ -374,11 +473,11 @@
     g.textAlign = "right"; g.textBaseline = "middle";
     font(g, 600, 15 * u, F.sans); g.fillStyle = C.faint;
     var exch = String(d.legend.meta || "").split(" · ")[0];
-    var span = d.intraday && (d.rows[d.to].time - d.rows[d.from].time) < 86400 * 1.2
+    var span = series ? d.points[0].label + " – " + d.points[d.points.length - 1].label : d.intraday && (d.rows[d.to].time - d.rows[d.from].time) < 86400 * 1.2
       ? fmt(d.rows[d.to].time, { timeZone: d.tz, month: "short", day: "numeric", year: "numeric" })
       : fmt(d.rows[d.from].time, { timeZone: d.tz, month: "short", day: "numeric", year: "numeric" }) + " – " +
         fmt(d.rows[d.to].time, { timeZone: d.tz, month: "short", day: "numeric", year: "numeric" });
-    var ctx = [d.legend.ticker, exch, span, d.interval].filter(Boolean).join("  ·  ");
+    var ctx = (series ? [d.legend.ticker, d.label, d.period, span] : [d.legend.ticker, exch, span, d.interval]).filter(Boolean).join("  ·  ");
     g.fillText(ctx, W - P, P + 14 * u);
     g.textAlign = "left"; g.textBaseline = "alphabetic";
 
@@ -397,13 +496,19 @@
     g.textBaseline = "alphabetic";
 
     var priceBlockW = wide ? 380 * u : 0;
-    var headline = state.headline || defaultHeadline(d, st);
+    var headline = state.headline || (series ? d.headline : defaultHeadline(d, st));
     var headSize = wide ? 50 * u : 56 * u;
     font(g, 700, headSize, F.sans);
     var maxW = W - P * 2 - priceBlockW - (wide ? 40 * u : 0);
     var lines = wrap(g, headline, maxW, 2);
-    if (lines.length === 2 && g.measureText(lines[1]).width < maxW * 0.25) {
-      headSize *= 0.9; font(g, 700, headSize, F.sans); lines = wrap(g, headline, maxW, 2);
+    /* Don't strand a short word on a second line: shrink to fit one line
+       (down to 78%) when the overflow is small. */
+    if (lines.length === 2 && g.measureText(lines[1]).width < maxW * 0.35) {
+      var base = headSize;
+      while (lines.length === 2 && headSize > base * 0.78) {
+        headSize -= base * 0.02; font(g, 700, headSize, F.sans); lines = wrap(g, headline, maxW, 2);
+      }
+      if (lines.length === 2) { headSize = base * 0.9; font(g, 700, headSize, F.sans); lines = wrap(g, headline, maxW, 2); }
     }
     var hy = y + 58 * u;
     lines.forEach(function (ln, i) {
@@ -413,9 +518,17 @@
     var afterHead = hy + (lines.length - 1) * headSize * 1.14;
 
     /* price block: right column on landscape, under the headline otherwise */
-    var up = st.chg >= 0, chgC = up ? C.up : C.down;
-    var priceTxt = money(st.last.close);
-    var chgTxt = (up ? "▲ " : "▼ ") + signedMoney(st.chg) + "  " + signedPct(st.pct);
+    var up, chgC, priceTxt, chgTxt;
+    if (series) {
+      up = st.yoy == null || st.yoy >= 0;
+      chgC = d.neutral || st.yoy == null ? C.dim : up ? C.up : C.down;
+      priceTxt = d.format(st.last.value);
+      chgTxt = st.yoy == null ? d.period + " · " + st.last.label : (d.neutral ? "" : up ? "▲ " : "▼ ") + d.changeText(st.yoy) + " vs a year ago";
+    } else {
+      up = st.chg >= 0; chgC = up ? C.up : C.down;
+      priceTxt = money(st.last.close);
+      chgTxt = (up ? "▲ " : "▼ ") + signedMoney(st.chg) + "  " + signedPct(st.pct);
+    }
     if (wide) {
       g.textAlign = "right";
       font(g, 600, 58 * u, F.num); g.fillStyle = C.ink;
@@ -441,16 +554,16 @@
     rr(g, box.x - 14 * u, box.y - 8 * u, box.w + 28 * u, box.h + 16 * u, 18 * u);
     g.fillStyle = C.panel; g.fill();
     g.strokeStyle = C.line; g.lineWidth = 1; g.stroke();
-    plot(g, { x: box.x + 6 * u, y: box.y, w: box.w - 6 * u, h: box.h }, d, C, u);
+    (series ? plotSeries : plot)(g, { x: box.x + 6 * u, y: box.y, w: box.w - 6 * u, h: box.h }, d, C, u);
 
     if (state.stats) {
-      var tiles = [
+      var tiles = series ? seriesTiles(d, st, C) : [
         ["Period return", signedPct(st.pct), chgC],
         ["Period high", money(st.hi), null],
         ["Period low", money(st.lo), null],
         [d.intraday ? "Avg volume / bar" : "Avg daily volume", vol(st.avgVol), null]
       ];
-      if (!/daily|min|hour/i.test(d.interval || "")) tiles[3][0] = "Avg volume / bar";
+      if (!series && !/daily|min|hour/i.test(d.interval || "")) tiles[3][0] = "Avg volume / bar";
       var gap = 14 * u, tw = (W - P * 2 - gap * 3) / 4, ty = chartBottom + 18 * u;
       tiles.forEach(function (t, i) {
         var tx = P + i * (tw + gap);
@@ -469,10 +582,12 @@
     g.strokeStyle = C.line; g.lineWidth = 1;
     g.beginPath(); g.moveTo(P, fy - 34 * u); g.lineTo(W - P, fy - 34 * u); g.stroke();
     font(g, 500, 15 * u, F.sans); g.fillStyle = C.faint;
-    var asOf = fmt(st.last.time, d.intraday
+    var asOf = series ? "" : fmt(st.last.time, d.intraday
       ? { timeZone: d.tz, month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" }
       : { timeZone: d.tz, month: "short", day: "numeric", year: "numeric" });
-    var src = "Price data: Yahoo Finance · as of " + asOf + (d.intraday ? " ET" : "") + " · Educational, not investment advice";
+    var src = series
+      ? "Source: company filings with the SEC · calendar quarters · Educational, not investment advice"
+      : "Price data: Yahoo Finance · as of " + asOf + (d.intraday ? " ET" : "") + " · Educational, not investment advice";
     fitFont(g, src, 500, 15 * u, F.sans, W - P * 2 - 220 * u, 10);
     g.fillText(src, P, fy);
     font(g, 700, 18 * u, F.sans); g.fillStyle = C.dark ? "#D9A441" : "#9C6C17";
@@ -481,6 +596,11 @@
 
   /* ── post text and file actions ────────────────────────────────────────── */
   function postText() {
+    if (data.kind === "series") {
+      var sl = "impliedlens.com/stock/" + encodeURIComponent(data.legend.ticker);
+      return "$" + data.legend.ticker + " " + data.label.replace(/ \(.*\)$/, "").replace(/^[A-Z][a-z]/, function (c) { return c.toLowerCase(); }) + (data.period === "TTM" ? " (TTM)" : "") + ": " + data.format(data.stats.last.value) +
+        (data.stats.yoy != null ? ", " + data.changeText(data.stats.yoy) + " vs a year ago" : "") + ".\n\n" + data.read + "\n\nEvery quarter, straight from SEC filings:\n" + sl;
+    }
     var d = data, st = stats(d), t = d.legend.ticker;
     var link = "impliedlens.com/stock/" + encodeURIComponent(t);
     return "$" + t + " " + windowWords(d) + ": " + signedPct(st.pct) + " (" + money(st.first.close) + " → " + money(st.last.close) + ").\n" +
@@ -489,6 +609,7 @@
   }
   function fileName() {
     var d = data;
+    if (d.kind === "series") return d.legend.ticker + "-" + d.metric + "-" + d.period.toLowerCase() + "-" + state.size + ".png";
     return (d.legend.ticker || "chart") + "-" + String(d.legend.meta || "").split(" · ").slice(-2).join("-").replace(/\s+/g, "").toLowerCase() + "-" + state.size + ".png";
   }
   function blob() { return new Promise(function (res) { canvas.toBlob(res, "image/png"); }); }
@@ -601,7 +722,7 @@
               '<button type="button" class="ilss-tog" data-tog="averages"><span>Moving averages</span><span></span></button>' +
               '<button type="button" class="ilss-tog" data-tog="stats"><span>Stats row</span><span></span></button>' +
             "</div></div>" +
-            '<span class="ilss-note">The image shows the stretch of chart that is on your screen. Pan or zoom the chart first to frame it.</span>' +
+            '<span class="ilss-note ilss-frame-note">The image shows the stretch of chart that is on your screen. Pan or zoom the chart first to frame it.</span>' +
           "</div>" +
           '<div class="ilss-stage"><canvas class="ilss-canvas" aria-label="Preview of the chart image"></canvas></div>' +
           '<div class="ilss-actions">' +
@@ -643,12 +764,16 @@
     });
     root.querySelectorAll("[data-tog]").forEach(function (b) {
       var k = b.getAttribute("data-tog");
-      var avail = k === "drawings" ? data.drawings.length > 0 : k === "averages" ? Object.keys(data.ma).length > 0 : true;
+      var avail = k === "drawings" ? (data.drawings || []).length > 0 : k === "averages" ? Object.keys(data.ma || {}).length > 0 : true;
       b.disabled = !avail;
       b.setAttribute("aria-pressed", String(avail && !!state[k]));
     });
     root.querySelector(".ilss-size-note").textContent = SIZES[state.size].note;
-    root.querySelector(".ilss-head-in").placeholder = defaultHeadline(data, stats(data));
+    root.querySelector(".ilss-head-in").placeholder = data.kind === "series" ? data.headline : defaultHeadline(data, stats(data));
+    var hint = root.querySelector(".ilss-frame-note");
+    if (hint) hint.textContent = data.kind === "series"
+      ? "The image uses the metric, period and years you picked on the growth chart."
+      : "The image shows the stretch of chart that is on your screen. Pan or zoom the chart first to frame it.";
     root.querySelector(".ilss-post").value = postText();
     draw();
   }
@@ -700,7 +825,7 @@
     window.downloadShareStudio = function () { if (root && !root.hidden) download(); };
     window.exportExpandedChart = open;
   }
-  window.ILShareStudio = { open: open, close: close, _draw: draw, _state: state, _collect: collect, _setData: function (d) { data = d; } };
+  window.ILShareStudio = { open: open, openSeries: openSeries, close: close, _draw: draw, _state: state, _collect: collect, _setData: function (d) { data = d; } };
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", install);
   else install();

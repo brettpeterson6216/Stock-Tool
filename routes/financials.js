@@ -20,6 +20,7 @@ const { db }           = require("../lib/db");
 const { requirePro, requireAccount, reconcileEffectivePlan, normalizeTicker, FREE_DAILY_LIMIT, GUEST_DAILY_LIMIT } = require("../lib/plan");
 const { deriveEarnings, loadCompanyFacts, loadFinnhubResearch, loadPriceHistory } = require("../lib/stock-research");
 
+const { buildQuarterlyHistory, attachPrices } = require("../lib/fundamentals-history");
 const router = express.Router();
 const UA     = "ImpliedLens/1.0 brettpeterson6216@gmail.com";
 
@@ -430,6 +431,46 @@ router.get("/financials/:ticker", requireAccount, async (req, res) => {
 // ============================================================
 //  GET /api/earnings/:ticker  (Pro)
 // ============================================================
+/* Quarterly fundamentals history for the growth charts: one row per fiscal
+   quarter from SEC XBRL, with the share price at each quarter end. */
+const historyCache = new Map();
+router.get("/fundamentals/history/:ticker", requireAccount, async (req, res) => {
+  const ticker = requestTicker(req, res);
+  if (!ticker) return;
+  const hit = historyCache.get(ticker);
+  if (hit && Date.now() - hit.at < 6 * 3600 * 1000) return res.json(hit.body);
+  try {
+    const company = await loadCompanyFacts(ticker);
+    const quarters = buildQuarterlyHistory(company.facts);
+    if (quarters.length < 4) {
+      return res.status(404).json({ error: "Quarterly statements are not available for this company.", noHistory: true });
+    }
+    let priceNote = null;
+    try {
+      const prices = await loadPriceHistory(ticker, { range: "10y", interval: "1wk" });
+      attachPrices(quarters, prices.bars);
+    } catch (e) { priceNote = "Price history unavailable; valuation ratios are hidden."; }
+    const body = {
+      ticker,
+      name: company.name || ticker,
+      quarters,
+      splits: quarters.splits || [],
+      calendar: "Quarters are labelled by the calendar quarter they end in.",
+      priceNote,
+      impliedLens: company.provenance || null,
+    };
+    if (historyCache.size > 400) historyCache.clear();
+    historyCache.set(ticker, { at: Date.now(), body });
+    res.json(body);
+  } catch (e) {
+    const missing = /identifier unavailable/i.test(String(e && e.message));
+    res.status(missing ? 404 : 502).json({
+      error: missing ? "SEC statements are not available for this ticker (it may be an ETF or a foreign filer)." : "SEC data is temporarily unavailable. Try again shortly.",
+      noHistory: missing,
+    });
+  }
+});
+
 router.get("/earnings/:ticker", requireAccount, async (req, res) => {
   const ticker = requestTicker(req, res);
   if (!ticker) return;
