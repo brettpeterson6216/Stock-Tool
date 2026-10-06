@@ -235,7 +235,7 @@ async function loadYahooScreenerUniverse() {
    A background job fills rows at low priority through lib/finnhub-gate, so
    it never starves someone's stock page; results are kept for a day. */
 const { finnhubJson } = require("../lib/finnhub-gate");
-const ENRICH_TTL = 24 * 3600 * 1000, PRICE_TTL = 20 * 60 * 1000;
+const ENRICH_TTL = 5.5 * 3600 * 1000, PRICE_TTL = 20 * 60 * 1000;
 const _enrich = new Map();   // ticker -> { at, priceAt, sector, revenueGrowth, ... }
 let _enrichRunning = false;
 
@@ -359,6 +359,16 @@ function screenerRow(ticker, base) {
     enriched: !!e.at,
   };
   return row;
+}
+
+/* Keep the popular names warm. Their Finnhub metrics and profiles sit in the
+   gate's cache, so a stock page for any of them answers from cache instead of
+   spending the shared per-minute quota (live audit 2026-10-06: a burst of
+   page loads ran it out and metrics/analyst answered 503 for niche names). */
+if (process.env.NODE_ENV === "production" && FINNHUB_KEY) {
+  const warm = () => startEnrichment(SCREENER_TICKERS.slice());
+  setTimeout(warm, 20 * 1000).unref();
+  setInterval(warm, 6 * 3600 * 1000).unref();
 }
 
 router.get("/screener", requirePro, async (req, res) => {

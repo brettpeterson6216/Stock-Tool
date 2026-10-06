@@ -331,6 +331,17 @@ router.get("/financials/:ticker", requireAccount, async (req, res) => {
       ? latestDebt + latestEquity - latestCash
       : null;
 
+    /* Latest quarter vs the same quarter a year earlier, from the company's
+       own SEC filings. Finnhub's quarterly growth uses its own revenue
+       definition and was off by miles for lenders (SoFi showed +185% when the
+       filings say about +42%). */
+    let secQuarterYoy = null;
+    try {
+      const qh = buildQuarterlyHistory(facts, { maxQuarters: 8 });
+      const last = qh.at(-1), prev = qh.length >= 5 ? qh.at(-5) : null;
+      const gap = last && prev ? (Date.parse(last.end) - Date.parse(prev.end)) / 86400000 : 0;
+      if (last && prev && gap > 330 && gap < 400 && last.revenue > 0 && prev.revenue > 0) secQuarterYoy = last.revenue / prev.revenue - 1;
+    } catch (_) { /* fall back to Finnhub */ }
     const n   = v => (v != null && !isNaN(v)) ? { raw: v } : null;
     const pct = v => (v != null && !isNaN(v)) ? { raw: v / 100 } : null;
 
@@ -363,7 +374,8 @@ router.get("/financials/:ticker", requireAccount, async (req, res) => {
       roic:            n(latestOperatingIncome != null && investedCapital > 0
         ? latestOperatingIncome * 0.79 / investedCapital
         : null),
-      revenueGrowth:    m.revenueGrowthQuarterlyYoy != null || m.revenueGrowth3Y != null
+      revenueGrowth:    secQuarterYoy != null ? n(secQuarterYoy)
+        : m.revenueGrowthQuarterlyYoy != null || m.revenueGrowth3Y != null
         ? pct(m.revenueGrowthQuarterlyYoy ?? m.revenueGrowth3Y)
         : n(priorRevenue ? safeRatio(latestRevenue - priorRevenue, Math.abs(priorRevenue)) : null),
       earningsGrowth:   m.epsGrowthTTMYoy != null || m.epsGrowth3Y != null
