@@ -1,52 +1,35 @@
 (function () {
   "use strict";
 
+  /* LensToolkit: the LensScore report card.
+
+     The server grades the company against its sector (lib/lens-factors.js)
+     and sends the result as payload.grades. The browser keeps the chart
+     engine for the Entry timing tab: zones, trend and the timing gauge are
+     computed here from the same price bars. */
   const engine = window.LensScoreEngine;
   if (!engine) throw new Error("LensScore engine failed to load.");
-
-  const ASSUMPTIONS = [
-    { key: "revenueGrowth", label: "Revenue growth", min: -10, max: 35, step: 1, format: "percent", note: "Normalized forward growth assumption" },
-    { key: "epsGrowth", label: "EPS growth", min: -20, max: 45, step: 1, format: "percent", note: "Per-share earnings trajectory" },
-    { key: "fcfMargin", label: "Free-cash-flow margin", min: -5, max: 45, step: 1, format: "percent", note: "Cash generated per revenue dollar" },
-    { key: "roic", label: "Return on invested capital", min: -5, max: 50, step: 1, format: "percent", note: "Capital efficiency" },
-    { key: "netDebtEbitda", label: "Net debt / EBITDA", min: -2, max: 7, step: 0.1, format: "multiple", note: "Negative values indicate net cash" },
-    { key: "interestCoverage", label: "Interest coverage", min: 0, max: 40, step: 1, format: "multiple", note: "Operating earnings divided by interest" },
-    { key: "dilution", label: "Annual dilution", min: -5, max: 10, step: 0.5, format: "percent", note: "Negative values represent buybacks" },
-    { key: "forwardPE", label: "Reference earnings multiple", min: 5, max: 90, step: 1, format: "multiple", note: "Price divided by the disclosed EPS basis" },
-    { key: "dcfUpside", label: "Modeled value gap", min: -50, max: 100, step: 1, format: "percent", note: "Price versus the normalized Implied Lens earnings-value model" },
-    { key: "impliedGrowthGap", label: "Expectations gap", min: -10, max: 25, step: 1, format: "percent", note: "Implied growth minus supported growth" },
-    { key: "bearDownside", label: "Bear-case downside", min: -70, max: -2, step: 1, format: "percent", note: "Modeled downside from the current price" },
-  ];
 
   const state = {
     ticker: "AAPL",
     bars: [],
     meta: {},
-    fundamentals: {},
-    reportedFundamentals: {},
-    fundamentalFields: {},
-    fundamentalModel: {},
+    grades: null,
     provenance: null,
     result: null,
-    baseline: null,
     chartPreset: "toolkit",
     source: "Waiting for live data",
-    entryPrice: null,
     chartPoints: [],
   };
 
   const $ = selector => document.querySelector(selector);
-  /* Bind only if the element is there. bindEvents() wires the whole page in one
-     run, so a single $("#missing").addEventListener threw and every listener
-     after it - the ticker form, the chart presets, the methodology dialog, the
-     assumptions, the save button, the resize redraw - was silently never
-     attached. One absent node must not be able to take the page down. */
   const on = (selector, type, handler, opts) => {
     const node = typeof selector === "string" ? $(selector) : selector;
     if (node) node.addEventListener(type, handler, opts);
     return node;
   };
   const $$ = selector => Array.from(document.querySelectorAll(selector));
+  const setText = (selector, text) => { const n = $(selector); if (n) n.textContent = text; return n; };
   let activeRequestController = null;
   const finite = value => value !== null && value !== undefined && value !== "" && Number.isFinite(Number(value));
   const money = value => finite(value)
@@ -56,18 +39,34 @@
   const compact = value => finite(value)
     ? new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 }).format(value)
     : "—";
-  const escapeText = value => String(value ?? "");
   const normalizeTickerInput = value => String(value || "")
     .trim()
     .toUpperCase()
     .replace("/", "-")
     .replace(/[^A-Z0-9.^-]/g, "")
     .slice(0, 15);
-  const SESSION_CACHE_PREFIX = "il:lens-score:v3:";
+  const SESSION_CACHE_PREFIX = "il:lens-score:v4:";
   const SESSION_CACHE_INDEX = `${SESSION_CACHE_PREFIX}index`;
-  // Short enough that a price never trails the market by much; the server
-  // caches as well, so this only saves a round trip when flipping tickers.
   const SESSION_CACHE_TTL_MS = 3 * 60 * 1000;
+  const el = (tag, cls, text) => {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text !== undefined && text !== null) n.textContent = text;
+    return n;
+  };
+  const SHORT = { value: "Value", growth: "Growth", profitability: "Profit", health: "Health", momentum: "Momentum" };
+  const gradeTone = g => !g ? "unknown" : /^A/.test(g) ? "strong" : /^B/.test(g) ? "positive" : /^C/.test(g) ? "neutral" : /^D/.test(g) ? "weak" : "severe";
+
+  function fmtMetric(value, fmt) {
+    if (!finite(value)) return "n/a";
+    const n = Number(value);
+    const abs = Math.abs(n);
+    const sign = n < 0 ? "−" : "";
+    if (fmt === "%") return `${sign}${abs >= 100 ? abs.toFixed(0) : abs.toFixed(1)}%`;
+    if (fmt === "pp") return `${n >= 0 ? "+" : "−"}${abs.toFixed(1)} pts`;
+    if (fmt === "x") return `${sign}${abs >= 100 ? abs.toFixed(0) : abs.toFixed(1)}×`;
+    return n.toFixed(2);
+  }
 
   function decodeBars(rows) {
     return (rows || []).map(row => Array.isArray(row)
@@ -144,141 +143,11 @@
     };
   }
 
-  function hydratePayload(payload, refreshing) {
-    if (payload.provenance?.synthetic !== false) throw new Error("Unverified or synthetic data was rejected.");
-    state.bars = engine.normalizeBars(decodeBars(payload.market?.bars || []));
-    if (state.bars.length < 60) throw new Error("Insufficient live price history.");
-    state.meta = {
-      ...(payload.market?.meta || {}),
-      longName: payload.company || payload.market?.meta?.name || state.ticker,
-    };
-    state.source = (payload.provenance?.sources || [])
-      .filter(source => source.status === "available")
-      .map(source => source.name)
-      .join(" + ") || "Reported provider data";
-    state.provenance = payload.provenance || null;
-    state.fundamentals = { ...(payload.fundamentals?.values || {}) };
-    state.reportedFundamentals = { ...state.fundamentals };
-    state.fundamentalFields = { ...(payload.fundamentals?.fields || {}) };
-    state.fundamentalModel = {
-      referenceEps: payload.fundamentals?.referenceEps ?? null,
-      referenceEpsBasis: payload.fundamentals?.referenceEpsBasis || "Unavailable",
-      referenceEpsAsOf: payload.fundamentals?.referenceEpsAsOf || null,
-      referenceEpsQuarters: payload.fundamentals?.referenceEpsQuarters || [],
-    };
-
-    const latest = state.bars[state.bars.length - 1];
-    state.entryPrice = latest.close;
-    state.fundamentals = normalizePresetForPrice(state.fundamentals, latest.close);
-    state.reportedFundamentals = { ...state.fundamentals };
-    calculate(true);
-    renderAssumptions();
-    if (state.result?.status === "graded") configureEntryControls();
-
-    const retrieved = formatAsOf(payload.provenance?.retrievedAt);
-    const marketAsOf = formatAsOf(payload.provenance?.asOf?.market);
-    const fundamentalsAsOf = formatAsOf(payload.provenance?.asOf?.fundamentals);
-    const companyEvidence = payload.provenance?.freshness?.fundamentals?.basis === "provider-snapshot"
-      ? `provider metric snapshot retrieved ${fundamentalsAsOf} (reporting-period date unavailable)`
-      : payload.provenance?.asOf?.fundamentals
-        ? `company evidence through ${fundamentalsAsOf}`
-        : "company evidence unavailable";
-    const warningList = Array.isArray(payload.provenance?.warnings)
-      ? payload.provenance.warnings
-      : [];
-    const warnings = warningList.length ? ` ${warningList.join(" ")}` : "";
-    const prefix = refreshing
-      ? `Showing verified session evidence retrieved ${retrieved} while live providers refresh.`
-      : `Retrieved ${retrieved} from ${state.source}.`;
-    setNotice(
-      `${prefix} Market through ${marketAsOf}; ${companyEvidence}.${warnings}`,
-      refreshing || warningList.length ? "warn" : "good"
-    );
-  }
-
   function alphaColor(hex, alpha) {
     const value = String(hex || "").replace("#", "");
     if (!/^[0-9a-f]{6}$/i.test(value)) return hex;
     const numeric = Number.parseInt(value, 16);
     return `rgba(${(numeric >> 16) & 255},${(numeric >> 8) & 255},${numeric & 255},${alpha})`;
-  }
-
-  async function loadTicker(ticker) {
-    const requestedTicker = normalizeTickerInput(ticker) || "AAPL";
-    if (activeRequestController) activeRequestController.abort();
-    const requestController = new AbortController();
-    activeRequestController = requestController;
-    state.ticker = requestedTicker;
-    $("#ticker-input").value = state.ticker;
-    $("#lab-main").setAttribute("aria-busy", "true");
-    state.chartPoints = [];
-    state.bars = [];
-    state.meta = { longName: state.ticker };
-    state.fundamentals = {};
-    state.reportedFundamentals = {};
-    state.fundamentalFields = {};
-    state.fundamentalModel = {};
-    state.provenance = null;
-    state.result = null;
-    state.baseline = null;
-    updateResearchLinks();
-    $("#chart-tooltip").hidden = true;
-    $("#chart-tooltip").textContent = "";
-    let hasUsableCache = false;
-    const sessionPayload = readSessionPayload(state.ticker);
-    if (sessionPayload) {
-      try {
-        hydratePayload(sessionPayload, true);
-        hasUsableCache = true;
-      } catch (_) {
-        hasUsableCache = false;
-      }
-    }
-    if (!hasUsableCache) {
-      renderUnavailable("Loading current market and company evidence…");
-      setNotice("Loading reported company facts, earnings expectations and market history…", "");
-    }
-    try {
-      const response = await fetch(`/api/lens-score/${encodeURIComponent(state.ticker)}?preview=1&compact=1`, {
-        credentials: "same-origin",
-        cache: "default",
-        signal: requestController.signal,
-      });
-      const payload = await response.json().catch(() => ({}));
-      if (requestController.signal.aborted || state.ticker !== requestedTicker) return;
-      if (!response.ok) throw new Error(payload.error || `Research endpoint returned ${response.status}`);
-      hydratePayload(payload, false);
-      writeSessionPayload(state.ticker, payload);
-    } catch (error) {
-      if (error?.name === "AbortError") return;
-      if (hasUsableCache) {
-        setNotice(
-          `Live refresh failed: ${error.message} Showing the verified session evidence above; no synthetic replacement was used.`,
-          "warn"
-        );
-        $("#lab-main").setAttribute("aria-busy", "false");
-        if (activeRequestController === requestController) activeRequestController = null;
-        return;
-      }
-      state.bars = [];
-      state.fundamentals = {};
-      state.reportedFundamentals = {};
-      state.fundamentalFields = {};
-      state.fundamentalModel = {};
-      state.result = null;
-      state.baseline = null;
-      state.meta = { longName: state.ticker };
-      setNotice(
-        `${error.message} LensScore is Not Rated; no synthetic replacement was used.`,
-        "warn"
-      );
-      renderUnavailable();
-      $("#lab-main").setAttribute("aria-busy", "false");
-      if (activeRequestController === requestController) activeRequestController = null;
-      return;
-    }
-    $("#lab-main").setAttribute("aria-busy", "false");
-    if (activeRequestController === requestController) activeRequestController = null;
   }
 
   function formatAsOf(value) {
@@ -293,345 +162,6 @@
     return Number.isNaN(date.getTime())
       ? String(value)
       : date.toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
-  }
-
-  function renderUnavailable(reason = "Required live evidence is unavailable.") {
-    $("#company-name").textContent = state.meta.longName || state.ticker;
-    $("#company-ticker").textContent = state.ticker;
-    $("#chart-ticker").textContent = state.ticker;
-    $("#market-price").textContent = "—";
-    $("#market-change").textContent = "Current quote unavailable";
-    $("#market-change").style.color = "";
-    ["#score-value", "#setup-score", "#value-score"].forEach(selector => {
-      const element = $(selector);
-      if (element) element.textContent = "—";
-    });
-    $("#score-label").textContent = "Not Rated";
-    $("#score-summary").textContent = reason;
-    $("#score-confidence").textContent = "Low";
-    $("#model-version").textContent = engine.VERSION;
-    $("#setup-label").textContent = "Not Rated";
-    $("#value-label").textContent = "Not Rated";
-    $("#golden-lens-signal").dataset.active = "false";
-    $("#golden-lens-label").textContent = "Golden Lens unavailable";
-    $("#golden-lens-reason").textContent = "Both independent lenses must have sufficient current evidence.";
-    $("#score-ring").dataset.tone = "unknown";
-    $("#score-ring").style.setProperty("--score-progress", 0);
-    $("#score-marker").style.left = "0%";
-    $("#as-of").textContent = "—";
-    $("#chart-source").textContent = "Source: waiting for verified data";
-    $("#buy-zone").textContent = "—";
-    $("#buy-zone-note").textContent = "A current price series is required.";
-    $("#invalidation-price").textContent = "—";
-    $("#implied-growth").textContent = "—";
-    $("#supported-growth").textContent = "—";
-    $("#growth-gap").textContent = "—";
-    $("#dcf-range").textContent = "Unavailable";
-    $("#valuation-chip").textContent = "Not Rated";
-    $("#alignment-copy").textContent = "Both lenses must be rated before LensScore can combine them.";
-    $("#alignment-visual").replaceChildren();
-    $("#trend-regime-heading").textContent = "Trend unavailable";
-    $("#trend-regime-value").textContent = "—";
-    $("#trend-agreement").textContent = "—";
-    $("#trend-extension").textContent = "—";
-    $("#trend-regime-votes").replaceChildren();
-    $("#trend-regime-copy").textContent = "A current price series is required.";
-    $("#coverage-value").textContent = "—";
-    $("#history-value").textContent = "—";
-    $("#cap-value").textContent = "—";
-    $("#guardrail-list").replaceChildren();
-    $("#strength-list").replaceChildren();
-    $("#concern-list").replaceChildren();
-    ["#support-zones", "#resistance-zones", "#technical-grid", "#indicator-table", "#driver-waterfall"].forEach(selector => {
-      const element = $(selector);
-      if (element) element.replaceChildren();
-    });
-    $("#chart-legend").replaceChildren();
-    const canvas = $("#price-chart");
-    if (canvas) {
-      const context = canvas.getContext("2d");
-      context?.clearRect(0, 0, canvas.width, canvas.height);
-    }
-    state.chartPoints = [];
-  }
-
-  function renderPartial(result) {
-    const latest = state.bars[state.bars.length - 1];
-    const previous = state.bars[state.bars.length - 2] || latest;
-    const change = latest && previous ? latest.close / previous.close - 1 : null;
-    $("#company-name").textContent = state.meta.longName || state.ticker;
-    $("#company-ticker").textContent = state.ticker;
-    $("#chart-ticker").textContent = state.ticker;
-    $("#market-price").textContent = latest ? money(latest.close) : "—";
-    $("#market-change").textContent = finite(change)
-      ? `${change >= 0 ? "+" : ""}${pct(change)} last session`
-      : "Current change unavailable";
-    $("#market-change").style.color = finite(change)
-      ? change >= 0 ? "var(--green)" : "var(--red)"
-      : "";
-    $("#score-value").textContent = "—";
-    $("#score-label").textContent = "Combined score unavailable";
-    $("#score-summary").textContent = result.reason;
-    $("#score-confidence").textContent = "Low";
-    $("#model-version").textContent = result.version;
-    $("#as-of").textContent = latest
-      ? new Date(latest.time * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-      : "—";
-    $("#score-ring").dataset.tone = "unknown";
-    $("#score-ring").style.setProperty("--score-progress", 0);
-    $("#score-marker").style.left = "0%";
-    $("#chart-source").textContent = `Source: ${state.source}`;
-
-    const setup = result.lenses?.setup;
-    $("#setup-score").textContent = finite(setup?.score) ? setup.score.toFixed(1) : "—";
-    $("#setup-label").textContent = setup?.label || "Not Rated";
-    $("#value-score").textContent = "—";
-    $("#value-label").textContent = "Insufficient company evidence";
-    $("#golden-lens-signal").dataset.active = "false";
-    $("#golden-lens-label").textContent = "Golden Lens unavailable";
-    $("#golden-lens-reason").textContent = "LensSetup remains usable, but LensValue needs more current reported company evidence.";
-
-    fillList("#strength-list", [], "LensSetup is available in Chart & zones.");
-    fillList("#concern-list", [result.reason], "No company-data limitation was reported.");
-    const support = result.technical?.zones?.support?.[0];
-    if (support) {
-      $("#buy-zone").textContent = `${money(support.lower)}–${money(support.upper)}`;
-      $("#buy-zone-note").textContent = `${support.touches} confirmed reaction${support.touches === 1 ? "" : "s"} · ${Math.round(support.strength)}/100 zone strength`;
-      $("#invalidation-price").textContent = money(support.lower - (result.technical.indicators.atr || 0));
-    } else {
-      $("#buy-zone").textContent = "No confirmed zone";
-      $("#buy-zone-note").textContent = "No qualified nearby support cluster was found.";
-      $("#invalidation-price").textContent = "—";
-    }
-    $("#implied-growth").textContent = "—";
-    $("#supported-growth").textContent = "—";
-    $("#growth-gap").textContent = "—";
-    $("#dcf-range").textContent = "Unavailable";
-    $("#valuation-chip").textContent = "Not Rated";
-    $("#alignment-copy").textContent = "LensSetup is available independently. LensValue and the combined LensScore are withheld until company evidence is sufficient.";
-    $("#coverage-value").textContent = `${result.dataCoverage?.fundamentals?.available || 0}/${result.dataCoverage?.fundamentals?.total || 7} company`;
-    $("#history-value").textContent = `${result.technical?.bars?.length || 0} bars`;
-    $("#cap-value").textContent = "Combined score withheld";
-    $("#driver-waterfall").replaceChildren();
-
-    if (result.technical?.status === "ok") {
-      renderTiming(result);
-      renderTrendRegime(result);
-      renderZones(result);
-      renderSetupComponents(result);
-      renderTechnicalMetrics(result);
-      renderIndicatorTable(result);
-      drawChart();
-    }
-  }
-
-  function normalizePresetForPrice(preset, price) {
-    return {
-      ...preset,
-      _marketPrice: price,
-      _baseForwardPE: preset.forwardPE,
-      _baseDcfUpside: preset.dcfUpside,
-      _baseBearDownside: preset.bearDownside,
-      _baseImpliedGrowthGap: preset.impliedGrowthGap,
-    };
-  }
-
-  function calculate(setBaseline = false) {
-    state.result = engine.scoreLens({
-      bars: state.bars,
-      fundamentals: state.fundamentals,
-      metadata: { ticker: state.ticker, source: state.source },
-    });
-    if (setBaseline) state.baseline = state.result;
-    if (state.result.status !== "graded") {
-      if (state.result.technical?.status === "ok") renderPartial(state.result);
-      else renderUnavailable(state.result.reason);
-      return;
-    }
-    renderAll();
-  }
-
-  function setNotice(message, tone) {
-    const notice = $("#data-notice");
-    notice.textContent = message;
-    notice.className = `notice${tone ? ` ${tone}` : ""}`;
-  }
-
-  function componentLabel(key) {
-    return {
-      fundamentals: "Company quality",
-      valuation: "Price & value",
-      technical: "Chart setup",
-      momentum: "Momentum",
-      risk: "Risk",
-    }[key] || key;
-  }
-
-  function scoreSummary(result) {
-    const { setup, value, goldenLens } = result.lenses;
-    if (goldenLens.active) return "Golden Lens: long-term value and tactical entry quality are exceptionally aligned.";
-    if (value.score >= 8.5 && setup.score < 7) {
-      return "Exceptional long-term value, but the chart has not yet confirmed a high-quality tactical entry.";
-    }
-    if (setup.score >= 8 && value.score < 7) {
-      return "A strong tactical setup, but the long-term valuation and business case are not strong enough yet.";
-    }
-    if (value.score >= 7 && setup.score >= 7) {
-      return "Both independent lenses are constructive, producing a broadly aligned buyability result.";
-    }
-    if (value.score >= setup.score) {
-      return "The long-term opportunity is stronger than the current tactical entry setup.";
-    }
-    return "The chart setup is stronger than the current long-term value case.";
-  }
-
-  function renderAll() {
-    const result = state.result;
-    if (!result || result.status !== "graded") return;
-    const latest = state.bars[state.bars.length - 1];
-    const previous = state.bars[state.bars.length - 2] || latest;
-    const change = latest.close / previous.close - 1;
-
-    $("#company-name").textContent = state.meta.longName || state.fundamentals.name || state.ticker;
-    $("#company-ticker").textContent = state.ticker;
-    $("#chart-ticker").textContent = state.ticker;
-    $("#market-price").textContent = money(result.price);
-    $("#market-change").textContent = `${change >= 0 ? "+" : ""}${pct(change)} last session`;
-    $("#market-change").style.color = change >= 0 ? "var(--green)" : "var(--red)";
-    $("#score-value").textContent = result.score.toFixed(1);
-    $("#score-label").textContent = result.label;
-    $("#score-summary").textContent = scoreSummary(result);
-    $("#score-confidence").textContent = result.confidence;
-    $("#model-version").textContent = result.version;
-    $("#as-of").textContent = new Date(latest.time * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-    $("#score-ring").dataset.tone = result.tone;
-    $("#score-ring").style.setProperty("--score-progress", result.score * 10);
-    $("#score-marker").style.left = `${result.score * 10}%`;
-    $("#chart-source").textContent = `Source: ${state.source}`;
-    renderLenses(result);
-    renderDecision(result);
-    renderExpectations(result);
-    renderAlignment(result);
-    renderValueComponents(result);
-    renderTiming(result);
-    renderTrendRegime(result);
-    renderZones(result);
-    renderSetupComponents(result);
-    renderTechnicalMetrics(result);
-    renderDrivers(result);
-    renderIndicatorTable(result);
-    renderScenario(result);
-    drawChart();
-  }
-
-  function renderLenses(result) {
-    const { setup, value, goldenLens } = result.lenses;
-    $("#setup-score").textContent = setup.score.toFixed(1);
-    $("#setup-label").textContent = setup.label;
-    $("#value-score").textContent = value.score.toFixed(1);
-    $("#value-page-score").textContent = value.score.toFixed(1);
-    $("#value-label").textContent = value.label;
-    const signal = $("#golden-lens-signal");
-    signal.dataset.active = goldenLens.active ? "true" : "false";
-    $("#golden-lens-label").textContent = goldenLens.active
-      ? "Golden Lens signal"
-      : "Golden Lens not active";
-    $("#golden-lens-reason").textContent = goldenLens.reason;
-  }
-
-  function renderValueComponents(result) {
-    const detail = result.componentDetails;
-    const cards = [
-      ["Business quality", detail.fundamentals.score, "Growth, cash generation, capital efficiency and leverage"],
-      ["Valuation", detail.valuation.score, "Modeled upside, earnings multiple and expectations gap"],
-      ["Downside resilience", detail.risk.score, "Balance sheet, dilution and bear-case exposure"],
-      ["Expectations", detail.valuation.parts.expectationsGap, "How achievable the growth embedded in price appears"],
-      ["Capital allocation", detail.fundamentals.parts.dilution, "Share issuance, buybacks and per-share discipline"],
-    ];
-    $("#value-component-grid").replaceChildren(...cards.map(([label, score, note]) => {
-      const card = document.createElement("article");
-      card.className = "value-component-card panel";
-      const head = document.createElement("div");
-      const name = document.createElement("span");
-      name.textContent = label;
-      const value = document.createElement("strong");
-      value.textContent = finite(score) ? `${(Number(score) / 10).toFixed(1)} / 10` : "Not rated";
-      head.append(name, value);
-      const track = document.createElement("i");
-      track.style.setProperty("--value-progress", `${finite(score) ? Math.max(0, Math.min(100, Number(score))) : 0}%`);
-      const copy = document.createElement("p");
-      copy.textContent = note;
-      card.append(head, track, copy);
-      return card;
-    }));
-  }
-
-  function fillList(selector, items, emptyMessage) {
-    const list = $(selector);
-    list.replaceChildren();
-    const values = items.length ? items : [emptyMessage];
-    values.slice(0, 3).forEach(item => {
-      const li = document.createElement("li");
-      li.textContent = item;
-      list.append(li);
-    });
-  }
-
-  function renderDecision(result) {
-    fillList("#strength-list", result.strengths, "No strong positive contributor is currently confirmed.");
-    fillList("#concern-list", result.concerns, "No material concern is currently triggered.");
-    const support = result.technical.zones.support[0];
-    if (support) {
-      $("#buy-zone").textContent = `${money(support.lower)}–${money(support.upper)}`;
-      $("#buy-zone-note").textContent = `${support.touches} confirmed reaction${support.touches === 1 ? "" : "s"} · ${Math.round(support.strength)}/100 zone strength`;
-      const invalidation = support.lower - (result.technical.indicators.atr || 0);
-      $("#invalidation-price").textContent = money(invalidation);
-    } else {
-      $("#buy-zone").textContent = "No confirmed zone";
-      $("#buy-zone-note").textContent = "The current history does not produce a qualified nearby support cluster.";
-      $("#invalidation-price").textContent = "—";
-    }
-  }
-
-  function renderExpectations(result) {
-    const implied = finite(state.fundamentals.revenueGrowth) && finite(state.fundamentals.impliedGrowthGap)
-      ? Number(state.fundamentals.revenueGrowth) + Number(state.fundamentals.impliedGrowthGap)
-      : null;
-    const current = result.price;
-    const baseValue = finite(state.fundamentals.dcfUpside)
-      ? current * (1 + Number(state.fundamentals.dcfUpside))
-      : null;
-    const bearValue = finite(state.fundamentals.bearDownside)
-      ? current * (1 + Number(state.fundamentals.bearDownside))
-      : null;
-    $("#implied-growth").textContent = pct(implied);
-    $("#supported-growth").textContent = pct(state.fundamentals.revenueGrowth);
-    $("#growth-gap").textContent = pct(state.fundamentals.impliedGrowthGap);
-    $("#dcf-range").textContent = finite(bearValue) && finite(baseValue)
-      ? `${money(bearValue)}–${money(baseValue)}`
-      : "Unavailable";
-    $("#valuation-chip").textContent = `${(result.components.valuation / 10).toFixed(1)} / 10`;
-  }
-
-  function renderAlignment(result) {
-    const visual = $("#alignment-visual");
-    visual.replaceChildren();
-    const { setup, value, goldenLens } = result.lenses;
-    const lensScores = [value.score, setup.score];
-    lensScores.forEach(score => {
-      const block = document.createElement("span");
-      if (score >= 7) block.className = "on";
-      visual.append(block);
-    });
-    $("#alignment-copy").textContent = goldenLens.active
-      ? "Golden Lens is active: both independent lenses are exceptionally strong."
-      : value.score >= 7 && setup.score >= 7
-        ? "LensValue and LensSetup are both constructive, but at least one remains below Golden Lens strength."
-        : value.score >= 7
-          ? "The long-term case is constructive; wait for stronger tactical confirmation if timing matters."
-          : setup.score >= 7
-            ? "The tactical setup is constructive; the long-term value case remains the limiting lens."
-            : "Neither independent lens currently shows a strong advantage.";
   }
 
   function renderZoneRows(containerSelector, zones, type) {
@@ -678,7 +208,7 @@
   function renderTiming(result) {
     const timing = result.technical.timing;
     const score = Number(timing.timingScore);
-    $("#timing-heading").textContent = timing.label;
+    $("#timing-heading").textContent = (TIMING_PLAIN[timing.key] || TIMING_PLAIN.unknown)[0];
     $("#timing-value").textContent = Number.isFinite(score) ? `${score.toFixed(1)} / 10` : "—";
     $("#timing-marker").style.left = Number.isFinite(score)
       ? `${Math.max(0, Math.min(100, score * 10))}%`
@@ -696,10 +226,10 @@
       return chip;
     }));
     $("#timing-copy").textContent = timing.condition === "buyer-extreme"
-      ? "Momentum is deeply compressed. LensSetup still requires support and reversal confirmation before treating this as buyable."
+      ? "Every momentum gauge says the stock has been sold hard. That is where rebounds often start, but confirm the trend and the support zone hold first."
       : timing.condition === "seller-extreme"
-        ? "Momentum is extended. A strong company or uptrend can still be a poor entry at this price."
-        : "LensTiming grades entry pressure only; LensTrend, zones, volume and confirmation decide whether the setup is actionable.";
+        ? "Every momentum gauge says the stock has run up hard. Even a great company can be a poor buy right after a spike."
+        : (TIMING_PLAIN[timing.key] || TIMING_PLAIN.unknown)[1];
   }
 
   function renderTrendRegime(result) {
@@ -729,7 +259,7 @@
       chip.textContent = `${voteLabels[key]} ${direction === "up" ? "↑" : direction === "down" ? "↓" : "•"}`;
       return chip;
     }));
-    $("#trend-regime-copy").textContent = `${regime.agreement} of ${regime.total} moving-average structure inputs agree. LensTrend measures direction; LensTiming measures entry pressure.`;
+    $("#trend-regime-copy").textContent = `${regime.agreement} of ${regime.total} moving-average checks agree. Trend says which way the stock is heading; Timing says whether the price is stretched or pulled back.`;
   }
 
   function renderTechnicalMetrics(result) {
@@ -738,9 +268,9 @@
       ? `${tech.trendRegime.trendScore.toFixed(1)} / 10`
       : "—";
     const metrics = [
-      ["LensTiming", `${tech.timing.timingScore.toFixed(1)} / 10`, `${tech.timing.label} · entry pressure`],
+      ["Lens Timing", `${tech.timing.timingScore.toFixed(1)} / 10`, (TIMING_PLAIN[tech.timing.key] || TIMING_PLAIN.unknown)[0]],
       ["Setup confirmation", `${(tech.confirmation / 10).toFixed(1)} / 10`, "Price recovery and momentum follow-through"],
-      ["LensTrend", regimeValue, `${tech.trendRegime.label} · direction, not buyability`],
+      ["Lens Trend", regimeValue, tech.trendRegime.label],
       ["Trend agreement", `${tech.trendRegime.agreement} / ${tech.trendRegime.total}`, "Price and moving-average structure"],
       ["RSI · 14", tech.indicators.rsi?.toFixed(1) || "—", tech.indicators.rsi > 70 ? "Extended" : tech.indicators.rsi < 35 ? "Oversold" : "Balanced"],
       ["Stochastic RSI", tech.indicators.stochasticRsi?.toFixed(1) || "—", tech.indicators.stochasticRsi > 80 ? "High momentum" : tech.indicators.stochasticRsi < 20 ? "Low momentum" : "Middle range"],
@@ -774,7 +304,7 @@
       ["Risk", tech.setupComponents.risk, "10%", "Volatility / drawdown"],
       ["Confirmation", tech.setupComponents.confirmation, "8%", "Reversal follow-through"],
     ];
-    $("#setup-page-score").textContent = `${(tech.setupScore / 10).toFixed(1)} / 10`;
+    if ($("#setup-page-score")) $("#setup-page-score").textContent = `${(tech.setupScore / 10).toFixed(1)} / 10`;
     $("#setup-component-grid").replaceChildren(...definitions.map(([label, score, weight, note]) => {
       const card = document.createElement("div");
       card.className = "setup-component";
@@ -798,230 +328,6 @@
         : "No tactical cap is active. The weighted setup remains subject to timing, zone, trend and confirmation alignment.";
     $("#setup-guardrail-copy").textContent = copy;
     $("#setup-guardrail-copy").dataset.tone = tech.setupGuardrails.length ? "caution" : tech.setupSignals.length ? "positive" : "neutral";
-  }
-
-  function renderDrivers(result) {
-    const waterfall = $("#driver-waterfall");
-    waterfall.replaceChildren();
-    const lenses = [
-      ["LensValue", result.lenses.value.rawScore, "Independent long-term lens", "70% of the combined base"],
-      ["LensSetup", result.lenses.setup.rawScore, "Independent tactical lens", "30% of the combined base"],
-    ];
-    lenses.forEach(([label, value, role, explanation]) => {
-      const row = document.createElement("div");
-      row.className = "driver-row";
-      const name = document.createElement("div");
-      name.className = "driver-name";
-      const strong = document.createElement("strong");
-      strong.textContent = label;
-      const span = document.createElement("span");
-      span.textContent = `${role} · ${(value / 10).toFixed(1)}/10`;
-      name.append(strong, span);
-      const track = document.createElement("div");
-      track.className = "driver-track";
-      const fill = document.createElement("i");
-      fill.style.width = `${value}%`;
-      track.append(fill);
-      const impact = document.createElement("div");
-      impact.className = "driver-impact";
-      impact.textContent = explanation;
-      row.append(name, track, impact);
-      waterfall.append(row);
-    });
-    $("#coverage-value").textContent = `${result.coverage}%`;
-    $("#history-value").textContent = `${result.technical.bars.length} bars`;
-    $("#cap-value").textContent = result.modelDetails.qualityCap < 100
-      ? `${(result.modelDetails.qualityCap / 10).toFixed(1)} maximum`
-      : result.caps.length ? `${result.caps.length} active` : "None";
-    const guardrails = $("#guardrail-list");
-    guardrails.replaceChildren();
-    [
-      "Confidence is separate from the score.",
-      "Confirmed pivots never use bars beyond their confirmation date.",
-      "Correlated indicators are grouped before weighting.",
-      "LensTiming, LensTrend, support location and confirmation are graded separately.",
-      ...result.technical.setupGuardrails,
-      `Cross-lens agreement bonus: +${(result.modelDetails.crossLensBonus / 10).toFixed(1)} points.`,
-      `Cross-lens mismatch penalty: −${(result.modelDetails.mismatchPenalty / 10).toFixed(1)} points.`,
-      ...(result.caps.length ? result.caps : ["No score cap is active for this scenario."]),
-    ].forEach(text => {
-      const p = document.createElement("p");
-      p.textContent = text;
-      guardrails.append(p);
-    });
-  }
-
-  function renderIndicatorTable(result) {
-    const i = result.technical.indicators;
-    const regimeValue = Number.isFinite(result.technical.trendRegime.trendScore)
-      ? `${result.technical.trendRegime.trendScore.toFixed(1)} / 10`
-      : "—";
-    const rows = [
-      ["LensTiming", `${result.technical.timing.timingScore.toFixed(1)} / 10`, "Entry pressure", `${result.technical.timing.agreement} of ${result.technical.timing.total} momentum inputs agree · ${result.technical.timing.label}`],
-      ["Price / 20-day MA", `${money(result.price)} / ${money(i.ma20)}`, "Technical structure", result.price > i.ma20 ? "Above short-term trend" : "Below short-term trend"],
-      ["50 / 200-day MA", `${money(i.ma50)} / ${money(i.ma200)}`, "Technical structure", i.ma50 > i.ma200 ? "Long-term alignment positive" : "Long-term alignment negative"],
-      ["LensTrend", regimeValue, "Trend direction", `${result.technical.trendRegime.agreement} of ${result.technical.trendRegime.total} inputs agree · ${result.technical.trendRegime.label}`],
-      ["RSI · 14", i.rsi?.toFixed(1) || "—", "Momentum", i.rsi > 70 ? "Extended" : i.rsi < 35 ? "Oversold" : "Balanced"],
-      ["Stochastic RSI", i.stochasticRsi?.toFixed(1) || "—", "Momentum", i.stochasticRsi > 80 ? "High in recent range" : i.stochasticRsi < 20 ? "Low in recent range" : "Balanced"],
-      ["MACD histogram", i.macd.histogram?.toFixed(2) || "—", "Momentum", i.macd.histogram >= 0 ? "Positive" : "Negative"],
-      ["Bollinger position", i.bollingerPosition?.toFixed(2) || "—", "Momentum", i.bollingerPosition > .8 ? "Near upper band" : i.bollingerPosition < -.8 ? "Near lower band" : "Inside normal band range"],
-      ["21-day return", pct(i.roc21), "Momentum", i.roc21 >= 0 ? "Positive" : "Negative"],
-      ["Relative volume", `${i.relativeVolume?.toFixed(2) || "—"}×`, "Volume", i.relativeVolume >= 1 ? "Above average" : "Below average"],
-      ["ATR / price", pct(i.atrPct), "Risk", i.atrPct > .035 ? "Elevated daily range" : "Contained daily range"],
-      ["Trailing drawdown", pct(i.drawdown), "Risk", Math.abs(i.drawdown) > .35 ? "High drawdown" : "Within normal range"],
-      ["Revenue growth", pct(state.fundamentals.revenueGrowth), "Fundamentals", state.fundamentalFields.revenueGrowth?.source || "Reported data"],
-      finite(state.fundamentals.fcfMargin)
-        ? ["Free-cash-flow margin", pct(state.fundamentals.fcfMargin), "Fundamentals", state.fundamentalFields.fcfMargin?.source || "Reported data"]
-        : ["Net profit margin", pct(state.fundamentals.profitMargin), "Fundamentals", state.fundamentalFields.profitMargin?.source || "Reported data"],
-      finite(state.fundamentals.roic)
-        ? ["Return on invested capital", pct(state.fundamentals.roic), "Fundamentals", state.fundamentalFields.roic?.source || "Reported data"]
-        : ["Return on equity", pct(state.fundamentals.returnOnEquity), "Fundamentals", state.fundamentalFields.returnOnEquity?.source || "Reported data"],
-      ["Reference earnings multiple", Number.isFinite(Number(state.fundamentals.forwardPE)) ? `${Number(state.fundamentals.forwardPE).toFixed(1)}×` : "—", "Valuation", state.fundamentalFields.forwardPE?.source || "Reported data"],
-      ["Expectations gap", pct(state.fundamentals.impliedGrowthGap), "Valuation", "Implied minus supported growth"],
-    ];
-    const tbody = $("#indicator-table");
-    tbody.replaceChildren(...rows.map(values => {
-      const tr = document.createElement("tr");
-      values.forEach(value => {
-        const td = document.createElement("td");
-        td.textContent = value;
-        tr.append(td);
-      });
-      return tr;
-    }));
-  }
-
-  function formatAssumption(definition, rawValue) {
-    const value = Number(rawValue);
-    if (definition.format === "percent") return `${value.toFixed(definition.step < 1 ? 1 : 0)}%`;
-    return `${value.toFixed(definition.step < 1 ? 1 : 0)}×`;
-  }
-
-  function fromSliderValue(definition, value) {
-    return definition.format === "percent" ? Number(value) / 100 : Number(value);
-  }
-
-  function toSliderValue(definition, value) {
-    return definition.format === "percent" ? Number(value) * 100 : Number(value);
-  }
-
-  function renderAssumptions() {
-    const container = $("#assumption-inputs");
-    container.replaceChildren();
-    ASSUMPTIONS.forEach(definition => {
-      const wrapper = document.createElement("div");
-      wrapper.className = "assumption";
-      const head = document.createElement("div");
-      head.className = "assumption-head";
-      const label = document.createElement("label");
-      const inputId = `assumption-${definition.key}`;
-      label.htmlFor = inputId;
-      label.textContent = definition.label;
-      const output = document.createElement("output");
-      output.htmlFor = inputId;
-      const hasValue = finite(state.fundamentals[definition.key]);
-      const sliderValue = hasValue ? toSliderValue(definition, state.fundamentals[definition.key]) : definition.min;
-      output.value = hasValue ? formatAssumption(definition, sliderValue) : "Unavailable";
-      output.textContent = output.value;
-      head.append(label, output);
-      const input = document.createElement("input");
-      input.type = "range";
-      input.id = inputId;
-      input.min = definition.min;
-      input.max = definition.max;
-      input.step = definition.step;
-      input.value = Math.min(definition.max, Math.max(definition.min, sliderValue));
-      input.dataset.key = definition.key;
-      input.disabled = !hasValue;
-      input.addEventListener("input", () => {
-        state.fundamentals[definition.key] = fromSliderValue(definition, input.value);
-        output.value = formatAssumption(definition, input.value);
-        output.textContent = output.value;
-        calculate(false);
-      });
-      const note = document.createElement("small");
-      note.textContent = definition.note;
-      wrapper.append(head, input, note);
-      container.append(wrapper);
-    });
-  }
-
-  function configureEntryControls() {
-    const current = state.result.price;
-    // Let users test a true half-price case (and somewhat beyond it) without
-    // silently clamping the value at the bottom of the slider.
-    const low = Math.max(1, current * 0.35);
-    const high = current * 1.25;
-    $("#entry-price").value = current.toFixed(2);
-    $("#entry-price").min = low.toFixed(2);
-    $("#entry-price").max = high.toFixed(2);
-    $("#entry-slider").min = low.toFixed(2);
-    $("#entry-slider").max = high.toFixed(2);
-    $("#entry-slider").value = current.toFixed(2);
-    $("#entry-low").textContent = money(low);
-    $("#entry-high").textContent = money(high);
-  }
-
-  function scenarioFundamentals(entryPrice) {
-    const current = state.fundamentals._marketPrice || state.result.price;
-    const baseValue = finite(state.fundamentals._baseDcfUpside)
-      ? current * (1 + Number(state.fundamentals._baseDcfUpside))
-      : null;
-    const bearValue = finite(state.fundamentals._baseBearDownside)
-      ? current * (1 + Number(state.fundamentals._baseBearDownside))
-      : null;
-    const priceRatio = entryPrice / current;
-    return {
-      ...state.fundamentals,
-      dcfUpside: finite(baseValue) ? baseValue / entryPrice - 1 : null,
-      bearDownside: finite(bearValue) ? bearValue / entryPrice - 1 : null,
-      forwardPE: finite(state.fundamentals._baseForwardPE)
-        ? Number(state.fundamentals._baseForwardPE) * priceRatio
-        : null,
-      impliedGrowthGap: finite(state.fundamentals._baseImpliedGrowthGap)
-        ? Number(state.fundamentals._baseImpliedGrowthGap) + Math.log(priceRatio) * 0.18
-        : null,
-    };
-  }
-
-  function scenarioResult() {
-    if (!state.result) return null;
-    const entry = Number(state.entryPrice || state.result.price);
-    return engine.scoreLens({
-      bars: state.bars,
-      fundamentals: scenarioFundamentals(entry),
-      metadata: { ticker: state.ticker, scenario: true },
-    });
-  }
-
-  function renderScenario() {
-    const scenario = scenarioResult();
-    if (!scenario || scenario.status !== "graded") return;
-    $("#scenario-score-value").textContent = scenario.score.toFixed(1);
-    $("#scenario-score-label").textContent = scenario.label;
-    $("#scenario-value-score").textContent = scenario.lenses.value.score.toFixed(1);
-    $("#scenario-setup-score").textContent = scenario.lenses.setup.score.toFixed(1);
-    const entry = Number(state.entryPrice || state.result.price);
-    const delta = scenario.score - state.baseline.score;
-    const priceDifference = entry / state.result.price - 1;
-    $("#scenario-delta").textContent = Math.abs(delta) < .05
-      ? Math.abs(priceDifference) >= .01
-        ? `The tested price is ${Math.abs(priceDifference * 100).toFixed(1)}% ${priceDifference < 0 ? "lower" : "higher"}, but the displayed score is unchanged because the current quality cap and chart setup remain in force.`
-        : "This scenario is effectively unchanged from the current setup."
-      : `${delta > 0 ? "+" : ""}${delta.toFixed(1)} points versus the current LensScore of ${state.baseline.score.toFixed(1)}.`;
-    $("#scenario-explanation").textContent = Math.abs(priceDifference) < .001
-      ? "Test a different entry price or change the fundamental assumptions to see the score respond. This is a price-only test using today’s evidence, not a historical backtest."
-      : `At ${money(entry)}, LensValue becomes ${scenario.lenses.value.score.toFixed(1)}/10 while LensSetup remains ${scenario.lenses.setup.score.toFixed(1)}/10 because the chart history is unchanged. The combined LensScore is ${scenario.score.toFixed(1)}/10. This assumes the company outlook has not deteriorated. It does not reconstruct how the stock would have scored on a past date.`;
-    const eps = state.fundamentalModel.referenceEps;
-    const basis = state.fundamentalModel.referenceEpsBasis || "Unavailable";
-    const basisText = basis ? `${basis.charAt(0).toLowerCase()}${basis.slice(1)}` : "unavailable EPS";
-    const asOf = state.fundamentalModel.referenceEpsAsOf;
-    $("#scenario-eps-basis").textContent = finite(eps)
-      ? `Valuation uses ${money(eps)} ${basisText}${asOf ? ` through ${formatAsOf(asOf)}` : ""}.`
-      : "No reliable positive EPS basis is available, so earnings-based valuation inputs are not graded.";
-    $("#scenario-score-cap").textContent = scenario.caps?.length
-      ? scenario.caps.join(" ")
-      : "No score cap is active. Price, company quality, valuation, risk and the unchanged chart setup all contribute independently.";
   }
 
   function renderChartLegend() {
@@ -1188,8 +494,381 @@
     renderChartLegend();
   }
 
+
+  function hydratePayload(payload, refreshing) {
+    if (payload.provenance?.synthetic !== false) throw new Error("Unverified or synthetic data was rejected.");
+    state.bars = engine.normalizeBars(decodeBars(payload.market?.bars || []));
+    if (state.bars.length < 60) throw new Error("Insufficient live price history.");
+    state.meta = {
+      ...(payload.market?.meta || {}),
+      longName: payload.company || payload.market?.meta?.name || state.ticker,
+    };
+    state.source = (payload.provenance?.sources || [])
+      .filter(source => source.status === "available")
+      .map(source => source.name)
+      .join(" + ") || "Reported provider data";
+    state.provenance = payload.provenance || null;
+    state.grades = payload.grades || null;
+    state.result = engine.scoreLens({
+      bars: state.bars,
+      fundamentals: payload.fundamentals?.values || {},
+      metadata: { ticker: state.ticker, source: state.source },
+    });
+    renderAll();
+
+    const retrieved = formatAsOf(payload.provenance?.retrievedAt);
+    const marketAsOf = formatAsOf(payload.provenance?.asOf?.market);
+    const prefix = refreshing
+      ? `Showing grades from ${retrieved} while live data refreshes.`
+      : `Prices through ${marketAsOf}.`;
+    const peerNote = state.grades?.status === "graded"
+      ? ` Graded against ${state.grades.peerCount} ${state.grades.basis === "sector" ? `${state.grades.sectorName} companies` : "companies"}; the score ranks it among ${state.grades.universeCount} companies we cover.`
+      : "";
+    setNotice(`${prefix}${peerNote}`, refreshing ? "warn" : "good");
+  }
+
+  async function loadTicker(ticker) {
+    const requestedTicker = normalizeTickerInput(ticker) || "AAPL";
+    if (activeRequestController) activeRequestController.abort();
+    const requestController = new AbortController();
+    activeRequestController = requestController;
+    state.ticker = requestedTicker;
+    $("#ticker-input").value = state.ticker;
+    $("#lab-main").setAttribute("aria-busy", "true");
+    state.chartPoints = [];
+    state.bars = [];
+    state.meta = { longName: state.ticker };
+    state.grades = null;
+    state.provenance = null;
+    state.result = null;
+    updateResearchLinks();
+    const tip = $("#chart-tooltip");
+    if (tip) { tip.hidden = true; tip.textContent = ""; }
+    const url = new URL(window.location.href);
+    url.searchParams.set("ticker", state.ticker);
+    window.history.replaceState({}, "", `${url.pathname}${url.search}`);
+    let hasUsableCache = false;
+    const sessionPayload = readSessionPayload(state.ticker);
+    if (sessionPayload) {
+      try { hydratePayload(sessionPayload, true); hasUsableCache = true; } catch (_) { hasUsableCache = false; }
+    }
+    if (!hasUsableCache) {
+      renderUnavailable("Grading the company against its sector…");
+      setNotice("Loading company data, prices and the peer group…", "");
+    }
+    try {
+      const response = await fetch(`/api/lens-score/${encodeURIComponent(state.ticker)}?compact=1`, {
+        credentials: "same-origin",
+        cache: "default",
+        signal: requestController.signal,
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (requestController.signal.aborted || state.ticker !== requestedTicker) return;
+      if (response.status === 429 || payload.upgrade) {
+        throw new Error(payload.error || "You have used today's free research. Upgrade to Pro for unlimited grades.");
+      }
+      if (!response.ok) throw new Error(payload.error || `Research endpoint returned ${response.status}`);
+      hydratePayload(payload, false);
+      writeSessionPayload(state.ticker, payload);
+    } catch (error) {
+      if (error?.name === "AbortError") return;
+      if (hasUsableCache) {
+        setNotice(`Live refresh failed: ${error.message} Showing the grades loaded earlier in this session.`, "warn");
+      } else {
+        setNotice(`${error.message}`, "warn");
+        renderUnavailable("LensScore could not be calculated right now.");
+      }
+    } finally {
+      if (activeRequestController === requestController) {
+        $("#lab-main").setAttribute("aria-busy", "false");
+        activeRequestController = null;
+      }
+    }
+  }
+
+  function setNotice(message, tone) {
+    const notice = $("#data-notice");
+    if (!notice) return;
+    notice.textContent = message;
+    notice.className = `notice${tone ? ` ${tone}` : ""}`;
+  }
+
+  function renderPriceLine() {
+    const latest = state.bars[state.bars.length - 1];
+    const previous = state.bars[state.bars.length - 2] || latest;
+    const change = latest && previous ? latest.close / previous.close - 1 : null;
+    setText("#company-name", state.meta.longName || state.ticker);
+    setText("#company-ticker", state.ticker);
+    setText("#chart-ticker", state.ticker);
+    setText("#market-price", latest ? money(latest.close) : "—");
+    const ch = setText("#market-change", finite(change) ? `${change >= 0 ? "+" : ""}${pct(change)} last session` : "Daily close");
+    if (ch) ch.style.color = finite(change) ? (change >= 0 ? "var(--green)" : "var(--red)") : "";
+  }
+
+  function renderUnavailable(reason) {
+    renderPriceLine();
+    setText("#rc-score-value", "—");
+    const ring = $("#rc-score");
+    if (ring) { ring.dataset.tone = "unknown"; ring.style.setProperty("--p", 0); }
+    setText("#rc-label", "Not rated yet");
+    const rank = $("#rc-rank"); if (rank) rank.hidden = true;
+    setText("#rc-verdict", reason);
+    const cap = $("#rc-cap"); if (cap) cap.hidden = true;
+    setText("#rc-sector", "");
+    ["#rc-mini", "#rc-factors", "#strength-list", "#concern-list", "#rc-peer-body", "#rc-peek-list"].forEach(sel => $(sel)?.replaceChildren());
+    setText("#rc-asof", "");
+    setText("#rc-timing-title", "Waiting for prices");
+    setText("#rc-timing-score", "—");
+    setText("#rc-timing-copy", "");
+    setText("#buy-zone", "—");
+    setText("#buy-zone-note", "");
+    ["#support-zones", "#resistance-zones", "#technical-grid", "#chart-legend", "#setup-component-grid", "#timing-votes", "#trend-regime-votes"].forEach(sel => $(sel)?.replaceChildren());
+    const canvas = $("#price-chart");
+    if (canvas) canvas.getContext("2d")?.clearRect(0, 0, canvas.width, canvas.height);
+    state.chartPoints = [];
+  }
+
+  function renderAll() {
+    renderPriceLine();
+    renderGrades(state.grades);
+    renderTimingCard(state.result);
+    if (state.result?.technical?.status === "ok") {
+      renderTiming(state.result);
+      renderTrendRegime(state.result);
+      renderZones(state.result);
+      renderSetupComponents(state.result);
+      renderTechnicalMetrics(state.result);
+      setText("#chart-source", `Source: ${state.source}`);
+      drawChart();
+    }
+  }
+
+  /* ── Report card ─────────────────────────────────────────────────────── */
+  function renderGrades(g) {
+    const ring = $("#rc-score");
+    if (!g || g.status !== "graded") {
+      setText("#rc-score-value", "—");
+      if (ring) { ring.dataset.tone = "unknown"; ring.style.setProperty("--p", 0); }
+      setText("#rc-label", "Not rated");
+      const rank = $("#rc-rank"); if (rank) rank.hidden = true;
+      setText("#rc-verdict", g?.reason || "Peer grades are not available for this company yet.");
+      setText("#rc-sector", g?.sectorName ? `${g.sectorName}` : "");
+      const cap = $("#rc-cap"); if (cap) cap.hidden = true;
+      $("#rc-mini")?.replaceChildren();
+      $("#rc-factors")?.replaceChildren();
+      $("#rc-peer-body")?.replaceChildren();
+      fillList("#strength-list", [], "Strengths appear once the company is graded.");
+      fillList("#concern-list", [], "Watch-outs appear once the company is graded.");
+      return;
+    }
+    setText("#rc-score-value", g.score.toFixed(1));
+    if (ring) { ring.dataset.tone = g.tone; ring.style.setProperty("--p", g.score * 10); }
+    setText("#rc-label", g.label);
+    const rank = $("#rc-rank");
+    if (rank) { rank.hidden = false; rank.textContent = `#${g.rank.position} of ${g.rank.of} in ${g.rank.sectorName}`; }
+    setText("#rc-sector", [g.sectorName, g.industry].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).join(" · "));
+    setText("#rc-verdict", g.verdict);
+    const cap = $("#rc-cap");
+    if (cap) { cap.hidden = !g.caps?.length; cap.textContent = g.caps?.length ? `Why it isn't higher: ${g.caps.join(" ")}` : ""; }
+    setText("#rc-group", g.basis === "sector" ? `${g.peerCount} ${g.sectorName} companies` : `${g.peerCount} companies across sectors`);
+    setText("#rc-peers-sector", g.sectorName);
+    setText("#rc-asof", `Model ${g.version} · ${formatAsOf(g.asOf)}`);
+
+    $("#rc-mini")?.replaceChildren(...g.factors.map(f => {
+      const chip = el("button", "rc-mini-chip");
+      chip.type = "button";
+      chip.dataset.tone = gradeTone(f.grade);
+      chip.append(el("b", null, f.grade || "–"), el("span", null, SHORT[f.key] || f.label));
+      chip.addEventListener("click", () => openFactor(f.key));
+      return chip;
+    }));
+
+    $("#rc-factors")?.replaceChildren(...g.factors.map(f => factorRow(f, g)));
+    fillList("#strength-list", g.strengths.map(s => s.text), "No measure stands out above its peers.");
+    fillList("#concern-list", g.watch.map(s => s.text), "No measure sits in the bottom quarter of its peers.");
+    renderPeers(g);
+  }
+
+  function readFor(f, g) {
+    if (!finite(f.percentile)) return "Not enough data to grade.";
+    const group = g.basis === "sector" ? `${g.sectorName} peers` : "companies we cover";
+    const p = Math.round(f.percentile);
+    return p >= 50 ? `Better than ${p}% of ${group}` : `Weaker than ${100 - p}% of ${group}`;
+  }
+
+  function factorRow(f, g) {
+    const wrap = el("div", "rc-factor");
+    wrap.dataset.key = f.key;
+    const btn = el("button", "rc-factor-row");
+    btn.type = "button";
+    btn.setAttribute("aria-expanded", "false");
+    const grade = el("span", "rc-grade", f.grade || "–");
+    grade.dataset.tone = gradeTone(f.grade);
+    const name = el("span", "rc-factor-name");
+    name.append(el("strong", null, f.label), el("small", null, f.question));
+    const bar = el("span", "rc-bar");
+    const fill = el("i");
+    fill.style.setProperty("--w", `${finite(f.percentile) ? Math.max(3, f.percentile) : 0}%`);
+    fill.dataset.tone = gradeTone(f.grade);
+    bar.append(fill, el("b"));
+    bar.setAttribute("aria-hidden", "true");
+    const read = el("span", "rc-factor-read", readFor(f, g));
+    const chev = el("span", "rc-chev", "▾");
+    chev.setAttribute("aria-hidden", "true");
+    btn.append(grade, name, bar, read, chev);
+
+    const detail = el("div", "rc-factor-detail");
+    detail.hidden = true;
+    detail.append(el("p", "rc-learn", f.learn));
+    const table = el("table", "rc-metric-table");
+    const head = el("thead");
+    const hr = el("tr");
+    ["Measure", g.ticker, `${g.basis === "sector" ? g.sectorName : "Peer"} median`, "Peer rank"].forEach(h => hr.append(el("th", null, h)));
+    head.append(hr);
+    const body = el("tbody");
+    f.metrics.forEach(m => {
+      const tr = el("tr");
+      const tdName = el("td", "rc-m-name");
+      tdName.append(el("strong", null, m.label), el("small", null, `${m.why} ${m.better === "higher" ? "Higher is better." : "Lower is better."}`));
+      const tdVal = el("td", "rc-m-val", fmtMetric(m.value, m.fmt));
+      const tdMed = el("td", "rc-m-med", fmtMetric(m.peerMedian, m.fmt));
+      const tdRank = el("td", "rc-m-rank");
+      if (finite(m.percentile)) {
+        const meter = el("span", "rc-meter");
+        const i = el("i");
+        i.style.setProperty("--w", `${Math.max(3, m.percentile)}%`);
+        i.dataset.tone = gradeTone(gradeOfPct(m.percentile));
+        meter.append(i);
+        tdRank.append(meter, el("em", null, `${Math.round(m.percentile)}`));
+      } else {
+        tdRank.append(el("em", "muted", "n/a"));
+      }
+      tr.append(tdName, tdVal, tdMed, tdRank);
+      body.append(tr);
+    });
+    table.append(head, body);
+    const scroller = el("div", "rc-table-wrap");
+    scroller.append(table);
+    detail.append(scroller);
+    detail.append(el("p", "rc-rank-note", "Peer rank: 100 is the best in the group, 0 the weakest. The factor grade averages these ranks."));
+
+    btn.addEventListener("click", () => {
+      const open = btn.getAttribute("aria-expanded") === "true";
+      btn.setAttribute("aria-expanded", open ? "false" : "true");
+      detail.hidden = open;
+      wrap.classList.toggle("open", !open);
+    });
+    wrap.append(btn, detail);
+    return wrap;
+  }
+
+  function gradeOfPct(p) {
+    return p >= 90 ? "A+" : p >= 80 ? "A" : p >= 73 ? "A-" : p >= 67 ? "B+" : p >= 60 ? "B" : p >= 53 ? "B-"
+      : p >= 47 ? "C+" : p >= 40 ? "C" : p >= 33 ? "C-" : p >= 27 ? "D+" : p >= 20 ? "D" : p >= 13 ? "D-" : "F";
+  }
+
+  function openFactor(key) {
+    showView("snapshot");
+    const row = document.querySelector(`.rc-factor[data-key="${key}"]`);
+    if (!row) return;
+    const btn = row.querySelector(".rc-factor-row");
+    if (btn.getAttribute("aria-expanded") !== "true") btn.click();
+    row.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  function renderPeers(g) {
+    const body = $("#rc-peer-body");
+    if (!body) return;
+    body.replaceChildren(...g.peers.map(p => {
+      const tr = el("tr", p.self ? "self" : "");
+      tr.append(el("td", "rc-p-rank", `${p.rank}`));
+      const name = el("td", "rc-p-name");
+      const link = el("button", "rc-p-link");
+      link.type = "button";
+      link.append(el("strong", null, p.ticker), el("span", null, p.name || ""));
+      if (!p.self) link.addEventListener("click", () => { showView("snapshot"); loadTicker(p.ticker); window.scrollTo({ top: 0, behavior: "smooth" }); });
+      else link.disabled = true;
+      name.append(link);
+      tr.append(name);
+      const score = el("td", "rc-p-score", finite(p.score) ? p.score.toFixed(1) : "—");
+      tr.append(score);
+      ["value", "growth", "profitability", "health", "momentum"].forEach(k => {
+        const td = el("td");
+        const chip = el("span", "rc-chip", p.grades?.[k] || "–");
+        chip.dataset.tone = gradeTone(p.grades?.[k]);
+        td.append(chip);
+        tr.append(td);
+      });
+      return tr;
+    }));
+    const peek = $("#rc-peek-list");
+    if (peek) {
+      const top = g.peers.filter(p => p.rank <= 5);
+      const self = g.peers.find(p => p.self);
+      if (self && self.rank > 5) top.push(self);
+      peek.replaceChildren(...top.map(p => {
+        const li = el("li", p.self ? "self" : "");
+        const b = el("button", "rc-peek-item");
+        b.type = "button";
+        b.append(el("span", "rc-peek-rank", `${p.rank}`), el("strong", null, p.ticker), el("span", "rc-peek-name", p.name || ""), el("em", null, finite(p.score) ? p.score.toFixed(1) : "—"));
+        if (p.self) b.disabled = true;
+        else b.addEventListener("click", () => { loadTicker(p.ticker); window.scrollTo({ top: 0, behavior: "smooth" }); });
+        li.append(b);
+        return li;
+      }));
+      setText("#rc-peek-title", `Top of ${g.rank.sectorName}`);
+    }
+    setText("#rc-peer-foot", `Ranked by LensScore among ${g.rank.of} ${g.rank.sectorName} companies we cover. Grades compare each company with its own sector.`);
+  }
+
+  function fillList(selector, items, emptyMessage) {
+    const list = $(selector);
+    if (!list) return;
+    list.replaceChildren();
+    const values = items.length ? items : [emptyMessage];
+    values.slice(0, 4).forEach(item => list.append(el("li", null, item)));
+  }
+
+  /* ── Entry timing (chart engine) ─────────────────────────────────────── */
+  const TIMING_PLAIN = {
+    "maximum-opportunity": ["Sharp pullback", "The stock has dropped hard in the short term. Pullbacks like this are where buyers have often stepped in, but only if the trend and support hold."],
+    "favorable": ["Pulled back", "Short-term momentum has cooled off without breaking the trend, which is usually a calmer moment to buy than after a big run."],
+    "mildly-favorable": ["Slight pullback", "The stock has eased a little from recent strength. Neither stretched nor deeply pulled back."],
+    "balanced": ["Neutral", "Short-term momentum is balanced. Nothing in the chart argues strongly for waiting or for hurrying."],
+    "extended": ["Stretched", "The stock has run up quickly. Buying after a sharp run raises the chance of a near-term pullback."],
+    "maximum-risk": ["Very stretched", "The stock is far above its recent range on every momentum gauge. Historically a risky moment to chase."],
+    unknown: ["Not enough data", "At least 60 trading days of prices are needed."],
+  };
+  function renderTimingCard(result) {
+    const tech = result?.technical;
+    if (!tech || tech.status !== "ok") {
+      setText("#rc-timing-title", "Not enough price history");
+      setText("#rc-timing-score", "—");
+      setText("#rc-timing-copy", "At least 60 trading days of prices are needed.");
+      return;
+    }
+    const t = tech.timing;
+    const [label, copy] = TIMING_PLAIN[t.key] || TIMING_PLAIN.unknown;
+    setText("#rc-timing-title", label);
+    setText("#rc-timing-score", finite(t.timingScore) ? `${Number(t.timingScore).toFixed(1)} / 10` : "—");
+    const marker = $("#rc-timing-marker");
+    if (marker) marker.style.left = `${finite(t.timingScore) ? Math.max(0, Math.min(100, t.timingScore * 10)) : 50}%`;
+    const trend = tech.trendRegime?.label ? ` Trend: ${tech.trendRegime.label.toLowerCase()}.` : "";
+    setText("#rc-timing-copy", `${copy}${trend}`);
+    const support = tech.zones?.support?.[0];
+    if (support) {
+      setText("#buy-zone", `${money(support.lower)}–${money(support.upper)}`);
+      setText("#buy-zone-note", `${Math.abs(support.distancePct).toFixed(1)}% below the price · buyers stepped in here ${support.touches} time${support.touches === 1 ? "" : "s"} before`);
+      setText("#invalidation-price", money(support.lower - (tech.indicators.atr || 0)));
+    } else {
+      setText("#buy-zone", "None nearby");
+      setText("#buy-zone-note", "No price level below has held repeatedly in the past year.");
+      setText("#invalidation-price", "—");
+    }
+  }
+
   function showView(name) {
-    const validView = ["snapshot", "chart", "value", "drivers", "scenario"].includes(name) ? name : "snapshot";
+    const validView = ["snapshot", "peers", "chart"].includes(name) ? name : "snapshot";
     $$("[data-view-panel]").forEach(panel => {
       const active = panel.dataset.viewPanel === validView;
       panel.hidden = !active;
@@ -1205,85 +884,58 @@
 
   async function saveCurrentScenario() {
     const button = $("#save-scenario");
-    const scenario = scenarioResult();
+    const g = state.grades;
+    if (!g || g.status !== "graded") { setText("#save-status", "Nothing to save until the company is graded."); return; }
     const now = new Date().toISOString();
+    const price = state.bars.at(-1)?.close ?? null;
+    const letters = g.factors.map(f => `${SHORT[f.key]} ${f.grade}`).join(", ");
     const entry = {
       id: Date.now(),
       type: "lensscore",
       ticker: state.ticker,
-      title: `${state.ticker} LensScore ${scenario.score.toFixed(1)} at ${money(state.entryPrice)}`,
+      title: `${state.ticker} LensScore ${g.score.toFixed(1)} (${letters})`,
       date: now,
       syncState: "local",
       data: {
         analysisKind: "lensscore",
-        modelVersion: engine.VERSION,
-        score: scenario.score,
-        entryPrice: state.entryPrice,
-        lenses: scenario.lenses || null,
-        confidence: state.result?.confidence || null,
-        marketAsOf: state.provenance?.asOf?.market || null,
-        fundamentalsAsOf: state.provenance?.asOf?.fundamentals || null,
-        assumptions: Object.fromEntries(ASSUMPTIONS.map(item => [item.key, state.fundamentals[item.key]])),
+        modelVersion: g.version,
+        score: g.score,
+        label: g.label,
+        rank: g.rank,
+        grades: Object.fromEntries(g.factors.map(f => [f.key, f.grade])),
+        entryPrice: price,
+        timing: state.result?.technical?.timing?.timingScore ?? null,
         savedAt: now,
       },
     };
-
     try {
       const savedKey = "impliedLens_savedAnalyses";
       const existing = JSON.parse(window.localStorage.getItem(savedKey) || "[]");
       window.localStorage.setItem(savedKey, JSON.stringify([entry, ...existing].slice(0, 100)));
-      window.localStorage.setItem("implied-lens-score-scenario", JSON.stringify(entry.data));
-    } catch (_) {
-      $("#save-status").textContent = "Scenario is active for this session.";
-      return;
-    }
-
+    } catch (_) { /* local copy is optional */ }
     button.disabled = true;
-    $("#save-status").textContent = "Saved on this device. Checking account sync…";
+    setText("#save-status", "Saving…");
     try {
       const csrfResponse = await fetch("/api/csrf", { credentials: "same-origin" });
       const csrfPayload = await csrfResponse.json().catch(() => ({}));
       const response = await fetch("/api/saves", {
         method: "POST",
         credentials: "same-origin",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRF-Token": csrfPayload.token || "",
-        },
-        body: JSON.stringify({
-          ticker: entry.ticker,
-          type: entry.type,
-          label: entry.title,
-          data: entry,
-        }),
+        headers: { "Content-Type": "application/json", "X-CSRF-Token": csrfPayload.token || "" },
+        body: JSON.stringify({ ticker: entry.ticker, type: entry.type, label: entry.title, data: entry }),
       });
       const result = await response.json().catch(() => ({}));
-      if (response.status === 401) {
-        $("#save-status").textContent = "Saved on this device. Log in to sync it to Saved.";
-        return;
-      }
-      if (!response.ok || !result.ok || !result.id) throw new Error(result.error || "Account sync failed.");
-      try {
-        const savedKey = "impliedLens_savedAnalyses";
-        const existing = JSON.parse(window.localStorage.getItem(savedKey) || "[]");
-        window.localStorage.setItem(savedKey, JSON.stringify(existing.map(item => item.id === entry.id
-          ? { ...item, id: `db_${result.id}`, _dbId: result.id, syncState: "synced" }
-          : item
-        )));
-      } catch (_) {}
-      $("#save-status").textContent = "Saved to your Implied Lens research library.";
+      if (response.status === 401) { setText("#save-status", "Saved on this device. Log in to keep it in your library."); return; }
+      if (!response.ok || !result.ok) throw new Error(result.error || "Account sync failed.");
+      setText("#save-status", "Saved to your library.");
     } catch (error) {
-      $("#save-status").textContent = `Saved on this device. ${error.message}`;
+      setText("#save-status", `Saved on this device. ${error.message}`);
     } finally {
       button.disabled = false;
     }
   }
 
   function bindEvents() {
-    /* The shared site header brought its own #theme-toggle-btn and this page's
-       original button became #theme-button-old, so this binding had been
-       pointing at nothing since. site-nav.js owns the shared toggle; this only
-       has to cover the legacy button if it is still in the markup. */
     on("#theme-button, #theme-button-old", "click", toggleTheme);
     on("#ticker-form", "submit", event => {
       event.preventDefault();
@@ -1291,33 +943,20 @@
     });
     $$(".quick-tickers [data-ticker]").forEach(button => button.addEventListener("click", () => loadTicker(button.dataset.ticker)));
     $$(".company-nav [data-view]").forEach(button => button.addEventListener("click", () => showView(button.dataset.view)));
-    on("#open-chart-button", "click", () => showView("chart"));
+    on("#open-chart-button", "click", () => { showView("chart"); $("#view-chart")?.scrollIntoView({ behavior: "smooth", block: "start" }); });
     $$(".chart-presets [data-preset]").forEach(button => button.addEventListener("click", () => {
       state.chartPreset = button.dataset.preset;
       $$(".chart-presets [data-preset]").forEach(item => item.classList.toggle("active", item === button));
       drawChart();
     }));
     on("#methodology-button", "click", () => $("#methodology-dialog").showModal());
+    on("#methodology-button-old", "click", () => $("#methodology-dialog").showModal());
     on("#close-methodology", "click", () => $("#methodology-dialog").close());
     on("#methodology-dialog", "click", event => {
       if (event.target === $("#methodology-dialog")) $("#methodology-dialog").close();
     });
-    on("#reset-assumptions", "click", () => {
-      state.fundamentals = { ...state.reportedFundamentals };
-      renderAssumptions();
-      calculate(false);
-    });
-    const setEntry = value => {
-      const min = Number($("#entry-slider").min);
-      const max = Number($("#entry-slider").max);
-      state.entryPrice = Math.min(max, Math.max(min, Number(value)));
-      $("#entry-price").value = state.entryPrice.toFixed(2);
-      $("#entry-slider").value = state.entryPrice;
-      renderScenario();
-    };
-    on("#entry-slider", "input", event => setEntry(event.target.value));
-    on("#entry-price", "input", event => setEntry(event.target.value));
     on("#save-scenario", "click", saveCurrentScenario);
+    on("#rc-peek-all", "click", () => { showView("peers"); $(".company-nav")?.scrollIntoView({ behavior: "smooth", block: "start" }); });
     on("#price-chart", "mousemove", event => {
       if (!state.chartPoints.length) return;
       const rect = event.currentTarget.getBoundingClientRect();
@@ -1332,7 +971,7 @@
       const date = new Date(nearest.bar.time * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
       tooltip.textContent = `${date} · O ${money(nearest.bar.open)} · H ${money(nearest.bar.high)} · L ${money(nearest.bar.low)} · C ${money(nearest.bar.close)} · Vol ${compact(nearest.bar.volume)}`;
     });
-    on("#price-chart", "mouseleave", () => { $("#chart-tooltip").hidden = true; });
+    on("#price-chart", "mouseleave", () => { const t = $("#chart-tooltip"); if (t) t.hidden = true; });
     let resizeFrame = null;
     window.addEventListener("resize", () => {
       cancelAnimationFrame(resizeFrame);
@@ -1342,12 +981,8 @@
 
   applySavedTheme();
   bindEvents();
-  // On wide screens the scenario view has room for the assumptions beside
-  // the price test, so show them instead of a lone collapsed bar.
-  const assumptions = document.querySelector("#assumption-form details");
-  if (assumptions && window.matchMedia && window.matchMedia("(min-width: 1000px)").matches) assumptions.open = true;
   const initialParams = new URLSearchParams(window.location.search);
-  const initialTicker = initialParams.get("ticker");
+  const initialTicker = initialParams.get("ticker") || initialParams.get("symbol");
   showView(initialParams.get("view") || "snapshot");
   loadTicker((initialTicker || "AAPL").toUpperCase());
 })();

@@ -182,7 +182,7 @@
 <script defer src="/app-navigation.js?v=20260906-4"></script>
 <script defer src="/ticker-search.js"></script>
 <script defer src="/landing-market.js?v=20260905-15"></script>
-<script defer src="/landing-demo.js?v=20261002-1"></script>
+<script defer src="/landing-demo.js?v=20261008-1"></script>
 <span id="main-content" tabindex="-1"></span>
 <!-- ══════════ VIEW: HOME ══════════ -->
 <div id="view-home" role="main">
@@ -440,7 +440,7 @@
     <div class="lx-head">
       <span class="lx-kicker"><span class="lx-live-dot" aria-hidden="true"></span>Live data, not a mockup</span>
       <h2 id="lx-demo-title">One score. <em>Every reason</em> behind it.</h2>
-      <p>Pick a company. LensScore grades the business, the valuation and the chart separately, then tells you in plain English what helps the case and what could break it.</p>
+      <p>Pick a company. LensScore grades it on value, growth, profitability, financial health and momentum against its own sector, then tells you in plain English what helps the case and what could break it.</p>
     </div>
     <div class="lx-window">
     <div class="lx-window-bar">
@@ -472,13 +472,13 @@
         <div class="lx-dial" id="lx-dial" style="--lx-score:0"><div><strong id="lx-demo-score">&ndash;</strong><span>/ 10</span></div></div>
         <span class="lx-demo-label" id="lx-demo-label">&nbsp;</span>
         <dl class="lx-lenses">
-          <div><dt>Long-term value</dt><dd id="lx-lens-value">&ndash;</dd><span class="lx-bar"><i id="lx-bar-value"></i></span></div>
-          <div><dt>Trade setup</dt><dd id="lx-lens-setup">&ndash;</dd><span class="lx-bar"><i id="lx-bar-setup"></i></span></div>
-          <div><dt>Fundamentals</dt><dd id="lx-comp-fund">&ndash;</dd><span class="lx-bar"><i id="lx-bar-fund"></i></span></div>
-          <div><dt>Valuation</dt><dd id="lx-comp-val">&ndash;</dd><span class="lx-bar"><i id="lx-bar-val"></i></span></div>
-          <div><dt>Risk control</dt><dd id="lx-comp-risk">&ndash;</dd><span class="lx-bar"><i id="lx-bar-risk"></i></span></div>
+          <div><dt>Value</dt><dd id="lx-f-value">&ndash;</dd><span class="lx-bar"><i id="lx-bar-f-value"></i></span></div>
+          <div><dt>Growth</dt><dd id="lx-f-growth">&ndash;</dd><span class="lx-bar"><i id="lx-bar-f-growth"></i></span></div>
+          <div><dt>Profitability</dt><dd id="lx-f-profitability">&ndash;</dd><span class="lx-bar"><i id="lx-bar-f-profitability"></i></span></div>
+          <div><dt>Financial health</dt><dd id="lx-f-health">&ndash;</dd><span class="lx-bar"><i id="lx-bar-f-health"></i></span></div>
+          <div><dt>Momentum</dt><dd id="lx-f-momentum">&ndash;</dd><span class="lx-bar"><i id="lx-bar-f-momentum"></i></span></div>
         </dl>
-        <a class="lx-btn lx-btn-gold" id="lx-demo-open" href="/?view=tool&amp;section=analyze&amp;symbol=NVDA">Open the full analysis <i class="ti ti-arrow-right" aria-hidden="true"></i></a>
+        <a class="lx-btn lx-btn-gold" id="lx-demo-open" href="/lens-score?ticker=NVDA">See the full report card <i class="ti ti-arrow-right" aria-hidden="true"></i></a>
         <p class="lx-fine" id="lx-demo-asof">Educational research, not a recommendation.</p>
       </aside>
     </div>

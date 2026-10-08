@@ -105,7 +105,7 @@ const SCREENER_TICKERS = [
   "CRWD","SNOW","PLTR","NET","MDB","DDOG","ZS","NOW","INTU","FTNT",
   // Consumer Discretionary
   "TSLA","HD","MCD","NKE","LOW","BKNG","TGT","TJX","SBUX","CMG",
-  "AMZN","MAR","HLT","F","GM","ABNB","EBAY","ETSY","LULU","DG",
+  "MAR","HLT","F","GM","ABNB","EBAY","ETSY","LULU","DG",
   // Consumer Staples
   "WMT","PG","KO","PEP","COST","PM","MO","CL","MDLZ","GIS","KHC","HSY",
   // Healthcare
@@ -125,9 +125,24 @@ const SCREENER_TICKERS = [
   "PLD","AMT","CCI","EQIX","SPG","O","PSA","EXR","WELL","AVB",
   // Utilities
   "NEE","SO","DUK","D","EXC","SRE","AEP","XEL","WEC",
+  // Popular growth and retail names (also widen the LensScore peer groups)
+  "MU","ARM","MRVL","ANET","SMCI","DELL","HPE","TSM","ASML","ADI","NXPI","ON","MCHP",
+  "SHOP","UBER","APP","TTD","U","RBLX","IONQ","RGTI","SOUN","PATH","OKTA","TWLO","HUBS","WDAY","TEAM","ADSK",
+  "NFLX","DIS","CMCSA","T","VZ","TMUS","SPOT","RDDT","PINS","SNAP","TTWO","EA","WBD","ROKU",
+  "SOFI","HOOD","COIN","AFRM","UPST","PYPL","XYZ","NU","ALLY","KKR","BX","APO",
+  "HIMS","TEM","DXCM","ZTS","MRNA","IDXX","ELV","HUM","GEHC","PODD",
+  "RKLB","ASTS","BA","LUV","DAL","UAL","PH","AXON","JCI","PWR","CEG","VST","OKLO","SMR",
+  "MELI","CPNG","DASH","LYFT","CAVA","WING","DECK","ONON","RCL","CCL","ORLY","AZO","ROST","YUM","DPZ",
+  "CELH","MNST","KDP","STZ","KR","SYY","EL","KMB",
+  "WMB","OKE","HAL","DVN","FANG","ENPH","FSLR",
+  "CTVA","ECL","DD","IP","CF",
+  "DLR","VICI","IRM","ARE",
+  "AES","PCG","ED","PEG","EIX",
   // ETFs
   "SPY","QQQ","IWM","DIA","XLF","XLK","XLV","XLE","GLD","TLT",
 ];
+
+const SCREENER_ETFS = new Set(["SPY","QQQ","IWM","DIA","XLF","XLK","XLV","XLE","GLD","TLT"]);
 
 const SCREENER_SECTOR = {
   AAPL:"Tech",MSFT:"Tech",NVDA:"Tech",GOOGL:"Tech",AMZN:"Cons.Disc",META:"Tech",
@@ -239,22 +254,8 @@ const ENRICH_TTL = 5.5 * 3600 * 1000, PRICE_TTL = 20 * 60 * 1000;
 const _enrich = new Map();   // ticker -> { at, priceAt, sector, revenueGrowth, ... }
 let _enrichRunning = false;
 
-function sectorFromIndustry(ind) {
-  const s = String(ind || "");
-  if (!s || s === "N/A") return null;
-  if (/utilit/i.test(s)) return "Utilities";
-  if (/real estate|reit/i.test(s)) return "Real Est.";
-  if (/pharma|biotech|health|life sciences|medical/i.test(s)) return "Health";
-  if (/semiconductor|technolog|software|internet|it services|electronic|communications|computer/i.test(s)) return "Tech";
-  if (/media|telecom|entertainment|interactive/i.test(s)) return "Comm.";
-  if (/bank|financ|insurance|capital markets|asset management/i.test(s)) return "Finance";
-  if (/beverage|food|tobacco|consumer products|household|personal products/i.test(s)) return "Staples";
-  if (/energy|oil|gas|coal/i.test(s)) return "Energy";
-  if (/chemical|metals|mining|paper|forest|packaging|steel|construction materials/i.test(s)) return "Materials";
-  if (/aerospace|defense|machinery|industrial|airline|logistics|transport|road|rail|marine|electrical|building|construction|commercial services|professional services|trading compan/i.test(s)) return "Industrials";
-  if (/retail|automobile|auto |hotel|restaurant|leisure|textile|apparel|luxury|diversified consumer|distributors|homebuild|consumer/i.test(s)) return "Cons.Disc";
-  return null;
-}
+const peers = require("../lib/peer-universe");
+const sectorFromIndustry = peers.sectorFromIndustry;
 function rsi14(closes) {
   if (closes.length < 16) return null;
   let g = 0, l = 0;
@@ -298,6 +299,7 @@ async function enrichOne(ticker) {
       finnhubJson(`https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FINNHUB_KEY}`),
     ]);
     const m = metric?.metric || {};
+    if (profile || metric) peers.put(ticker, { profile, metric: m });
     if (profile || metric) {
       out.at = now;
       out.sector = sectorFromIndustry(profile?.finnhubIndustry) || prev.sector || null;
@@ -314,7 +316,7 @@ async function enrichOne(ticker) {
   }
   if (!prev.priceAt || now - prev.priceAt > PRICE_TTL) {
     const y = await yahooYear(ticker);
-    if (y) Object.assign(out, y, { priceAt: now, name: out.name || y.name });
+    if (y) { Object.assign(out, y, { priceAt: now, name: out.name || y.name }); peers.setPrice(ticker, y.price); }
   }
   _enrich.set(ticker, out);
 }
@@ -366,7 +368,7 @@ function screenerRow(ticker, base) {
    spending the shared per-minute quota (live audit 2026-10-06: a burst of
    page loads ran it out and metrics/analyst answered 503 for niche names). */
 if (process.env.NODE_ENV === "production" && FINNHUB_KEY) {
-  const warm = () => startEnrichment(SCREENER_TICKERS.slice());
+  const warm = () => startEnrichment([...new Set(SCREENER_TICKERS)].filter(t => !SCREENER_ETFS.has(t)));
   setTimeout(warm, 20 * 1000).unref();
   setInterval(warm, 6 * 3600 * 1000).unref();
 }

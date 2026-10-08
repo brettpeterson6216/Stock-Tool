@@ -2,8 +2,11 @@
 
 const express = require("express");
 const { checkAnalysisLimit, normalizeTicker } = require("../lib/plan");
-const { buildResearchBundle } = require("../lib/stock-research");
+const { buildResearchBundle, loadFinnhubResearch, loadCompanyFacts } = require("../lib/stock-research");
 const LensScoreEngine = require("../lib/lens-score-engine");
+const LensFactors = require("../lib/lens-factors");
+const peers = require("../lib/peer-universe");
+const { buildQuarterlyHistory } = require("../lib/fundamentals-history");
 
 const router = express.Router();
 const responseCache = new Map();
@@ -48,6 +51,55 @@ function storePayload(ticker, payload) {
   return payload;
 }
 
+/* Latest-quarter and TTM revenue growth from the company's own SEC filings.
+   Finnhub's growth uses its own revenue definition, which is badly off for
+   some companies (lenders especially); peers still use Finnhub so the
+   comparison stays like-for-like everywhere else. */
+function secGrowth(facts) {
+  try {
+    const q = buildQuarterlyHistory(facts, { maxQuarters: 9 });
+    const last = q.at(-1);
+    if (!last || Date.now() - Date.parse(last.end) > 200 * 86400000) return {};
+    const out = {};
+    const yearAgo = q.length >= 5 ? q.at(-5) : null;
+    const gap = yearAgo ? (Date.parse(last.end) - Date.parse(yearAgo.end)) / 86400000 : 0;
+    if (yearAgo && gap > 330 && gap < 400 && last.revenue > 0 && yearAgo.revenue > 0) out.revenueGrowthQuarterlyYoy = (last.revenue / yearAgo.revenue - 1) * 100;
+    if (q.length >= 8) {
+      const sum = a => a.reduce((s, r) => s + (r.revenue || 0), 0);
+      const cur = sum(q.slice(-4)), prev = sum(q.slice(-8, -4));
+      if (q.slice(-8).every(r => r.revenue > 0) && prev > 0) out.revenueGrowthTTMYoy = (cur / prev - 1) * 100;
+    }
+    return out;
+  } catch (_) { return {}; }
+}
+
+async function gradeTicker(ticker, research) {
+  await peers.load();
+  const [fh, company] = await Promise.all([
+    loadFinnhubResearch(ticker).catch(() => null),
+    loadCompanyFacts(ticker).catch(() => null),
+  ]);
+  const price = research.market?.bars?.at(-1)?.close ?? null;
+  const metric = { ...(fh?.metrics || {}) };
+  const overrides = company?.facts ? secGrowth(company.facts) : {};
+  Object.assign(metric, overrides);
+  if (fh?.profile || fh?.metrics) peers.put(ticker, { profile: fh.profile, metric: fh.metrics, price });
+  const sector = peers.sectorFromIndustry(fh?.profile?.finnhubIndustry) || peers.get(ticker)?.s || null;
+  const graded = LensFactors.gradeCompany({
+    ticker,
+    name: fh?.profile?.name || research.company || ticker,
+    sector,
+    metric,
+    price,
+    marketCap: Number(fh?.profile?.marketCapitalization) > 0 ? Number(fh.profile.marketCapitalization) * 1e6 : null,
+  }, peers.all());
+  graded.industry = fh?.profile?.finnhubIndustry || null;
+  graded.secOverrides = Object.keys(overrides);
+  graded.source = "Finnhub fundamentals and price returns for every company, ranked within sector; revenue growth from SEC filings where current.";
+  graded.asOf = new Date().toISOString();
+  return graded;
+}
+
 async function calculatePayload(ticker) {
   const research = await buildResearchBundle(ticker, { range: "5y", interval: "1d" });
   const score = LensScoreEngine.scoreLens({
@@ -65,10 +117,14 @@ async function calculatePayload(ticker) {
       synthetic: false,
     },
   });
+  const grades = await gradeTicker(ticker, research).catch(error => ({
+    status: "not-rated", version: LensFactors.VERSION, reason: `Peer grading failed: ${String(error?.message || error).slice(0, 160)}`,
+  }));
   return {
     schemaVersion: research.schemaVersion,
     ticker,
     company: research.company,
+    grades,
     score,
     market: research.market,
     fundamentals: research.fundamentals,
@@ -109,12 +165,23 @@ function compactPayload(payload) {
     },
     fundamentals: payload.fundamentals,
     provenance: payload.provenance,
+    grades: payload.grades || null,
   };
 }
 
 // The homepage demo card shows the score, its parts, the reasons and a
 // one-year line. The full payload is ~770KB of JSON (5 years of bars,
 // regime and timing series); this is a few KB.
+function cardGrades(g) {
+  if (g.status !== "graded") return { status: g.status, reason: g.reason || null };
+  return {
+    status: g.status, version: g.version, score: g.score, label: g.label, tone: g.tone, sectorName: g.sectorName,
+    rank: g.rank, verdict: g.verdict, caps: g.caps,
+    factors: g.factors.map(f => ({ key: f.key, label: f.label, grade: f.grade, percentile: f.percentile, tone: f.tone })),
+    strengths: g.strengths.slice(0, 3), watch: g.watch.slice(0, 3),
+  };
+}
+
 function cardPayload(payload) {
   const score = payload.score || {};
   const tech = score.technical || {};
@@ -124,6 +191,7 @@ function cardPayload(payload) {
     ticker: payload.ticker,
     company: payload.company,
     score: { ...score, technical: { ...techRest, bars: (bars || []).slice(-252).map(bar => ({ close: bar.close })) } },
+    grades: payload.grades ? cardGrades(payload.grades) : null,
     provenance: { asOf: payload.provenance?.asOf, retrievedAt: payload.provenance?.retrievedAt },
   };
 }

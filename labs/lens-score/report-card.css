@@ -1,0 +1,178 @@
+/* LensScore report card. Loaded last on the LensToolkit page; every rule is
+   scoped to body.il-lens-page so the shared sheets above cannot win. */
+body.il-lens-page {
+  --rc-a: #45d08f; --rc-b: #a3cf63; --rc-c: #e1b65f; --rc-d: #f0904f; --rc-f: #ff6670; --rc-x: #7e897f;
+  --rc-num: "IBM Plex Sans", "Plus Jakarta Sans", system-ui, sans-serif;
+}
+html[data-theme="light"] body.il-lens-page {
+  --rc-a: #0a7a43; --rc-b: #4d7c12; --rc-c: #8a5d07; --rc-d: #ad4b12; --rc-f: #c0283a; --rc-x: #5c6a5e;
+}
+body.il-lens-page [data-tone="strong"]   { --tone: var(--rc-a); }
+body.il-lens-page [data-tone="positive"] { --tone: var(--rc-b); }
+body.il-lens-page [data-tone="neutral"]  { --tone: var(--rc-c); }
+body.il-lens-page [data-tone="weak"]     { --tone: var(--rc-d); }
+body.il-lens-page [data-tone="severe"]   { --tone: var(--rc-f); }
+body.il-lens-page [data-tone="unknown"]  { --tone: var(--rc-x); }
+
+/* ── hero ─────────────────────────────────────────────────────────────── */
+body.il-lens-page .rc-hero { padding: 26px 28px 18px !important; display: grid; gap: 18px; }
+body.il-lens-page .rc-hero-top { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; }
+body.il-lens-page .rc-id h2 { margin: 2px 0 0; font-size: 26px; letter-spacing: -0.02em; }
+body.il-lens-page .rc-id h2 span { color: var(--gold-bright); }
+body.il-lens-page .rc-sector { margin: 4px 0 0; color: var(--ink-soft); font-size: 13px; }
+body.il-lens-page .rc-hero .market-price { text-align: right; display: grid; gap: 2px; }
+body.il-lens-page .rc-hero .market-price strong { font-family: var(--rc-num); font-size: 30px; font-weight: 600; letter-spacing: -0.02em; }
+body.il-lens-page .rc-hero .market-price span { font-family: var(--rc-num); font-size: 13px; }
+body.il-lens-page .rc-hero-body { display: grid; grid-template-columns: 168px minmax(0, 1fr); gap: 28px; align-items: center; }
+body.il-lens-page .rc-score {
+  --p: 0; width: 168px; height: 168px; border-radius: 50%; display: grid; place-items: center; position: relative;
+  background: conic-gradient(var(--tone) calc(var(--p) * 1%), color-mix(in srgb, var(--ink) 9%, transparent) 0);
+  box-shadow: 0 0 46px color-mix(in srgb, var(--tone) 22%, transparent);
+  transition: background 400ms ease;
+}
+body.il-lens-page .rc-score::before { content: ""; position: absolute; inset: 11px; border-radius: 50%; background: var(--surface); }
+body.il-lens-page .rc-score > div { position: relative; text-align: center; }
+body.il-lens-page .rc-score strong { display: block; font-family: var(--rc-num); font-size: 52px; font-weight: 600; letter-spacing: -0.04em; line-height: 1; color: var(--ink); }
+body.il-lens-page .rc-score span { display: block; margin-top: 6px; font-family: var(--rc-num); color: var(--ink-faint); font-size: 13px; font-weight: 600; }
+body.il-lens-page .rc-badges { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+body.il-lens-page .rc-label {
+  display: inline-flex; padding: 5px 12px; border-radius: 999px; font-weight: 700; font-size: 13px;
+  color: var(--tone, var(--gold-bright)); background: color-mix(in srgb, var(--tone, var(--gold)) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tone, var(--gold)) 35%, transparent);
+}
+body.il-lens-page .rc-rank { display: inline-flex; padding: 5px 12px; border-radius: 999px; font-weight: 600; font-size: 13px; color: var(--ink); background: var(--surface-3); border: 1px solid var(--line); font-family: var(--rc-num); }
+body.il-lens-page .rc-verdict { margin: 12px 0 0; font-size: 18px; line-height: 1.5; color: var(--ink); max-width: 62ch; }
+body.il-lens-page .rc-cap { margin: 10px 0 0; font-size: 13px; color: var(--ink-soft); padding: 8px 12px; border-radius: 10px; background: color-mix(in srgb, var(--rc-d) 9%, transparent); border-left: 3px solid var(--rc-d); }
+body.il-lens-page .rc-mini { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+body.il-lens-page .rc-mini-chip {
+  display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px 6px 6px; border-radius: 12px; cursor: pointer;
+  background: var(--surface-2); border: 1px solid var(--line); color: var(--ink-soft); font-size: 13px; font-weight: 600;
+  transition: border-color 160ms ease, transform 160ms ease;
+}
+body.il-lens-page .rc-mini-chip:hover { border-color: color-mix(in srgb, var(--tone) 60%, transparent); transform: translateY(-1px); }
+body.il-lens-page .rc-mini-chip b {
+  min-width: 34px; height: 28px; display: grid; place-items: center; border-radius: 8px; font-family: var(--rc-num); font-size: 15px;
+  color: var(--tone); background: color-mix(in srgb, var(--tone) 15%, transparent);
+}
+body.il-lens-page .rc-hero-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-top: 12px; border-top: 1px solid var(--line); color: var(--ink-faint); font-size: 12px; flex-wrap: wrap; }
+body.il-lens-page .rc-foot-actions { display: inline-flex; align-items: center; gap: 12px; }
+body.il-lens-page .rc-save { padding: 8px 14px; border-radius: 10px; border: 1px solid var(--line-strong); background: transparent; color: var(--ink); font-weight: 600; font-size: 13px !important; cursor: pointer; }
+body.il-lens-page .rc-save:hover { border-color: var(--gold); color: var(--gold-bright); }
+
+/* ── layout ───────────────────────────────────────────────────────────── */
+body.il-lens-page .rc-grid { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(300px, 1fr); gap: 18px; margin-top: 18px; align-items: start; }
+body.il-lens-page .rc-side, body.il-lens-page .rc-main { display: grid; gap: 18px; min-width: 0; }
+body.il-lens-page .rc-lists { display: grid !important; grid-template-columns: 1fr 1fr; gap: 24px; }
+body.il-lens-page .rc-lists .rc-list-title.bad { margin-top: 0; }
+body.il-lens-page .rc-peek h3 { margin: 2px 0 10px; font-size: 18px; }
+body.il-lens-page .rc-peek-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+body.il-lens-page .rc-peek-item { width: 100%; display: grid; grid-template-columns: 22px 54px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 8px 10px; border-radius: 10px; border: 1px solid transparent; background: transparent; color: var(--ink); cursor: pointer; text-align: left; font-size: 13px !important; }
+body.il-lens-page .rc-peek-item:not(:disabled):hover { border-color: var(--line-strong); background: var(--surface-2); }
+body.il-lens-page .rc-peek-list li.self .rc-peek-item { background: color-mix(in srgb, var(--gold) 10%, transparent); cursor: default; }
+body.il-lens-page .rc-peek-rank { color: var(--ink-faint); font-family: var(--rc-num); }
+body.il-lens-page .rc-peek-name { color: var(--ink-faint); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+body.il-lens-page .rc-peek-item em { font-style: normal; font-family: var(--rc-num); font-weight: 700; }
+body.il-lens-page .rc-peek-all { margin-top: 10px; width: 100%; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--line-strong); background: transparent; color: var(--ink); font-weight: 600; font-size: 13px !important; cursor: pointer; }
+body.il-lens-page .rc-peek-all:hover { border-color: var(--gold); color: var(--gold-bright); }
+body.il-lens-page .rc-card, body.il-lens-page .rc-peers, body.il-lens-page .rc-timing, body.il-lens-page .rc-lists, body.il-lens-page .rc-peek { padding: 22px 24px !important; }
+body.il-lens-page .rc-card-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+body.il-lens-page .rc-card-head h2 { margin: 2px 0 0; font-size: 20px; }
+body.il-lens-page .rc-card-note { margin: 0; color: var(--ink-faint); font-size: 12px; }
+
+/* ── factor rows ──────────────────────────────────────────────────────── */
+body.il-lens-page .rc-factor { border-top: 1px solid var(--line); }
+body.il-lens-page .rc-factor:first-child { border-top: 0; }
+body.il-lens-page .rc-factor-row {
+  width: 100%; display: grid; grid-template-columns: 54px minmax(130px, 1.05fr) minmax(90px, 1fr) minmax(150px, 1.1fr) 18px;
+  gap: 14px; align-items: center; padding: 14px 4px; background: transparent; border: 0; text-align: left; cursor: pointer; color: var(--ink);
+}
+body.il-lens-page .rc-factor-row:hover .rc-factor-name strong { color: var(--gold-bright); }
+body.il-lens-page .rc-grade {
+  width: 54px; height: 44px; display: grid; place-items: center; border-radius: 12px; font-family: var(--rc-num); font-size: 20px; font-weight: 700;
+  color: var(--tone); background: color-mix(in srgb, var(--tone) 14%, transparent); border: 1px solid color-mix(in srgb, var(--tone) 32%, transparent);
+}
+body.il-lens-page .rc-factor-name { display: grid; gap: 2px; }
+body.il-lens-page .rc-factor-name strong { font-size: 15px; transition: color 150ms ease; }
+body.il-lens-page .rc-factor-name small { color: var(--ink-faint); font-size: 12px; }
+body.il-lens-page .rc-bar { position: relative; height: 8px; border-radius: 99px; background: color-mix(in srgb, var(--ink) 9%, transparent); }
+body.il-lens-page .rc-bar i { position: absolute; inset: 0 auto 0 0; width: var(--w); border-radius: 99px; background: var(--tone); transition: width 500ms cubic-bezier(.2,.8,.2,1); }
+body.il-lens-page .rc-bar b { position: absolute; left: 50%; top: -4px; bottom: -4px; width: 2px; background: color-mix(in srgb, var(--ink) 35%, transparent); border-radius: 2px; }
+body.il-lens-page .rc-factor-read { color: var(--ink-soft); font-size: 13px; }
+body.il-lens-page .rc-chev { color: var(--ink-faint); transition: transform 180ms ease; font-size: 12px; }
+body.il-lens-page .rc-factor.open .rc-chev { transform: rotate(180deg); }
+body.il-lens-page .rc-factor-detail { padding: 0 4px 18px 68px; }
+body.il-lens-page .rc-learn { margin: 0 0 12px; color: var(--ink-soft); font-size: 13.5px; line-height: 1.55; max-width: 70ch; }
+body.il-lens-page .rc-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+body.il-lens-page .rc-metric-table, body.il-lens-page .rc-peer-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+body.il-lens-page .rc-metric-table th, body.il-lens-page .rc-peer-table th {
+  text-align: left; font-weight: 600; color: var(--ink-faint); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; padding: 8px 10px; border-bottom: 1px solid var(--line);
+}
+body.il-lens-page .rc-metric-table td { padding: 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+body.il-lens-page .rc-m-name strong { display: block; font-size: 13.5px; }
+body.il-lens-page .rc-m-name small { display: block; margin-top: 3px; color: var(--ink-faint); font-size: 12px; line-height: 1.45; max-width: 46ch; }
+body.il-lens-page .rc-m-val, body.il-lens-page .rc-m-med { font-family: var(--rc-num); white-space: nowrap; font-weight: 600; }
+body.il-lens-page .rc-m-med { color: var(--ink-soft); font-weight: 500; }
+body.il-lens-page .rc-m-rank { white-space: nowrap; min-width: 120px; }
+body.il-lens-page .rc-meter { display: inline-block; vertical-align: middle; width: 72px; height: 6px; border-radius: 99px; background: color-mix(in srgb, var(--ink) 9%, transparent); position: relative; margin-right: 8px; }
+body.il-lens-page .rc-meter i { position: absolute; inset: 0 auto 0 0; width: var(--w); border-radius: 99px; background: var(--tone); }
+body.il-lens-page .rc-m-rank em { font-style: normal; font-family: var(--rc-num); font-weight: 600; color: var(--ink-soft); }
+body.il-lens-page .rc-rank-note { margin: 10px 0 0; color: var(--ink-faint); font-size: 12px; }
+
+/* ── timing + lists ───────────────────────────────────────────────────── */
+body.il-lens-page .rc-timing-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-top: 2px; }
+body.il-lens-page .rc-timing-head h3 { margin: 0; font-size: 20px; }
+body.il-lens-page .rc-timing-head strong { font-family: var(--rc-num); font-size: 16px; color: var(--ink-soft); }
+body.il-lens-page .rc-timing-scale { position: relative; height: 8px; margin: 14px 0 6px; border-radius: 99px; background: linear-gradient(90deg, var(--rc-f), var(--rc-c) 50%, var(--rc-a)); opacity: .9; }
+body.il-lens-page .rc-timing-scale i { position: absolute; top: 50%; width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 50%; background: var(--surface); border: 3px solid var(--ink); transition: left 400ms ease; }
+body.il-lens-page .rc-timing-ends { display: flex; justify-content: space-between; color: var(--ink-faint); font-size: 11px; }
+body.il-lens-page #rc-timing-copy { margin: 12px 0 14px; color: var(--ink-soft); font-size: 13.5px; line-height: 1.55; }
+body.il-lens-page .rc-zone { display: grid; gap: 2px; padding: 12px 14px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line); }
+body.il-lens-page .rc-zone span { color: var(--ink-faint); font-size: 12px; }
+body.il-lens-page .rc-zone strong { font-family: var(--rc-num); font-size: 20px; color: var(--gold-bright); }
+body.il-lens-page .rc-zone small { color: var(--ink-soft); font-size: 12px; }
+body.il-lens-page #open-chart-button { margin-top: 14px; width: 100%; padding: 11px 14px; border-radius: 11px; border: 0; cursor: pointer; font-weight: 700; color: #1b1406; background: linear-gradient(180deg, var(--gold-bright), var(--gold)); }
+body.il-lens-page .rc-list-title { margin: 0 0 8px; font-size: 13px; letter-spacing: .04em; text-transform: uppercase; }
+body.il-lens-page .rc-list-title.good { color: var(--rc-a); }
+body.il-lens-page .rc-list-title.bad { color: var(--rc-d); margin-top: 18px; }
+body.il-lens-page .rc-lists ul { margin: 0; padding-left: 18px; display: grid; gap: 8px; color: var(--ink-soft); font-size: 13.5px; line-height: 1.5; }
+
+/* ── peers ────────────────────────────────────────────────────────────── */
+body.il-lens-page .rc-peer-table td { padding: 10px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+body.il-lens-page .rc-peer-table tr.self td { background: color-mix(in srgb, var(--gold) 9%, transparent); }
+body.il-lens-page .rc-p-rank, body.il-lens-page .rc-p-score { font-family: var(--rc-num); font-weight: 600; }
+body.il-lens-page .rc-p-score { font-size: 15px; }
+body.il-lens-page .rc-p-link { display: grid; gap: 1px; text-align: left; background: transparent; border: 0; padding: 0; cursor: pointer; color: var(--ink); }
+body.il-lens-page .rc-p-link:disabled { cursor: default; }
+body.il-lens-page .rc-p-link { font-size: 14px !important; }
+body.il-lens-page .rc-p-link strong { font-size: 14px; }
+body.il-lens-page .rc-p-link span { color: var(--ink-faint); font-size: 12px; max-width: 26ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+body.il-lens-page .rc-p-link:not(:disabled):hover strong { color: var(--gold-bright); }
+body.il-lens-page .rc-chip { display: inline-grid; place-items: center; min-width: 34px; height: 26px; padding: 0 6px; border-radius: 7px; font-family: var(--rc-num); font-weight: 700; font-size: 13px; color: var(--tone); background: color-mix(in srgb, var(--tone) 14%, transparent); }
+body.il-lens-page .rc-peer-foot { margin: 12px 0 0; color: var(--ink-faint); font-size: 12px; }
+
+/* ── responsive ───────────────────────────────────────────────────────── */
+@media (max-width: 1040px) {
+  body.il-lens-page .rc-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 720px) {
+  body.il-lens-page .rc-hero { padding: 18px 16px 14px !important; }
+  body.il-lens-page .rc-hero-body { grid-template-columns: 1fr; gap: 16px; justify-items: start; }
+  body.il-lens-page .rc-score { width: 132px; height: 132px; }
+  body.il-lens-page .rc-score strong { font-size: 42px; }
+  body.il-lens-page .rc-verdict { font-size: 16px; }
+  body.il-lens-page .rc-id h2 { font-size: 22px; }
+  body.il-lens-page .rc-hero .market-price strong { font-size: 24px; }
+  body.il-lens-page .rc-card, body.il-lens-page .rc-peers, body.il-lens-page .rc-timing, body.il-lens-page .rc-lists, body.il-lens-page .rc-peek { padding: 16px !important; }
+  body.il-lens-page .rc-lists { grid-template-columns: 1fr; gap: 18px; }
+  body.il-lens-page .rc-factor-row { grid-template-columns: 48px minmax(0, 1fr) 16px; grid-template-areas: "g n c" "g r c" "b b b"; row-gap: 6px; column-gap: 12px; }
+  body.il-lens-page .rc-grade { grid-area: g; width: 48px; height: 42px; font-size: 18px; }
+  body.il-lens-page .rc-factor-name { grid-area: n; }
+  body.il-lens-page .rc-factor-read { grid-area: r; font-size: 12.5px; }
+  body.il-lens-page .rc-bar { grid-area: b; margin-top: 4px; }
+  body.il-lens-page .rc-chev { grid-area: c; }
+  body.il-lens-page .rc-factor-detail { padding: 0 0 16px; }
+  body.il-lens-page .rc-metric-table th:nth-child(3), body.il-lens-page .rc-metric-table td:nth-child(3) { display: none; }
+  body.il-lens-page .rc-m-rank { min-width: 0; }
+  body.il-lens-page .rc-meter { width: 44px; }
+  body.il-lens-page .rc-peer-table th:nth-child(n+4), body.il-lens-page .rc-peer-table td:nth-child(n+4) { padding: 8px 4px; }
+}

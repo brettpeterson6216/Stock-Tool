@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="robots" content="noindex,nofollow,noarchive">
-  <meta name="description" content="LensScore combines independent long-term value and tactical setup scores into one transparent 0–10 stock buyability metric.">
+  <meta name="description" content="LensScore grades any stock on value, growth, profitability, financial health and momentum against its own sector, with every number shown.">
   <meta property="og:title" content="LensToolkit · ImpliedLens">
   <meta property="og:description" content="See business quality, valuation, support zones, trend, momentum, risk, and source dates in one transparent stock score.">
   <meta property="og:type" content="website">
@@ -34,7 +34,7 @@
   <link rel="stylesheet" href="/beauty-system.css?v=20260906-8">
   <script defer src="/static-auth.js?v=20260905-1"></script>
   <script defer src="/__lab/lens-score/assets/lens-score-engine.js?v=20260825-6"></script>
-  <script defer src="/__lab/lens-score/assets/app.js?v=20260825-6"></script>
+  <script defer src="/__lab/lens-score/assets/app.js?v=20261008-1"></script>
 <link rel="stylesheet" href="/premium-revamp.css?v=20260906-8">
 <link rel="stylesheet" href="/il-system.css?v=20260906-8">
 <link rel="stylesheet" href="/lens-prime-shared.css?v=20260906-8">
@@ -45,6 +45,7 @@
      fields, the search row - stopped at the boundary of this document and
      the page read as a different product. -->
 <link href="/surface.css?v=20260906-8" rel="stylesheet">
+<link rel="stylesheet" href="/__lab/lens-score/assets/report-card.css?v=20261008-1">
 <script defer src="/premium-motion.js?v=20260825-6"></script>
 <script defer src="/il-ribbon.js?v=20261001-3"></script>
 </head>
@@ -141,207 +142,155 @@
   <main id="lab-main">
     <section class="search-shell" aria-labelledby="lab-title">
       <div>
-        <p class="eyebrow">One answer from all the evidence</p>
-        <h1 id="lab-title">Is this stock <em>buyable right now?</em></h1>
-        <p class="intro">LensScore turns company strength, price, chart signals and risk into one score. Zero is a severe risk profile; ten is an exceptional opportunity with both lenses aligned.</p>
+        <p class="eyebrow">LensScore report card</p>
+        <h1 id="lab-title">How good is this stock, <em>really?</em></h1>
+        <p class="intro">LensScore grades a company on five things investors care about, each against its own sector: value, growth, profitability, financial health and momentum. Every grade shows the numbers behind it and what they mean, and the score ranks it across the market from 0 to 10.</p>
         <button class="methodology-inline" id="methodology-button" type="button" aria-haspopup="dialog">How LensScore works</button>
       </div>
       <form class="ticker-form" id="ticker-form">
         <label for="ticker-input">Company or ticker</label>
         <div class="ticker-control">
           <input id="ticker-input" name="ticker" value="AAPL" maxlength="10" autocomplete="off" spellcheck="false">
-          <button type="submit">Analyze</button>
+          <button type="submit">Grade it</button>
         </div>
         <div class="quick-tickers" aria-label="Example tickers">
           <button type="button" data-ticker="AAPL">AAPL</button>
-          <button type="button" data-ticker="MSFT">MSFT</button>
           <button type="button" data-ticker="NVDA">NVDA</button>
-          <button type="button" data-ticker="TSLA">TSLA</button>
+          <button type="button" data-ticker="JPM">JPM</button>
+          <button type="button" data-ticker="SOFI">SOFI</button>
+          <button type="button" data-ticker="COST">COST</button>
         </div>
       </form>
     </section>
 
     <div class="notice" id="data-notice" role="status" aria-live="polite">
-      Loading local market data…
+      Loading market data…
     </div>
 
     <section class="diligence-rail" aria-labelledby="diligence-title">
       <div class="diligence-intro">
-        <span>Decision workflow</span>
-        <strong id="diligence-title">Validate the score before committing capital</strong>
+        <span>Next steps</span>
+        <strong id="diligence-title">Check the story behind the grades</strong>
       </div>
       <div class="diligence-links">
-        <a data-research-section="analyze" href="/?view=tool&amp;section=analyze&amp;symbol=AAPL"><span>01</span> Research</a>
+        <a data-research-section="analyze" href="/?view=tool&amp;section=analyze&amp;symbol=AAPL"><span>01</span> Chart</a>
         <a data-research-section="financials" href="/?view=tool&amp;section=financials&amp;symbol=AAPL"><span>02</span> Financials</a>
         <a data-research-section="earnings" href="/?view=tool&amp;section=earnings&amp;symbol=AAPL"><span>03</span> Earnings</a>
         <a data-research-section="secfilings" href="/?view=tool&amp;section=secfilings&amp;symbol=AAPL"><span>04</span> Filings</a>
-        <a data-research-section="projection" href="/?view=tool&amp;section=projection&amp;symbol=AAPL"><span>05</span> Model</a>
+        <a data-research-section="projection" href="/?view=tool&amp;section=projection&amp;symbol=AAPL"><span>05</span> Valuation</a>
       </div>
     </section>
 
     <nav class="company-nav" aria-label="Company analysis">
-      <button type="button" class="active" data-view="snapshot">Overview</button>
-      <button type="button" data-view="chart">Setup</button>
-      <button type="button" data-view="value">Value</button>
-      <button type="button" data-view="drivers">Evidence</button>
-      <button type="button" data-view="scenario">Scenario</button>
+      <button type="button" class="active" data-view="snapshot">Report card</button>
+      <button type="button" data-view="peers">Peers</button>
+      <button type="button" data-view="chart">Entry timing</button>
     </nav>
 
     <section class="view active" id="view-snapshot" data-view-panel="snapshot">
-      <div class="score-grid">
-        <article class="score-card panel" aria-labelledby="score-heading">
-          <div class="company-line">
+      <article class="panel rc-hero" aria-labelledby="rc-heading">
+        <div class="rc-hero-top">
+          <div class="rc-id">
+            <p class="eyebrow" id="company-name">Apple Inc.</p>
+            <h2 id="rc-heading"><span id="company-ticker">AAPL</span> LensScore</h2>
+            <p class="rc-sector" id="rc-sector">Sector loading…</p>
+          </div>
+          <div class="market-price">
+            <strong id="market-price">—</strong>
+            <span id="market-change">Daily close</span>
+          </div>
+        </div>
+        <div class="rc-hero-body">
+          <div class="rc-score" id="rc-score" data-tone="unknown" style="--p:0">
+            <div><strong id="rc-score-value">—</strong><span>/ 10</span></div>
+          </div>
+          <div class="rc-summary">
+            <div class="rc-badges">
+              <span class="rc-label" id="rc-label">Grading…</span>
+              <span class="rc-rank" id="rc-rank" hidden></span>
+            </div>
+            <p class="rc-verdict" id="rc-verdict">Comparing the company with its sector.</p>
+            <p class="rc-cap" id="rc-cap" hidden></p>
+            <div class="rc-mini" id="rc-mini" aria-label="Factor grades"></div>
+          </div>
+        </div>
+        <div class="rc-hero-foot">
+          <span id="rc-asof">—</span>
+          <span class="rc-foot-actions">
+            <span class="save-status" id="save-status" role="status" aria-live="polite"></span>
+            <button type="button" class="rc-save" id="save-scenario">Save to library</button>
+          </span>
+        </div>
+      </article>
+
+      <div class="rc-grid">
+        <div class="rc-main">
+        <section class="panel rc-card" aria-labelledby="rc-card-title">
+          <div class="rc-card-head">
             <div>
-              <p class="eyebrow" id="company-name">Apple Inc.</p>
-              <h2 id="score-heading"><span id="company-ticker">AAPL</span> LensScore</h2>
+              <p class="eyebrow">Report card</p>
+              <h2 id="rc-card-title">Graded against <span id="rc-group">its sector</span></h2>
             </div>
-            <div class="market-price">
-              <strong id="market-price">—</strong>
-              <span id="market-change">Daily close</span>
-            </div>
+            <p class="rc-card-note">Tap a grade to see the numbers behind it.</p>
           </div>
-
-          <div class="score-hero">
-            <div class="score-ring" id="score-ring" data-tone="neutral">
-              <div>
-                <strong id="score-value">—</strong>
-                <span>/ 10</span>
-              </div>
-            </div>
-            <div class="score-summary">
-              <span class="score-label" id="score-label">Calculating</span>
-              <p id="score-summary">Gathering the evidence behind this setup.</p>
-              <div class="score-meta">
-                <span>Confidence <strong id="score-confidence">—</strong></span>
-                <span>Model <strong id="model-version">—</strong></span>
-                <span>As of <strong id="as-of">—</strong></span>
-              </div>
-            </div>
-          </div>
-
-          <div class="score-scale" aria-label="LensScore scale from zero to ten">
-            <div class="scale-track">
-              <span class="scale-marker" id="score-marker"></span>
-            </div>
-            <div class="scale-labels">
-              <span>0 Severe risk</span>
-              <span>5 Neutral</span>
-              <span>10 Exceptional</span>
-            </div>
-          </div>
-
-          <div class="dual-lens-grid" aria-label="Independent ImpliedLens scores">
-            <section class="lens-card setup">
-              <div class="lens-card-head">
-                <div><span>Tactical</span><h3>LensSetup</h3></div>
-                <span class="horizon-pill">2–12 weeks</span>
-              </div>
-              <div class="lens-card-score"><strong id="setup-score">—</strong><span>/ 10</span></div>
-              <strong class="lens-card-label" id="setup-label">Calculating</strong>
-              <p>Price action, zones, trend, momentum, volume and technical risk.</p>
-            </section>
-            <section class="lens-card value">
-              <div class="lens-card-head">
-                <div><span>Long term</span><h3>LensValue</h3></div>
-                <span class="horizon-pill">1–3 years</span>
-              </div>
-              <div class="lens-card-score"><strong id="value-score">—</strong><span>/ 10</span></div>
-              <strong class="lens-card-label" id="value-label">Calculating</strong>
-              <p>Business quality, valuation, expectations and fundamental downside risk.</p>
-            </section>
-          </div>
-          <div class="golden-lens-signal" id="golden-lens-signal" data-active="false">
-            <div class="golden-lens-mark" aria-hidden="true">◎</div>
-            <div>
-              <strong id="golden-lens-label">Golden Lens not active</strong>
-              <p id="golden-lens-reason">Both independent lenses must reach exceptional levels.</p>
-            </div>
-          </div>
-        </article>
-
-        <aside class="decision-card panel" aria-labelledby="decision-heading">
-          <div class="panel-heading">
-            <div>
-              <p class="eyebrow">Plain-language answer</p>
-              <h2 id="decision-heading">Why it scored this way</h2>
-            </div>
-            <span class="horizon-pill">6–18 months</span>
-          </div>
-
-          <div class="decision-section positive">
-            <h3><span aria-hidden="true">↑</span> Supporting the score</h3>
+          <div class="rc-factors" id="rc-factors"></div>
+        </section>
+        <section class="panel rc-lists" aria-label="Strengths and watch-outs">
+          <div>
+            <h3 class="rc-list-title good">Strengths</h3>
             <ul id="strength-list"></ul>
           </div>
-          <div class="decision-section caution">
-            <h3><span aria-hidden="true">↓</span> Holding it back</h3>
+          <div>
+            <h3 class="rc-list-title bad">Watch-outs</h3>
             <ul id="concern-list"></ul>
           </div>
+        </section>
+        </div>
 
-          <div class="next-move">
-            <span>Nearest buy zone</span>
-            <strong id="buy-zone">—</strong>
-            <p id="buy-zone-note">Waiting for support analysis.</p>
-            <button type="button" id="open-chart-button">Inspect technical setup</button>
-          </div>
+        <aside class="rc-side">
+          <section class="panel rc-timing" aria-labelledby="rc-timing-title">
+            <p class="eyebrow">Entry timing</p>
+            <div class="rc-timing-head">
+              <h3 id="rc-timing-title">Calculating</h3>
+              <strong id="rc-timing-score">—</strong>
+            </div>
+            <div class="rc-timing-scale" aria-hidden="true"><i id="rc-timing-marker"></i></div>
+            <div class="rc-timing-ends"><span>Stretched</span><span>Pulled back</span></div>
+            <p id="rc-timing-copy">Reading the chart.</p>
+            <div class="rc-zone">
+              <span>Nearest buy zone</span>
+              <strong id="buy-zone">—</strong>
+              <small id="buy-zone-note">Waiting for the chart.</small>
+            </div>
+            <button type="button" id="open-chart-button">See the chart and zones</button>
+          </section>
+          <section class="panel rc-peek" aria-labelledby="rc-peek-title">
+            <p class="eyebrow">Peers</p>
+            <h3 id="rc-peek-title">Top of the sector</h3>
+            <ol class="rc-peek-list" id="rc-peek-list"></ol>
+            <button type="button" class="rc-peek-all" id="rc-peek-all">See all peers</button>
+          </section>
         </aside>
       </div>
-
     </section>
 
-    <section class="view" id="view-value" data-view-panel="value" hidden>
-      <div class="value-toolkit-head panel">
-        <div>
-          <p class="eyebrow">LensValue toolkit</p>
-          <h2>Long-term value, separated from short-term price action</h2>
-          <p>LensValue grades what you own, what the market expects, and how much downside the balance sheet and valuation leave exposed.</p>
+    <section class="view" id="view-peers" data-view-panel="peers" hidden>
+      <section class="panel rc-peers" aria-labelledby="rc-peers-title">
+        <div class="rc-card-head">
+          <div>
+            <p class="eyebrow">Peers</p>
+            <h2 id="rc-peers-title">Where it ranks in <span id="rc-peers-sector">its sector</span></h2>
+          </div>
+          <p class="rc-card-note">Select a company to grade it.</p>
         </div>
-        <div class="value-toolkit-score"><strong id="value-page-score">—</strong><span>/ 10</span></div>
-      </div>
-      <div class="value-component-grid" id="value-component-grid"></div>
-      <div class="snapshot-lower">
-        <article class="expectations-card panel">
-          <div class="panel-heading">
-            <div>
-              <p class="eyebrow">Price versus business</p>
-              <h2>Is the price demanding too much?</h2>
-            </div>
-            <span class="metric-chip" id="valuation-chip">—</span>
-          </div>
-          <div class="expectation-grid">
-            <div>
-              <span>Growth the price assumes</span>
-              <strong id="implied-growth">—</strong>
-              <small>What buyers appear to be paying for</small>
-            </div>
-            <div>
-              <span>Growth our current case supports</span>
-              <strong id="supported-growth">—</strong>
-              <small>The business-growth estimate being tested</small>
-            </div>
-            <div>
-              <span>Difference</span>
-              <strong id="growth-gap">—</strong>
-              <small>Smaller means the price is easier to justify</small>
-            </div>
-            <div>
-              <span>Estimated value range</span>
-              <strong id="dcf-range">—</strong>
-              <small>Conservative case through normalized case</small>
-            </div>
-          </div>
-        </article>
-
-        <article class="alignment-card panel">
-          <div class="panel-heading">
-            <div>
-              <p class="eyebrow">Agreement check</p>
-              <h2>Do the two lenses agree?</h2>
-            </div>
-          </div>
-          <div class="alignment-visual" id="alignment-visual"></div>
-          <p id="alignment-copy">Calculating signal alignment.</p>
-        </article>
-      </div>
+        <div class="rc-table-wrap">
+          <table class="rc-peer-table">
+            <thead><tr><th>#</th><th>Company</th><th>LensScore</th><th>Value</th><th>Growth</th><th>Profit</th><th>Health</th><th>Momentum</th></tr></thead>
+            <tbody id="rc-peer-body"></tbody>
+          </table>
+        </div>
+        <p class="rc-peer-foot" id="rc-peer-foot"></p>
+      </section>
     </section>
 
     <section class="view" id="view-chart" data-view-panel="chart" hidden>
@@ -349,7 +298,7 @@
         <article class="chart-card panel">
           <div class="chart-header">
             <div>
-              <p class="eyebrow">Technical Lens</p>
+              <p class="eyebrow">Entry timing</p>
               <h2><span id="chart-ticker">AAPL</span> price structure</h2>
             </div>
             <div class="chart-presets" aria-label="Chart overlays">
@@ -380,31 +329,31 @@
           <section class="trend-regime-card timing-card" aria-labelledby="timing-heading">
             <div class="trend-regime-head">
               <div>
-                <span>LensTiming · entry pressure</span>
+                <span>Lens Timing · stretched or pulled back?</span>
                 <strong id="timing-heading">Calculating</strong>
               </div>
               <strong id="timing-value">—</strong>
             </div>
-            <div class="trend-regime-meter timing-meter" aria-label="LensTiming from zero extended to ten favorable">
+            <div class="trend-regime-meter timing-meter" aria-label="Lens Timing from zero stretched to ten pulled back">
               <i id="timing-marker"></i>
             </div>
-            <div class="trend-regime-scale"><span>0 Extended</span><span>5 Balanced</span><span>10 Opportunity</span></div>
+            <div class="trend-regime-scale"><span>0 Stretched</span><span>5 Neutral</span><span>10 Pulled back</span></div>
             <div class="trend-regime-details">
               <span>Pressure <strong id="timing-pressure">—</strong></span>
               <span>Agreement <strong id="timing-agreement">—</strong></span>
             </div>
-            <div class="trend-regime-votes" id="timing-votes" aria-label="LensTiming indicator votes"></div>
-            <p id="timing-copy">LensTiming converts four momentum conditions into a brandable 0–10 entry scale. It does not override trend, support, or confirmation.</p>
+            <div class="trend-regime-votes" id="timing-votes" aria-label="Lens Timing gauges"></div>
+            <p id="timing-copy">Lens Timing reads four momentum gauges (RSI, Stochastic RSI, MACD and Bollinger Bands). 10 means the stock has pulled back hard; 0 means it has run up hard and is stretched.</p>
           </section>
           <section class="trend-regime-card" aria-labelledby="trend-regime-heading">
             <div class="trend-regime-head">
               <div>
-                <span>LensTrend · direction</span>
+                <span>Lens Trend · which way is it heading?</span>
                 <strong id="trend-regime-heading">Calculating</strong>
               </div>
               <strong id="trend-regime-value">—</strong>
             </div>
-            <div class="trend-regime-meter" aria-label="LensTrend from zero downtrend to ten uptrend">
+            <div class="trend-regime-meter" aria-label="Lens Trend from zero downtrend to ten uptrend">
               <i id="trend-regime-marker"></i>
             </div>
             <div class="trend-regime-scale"><span>0 Downtrend</span><span>5 Transition</span><span>10 Uptrend</span></div>
@@ -412,8 +361,8 @@
               <span>Signal agreement <strong id="trend-agreement">—</strong></span>
               <span>Condition <strong id="trend-extension">—</strong></span>
             </div>
-            <div class="trend-regime-votes" id="trend-regime-votes" aria-label="LensTrend signal votes"></div>
-            <p id="trend-regime-copy">LensTrend measures direction, not buyability. It feeds the final LensScore only as a setup modifier.</p>
+            <div class="trend-regime-votes" id="trend-regime-votes" aria-label="Lens Trend checks"></div>
+            <p id="trend-regime-copy">Lens Trend checks five moving-average conditions to say which way the stock is heading. Direction only: a strong trend can still be a poor entry if the price is stretched.</p>
           </section>
           <div class="zone-group">
             <h3>Support zones</h3>
@@ -434,8 +383,8 @@
       <article class="panel setup-anatomy">
         <div class="panel-heading">
           <div>
-            <p class="eyebrow">LensSetup anatomy</p>
-            <h2>What makes this entry buyable—or not</h2>
+            <p class="eyebrow">Entry checklist</p>
+            <h2>What the chart says about buying now</h2>
           </div>
           <span class="metric-chip" id="setup-page-score">—</span>
         </div>
@@ -445,129 +394,26 @@
       <div class="technical-grid" id="technical-grid"></div>
     </section>
 
-    <section class="view" id="view-drivers" data-view-panel="drivers" hidden>
-      <div class="drivers-layout">
-        <article class="panel driver-panel">
-          <div class="panel-heading">
-            <div>
-              <p class="eyebrow">Why this score</p>
-              <h2>How did the two lenses combine?</h2>
-            </div>
-            <span class="metric-chip">100% accounted for</span>
-          </div>
-          <div id="driver-waterfall" class="driver-waterfall"></div>
-        </article>
-        <article class="panel">
-          <div class="panel-heading">
-            <div>
-              <p class="eyebrow">Guardrails</p>
-              <h2>Caps and data quality</h2>
-            </div>
-          </div>
-          <div class="quality-grid">
-            <div><span>Data coverage</span><strong id="coverage-value">—</strong></div>
-            <div><span>History</span><strong id="history-value">—</strong></div>
-            <div><span>Score caps</span><strong id="cap-value">None</strong></div>
-          </div>
-          <div class="guardrail-list" id="guardrail-list"></div>
-        </article>
-      </div>
-      <article class="panel metric-table-card">
-        <div class="panel-heading">
-          <div>
-            <p class="eyebrow">Inputs</p>
-            <h2>Indicator registry</h2>
-          </div>
-          <span class="muted">Advanced details</span>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Indicator</th><th>Current</th><th>Family</th><th>Interpretation</th></tr></thead>
-            <tbody id="indicator-table"></tbody>
-          </table>
-        </div>
-      </article>
-    </section>
-
-    <section class="view" id="view-scenario" data-view-panel="scenario" hidden>
-      <div class="scenario-layout">
-        <form class="panel assumption-panel" id="assumption-form">
-          <details>
-            <summary>
-              <span><strong>Advanced: change company assumptions</strong><small>Growth, cash flow, debt and valuation inputs</small></span>
-              <span class="summary-count">11 inputs</span>
-            </summary>
-            <div class="advanced-assumption-content">
-              <div class="panel-heading">
-                <div>
-                  <p class="eyebrow">Optional advanced controls</p>
-                  <h2>Change the company case</h2>
-                </div>
-                <button type="button" class="text-button" id="reset-assumptions">Reset</button>
-              </div>
-              <p class="form-note">These inputs are loaded automatically from reported filings, consensus feeds, and the ImpliedLens valuation model. Adjustments create a personal scenario and never overwrite the reported score.</p>
-              <div id="assumption-inputs" class="assumption-inputs"></div>
-            </div>
-          </details>
-        </form>
-
-        <article class="panel scenario-result">
-          <p class="eyebrow">Start here</p>
-          <h2>How would a different price change the score?</h2>
-          <div class="entry-simulator">
-            <label for="entry-price">Enter a price you might consider</label>
-            <div class="entry-control">
-              <span>$</span>
-              <input id="entry-price" type="number" min="0.01" step="0.01">
-            </div>
-            <input id="entry-slider" type="range" min="1" max="500" step="0.5" aria-label="Scenario entry price">
-            <div class="entry-scale"><span id="entry-low">—</span><span id="entry-high">—</span></div>
-          </div>
-          <div class="scenario-score">
-            <strong id="scenario-score-value">—</strong><span>/ 10</span>
-          </div>
-          <span class="score-label" id="scenario-score-label">Calculating</span>
-          <div class="scenario-delta" id="scenario-delta">Adjust an assumption to test the setup.</div>
-          <div class="scenario-lenses" aria-label="Scenario score breakdown">
-            <div><span>Long-term LensValue</span><strong id="scenario-value-score">—</strong><small>/ 10</small></div>
-            <div><span>Tactical LensSetup</span><strong id="scenario-setup-score">—</strong><small>/ 10</small></div>
-          </div>
-          <div class="scenario-callout">
-            <span>Why the score changes</span>
-            <p id="scenario-explanation">The score will respond to valuation, expectations and risk—not overwrite the current market score or reconstruct a past score.</p>
-          </div>
-          <div class="scenario-callout">
-            <span>What the valuation uses</span>
-            <p id="scenario-eps-basis">The earnings basis will appear after live company data loads.</p>
-            <p id="scenario-score-cap">Any active quality or risk cap will appear here.</p>
-          </div>
-          <button type="button" class="primary-action" id="save-scenario">Save scenario</button>
-          <p class="save-status" id="save-status" role="status" aria-live="polite"></p>
-        </article>
-      </div>
-    </section>
   </main>
 
   <dialog id="methodology-dialog">
     <div class="dialog-head">
       <div>
-        <p class="eyebrow">LensScore production methodology</p>
-        <h2>Two independent lenses, one final decision</h2>
+        <p class="eyebrow">How LensScore works</p>
+        <h2>Five grades, one score, every number shown</h2>
       </div>
-      <button type="button" id="close-methodology" aria-label="Close methodology">×</button>
+      <button type="button" id="close-methodology" aria-label="Close">×</button>
     </div>
-    <p>LensSetup and LensValue can be used independently. LensScore combines them for a 6–18 month buyability decision. This is a research metric, not investment advice or a prediction.</p>
     <ol>
-      <li><strong>LensTiming measures entry pressure on a branded 0–10 scale.</strong> RSI(14), smoothed Stochastic RSI, MACD(12,26,9) normalized to 100-bar histogram volatility, and Bollinger position (20,2) each vote from seller-side extension to buyer-side opportunity. The four-vote pressure is smoothed over three bars and inverted so 10 is the most favorable entry pressure.</li>
-      <li><strong>LensTrend measures direction only.</strong> Price versus EMA20, EMA20 versus EMA50, EMA50 versus SMA200, and the 20-bar slopes of EMA20 and EMA50 create a separate 0–10 trend score.</li>
-      <li><strong>LensSetup measures tactical buyability.</strong> LensTiming 22%, support/resistance location 20%, LensTrend 16%, price structure 14%, volume 10%, technical risk 10%, and reversal confirmation 8% produce a 2–12 week setup score. Aligned pullbacks can earn a bonus; falling knives and extended entries are capped.</li>
-      <li><strong>LensValue measures long-term opportunity.</strong> Business quality, valuation, embedded expectations and fundamental downside risk produce a 1–3 year score.</li>
-      <li><strong>LensScore combines the independent conclusions.</strong> Long-term value carries 70% and tactical setup carries 30%; strong agreement earns a bonus and major disagreement is penalized.</li>
-      <li><strong>Golden Lens requires exceptional alignment.</strong> LensValue must be at least 8.5, LensSetup at least 8.0, LensScore at least 8.5, confidence cannot be Low and no quality cap can be active.</li>
-      <li><strong>Severe risks override the formula.</strong> Going-concern, leverage and missing-data rules can cap or suppress the score.</li>
+      <li><strong>Each company is compared with its own sector.</strong> A bank is graded against banks and a chipmaker against chipmakers, because a "normal" P/E or margin is very different from one industry to the next. When a sector has fewer than eight companies in our coverage, the company is compared with everyone.</li>
+      <li><strong>Five factors, 25 measures.</strong> Value (P/E, forward P/E, PEG, price to sales, price to free cash flow, EV/EBITDA, or price to book for banks and property), Growth (revenue and earnings growth over one and three years), Profitability (gross, operating and net margins, return on equity and on invested capital), Financial health (debt to equity, current ratio, interest coverage, volatility) and Momentum (performance against the S&amp;P 500 over 3, 6 and 12 months and distance from the 52-week high).</li>
+      <li><strong>Grades are percentiles.</strong> Each measure is ranked from 0 (worst in the sector) to 100 (best). A factor's grade is the average of its measures: A+ is the top 10%, B is around the 60th percentile, F is the bottom 13%. A loss counts as the most expensive possible P/E.</li>
+      <li><strong>The LensScore ranks the whole picture across the market.</strong> The five factors are blended (Profitability 25%, Value, Growth and Momentum 20% each, Financial health 15%), and the blend is ranked against every company we cover. A LensScore of 8.0 means the company's overall profile beats about 80% of them.</li>
+      <li><strong>One failing grade caps the score.</strong> A failing grade in any factor holds the LensScore at 6.8 or below; two failing grades hold it at 5.0. Weak profits plus a weak balance sheet, or negative shareholders' equity, cap it lower still.</li>
+      <li><strong>Entry timing is separate.</strong> The chart-based timing read (momentum gauges, trend and support zones) tells you whether now looks like a stretched or a pulled-back moment. It never changes the grades, because a great company can be a poor buy for a few weeks, and the reverse.</li>
     </ol>
-    <p><strong>Calibration status:</strong> LensSetup has a no-lookahead walk-forward diagnostic across 525 observations and 15 liquid U.S. symbols. Its separation is positive but still weak, so the current calibration is preliminary. LensValue and Golden Lens do not carry historical-performance claims until point-in-time fundamentals and estimates are validated across a broader, survivorship-bias-controlled universe. <a href="/lens-calibration.json" target="_blank" rel="noopener">View the machine-readable diagnostic.</a></p>
-    <p>Missing essential evidence produces Not Rated. Serious risks can cap the score. Confidence is displayed separately.</p>
+    <p><strong>Data.</strong> Ratios and price returns come from Finnhub for every company so the comparison is like for like; revenue growth for the company you are viewing comes from its own SEC filings when they are current. Grades refresh as new data arrives.</p>
+    <p>LensScore is a research tool for comparing companies, not a recommendation to buy or sell. Grades describe the past and present; they do not predict returns.</p>
   </dialog>
   <script defer src="/site-nav.js?v=20260905-2"></script>
   <script defer src="/ticker-search.js"></script>

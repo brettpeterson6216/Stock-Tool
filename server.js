@@ -598,6 +598,7 @@ if (require.main === module) {
     app.listen(PORT, () => {
       console.log(`ImpliedLens running on port ${PORT}`);
       if (process.env.NODE_ENV !== "test" && typeof lensScoreRouter.startWarmup === "function") lensScoreRouter.startWarmup();
+      if (process.env.NODE_ENV !== "test") require("./lib/peer-universe").load().catch(() => {});
       startKeepAwake();
     });
     // Company-name search answers from memory. The seed list in

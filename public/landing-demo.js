@@ -103,6 +103,8 @@
   function render(t, d) {
     var card = $("lx-demo-card");
     if (card) { card.setAttribute("aria-busy", "false"); card.classList.remove("is-error"); }
+    var g = d && d.grades;
+    if (g && g.status === "graded") return renderGrades(t, d, g);
     var s = d && d.score;
     if (!s || s.status !== "graded" || !Number.isFinite(Number(s.score))) return renderError(t, "LensScore is not available for " + t + " right now.");
     var lenses = s.lenses || {};
@@ -125,6 +127,29 @@
     list("lx-demo-strengths", s.strengths, "No standout strengths on the current evidence.");
     list("lx-demo-concerns", (s.concerns || []).concat(s.caps || []).map(function (c) { return typeof c === "string" ? c : (c && (c.reason || c.label)) || ""; }).filter(Boolean), "No active warnings on the current evidence.");
     var open = $("lx-demo-open"); if (open) open.href = "/?view=tool&section=analyze&symbol=" + encodeURIComponent(t);
+    setText("lx-demo-asof", (d.servedStale ? "Most recent read · " : "Live data · ") + new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" }) + " · Educational research, not a recommendation.");
+  }
+
+  /* LensScore 2: five sector-relative factor grades (lib/lens-factors.js). */
+  function renderGrades(t, d, g) {
+    var card = $("lx-demo-card");
+    var s = d.score || {};
+    setText("lx-demo-sym", t);
+    setText("lx-demo-name", d.company || t);
+    var yr = drawChart(s.technical && s.technical.bars);
+    var price = Number(s.price);
+    setText("lx-demo-price", (Number.isFinite(price) ? fmtPrice(price) : "") + (Number.isFinite(yr) ? "  ·  " + (yr >= 0 ? "+" : "") + yr.toFixed(1) + "% over 1 year" : ""));
+    countUp(document.getElementById("lx-demo-score"), Number(g.score));
+    if (card) { card.classList.remove("is-drawing"); void card.offsetWidth; card.classList.add("is-drawing"); }
+    var dial = $("lx-dial"); if (dial) dial.style.setProperty("--lx-score", String(Number(g.score) * 10));
+    setText("lx-demo-label", g.label + (g.rank ? " · #" + g.rank.position + " of " + g.rank.of + " in " + g.rank.sectorName : ""));
+    (g.factors || []).forEach(function (f) {
+      setText("lx-f-" + f.key, f.grade || "–");
+      setBar("lx-bar-f-" + f.key, Number(f.percentile));
+    });
+    list("lx-demo-strengths", (g.strengths || []).map(function (x) { return x.text; }), "No measure stands out above its peers.");
+    list("lx-demo-concerns", (g.watch || []).map(function (x) { return x.text; }).concat(g.caps || []), "No measure sits in the bottom quarter of its peers.");
+    var open = $("lx-demo-open"); if (open) open.href = "/lens-score?ticker=" + encodeURIComponent(t);
     setText("lx-demo-asof", (d.servedStale ? "Most recent read · " : "Live data · ") + new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" }) + " · Educational research, not a recommendation.");
   }
 
@@ -170,7 +195,8 @@
       .then(function (r) { if (!r.ok) throw new Error(String(r.status)); return r.json(); })
       .then(function (d) {
         clearTimeout(timer);
-        if (!d || !d.score || d.score.status !== "graded") throw new Error("not graded");
+        var ok = d && ((d.grades && d.grades.status === "graded") || (d.score && d.score.status === "graded"));
+        if (!ok) throw new Error("not graded");
         cache[t] = d;
         if (current === t) render(t, d);
       })
