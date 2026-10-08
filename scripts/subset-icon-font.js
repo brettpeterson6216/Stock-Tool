@@ -89,6 +89,14 @@ function main() {
     bytes: fs.statSync(TARGET).size,
   }, null, 2) + "\n");
 
+  /* The font is cached for a week under a fixed URL, so a browser that has the
+     old subset keeps drawing blank tiles for every new icon. Put a hash of the
+     font in its URL so a new subset is a new file. */
+  const hash = require("crypto").createHash("sha1").update(fs.readFileSync(TARGET)).digest("hex").slice(0, 10);
+  const sheet = fs.readFileSync(SHEET, "utf8");
+  const stamped = sheet.replace(/(tabler-icons\.woff2)\?[^")]*/, `$1?v=${hash}`);
+  if (stamped !== sheet) fs.writeFileSync(SHEET, stamped);
+
   console.log("glyphs kept :", codepoints.length);
   console.log("source      :", (fs.statSync(SOURCE).size / 1024).toFixed(0) + " KB (full set)");
   console.log("shipped     :", (fs.statSync(TARGET).size / 1024).toFixed(1) + " KB");
