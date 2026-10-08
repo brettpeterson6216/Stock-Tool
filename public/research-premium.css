@@ -2469,3 +2469,31 @@ html body [hidden] { display: none !important; }
    space happens to be left over is a control that is a different size on every
    route, which is the whole complaint. */
 html body #main-nav .il-global-actions > * { flex: 0 0 auto !important; }
+
+/* ── Screener: LensScore grade filters (2026-10-08) ───────────────────── */
+html body .scr-lens { margin: 0 0 1.1rem !important; padding: 16px 18px !important; border: 1px solid color-mix(in srgb, var(--gold, #d2a34c) 30%, transparent) !important; border-radius: 14px !important; background: color-mix(in srgb, var(--gold, #d2a34c) 5%, transparent) !important; display: grid !important; gap: 12px !important; }
+html body .scr-lens-head { display: flex !important; flex-wrap: wrap !important; gap: 4px 14px !important; align-items: baseline !important; }
+html body .scr-lens-head strong { font-size: 14px !important; color: var(--text, #ecf0e9) !important; }
+html body .scr-lens-head span { font-size: 12px !important; color: var(--text4, #96a297) !important; }
+html body .scr-lens-presets { display: flex !important; flex-wrap: wrap !important; gap: 8px !important; }
+html body .scr-preset { padding: 7px 12px !important; border-radius: 999px !important; border: 1px solid var(--border2, rgba(229,237,227,.2)) !important; background: transparent !important; color: var(--text, #ecf0e9) !important; font-size: 12.5px !important; font-weight: 600 !important; cursor: pointer !important; }
+html body .scr-preset:hover { border-color: var(--gold, #d2a34c) !important; }
+html body .scr-preset.active { background: linear-gradient(180deg, #efc977, #d2a34c) !important; color: #1b1406 !important; border-color: transparent !important; }
+html body .scr-lens-row { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important; gap: 12px !important; }
+html body .scr-grade-sel { width: 100% !important; background: var(--card) !important; color: var(--text) !important; border: 1px solid var(--border2) !important; border-radius: var(--r) !important; padding: 5px 6px !important; font-size: 12px !important; }
+html body .scr-ls, html body .scr-g { display: inline-grid !important; place-items: center !important; border-radius: 8px !important; font-family: 'IBM Plex Sans', system-ui, sans-serif !important; font-weight: 700 !important; }
+html body .scr-ls { min-width: 38px !important; height: 24px !important; font-size: 13px !important; }
+html body .scr-g { min-width: 24px !important; height: 22px !important; margin-right: 3px !important; font-size: 11px !important; padding: 0 3px !important; }
+html body :is(.scr-ls, .scr-g)[data-tone="strong"] { color: #45d08f !important; background: rgba(69,208,143,.14) !important; }
+html body :is(.scr-ls, .scr-g)[data-tone="positive"] { color: #a3cf63 !important; background: rgba(163,207,99,.14) !important; }
+html body :is(.scr-ls, .scr-g)[data-tone="neutral"] { color: #e1b65f !important; background: rgba(225,182,95,.14) !important; }
+html body :is(.scr-ls, .scr-g)[data-tone="weak"] { color: #f0904f !important; background: rgba(240,144,79,.14) !important; }
+html body :is(.scr-ls, .scr-g)[data-tone="severe"] { color: #ff6670 !important; background: rgba(255,102,112,.14) !important; }
+html body :is(.scr-ls, .scr-g)[data-tone="unknown"] { color: #7e897f !important; background: rgba(126,137,127,.12) !important; }
+html[data-theme="light"] body :is(.scr-ls, .scr-g)[data-tone="strong"] { color: #0a7a43 !important; }
+html[data-theme="light"] body :is(.scr-ls, .scr-g)[data-tone="positive"] { color: #4d7c12 !important; }
+html[data-theme="light"] body :is(.scr-ls, .scr-g)[data-tone="neutral"] { color: #8a5d07 !important; }
+html[data-theme="light"] body :is(.scr-ls, .scr-g)[data-tone="weak"] { color: #ad4b12 !important; }
+html[data-theme="light"] body :is(.scr-ls, .scr-g)[data-tone="severe"] { color: #c0283a !important; }
+html body .scr-grades-cell { white-space: nowrap !important; }
+html body .scr-grades-th { letter-spacing: .12em !important; white-space: nowrap !important; }

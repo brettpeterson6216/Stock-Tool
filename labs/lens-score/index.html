@@ -34,7 +34,7 @@
   <link rel="stylesheet" href="/beauty-system.css?v=20260906-8">
   <script defer src="/static-auth.js?v=20260905-1"></script>
   <script defer src="/__lab/lens-score/assets/lens-score-engine.js?v=20260825-6"></script>
-  <script defer src="/__lab/lens-score/assets/app.js?v=20261008-1"></script>
+  <script defer src="/__lab/lens-score/assets/app.js?v=20261009-1"></script>
 <link rel="stylesheet" href="/premium-revamp.css?v=20260906-8">
 <link rel="stylesheet" href="/il-system.css?v=20260906-8">
 <link rel="stylesheet" href="/lens-prime-shared.css?v=20260906-8">
@@ -45,7 +45,7 @@
      fields, the search row - stopped at the boundary of this document and
      the page read as a different product. -->
 <link href="/surface.css?v=20260906-8" rel="stylesheet">
-<link rel="stylesheet" href="/__lab/lens-score/assets/report-card.css?v=20261008-1">
+<link rel="stylesheet" href="/__lab/lens-score/assets/report-card.css?v=20261009-1">
 <script defer src="/premium-motion.js?v=20260825-6"></script>
 <script defer src="/il-ribbon.js?v=20261001-3"></script>
 </head>
@@ -185,6 +185,7 @@
       <button type="button" class="active" data-view="snapshot">Report card</button>
       <button type="button" data-view="peers">Peers</button>
       <button type="button" data-view="chart">Entry timing</button>
+      <button type="button" data-view="leaders">Leaderboard</button>
     </nav>
 
     <section class="view active" id="view-snapshot" data-view-panel="snapshot">
@@ -245,6 +246,16 @@
             <ul id="concern-list"></ul>
           </div>
         </section>
+        <section class="panel rc-history" aria-labelledby="rc-history-title">
+          <div class="rc-card-head">
+            <div>
+              <p class="eyebrow">Score history</p>
+              <h2 id="rc-history-title">How the LensScore has moved</h2>
+            </div>
+            <p class="rc-card-note" id="rc-history-note">Saved once a trading day after the close.</p>
+          </div>
+          <div class="rc-history-chart" id="rc-history-chart"></div>
+        </section>
         </div>
 
         <aside class="rc-side">
@@ -263,12 +274,35 @@
               <small id="buy-zone-note">Waiting for the chart.</small>
             </div>
             <button type="button" id="open-chart-button">See the chart and zones</button>
+            <div class="rc-alerts" aria-labelledby="rc-alerts-title">
+              <h4 id="rc-alerts-title">Email alerts</h4>
+              <div class="rc-alert-quick">
+                <button type="button" id="rc-alert-zone">Alert me at the buy zone</button>
+                <button type="button" id="rc-alert-score">Alert me if a grade changes</button>
+              </div>
+              <form id="rc-alert-form" class="rc-alert-form">
+                <label class="sr-only" for="rc-alert-kind">Alert type</label>
+                <select id="rc-alert-kind"><option value="below">Price falls to</option><option value="above">Price rises to</option></select>
+                <label class="sr-only" for="rc-alert-level">Price</label>
+                <input id="rc-alert-level" type="number" step="0.01" min="0" inputmode="decimal" placeholder="Price">
+                <button type="submit">Add</button>
+              </form>
+              <p class="rc-alert-status" id="rc-alert-status" role="status" aria-live="polite"></p>
+              <ul class="rc-alert-list" id="rc-alert-list"></ul>
+            </div>
           </section>
           <section class="panel rc-peek" aria-labelledby="rc-peek-title">
             <p class="eyebrow">Peers</p>
             <h3 id="rc-peek-title">Top of the sector</h3>
             <ol class="rc-peek-list" id="rc-peek-list"></ol>
             <button type="button" class="rc-peek-all" id="rc-peek-all">See all peers</button>
+          </section>
+          <section class="panel rc-street" id="rc-street" aria-labelledby="rc-street-title" hidden>
+            <p class="eyebrow">Wall Street</p>
+            <h3 id="rc-street-title">Analysts and earnings</h3>
+            <div id="rc-street-ratings"></div>
+            <div id="rc-street-earnings"></div>
+            <p class="rc-rank-note">Shown for context. Analyst opinions are not part of the LensScore.</p>
           </section>
         </aside>
       </div>
@@ -290,6 +324,45 @@
           </table>
         </div>
         <p class="rc-peer-foot" id="rc-peer-foot"></p>
+      </section>
+    </section>
+
+    <section class="view" id="view-leaders" data-view-panel="leaders" hidden>
+      <section class="panel rc-leaders" aria-labelledby="rc-leaders-title">
+        <div class="rc-card-head">
+          <div>
+            <p class="eyebrow">Leaderboard</p>
+            <h2 id="rc-leaders-title">Top-rated stocks right now</h2>
+          </div>
+          <div class="rc-leaders-actions">
+            <span class="save-status" id="rc-post-status" role="status" aria-live="polite"></span>
+            <button type="button" class="rc-save" id="rc-copy-post">Copy as an X post</button>
+          </div>
+        </div>
+        <p class="rc-card-note" id="rc-leaders-note">Ranked by LensScore across every company we cover.</p>
+        <div class="rc-table-wrap">
+          <table class="rc-peer-table">
+            <thead><tr><th>#</th><th>Company</th><th>Sector</th><th>LensScore</th><th>Value</th><th>Growth</th><th>Profit</th><th>Health</th><th>Momentum</th></tr></thead>
+            <tbody id="rc-leaders-body"></tbody>
+          </table>
+        </div>
+      </section>
+      <div class="rc-leaders-grid">
+        <section class="panel rc-movers" aria-labelledby="rc-movers-title">
+          <p class="eyebrow">Biggest changes</p>
+          <h3 id="rc-movers-title">Score moves this week</h3>
+          <div id="rc-movers-body"></div>
+        </section>
+        <section class="panel rc-track" aria-labelledby="rc-track-title">
+          <p class="eyebrow">Track record</p>
+          <h3 id="rc-track-title">How each score band has done</h3>
+          <div id="rc-track-body"></div>
+        </section>
+      </div>
+      <section class="panel rc-sectors" aria-labelledby="rc-sectors-title">
+        <p class="eyebrow">By sector</p>
+        <h3 id="rc-sectors-title">Sector leaders</h3>
+        <div class="rc-sector-grid" id="rc-sector-grid"></div>
       </section>
     </section>
 

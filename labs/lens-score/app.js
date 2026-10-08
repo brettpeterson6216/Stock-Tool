@@ -570,6 +570,8 @@
       if (!response.ok) throw new Error(payload.error || `Research endpoint returned ${response.status}`);
       hydratePayload(payload, false);
       writeSessionPayload(state.ticker, payload);
+      loadHistory(state.ticker);
+      renderAlerts();
     } catch (error) {
       if (error?.name === "AbortError") return;
       if (hasUsableCache) {
@@ -684,9 +686,55 @@
     }));
 
     $("#rc-factors")?.replaceChildren(...g.factors.map(f => factorRow(f, g)));
+    renderStreet(g.street);
     fillList("#strength-list", g.strengths.map(s => s.text), "No measure stands out above its peers.");
     fillList("#concern-list", g.watch.map(s => s.text), "No measure sits in the bottom quarter of its peers.");
     renderPeers(g);
+  }
+
+  function renderStreet(st) {
+    const box = $("#rc-street");
+    if (!box) return;
+    box.hidden = !st;
+    if (!st) return;
+    const r = $("#rc-street-ratings"), e = $("#rc-street-earnings");
+    r.replaceChildren(); e.replaceChildren();
+    if (st.ratings) {
+      const x = st.ratings;
+      const head = el("div", "rc-st-head");
+      head.append(el("strong", null, x.label), el("span", null, `${x.total} analyst${x.total === 1 ? "" : "s"}`));
+      const bar = el("div", "rc-st-bar");
+      bar.setAttribute("role", "img");
+      bar.setAttribute("aria-label", `${x.strongBuy} strong buy, ${x.buy} buy, ${x.hold} hold, ${x.sell} sell, ${x.strongSell} strong sell`);
+      [["strongBuy", "sb"], ["buy", "b"], ["hold", "h"], ["sell", "s"], ["strongSell", "ss"]].forEach(([k, cls]) => {
+        if (!x[k]) return;
+        const seg = el("i", `rc-st-${cls}`);
+        seg.style.flex = String(x[k]);
+        seg.title = `${x[k]} ${k.replace(/([A-Z])/g, " $1").toLowerCase()}`;
+        bar.append(seg);
+      });
+      const legend = el("p", "rc-st-legend", `${x.strongBuy + x.buy} buy · ${x.hold} hold · ${x.sell + x.strongSell} sell`);
+      r.append(head, bar, legend);
+      if (x.threeMonthsAgo) {
+        const t = x.threeMonthsAgo;
+        const dir = x.mean > t.mean + 0.05 ? "more positive than" : x.mean < t.mean - 0.05 ? "less positive than" : "about the same as";
+        r.append(el("p", "rc-st-note", `Ratings are ${dir} three months ago (${t.label}, ${t.total} analysts).`));
+      }
+    }
+    if (st.earnings) {
+      const q = st.earnings.quarters;
+      e.append(el("p", "rc-st-beats", `Beat the earnings estimate in ${st.earnings.beats} of the last ${q.length} quarter${q.length === 1 ? "" : "s"}.`));
+      const ul = el("ul", "rc-st-list");
+      q.forEach(item => {
+        const li = el("li");
+        const d = new Date(`${item.period}T12:00:00Z`);
+        li.append(el("span", null, `Q ending ${d.toLocaleDateString("en-US", { month: "short", year: "numeric", timeZone: "UTC" })}`),
+          el("span", "rc-st-num", `$${item.actual.toFixed(2)} vs $${item.estimate.toFixed(2)}`),
+          el("em", item.beat ? "good" : "bad", item.surprisePct == null ? (item.beat ? "Beat" : "Missed") : `${item.surprisePct >= 0 ? "+" : "−"}${Math.abs(item.surprisePct).toFixed(1)}%`));
+        ul.append(li);
+      });
+      e.append(ul);
+    }
   }
 
   function readFor(f, g) {
@@ -868,7 +916,7 @@
   }
 
   function showView(name) {
-    const validView = ["snapshot", "peers", "chart"].includes(name) ? name : "snapshot";
+    const validView = ["snapshot", "peers", "chart", "leaders"].includes(name) ? name : "snapshot";
     $$("[data-view-panel]").forEach(panel => {
       const active = panel.dataset.viewPanel === validView;
       panel.hidden = !active;
@@ -880,6 +928,266 @@
     else url.searchParams.set("view", validView);
     window.history.replaceState({}, "", `${url.pathname}${url.search}`);
     if (validView === "chart") requestAnimationFrame(drawChart);
+    if (validView === "leaders") loadLeaders();
+  }
+
+  /* ── Score history ───────────────────────────────────────────────────── */
+  async function loadHistory(ticker) {
+    const box = $("#rc-history-chart");
+    if (!box) return;
+    try {
+      const r = await fetch(`/api/lens-history/${encodeURIComponent(ticker)}`, { credentials: "same-origin" });
+      const j = await r.json();
+      if (state.ticker !== ticker) return;
+      renderHistory(r.ok ? (j.points || []) : []);
+    } catch (_) { renderHistory([]); }
+  }
+
+  function smoothPath(pts) {
+    if (pts.length < 2) return "";
+    let d = `M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
+      const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6];
+      const c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
+      d += ` C${c1[0].toFixed(1)},${c1[1].toFixed(1)} ${c2[0].toFixed(1)},${c2[1].toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`;
+    }
+    return d;
+  }
+
+  function renderHistory(points) {
+    const box = $("#rc-history-chart");
+    if (!box) return;
+    const note = $("#rc-history-note");
+    box.replaceChildren();
+    if (!points.length) {
+      box.append(el("p", "rc-history-empty", "Daily score history starts with tonight's snapshot. Come back tomorrow to see the first change."));
+      if (note) note.textContent = "Saved once a trading day after the close.";
+      return;
+    }
+    const fmtDay = d => new Date(`${d}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+    if (note) note.textContent = `${points.length} trading day${points.length === 1 ? "" : "s"} since ${fmtDay(points[0].day)}`;
+    const W = Math.max(300, Math.round(box.clientWidth || 640)), H = W < 500 ? 170 : 150, L = 30, R = 14, T = 12, B = 24;
+    const x = i => points.length === 1 ? (L + (W - R)) / 2 : L + (i / (points.length - 1)) * (W - L - R);
+    const y = v => T + (1 - v / 10) * (H - T - B);
+    const NS = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+    svg.setAttribute("class", "rc-history-svg");
+    svg.setAttribute("role", "img");
+    svg.setAttribute("aria-label", `LensScore history: ${points.map(p => `${fmtDay(p.day)} ${p.score.toFixed(1)}`).join(", ")}`);
+    const mk = (tag, attrs) => { const n = document.createElementNS(NS, tag); Object.entries(attrs).forEach(([k, v]) => n.setAttribute(k, v)); return n; };
+    [0, 5, 10].forEach(v => {
+      svg.append(mk("line", { x1: L, x2: W - R, y1: y(v), y2: y(v), class: "rc-h-grid" }));
+      const t = mk("text", { x: L - 8, y: y(v) + 4, class: "rc-h-axis", "text-anchor": "end" }); t.textContent = String(v); svg.append(t);
+    });
+    const pts = points.map((p, i) => [x(i), y(p.score)]);
+    if (pts.length > 1) {
+      const area = mk("path", { d: `${smoothPath(pts)} L${pts.at(-1)[0]},${y(0)} L${pts[0][0]},${y(0)} Z`, class: "rc-h-area" });
+      svg.append(area, mk("path", { d: smoothPath(pts), class: "rc-h-line" }));
+    }
+    const last = pts.at(-1);
+    svg.append(mk("circle", { cx: last[0], cy: last[1], r: 4.5, class: "rc-h-dot" }));
+    const lab = mk("text", { x: Math.min(last[0], W - R - 2), y: last[1] - 10, class: "rc-h-label", "text-anchor": pts.length > 1 ? "end" : "middle" });
+    lab.textContent = points.at(-1).score.toFixed(1);
+    svg.append(lab);
+    const d0 = mk("text", { x: L, y: H - 6, class: "rc-h-axis" }); d0.textContent = fmtDay(points[0].day); svg.append(d0);
+    if (points.length > 1) { const d1 = mk("text", { x: W - R, y: H - 6, class: "rc-h-axis", "text-anchor": "end" }); d1.textContent = fmtDay(points.at(-1).day); svg.append(d1); }
+    box.append(svg);
+    if (points.length > 1) {
+      const first = points[0], lastP = points.at(-1);
+      const diff = lastP.score - first.score;
+      const changed = Object.keys(lastP.grades || {}).filter(k => (first.grades || {})[k] && first.grades[k] !== lastP.grades[k]);
+      box.append(el("p", "rc-history-read", `${diff === 0 ? "Unchanged" : `${diff > 0 ? "Up" : "Down"} ${Math.abs(diff).toFixed(1)}`} since ${fmtDay(first.day)}.${changed.length ? ` Grade changes: ${changed.map(k => `${SHORT[k]} ${first.grades[k]} → ${lastP.grades[k]}`).join(", ")}.` : ""}`));
+    }
+  }
+
+  /* ── Leaderboard ─────────────────────────────────────────────────────── */
+  let leaders = { at: 0, data: null };
+  async function loadLeaders() {
+    if (leaders.data && Date.now() - leaders.at < 5 * 60 * 1000) return renderLeaders(leaders.data);
+    setText("#rc-leaders-note", "Loading the leaderboard…");
+    try {
+      const r = await fetch("/api/lens-leaders", { credentials: "same-origin" });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || "The leaderboard is unavailable right now.");
+      leaders = { at: Date.now(), data: j };
+      renderLeaders(j);
+    } catch (error) {
+      setText("#rc-leaders-note", error.message);
+    }
+  }
+
+  function gradeCells(tr, grades) {
+    ["value", "growth", "profitability", "health", "momentum"].forEach(k => {
+      const td = el("td");
+      const chip = el("span", "rc-chip", grades?.[k] || "–");
+      chip.dataset.tone = gradeTone(grades?.[k]);
+      td.append(chip);
+      tr.append(td);
+    });
+  }
+
+  function gradeLink(ticker, name) {
+    const b = el("button", "rc-p-link");
+    b.type = "button";
+    b.append(el("strong", null, ticker), el("span", null, name || ""));
+    b.addEventListener("click", () => { showView("snapshot"); loadTicker(ticker); window.scrollTo({ top: 0, behavior: "smooth" }); });
+    return b;
+  }
+
+  function renderLeaders(d) {
+    const fmtDay = v => new Date(`${v}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
+    setText("#rc-leaders-note", `Ranked by LensScore across ${d.universe} companies we cover · updated ${formatAsOf(d.asOf)}.`);
+    $("#rc-leaders-body")?.replaceChildren(...d.top.map((r, i) => {
+      const tr = el("tr");
+      tr.append(el("td", "rc-p-rank", `${i + 1}`));
+      const name = el("td", "rc-p-name"); name.append(gradeLink(r.ticker, r.name)); tr.append(name);
+      tr.append(el("td", "rc-p-sector", r.sectorName));
+      tr.append(el("td", "rc-p-score", r.score.toFixed(1)));
+      gradeCells(tr, r.grades);
+      return tr;
+    }));
+    const movers = $("#rc-movers-body");
+    if (movers) {
+      movers.replaceChildren();
+      if (!d.movers || (!d.movers.up.length && !d.movers.down.length)) {
+        movers.append(el("p", "rc-history-empty", d.historyStarts
+          ? `Score history began ${fmtDay(d.historyStarts)}. Weekly moves appear after the next trading day's snapshot.`
+          : "Score history starts with tonight's snapshot. Weekly moves appear from tomorrow."));
+      } else {
+        const list = (title, rows, cls) => {
+          const wrap = el("div", "rc-mover-col");
+          wrap.append(el("h4", cls, title));
+          const ul = el("ul", "rc-mover-list");
+          rows.forEach(m => {
+            const li = el("li");
+            li.append(gradeLink(m.ticker, m.name), el("em", cls, `${m.change > 0 ? "+" : "−"}${Math.abs(m.change).toFixed(1)}`), el("small", null, `${m.then.toFixed(1)} → ${m.now.toFixed(1)}`));
+            ul.append(li);
+          });
+          wrap.append(ul);
+          return wrap;
+        };
+        movers.append(el("p", "rc-card-note", `Since ${fmtDay(d.movers.since)}`), list("Rising", d.movers.up, "good"), list("Falling", d.movers.down, "bad"));
+      }
+    }
+    const track = $("#rc-track-body");
+    if (track) {
+      track.replaceChildren();
+      const tr = d.trackRecord;
+      if (!tr || !tr.companies) {
+        track.append(el("p", "rc-history-empty", `${d.historyStarts ? `The record started ${fmtDay(d.historyStarts)}.` : "The record starts with tonight's snapshot."} Each night we save every grade with its price, then show how each score band has performed since, winners and losers alike. Meaningful results take months; we will show them from day one anyway.`));
+      } else {
+        track.append(el("p", "rc-card-note", `Price change since ${fmtDay(tr.startDay)} for the ${tr.companies} companies graded that day. All companies: ${tr.allAverage >= 0 ? "+" : ""}${tr.allAverage}%.`));
+        const table = el("table", "rc-peer-table rc-track-table");
+        const head = el("tr"); ["Score band on day one", "Companies", "Average change", "vs all"].forEach(h => head.append(el("th", null, h)));
+        const thead = el("thead"); thead.append(head);
+        const tbody = el("tbody");
+        tr.bands.forEach(b => {
+          const row = el("tr");
+          row.append(el("td", null, b.label), el("td", "rc-p-rank", `${b.count}`),
+            el("td", "rc-p-score", b.averageReturn == null ? "—" : `${b.averageReturn >= 0 ? "+" : ""}${b.averageReturn}%`),
+            el("td", b.beatAll > 0 ? "good" : b.beatAll < 0 ? "bad" : "", b.beatAll == null ? "—" : `${b.beatAll >= 0 ? "+" : ""}${b.beatAll} pts`));
+          tbody.append(row);
+        });
+        table.append(thead, tbody);
+        track.append(table, el("p", "rc-rank-note", "Past results do not predict future returns. Prices only; dividends not included."));
+      }
+    }
+    $("#rc-sector-grid")?.replaceChildren(...d.sectors.map(sec => {
+      const card = el("div", "rc-sector-card");
+      card.append(el("h4", null, sec.sectorName), el("small", null, `${sec.count} companies`));
+      const ol = el("ol");
+      sec.top.forEach(r => {
+        const li = el("li");
+        li.append(gradeLink(r.ticker, r.name), el("em", null, r.score.toFixed(1)));
+        ol.append(li);
+      });
+      card.append(ol);
+      return card;
+    }));
+  }
+
+  async function copyPost() {
+    const d = leaders.data;
+    if (!d) return;
+    const lines = d.top.slice(0, 5).map((r, i) => `${i + 1}. $${r.ticker} ${r.score.toFixed(1)} (Value ${r.grades.value}, Growth ${r.grades.growth}, Profit ${r.grades.profitability})`);
+    let text = `Top-rated stocks by LensScore this week, graded against their own sector:\n\n${lines.join("\n")}`;
+    if (d.movers?.up?.length) text += `\n\nBiggest riser: $${d.movers.up[0].ticker} ${d.movers.up[0].then.toFixed(1)} → ${d.movers.up[0].now.toFixed(1)}`;
+    text += "\n\nEvery grade and the numbers behind it: impliedlens.com/lens-score";
+    try {
+      await navigator.clipboard.writeText(text);
+      setText("#rc-post-status", "Copied. Paste it into X.");
+    } catch (_) {
+      window.prompt("Copy this post:", text);
+    }
+  }
+
+  /* ── Email alerts ────────────────────────────────────────────────────── */
+  let alertState = { list: [], limit: 0, loggedIn: null };
+  const KIND_TEXT = { above: "rises to", below: "falls to", buy_zone: "reaches the buy zone", score: "grade change" };
+  async function csrfToken() {
+    try { const r = await fetch("/api/csrf", { credentials: "same-origin" }); const j = await r.json(); return j.token || ""; } catch (_) { return ""; }
+  }
+  async function loadAlerts() {
+    try {
+      const r = await fetch("/api/alerts", { credentials: "same-origin" });
+      if (r.status === 401) { alertState = { list: [], limit: 0, loggedIn: false }; return renderAlerts(); }
+      const j = await r.json();
+      alertState = { list: j.alerts || [], limit: j.limit || 0, loggedIn: true };
+    } catch (_) { alertState.loggedIn = alertState.loggedIn ?? null; }
+    renderAlerts();
+  }
+  function renderAlerts() {
+    const ul = $("#rc-alert-list");
+    if (!ul) return;
+    ul.replaceChildren();
+    if (alertState.loggedIn === false) {
+      const li = el("li", "rc-alert-login");
+      const a = el("a", null, "Log in or create a free account");
+      a.href = `/login?next=${encodeURIComponent(location.pathname + location.search)}`;
+      li.append(a, document.createTextNode(" to get email alerts."));
+      ul.append(li);
+      return;
+    }
+    const mine = alertState.list.filter(a => a.active);
+    const sorted = mine.filter(a => a.ticker === state.ticker).concat(mine.filter(a => a.ticker !== state.ticker));
+    sorted.slice(0, 12).forEach(a => {
+      const li = el("li");
+      const txt = a.kind === "score" ? `${a.ticker} · any grade change` : a.kind === "buy_zone" ? `${a.ticker} · buy zone at ${money(a.level)}` : `${a.ticker} · ${KIND_TEXT[a.kind]} ${money(a.level)}`;
+      li.append(el("span", a.ticker === state.ticker ? "here" : "", txt));
+      const del = el("button", "rc-alert-del", "Remove");
+      del.type = "button";
+      del.setAttribute("aria-label", `Remove alert: ${txt}`);
+      del.addEventListener("click", () => deleteAlert(a.id));
+      li.append(del);
+      ul.append(li);
+    });
+    if (alertState.limit) setText("#rc-alerts-title", `Email alerts · ${mine.length} of ${alertState.limit}`);
+  }
+  async function addAlert(kind, level) {
+    if (alertState.loggedIn === false) { setText("#rc-alert-status", "Log in to set alerts."); return; }
+    setText("#rc-alert-status", "Saving…");
+    try {
+      const r = await fetch("/api/alerts", {
+        method: "POST", credentials: "same-origin",
+        headers: { "Content-Type": "application/json", "X-CSRF-Token": await csrfToken() },
+        body: JSON.stringify({ ticker: state.ticker, kind, level }),
+      });
+      const j = await r.json().catch(() => ({}));
+      if (r.status === 401) { alertState.loggedIn = false; renderAlerts(); setText("#rc-alert-status", "Log in to set alerts."); return; }
+      if (!r.ok) throw new Error(j.error || "Could not save the alert.");
+      alertState.list = j.alerts || alertState.list;
+      renderAlerts();
+      setText("#rc-alert-status", j.duplicate ? "You already have that alert." : "Alert saved. We check every 10 minutes while the market is open.");
+    } catch (error) { setText("#rc-alert-status", error.message); }
+  }
+  async function deleteAlert(id) {
+    try {
+      const r = await fetch(`/api/alerts/${encodeURIComponent(id)}`, { method: "DELETE", credentials: "same-origin", headers: { "X-CSRF-Token": await csrfToken() } });
+      const j = await r.json().catch(() => ({}));
+      if (r.ok) { alertState.list = j.alerts || alertState.list.filter(a => a.id !== id); renderAlerts(); setText("#rc-alert-status", "Alert removed."); }
+    } catch (_) { setText("#rc-alert-status", "Could not remove the alert."); }
   }
 
   async function saveCurrentScenario() {
@@ -956,6 +1264,19 @@
       if (event.target === $("#methodology-dialog")) $("#methodology-dialog").close();
     });
     on("#save-scenario", "click", saveCurrentScenario);
+    on("#rc-copy-post", "click", copyPost);
+    on("#rc-alert-zone", "click", () => {
+      const zone = state.result?.technical?.zones?.support?.[0];
+      if (!zone) { setText("#rc-alert-status", "There is no buy zone below the price right now."); return; }
+      addAlert("buy_zone", Math.round(zone.upper * 100) / 100);
+    });
+    on("#rc-alert-score", "click", () => addAlert("score", null));
+    on("#rc-alert-form", "submit", event => {
+      event.preventDefault();
+      const level = Number($("#rc-alert-level").value);
+      if (!(level > 0)) { setText("#rc-alert-status", "Enter a price."); return; }
+      addAlert($("#rc-alert-kind").value, level);
+    });
     on("#rc-peek-all", "click", () => { showView("peers"); $(".company-nav")?.scrollIntoView({ behavior: "smooth", block: "start" }); });
     on("#price-chart", "mousemove", event => {
       if (!state.chartPoints.length) return;
@@ -985,4 +1306,5 @@
   const initialTicker = initialParams.get("ticker") || initialParams.get("symbol");
   showView(initialParams.get("view") || "snapshot");
   loadTicker((initialTicker || "AAPL").toUpperCase());
+  loadAlerts();
 })();

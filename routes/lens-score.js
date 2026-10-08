@@ -76,6 +76,12 @@ function secGrowth(facts) {
   } catch (_) { return {}; }
 }
 
+const { summarizeStreet } = require("../lib/street");
+async function streetView(ticker, fh) {
+  const rec = await finnhubJson(`https://finnhub.io/api/v1/stock/recommendation?symbol=${encodeURIComponent(ticker)}&token=${FINNHUB_KEY}`, { priority: "high", timeoutMs: 6000 });
+  return summarizeStreet(rec, fh?.earnings);
+}
+
 async function gradeTicker(ticker, research) {
   await peers.load();
   const [fh, company] = await Promise.all([
@@ -112,6 +118,7 @@ async function gradeTicker(ticker, research) {
     marketCap: Number(profile?.marketCapitalization) > 0 ? Number(profile.marketCapitalization) * 1e6 : known?.mc || null,
   }, peers.all());
   graded.industry = profile?.finnhubIndustry || known?.i || null;
+  graded.street = await streetView(ticker, fh).catch(() => null);
   graded.secOverrides = Object.keys(overrides);
   graded.source = "Finnhub fundamentals and price returns for every company, ranked within sector; revenue growth from SEC filings where current.";
   graded.asOf = new Date().toISOString();
@@ -255,6 +262,35 @@ router.get("/lens-score/:ticker", checkAnalysisLimit, async (req, res) => {
   }
 });
 
+/* Score history for one company (one point per trading day since history
+   began) and the leaderboard: top-rated overall and per sector, biggest
+   score changes over about a week, and the running track record. */
+const LensHistory = require("../lib/lens-history");
+router.get("/lens-history/:ticker", async (req, res) => {
+  const ticker = normalizeTicker(req.params.ticker);
+  if (!ticker) return res.status(400).json({ error: "Invalid ticker." });
+  try {
+    res.setHeader("Cache-Control", "private, max-age=300");
+    res.json({ ticker, points: await LensHistory.historyFor(ticker) });
+  } catch (error) {
+    res.status(503).json({ error: "Score history is unavailable right now." });
+  }
+});
+let leadersCache = { at: 0, body: null };
+router.get("/lens-leaders", async (_req, res) => {
+  try {
+    if (!leadersCache.body || Date.now() - leadersCache.at > 5 * 60 * 1000) {
+      const body = await LensHistory.leaders();
+      if (body.universe >= 20) leadersCache = { at: Date.now(), body };
+      else return res.status(503).json({ error: "Grades are still loading. Try again in a few minutes.", universe: body.universe });
+    }
+    res.setHeader("Cache-Control", "public, max-age=120");
+    res.json(leadersCache.body);
+  } catch (error) {
+    res.status(503).json({ error: "The leaderboard is unavailable right now." });
+  }
+});
+
 // Popular tickers are scored in the background so the homepage demo and the
 // LensToolkit open instantly instead of computing five years of research on
 // the visitor's click. Started by server.js only (never in tests); timers are
@@ -279,4 +315,5 @@ function startWarmup({ firstDelayMs = 20 * 1000, everyMs = 9 * 60 * 1000 } = {})
 module.exports = router;
 module.exports.usMarketOpen = usMarketOpen;
 module.exports.cardPayload = cardPayload;
+module.exports.summarizeStreet = summarizeStreet;
 module.exports.startWarmup = startWarmup;

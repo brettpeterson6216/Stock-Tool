@@ -79,6 +79,7 @@ const financialsRouter  = require("./routes/financials");
 const lensScoreRouter   = require("./routes/lens-score");
 const stockLandingRouter = require("./routes/stock-landing");
 const workspaceRouter     = require("./routes/workspace");
+const alertsRouter        = require("./routes/alerts");
 const analysisRouter      = require("./routes/analysis");
 const searchRouter        = require("./routes/search");
 const logoRouter          = require("./routes/logo");
@@ -238,6 +239,8 @@ app.use([
   "/api/institutional",
   "/api/darkpool",
   "/api/lens-score",
+  "/api/lens-history",
+  "/api/lens-leaders",
   "/api/search",
   "/api/logo",
 ], marketDataLimiter);
@@ -250,6 +253,7 @@ app.use("/api",         financialsRouter);  // /api/financials/*, /api/earnings/
                                             // /api/institutional/*, /api/darkpool/*, /api/me/limit
 app.use("/api",         lensScoreRouter);    // /api/lens-score/*
 app.use("/api",         workspaceRouter);    // /api/workspace/*
+app.use("/api",         alertsRouter);       // /api/alerts
 app.use("/api",         analysisRouter);     // /api/analysis/:ticker
 app.use("/api",         searchRouter);       // /api/search
 app.use("/api",         logoRouter);         // /api/logo/:ticker
@@ -599,6 +603,8 @@ if (require.main === module) {
       console.log(`ImpliedLens running on port ${PORT}`);
       if (process.env.NODE_ENV !== "test" && typeof lensScoreRouter.startWarmup === "function") lensScoreRouter.startWarmup();
       if (process.env.NODE_ENV !== "test") require("./lib/peer-universe").load().catch(() => {});
+      if (process.env.NODE_ENV !== "test") require("./lib/lens-history").start();
+      if (process.env.NODE_ENV !== "test") require("./lib/alerts").start();
       startKeepAwake();
     });
     // Company-name search answers from memory. The seed list in

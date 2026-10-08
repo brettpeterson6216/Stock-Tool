@@ -1539,7 +1539,7 @@
           </div><!-- /sec-dcf -->
 
           <div class="app-section" id="sec-screener"><div class="acc-body" id="body-screener" style="display:none;">
-<div class="tool-intro"><div><strong>Market Screener</strong> narrows an actively traded U.S. equity universe using valuation, size, income, momentum, and sector filters.</div><div class="tool-intro-note">Yahoo Finance and optional Finnhub snapshots · refreshed automatically. Missing metrics remain unavailable rather than being treated as zero.</div></div>
+<div class="tool-intro"><div><strong>Market Screener</strong> narrows about 290 actively traded U.S. stocks by LensScore grade, valuation, size, income, momentum and sector. Sorted by LensScore.</div><div class="tool-intro-note">Yahoo Finance and optional Finnhub snapshots · refreshed automatically. Missing metrics remain unavailable rather than being treated as zero.</div></div>
 <div class="scr-filters">
               <div class="scr-filter-group"><label>Sector</label><select id="scr-sector" onchange="applyScreener()" style="width:100%;background:var(--card);color:var(--text);border:1px solid var(--border2);border-radius:var(--r);padding:4px 6px;font-size:11px;margin-top:6px;"><option value="ALL">All Sectors</option><option value="Tech">Technology</option><option value="Comm.">Communication</option><option value="Health">Healthcare</option><option value="Finance">Financials</option><option value="Cons.Disc">Consumer Disc.</option><option value="Staples">Consumer Staples</option><option value="Energy">Energy</option><option value="Industrials">Industrials</option><option value="Materials">Materials</option><option value="Real Est.">Real Estate</option><option value="Utilities">Utilities</option><option value="ETF">ETFs</option></select></div>
               <div class="scr-filter-group"><label>Max P/E <span id="scr-pe-val">50x</span></label><input type="range" class="scr-slider" id="scr-pe" min="5" max="200" value="50" oninput="document.getElementById('scr-pe-val').textContent=this.value+'x';applyScreener()"></div>
@@ -1548,12 +1548,32 @@
               <div class="scr-filter-group"><label>Min Mkt Cap <span id="scr-cap-val">$0B</span></label><input type="range" class="scr-slider" id="scr-cap" min="0" max="500" value="0" step="10" oninput="document.getElementById('scr-cap-val').textContent='$'+this.value+'B';applyScreener()"></div>
               <div class="scr-filter-group"><label>Min 1Y Return <span id="scr-ret-val">−50%</span></label><input type="range" class="scr-slider" id="scr-ret" min="-50" max="200" value="-50" oninput="document.getElementById('scr-ret-val').textContent=this.value+'%';applyScreener()"></div>
             </div>
+            <div class="scr-lens" aria-label="LensScore filters">
+              <div class="scr-lens-head"><strong>Filter by LensScore grades</strong><span>Grades compare each company with its own sector. A = top of the sector.</span></div>
+              <div class="scr-lens-presets" role="group" aria-label="Preset screens">
+                <button type="button" class="scr-preset" data-preset="quality">Quality at a fair price</button>
+                <button type="button" class="scr-preset" data-preset="growth">Fast growers</button>
+                <button type="button" class="scr-preset" data-preset="fortress">Fortress balance sheet</button>
+                <button type="button" class="scr-preset" data-preset="leaders">Market leaders</button>
+                <button type="button" class="scr-preset" data-preset="value">Cheap and improving</button>
+              </div>
+              <div class="scr-lens-row">
+                <div class="scr-filter-group"><label>Min LensScore <span id="scr-ls-val">0.0</span></label><input type="range" class="scr-slider" id="scr-ls" min="0" max="9" value="0" step="0.5" oninput="document.getElementById('scr-ls-val').textContent=Number(this.value).toFixed(1);applyScreener()"></div>
+                <div class="scr-filter-group"><label for="scr-g-value">Value</label><select id="scr-g-value" class="scr-grade-sel" onchange="applyScreener()"><option value="">Any</option><option value="A-">A or better</option><option value="B-">B or better</option><option value="C-">C or better</option></select></div>
+                <div class="scr-filter-group"><label for="scr-g-growth">Growth</label><select id="scr-g-growth" class="scr-grade-sel" onchange="applyScreener()"><option value="">Any</option><option value="A-">A or better</option><option value="B-">B or better</option><option value="C-">C or better</option></select></div>
+                <div class="scr-filter-group"><label for="scr-g-profitability">Profitability</label><select id="scr-g-profitability" class="scr-grade-sel" onchange="applyScreener()"><option value="">Any</option><option value="A-">A or better</option><option value="B-">B or better</option><option value="C-">C or better</option></select></div>
+                <div class="scr-filter-group"><label for="scr-g-health">Health</label><select id="scr-g-health" class="scr-grade-sel" onchange="applyScreener()"><option value="">Any</option><option value="A-">A or better</option><option value="B-">B or better</option><option value="C-">C or better</option></select></div>
+                <div class="scr-filter-group"><label for="scr-g-momentum">Momentum</label><select id="scr-g-momentum" class="scr-grade-sel" onchange="applyScreener()"><option value="">Any</option><option value="A-">A or better</option><option value="B-">B or better</option><option value="C-">C or better</option></select></div>
+              </div>
+            </div>
             <div class="screener-summary"><span id="scr-result-count" role="status">Load the screener to view results.</span><button class="btn-secondary-compact" type="button" onclick="resetScreener()"><i class="ti ti-refresh"></i> Reset filters</button></div>
             <div class="loading-bar" id="scr-loading" style="display:none;"><div class="spinner"></div> Loading market data…</div>
             <div class="scr-table-wrap">
               <table class="scr-table" id="scr-table">
                 <thead><tr>
                   <th style="text-align:left;"><button class="scr-sort-btn" type="button" data-sort="ticker" onclick="sortScreener('ticker')">Stock <i class="ti ti-selector"></i></button></th>
+                  <th><button class="scr-sort-btn" type="button" data-sort="lensScore" onclick="sortScreener('lensScore')" aria-sort="descending">LensScore <i class="ti ti-selector"></i></button></th>
+                  <th class="scr-grades-th">V&nbsp;G&nbsp;P&nbsp;H&nbsp;M</th>
                   <th><button class="scr-sort-btn" type="button" data-sort="price" onclick="sortScreener('price')">Price <i class="ti ti-selector"></i></button></th>
                   <th><button class="scr-sort-btn" type="button" data-sort="change1D" onclick="sortScreener('change1D')">Day <i class="ti ti-selector"></i></button></th>
                   <th><button class="scr-sort-btn" type="button" data-sort="change1Y" onclick="sortScreener('change1Y')">1Y Chg <i class="ti ti-selector"></i></button></th>
@@ -1565,7 +1585,7 @@
                   <th><button class="scr-sort-btn" type="button" data-sort="dividendYield" onclick="sortScreener('dividendYield')">Div Yield <i class="ti ti-selector"></i></button></th>
                   <th><button class="scr-sort-btn" type="button" data-sort="beta" onclick="sortScreener('beta')">Beta <i class="ti ti-selector"></i></button></th>
                 </tr></thead>
-                <tbody id="scr-body"><tr><td colspan="11" style="text-align:center;color:var(--text5);padding:2rem;">Click the Screener tab to load data</td></tr></tbody>
+                <tbody id="scr-body"><tr><td colspan="13" style="text-align:center;color:var(--text5);padding:2rem;">Click the Screener tab to load data</td></tr></tbody>
               </table>
             </div>
 
@@ -1952,8 +1972,9 @@
 <script defer src="/research-system.js?v=20260825-6"></script>
 <script defer src="/product-system.js?v=20260825-6"></script>
 <script defer src="/workspace-system.js?v=20260825-6"></script>
-<script defer src="/chart-tools.js?v=20261005-1"></script>
-<script defer src="/chart-engine.js?v=20261005-1"></script>
+<script defer src="/chart-tools.js?v=20261009-1"></script>
+<script defer src="/lens-score/assets/lens-score-engine.js?v=20261009-1"></script>
+<script defer src="/chart-engine.js?v=20261009-1"></script>
 <script defer src="/chart-analysis.js?v=20260825-6"></script>
 <script defer src="/hero-chart.js?v=20260825-6"></script>
 <script defer src="/tool-launch.js?v=20260904-1"></script>

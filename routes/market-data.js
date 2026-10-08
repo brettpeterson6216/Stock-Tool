@@ -255,6 +255,7 @@ const _enrich = new Map();   // ticker -> { at, priceAt, sector, revenueGrowth, 
 let _enrichRunning = false;
 
 const peers = require("../lib/peer-universe");
+const universeGrades = require("../lib/universe-grades");
 const sectorFromIndustry = peers.sectorFromIndustry;
 function rsi14(closes) {
   if (closes.length < 16) return null;
@@ -369,6 +370,8 @@ function screenerRow(ticker, base) {
     source: base ? base.source : "Yahoo Finance chart + Finnhub fundamentals",
     enriched: !!e.at,
   };
+  const lg = universeGrades.get(ticker);
+  if (lg) { row.lensScore = lg.score; row.grades = lg.grades; row.sectorRank = lg.sectorRank; row.sectorCount = lg.sectorCount; }
   return row;
 }
 

@@ -83,7 +83,7 @@ const S = {
   inds: { ma50: true, ma200: false, bb: false },
   chartType: 'candle',
   screenerData: null,
-  screenerSort: { col: 'marketCap', dir: -1 },
+  screenerSort: { col: 'lensScore', dir: -1 },
   userPlan: 'free',   // 'free' | 'trial' | 'pro'
   loggedIn: false,
   authReady: false,
@@ -4060,7 +4060,17 @@ function applyScreener() {
   var minRet=parseFloat(retEl.value);
   var sectorEl=document.getElementById('scr-sector');
   var sector=sectorEl?sectorEl.value:'ALL';
+  var lsEl=document.getElementById('scr-ls');
+  var minLs=lsEl?parseFloat(lsEl.value)||0:0;
+  var gradeMins={};
+  ['value','growth','profitability','health','momentum'].forEach(function(k){var el=document.getElementById('scr-g-'+k);if(el&&el.value) gradeMins[k]=el.value;});
+  var gradeFilterOn=minLs>0||Object.keys(gradeMins).length>0;
   var filtered=S.screenerData.filter(function(s){
+    if(gradeFilterOn){
+      if(s.lensScore==null) return false;
+      if(s.lensScore<minLs) return false;
+      for(var k in gradeMins){ if(!scrGradeAtLeast(s.grades&&s.grades[k],gradeMins[k])) return false; }
+    }
     if(s.pe!=null && s.pe>0 && s.pe>maxPE) return false;
     if(s.pb!=null && s.pb>0 && s.pb>maxPB) return false;
     if((s.dividendYield||0)<minDiv) return false;
@@ -4079,7 +4089,31 @@ function applyScreener() {
   if(count) count.textContent=filtered.length+' of '+S.screenerData.length+' stocks match the current filters';
   renderScreenerTable(filtered);
 }
+var SCR_GRADES=['F','D-','D','D+','C-','C','C+','B-','B','B+','A-','A','A+'];
+function scrGradeAtLeast(g,min){ if(!min) return true; return !!g && SCR_GRADES.indexOf(g)>=SCR_GRADES.indexOf(min); }
+function scrGradeTone(g){ return !g?'unknown':/^A/.test(g)?'strong':/^B/.test(g)?'positive':/^C/.test(g)?'neutral':/^D/.test(g)?'weak':'severe'; }
+/* Preset screens built from LensScore grades. */
+var SCR_PRESETS={
+  quality:{ls:'0',g:{profitability:'B-',health:'C-',value:'C-'},label:'Quality at a fair price: profitable, solid balance sheet, not overpriced for its sector.'},
+  growth:{ls:'0',g:{growth:'A-',profitability:'C-'},label:'Fast growers: top-of-sector growth that is not losing money hand over fist.'},
+  fortress:{ls:'0',g:{health:'A-',profitability:'B-'},label:'Fortress balance sheet: low debt, easy interest cover, steady profits.'},
+  leaders:{ls:'7',g:{momentum:'B-'},label:'Market leaders: LensScore 7+ and beating the market.'},
+  value:{ls:'0',g:{value:'A-',momentum:'C-'},label:'Cheap and improving: cheapest in the sector with the price no longer lagging.'}
+};
+function applyScreenerPreset(key){
+  var p=SCR_PRESETS[key]; if(!p) return;
+  var ls=document.getElementById('scr-ls'); if(ls){ls.value=p.ls;document.getElementById('scr-ls-val').textContent=Number(p.ls).toFixed(1);}
+  ['value','growth','profitability','health','momentum'].forEach(function(k){var el=document.getElementById('scr-g-'+k);if(el) el.value=p.g[k]||'';});
+  document.querySelectorAll('.scr-preset').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-preset')===key);});
+  S.screenerSort={col:'lensScore',dir:-1};
+  applyScreener();
+  var count=document.getElementById('scr-result-count'); if(count) count.textContent+=' · '+p.label;
+}
+document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('.scr-preset');if(b) applyScreenerPreset(b.getAttribute('data-preset'));});
 function resetScreener() {
+  ['scr-g-value','scr-g-growth','scr-g-profitability','scr-g-health','scr-g-momentum'].forEach(function(id){var el=document.getElementById(id);if(el) el.value='';});
+  var ls=document.getElementById('scr-ls'); if(ls){ls.value='0';var lv=document.getElementById('scr-ls-val');if(lv) lv.textContent='0.0';}
+  document.querySelectorAll('.scr-preset').forEach(function(b){b.classList.remove('active');});
   var defaults={ 'scr-sector':'ALL','scr-pe':'50','scr-pb':'20','scr-div':'0','scr-cap':'0','scr-ret':'-50' };
   Object.keys(defaults).forEach(function(id){var el=document.getElementById(id);if(el) el.value=defaults[id];});
   document.getElementById('scr-pe-val').textContent='50x';
@@ -4087,7 +4121,7 @@ function resetScreener() {
   document.getElementById('scr-div-val').textContent='0%';
   document.getElementById('scr-cap-val').textContent='$0B';
   document.getElementById('scr-ret-val').textContent='-50%';
-  S.screenerSort={col:'marketCap',dir:-1};
+  S.screenerSort={col:'lensScore',dir:-1};
   applyScreener();
 }
 function loadFromScreener(el){var t=el.getAttribute('data-ticker');if(t){quickLoad(t);navGoTo('analyze');}}
@@ -4103,7 +4137,7 @@ function sortScreener(col) {
 function renderScreenerTable(stocks) {
   var tbody=document.getElementById('scr-body');
   if(!tbody) return;
-  if(!stocks.length){tbody.innerHTML='<tr><td colspan="11" style="text-align:center;color:var(--text5);padding:2rem;">No stocks match the current filters.</td></tr>';return;}
+  if(!stocks.length){tbody.innerHTML='<tr><td colspan="13" style="text-align:center;color:var(--text5);padding:2rem;">No stocks match the current filters.</td></tr>';return;}
   tbody.innerHTML=stocks.map(function(s){
     var chg1D=s.change1D||0;
     var chg1Y=s.change1Y;
@@ -4115,6 +4149,8 @@ function renderScreenerTable(stocks) {
     var signal=chg1Y==null?'--':chg1Y>20?'<span class="tag tag-up">Bullish</span>':chg1Y<-15?'<span class="tag tag-dn">Bearish</span>':'<span class="tag tag-neu">Neutral</span>';
     return '<tr role="button" tabindex="0" aria-label="Analyze '+ticker+'" style="cursor:pointer" onclick="loadFromScreener(this)" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();loadFromScreener(this)}" data-ticker="'+ticker+'">'
       +'<td><span class="scr-ticker">'+ticker+'</span></td>'
+      +'<td class="scr-ls-cell">'+(s.lensScore!=null?'<span class="scr-ls" data-tone="'+(s.lensScore>=8?'strong':s.lensScore>=6.5?'positive':s.lensScore>=4.5?'neutral':s.lensScore>=3?'weak':'severe')+'">'+s.lensScore.toFixed(1)+'</span>':'<span class="scr-ls-na">--</span>')+'</td>'
+      +'<td class="scr-grades-cell">'+(s.grades?['value','growth','profitability','health','momentum'].map(function(k){var g=s.grades[k];return '<span class="scr-g" data-tone="'+scrGradeTone(g)+'" title="'+k+'">'+(g?escapeHtml(g):'–')+'</span>';}).join(''):'')+'</td>'
       +'<td>$'+(s.price||0).toFixed(2)+'</td>'
       +'<td style="color:'+(chg1D>=0?'var(--market-up)':'var(--market-down)')+'">'+(chg1D>=0?'+':'')+chg1D.toFixed(2)+'%</td>'
       +'<td style="color:'+(chg1Y==null?'inherit':chg1Y>=0?'var(--market-up)':'var(--market-down)')+'">'+(chg1Y!=null?(chg1Y>=0?'+':'')+chg1Y.toFixed(1)+'%':'--')+'</td>'

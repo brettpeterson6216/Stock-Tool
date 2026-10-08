@@ -176,3 +176,83 @@ body.il-lens-page .rc-peer-foot { margin: 12px 0 0; color: var(--ink-faint); fon
   body.il-lens-page .rc-meter { width: 44px; }
   body.il-lens-page .rc-peer-table th:nth-child(n+4), body.il-lens-page .rc-peer-table td:nth-child(n+4) { padding: 8px 4px; }
 }
+
+/* ── score history ────────────────────────────────────────────────────── */
+body.il-lens-page .rc-history { padding: 22px 24px !important; }
+body.il-lens-page .rc-history-svg { width: 100%; height: auto; display: block; overflow: visible; }
+body.il-lens-page .rc-h-grid { stroke: color-mix(in srgb, var(--ink) 10%, transparent); stroke-width: 1; }
+body.il-lens-page .rc-h-axis { fill: var(--ink-faint); font: 600 11px var(--rc-num); }
+body.il-lens-page .rc-h-line { fill: none; stroke: var(--gold-bright); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+body.il-lens-page .rc-h-area { fill: color-mix(in srgb, var(--gold) 14%, transparent); }
+body.il-lens-page .rc-h-dot { fill: var(--gold-bright); stroke: var(--surface); stroke-width: 2; }
+body.il-lens-page .rc-h-label { fill: var(--ink); font: 700 13px var(--rc-num); }
+body.il-lens-page .rc-history-empty { margin: 4px 0 0; color: var(--ink-soft); font-size: 13.5px; line-height: 1.55; }
+body.il-lens-page .rc-history-read { margin: 10px 0 0; color: var(--ink-soft); font-size: 13px; }
+
+/* ── leaderboard ──────────────────────────────────────────────────────── */
+body.il-lens-page .rc-leaders, body.il-lens-page .rc-movers, body.il-lens-page .rc-track, body.il-lens-page .rc-sectors { padding: 22px 24px !important; }
+body.il-lens-page .rc-leaders-actions { display: inline-flex; align-items: center; gap: 12px; }
+body.il-lens-page .rc-leaders-grid { display: grid; grid-template-columns: 1fr 1.3fr; gap: 18px; margin: 18px 0; }
+body.il-lens-page .rc-movers h3, body.il-lens-page .rc-track h3, body.il-lens-page .rc-sectors h3 { margin: 2px 0 10px; font-size: 18px; }
+body.il-lens-page .rc-p-sector { color: var(--ink-soft); font-size: 13px; }
+body.il-lens-page .rc-mover-col h4 { margin: 12px 0 6px; font-size: 12px; letter-spacing: .05em; text-transform: uppercase; }
+body.il-lens-page .rc-mover-col h4.good, body.il-lens-page td.good, body.il-lens-page .rc-mover-list em.good { color: var(--rc-a); }
+body.il-lens-page .rc-mover-col h4.bad, body.il-lens-page td.bad, body.il-lens-page .rc-mover-list em.bad { color: var(--rc-f); }
+body.il-lens-page .rc-mover-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+body.il-lens-page .rc-mover-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px; align-items: center; }
+body.il-lens-page .rc-mover-list em { font-style: normal; font-family: var(--rc-num); font-weight: 700; }
+body.il-lens-page .rc-mover-list small { color: var(--ink-faint); font-family: var(--rc-num); font-size: 12px; }
+body.il-lens-page .rc-track-table td, body.il-lens-page .rc-track-table th { font-size: 13px; }
+body.il-lens-page .rc-sector-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+body.il-lens-page .rc-sector-card { padding: 14px 16px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line); }
+body.il-lens-page .rc-sector-card h4 { margin: 0; font-size: 14px; }
+body.il-lens-page .rc-sector-card small { color: var(--ink-faint); font-size: 12px; }
+body.il-lens-page .rc-sector-card ol { margin: 10px 0 0; padding-left: 18px; display: grid; gap: 6px; }
+body.il-lens-page .rc-sector-card li { padding-left: 2px; }
+body.il-lens-page .rc-sector-card li { display: list-item; }
+body.il-lens-page .rc-sector-card li .rc-p-link { display: inline-grid; vertical-align: top; max-width: calc(100% - 44px); }
+body.il-lens-page .rc-sector-card li em { float: right; font-style: normal; font-family: var(--rc-num); font-weight: 700; }
+@media (max-width: 900px) { body.il-lens-page .rc-leaders-grid { grid-template-columns: 1fr; } }
+@media (max-width: 720px) {
+  body.il-lens-page .rc-history, body.il-lens-page .rc-leaders, body.il-lens-page .rc-movers, body.il-lens-page .rc-track, body.il-lens-page .rc-sectors { padding: 16px !important; }
+}
+
+/* ── alerts ───────────────────────────────────────────────────────────── */
+body.il-lens-page .rc-alerts { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); display: grid; gap: 10px; }
+body.il-lens-page .rc-alerts h4 { margin: 0; font-size: 13px; letter-spacing: .04em; text-transform: uppercase; color: var(--gold-bright); }
+body.il-lens-page .rc-alert-quick { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+body.il-lens-page .rc-alert-quick button, body.il-lens-page .rc-alert-form button { padding: 9px 10px; border-radius: 10px; border: 1px solid var(--line-strong); background: transparent; color: var(--ink); font-weight: 600; font-size: 12.5px !important; cursor: pointer; line-height: 1.25; }
+body.il-lens-page .rc-alert-quick button:hover, body.il-lens-page .rc-alert-form button:hover { border-color: var(--gold); color: var(--gold-bright); }
+body.il-lens-page .rc-alert-form { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 8px; }
+body.il-lens-page .rc-alert-form select, body.il-lens-page .rc-alert-form input { min-width: 0; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line-strong); background: var(--surface-2); color: var(--ink); font-size: 13px !important; font-family: var(--rc-num); }
+body.il-lens-page .rc-alert-status { margin: 0; min-height: 1em; color: var(--ink-soft); font-size: 12.5px; }
+body.il-lens-page .rc-alert-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+body.il-lens-page .rc-alert-list li { display: flex; justify-content: space-between; gap: 10px; align-items: center; padding: 7px 10px; border-radius: 9px; background: var(--surface-2); font-size: 12.5px; color: var(--ink-soft); }
+body.il-lens-page .rc-alert-list li span.here { color: var(--ink); font-weight: 600; }
+body.il-lens-page .rc-alert-list li.rc-alert-login { display: block; }
+body.il-lens-page .rc-alert-list li.rc-alert-login a { color: var(--gold-bright); font-weight: 600; }
+body.il-lens-page .rc-alert-del { border: 0; background: transparent; color: var(--ink-faint); font-size: 12px !important; cursor: pointer; text-decoration: underline; }
+body.il-lens-page .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+@media (max-width: 720px) { body.il-lens-page .rc-alert-quick { grid-template-columns: 1fr; } }
+
+/* ── wall street ──────────────────────────────────────────────────────── */
+body.il-lens-page .rc-street { padding: 22px 24px !important; }
+body.il-lens-page .rc-street h3 { margin: 2px 0 12px; font-size: 18px; }
+body.il-lens-page .rc-st-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+body.il-lens-page .rc-st-head strong { font-size: 18px; }
+body.il-lens-page .rc-st-head span { color: var(--ink-faint); font-size: 12.5px; }
+body.il-lens-page .rc-st-bar { display: flex; height: 10px; border-radius: 99px; overflow: hidden; margin: 10px 0 6px; gap: 2px; }
+body.il-lens-page .rc-st-bar i { display: block; min-width: 4px; }
+body.il-lens-page .rc-st-sb { background: var(--rc-a); }
+body.il-lens-page .rc-st-b { background: var(--rc-b); }
+body.il-lens-page .rc-st-h { background: var(--rc-c); }
+body.il-lens-page .rc-st-s { background: var(--rc-d); }
+body.il-lens-page .rc-st-ss { background: var(--rc-f); }
+body.il-lens-page .rc-st-legend, body.il-lens-page .rc-st-note { margin: 0 0 6px; color: var(--ink-soft); font-size: 12.5px; }
+body.il-lens-page .rc-st-beats { margin: 14px 0 8px; font-weight: 600; font-size: 13.5px; }
+body.il-lens-page .rc-st-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+body.il-lens-page .rc-st-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto 64px; gap: 10px; align-items: center; font-size: 12.5px; color: var(--ink-soft); padding: 6px 0; border-bottom: 1px solid var(--line); }
+body.il-lens-page .rc-st-num { font-family: var(--rc-num); }
+body.il-lens-page .rc-st-list em { font-style: normal; font-family: var(--rc-num); font-weight: 700; text-align: right; }
+body.il-lens-page .rc-st-list em.good { color: var(--rc-a); }
+body.il-lens-page .rc-st-list em.bad { color: var(--rc-f); }

@@ -140,7 +140,7 @@
   var view = {
     scale: "normal",       // normal | log | percent
     volume: true,
-    osc: "rsi",            // rsi | macd | none
+    osc: "rsi",            // rsi | macd | timing | none
     ema21: false,
     vwap: false,
     pins: { earnings: false, news: false }
@@ -366,6 +366,21 @@
         });
       });
       paneIdx++;
+    } else if (view.osc === "timing" && !opts.compact && LWC.BaselineSeries) {
+      /* Lens Timing: 10 = pulled back hard, 0 = stretched. Green above 5,
+         red below, with the extreme bands marked. */
+      series.timing = chart.addSeries(LWC.BaselineSeries, {
+        baseValue: { type: "price", price: 5 },
+        topLineColor: p.up, topFillColor1: isDark() ? "rgba(46,204,140,.30)" : "rgba(10,122,67,.22)", topFillColor2: "rgba(46,204,140,.02)",
+        bottomLineColor: p.down, bottomFillColor1: "rgba(255,90,100,.02)", bottomFillColor2: isDark() ? "rgba(255,90,100,.30)" : "rgba(192,40,58,.22)",
+        lineWidth: 2, lineType: 2, priceLineVisible: false,
+        autoscaleInfoProvider: function () { return { priceRange: { minValue: 0, maxValue: 10 } }; },
+        priceFormat: { type: "price", precision: 1, minMove: 0.1 }
+      }, paneIdx);
+      [[7.5, p.up, "Pulled back"], [2.5, p.down, "Stretched"]].forEach(function (l) {
+        series.timing.createPriceLine({ price: l[0], color: l[1], lineWidth: 1, lineStyle: 2, axisLabelVisible: true, title: l[2] });
+      });
+      paneIdx++;
     } else if (view.osc === "macd" && !opts.compact) {
       series.macdHist = chart.addSeries(LWC.HistogramSeries, { priceLineVisible: false }, paneIdx);
       series.macdLine = chart.addSeries(LWC.LineSeries, {
@@ -417,6 +432,14 @@
         }));
       }
       if (series.rsi) series.rsi.setData(pair(trim(ext, TA.rsi(ext.closes, 14))));
+      if (series.timing && window.LensScoreEngine && LensScoreEngine.calculateLensTiming) {
+        try {
+          var lt = LensScoreEngine.calculateLensTiming(rs.map(function (r) {
+            return { time: r.time, open: r.open, high: r.high, low: r.low, close: r.close, volume: r.volume || 0 };
+          }));
+          series.timing.setData((lt.series || []).map(function (pt) { return { time: pt.time, value: pt.timingScore }; }));
+        } catch (e) {}
+      }
       if (series.macdHist) {
         var m = TA.macd(ext.closes);
         var hist = trim(ext, m.hist);
@@ -1040,6 +1063,10 @@
       try { instance.series.price.removePriceLine(ln); } catch (e) {}
     });
     instance._ilZoneLines = [];
+    if (instance._ilZonePrim) {
+      try { instance.series.price.detachPrimitive(instance._ilZonePrim); } catch (e) {}
+      instance._ilZonePrim = null;
+    }
     if (instance._ilZoneMarkers) {
       try { instance._ilZoneMarkers.setMarkers([]); } catch (e) {}
       instance._ilZoneMarkers = null;
@@ -1088,6 +1115,33 @@
       add(fib.lower, tint(p.gold, .35), "", 3, 1, false);
     }
     instance._ilZoneLines = lines;
+
+    /* Shaded bands: each zone is a price shelf, not a single line, so paint
+       its width (half the clustering tolerance either side). */
+    var band = Number(z.band) || 0;
+    if (band > 0) {
+      var rects = [];
+      (z.buyer || []).slice(0, 3).forEach(function (g, i) { rects.push({ lo: g.price - band, hi: g.price + band, color: p.up, a: i === 0 ? .16 : .07 }); });
+      (z.seller || []).slice(0, 3).forEach(function (g, i) { rects.push({ lo: g.price - band, hi: g.price + band, color: p.down, a: i === 0 ? .16 : .07 }); });
+      var req = null;
+      var renderer = { draw: function (target) {
+        target.useMediaCoordinateSpace(function (scope) {
+          var ctx = scope.context, w = scope.mediaSize.width;
+          rects.forEach(function (r) {
+            var y1 = instance.series.price.priceToCoordinate(r.hi), y2 = instance.series.price.priceToCoordinate(r.lo);
+            if (y1 == null || y2 == null) return;
+            ctx.fillStyle = tint(r.color, r.a);
+            ctx.fillRect(0, Math.min(y1, y2), w, Math.max(2, Math.abs(y2 - y1)));
+          });
+        });
+      } };
+      var view_ = { zOrder: function () { return "bottom"; }, renderer: function () { return renderer; } };
+      var prim = {
+        attached: function (q) { req = q.requestUpdate; }, detached: function () { req = null; },
+        updateAllViews: function () {}, paneViews: function () { return [view_]; }
+      };
+      try { instance.series.price.attachPrimitive(prim); instance._ilZonePrim = prim; } catch (e) {}
+    }
 
     /* Divergence gets a marker on the swing that formed it, not a price line. */
     var div = setup.divergence || {};

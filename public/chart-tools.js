@@ -789,8 +789,9 @@
       { id: "vol", n: "Volume", on: !!v.volume, key: pal.volUp },
       { id: "rsi", n: "RSI (14)", sub: "Momentum, 0 to 100", on: v.osc === "rsi", key: pal.rsi },
       { id: "macd", n: "MACD (12, 26, 9)", on: v.osc === "macd", key: pal.gold },
+      { id: "timing", n: "Lens Timing (0\u201310)", sub: "Stretched or pulled back, from four momentum gauges", on: v.osc === "timing", key: pal.up },
       { h: "On the chart" },
-      { id: "zones", n: "LensScore zones", sub: "Buy and sell zones, retracement, divergence", on: !!(E() && E().zonesOn()) },
+      { id: "zones", n: "Lens Zones", sub: "Shaded buy and sell zones, retracement, divergence", on: !!(E() && E().zonesOn()) },
       { id: "earnings", n: "Earnings markers", on: !!(v.pins && v.pins.earnings) },
       { id: "news", n: "News markers", on: !!(v.pins && v.pins.news) },
       read ? { id: "read", n: "Technical read below the chart", on: read.classList.contains("on") } : null
@@ -810,7 +811,7 @@
         break;
       case "ema21": case "vwap": if (window.ilToggleOverlay) window.ilToggleOverlay(id); break;
       case "vol": if (window.ilToggleVolume) window.ilToggleVolume(); break;
-      case "rsi": case "macd": if (window.ilSetOscillator) window.ilSetOscillator(id); break;
+      case "rsi": case "macd": case "timing": if (window.ilSetOscillator) window.ilSetOscillator(id); break;
       case "zones": if (window.ilToggleZones) window.ilToggleZones(); break;
       case "earnings": case "news": if (window.ilTogglePins) window.ilTogglePins(id); break;
       case "read": if (window.ilToggleRead) window.ilToggleRead(); break;
