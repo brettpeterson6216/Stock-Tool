@@ -330,8 +330,17 @@ function startEnrichment(tickers) {
   _enrichRunning = true;
   (async () => {
     try {
-      const queue = todo.slice();
-      const worker = async () => { while (queue.length) { await enrichOne(queue.shift()); } };
+      const queue = todo.map(t => ({ t, tries: 0 }));
+      /* A ticker whose Finnhub calls were refused (rate limit) goes back on
+         the queue, up to three tries, instead of waiting six hours. */
+      const worker = async () => {
+        while (queue.length) {
+          const job = queue.shift();
+          await enrichOne(job.t);
+          const e = _enrich.get(job.t);
+          if ((!e || !e.at) && job.tries < 2) { job.tries++; queue.push(job); await new Promise(r => setTimeout(r, 2000)); }
+        }
+      };
       await Promise.all([worker(), worker(), worker()]);
     } catch (e) { console.warn("[screener] enrichment stopped:", e.message); }
     finally { _enrichRunning = false; _screenerCache.ts = 0; }

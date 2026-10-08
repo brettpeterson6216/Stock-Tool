@@ -41,7 +41,8 @@ function storePayload(ticker, payload) {
   if (responseCache.size >= RESPONSE_CACHE_LIMIT) {
     responseCache.delete(responseCache.keys().next().value);
   }
-  const complete = (payload.provenance?.sources || []).every(source => source.status === "available");
+  const complete = (payload.provenance?.sources || []).every(source => source.status === "available")
+    && payload.grades?.status === "graded";
   const ttlMs = complete ? (usMarketOpen() ? MARKET_HOURS_TTL_MS : RESPONSE_TTL_MS) : 15 * 1000;
   responseCache.set(ticker, { expiresAt: Date.now() + ttlMs, payload });
   if (payload?.score?.status === "graded") {
