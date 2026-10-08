@@ -7,6 +7,8 @@ const LensScoreEngine = require("../lib/lens-score-engine");
 const LensFactors = require("../lib/lens-factors");
 const peers = require("../lib/peer-universe");
 const { buildQuarterlyHistory } = require("../lib/fundamentals-history");
+const { finnhubJson } = require("../lib/finnhub-gate");
+const { FINNHUB_KEY } = require("../lib/config");
 
 const router = express.Router();
 const responseCache = new Map();
@@ -81,20 +83,35 @@ async function gradeTicker(ticker, research) {
     loadCompanyFacts(ticker).catch(() => null),
   ]);
   const price = research.market?.bars?.at(-1)?.close ?? null;
-  const metric = { ...(fh?.metrics || {}) };
+  /* The research bundle's Finnhub calls can come back empty when the shared
+     quota is busy (and that empty answer is cached for minutes). Ask again
+     directly at interactive priority, then fall back to the peer row. */
+  let profile = fh?.profile || null;
+  let fhMetric = fh?.metrics || null;
+  if (!profile || !fhMetric) {
+    const base = "https://finnhub.io/api/v1/stock";
+    const [p2, m2] = await Promise.all([
+      profile ? null : finnhubJson(`${base}/profile2?symbol=${encodeURIComponent(ticker)}&token=${FINNHUB_KEY}`, { priority: "high", timeoutMs: 6000 }),
+      fhMetric ? null : finnhubJson(`${base}/metric?symbol=${encodeURIComponent(ticker)}&metric=all&token=${FINNHUB_KEY}`, { priority: "high", timeoutMs: 6000 }),
+    ]);
+    if (!profile && p2 && p2.name) profile = p2;
+    if (!fhMetric && m2 && m2.metric) fhMetric = m2.metric;
+  }
+  const known = peers.get(ticker);
+  const metric = { ...(fhMetric || known?.m || {}) };
   const overrides = company?.facts ? secGrowth(company.facts) : {};
   Object.assign(metric, overrides);
-  if (fh?.profile || fh?.metrics) peers.put(ticker, { profile: fh.profile, metric: fh.metrics, price });
-  const sector = peers.sectorFromIndustry(fh?.profile?.finnhubIndustry) || peers.get(ticker)?.s || null;
+  if (profile || fhMetric) peers.put(ticker, { profile, metric: fhMetric, price });
+  const sector = peers.sectorFor(ticker, profile?.finnhubIndustry) || known?.s || null;
   const graded = LensFactors.gradeCompany({
     ticker,
-    name: fh?.profile?.name || research.company || ticker,
+    name: profile?.name || known?.n || research.company || ticker,
     sector,
     metric,
     price,
-    marketCap: Number(fh?.profile?.marketCapitalization) > 0 ? Number(fh.profile.marketCapitalization) * 1e6 : null,
+    marketCap: Number(profile?.marketCapitalization) > 0 ? Number(profile.marketCapitalization) * 1e6 : known?.mc || null,
   }, peers.all());
-  graded.industry = fh?.profile?.finnhubIndustry || null;
+  graded.industry = profile?.finnhubIndustry || known?.i || null;
   graded.secOverrides = Object.keys(overrides);
   graded.source = "Finnhub fundamentals and price returns for every company, ranked within sector; revenue growth from SEC filings where current.";
   graded.asOf = new Date().toISOString();
