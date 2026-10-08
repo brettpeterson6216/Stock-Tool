@@ -128,7 +128,7 @@ test("GET / serves the homepage with a successful status", async () => {
   const html = await res.text();
   const appSource = `${html}\n${fs.readFileSync(path.join(__dirname, "..", "public", "app-navigation.js"), "utf8")}\n${fs.readFileSync(path.join(__dirname, "..", "public", "app-legacy.js"), "utf8")}`;
   assert.match(html, /ImpliedLens/);
-  assert.match(html, /5 stock analyses per day/);
+  assert.match(html, /\d+ company analyses a day/, "the free plan states its templated daily limit");
   assert.match(appSource, /function startGuestSignup/);
   assert.match(appSource, /analysis_resumed_after_auth/);
   assert.match(appSource, /function openBillingPortal/);

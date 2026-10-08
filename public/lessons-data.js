@@ -785,47 +785,58 @@
     },
     {
       "slug": "lens-score",
-      "title": "Read the two lenses before the combined score",
+      "title": "Read a report card: five grades against the sector",
       "group": "Level 4 · Charts and timing",
       "level": 4,
-      "minutes": 6,
-      "summary": "What the 0–10 LensScore measures, why it is two separate lenses, and when the combined number is misleading.",
-      "opening": "A single number that tells you whether to buy a stock would be worth a great deal of money, and nobody has one. LensScore is not that. It is a summary of evidence the tool has already gathered, arranged so you can see which part is carrying the conclusion — and, more usefully, when the two halves disagree.",
-      "body": "LensScore is a 0–10 buyability metric, not a prediction. LensValue measures the long-term opportunity; LensSetup measures the current technical entry. The combined score is useful only when you can explain what each lens is saying.",
+      "minutes": 7,
+      "summary": "What the 0–10 LensScore measures, how its five grades are built, and why a single number never replaces reading the grades.",
+      "opening": "A single number that tells you whether to buy a stock would be worth a great deal of money, and nobody has one. LensScore is not that. It is a report card: five grades that show where a company is strong and where it is weak compared with the companies it actually competes with, plus one number that ranks the whole card against every other company we cover.",
+      "body": "Each company is graded A+ to F on five factors, and every grade is a percentile against its own sector, so a bank is compared with banks and a software company with software companies. The 0–10 LensScore ranks the weighted result across the whole universe. A 7.5 means the company's report card is better than about 75% of the companies we grade.",
       "points": [
-        "LensValue covers business quality, valuation, embedded expectations, and downside risk over roughly 1–3 years.",
-        "LensTiming measures entry pressure: 10 means the most favorable buyer-side pressure and 0 means an extended, seller-dominated entry. LensTrend separately measures direction.",
-        "LensSetup combines timing, support/resistance location, trend, structure, volume, technical risk, and reversal confirmation over roughly 2–12 weeks.",
-        "The combined score weights LensValue 70% and LensSetup 30%, then considers agreement and severe risks.",
-        "Confidence reports evidence coverage. A cap means one attractive feature—such as oversold momentum or a lower price—cannot erase a falling knife, weak quality, leverage, or missing evidence."
+        "Value (20%): what you pay for each dollar of earnings, sales, cash flow and book value, compared with sector peers. Cheaper than peers grades higher.",
+        "Growth (20%): how fast revenue and earnings per share have grown over recent years, using SEC-reported figures where we have them.",
+        "Profitability (25%): margins and returns on equity and assets. This weighs most because durable profits are what compound over time.",
+        "Financial health (15%): debt against equity, the ability to pay short-term bills, and interest coverage. Weak health is what turns a bad year into a crisis.",
+        "Momentum (20%): price performance over 3, 6 and 12 months against peers. It tells you what the market is doing, not why.",
+        "Caps: one failing grade (an F in value or profitability, D- or lower in health, D or lower in growth or momentum) holds the score at 6.8 or below, and two hold it at 5.0, so a cheap price cannot hide a broken balance sheet."
       ],
-      "formula": "LensScore = 70% LensValue + 30% LensSetup ± alignment, subject to caps",
-      "example": "A 9.1 LensValue and 5.0 LensSetup can describe an attractive business at a technically weak entry. Use each lens independently.",
-      "warning": "Golden Lens is deliberately rare. It requires both lenses to be exceptional, adequate confidence, and no active quality cap.",
-      "closing": "The habit worth building: read the two lenses first, then the combined score. If you cannot say in one sentence what each lens is telling you, the combined number is not information — it is just a color.",
+      "formula": "LensScore = rank of (25% Profitability + 20% Value + 20% Growth + 20% Momentum + 15% Health) across all graded companies, held down by caps when a grade is failing",
+      "example": "A company graded A in Profitability and Growth but D in Value is a great business priced like one. The score may be middling while the grades tell you exactly why: you are waiting for a better price, not a better business.",
+      "warning": "Grades compare a company with today's peers. They are not a forecast, and a top grade in momentum can disappear quickly. Read the five grades first, then the number.",
+      "closing": "The habit worth building: before you look at the score, say in one sentence which grade is carrying the company and which one worries you. If you can do that, the number becomes a quick check. If you cannot, the number is just a color.",
       "tool": "lens-score",
       "toolLabel": "Open LensScore",
-      "tryIt": "Open LensScore for two companies and compare their LensValue and LensSetup separately before looking at the combined score.",
+      "tryIt": "Open the report card for two companies in the same sector. Find the one grade where they differ most, then open Peers to see who leads that factor.",
       "quiz": [
         {
-          "q": "LensValue is 9 and LensSetup is 4. What is the most sensible reading?",
+          "q": "A company has A grades in Profitability and Growth and a D in Value. What is the most sensible reading?",
           "options": [
-            "Strong business, weak entry timing",
-            "Avoid the stock entirely",
-            "Buy immediately"
+            "A strong business that looks expensive against its peers",
+            "A weak business to avoid",
+            "A guaranteed buy"
           ],
           "answer": 0,
-          "why": "The lenses measure different things: long-term value is strong while the technical entry is not."
+          "why": "The grades separate the quality of the business from the price you pay for it. Here quality is strong and the price is the concern."
         },
         {
-          "q": "What does a cap on the score mean?",
+          "q": "Why is each grade compared with the company's own sector?",
           "options": [
-            "The score is maxed out",
-            "One severe risk limits how high the score can go",
-            "The data is real-time"
+            "To make every company look good",
+            "Because normal margins and valuations differ a lot between industries",
+            "Because the sector decides the score alone"
           ],
           "answer": 1,
-          "why": "Caps stop one attractive feature from hiding a serious problem like a falling knife or weak quality."
+          "why": "A 10% margin is excellent for a grocer and weak for a software company. Sector percentiles compare like with like."
+        },
+        {
+          "q": "A stock is cheap (A in Value) but has an F in Financial health. What happens to its LensScore?",
+          "options": [
+            "Nothing, the cheap price wins",
+            "It is capped at 6.8 however good the other grades are",
+            "It is removed from the leaderboard"
+          ],
+          "answer": 1,
+          "why": "Caps stop one attractive grade from hiding a serious problem like too much debt."
         }
       ]
     },
@@ -1053,13 +1064,13 @@
       "body": "The product is organized around a repeatable sequence. Start with the company and chart, verify the business evidence, test valuation, then record the decision. You do not need to visit every tab for every stock.",
       "points": [
         "Research: load a ticker and confirm the company, price, source badges, and as-of dates.",
-        "Chart and LensScore: identify trend, key zones, tactical setup, long-term value, confidence, and active caps.",
+        "Chart and LensScore: identify the trend and buy zones, then read the five grades and any active cap.",
         "Financials, Metrics, and Earnings: verify the operating evidence behind the score.",
         "Value or Projection: test a range of assumptions; do not treat one model output as truth.",
         "Saved or Planner: record the thesis, risks, failure condition, and review date."
       ],
       "formula": "Workflow = Identify → Verify → Value → Decide → Review",
-      "example": "If LensValue is high but LensSetup is weak, add the company to Saved with a price zone and review date instead of forcing an entry.",
+      "example": "If the report card grades the business well but the Value grade is weak or the timing gauge is stretched, add the company to Saved with a price alert and a review date instead of forcing an entry.",
       "warning": "Do not jump from a green score to a trade. Confirm source dates, missing fields, and the evidence that could invalidate the idea.",
       "closing": "None of this requires you to visit every tab for every company. The sequence is there so you know what you have skipped. Most decisions die at step two, and that is the point — the cheapest research is the research that stops early.",
       "tool": "analyze",
@@ -1077,7 +1088,7 @@
           "why": "Most ideas fail verification, which is the cheapest place for research to stop."
         },
         {
-          "q": "LensValue is high but LensSetup is weak. What does the lesson suggest?",
+          "q": "The business grades well but the entry looks stretched. What does the lesson suggest?",
           "options": [
             "Force an entry now",
             "Save it with a price zone and review date",

@@ -76,10 +76,18 @@ function secGrowth(facts) {
   } catch (_) { return {}; }
 }
 
-const { summarizeStreet } = require("../lib/street");
+const { summarizeStreet, nextEarnings } = require("../lib/street");
 async function streetView(ticker, fh) {
-  const rec = await finnhubJson(`https://finnhub.io/api/v1/stock/recommendation?symbol=${encodeURIComponent(ticker)}&token=${FINNHUB_KEY}`, { priority: "high", timeoutMs: 6000 });
-  return summarizeStreet(rec, fh?.earnings);
+  const today = new Date().toISOString().slice(0, 10);
+  const to = new Date(Date.now() + 120 * 86400000).toISOString().slice(0, 10);
+  const [rec, cal] = await Promise.all([
+    finnhubJson(`https://finnhub.io/api/v1/stock/recommendation?symbol=${encodeURIComponent(ticker)}&token=${FINNHUB_KEY}`, { priority: "high", timeoutMs: 6000 }),
+    finnhubJson(`https://finnhub.io/api/v1/calendar/earnings?symbol=${encodeURIComponent(ticker)}&from=${today}&to=${to}&token=${FINNHUB_KEY}`, { priority: "high", timeoutMs: 6000 }).catch(() => null),
+  ]);
+  const out = summarizeStreet(rec, fh?.earnings) || {};
+  const next = nextEarnings(cal, today);
+  if (next) out.nextEarnings = next;
+  return Object.keys(out).length ? out : null;
 }
 
 async function gradeTicker(ticker, research) {
@@ -204,6 +212,10 @@ function cardGrades(g) {
     rank: g.rank, verdict: g.verdict, caps: g.caps,
     factors: g.factors.map(f => ({ key: f.key, label: f.label, grade: f.grade, percentile: f.percentile, tone: f.tone })),
     strengths: g.strengths.slice(0, 3), watch: g.watch.slice(0, 3),
+    peers: (g.peers || []).filter(p => !p.self).slice(0, 3).map(p => p.ticker),
+    street: g.street ? { ratings: g.street.ratings ? { label: g.street.ratings.label, total: g.street.ratings.total } : null,
+      earnings: g.street.earnings ? { beats: g.street.earnings.beats, of: g.street.earnings.quarters.length } : null,
+      nextEarnings: g.street.nextEarnings || null } : null,
   };
 }
 
@@ -216,6 +228,8 @@ function cardPayload(payload) {
     ticker: payload.ticker,
     company: payload.company,
     score: { ...score, technical: { ...techRest, bars: (bars || []).slice(-252).map(bar => ({ close: bar.close })) } },
+    timing: timing && Number.isFinite(Number(timing.timingScore)) ? { score: Number(timing.timingScore), key: timing.key || null } : null,
+    buyZone: zones?.support?.[0] ? { lower: zones.support[0].lower, upper: zones.support[0].upper } : null,
     grades: payload.grades ? cardGrades(payload.grades) : null,
     provenance: { asOf: payload.provenance?.asOf, retrievedAt: payload.provenance?.retrievedAt },
   };
@@ -276,6 +290,28 @@ router.get("/lens-history/:ticker", async (req, res) => {
     res.status(503).json({ error: "Score history is unavailable right now." });
   }
 });
+/* Grades for a list of tickers (watchlists, the dashboard). Read from the
+   graded peer universe, so it is cheap and does not count as an analysis.
+   Companies outside the universe come back as null. */
+const universeGrades = require("../lib/universe-grades");
+router.get("/lens-grades", async (req, res) => {
+  const tickers = [...new Set(String(req.query.tickers || "").split(",").map(t => normalizeTicker(t)).filter(Boolean))].slice(0, 60);
+  if (!tickers.length) return res.status(400).json({ error: "Pass tickers=AAPL,MSFT." });
+  try {
+    const { since, changes } = await LensHistory.changesFor(tickers).catch(() => ({ since: null, changes: {} }));
+    const out = {};
+    tickers.forEach(t => {
+      const g = universeGrades.get(t);
+      out[t] = g ? { score: g.score, label: g.label, tone: g.score >= 8 ? "strong" : g.score >= 6.5 ? "positive" : g.score >= 4.5 ? "neutral" : g.score >= 3 ? "weak" : "severe", grades: g.grades, sectorName: g.sectorName,
+        change: changes[t] ? changes[t].change : null } : null;
+    });
+    res.setHeader("Cache-Control", "private, max-age=120");
+    res.json({ since, grades: out });
+  } catch (error) {
+    res.status(503).json({ error: "Grades are unavailable right now." });
+  }
+});
+
 let leadersCache = { at: 0, body: null };
 router.get("/lens-leaders", async (_req, res) => {
   try {

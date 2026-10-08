@@ -79,7 +79,7 @@
         text: "Lesson one explains what a share is and why its price moves. Five minutes.",
         cta: "Start lesson one", href: "/learn/what-is-a-stock" },
       { done: !!counts.analyzed || !!stored("il-first-analysis") || counts.saves > 0, title: "Research your first company",
-        text: "Open Apple's chart, financials and analyst targets, with a plain-English read.",
+        text: "Open Apple's report card, chart and financials, with a plain-English read.",
         cta: "Analyze AAPL", href: "/?view=tool&section=analyze&symbol=AAPL" },
       { done: counts.watchlist > 0, title: "Start a watchlist",
         text: "Keep the companies you want to follow in one list, on every device.",
@@ -412,8 +412,21 @@
       return '<a class="ihm-fav' + (q ? dirClass(q.changePct) : "") +
         '" href="/?view=tool&section=analyze&symbol=' + encodeURIComponent(item.ticker) + '">' +
         '<span class="ihm-fav-sym">' + esc(item.ticker) + target + "</span>" +
+        '<span class="ihm-fav-ls" data-ls-ticker="' + esc(item.ticker) + '"></span>' +
         '<span class="ihm-fav-q">' + right + "</span></a>";
     }).join("");
+    fillFavouriteGrades(items.slice(0, 10).map(function (item) { return item.ticker; }));
+  }
+
+  /* LensScore and its move over the last week next to each favourite. */
+  function fillFavouriteGrades(tickers) {
+    if (!window.ILGrades || !tickers.length) return;
+    window.ILGrades.get(tickers).then(function (res) {
+      tickers.forEach(function (t) {
+        var slot = document.querySelector('.ihm-fav-ls[data-ls-ticker="' + String(t).replace(/["\\]/g, "") + '"]');
+        if (slot && res.grades[t] !== undefined) slot.innerHTML = window.ILGrades.pill(res.grades[t], res.since);
+      });
+    }).catch(function () {});
   }
 
   /* The timeframe picks the resolution, not just the span: a day is drawn from

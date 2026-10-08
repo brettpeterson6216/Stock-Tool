@@ -359,9 +359,9 @@
 
   function installLensToolkitConnections() {
     const contexts = {
-      financials: ["Feeds LensValue", "Reported growth, margins, cash generation and balance-sheet resilience.", "value"],
-      advmetrics: ["Feeds LensValue", "Quality, capital efficiency, valuation and risk evidence.", "value"],
-      earnings: ["Feeds LensValue", "Expectations, estimate direction and operating confirmation.", "value"],
+      financials: ["Feeds the grades", "Reported growth, margins and balance-sheet strength behind the Growth, Profitability and Health grades.", "value"],
+      advmetrics: ["Feeds the grades", "Valuation, returns and risk evidence behind the Value and Profitability grades.", "value"],
+      earnings: ["Wall Street view", "Earnings beats and misses, shown next to the report card.", "value"],
       secfilings: ["Feeds Evidence", "Primary-source evidence for quality, risk and score confidence.", "drivers"],
       institutional: ["Feeds Evidence", "Ownership context is supporting evidence, not a standalone buy signal.", "drivers"],
       screener: ["Candidate workflow", "Screen broadly, then validate timing, trend, zones and value in one toolkit.", "snapshot"],

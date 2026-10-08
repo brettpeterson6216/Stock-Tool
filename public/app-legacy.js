@@ -188,7 +188,7 @@ const PRO_GATE_CONFIG = {
       'Quarterly EPS actuals vs Wall Street consensus estimates — every quarter',
       'Beat/miss percentage and streak — how consistently it surprises',
       'Revenue trend across the last 8+ reporting periods',
-      'Forward EPS estimates and analyst guidance revision history',
+      'The next earnings date and the estimate going into it',
     ],
     preview: `<table class="pgc-tbl"><thead><tr><th>Quarter</th><th>Est. EPS</th><th>Act. EPS</th><th>Surprise</th></tr></thead><tbody>
       <tr><td>Q1 FY25</td><td>$2.35</td><td>$2.40</td><td style="color:#46b184">+2.1%</td></tr>
@@ -216,38 +216,38 @@ const PRO_GATE_CONFIG = {
     previewLabel: 'AAPL recent filings · sample',
   },
   institutional: {
-    title: 'Institutional Holdings &amp; Fund Activity',
+    title: 'Insider Trades &amp; Off-Exchange Volume',
     bullets: [
-      'Top institutional holders with exact share counts and % of float owned',
-      'Recent additions, reductions, and newly opened positions each quarter',
-      'Total institutional ownership % and concentration risk at a glance',
-      'FINRA OTC activity paired with reported institutional ownership',
+      'Every open-market insider buy and sale from SEC Form 4, last 12 months',
+      'Who traded, how many shares, at what price and when',
+      'Total insider buying against selling, in dollars',
+      'Weekly FINRA off-exchange (OTC) volume and trade counts',
     ],
-    preview: `<table class="pgc-tbl"><thead><tr><th>Institution</th><th>Shares</th><th>% Float</th></tr></thead><tbody>
-      <tr><td>Vanguard Group</td><td>1.29B</td><td>8.2%</td></tr>
-      <tr><td>BlackRock</td><td>1.02B</td><td>6.5%</td></tr>
-      <tr><td>Berkshire Hathaway</td><td>789M</td><td>5.0%</td></tr>
-      <tr><td>State Street</td><td>598M</td><td>3.8%</td></tr>
+    preview: `<table class="pgc-tbl"><thead><tr><th>Insider</th><th>Trade</th><th>Shares</th></tr></thead><tbody>
+      <tr><td>Chief Executive Officer</td><td>Sell</td><td>108K</td></tr>
+      <tr><td>Director</td><td>Buy</td><td>4.2K</td></tr>
+      <tr><td>Chief Financial Officer</td><td>Sell</td><td>59K</td></tr>
+      <tr><td>Director</td><td>Sell</td><td>12K</td></tr>
     </tbody></table>`,
-    previewLabel: 'AAPL top holders · sample',
+    previewLabel: 'Insider trades · illustrative sample',
   },
   analyst: {
-    title: 'Analyst Price Targets &amp; Ratings',
+    title: 'Analyst Ratings &amp; Earnings Track Record',
     bullets: [
-      'Consensus price target with upside/downside % from today\'s price',
       'Buy / Hold / Sell breakdown across all covering Wall Street analysts',
-      'Individual firm targets — Goldman, Morgan Stanley, JPMorgan, and more',
-      'Historical target trend — where analysts stood 3, 6, and 12 months ago',
+      'How the rating mix has shifted over the last few months',
+      'Earnings beats and misses against the estimate, quarter by quarter',
+      'The next earnings date, shown on the stock page and the report card',
     ],
     preview: null,
   },
   darkpool: {
-    title: 'FINRA OTC &amp; Institutional Activity',
+    title: 'FINRA Off-Exchange (OTC) Activity',
     bullets: [
       'Aggregated weekly OTC volume and trade counts from FINRA',
       'Review changes in off-exchange activity over time',
       'Keep activity context separate from unsupported intent claims',
-      'Compare OTC activity with reported institutional ownership',
+      'Read OTC activity next to insider buying and selling',
     ],
     preview: null,
   },
@@ -651,7 +651,7 @@ const SECTION_META = {
   advmetrics:  { icon:'ti-report-analytics', title:'Adv. Metrics' },
   earnings:    { icon:'ti-trending-up',   title:'Earnings & EPS' },
   secfilings:  { icon:'ti-file-text',     title:'SEC Filings' },
-  institutional:{ icon:'ti-building-bank', title:'Institutional' },
+  institutional:{ icon:'ti-building-bank', title:'Insiders & OTC volume' },
   compare:     { icon:'ti-adjustments-horizontal', title:'Compare Stocks' },
   /* Two engines, one destination. The rail has a single Valuation Lab entry;
      `projection` and `dcf` are the two panes behind it, switched by the
@@ -2121,6 +2121,7 @@ async function fetchAndRender() {
     S.ticker=ticker; S.data=result; S.analystTarget=null;
     try { if (!localStorage.getItem('il-first-analysis')) localStorage.setItem('il-first-analysis', ticker); } catch (_) {}
     renderStock(result,ticker);
+    try { window.ILStockCard?.load(ticker); } catch (_) {}
     if(requestedDataSection !== 'analyze' && typeof window.navGoTo === 'function') {
       window.navGoTo(requestedDataSection);
     }
@@ -3200,8 +3201,8 @@ function toggleTheme() {
 }
 
 const EDU_LESSONS = {
-  'site-tour':{title:'Use ImpliedLens as one decision workflow',body:'The product is organized around a repeatable sequence. Start with the company and chart, verify the business evidence, test valuation, then record the decision. You do not need to visit every tab for every stock.',points:['Research: load a ticker and confirm the company, price, source badges, and as-of dates.','Chart and LensScore: identify trend, key zones, tactical setup, long-term value, confidence, and active caps.','Financials, Metrics, and Earnings: verify the operating evidence behind the score.','Value or Projection: test a range of assumptions; do not treat one model output as truth.','Saved or Planner: record the thesis, risks, failure condition, and review date.'],formula:'Workflow = Identify → Verify → Value → Decide → Review',example:'If LensValue is high but LensSetup is weak, add the company to Saved with a price zone and review date instead of forcing an entry.',warning:'Do not jump from a green score to a trade. Confirm source dates, missing fields, and the evidence that could invalidate the idea.',tool:'analyze',toolLabel:'Open Research'},
-  'lens-score':{title:'Read the two lenses before the combined score',body:'LensScore is a 0–10 buyability metric, not a prediction. LensValue measures the long-term opportunity; LensSetup measures the current technical entry. The combined score is useful only when you can explain what each lens is saying.',points:['LensValue covers business quality, valuation, embedded expectations, and downside risk over roughly 1–3 years.','LensTiming measures entry pressure: 10 means the most favorable buyer-side pressure and 0 means an extended, seller-dominated entry. LensTrend separately measures direction.','LensSetup combines timing, support/resistance location, trend, structure, volume, technical risk, and reversal confirmation over roughly 2–12 weeks.','The combined score weights LensValue 70% and LensSetup 30%, then considers agreement and severe risks.','Confidence reports evidence coverage. A cap means one attractive feature—such as oversold momentum or a lower price—cannot erase a falling knife, weak quality, leverage, or missing evidence.'],formula:'LensScore = 70% LensValue + 30% LensSetup ± alignment, subject to caps',example:'A 9.1 LensValue and 5.0 LensSetup can describe an attractive business at a technically weak entry. Use each lens independently.',warning:'Golden Lens is deliberately rare. It requires both lenses to be exceptional, adequate confidence, and no active quality cap.',tool:'lens-score',toolLabel:'Open LensScore'},
+  'site-tour':{title:'Use ImpliedLens as one decision workflow',body:'The product is organized around a repeatable sequence. Start with the company and chart, verify the business evidence, test valuation, then record the decision. You do not need to visit every tab for every stock.',points:['Research: load a ticker and confirm the company, price, source badges, and as-of dates.','Chart and LensScore: identify trend, key zones, tactical setup, long-term value, confidence, and active caps.','Financials, Metrics, and Earnings: verify the operating evidence behind the score.','Value or Projection: test a range of assumptions; do not treat one model output as truth.','Saved or Planner: record the thesis, risks, failure condition, and review date.'],formula:'Workflow = Identify → Verify → Value → Decide → Review',example:'If the business grades well but the Value grade is weak or the entry looks stretched, add the company to Saved with a price alert and a review date instead of forcing an entry.',warning:'Do not jump from a green score to a trade. Confirm source dates, missing fields, and the evidence that could invalidate the idea.',tool:'analyze',toolLabel:'Open Research'},
+  'lens-score':{"title":"Read a report card: five grades against the sector","body":"Each company is graded A+ to F on five factors, and every grade is a percentile against its own sector, so a bank is compared with banks and a software company with software companies. The 0–10 LensScore ranks the weighted result across the whole universe. A 7.5 means the company's report card is better than about 75% of the companies we grade.","points":["Value (20%): what you pay for each dollar of earnings, sales, cash flow and book value, compared with sector peers. Cheaper than peers grades higher.","Growth (20%): how fast revenue and earnings per share have grown over recent years, using SEC-reported figures where we have them.","Profitability (25%): margins and returns on equity and assets. This weighs most because durable profits are what compound over time.","Financial health (15%): debt against equity, the ability to pay short-term bills, and interest coverage. Weak health is what turns a bad year into a crisis.","Momentum (20%): price performance over 3, 6 and 12 months against peers. It tells you what the market is doing, not why.","Caps: one failing grade (an F in value or profitability, D- or lower in health, D or lower in growth or momentum) holds the score at 6.8 or below, and two hold it at 5.0, so a cheap price cannot hide a broken balance sheet."],"formula":"LensScore = rank of (25% Profitability + 20% Value + 20% Growth + 20% Momentum + 15% Health) across all graded companies, held down by caps when a grade is failing","example":"A company graded A in Profitability and Growth but D in Value is a great business priced like one. The score may be middling while the grades tell you exactly why: you are waiting for a better price, not a better business.","warning":"Grades compare a company with today's peers. They are not a forecast, and a top grade in momentum can disappear quickly. Read the five grades first, then the number.","tool":"lens-score","toolLabel":"Open LensScore"},
   charts:{title:'Use technical indicators as a system, not isolated signals',body:'Technical analysis describes price behavior and risk. Start with trend and price structure, then use momentum, volume, and volatility to confirm or challenge that reading.',points:['Support and resistance are zones created from repeated price reactions, not exact promises.','The 20-, 50-, and 200-day moving averages describe short-, intermediate-, and long-term trend structure.','RSI and Stochastic RSI describe momentum location; extreme readings can persist in strong trends.','MACD describes changes in trend momentum. Confirm crossovers with price structure and volume.','ATR/price and drawdown describe risk. Use them to size expectations and avoid treating all charts as equally stable.'],formula:'Technical case = Structure + Trend + Momentum + Volume − Volatility risk',example:'A support retest is stronger when the long-term trend is positive, selling volume fades, and momentum begins improving.',warning:'One oversold reading is not a floor. A broken trend with heavy volume can keep falling through prior support.',tool:'analyze',toolLabel:'Open the chart'},
   financials:{title:'Separate company facts from valuation assumptions',body:'Financial analysis is most useful when every number has a clear status. ImpliedLens distinguishes observed provider data, derived calculations, modeled estimates, and user scenarios.',points:['Observed: revenue, net income, cash flow, balance-sheet values, price, and reported earnings from named sources.','Derived: growth rates, margins, ROIC, leverage, dilution, and multiples calculated from observed inputs.','Modeled: fair multiples, value ranges, and expectations gaps produced by disclosed ImpliedLens assumptions.','Scenario: your changed price, growth, margin, or discount-rate inputs; it never replaces reported history.','Always read the source badge, as-of date, EPS basis, unavailable-field message, and sensitivity before acting.'],formula:'Per-share value = Business economics × defensible assumptions ÷ diluted shares',example:'If annual EPS is stale but four newer reported quarters are complete, the valuation can use disclosed trailing-four-quarter actual EPS instead.',warning:'Revenue growth without cash flow, returns on capital, balance-sheet context, and dilution can create a misleading quality impression.',tool:'financials',toolLabel:'Open Financials'},
   thesis:{title:'Build a falsifiable stock thesis',body:'A useful stock thesis states what the market may be missing, identifies the operating evidence that should close the gap, and defines what would prove the idea wrong. It is a testable decision record, not a prediction that the price will rise.',points:['Variant view: state what you believe differently from the market.','Business driver: connect the view to revenue, margins, cash flow, or per-share value.','Evidence: name the result or catalyst that would support the view.','Failure condition: write the measurable fact that would invalidate it.'],formula:'Thesis = Variant view + Business driver + Evidence + Failure condition',example:'Example: recurring-revenue mix lifts operating margin faster than expected over the next four quarters.',warning:'“The stock looks cheap” is not a thesis unless you explain why earnings or cash-flow expectations are wrong.',tool:'analyze',toolLabel:'Choose a stock to research'}
@@ -4377,7 +4378,7 @@ async function loadFinancials(ticker) {
           if (row.pct && rawObj) val = fmtPct(rawObj);
           const rawNum = getRaw(rawObj);
           const color = (rawNum!=null && rawNum < 0) ? ' class="fin-negative"' : (rawNum!=null && rawNum > 0 && row.highlight) ? ' class="fin-positive"' : '';
-          html += '<td'+color+'>'+val+'</td>';
+          html += '<td'+color+(rawNum!=null?' data-raw="'+rawNum+'"':'')+'>'+val+'</td>';
         }
         html += '</tr>';
       }

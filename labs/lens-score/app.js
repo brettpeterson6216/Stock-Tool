@@ -735,6 +735,17 @@
       });
       e.append(ul);
     }
+    if (st.nextEarnings) e.append(nextEarningsLine(st.nextEarnings));
+  }
+
+  function nextEarningsLine(n) {
+    const d = new Date(`${n.date}T12:00:00Z`);
+    const date = d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" });
+    const when = n.days === 0 ? "today" : n.days === 1 ? "tomorrow" : `in ${n.days} days`;
+    const p = el("p", "rc-st-next");
+    p.append(el("i", "ti ti-calendar-event"), el("span", null, `Next earnings ${date}${n.when ? `, ${n.when}` : ""} (${when}).${n.epsEstimate != null ? ` Estimate $${n.epsEstimate.toFixed(2)} a share.` : ""}`));
+    p.firstChild.setAttribute("aria-hidden", "true");
+    return p;
   }
 
   function readFor(f, g) {
@@ -1277,6 +1288,10 @@
       if (!(level > 0)) { setText("#rc-alert-status", "Enter a price."); return; }
       addAlert($("#rc-alert-kind").value, level);
     });
+    if (window.ILExport) {
+      window.ILExport.button($(".rc-peers .rc-card-head"), () => $(".rc-peers table"), () => `${state.ticker || "lens"}-sector-peers`, "csv_peers");
+      window.ILExport.button($(".rc-leaders .rc-leaders-actions"), () => $(".rc-leaders table"), "lensscore-leaderboard", "csv_leaders");
+    }
     on("#rc-peek-all", "click", () => { showView("peers"); $(".company-nav")?.scrollIntoView({ behavior: "smooth", block: "start" }); });
     on("#price-chart", "mousemove", event => {
       if (!state.chartPoints.length) return;

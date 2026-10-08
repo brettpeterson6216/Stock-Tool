@@ -98,7 +98,7 @@
     advmetrics:   ["ti-report-analytics", "Metrics", "Quality, price and", "the balance sheet.", "Valuation multiples, margins, returns and leverage in one view."],
     earnings:     ["ti-chart-arrows-vertical", "Earnings", "Promises versus", "results.", "Consensus estimates against reported earnings, quarter by quarter."],
     secfilings:   ["ti-file-search", "SEC filings", "Read the source,", "not the summary.", "Annual, quarterly and current reports direct from SEC EDGAR."],
-    institutional:["ti-building-bank", "Ownership", "Who owns it,", "and who is moving.", "The largest institutional holders and weekly off-exchange volume."],
+    institutional:["ti-building-bank", "Ownership", "Who owns it,", "and who is moving.", "Insider buying and selling, plus weekly off-exchange volume."],
     compare:      ["ti-arrows-diff", "Compare", "Side by side,", "on equal terms.", "Up to four companies with normalized performance and fundamentals."],
     screener:     ["ti-filter", "Screener", "Find the candidates", "worth a closer look.", "Filter the market by value, size, income and momentum."],
     projection:   ["ti-calculator", "Valuation Lab", "What could it", "be worth?", "Bear, Base and Bull projections with every assumption editable."],

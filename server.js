@@ -241,6 +241,7 @@ app.use([
   "/api/lens-score",
   "/api/lens-history",
   "/api/lens-leaders",
+  "/api/lens-grades",
   "/api/search",
   "/api/logo",
 ], marketDataLimiter);

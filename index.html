@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>ImpliedLens — Research stocks like a professional</title>
 <meta name="description" content="Learn to research stocks like a professional. Free lessons, SEC-sourced financials, a transparent 0–10 LensScore and valuation scenarios you control. Free plan, no card.">
-<meta name="keywords" content="stock analysis, stock screener, intrinsic value, earnings history, SEC filings, analyst price targets, FINRA OTC data, institutional holdings, stock comparison, financial statements, impliedlens">
+<meta name="keywords" content="stock analysis, stock screener, intrinsic value, earnings history, SEC filings, LensScore, stock grades, insider trading, FINRA OTC data, stock alerts, stock comparison, financial statements, impliedlens">
 <meta name="author" content="ImpliedLens">
 <meta name="robots" content="index, follow">
 <meta name="theme-color" content="#100f0e">
@@ -57,9 +57,11 @@
     "EPS intrinsic value calculator",
     "Earnings history and EPS surprise tracker",
     "SEC EDGAR filing browser",
-    "Analyst price targets and recommendations",
-    "FINRA OTC activity and institutional holdings data",
-    "Curated stock screener",
+    "LensScore report card: five factor grades against sector peers",
+    "Stock screener with grade filters and presets",
+    "Email alerts for price, buy zones and grade changes",
+    "Insider transactions and analyst rating trends",
+    "FINRA OTC (off-exchange) volume",
     "Compare up to 4 stocks side by side",
     "Risk metrics: Sharpe, Sortino, Alpha, Beta, VaR",
     "Financial statements: Income, Balance Sheet, Cash Flow"
@@ -580,10 +582,10 @@
         <p class="lx-plan-sub">Everything a beginner needs to learn and practice.</p>
         <ul>
           <li><i class="ti ti-check" aria-hidden="true"></i>{{FREE_DAILY_LIMIT}} company analyses a day</li>
-          <li><i class="ti ti-check" aria-hidden="true"></i>Charts, key stats and LensScore</li>
-          <li><i class="ti ti-check" aria-hidden="true"></i>Full financial statements and earnings history</li>
-          <li><i class="ti ti-check" aria-hidden="true"></i>Every lesson in the Academy</li>
-          <li><i class="ti ti-check" aria-hidden="true"></i>Watchlists and saved research</li>
+          <li><i class="ti ti-check" aria-hidden="true"></i>LensScore report card: five grades against sector peers</li>
+          <li><i class="ti ti-check" aria-hidden="true"></i>Charts, financial statements and earnings history</li>
+          <li><i class="ti ti-check" aria-hidden="true"></i>Every lesson in the Academy and the leaderboard</li>
+          <li><i class="ti ti-check" aria-hidden="true"></i>Watchlists and 3 email alerts</li>
         </ul>
         <a class="lx-btn lx-btn-ghost" href="/signup?source=landing_pricing_free">Create free account</a>
       </article>
@@ -594,10 +596,11 @@
         <p class="lx-plan-sub">or {{PLAN_ANNUAL_PRICE}} billed yearly, and save {{PLAN_ANNUAL_SAVINGS_PERCENT}}%</p>
         <ul>
           <li><i class="ti ti-check" aria-hidden="true"></i>Everything in Free, with unlimited analyses</li>
-          <li><i class="ti ti-check" aria-hidden="true"></i>Projection Lab and scenario valuation models</li>
-          <li><i class="ti ti-check" aria-hidden="true"></i>Stock screener and advanced risk metrics</li>
-          <li><i class="ti ti-check" aria-hidden="true"></i>SEC filings, institutional holders, analyst targets</li>
-          <li><i class="ti ti-check" aria-hidden="true"></i>Earnings-call research and off-exchange volume</li>
+          <li><i class="ti ti-check" aria-hidden="true"></i>Grade screener with ready-made presets</li>
+          <li><i class="ti ti-check" aria-hidden="true"></i>Projection Lab and Valuation Lab</li>
+          <li><i class="ti ti-check" aria-hidden="true"></i>50 price, buy-zone and grade-change alerts</li>
+          <li><i class="ti ti-check" aria-hidden="true"></i>SEC filings, insider trades and analyst ratings</li>
+          <li><i class="ti ti-check" aria-hidden="true"></i>Risk metrics, off-exchange volume and CSV exports</li>
         </ul>
         <a class="lx-btn lx-btn-gold" href="/signup?next=%2F%3Fpricing%3D1&amp;source=landing_pricing_pro">Start {{TRIAL_DAYS}}-day free trial</a>
         <p class="lx-fine">{{TRIAL_CARD_SHORT}} for the trial. Cancel anytime before it ends and you pay nothing. Have a discount code? Enter it in Checkout.</p>
@@ -996,8 +999,8 @@
       <p class="sec-sub">Clear pricing. No hidden paywalls. A focused research workspace built for repeat use.</p>
       <div class="pricing-toggle" role="group" aria-label="Pro billing period"><button class="active" id="pricing-period-monthly" onclick="setPricingPeriod('monthly')">Monthly</button><button id="pricing-period-annual" onclick="setPricingPeriod('annual')">Annual · save {{PLAN_ANNUAL_SAVINGS_PERCENT}}%</button></div>
       <div class="pricing-grid">
-        <div class="pricing-card"><div class="pricing-tier">Free</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">0</span><span class="p-per">/month</span></div><p class="p-desc">Build a repeatable research habit before paying.</p><ul class="p-features"><li>5 stock analyses per day</li><li>Charts, indicators, and scenarios</li><li>Cloud-saved analyses</li><li>Decision workspace and thesis tracking</li><li>AI Portfolio Guide</li><li>Review-date reminders</li></ul><button class="btn-plan btn-plan-dark" id="pricing-free-btn">Create free account</button></div>
-        <div class="pricing-card featured"><div class="pricing-pop">{{TRIAL_DAYS}}-day free trial</div><div class="pricing-tier">Pro</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount" id="pricing-pro-amount">{{PLAN_MONTHLY_AMOUNT}}</span><span class="p-per" id="pricing-pro-period">/month</span></div><p class="p-desc" id="pricing-pro-note">Start with a {{TRIAL_DAYS}}-day free trial. Have a discount code? Enter it in Checkout.</p><ul class="p-features"><li>Unlimited stock analyses</li><li>Intrinsic value and advanced projections</li><li>Earnings-call research center</li><li>4-stock side-by-side comparison</li><li>Full stock screener</li><li>PDF report export</li></ul><button class="btn-plan btn-plan-gold" id="pricing-pro-btn">Start {{TRIAL_DAYS}}-day free trial &rarr;</button></div>
+        <div class="pricing-card"><div class="pricing-tier">Free</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">0</span><span class="p-per">/month</span></div><p class="p-desc">Build a repeatable research habit before paying.</p><ul class="p-features"><li>{{FREE_DAILY_LIMIT}} company analyses a day</li><li>LensScore report card</li><li>Charts and financial statements</li><li>Decision workspace and thesis tracking</li><li>Portfolio Guide</li><li>3 email alerts</li></ul><button class="btn-plan btn-plan-dark" id="pricing-free-btn">Create free account</button></div>
+        <div class="pricing-card featured"><div class="pricing-pop">{{TRIAL_DAYS}}-day free trial</div><div class="pricing-tier">Pro</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount" id="pricing-pro-amount">{{PLAN_MONTHLY_AMOUNT}}</span><span class="p-per" id="pricing-pro-period">/month</span></div><p class="p-desc" id="pricing-pro-note">Start with a {{TRIAL_DAYS}}-day free trial. Have a discount code? Enter it in Checkout.</p><ul class="p-features"><li>Unlimited company analyses</li><li>Grade screener with presets</li><li>Projection Lab and Valuation Lab</li><li>50 price and grade alerts</li><li>Filings, insider trades, analyst ratings</li><li>PDF and CSV exports</li></ul><button class="btn-plan btn-plan-gold" id="pricing-pro-btn">Start {{TRIAL_DAYS}}-day free trial &rarr;</button></div>
       </div>
       <div class="pricing-compare" aria-label="Free and Pro feature comparison"><div class="pricing-compare-row head"><span>Capability</span><span>Free</span><span>Pro</span></div><div class="pricing-compare-row"><span>Workspace, thesis, watchlist, Portfolio Guide</span><span class="yes">Included</span><span class="yes">Included</span></div><div class="pricing-compare-row"><span>Daily stock analyses</span><span>5 / day</span><span class="yes">Unlimited</span></div><div class="pricing-compare-row"><span>Advanced valuation, calls, screener, export</span><span>Preview</span><span class="yes">Included</span></div></div>
     </div></section>
@@ -1049,7 +1052,7 @@
         <div class="sb-item" data-sec="advmetrics"><i class="ti ti-report-analytics sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Metrics</span></div>
         <div class="sb-item" data-sec="earnings"><i class="ti ti-trending-up sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Earnings</span></div>
         <div class="sb-item" data-sec="secfilings"><i class="ti ti-file-text sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">SEC Filings</span></div>
-        <div class="sb-item" data-sec="institutional"><i class="ti ti-building-bank sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Institutional</span></div>
+        <div class="sb-item" data-sec="institutional"><i class="ti ti-building-bank sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Insiders &amp; OTC</span></div>
         <div class="sb-item" data-sec="compare"><i class="ti ti-adjustments-horizontal sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Compare</span></div>
         <div class="sb-item" data-sec="screener"><i class="ti ti-filter sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Screener</span></div>
         <div class="sb-item" data-sec="projection"><i class="ti ti-calculator sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Valuation Lab</span></div>
@@ -1130,7 +1133,7 @@
         <button class="mst-btn" data-sec="advmetrics">Metrics</button>
         <button class="mst-btn" data-sec="earnings">Earnings</button>
         <button class="mst-btn" data-sec="secfilings">SEC</button>
-        <button class="mst-btn" data-sec="institutional">Inst.</button>
+        <button class="mst-btn" data-sec="institutional">Insiders</button>
         <button class="mst-btn" data-sec="compare">Compare</button>
         <button class="mst-btn" data-sec="dcf">Value</button>
         <button class="mst-btn" data-sec="screener">Screener</button>
@@ -1448,8 +1451,8 @@
                   <div class="analyst-box-title" style="margin-bottom:.5rem;">Weekly OTC Volume (FINRA)</div>
                   <div class="dp-chart-wrap"><canvas id="dp-chart"></canvas></div>
                 </div>
-                <!-- Institutional Holders Table -->
-                <div class="analyst-box-title" id="inst-table-title" style="margin-bottom:.65rem;">Top Institutional Holders</div>
+                <!-- Ownership table: insider trades (Form 4), or holders when the feed has them -->
+                <div class="analyst-box-title" id="inst-table-title" style="margin-bottom:.65rem;">Insider buying and selling</div>
                 <div style="overflow-x:auto;">
                   <table class="inst-table" id="inst-table">
                     <thead><tr>
@@ -1674,10 +1677,10 @@
                 <div class="edu-term" data-term="beta risk volatility capm"><strong>Beta</strong><span>A historical estimate of sensitivity to broad-market returns, not a complete measure of risk.</span><code>Cov(stock, market) ÷ Var(market)</code></div>
                 <div class="edu-term" data-term="free cash flow yield valuation"><strong>FCF yield</strong><span>Free cash flow relative to market value. Useful for comparing cash generation with price.</span><code>Free cash flow ÷ Market cap</code></div>
                 <div class="edu-term" data-term="dilution shares stock compensation"><strong>Dilution</strong><span>Growth in share count that reduces each existing share's claim on earnings and cash flow.</span><code>(New shares ÷ Old shares) − 1</code></div>
-                <div class="edu-term" data-term="lensscore buyability combined score"><strong>LensScore</strong><span>The 0–10 combined buyability score: 70% long-term LensValue and 30% tactical LensSetup, adjusted for agreement and risk caps.</span><code>Value + Setup + alignment</code></div>
-                <div class="edu-term" data-term="lensvalue long term quality valuation"><strong>LensValue</strong><span>The 1–3 year opportunity score built from business quality, valuation, expectations, and fundamental downside risk.</span><code>Long-term evidence</code></div>
-                <div class="edu-term" data-term="lenssetup short term tactical technical"><strong>LensSetup</strong><span>The 2–12 week entry-quality score built from trend, price zones, momentum, volume, and volatility.</span><code>Tactical evidence</code></div>
-                <div class="edu-term" data-term="golden lens signal alignment"><strong>Golden Lens</strong><span>A rare alignment state requiring exceptional Value, Setup, combined score, adequate confidence, and no active quality cap.</span><code>Both lenses exceptional</code></div>
+                <div class="edu-term" data-term="lensscore report card score grades"><strong>LensScore</strong><span>A 0–10 rank of a company's five-grade report card against every company we cover. A 7.5 beats about 75% of them. Failing grades cap it.</span><code>Rank of the weighted grades</code></div>
+                <div class="edu-term" data-term="factor grade percentile sector peers report card"><strong>Factor grade</strong><span>An A+ to F grade for Value, Growth, Profitability, Financial health or Momentum, set by the company's percentile among its sector peers.</span><code>Percentile vs sector → letter</code></div>
+                <div class="edu-term" data-term="score cap failing grade"><strong>Score cap</strong><span>A ceiling on LensScore when a grade is failing: 6.8 with one, 5.0 with two. One attractive grade cannot hide a serious weakness.</span><code>1 fail → 6.8 · 2 → 5.0</code></div>
+                <div class="edu-term" data-term="lens timing entry stretched pulled back"><strong>Lens Timing</strong><span>A 0–10 gauge of whether the price looks stretched or pulled back, from four momentum readings. It is about entry, not about the business.</span><code>0 stretched · 10 pulled back</code></div>
                 <div class="edu-term" data-term="support zone price demand technical"><strong>Support zone</strong><span>An evidence-based price area where demand previously strengthened. It is a zone, not a guaranteed floor.</span><code>Repeated reaction area</code></div>
                 <div class="edu-term" data-term="resistance zone price supply technical"><strong>Resistance zone</strong><span>An area where supply previously strengthened or rallies stalled. A breakout needs price and volume confirmation.</span><code>Repeated rejection area</code></div>
                 <div class="edu-term" data-term="rsi relative strength index momentum"><strong>RSI</strong><span>A 0–100 momentum measure. Extreme readings describe recent price pressure; they are not automatic buy or sell commands.</span><code>14-period momentum</code></div>
@@ -1925,11 +1928,11 @@
 
     <ul class="modal-2col il-up-feats">
       <li><i class="ti ti-chart-candle" aria-hidden="true"></i>Unlimited company analyses</li>
-      <li><i class="ti ti-adjustments-horizontal" aria-hidden="true"></i>Valuation Lab and DCF models</li>
-      <li><i class="ti ti-filter" aria-hidden="true"></i>Stock screener</li>
+      <li><i class="ti ti-adjustments-horizontal" aria-hidden="true"></i>Valuation Lab and Projection Lab</li>
+      <li><i class="ti ti-filter" aria-hidden="true"></i>Grade screener with presets</li>
       <li><i class="ti ti-chart-arrows-vertical" aria-hidden="true"></i>Advanced risk and quality metrics</li>
-      <li><i class="ti ti-file-search" aria-hidden="true"></i>SEC filings and institutional holders</li>
-      <li><i class="ti ti-target" aria-hidden="true"></i>Analyst targets and earnings-call research</li>
+      <li><i class="ti ti-file-search" aria-hidden="true"></i>SEC filings and insider trades</li>
+      <li><i class="ti ti-bell" aria-hidden="true"></i>50 price and grade-change alerts</li>
     </ul>
 
     <button id="upgrade-cta-btn" class="btn-modal-cta" onclick="handleUpgradeClick()">Start {{TRIAL_DAYS}}-day free trial →</button>
@@ -1981,6 +1984,8 @@
 <script defer src="/lessons-data.js?v=20261002-1"></script>
 <script defer src="/academy-panel.js?v=20261002-1"></script>
 <script defer src="/research-flow.js?v=20261002-1"></script>
+<script defer src="/stock-report-card.js?v=20261010-1"></script>
+<script defer src="/csv-export.js?v=20261010-1"></script>
 <script defer src="/share-studio.js?v=20261005-1"></script>
 <script defer src="/fin-glance.js?v=20261002-1"></script>
 <script defer src="/growth-math.js?v=20261006-2"></script>

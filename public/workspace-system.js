@@ -3,7 +3,7 @@
 
   const STORE = "il-workspace-v1";
   const LAYOUTS = "il-chart-layouts-v1";
-  const state = { tab: "review", theses: [], positions: [], watchlist: [], prices: {}, priceRequested: new Set(), thesisMkt: {}, thesisMktRequested: new Set(), providers: null, summary: null, portfolioProfile: null, conviction: 3, activationTracked: false };
+  const state = { tab: "review", theses: [], positions: [], watchlist: [], prices: {}, priceRequested: new Set(), grades: {}, gradesSince: null, gradeRequested: new Set(), thesisMkt: {}, thesisMktRequested: new Set(), providers: null, summary: null, portfolioProfile: null, conviction: 3, activationTracked: false };
 
   function read(key, fallback) { try { return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback)); } catch (_) { return fallback; } }
   function write(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch (_) {} }
@@ -479,11 +479,13 @@
 
   function renderWatchlist() {
     const panel = document.querySelector('[data-panel="watchlist"]');
-    panel.innerHTML = `<div class="il-ws-grid">${formBlock("watchlist")}<div class="il-ws-block"><h3>Watchlist intelligence</h3><p>See how far the latest price sits from your level.</p><div class="il-ws-list">${state.watchlist.length ? state.watchlist.map(row => {
+    panel.innerHTML = `<div class="il-ws-grid">${formBlock("watchlist")}<div class="il-ws-block"><h3>Watchlist intelligence</h3><p>Each company&rsquo;s LensScore and its move this week, and how far the price sits from your level.</p><div class="il-ws-list">${state.watchlist.length ? state.watchlist.map(row => {
       const price = state.prices[row.ticker]; const gap = price && row.target_price ? (row.target_price - price) / price * 100 : null;
-      return `<div class="il-ws-item"><button class="il-ws-btn" data-open-ticker="${esc(row.ticker)}"><strong>${esc(row.ticker)}</strong></button><div class="il-ws-num">${money(price)}<span>latest price</span></div><div class="il-ws-num ${gap == null ? "" : gap >= 0 ? "pos" : "neg"}">${gap == null ? "—" : `${gap >= 0 ? "+" : ""}${gap.toFixed(1)}%`}<span>to ${money(row.target_price)}</span></div><div><span>${esc(row.note || "No note")}</span></div><button class="il-ws-btn danger" data-remove="watchlist" data-ticker="${esc(row.ticker)}"><i class="ti ti-trash"></i></button></div>`;
+      const g = state.grades[row.ticker];
+      const ls = window.ILGrades && g !== undefined ? window.ILGrades.pill(g, state.gradesSince) : "";
+      return `<div class="il-ws-item"><div class="il-ws-tk"><button class="il-ws-btn" data-open-ticker="${esc(row.ticker)}"><strong>${esc(row.ticker)}</strong></button>${ls}</div><div class="il-ws-num">${money(price)}<span>latest price</span></div><div class="il-ws-num ${gap == null ? "" : gap >= 0 ? "pos" : "neg"}">${gap == null ? "—" : `${gap >= 0 ? "+" : ""}${gap.toFixed(1)}%`}<span>to ${money(row.target_price)}</span></div><div><span>${esc(row.note || "No note")}</span></div><button class="il-ws-btn danger" data-remove="watchlist" data-ticker="${esc(row.ticker)}"><i class="ti ti-trash"></i></button></div>`;
     }).join("") : `<div class="il-ws-empty il-ws-empty-rich"><i class="ti ti-star"></i><strong>Track the reason, not only the ticker.</strong><span>Add a company with the price level or evidence that would make it worth revisiting.</span><button class="il-ws-btn" data-empty-focus="watchlist">Add the first watch item</button></div>`}</div></div></div>`;
-    panel.querySelector("#il-save-watchlist").onclick = saveWatchlist; panel.querySelectorAll("[data-open-ticker]").forEach(button => button.onclick = () => openTicker(button.dataset.openTicker)); wireRemoves(panel); refreshPrices(state.watchlist.map(v => v.ticker));
+    panel.querySelector("#il-save-watchlist").onclick = saveWatchlist; panel.querySelectorAll("[data-open-ticker]").forEach(button => button.onclick = () => openTicker(button.dataset.openTicker)); wireRemoves(panel); refreshPrices(state.watchlist.map(v => v.ticker)); refreshGrades(state.watchlist.map(v => v.ticker));
     panel.querySelector("[data-empty-focus='watchlist']")?.addEventListener("click", () => document.getElementById("il-watchlist-ticker")?.focus());
   }
 
@@ -507,6 +509,16 @@
     if (typeof window.fetchAndRender === "function") window.fetchAndRender();
     if (tab) { state.tab = tab; renderAll(); } else if (typeof window.openSection === "function") window.openSection("analyze");
   }
+  async function refreshGrades(tickers) {
+    if (!window.ILGrades) return;
+    const missing = [...new Set(tickers)].filter(t => !state.gradeRequested.has(t)).slice(0, 60);
+    if (!missing.length) return;
+    missing.forEach(t => state.gradeRequested.add(t));
+    const { since, grades } = await window.ILGrades.get(missing);
+    state.gradesSince = since || state.gradesSince;
+    Object.assign(state.grades, grades);
+    renderWatchlist(); renderHomeWatchlist();
+  }
   async function refreshPrices(tickers) {
     const missing = [...new Set(tickers)].filter(t => !state.priceRequested.has(t)).slice(0, 20);
     if (!missing.length) return;
@@ -529,7 +541,9 @@
     }
     host.innerHTML = state.watchlist.slice(0, 5).map(row => {
       const price = state.prices[row.ticker]; const gap = price && row.target_price ? (row.target_price - price) / price * 100 : null;
-      return `<tr><td><div class="wl-sym">${esc(row.ticker)}</div><div class="wl-co">${esc(row.note || "Your watchlist")}</div></td><td class="wl-price">${money(price)}</td><td class="wl-pct ${gap == null ? "" : gap >= 0 ? "up" : "dn"}">${gap == null ? "—" : `${gap >= 0 ? "+" : ""}${gap.toFixed(1)}%`}</td><td class="wl-spark"><span style="color:var(--text5);font-size:.6rem;">to ${money(row.target_price)}</span></td><td><span class="wl-star lit" title="Tracked">★</span></td></tr>`;
+      const g = state.grades[row.ticker];
+      const ls = window.ILGrades && g !== undefined ? ` ${window.ILGrades.pill(g, state.gradesSince)}` : "";
+      return `<tr><td><div class="wl-sym">${esc(row.ticker)}${ls}</div><div class="wl-co">${esc(row.note || "Your watchlist")}</div></td><td class="wl-price">${money(price)}</td><td class="wl-pct ${gap == null ? "" : gap >= 0 ? "up" : "dn"}">${gap == null ? "—" : `${gap >= 0 ? "+" : ""}${gap.toFixed(1)}%`}</td><td class="wl-spark"><span style="color:var(--text5);font-size:.6rem;">to ${money(row.target_price)}</span></td><td><span class="wl-star lit" title="Tracked">★</span></td></tr>`;
     }).join("");
   }
   function renderTrust() {
