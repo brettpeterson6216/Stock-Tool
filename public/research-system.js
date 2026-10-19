@@ -25,7 +25,7 @@
     // (Market-page sidebar mirrors removed 2026-07-13 — each top tab owns its own left panel.)
     const earnings = document.querySelector('.app-sidebar .sb-item[data-sec="earnings"]');
     if (earnings && !document.querySelector('.app-sidebar .sb-item[data-sec="calls"]')) {
-      earnings.insertAdjacentHTML("afterend", `<div class="sb-item" data-sec="calls"><i class="ti ti-headphones sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Call Research</span></div>`);
+      earnings.insertAdjacentHTML("afterend", `<div class="sb-item" data-sec="calls"><i class="ti ti-headphones sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Earnings Releases</span></div>`);
     }
     const dcf = document.querySelector('.app-sidebar .sb-item[data-sec="dcf"]');
     if (dcf && !document.querySelector('.app-sidebar .sb-item[data-sec="wealth"]')) {
@@ -33,21 +33,21 @@
     }
     const mobileTabs = document.getElementById("mobile-sec-tabs");
     if (mobileTabs && !mobileTabs.querySelector('[data-sec="wealth"]')) {
-      mobileTabs.insertAdjacentHTML("beforeend", `<button class="mst-btn" data-sec="calls">Calls</button><button class="mst-btn" data-sec="wealth">Wealth</button>`);
+      mobileTabs.insertAdjacentHTML("beforeend", `<button class="mst-btn" data-sec="calls">Releases</button><button class="mst-btn" data-sec="wealth">Wealth</button>`);
     }
     const more = document.querySelector(".mmenu-grid");
     if (more && !more.querySelector('[data-il-nav="calls"]')) {
-      more.insertAdjacentHTML("beforeend", `<a href="#" class="mmenu-item" data-il-nav="calls" onclick="navGoTo('calls');_setMobileNav('calls');_toggleMobileMenu();return false;"><i class="ti ti-headphones"></i><span>Calls</span></a><a href="#" class="mmenu-item" data-il-nav="wealth" onclick="navGoTo('wealth');_setMobileNav('wealth');_toggleMobileMenu();return false;"><i class="ti ti-chart-dots-3"></i><span>Wealth</span></a>`);
+      more.insertAdjacentHTML("beforeend", `<a href="#" class="mmenu-item" data-il-nav="calls" onclick="navGoTo('calls');_setMobileNav('calls');_toggleMobileMenu();return false;"><i class="ti ti-headphones"></i><span>Releases</span></a><a href="#" class="mmenu-item" data-il-nav="wealth" onclick="navGoTo('wealth');_setMobileNav('wealth');_toggleMobileMenu();return false;"><i class="ti ti-chart-dots-3"></i><span>Wealth</span></a>`);
     }
   }
 
   function callsHtml() {
     return `<div class="app-section" id="sec-calls"><div class="acc-body" id="body-calls" style="display:none"><div class="il-research-shell">
-      <div class="il-research-hero"><div><div class="il-research-kicker">Earnings-call research</div><h2>Listen for changes, not confidence.</h2><p>Review transcripts, official filings, and your own expectations in one repeatable scorecard. Transcript availability depends on the connected data provider.</p></div><div class="il-research-actions"><button class="il-research-btn primary" id="il-load-calls"><i class="ti ti-refresh"></i>Load current ticker</button></div></div>
+      <div class="il-research-hero"><div><div class="il-research-kicker">Earnings releases</div><h2>Listen for changes, not confidence.</h2><p>Every quarter's results release as the company filed it with the SEC, the numbers beside it, and your own before-and-after scorecard.</p></div><div class="il-research-actions"><button class="il-research-btn primary" id="il-load-calls"><i class="ti ti-refresh"></i>Load current ticker</button></div></div>
       <div class="il-research-grid">
-        <section class="il-research-panel"><h3 id="il-call-title">Recent calls</h3><p id="il-call-sub">Load a ticker to begin.</p><div class="il-call-links" id="il-call-links"></div><div class="il-call-list" id="il-call-list"><div class="il-call-empty">Search a company in Analyze, then return here to review its calls.</div></div><div class="il-transcript-reader" id="il-transcript-reader"></div></section>
-        <section class="il-research-panel"><h3>Call scorecard</h3><p>Write expectations before the call, then record what changed. Saved on this device by ticker.</p><div class="il-scorecard">
-          <div class="il-score-field"><label for="il-call-expectation">Before the call: what must be true?</label><textarea id="il-call-expectation" data-call-note="expectation"></textarea></div>
+        <section class="il-research-panel"><h3 id="il-call-title">Recent results</h3><p id="il-call-sub">Load a ticker to begin.</p><div class="il-call-links" id="il-call-links"></div><div class="il-call-list" id="il-call-list"><div class="il-call-empty">Search a company in Analyze, then return here to read its results releases.</div></div><div class="il-transcript-reader" id="il-transcript-reader"></div></section>
+        <section class="il-research-panel"><h3>Results scorecard</h3><p>Write what you expect before the release, then record what changed. Saved on this device by ticker.</p><div class="il-scorecard">
+          <div class="il-score-field"><label for="il-call-expectation">Before the results: what must be true?</label><textarea id="il-call-expectation" data-call-note="expectation"></textarea></div>
           <div class="il-score-field"><label for="il-call-demand">Demand and revenue change</label><textarea id="il-call-demand" data-call-note="demand"></textarea></div>
           <div class="il-score-field"><label for="il-call-margin">Margins and cash flow change</label><textarea id="il-call-margin" data-call-note="margin"></textarea></div>
           <div class="il-score-field"><label for="il-call-guidance">Guidance and management credibility</label><textarea id="il-call-guidance" data-call-note="guidance"></textarea></div>
@@ -91,21 +91,21 @@
     if (typeof PRO_SECTIONS !== "undefined" && !PRO_SECTIONS.includes("calls")) PRO_SECTIONS.push("calls");
     if (typeof PRO_GATE_CONFIG !== "undefined") {
       PRO_GATE_CONFIG.calls = {
-        title: "Earnings-Call Research Center",
+        title: "Earnings releases",
         bullets: [
-          "Review available earnings-call transcripts without leaving the workflow",
-          "Keep a repeatable pre-call and post-call scorecard by ticker",
-          "Move directly between calls, SEC filings, earnings, and your investment thesis",
-          "Record what changed instead of reacting to management confidence",
+          "Every quarterly results release, as filed with the SEC",
+          "Revenue, net income and EPS for each quarter, with the change from a year earlier",
+          "One click to the 10-Q or 10-K that followed",
+          "A before-and-after scorecard per ticker, so you record what changed",
         ],
         preview: null,
       };
     }
     if (window.SECTION_META) {
-      window.SECTION_META.calls = { icon: "ti-headphones", title: "Earnings-Call Research" };
+      window.SECTION_META.calls = { icon: "ti-headphones", title: "Earnings Releases" };
       window.SECTION_META.wealth = { icon: "ti-chart-dots-3", title: "Wealth Planner" };
     } else if (typeof SECTION_META !== "undefined") {
-      SECTION_META.calls = { icon: "ti-headphones", title: "Earnings-Call Research" };
+      SECTION_META.calls = { icon: "ti-headphones", title: "Earnings Releases" };
       SECTION_META.wealth = { icon: "ti-chart-dots-3", title: "Wealth Planner" };
     }
   }
@@ -135,12 +135,24 @@
     const links = document.getElementById("il-call-links");
     if (!links) return;
     const items = [
-      [data.companyWebsite, "Company site", "ti-building"],
-      [data.links?.sec, "SEC filings", "ti-file-text"],
-      [data.links?.investorRelationsSearch, "Find investor relations", "ti-search"],
-      [data.links?.earnings, "Earnings history", "ti-chart-bar"],
+      [data.links?.website, "Company site", "ti-building"],
+      [data.links?.sec, "All 8-K filings", "ti-file-text"],
     ].filter(item => item[0]);
     links.innerHTML = items.map(([url, label, icon]) => `<a class="il-research-btn" href="${esc(url)}" target="_blank" rel="noopener noreferrer"><i class="ti ${icon}"></i>${label}</a>`).join("");
+  }
+
+  function bigMoney(v) {
+    if (v == null || !Number.isFinite(Number(v))) return "\u2014";
+    const a = Math.abs(v), sign = v < 0 ? "-" : "";
+    return a >= 1e9 ? `${sign}$${(a / 1e9).toFixed(a >= 1e11 ? 0 : 1)}B` : a >= 1e6 ? `${sign}$${(a / 1e6).toFixed(0)}M` : `${sign}$${Math.round(a).toLocaleString("en-US")}`;
+  }
+  function change(v) {
+    if (v == null || !Number.isFinite(Number(v))) return "";
+    return `<em class="${v >= 0 ? "is-gain" : "is-drop"}">${v >= 0 ? "+" : ""}${v.toFixed(Math.abs(v) >= 100 ? 0 : 1)}% y/y</em>`;
+  }
+  function releaseDate(d) {
+    const t = Date.parse(`${d}T12:00:00Z`);
+    return Number.isFinite(t) ? new Date(t).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" }) : "";
   }
 
   async function loadCallResearch(force) {
@@ -151,7 +163,7 @@
     if (!list) return;
     loadCallNotes();
     if (!current) {
-      list.innerHTML = `<div class="il-call-empty">Search a company in Analyze, then return here to review its calls.</div>`;
+      list.innerHTML = `<div class="il-call-empty">Search a company in Analyze, then return here to read its results releases.</div>`;
       return;
     }
     if (!force && (
@@ -160,49 +172,35 @@
     )) return;
     callsLoadedTicker = current;
     list.dataset.loading = current;
-    if (title) title.textContent = `${current} recent calls`;
-    if (sub) sub.textContent = "Loading transcript availability and official research links.";
-    list.innerHTML = `<div class="il-call-empty">Loading ${esc(current)} call research...</div>`;
+    if (title) title.textContent = `${current} recent results`;
+    if (sub) sub.textContent = "Loading results releases from SEC filings\u2026";
+    list.innerHTML = `<div class="il-call-empty">Loading ${esc(current)} results releases\u2026</div>`;
     try {
       const response = await fetch(`/api/calls/${encodeURIComponent(current)}`, { credentials: "same-origin" });
-      if (!response.ok) {
-        const body = await response.json().catch(() => ({}));
-        throw new Error(body.error || "Call research is unavailable.");
-      }
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "Results releases are unavailable.");
       renderCallLinks(data);
-      if (sub) sub.textContent = data.transcripts?.length ? `${data.transcripts.length} available transcript records from ${data.transcriptProvider}.` : "No transcript records are available from the connected provider. Official research links remain available.";
-      list.innerHTML = data.transcripts?.length ? data.transcripts.map(row => {
-        const period = row.year && row.quarter ? `Q${row.quarter} ${row.year}` : row.year || "Call";
-        const date = dateLabel(row.time);
-        return `<div class="il-call-row"><div class="il-call-period">${esc(period)}</div><div class="il-call-title">${esc(row.title)}<span>${esc(date)}</span></div><button class="il-research-btn" data-transcript-id="${esc(row.id)}"><i class="ti ti-file-description"></i>Read</button></div>`;
-      }).join("") : `<div class="il-call-empty">No transcript is available through the current provider. Use the official links above, then save what changed in the scorecard.</div>`;
-      list.dataset.loaded = current;
-      list.querySelectorAll("[data-transcript-id]").forEach(button => button.onclick = () => openCallTranscript(button.dataset.transcriptId));
-      // Without transcripts, make the tab useful anyway: recent EPS vs estimate
-      if (!data.transcripts?.length) {
-        try {
-          const earnResp = await fetch(`/api/earnings/${encodeURIComponent(current)}`, { credentials: "same-origin" });
-          const rows = earnResp.ok ? await earnResp.json() : [];
-          if (Array.isArray(rows) && rows.length) {
-            const fmtQ = r => {
-              if (r.period) return r.period;
-              if (!r.year || !r.quarter) return "—";
-              const quarter = String(r.quarter).toUpperCase();
-              return `${quarter.startsWith("Q") ? quarter : `Q${quarter}`} ${r.year}`;
-            };
-            list.insertAdjacentHTML("beforeend",
-              `<div class="il-call-earnings"><h4>Recent quarters — reported EPS vs estimate</h4>` +
-              rows.slice(0, 6).map(r => {
-                const beat = r.actual != null && r.estimate != null ? r.actual - r.estimate : null;
-                const cls = beat == null ? "" : beat >= 0 ? "up" : "dn";
-                const pct = r.surprisePercent != null ? ` (${beat >= 0 ? "+" : ""}${Number(r.surprisePercent).toFixed(1)}%)` : "";
-                return `<div class="il-call-row"><div class="il-call-period">${esc(fmtQ(r))}</div><div class="il-call-title">Est ${r.estimate != null ? "$" + Number(r.estimate).toFixed(2) : "—"} · Actual ${r.actual != null ? "$" + Number(r.actual).toFixed(2) : "—"}<span class="${cls}">${beat == null ? "" : (beat >= 0 ? "Beat" : "Miss") + pct}</span></div></div>`;
-              }).join("") + `</div>`);
-          }
-        } catch (_) {}
+      const rows = data.releases || [];
+      if (data.unavailable) {
+        if (sub) sub.textContent = data.error || "SEC filings are temporarily unavailable.";
+        list.innerHTML = `<div class="il-call-empty">${esc(data.error || "SEC filings are temporarily unavailable.")} Your scorecard still works.</div>`;
+        return;
       }
-      trackEvent("call_research_loaded", { ticker: current, transcripts: data.transcripts?.length || 0 });
+      if (sub) sub.textContent = rows.length
+        ? `${rows.length} quarterly results releases filed with the SEC (Form 8-K, Item 2.02). Numbers are as the company reported them in XBRL.`
+        : "No results releases found in this company's recent SEC filings.";
+      list.innerHTML = rows.length ? rows.map(r => {
+        const q = r.quarter;
+        const nums = q ? `<div class="il-rel-nums">
+            <span><small>Revenue</small><b>${bigMoney(q.revenue)}</b>${change(q.revenueYoY)}</span>
+            <span><small>Net income</small><b>${bigMoney(q.netIncome)}</b>${change(q.netIncomeYoY)}</span>
+            <span><small>EPS (diluted)</small><b>${q.eps != null ? (q.eps < 0 ? "-$" : "$") + Math.abs(q.eps).toFixed(2) : "\u2014"}</b>${change(q.epsYoY)}</span>
+          </div>` : "";
+        return `<div class="il-call-row il-rel-row"><div class="il-call-period">${esc(q ? q.label : "Release")}</div><div class="il-call-title">${esc(r.title)}<span>Released ${esc(releaseDate(r.date))}</span>${nums}</div><div class="il-rel-actions"><button class="il-research-btn" data-release-id="${esc(r.id)}"><i class="ti ti-file-description"></i>Read release</button>${r.report ? `<a class="il-research-btn" href="${esc(r.report.url)}" target="_blank" rel="noopener noreferrer"><i class="ti ti-file-text"></i>${esc(r.report.form)}</a>` : ""}</div></div>`;
+      }).join("") : `<div class="il-call-empty">No results releases are in this company's recent SEC filings. Foreign companies often file theirs on Form 6-K, which is not covered yet.</div>`;
+      list.dataset.loaded = current;
+      list.querySelectorAll("[data-release-id]").forEach(button => button.onclick = () => openCallTranscript(button.dataset.releaseId));
+      trackEvent("call_research_loaded", { ticker: current, releases: rows.length });
     } catch (error) {
       list.innerHTML = `<div class="il-call-empty">${esc(error.message)}</div>`;
     } finally {
@@ -210,21 +208,24 @@
     }
   }
 
+  /* The results release itself, as the company filed it (Exhibit 99.1). */
   async function openCallTranscript(id) {
     const current = ticker();
     const reader = document.getElementById("il-transcript-reader");
     if (!reader || !current || !id) return;
     reader.classList.add("open");
-    reader.innerHTML = `<div class="il-call-empty">Loading transcript...</div>`;
+    reader.innerHTML = `<div class="il-call-empty">Loading the release from the SEC\u2026</div>`;
     try {
       const response = await fetch(`/api/calls/${encodeURIComponent(current)}/${encodeURIComponent(id)}`, { credentials: "same-origin" });
       const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.error || "Transcript is unavailable.");
-      const heading = data.year && data.quarter ? `${current} Q${data.quarter} ${data.year}` : `${current} transcript`;
-      reader.innerHTML = `<div class="il-transcript-head"><div><div class="il-research-kicker">Transcript</div><h3>${esc(heading)}</h3></div><button class="il-research-btn" id="il-close-transcript"><i class="ti ti-x"></i>Close</button></div>${data.audio ? `<audio controls preload="none" src="${esc(data.audio)}" style="width:100%;margin-bottom:10px"></audio>` : ""}<div class="il-transcript-copy">${data.transcript?.length ? data.transcript.map(block => `<div class="il-transcript-block"><strong>${esc(block.name)}</strong><p>${esc(block.speech)}</p></div>`).join("") : `<div class="il-call-empty">The provider returned metadata without transcript text.</div>`}</div>`;
+      if (!response.ok) throw new Error(data.error || "This release is unavailable.");
+      const paras = data.paragraphs || [];
+      reader.innerHTML = `<div class="il-transcript-head"><div><div class="il-research-kicker">Results release \u00b7 ${esc(releaseDate(data.date))}</div><h3>${esc(current)}: what the company said</h3></div><div class="il-rel-actions"><a class="il-research-btn" href="${esc(data.url)}" target="_blank" rel="noopener noreferrer"><i class="ti ti-external-link"></i>Full release on SEC.gov</a><button class="il-research-btn" id="il-close-transcript"><i class="ti ti-x"></i>Close</button></div></div>
+        <p class="il-rel-note">The company's own words, unedited. Financial tables are left out here; the numbers above come from its XBRL data.</p>
+        <div class="il-transcript-copy">${paras.length ? paras.map(p => `<p class="il-rel-p">${esc(p)}</p>`).join("") : `<div class="il-call-empty">This release has no readable text. Open it on SEC.gov.</div>`}</div>`;
       document.getElementById("il-close-transcript").onclick = () => { reader.classList.remove("open"); reader.innerHTML = ""; };
       reader.scrollIntoView({ behavior: "smooth", block: "start" });
-      trackEvent("call_transcript_opened", { ticker: current });
+      trackEvent("earnings_release_opened", { ticker: current });
     } catch (error) {
       reader.innerHTML = `<div class="il-call-empty">${esc(error.message)}</div>`;
     }

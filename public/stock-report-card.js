@@ -105,6 +105,9 @@
       body.append(cap);
     }
 
+    const next = nextSteps(g, d);
+    if (next.length) body.append(nextList(next));
+
     const meta = el("div", "il-sc-meta");
     const st = g.street || {};
     if (st.nextEarnings) {
@@ -134,8 +137,82 @@
     alert.firstChild.setAttribute("aria-hidden", "true");
     alert.addEventListener("click", () => openAlert());
     actions.append(open, peers, alert);
+    if (window.ILReportCardShare) {
+      const share = el("button", "il-sc-btn");
+      share.type = "button";
+      share.append(el("i", "ti ti-share-3"), document.createTextNode(" Share image"));
+      share.firstChild.setAttribute("aria-hidden", "true");
+      share.addEventListener("click", () => {
+        const f = fundCache.get(ticker);
+        window.ILReportCardShare.open({
+          ticker, grades: g,
+          name: (d.company && (d.company.name || d.company.title)) || ($("#r-name") && $("#r-name").textContent.trim()) || null,
+          funds: f && f.holders ? f.holders.map(h => h.fund) : [],
+        });
+      });
+      actions.append(share);
+    }
 
     box.append(scoreBox, body, actions);
+  }
+
+  /* "What to check next": two or three concrete steps built from the weakest
+     grades (below the 40th percentile of the sector), or from strength and an
+     upcoming report when nothing is weak. Each step opens the place to check
+     and links the lesson that explains it. */
+  const STEPS = {
+    value: { why: "You pay more than most peers for each dollar of profit.", act: "See what it's worth", go: () => scrollTo("il-worth", "projection"), learn: "valuation-multiples", lesson: "P/E and other multiples" },
+    growth: { why: "Sales or profits are growing slower than peers'.", act: "Check quarterly growth", go: () => openFinancials("q", "income"), learn: "income-statement", lesson: "Read an income statement" },
+    profitability: { why: "It keeps less of each sale than its peers.", act: "Check the margins", go: () => openFinancials("q", "income"), learn: "quality-ratios", lesson: "Five quality ratios" },
+    health: { why: "Its balance sheet carries more risk than peers'.", act: "Check debt and cash", go: () => openFinancials("a", "balance"), learn: "balance-sheet", lesson: "Read a balance sheet" },
+    momentum: { why: "The share price has lagged the market lately.", act: "Set a buy-zone alert", go: () => openAlert(), learn: "trend-support-resistance", lesson: "Trend, support and resistance" },
+  };
+  function nextSteps(g, d) {
+    const out = [];
+    const weak = (g.factors || []).filter(f => Number.isFinite(f.percentile) && f.percentile < 40 && STEPS[f.key]).sort((a, b) => a.percentile - b.percentile);
+    weak.slice(0, 2).forEach(f => out.push({ title: `${f.label} ${f.grade}`, ...STEPS[f.key] }));
+    const n = g.street && g.street.nextEarnings;
+    if (n && n.days >= 0 && n.days <= 30 && out.length < 3) {
+      out.push({ title: `Earnings ${n.days <= 1 ? "this week" : `in ~${n.days} days`}`, why: "Prices often move most around results. Read the last release before the next one.", act: "Read the last release", go: () => go("calls"), learn: "earnings-season", lesson: "Earnings season" });
+    }
+    if (!weak.length && out.length < 3) {
+      out.unshift({ title: "No weak grade", why: "Strong businesses can still be expensive. The risk is the price you pay.", act: "See what it's worth", go: () => scrollTo("il-worth", "projection"), learn: "priced-in", lesson: "Reverse valuation" });
+    }
+    return out.slice(0, 3);
+  }
+  function nextList(steps) {
+    const wrap = el("div", "il-sc-next");
+    wrap.append(el("div", "il-sc-next-h", "What to check next"));
+    const list = el("ol", "il-sc-next-list");
+    steps.forEach(s => {
+      const li = el("li", "il-sc-next-item");
+      const text = el("div", "il-sc-next-text");
+      text.append(el("b", null, s.title), el("span", null, ` ${s.why}`));
+      const acts = el("div", "il-sc-next-acts");
+      const b = el("button", "il-sc-next-btn", s.act);
+      b.type = "button";
+      b.addEventListener("click", s.go);
+      const a = el("a", "il-sc-next-learn", `Lesson: ${s.lesson}`);
+      a.href = `/learn/${s.learn}`;
+      acts.append(b, a);
+      li.append(text, acts);
+      list.append(li);
+    });
+    wrap.append(list);
+    return wrap;
+  }
+  function go(section) { if (typeof window.navGoTo === "function") window.navGoTo(section); }
+  function scrollTo(id, fallback) {
+    const n = document.getElementById(id);
+    if (n && !n.hidden && n.offsetParent) n.scrollIntoView({ behavior: "smooth", block: "start" }); else go(fallback);
+  }
+  function openFinancials(period, tab) {
+    go("financials");
+    setTimeout(() => {
+      try { if (window.ILFinQuarterly) window.ILFinQuarterly.setPeriod(period); } catch (_) {}
+      const btn = [...document.querySelectorAll(".fin-tab-btn")].find(b => (b.getAttribute("onclick") || "").includes(`'${tab}'`));
+      if (btn) btn.click();
+    }, 60);
   }
 
   function chip(icon, text, cls) {

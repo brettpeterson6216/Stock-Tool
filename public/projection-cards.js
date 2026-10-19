@@ -558,10 +558,13 @@
     ".ilpc-types{flex-direction:row}.ilpc-type{flex:1 1 0;min-width:0;padding:10px}.ilpc-type b{font-size:13.5px}.ilpc-type span{display:none}.ilpc-stage{padding:8px;min-height:0}.ilpc-canvas{max-height:46vh}" +
     ".ilpc-head-in,.ilpc-post{font-size:16px}.ilpc-btn{flex:1 1 auto;justify-content:center}}";
 
-  function build() {
+  function ensureStyle() {
     if (!document.getElementById("ilpc-style")) {
       var st = document.createElement("style"); st.id = "ilpc-style"; st.textContent = CSS; document.head.appendChild(st);
     }
+  }
+  function build() {
+    ensureStyle();
     root = document.createElement("div");
     root.className = "ilpc"; root.hidden = true;
     root.innerHTML =
@@ -629,5 +632,5 @@
     document.documentElement.classList.remove("ilpc-open");
   }
 
-  window.ILProjectionCards = { open: open, close: close, _draw: draw, _state: state };
+  window.ILProjectionCards = { open: open, close: close, ensureStyle: ensureStyle, _draw: draw, _state: state };
 })();

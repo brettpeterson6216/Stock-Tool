@@ -24,6 +24,7 @@ const { buildQuarterlyHistory, attachPrices } = require("../lib/fundamentals-his
 const secUniverse = require("../lib/sec-universe");
 const secFilings = require("../lib/sec-filings");
 const sec13f = require("../lib/sec-13f");
+const secEarnings = require("../lib/sec-earnings");
 const prices = require("../lib/prices");
 const router = express.Router();
 const UA     = "ImpliedLens/1.0 brettpeterson6216@gmail.com";
@@ -482,10 +483,13 @@ router.get("/fundamentals/history/:ticker", requireAccount, async (req, res) => 
       });
     }
     if (prices) attachPrices(quarters, prices.bars);
+    // Each quarter's 10-Q/10-K, for the quarterly statement tables' links.
+    const filings = await secEarnings.filingLinks(ticker, quarters.map(q => q.end)).catch(() => ({}));
     const body = {
       ticker,
       name: company.name || ticker,
       quarters,
+      filings,
       splits: quarters.splits || [],
       calendar: "Quarters that line up with the calendar are labelled Q1–Q4; others by the month they end.",
       priceNote,
@@ -539,71 +543,42 @@ router.get("/earnings/:ticker", requireAccount, async (req, res) => {
 // ============================================================
 //  GET /api/calls/:ticker and /api/calls/:ticker/:id  (Pro)
 // ============================================================
+/* Earnings materials from SEC filings (lib/sec-earnings.js): each quarter's
+   results release (8-K Item 2.02, Exhibit 99.1), the quarter's reported
+   numbers and the 10-Q/10-K that followed. Transcripts need a licensed
+   provider the site does not have; the response keeps an empty list. */
 router.get("/calls/:ticker", requirePro, async (req, res) => {
   const ticker = requestTicker(req, res);
   if (!ticker) return;
   try {
-    const [listResult, profileResult] = await Promise.allSettled([
-      fetchWithTimeout(`https://finnhub.io/api/v1/stock/transcripts/list?symbol=${ticker}&token=${FINNHUB_KEY}`, {}, 7000),
-      fetchWithTimeout(`https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${FINNHUB_KEY}`, {}, 5000),
-    ]);
-    const read = async result => {
-      if (result.status !== "fulfilled" || !result.value.ok) return null;
-      return result.value.json().catch(() => null);
-    };
-    const [listData, profile] = await Promise.all([read(listResult), read(profileResult)]);
-    const rows = Array.isArray(listData) ? listData : Array.isArray(listData?.transcripts) ? listData.transcripts : Array.isArray(listData?.data) ? listData.data : [];
-    const transcripts = rows.slice(0, 24).map(row => ({
-      id: String(row.id || ""),
-      symbol: String(row.symbol || ticker),
-      year: Number(row.year) || null,
-      quarter: Number(row.quarter) || null,
-      time: row.time || row.date || null,
-      title: String(row.title || `${ticker} earnings call`).slice(0, 200),
-    })).filter(row => row.id);
+    const data = await secEarnings.releasesFor(ticker);
     res.json({
-      ticker,
-      company: profile?.name || ticker,
-      companyWebsite: /^https?:\/\//.test(profile?.weburl || "") ? profile.weburl : null,
-      transcripts,
-      transcriptProvider: transcripts.length ? "Finnhub" : null,
-      links: {
-        sec: `https://www.sec.gov/edgar/browse/?CIK=${encodeURIComponent(ticker)}&owner=exclude&action=getcompany`,
-        investorRelationsSearch: `https://www.google.com/search?q=${encodeURIComponent(`${ticker} investor relations earnings call`)}`,
-        earnings: `https://finance.yahoo.com/quote/${encodeURIComponent(ticker)}/earnings/`,
-      },
+      ...data,
+      transcripts: [], transcriptProvider: null,
+      links: { sec: data.filingsUrl, website: data.website },
+      impliedLens: sourceMeta("SEC EDGAR 8-K (Item 2.02), 10-Q and 10-K filings", { asOf: data.releases[0]?.date || null }),
     });
   } catch (error) {
-    console.error("[calls] list error:", error.message);
-    res.status(500).json({ error: "Could not load earnings-call research." });
+    if (error.status === 404) return res.status(404).json({ error: "No SEC earnings releases for this ticker (it may be an ETF or a foreign filer)." });
+    console.error("[calls] releases error:", error.message);
+    // SEC unreachable: keep the page usable (scorecard, EDGAR search link).
+    res.json({
+      ticker, releases: [], transcripts: [], transcriptProvider: null, unavailable: true,
+      error: "SEC filings are temporarily unavailable. Try again shortly.",
+      links: { sec: `https://www.sec.gov/edgar/search/#/q=${encodeURIComponent(ticker)}&forms=8-K` },
+    });
   }
 });
 
 router.get("/calls/:ticker/:id", requirePro, async (req, res) => {
   const ticker = requestTicker(req, res);
-  const id = String(req.params.id || "");
   if (!ticker) return;
-  if (!/^[A-Za-z0-9_.:-]{1,200}$/.test(id)) return res.status(400).json({ error: "Invalid transcript request." });
   try {
-    const response = await fetchWithTimeout(`https://finnhub.io/api/v1/stock/transcripts?id=${encodeURIComponent(id)}&token=${FINNHUB_KEY}`, {}, 12000);
-    if (!response.ok) return res.status(response.status).json({ error: "Transcript is unavailable from the current data provider." });
-    const data = await response.json();
-    const transcript = Array.isArray(data?.transcript) ? data.transcript.slice(0, 800).map(item => ({
-      name: String(item.name || item.speaker || "Speaker").slice(0, 160),
-      speech: String(item.speech || item.text || "").slice(0, 30000),
-    })).filter(item => item.speech) : [];
-    res.json({
-      id,
-      ticker,
-      year: Number(data?.year) || null,
-      quarter: Number(data?.quarter) || null,
-      audio: /^https?:\/\//.test(data?.audio || "") ? data.audio : null,
-      participants: Array.isArray(data?.participant) ? data.participant.slice(0, 100) : [],
-      transcript,
-    });
+    res.json({ ticker, kind: "release", ...(await secEarnings.releaseText(ticker, String(req.params.id || ""))) });
   } catch (error) {
-    console.error("[calls] transcript error:", error.message);
-    res.status(500).json({ error: "Could not load this transcript." });
+    if (error.status) return res.status(error.status).json({ error: error.message });
+    console.error("[calls] release text error:", error.message);
+    res.status(503).json({ error: "Could not load this release from the SEC. Try again shortly." });
   }
 });
 

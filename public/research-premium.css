@@ -2635,3 +2635,18 @@ html[data-theme="light"] body .il-funds-chg.is-sell { color: #c0283a !important;
 html body .il-funds-sold { margin: .65rem 0 0 !important; font-size: 12px !important; color: var(--rp-muted, var(--text4)) !important; }
 html body .il-funds-sold[hidden] { display: none !important; }
 html body .il-sc-chip.is-funds { cursor: pointer !important; }
+
+/* Report card: "What to check next" (stock-report-card.js) */
+html body .il-sc-next { display: grid !important; gap: 6px !important; padding: 10px 12px !important; border-radius: 8px !important; background: var(--rp-raised) !important; border: 1px solid var(--rp-line) !important; }
+html body .il-sc-next-h { font-size: 11px !important; font-weight: 700 !important; letter-spacing: .02em !important; color: var(--rp-gold) !important; }
+html body .il-sc-next-list { margin: 0 !important; padding: 0 !important; list-style: none !important; display: grid !important; gap: 8px !important; counter-reset: ilnext !important; }
+html body .il-sc-next-item { display: flex !important; flex-wrap: wrap !important; align-items: center !important; justify-content: space-between !important; gap: 6px 14px !important; counter-increment: ilnext !important; }
+html body .il-sc-next-text { flex: 1 1 260px !important; min-width: 0 !important; font-size: 13px !important; line-height: 1.45 !important; color: var(--rp-copy) !important; }
+html body .il-sc-next-text::before { content: counter(ilnext) "." !important; margin-right: 6px !important; font: 700 12px/1 'IBM Plex Sans', system-ui, sans-serif !important; color: var(--rp-gold) !important; }
+html body .il-sc-next-text b { color: var(--rp-ink) !important; font-weight: 700 !important; }
+html body .il-sc-next-text span { color: var(--rp-muted) !important; }
+html body .il-sc-next-acts { display: inline-flex !important; flex-wrap: wrap !important; align-items: center !important; gap: 10px !important; }
+html body .il-sc-next-btn { min-height: 30px !important; padding: 0 12px !important; border-radius: 8px !important; border: 1px solid var(--rp-line) !important; background: transparent !important; color: var(--rp-ink) !important; font: 600 12.5px/1 var(--rp-sans, inherit) !important; cursor: pointer !important; white-space: nowrap !important; }
+html body .il-sc-next-btn:hover { border-color: var(--rp-gold) !important; }
+html body .il-sc-next-learn { font-size: 12.5px !important; color: var(--rp-gold) !important; text-decoration: none !important; white-space: nowrap !important; }
+html body .il-sc-next-learn:hover { text-decoration: underline !important; }
