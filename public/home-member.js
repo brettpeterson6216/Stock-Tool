@@ -240,6 +240,7 @@
           if (Number.isFinite(n) && n > 0) closes.push(n);
         });
         return { symbol: symbol, price: price, closes: closes,
+                 etf: meta.standInFor && meta.symbol ? meta.symbol : null,
                  changePct: prev > 0 ? ((price - prev) / prev) * 100 : NaN };
       })
       .catch(function () { return null; });
@@ -342,6 +343,7 @@
     wrap.innerHTML = have.length
       ? have.map(function (r) {
           var label = (INDEXES.filter(function (i) { return i.t === r.symbol; })[0] || {}).label || r.symbol;
+          if (r.etf) label += " · " + r.etf;   // index shown through its tracking ETF
           return '<div class="ihm-index' + dirClass(r.changePct) + '">' +
             '<div class="ihm-index-txt"><span>' + esc(label) + "</span><b>" + num(r.price, 2) +
             "</b><i>" + pct(r.changePct) + "</i></div>" +

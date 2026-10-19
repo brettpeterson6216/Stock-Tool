@@ -29,7 +29,8 @@
         var prev = meta.chartPreviousClose || p, chg = p - prev, pct = prev ? (chg / prev) * 100 : 0, up = chg >= 0;
         var val = Number(p).toLocaleString("en-US", { maximumFractionDigits: p >= 1000 ? 0 : 2 });
         var chgHtml = '<span class="twm-chg ' + (up ? "up" : "dn") + '">' + (up ? "▲" : "▼") + " " + Math.abs(pct).toFixed(2) + "%</span>";
-        return cell(IDX[i].label, val, chgHtml);
+        // On the licensed feed an index is shown through its tracking ETF.
+        return cell(IDX[i].label + (meta.standInFor && meta.symbol ? " · " + meta.symbol : ""), val, chgHtml);
       }).join("");
     } catch (e) {
       el.innerHTML = IDX.map(function (i) { return cell(i.label, "Unavailable", "", "unavailable"); }).join("");

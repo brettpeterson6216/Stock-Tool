@@ -1191,7 +1191,7 @@
       if (!r.ok) throw new Error(j.error || "Could not save the alert.");
       alertState.list = j.alerts || alertState.list;
       renderAlerts();
-      setText("#rc-alert-status", j.duplicate ? "You already have that alert." : "Alert saved. We check every 10 minutes while the market is open.");
+      setText("#rc-alert-status", j.duplicate ? "You already have that alert." : "Alert saved. We usually check every 30 to 60 minutes while the market is open.");
     } catch (error) { setText("#rc-alert-status", error.message); }
   }
   async function deleteAlert(id) {

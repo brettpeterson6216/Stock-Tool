@@ -382,7 +382,7 @@ router.get("/quote/:ticker", checkAnalysisLimit, async (req, res) => {
     let data = null;
     let source = null;
     try {
-      const chart = await prices.getChart(ticker, { range, interval });
+      const chart = await prices.getChart(ticker, { range, interval, preview: req.query.preview === "1" });
       source = chart.source;
       data = { chart: chart.chart };
     } catch (e) { console.log(`[quote] ${prices.sourceLabel()} failed for ${ticker}: ${e.message}`); }
@@ -464,8 +464,14 @@ router.get("/market/movers", (req, res) => {
   const type = ["gainers", "losers", "active"].includes(requestedType) ? requestedType : "gainers";
   startEnrichment([...new Set(SCREENER_TICKERS)].filter(t => !SCREENER_ETFS.has(t)));
   const rows = [..._enrich.entries()]
-    .map(([symbol, e]) => ({ symbol, name: e.name || symbol, price: e.price, chgPct: e.change1D, cap: e.marketCap || 0 }))
+    .map(([symbol, e]) => ({ symbol, name: e.name || symbol, price: e.price, chgPct: e.change1D, cap: e.marketCap || 0, asOf: e.asOf ? new Date(e.asOf * 1000).toISOString().slice(0, 10) : null }))
     .filter(r => Number.isFinite(r.price) && r.price > 0 && Number.isFinite(r.chgPct));
+  /* The universe refreshes half its companies each evening (lib/prices.js),
+     so compare only companies whose latest close is the newest one: a
+     two-day-old move must not sit beside yesterday's. */
+  const newest = rows.reduce((m, r) => (r.asOf && r.asOf > m ? r.asOf : m), "");
+  const fresh = rows.filter(r => r.asOf === newest);
+  if (fresh.length >= 12) rows.splice(0, rows.length, ...fresh);
   const sorted = type === "losers" ? rows.sort((a, b) => a.chgPct - b.chgPct)
     : type === "active" ? rows.sort((a, b) => Math.abs(b.chgPct) * Math.log10(b.cap + 10) - Math.abs(a.chgPct) * Math.log10(a.cap + 10))
     : rows.sort((a, b) => b.chgPct - a.chgPct);
@@ -558,7 +564,7 @@ router.get("/market/landing-summary", async (req, res) => {
   const ETF_FOR = { "^GSPC": "SPY", "^IXIC": "QQQ", "^DJI": "DIA" };
   async function fetchSeries(symbol, interval, range) {
     const sym = prices.provider() === "marketstack" ? (ETF_FOR[symbol] || symbol) : symbol;
-    const payload = await prices.getChart(sym, { range, interval });
+    const payload = await prices.getChart(sym, { range, interval, preview: true });
     const result = payload?.chart?.result?.[0];
     if (!result) throw new Error(`${symbol} returned no result`);
     const rawCloses = result?.indicators?.quote?.[0]?.close || [];
