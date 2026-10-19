@@ -1,6 +1,6 @@
 /* Under the research chart: "Read the chart" (plain-English reads of trend,
    momentum, volume and any recent golden/death cross) and "What is it
-   worth?" (a Lens Charts range comparing four ways to value the company).
+   worth?" (a Lens Charts range comparing the ways we can value the company).
 
    Both are computed in the browser from data the page already has: the
    price rows chart-engine.js draws (it fires il-chart-rendered), the quote
@@ -142,6 +142,8 @@
 
     if (rows.length < 2 || !(price > 0)) { wrap.hidden = true; return; }
     wrap.hidden = false;
+    var title = document.getElementById("il-worth-title");
+    if (title) title.textContent = "What is it worth? " + (["", "", "Two", "Three", "Four", "Five"][rows.length] || rows.length) + " ways to look";
     window.LensCharts.range(host, {
       rows: rows, marker: { value: price, label: "Price" },
       format: function (v) { return "$" + (v >= 10 ? Math.round(v).toLocaleString("en-US") : v.toFixed(2)); },

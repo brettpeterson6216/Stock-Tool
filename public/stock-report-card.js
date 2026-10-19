@@ -152,7 +152,7 @@
     if (!box || !ticker) return;
     const mine = ++seq;
     const hit = cache.get(ticker);
-    if (hit && Date.now() - hit.at < 5 * 60 * 1000) { current = { ticker, data: hit.data }; render(box, ticker, hit.data); return; }
+    if (hit && Date.now() - hit.at < 5 * 60 * 1000) { current = { ticker, data: hit.data }; render(box, ticker, hit.data); funds(box, ticker, mine); return; }
     skeleton(box, ticker);
     try {
       const r = await fetch(`/api/lens-score/${encodeURIComponent(ticker)}?card=1`, { credentials: "same-origin" });
@@ -163,9 +163,35 @@
       if (data) cache.set(ticker, { at: Date.now(), data });
       current = { ticker, data };
       render(box, ticker, data);
+      funds(box, ticker, mine);
     } catch (_) {
       if (mine === seq) box.hidden = true;
     }
+  }
+
+  /* "Famous investors: Berkshire Hathaway +2" — from their SEC 13F filings.
+     Opens the Ownership section, where the full table lives. */
+  const fundCache = new Map();
+  async function funds(box, ticker, mine) {
+    let d = fundCache.get(ticker);
+    if (!d) {
+      try { const r = await fetch(`/api/funds/${encodeURIComponent(ticker)}`, { credentials: "same-origin" }); d = r.ok ? await r.json() : null; } catch (_) { d = null; }
+      if (d && !d.loading) fundCache.set(ticker, d);
+    }
+    if (mine !== seq || !d || !(d.holders || []).length) return;
+    const body = $(".il-sc-body", box);
+    if (!body || $(".il-sc-chip.is-funds", box)) return;
+    let meta = $(".il-sc-meta", body);
+    if (!meta) { meta = el("div", "il-sc-meta"); body.append(meta); }
+    const [first, ...rest] = d.holders;
+    const c = chip("ti-building-bank", `Famous investors: ${first.fund}${rest.length ? ` +${rest.length}` : ""}`, "is-funds");
+    c.setAttribute("role", "button");
+    c.tabIndex = 0;
+    c.title = d.holders.map(h => `${h.fund}${h.who ? ` (${h.who})` : ""}`).join("\n") + "\nFrom their latest SEC 13F filings (positions at quarter end).";
+    const go = () => { if (typeof window.navGoTo === "function") window.navGoTo("institutional"); };
+    c.addEventListener("click", go);
+    c.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } });
+    meta.append(c);
   }
 
   /* ── Alert dialog ─────────────────────────────────────────────────────── */
@@ -195,7 +221,7 @@
       </form>
       <p class="il-ad-status" id="il-ad-status" role="status" aria-live="polite"></p>
       <ul class="il-ad-list" id="il-ad-list"></ul>
-      <p class="il-ad-fine">Prices are checked every 10 minutes while US markets are open. Price alerts switch off after they fire; grade alerts keep watching. Manage every alert in <a href="/lens-score">LensToolkit</a>.</p>`;
+      <p class="il-ad-fine">Prices are usually checked every 30 to 60 minutes while US markets are open. Price alerts switch off after they fire; grade alerts keep watching. Manage every alert in <a href="/lens-score">LensToolkit</a>.</p>`;
     document.body.append(d);
     d.addEventListener("click", e => { if (e.target === d) d.close(); });
     $("#il-ad-form", d).addEventListener("submit", e => {

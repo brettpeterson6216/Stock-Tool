@@ -506,6 +506,7 @@ app.get("/readyz", async (_req, res) => {
     dataPolicy: require("./lib/data-policy").snapshot(),
     prices: await require("./lib/prices").snapshot().catch(() => null),
     secUniverse: require("./lib/sec-universe").status(),
+    famousInvestors: require("./lib/sec-13f").status(),
     ...buildInfo,
   });
 });
@@ -611,6 +612,7 @@ if (require.main === module) {
       if (process.env.NODE_ENV !== "test") require("./lib/peer-universe").load().catch(() => {});
       if (process.env.NODE_ENV !== "test") require("./lib/lens-history").start();
       if (process.env.NODE_ENV !== "test") require("./lib/alerts").start();
+      if (process.env.NODE_ENV !== "test") require("./lib/sec-13f").start();
       startKeepAwake();
     });
     // Company-name search answers from memory. The seed list in

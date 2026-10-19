@@ -651,7 +651,7 @@ const SECTION_META = {
   advmetrics:  { icon:'ti-report-analytics', title:'Adv. Metrics' },
   earnings:    { icon:'ti-trending-up',   title:'Earnings & EPS' },
   secfilings:  { icon:'ti-file-text',     title:'SEC Filings' },
-  institutional:{ icon:'ti-building-bank', title:'Insiders & OTC volume' },
+  institutional:{ icon:'ti-building-bank', title:'Ownership' },
   compare:     { icon:'ti-adjustments-horizontal', title:'Compare Stocks' },
   /* Two engines, one destination. The rail has a single Valuation Lab entry;
      `projection` and `dcf` are the two panes behind it, switched by the
@@ -2866,6 +2866,12 @@ async function loadMarketOverview(range,btn){
             prev=meta.chartPreviousClose||price,
             pct=prev?((price-prev)/prev*100):0,up=(price-prev)>=0;
       const vEl=document.getElementById(idx.vi),cEl=document.getElementById(idx.vc);
+      // Licensed feed: an index is shown through its tracking ETF, and says so.
+      if(meta.standInFor&&meta.symbol){
+        const tag=`${idx.label} · ${meta.symbol}`;
+        const nm=vEl?.closest('.mo-idx-item')?.querySelector('.mo-idx-name');if(nm)nm.textContent=tag;
+        if(i===0)['prime-sp-value','prime-mobile-sp-value'].forEach(id=>{const lab=document.getElementById(id)?.previousElementSibling;if(lab)lab.textContent=`S&P 500 · ${meta.symbol}`;});
+      }
       if(vEl)vEl.textContent=price>=1000?price.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):price.toFixed(2);
       if(cEl){cEl.textContent=`${up?'▲':'▼'} ${Math.abs(pct).toFixed(2)}%`;cEl.className='mo-idx-chg '+(up?'up':'dn');}
       if(i===0){
@@ -2876,7 +2882,7 @@ async function loadMarketOverview(range,btn){
       }
     }
     return{
-      label:idx.label, data:norm,
+      label:meta?.standInFor&&meta?.symbol?`${idx.label} (${meta.symbol})`:idx.label, data:norm,
       borderColor:idx.col, borderWidth:2.2,
       pointRadius:0, pointHoverRadius:5,
       fill:false,
@@ -4266,21 +4272,55 @@ function renderRiskPanel(closes, meta) {
       <div class="risk-stat-val ${toneOf(valColor)}${val === '--' || val === '—' ? ' is-empty' : ''}">${val === '--' ? '—' : val}</div>
     </div>`;
 
+  /* Simple view (default): five lines in plain English. All measures: the
+     full grid, without any measure we could not compute (a dash reads as
+     broken). The choice is remembered per browser. */
+  const vol = parseFloat(annualVol), dd = parseFloat(maxDD), sh = parseFloat(sharpe), v95 = parseFloat(var95);
+  const plain = [
+    ['Typical yearly swing', annualVol+'%', vol<25?'is-up':vol<45?'is-warn':'is-down',
+      vol<20?'Calm for a stock.':vol<35?'About average for a stock.':vol<50?'Bumpy: expect big moves both ways.':'Very bumpy: large daily moves are normal.'],
+    ['Worst fall from a high', maxDD+'%', dd>-15?'is-neutral':dd>-30?'is-warn':'is-down',
+      `The biggest drop from a peak in the period shown on the chart.`],
+    ['A bad day (1 in 20)', !isNaN(v95)?var95+'%':null, 'is-down',
+      'On about one trading day in twenty, it fell at least this much.'],
+    ['Reward for the risk', !isNaN(sh)?sharpe:null, sh>1?'is-up':sh>0.3?'is-warn':'is-down',
+      sh>1?'Returns have been strong for the swings taken.':sh>0.3?'Returns have roughly paid for the swings.':'Returns have not paid for the swings.'],
+    ['Moves with the market', betaRaw!=null?betaRaw.toFixed(2)+'\u00d7':null, betaRaw==null?'is-neutral':betaRaw<0.8?'is-up':betaRaw>1.4?'is-down':'is-warn',
+      betaRaw==null?'':betaRaw>1.15?'Tends to move more than the S&P 500.':betaRaw<0.85?'Tends to move less than the S&P 500.':'Tends to move about as much as the S&P 500.'],
+  ].filter(r => r[1] != null);
+  const simpleHtml = `<div class="risk-plain">${plain.map(([label, val, tone, note]) =>
+      `<div class="risk-plain-row"><span class="risk-plain-lbl">${label}</span><b class="risk-plain-val ${tone}">${val}</b><span class="risk-plain-note">${note}</span></div>`).join('')}
+    <div class="risk-plain-row is-rating"><span class="risk-plain-lbl">Overall risk</span><b class="risk-plain-val ${toneOf(ratingColor)}">${rating}</b><span class="risk-plain-note">From the swing, the worst fall and the reward for risk. History, not a forecast.</span></div></div>`;
+  const cells = [
+    ['Annual Volatility', annualVol+'%', parseFloat(annualVol)<25?'#46b184':parseFloat(annualVol)<45?'#C6A052':'#d96a70'],
+    ['Annual Return', annualReturn+'%', posCol(annualReturn), 'est.'],
+    ['Beta', beta, betaRaw!=null?(betaRaw<0.8?'#46b184':betaRaw>1.4?'#d96a70':'var(--gold)'):'var(--text4)'],
+    ['Alpha', alpha!=='--'?alpha+'%':'--', posCol(alpha), 'vs S&P 500'],
+    ['Sharpe Ratio', sharpe, posCol(sharpe), 'rf 4.5%'],
+    ['Sortino Ratio', sortino, posCol(sortino), 'downside'],
+    ['Treynor Ratio', treynor!=='--'?treynor+'%':'--', posCol(treynor)],
+    ['Calmar Ratio', calmar, posCol(calmar), '1Y'],
+    ['Max Drawdown', maxDD+'%', '#d96a70'],
+    ['1-Day VaR 95%', var95!=='--'?var95+'%':'--', '#d96a70'],
+    ['CVaR (ES) 95%', cvar95!=='--'?cvar95+'%':'--', '#d96a70', 'avg tail'],
+    ['Risk Rating', rating, ratingColor],
+  ].filter(c => c[1] !== '--' && !/^(NaN|--)/.test(String(c[1])));
+  const fullHtml = `<div class="risk-grid">${cells.map(c => stat(c[0], c[1], c[2], c[3] || '')).join('')}</div>`;
+  let mode = 'simple';
+  try { mode = localStorage.getItem('il-risk-view') === 'all' ? 'all' : 'simple'; } catch (_) {}
   el.innerHTML = `
-    <div class="risk-grid">
-      ${stat('Annual Volatility', annualVol+'%', parseFloat(annualVol)<25?'#46b184':parseFloat(annualVol)<45?'#C6A052':'#d96a70')}
-      ${stat('Annual Return', annualReturn+'%', posCol(annualReturn), 'est.')}
-      ${stat('Beta', beta, betaRaw!=null?(betaRaw<0.8?'#46b184':betaRaw>1.4?'#d96a70':'var(--gold)'):'var(--text4)')}
-      ${stat('Alpha', alpha!=='--'?alpha+'%':'--', posCol(alpha), 'vs S&P 500')}
-      ${stat('Sharpe Ratio', sharpe, posCol(sharpe), 'rf 4.5%')}
-      ${stat('Sortino Ratio', sortino, posCol(sortino), 'downside')}
-      ${stat('Treynor Ratio', treynor!=='--'?treynor+'%':'--', posCol(treynor))}
-      ${stat('Calmar Ratio', calmar, posCol(calmar), '1Y')}
-      ${stat('Max Drawdown', maxDD+'%', '#d96a70')}
-      ${stat('1-Day VaR 95%', var95!=='--'?var95+'%':'--', '#d96a70')}
-      ${stat('CVaR (ES) 95%', cvar95!=='--'?cvar95+'%':'--', '#d96a70', 'avg tail')}
-      ${stat('Risk Rating', rating, ratingColor)}
-    </div>`;
+    <div class="risk-switch" role="group" aria-label="Risk view">
+      <button type="button" class="risk-switch-btn" data-view="simple" aria-pressed="${mode==='simple'}">Simple</button>
+      <button type="button" class="risk-switch-btn" data-view="all" aria-pressed="${mode==='all'}">All measures</button>
+    </div>
+    <div class="risk-view" data-view="simple"${mode==='simple'?'':' hidden'}>${simpleHtml}</div>
+    <div class="risk-view" data-view="all"${mode==='all'?'':' hidden'}>${fullHtml}</div>`;
+  el.querySelectorAll('.risk-switch-btn').forEach(b => b.addEventListener('click', () => {
+    const v = b.dataset.view;
+    el.querySelectorAll('.risk-switch-btn').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    el.querySelectorAll('.risk-view').forEach(x => { x.hidden = x.dataset.view !== v; });
+    try { localStorage.setItem('il-risk-view', v); } catch (_) {}
+  }));
 }
 
 /* =====================================================
@@ -4289,12 +4329,12 @@ function renderRiskPanel(closes, meta) {
 async function renderNews(ticker, name) {
   const el = document.getElementById('news-items');
   if (!el) return;
-  el.innerHTML = '<div style="color:var(--text5);font-size:.78rem;">Loading news…</div>';
+  el.innerHTML = '<div style="color:var(--text5);font-size:.78rem;">Loading filings…</div>';
   try {
     const res  = await fetch('/api/news/' + ticker, { credentials: 'same-origin' });
     const data = await res.json();
     if (!Array.isArray(data) || !data.length) {
-      el.innerHTML = '<div style="color:var(--text5);font-size:.78rem;">No recent news found.</div>';
+      el.innerHTML = '<div style="color:var(--text5);font-size:.78rem;">No recent filings found.</div>';
       return;
     }
     const POS_WORDS = /surges?|soars?|beats?|strong|rises?|record|gains?|upgrades?|bullish|profit|growth|rally|buy|outperform|expands?|exceeds?/i;
@@ -4569,6 +4609,41 @@ async function loadAdvMetrics(ticker) {
 /* =====================================================
    INSTITUTIONAL & FINRA OTC ACTIVITY
 ===================================================== */
+/* Famous investors' positions from their SEC 13F filings (/api/funds). */
+async function loadFamousInvestors(ticker){
+  const block=document.getElementById('funds-block'),tb=document.getElementById('funds-tbody');
+  if(!block||!tb)return;
+  block.hidden=true;
+  let d=null;
+  try{const r=await fetch('/api/funds/'+encodeURIComponent(ticker),{credentials:'same-origin'});d=r.ok?await r.json():null;}catch(_){d=null;}
+  if(!d||S.ticker&&String(S.ticker).toUpperCase()!==String(ticker).toUpperCase())return;
+  const money=v=>v>=1e9?'$'+(v/1e9).toFixed(2)+'B':v>=1e6?'$'+(v/1e6).toFixed(1)+'M':v>=1e3?'$'+Math.round(v/1e3)+'K':'$'+Math.round(v||0);
+  const qtr=p=>{if(!p)return'';const dt=new Date(p+'T12:00:00Z');return'Q'+(Math.floor(dt.getUTCMonth()/3)+1)+' '+dt.getUTCFullYear();};
+  const note=document.getElementById('funds-note'),sold=document.getElementById('funds-sold');
+  const holders=d.holders||[],out=d.soldOut||[];
+  if(d.loading&&!holders.length){block.hidden=false;note.textContent='Reading the latest 13F filings from well-known investors. Check back in a minute.';tb.innerHTML='';sold.hidden=true;return;}
+  if(!d.managersTracked)return;
+  block.hidden=false;
+  note.textContent=holders.length
+    ?`${holders.length} of the ${d.managersTracked} well-known investors we follow held ${ticker} at the end of ${qtr(d.latestPeriod)||'last quarter'}, from their SEC 13F filings. These are filed up to 45 days after the quarter ends, so they show what was held then, not today.`
+    :`None of the ${d.managersTracked} well-known investors we follow held ${ticker} at the end of ${qtr(d.latestPeriod)||'last quarter'} (SEC 13F filings).`;
+  const badge=h=>{
+    if(h.change==='new')return'<span class="il-funds-chg is-buy">New position</span>';
+    if(h.change==='added')return`<span class="il-funds-chg is-buy">Bought more (+${Math.round(h.changePct)}%)</span>`;
+    if(h.change==='reduced')return`<span class="il-funds-chg is-sell">Sold some (${Math.round(h.changePct)}%)</span>`;
+    if(h.change==='unchanged')return'<span class="il-funds-chg">No change</span>';
+    return'<span class="il-funds-chg">—</span>';
+  };
+  tb.innerHTML=holders.length?holders.map(h=>`<tr>
+    <td><a href="${escapeHtml(h.url)}" target="_blank" rel="noopener" class="il-funds-name">${escapeHtml(h.fund)}</a><span class="il-funds-who">${escapeHtml(h.who||'')}</span></td>
+    <td>${money(h.value)}<span class="il-funds-sub">${escapeHtml(fmtShares(h.shares))} shares</span></td>
+    <td>${h.weight!=null?(h.weight>=1?h.weight.toFixed(1):h.weight.toFixed(2))+'%':'—'}<span class="il-funds-sub">#${h.rank} of ${h.positions} holdings</span></td>
+    <td>${badge(h)}<span class="il-funds-sub">${escapeHtml(qtr(h.period))}</span></td>
+  </tr>`).join(''):'<tr><td colspan="4" style="text-align:center;color:var(--text5);padding:1.25rem;">No positions in the latest filings.</td></tr>';
+  if(out.length){sold.hidden=false;sold.textContent='Sold their whole position last quarter: '+out.map(o=>o.fund+(o.who?` (${o.who})`:'')).join(', ')+'.';}
+  else sold.hidden=true;
+}
+
 async function loadInstitutional(ticker) {
   const dpCards  = document.getElementById('dp-cards');
   const dpCanvas = document.getElementById('dp-chart');
@@ -4584,6 +4659,7 @@ async function loadInstitutional(ticker) {
       proAwareFetch('/api/darkpool/'+encodeURIComponent(ticker),'institutional'),
       proAwareFetch('/api/institutional/'+encodeURIComponent(ticker),'institutional'),
     ]);
+    loadFamousInvestors(ticker);
     if (dpResult.status === 'rejected' && instResult.status === 'rejected') throw dpResult.reason;
     const dpData = dpResult.status === 'fulfilled' ? await dpResult.value.json() : {};
     const instData = instResult.status === 'fulfilled' ? await instResult.value.json() : {};
@@ -4664,8 +4740,8 @@ async function loadInstitutional(ticker) {
       if(instHead) instHead.innerHTML = '<th>Insider</th><th>Trade</th><th>Shares</th><th>Price</th><th>Date</th>';
       const note = document.getElementById('inst-insider-note') || (()=>{ const d=document.createElement('p'); d.id='inst-insider-note'; d.style.cssText='font-size:12.5px;color:var(--text4);margin:-.25rem 0 .75rem;line-height:1.5;'; instTitle && instTitle.insertAdjacentElement('afterend', d); return d; })();
       note.textContent = instData.insiders.length
-        ? `${sm.buys||0} open-market buy${sm.buys===1?'':'s'} (${money(sm.buyValue||0)}) and ${sm.sells||0} sale${sm.sells===1?'':'s'} (${money(sm.sellValue||0)}) by officers, directors and 10% owners. Insiders sell for many reasons; buys with their own money are the rarer, stronger signal. Top institutional holders need a data plan we don't have yet.`
-        : 'No open-market insider buys or sales in the last 12 months. Top institutional holders need a data plan we don\'t have yet.';
+        ? `${sm.buys||0} open-market buy${sm.buys===1?'':'s'} (${money(sm.buyValue||0)}) and ${sm.sells||0} sale${sm.sells===1?'':'s'} (${money(sm.sellValue||0)}) by officers, directors and 10% owners. Insiders sell for many reasons; buys with their own money are the rarer, stronger signal.`
+        : 'No open-market insider buys or sales in the last 12 months.';
       instTbl.innerHTML = instData.insiders.length ? instData.insiders.map(t => {
         const buy = t.code === 'P';
         return `<tr>

@@ -1815,3 +1815,61 @@ html body #acct-modal-bg section.il-acct-sec { padding: 16px 0 0 !important; mar
 #view-tool .il-lab-cta-copy { margin: 0 0 12px; font: 500 13px/1.55 var(--rp-sans) !important; color: var(--rp-text-2) !important; }
 #view-tool .il-lab-cta-btn { display: inline-flex !important; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px !important; border-radius: 10px !important; border: 0 !important; background: var(--rp-gold) !important; color: #17130c !important; font: 600 13.5px/1 var(--rp-sans) !important; cursor: pointer; }
 
+
+/* ── Stock page reading order (research-flow.js, audit fix 6) ─────────── */
+#view-tool .il-flow-parked, #view-tool .il-insights[hidden] { display: none !important; }
+#view-tool .il-ind-more {
+  margin: var(--r5-gap) 0 0 !important; background: var(--rp-panel) !important; border: 1px solid var(--rp-line) !important;
+  border-radius: var(--r5-radius) !important; box-shadow: var(--rp-shadow) !important; overflow: hidden !important;
+}
+#view-tool .il-ind-more > summary {
+  display: flex !important; align-items: baseline !important; gap: 12px !important; padding: 16px var(--r5-pad) !important;
+  cursor: pointer !important; list-style: none !important; color: var(--rp-ink) !important;
+}
+#view-tool .il-ind-more > summary::-webkit-details-marker { display: none !important; }
+#view-tool .il-ind-more > summary span { font: 700 15px/1.2 var(--rp-sans) !important; }
+#view-tool .il-ind-more > summary small { font: 500 12.5px/1.3 var(--rp-sans) !important; color: var(--rp-muted) !important; }
+#view-tool .il-ind-more > summary .il-ind-chev {
+  margin-left: auto !important; align-self: center !important; width: 8px !important; height: 8px !important;
+  border-right: 2px solid var(--rp-gold) !important; border-bottom: 2px solid var(--rp-gold) !important;
+  transform: translateY(-2px) rotate(45deg) !important; transition: transform .2s ease !important;
+}
+#view-tool .il-ind-more[open] > summary .il-ind-chev { transform: translateY(2px) rotate(225deg) !important; }
+#view-tool .dash-layout.il-flow > .il-ind-more { grid-column: 1 / -1 !important; margin: 0 !important; }
+#view-tool .il-ind-more > summary:focus-visible { outline: 2px solid var(--rp-gold) !important; outline-offset: -2px !important; }
+#view-tool .il-ind-more > .il-ind-panel { border: 0 !important; border-top: 1px solid var(--rp-line) !important; border-radius: 0 !important; box-shadow: none !important; }
+#view-tool .il-ind-more .il-ind-title { display: none !important; }
+
+/* Risk: Simple (plain lines) / All measures */
+#view-tool #risk-panel { position: relative !important; }
+#view-tool .risk-switch {
+  position: absolute !important; top: var(--r5-pad, 20px) !important; right: var(--r5-pad, 20px) !important;
+  display: inline-flex !important; gap: 2px !important; padding: 3px !important; border-radius: 12px !important;
+  background: var(--rp-inset) !important; border: 1px solid var(--rp-line) !important;
+}
+#view-tool .risk-switch-btn {
+  height: 30px !important; padding: 0 12px !important; border-radius: 9px !important; border: 1px solid transparent !important;
+  background: transparent !important; color: var(--rp-muted) !important; font: 600 12.5px/1 var(--rp-sans) !important; cursor: pointer !important;
+}
+#view-tool .risk-switch-btn[aria-pressed="true"] { background: var(--rp-panel) !important; color: var(--rp-ink) !important; border-color: var(--rp-gold-ring) !important; }
+#view-tool .risk-view[hidden] { display: none !important; }
+#view-tool .risk-plain { display: grid !important; gap: 0 !important; }
+#view-tool .risk-plain-row {
+  display: grid !important; grid-template-columns: minmax(150px, 220px) minmax(84px, 120px) minmax(0, 1fr) !important; align-items: baseline !important;
+  gap: 16px !important; padding: 13px 0 !important; border-bottom: 1px solid var(--rp-line) !important;
+}
+#view-tool .risk-plain-row:last-child { border-bottom: 0 !important; }
+#view-tool .risk-plain-lbl { font: 600 13.5px/1.3 var(--rp-sans) !important; color: var(--rp-ink) !important; }
+#view-tool .risk-plain-val { font: 700 20px/1 'IBM Plex Sans', system-ui, sans-serif !important; color: var(--rp-ink) !important; font-variant-numeric: tabular-nums !important; }
+#view-tool .risk-plain-val.is-up { color: #3fae76 !important; }
+#view-tool .risk-plain-val.is-down { color: #e0656d !important; }
+#view-tool .risk-plain-val.is-warn { color: var(--rp-gold) !important; }
+#view-tool .risk-plain-note { font: 400 12.5px/1.45 var(--rp-sans) !important; color: var(--rp-muted) !important; }
+html[data-theme="dark"] #view-tool .risk-plain-val.is-up { color: #4fd18b !important; }
+html[data-theme="dark"] #view-tool .risk-plain-val.is-down { color: #f2737b !important; }
+@media (max-width: 640px) {
+  #view-tool .risk-switch { position: static !important; margin: 0 0 10px !important; }
+  #view-tool .risk-plain-row { grid-template-columns: minmax(0, 1fr) auto !important; gap: 4px 12px !important; }
+  #view-tool .risk-plain-note { grid-column: 1 / -1 !important; }
+  #view-tool .il-ind-more > summary small { display: none !important; }
+}

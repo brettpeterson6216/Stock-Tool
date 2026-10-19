@@ -1155,7 +1155,6 @@ ${thesis ? `<h2>Saved thesis</h2><div class="rp-thesis"><strong>${esc2(thesis.ti
     ];
     const n = await filings(ticker);
     if (window.IL_STATE?.ticker !== ticker) return;
-    const newsN = document.querySelectorAll("#news-items .news-item").length;
     let card = document.getElementById("il-coverage");
     if (!card) {
       card = document.createElement("div"); card.className = "sidebar-card"; card.id = "il-coverage";
@@ -1164,7 +1163,7 @@ ${thesis ? `<h2>Saved thesis</h2><div class="rp-thesis"><strong>${esc2(thesis.ti
     const markup = `<div class="sidebar-card-title">Research coverage</div>
       <div class="il-cov-list">${steps.map(([l, done, sec]) =>
         `<button type="button" class="il-cov-step${done ? " done" : ""}" onclick="openSection('${sec}')"><i class="ti ${done ? "ti-circle-check-filled" : "ti-circle"}"></i>${l}<span>${done ? "Complete" : "Open"}</span></button>`).join("")}</div>
-      <div class="il-cov-src">${n != null ? `<span><i class="ti ti-file-text"></i>${n} SEC filings</span>` : ""}<span><i class="ti ti-news"></i>${newsN} news items</span><span><i class="ti ti-database"></i>3 data providers</span></div>`;
+      <div class="il-cov-src">${n != null ? `<span><i class="ti ti-file-text"></i>${n} SEC filings</span>` : ""}<span><i class="ti ti-database"></i>SEC EDGAR, market prices, FINRA</span></div>`;
     // Preserve the reader's focused control and avoid rebuilding an unchanged
     // sidebar every three seconds (which also woke the document observers).
     if (card.dataset.coverageMarkup !== markup) {

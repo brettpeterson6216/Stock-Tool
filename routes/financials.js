@@ -23,6 +23,7 @@ const { deriveEarnings, loadCompanyFacts, loadFinnhubResearch, loadPriceHistory 
 const { buildQuarterlyHistory, attachPrices } = require("../lib/fundamentals-history");
 const secUniverse = require("../lib/sec-universe");
 const secFilings = require("../lib/sec-filings");
+const sec13f = require("../lib/sec-13f");
 const prices = require("../lib/prices");
 const router = express.Router();
 const UA     = "ImpliedLens/1.0 brettpeterson6216@gmail.com";
@@ -828,6 +829,23 @@ router.get("/institutional/:ticker", requirePro, async (req, res) => {
   } catch (e) {
     console.error("insider (Form 4) error:", e.message);
     res.status(503).json({ error: "Insider filings are unavailable for this ticker.", synthetic: false });
+  }
+});
+
+// ============================================================
+//  GET /api/funds/:ticker  (everyone; public SEC data)
+// ============================================================
+/* Which well-known investors held the stock at the last quarter end, and
+   whether they bought or sold in that quarter (lib/sec-13f.js, SEC 13F). */
+router.get("/funds/:ticker", async (req, res) => {
+  const ticker = requestTicker(req, res);
+  if (!ticker) return;
+  try {
+    const data = await sec13f.forTicker(ticker);
+    res.setHeader("Cache-Control", "public, max-age=900");
+    res.json({ ...data, impliedLens: sourceMeta("SEC EDGAR Form 13F filings", { asOf: data.latestPeriod }) });
+  } catch (e) {
+    res.status(404).json({ error: "No 13F holdings for this ticker.", holders: [], soldOut: [] });
   }
 });
 

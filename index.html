@@ -61,6 +61,7 @@
     "Stock screener with grade filters and presets",
     "Email alerts for price, buy zones and grade changes",
     "Insider transactions from SEC Form 4 filings",
+    "Famous investors' holdings from SEC 13F filings",
     "FINRA OTC (off-exchange) volume",
     "Compare up to 4 stocks side by side",
     "Risk metrics: Sharpe, Sortino, Alpha, Beta, VaR",
@@ -550,7 +551,7 @@
           <li><i class="ti ti-file-certificate" aria-hidden="true"></i><b>SEC-sourced financials</b><span>Income, balance sheet and cash flow straight from EDGAR XBRL.</span></li>
           <li><i class="ti ti-focus-2" aria-hidden="true"></i><b>LensScore, decomposed</b><span>Separate value and setup lenses with every component visible.</span></li>
           <li><i class="ti ti-adjustments" aria-hidden="true"></i><b>Scenario valuation</b><span>Bear, Base and Bull projections and an operating-model valuation you control.</span></li>
-          <li><i class="ti ti-filter" aria-hidden="true"></i><b>Screener and ownership</b><span>Find candidates, then check insider trades and off-exchange volume.</span></li>
+          <li><i class="ti ti-filter" aria-hidden="true"></i><b>Screener and ownership</b><span>Find candidates, then see which famous investors own them and what insiders are doing.</span></li>
         </ul>
         <a class="lx-link" href="/?view=tool&amp;section=analyze&amp;symbol=NVDA">Open the research workspace <i class="ti ti-arrow-right" aria-hidden="true"></i></a>
       </article>
@@ -599,7 +600,7 @@
           <li><i class="ti ti-check" aria-hidden="true"></i>Grade screener with ready-made presets</li>
           <li><i class="ti ti-check" aria-hidden="true"></i>Projection Lab and Valuation Lab</li>
           <li><i class="ti ti-check" aria-hidden="true"></i>50 price, buy-zone and grade-change alerts</li>
-          <li><i class="ti ti-check" aria-hidden="true"></i>SEC filings and insider buying and selling</li>
+          <li><i class="ti ti-check" aria-hidden="true"></i>SEC filings, insider trades and famous investors&rsquo; holdings</li>
           <li><i class="ti ti-check" aria-hidden="true"></i>Risk metrics, off-exchange volume and CSV exports</li>
         </ul>
         <a class="lx-btn lx-btn-gold" href="/signup?next=%2F%3Fpricing%3D1&amp;source=landing_pricing_pro">Start {{TRIAL_DAYS}}-day free trial</a>
@@ -1000,7 +1001,7 @@
       <div class="pricing-toggle" role="group" aria-label="Pro billing period"><button class="active" id="pricing-period-monthly" onclick="setPricingPeriod('monthly')">Monthly</button><button id="pricing-period-annual" onclick="setPricingPeriod('annual')">Annual · save {{PLAN_ANNUAL_SAVINGS_PERCENT}}%</button></div>
       <div class="pricing-grid">
         <div class="pricing-card"><div class="pricing-tier">Free</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">0</span><span class="p-per">/month</span></div><p class="p-desc">Build a repeatable research habit before paying.</p><ul class="p-features"><li>{{FREE_DAILY_LIMIT}} company analyses a day</li><li>LensScore report card</li><li>Charts and financial statements</li><li>Decision workspace and thesis tracking</li><li>Portfolio Guide</li><li>3 email alerts</li></ul><button class="btn-plan btn-plan-dark" id="pricing-free-btn">Create free account</button></div>
-        <div class="pricing-card featured"><div class="pricing-pop">{{TRIAL_DAYS}}-day free trial</div><div class="pricing-tier">Pro</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount" id="pricing-pro-amount">{{PLAN_MONTHLY_AMOUNT}}</span><span class="p-per" id="pricing-pro-period">/month</span></div><p class="p-desc" id="pricing-pro-note">Start with a {{TRIAL_DAYS}}-day free trial. Have a discount code? Enter it in Checkout.</p><ul class="p-features"><li>Unlimited company analyses</li><li>Grade screener with presets</li><li>Projection Lab and Valuation Lab</li><li>50 price and grade alerts</li><li>SEC filings and insider trades</li><li>PDF and CSV exports</li></ul><button class="btn-plan btn-plan-gold" id="pricing-pro-btn">Start {{TRIAL_DAYS}}-day free trial &rarr;</button></div>
+        <div class="pricing-card featured"><div class="pricing-pop">{{TRIAL_DAYS}}-day free trial</div><div class="pricing-tier">Pro</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount" id="pricing-pro-amount">{{PLAN_MONTHLY_AMOUNT}}</span><span class="p-per" id="pricing-pro-period">/month</span></div><p class="p-desc" id="pricing-pro-note">Start with a {{TRIAL_DAYS}}-day free trial. Have a discount code? Enter it in Checkout.</p><ul class="p-features"><li>Unlimited company analyses</li><li>Grade screener with presets</li><li>Projection Lab and Valuation Lab</li><li>50 price and grade alerts</li><li>SEC filings, insider trades and 13F holdings</li><li>PDF and CSV exports</li></ul><button class="btn-plan btn-plan-gold" id="pricing-pro-btn">Start {{TRIAL_DAYS}}-day free trial &rarr;</button></div>
       </div>
       <div class="pricing-compare" aria-label="Free and Pro feature comparison"><div class="pricing-compare-row head"><span>Capability</span><span>Free</span><span>Pro</span></div><div class="pricing-compare-row"><span>Workspace, thesis, watchlist, Portfolio Guide</span><span class="yes">Included</span><span class="yes">Included</span></div><div class="pricing-compare-row"><span>Daily stock analyses</span><span>5 / day</span><span class="yes">Unlimited</span></div><div class="pricing-compare-row"><span>Advanced valuation, calls, screener, export</span><span>Preview</span><span class="yes">Included</span></div></div>
     </div></section>
@@ -1052,7 +1053,7 @@
         <div class="sb-item" data-sec="advmetrics"><i class="ti ti-report-analytics sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Metrics</span></div>
         <div class="sb-item" data-sec="earnings"><i class="ti ti-trending-up sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Earnings</span></div>
         <div class="sb-item" data-sec="secfilings"><i class="ti ti-file-text sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">SEC Filings</span></div>
-        <div class="sb-item" data-sec="institutional"><i class="ti ti-building-bank sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Insiders &amp; OTC</span></div>
+        <div class="sb-item" data-sec="institutional"><i class="ti ti-building-bank sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Ownership</span></div>
         <div class="sb-item" data-sec="compare"><i class="ti ti-adjustments-horizontal sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Compare</span></div>
         <div class="sb-item" data-sec="screener"><i class="ti ti-filter sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Screener</span></div>
         <div class="sb-item" data-sec="projection"><i class="ti ti-calculator sb-item-icon" aria-hidden="true"></i><span class="sb-item-label">Valuation Lab</span></div>
@@ -1133,7 +1134,7 @@
         <button class="mst-btn" data-sec="advmetrics">Metrics</button>
         <button class="mst-btn" data-sec="earnings">Earnings</button>
         <button class="mst-btn" data-sec="secfilings">SEC</button>
-        <button class="mst-btn" data-sec="institutional">Insiders</button>
+        <button class="mst-btn" data-sec="institutional">Ownership</button>
         <button class="mst-btn" data-sec="compare">Compare</button>
         <button class="mst-btn" data-sec="dcf">Value</button>
         <button class="mst-btn" data-sec="screener">Screener</button>
@@ -1295,7 +1296,7 @@
                 <!-- Market context news (fills the rail; no sticky float) -->
                 <div class="panel-box">
                   <div class="news-section">
-                    <div class="news-lbl">Market Context</div>
+                    <div class="news-lbl">Latest company filings</div>
                     <div id="news-items"></div>
                   </div>
                 </div>
@@ -1352,7 +1353,7 @@
 
               <!-- INLINE: Risk & Volatility -->
               <div class="panel-box" style="margin-bottom:14px;" id="risk-panel">
-                <div class="panel-box-title">Risk &amp; Volatility Assessment</div>
+                <div class="panel-box-title">How risky has it been?</div>
                 <div id="risk-content">
                   <div style="color:var(--text5);font-size:12px;">Load a stock to see risk metrics.</div>
                 </div>
@@ -1439,11 +1440,23 @@
 
           <!-- INSTITUTIONAL & FINRA OTC ACTIVITY -->
           <div class="app-section" id="sec-institutional"><div class="acc-body" id="body-institutional" style="display:none;">
-              <div style="font-size:12px;color:var(--text4);margin-bottom:1.25rem;">Insider buying and selling from SEC Form 4 filings, and FINRA-reported off-exchange (OTC) activity.</div>
+              <div style="font-size:12px;color:var(--text4);margin-bottom:1.25rem;">Famous investors&rsquo; positions from SEC 13F filings, insider buying and selling from Form 4, and FINRA-reported off-exchange (OTC) activity.</div>
               <div id="inst-loading" class="loading-bar" style="display:none;"><div class="spinner"></div> Loading institutional data…</div>
               <div id="inst-nostock" style="color:var(--text5);font-size:13px;">Search for a stock in the Research tab first.</div>
               <div id="inst-content" style="display:none;">
                 <div id="inst-source" class="il-data-source-line"></div>
+                <!-- Famous investors (SEC 13F) -->
+                <div class="il-funds-block" id="funds-block" hidden>
+                  <div class="analyst-box-title" style="margin-bottom:.35rem;">Famous investors who own it</div>
+                  <p class="il-funds-note" id="funds-note"></p>
+                  <div style="overflow-x:auto;">
+                    <table class="inst-table il-funds-table">
+                      <thead><tr><th>Investor</th><th>Value</th><th>Share of their portfolio</th><th>Last quarter</th></tr></thead>
+                      <tbody id="funds-tbody"></tbody>
+                    </table>
+                  </div>
+                  <p class="il-funds-sold" id="funds-sold" hidden></p>
+                </div>
                 <!-- OTC Activity & Short Interest Cards -->
                 <div class="analyst-box-title" style="margin-bottom:.65rem;">FINRA OTC Activity &amp; Short Interest</div>
                 <div id="dp-cards" class="dp-grid"></div>

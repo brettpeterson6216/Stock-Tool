@@ -2618,3 +2618,20 @@ html body .cmp-prefill-note { margin: 10px 0 0 !important; font-size: 12.5px !im
 html body .cmp-table tr.cmp-ls-row td { font-family: 'IBM Plex Sans', system-ui, sans-serif !important; font-weight: 600 !important; }
 html body .cmp-table tr.cmp-ls-last td { border-bottom: 2px solid var(--rp-line-strong, var(--rp-line)) !important; }
 html body .hg-signals[hidden] { display: none !important; }
+
+/* Famous investors (SEC 13F) in the Ownership section */
+html body .il-funds-block { margin: 0 0 1.5rem !important; }
+html body .il-funds-block[hidden] { display: none !important; }
+html body .il-funds-note { margin: 0 0 .75rem !important; font-size: 12.5px !important; line-height: 1.55 !important; color: var(--rp-muted, var(--text4)) !important; max-width: 70ch !important; }
+html body .il-funds-table td { vertical-align: top !important; font-family: 'IBM Plex Sans', system-ui, sans-serif !important; }
+html body .il-funds-name { color: var(--rp-ink, var(--text)) !important; font-weight: 600 !important; text-decoration: none !important; }
+html body .il-funds-name:hover { color: var(--rp-gold) !important; }
+html body .il-funds-who, html body .il-funds-sub { display: block !important; margin-top: 2px !important; font-size: 11px !important; font-weight: 400 !important; color: var(--rp-muted, var(--text5)) !important; }
+html body .il-funds-chg { display: inline-block !important; padding: 2px 8px !important; border-radius: 8px !important; font-size: 11.5px !important; font-weight: 600 !important; color: var(--rp-muted, var(--text4)) !important; background: rgba(140,140,130,.12) !important; white-space: nowrap !important; }
+html body .il-funds-chg.is-buy { color: #45d08f !important; background: rgba(69,208,143,.12) !important; }
+html body .il-funds-chg.is-sell { color: #ff6670 !important; background: rgba(255,102,112,.12) !important; }
+html[data-theme="light"] body .il-funds-chg.is-buy { color: #0a7a43 !important; }
+html[data-theme="light"] body .il-funds-chg.is-sell { color: #c0283a !important; }
+html body .il-funds-sold { margin: .65rem 0 0 !important; font-size: 12px !important; color: var(--rp-muted, var(--text4)) !important; }
+html body .il-funds-sold[hidden] { display: none !important; }
+html body .il-sc-chip.is-funds { cursor: pointer !important; }

@@ -1,27 +1,36 @@
 /* Research flow: the Chart & Analysis page as one reading order.
 
    The legacy markup is a two-column dashboard (charts left, a long rail
-   right), which left the centre empty below the fold and shrank every
-   indicator to a thumbnail. This module rearranges the SAME elements — ids
-   untouched, so every renderer keeps working — into:
+   right). This module rearranges the SAME elements — ids untouched, so every
+   renderer keeps working — into one order a beginner can follow and a pro
+   can skim (audit fix 6, Oct 2026):
 
-     price chart (full width, tall)
-     insights row: analyst target · plain-English read · risk
-     indicators: one large chart, tabbed (RSI, MACD, Volume, OBV, ATR, Returns)
-     news (wide, two columns)  |  tools (Quick EPS, research coverage)
+     report card (stock-report-card.js) and key numbers
+     price chart (full width; RSI and volume are panes inside it)
+     read the chart (trend, momentum, volume in plain English)
+     what is it worth (one valuation view, one link to the Valuation Lab)
+     risk (five plain lines by default, every measure one click away)
+     filings and research coverage
+     more indicators (MACD, OBV, ATR, returns), folded away
+
+   Removed from view, still rendered for the scripts that read them: the
+   second RSI and volume charts, the plain-English bullet card (it repeated
+   "Read the chart"), the mini risk card (it repeated the risk panel), the
+   Quick EPS calculator and the Bear/Base/Bull teaser (the Valuation Lab does
+   both, properly).
 
    No data logic lives here. */
 (function () {
   "use strict";
 
   var TABS = [
-    { id: "rsi-chart", label: "RSI" },
     { id: "macd-chart", label: "MACD" },
-    { id: "vol-chart", label: "Volume" },
     { id: "obv-chart", label: "OBV" },
     { id: "atr-chart", label: "ATR" },
     { id: "dist-chart", label: "Returns" }
   ];
+  // Already panes of the main chart; their legacy copies are parked.
+  var DUPLICATES = ["rsi-chart", "vol-chart"];
   var KEY = "il-ind-tab";
 
   function el(tag, cls, html) {
@@ -83,10 +92,38 @@
       body.appendChild(p.wrap);
     });
 
-    if (firstGrid) firstGrid.before(panel); else main.appendChild(panel);
+    var parked = parking(main);
+    DUPLICATES.forEach(function (id) {
+      var c = document.getElementById(id), w = c && c.closest(".chart-wrap");
+      if (w) parked.appendChild(w);
+    });
+    // Folded away at the end of the page: useful to traders, noise to a beginner.
+    var more = el("details", "il-ind-more");
+    var sum = el("summary", "il-ind-more-sum", '<span>More indicators</span><small>MACD, on-balance volume, ATR, daily returns</small><b class="il-ind-chev" aria-hidden="true"></b>');
+    more.appendChild(sum);
+    more.appendChild(panel);
+    more.addEventListener("toggle", function () {
+      if (!more.open) return;
+      panes.forEach(function (p) { if (!p.wrap.hidden) requestAnimationFrame(function () { resizeChart(p.canvas); }); });
+    });
+    var layout = main.closest(".dash-layout");
+    (layout || main).appendChild(more);
     main.querySelectorAll(".g2").forEach(function (g) { if (!g.querySelector(".chart-wrap")) g.remove(); });
     var start = panes.some(function (p) { return p.tab.id === saved; }) ? saved : panes[0].tab.id;
     select(start);
+  }
+
+  /* A hidden holder for elements other scripts still fill or read. */
+  function parking(scope) {
+    var p = document.getElementById("il-flow-parked");
+    if (!p) {
+      p = el("div", "il-flow-parked");
+      p.id = "il-flow-parked";
+      p.hidden = true;
+      p.setAttribute("aria-hidden", "true");
+      (document.getElementById("stock-result") || scope).appendChild(p);
+    }
+    return p;
   }
 
 
@@ -96,9 +133,9 @@
   var INTROS = {
     financials:   ["ti-report-money", "Financials", "What the business", "actually earns.", "Four years of income, balance sheet and cash flow, straight from SEC filings."],
     advmetrics:   ["ti-report-analytics", "Metrics", "Quality, price and", "the balance sheet.", "Valuation multiples, margins, returns and leverage in one view."],
-    earnings:     ["ti-chart-arrows-vertical", "Earnings", "Promises versus", "results.", "Consensus estimates against reported earnings, quarter by quarter."],
+    earnings:     ["ti-chart-arrows-vertical", "Earnings", "Promises versus", "results.", "Reported earnings quarter by quarter, straight from SEC filings."],
     secfilings:   ["ti-file-search", "SEC filings", "Read the source,", "not the summary.", "Annual, quarterly and current reports direct from SEC EDGAR."],
-    institutional:["ti-building-bank", "Ownership", "Who owns it,", "and who is moving.", "Insider buying and selling, plus weekly off-exchange volume."],
+    institutional:["ti-building-bank", "Ownership", "Who owns it,", "and who is moving.", "Famous investors' positions, insider buying and selling, and weekly off-exchange volume."],
     compare:      ["ti-arrows-diff", "Compare", "Side by side,", "on equal terms.", "Up to four companies with normalized performance and fundamentals."],
     screener:     ["ti-filter", "Screener", "Find the candidates", "worth a closer look.", "Filter the market by value, size, income and momentum."],
     projection:   ["ti-calculator", "Valuation Lab", "What could it", "be worth?", "Bear, Base and Bull projections with every assumption editable."],
@@ -144,22 +181,42 @@
     var rail = layout.querySelector(".dash-sidebar");
     if (!main || !rail) return;
     layout.classList.add("il-flow");
+    var parked = parking(main);
 
     var price = main.querySelector(".chart-wrap");
-    // Insights row. #il-plain-read is created later right after
-    // #analyst-sidebar, so it lands in this row on its own.
+    // Analyst consensus shows only when a licensed feed supplies it; the row
+    // disappears when the slot is empty.
     var insights = el("div", "il-insights");
-    ["analyst-sidebar", "sidebar-risk"].forEach(function (id) {
-      var n = document.getElementById(id);
-      if (n) insights.appendChild(n);
-    });
-    var plain = document.getElementById("il-plain-read");
-    if (plain) insights.insertBefore(plain, document.getElementById("sidebar-risk"));
+    var analyst = document.getElementById("analyst-sidebar");
+    if (analyst) insights.appendChild(analyst);
     if (price) price.after(insights); else main.prepend(insights);
+    function tidyInsights() {
+      ["il-plain-read", "sidebar-risk"].forEach(function (id) {
+        var n = document.getElementById(id);
+        if (n && n.parentElement !== parked) parked.appendChild(n);
+      });
+      insights.hidden = !analyst || !analyst.children.length;
+    }
+    tidyInsights();
+    if ("MutationObserver" in window) {
+      new MutationObserver(tidyInsights).observe(insights, { childList: true, subtree: true });
+      new MutationObserver(tidyInsights).observe(rail, { childList: true });
+    }
+
+    // One valuation view, then risk, straight after the chart.
+    var worth = document.getElementById("il-worth");
+    var reads = document.getElementById("il-chart-reads");
+    var risk = document.getElementById("risk-panel");
+    if (reads) insights.after(reads);
+    if (worth) (reads || insights).after(worth);
+    if (risk) (worth || reads || insights).after(risk);
+    ["il-quick-eps"].forEach(function (id) { var n = document.getElementById(id); if (n) parked.appendChild(n); });
+    var lab = document.querySelector("#stock-result .il-lab-cta");
+    if (lab) parked.appendChild(lab);
 
     buildIndicators(main);
 
-    // News gets the wide column; the rail keeps the tools.
+    // Filings and news get the wide column; research coverage sits beside them.
     var news = rail.querySelector(".news-section");
     var newsBox = news && news.closest(".panel-box");
     if (newsBox) {
@@ -169,16 +226,6 @@
       rail.before(col);
     }
     rail.classList.add("il-tools-col");
-
-    // Research coverage is appended to the rail later; it reads better under
-    // the news, so the two columns finish at similar heights.
-    var newsCol = layout.querySelector(".il-news-col");
-    function moveCoverage() {
-      var cov = document.getElementById("il-coverage");
-      if (cov && newsCol && cov.parentElement !== newsCol) newsCol.appendChild(cov);
-    }
-    moveCoverage();
-    if (newsCol && "MutationObserver" in window) new MutationObserver(moveCoverage).observe(rail, { childList: true });
   }
 
   function init() {
