@@ -57,12 +57,13 @@ test("discount rate uses an adjusted beta and stays in a sane band", () => {
 
 test("estimates say 'unavailable' instead of 'available' with nulls", () => {
   const src = fs.readFileSync(path.join(__dirname, "..", "routes", "financials.js"), "utf8");
-  assert.match(src, /status: hasEstimates \? "available" : "unavailable"/);
+  assert.match(src, /estimatesAvailable: false/);
+  assert.match(src, /status: "unavailable"/);
   assert.doesNotMatch(src, /const forwardPE = m\["peNormalizedAnnual"\]/);
 });
 
-test("the quote P/E prefers TTM over the year-old annual figure", () => {
+test("the quote P/E is the trailing-twelve-month figure from SEC filings", () => {
   const src = fs.readFileSync(path.join(__dirname, "..", "routes", "market-data.js"), "utf8");
-  assert.doesNotMatch(src, /peNormalizedAnnual\s*\|\|\s*m2?\.peBasicExclExtraTTM/);
-  assert.match(src, /peBasicExclExtraTTM\s*\|\|\s*m\.peNormalizedAnnual/);
+  assert.doesNotMatch(src, /peNormalizedAnnual/);
+  assert.match(src, /result\.meta\.trailingPE = m\.peTTM; result\.meta\.peBasis = "ttm"/);
 });

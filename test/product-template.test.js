@@ -42,11 +42,12 @@ test("all public product promises resolve from the canonical plan configuration"
 
 test("provider disclosures are generated from the registry and omit retired claims", () => {
   const page = renderProductTemplate(fs.readFileSync(path.join(ROOT, "public/data-sources.html"), "utf8"));
-  for (const provider of ["Yahoo Finance", "Finnhub", "SEC EDGAR", "FINRA OTC Transparency", "Stooq"]) {
+  for (const provider of ["Marketstack", "SEC EDGAR", "FINRA OTC Transparency"]) {
     assert.match(page, new RegExp(provider));
   }
+  assert.doesNotMatch(page, /Finnhub|Stooq/, "unlicensed sources are not listed as providers");
   assert.doesNotMatch(page, /\bFRED\b/);
-  assert.match(page, /Show the observation timestamp returned by the provider/);
+  assert.match(page, /Show the date of the latest daily bar/);
   assert.match(page, /delayed, aggregated OTC activity/i);
 });
 

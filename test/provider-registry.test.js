@@ -22,11 +22,10 @@ const ROOT = path.join(__dirname, "..");
 
 test("registry covers every current public data source and named operating service", () => {
   const expected = [
+    "marketstack",
     "yahoo-finance",
-    "finnhub",
     "sec-edgar",
     "finra-otc",
-    "stooq",
     "turso",
     "stripe",
     "render",
@@ -70,7 +69,7 @@ test("market and research providers stay separate from infrastructure and proces
   const marketIds = listProviders({ category: CATEGORIES.MARKET_RESEARCH }).map(provider => provider.id);
   const infrastructureIds = listProviders({ category: CATEGORIES.INFRASTRUCTURE_PROCESSOR }).map(provider => provider.id);
 
-  assert.deepEqual(marketIds, ["yahoo-finance", "finnhub", "sec-edgar", "finra-otc", "stooq"]);
+  assert.deepEqual(marketIds, ["marketstack", "yahoo-finance", "sec-edgar", "finra-otc"]);
   assert.ok(infrastructureIds.includes("turso"));
   assert.ok(infrastructureIds.includes("stripe"));
   assert.ok(infrastructureIds.includes("render"));
@@ -80,11 +79,11 @@ test("market and research providers stay separate from infrastructure and proces
 });
 
 test("status and role describe real conditional behavior without claiming provider uptime", () => {
-  assert.equal(getProvider("yahoo-finance").role, "primary");
-  assert.equal(getProvider("stooq").role, "fallback");
-  assert.equal(getProvider("stooq").status, "optional");
+  assert.equal(getProvider("marketstack").role, "primary");
+  assert.equal(getProvider("yahoo-finance").role, "fallback");
+  assert.equal(getProvider("yahoo-finance").status, "optional");
   assert.equal(getProvider("anthropic").status, "optional");
-  assert.equal(getProvider("finnhub").status, "active");
+  assert.equal(getProvider("finnhub"), null);
   assert.equal(listProviders({ includeOptional: false }).some(provider => provider.optional), false);
 });
 
@@ -97,9 +96,10 @@ test("actual route and library integrations named by the registry remain present
   const billing = fs.readFileSync(path.join(ROOT, "routes", "billing.js"), "utf8");
   const buildInfo = fs.readFileSync(path.join(ROOT, "lib", "build-info.js"), "utf8");
 
-  assert.match(market, /finance\.yahoo\.com/);
-  assert.match(market, /finnhub\.io/);
-  assert.match(market, /stooq\.com/);
+  const prices = fs.readFileSync(path.join(ROOT, "lib", "prices.js"), "utf8");
+  assert.match(prices, /api\.marketstack\.com/);
+  assert.match(prices, /finance\.yahoo\.com/);
+  assert.doesNotMatch(market, /stooq\.com/);
   assert.match(financials, /data\.sec\.gov/);
   assert.match(financials, /api\.finra\.org/);
   assert.match(database, /@libsql\/client/);
@@ -111,7 +111,7 @@ test("actual route and library integrations named by the registry remain present
 
 test("lookup and HTML helpers resolve aliases without reflecting untrusted input", () => {
   assert.equal(providerName("SEC EDGAR XBRL"), "SEC EDGAR");
-  assert.match(providerSummary("Finnhub metrics"), /^Finnhub:/);
+  assert.match(providerSummary("Marketstack"), /^Marketstack:/);
   assert.equal(renderProviderNameHtml("TradingView"), "TradingView Lightweight Charts");
   assert.match(renderProviderSummaryHtml("stripe"), /Stripe:/);
 

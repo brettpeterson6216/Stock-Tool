@@ -713,13 +713,13 @@
 /* ── Source provenance notes: every data tab names its providers ─────────────── */
 (function () {
   const SOURCES = {
-    financials:    "SEC EDGAR XBRL statements · optional Finnhub supplement",
-    advmetrics:    "SEC EDGAR XBRL calculations · optional Finnhub supplement",
-    earnings:      "SEC-reported EPS · optional Finnhub estimates",
+    financials:    "SEC EDGAR XBRL statements",
+    advmetrics:    "SEC EDGAR XBRL calculations",
+    earnings:      "SEC-reported EPS",
     secfilings:    "SEC EDGAR — links open official filings",
-    institutional: "FINRA OTC weekly data · optional Finnhub ownership",
-    screener:      "Finnhub + exchange reference data",
-    compare:       "Yahoo Finance charts · optional Finnhub fundamentals",
+    institutional: "SEC Form 4 insider filings · FINRA OTC weekly data",
+    screener:      "SEC filings + daily prices",
+    compare:       "Daily prices · SEC filings",
   };
   function inject() {
     Object.entries(SOURCES).forEach(([sec, label]) => {
@@ -1068,7 +1068,7 @@ ${metrics.length ? `<h2>Key metrics</h2><table>${metrics.map(x => `<tr><td class
 ${plain.length ? `<h2>Plain-English read</h2><ul>${plain.map(p => `<li>${esc2(p)}</li>`).join("")}</ul>` : ""}
 ${dcfOut ? `<h2>Valuation model output</h2><pre>${esc2(dcfOut)}</pre>` : ""}
 ${thesis ? `<h2>Saved thesis</h2><div class="rp-thesis"><strong>${esc2(thesis.title || S.ticker + " thesis")}</strong><br>${esc2(thesis.thesis || thesis.summary || "")}${thesis.review_date ? `<br><br><em>Next review: ${esc2(thesis.review_date)}</em>` : ""}</div>` : ""}
-<div class="rp-foot"><strong>Sources:</strong> Yahoo Finance chart data · SEC EDGAR XBRL statements · Finnhub fundamentals &amp; estimates · FINRA OTC data. Methodology: impliedlens.com/data-sources.<br><strong>Disclaimer:</strong> ImpliedLens provides market data and modeling tools for informational and educational purposes only. This report reflects user-selected assumptions and is not investment advice. Past performance does not guarantee future results.</div>
+<div class="rp-foot"><strong>Sources:</strong> licensed daily price data · SEC EDGAR XBRL statements and filings · FINRA OTC data. Methodology: impliedlens.com/data-sources.<br><strong>Disclaimer:</strong> ImpliedLens provides market data and modeling tools for informational and educational purposes only. This report reflects user-selected assumptions and is not investment advice. Past performance does not guarantee future results.</div>
 <script>window.onload=()=>setTimeout(()=>window.print(),350)<\/script>
 </body></html>`;
     const w = window.open("", "_blank", "width=880,height=1000");

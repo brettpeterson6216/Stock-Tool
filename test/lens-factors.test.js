@@ -95,12 +95,12 @@ test("the LensToolkit page is built around the report card and the API ships gra
   assert.equal(card.grades.score, 7.1);
 });
 
-test("peer universe maps Finnhub industries and keeps only graded fields", () => {
+test("peer universe keeps SEC-built rows with only graded fields", () => {
   const peers = require("../lib/peer-universe");
   peers._reset();
-  peers.put("ZZZ", { profile: { name: "Zed", finnhubIndustry: "Banking", marketCapitalization: 1000 }, metric: { peTTM: 9, junk: 1 }, price: 12 });
+  peers.put("ZZZ", { name: "Zed", sector: "Finance", industry: "National commercial banks", metric: { peTTM: 9, junk: 1, marketCapitalization: 1000 }, price: 12 });
   const r = peers.get("ZZZ");
-  assert.equal(r.s, "Finance"); assert.equal(r.mc, 1e9); assert.equal(r.m.peTTM, 9); assert.equal(r.m.junk, undefined);
+  assert.equal(r.s, "Finance"); assert.equal(r.mc, 1e9); assert.equal(r.m.peTTM, 9); assert.equal(r.m.junk, undefined); assert.equal(r.src, "sec");
   assert.equal(peers.all().length, 1);
   peers._reset();
 });

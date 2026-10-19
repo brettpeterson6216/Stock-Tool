@@ -743,7 +743,8 @@
     const date = d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" });
     const when = n.days === 0 ? "today" : n.days === 1 ? "tomorrow" : `in ${n.days} days`;
     const p = el("p", "rc-st-next");
-    p.append(el("i", "ti ti-calendar-event"), el("span", null, `Next earnings ${date}${n.when ? `, ${n.when}` : ""} (${when}).${n.epsEstimate != null ? ` Estimate $${n.epsEstimate.toFixed(2)} a share.` : ""}`));
+    const label = n.estimated ? `Expected around ${date}` : `Next earnings ${date}`;
+    p.append(el("i", "ti ti-calendar-event"), el("span", null, `${label}${n.when ? `, ${n.when}` : ""} (${when}).${n.epsEstimate != null ? ` Estimate $${n.epsEstimate.toFixed(2)} a share.` : ""}`));
     p.firstChild.setAttribute("aria-hidden", "true");
     return p;
   }

@@ -11,6 +11,8 @@ const express = require("express");
 const { FINNHUB_KEY }              = require("../lib/config");
 const { requirePro, checkAnalysisLimit, normalizeTicker } = require("../lib/plan");
 const { recordProvider } = require("../lib/provider-health");
+const prices = require("../lib/prices");
+const secUniverse = require("../lib/sec-universe");
 
 const router = express.Router();
 const _responseCache = new Map();
@@ -70,27 +72,53 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 5000) {
 // ============================================================
 //  News
 // ============================================================
+/* Company "news" is the company's own SEC filings: 8-Ks (results, deals,
+   management changes) and periodic reports, each linked to the filing.
+   Licensed headline feeds cost far more than this site's data budget, and
+   the filings are the primary source the headlines are written from. */
+const ITEM_TITLES = {
+  "1.01": "Signed a material agreement", "1.02": "Ended a material agreement", "1.03": "Bankruptcy or receivership",
+  "2.01": "Completed an acquisition or sale of assets", "2.02": "Reported quarterly results", "2.03": "Took on new debt or obligations",
+  "2.05": "Announced restructuring costs", "2.06": "Reported an impairment", "3.01": "Listing or exchange notice",
+  "3.02": "Sold unregistered shares", "4.01": "Changed auditor", "5.02": "Executive or board change",
+  "5.03": "Changed its bylaws or fiscal year", "5.07": "Shareholder vote results", "7.01": "Shared information with investors (Reg FD)",
+  "8.01": "Announced other events",
+};
+const secFilings = require("../lib/sec-filings");
+const secData = require("../lib/sec-fundamentals");
 router.get("/news/:ticker", async (req, res) => {
   const ticker = normalizeTicker(req.params.ticker);
   if (!ticker) return res.status(400).json({ error: "Invalid ticker." });
   const started = Date.now();
   try {
     const cacheKey = `news:${ticker}`;
-    const cached = getCached(cacheKey, 5 * 60 * 1000);
+    const cached = getCached(cacheKey, 30 * 60 * 1000);
     if (cached) return res.json(cached);
-    const to     = new Date().toISOString().split("T")[0];
-    const from   = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
-    const url    = `https://finnhub.io/api/v1/company-news?symbol=${ticker}&from=${from}&to=${to}&token=${FINNHUB_KEY}`;
-    const r      = await fetchWithTimeout(url);
-    if (!r.ok) console.warn(`[news] Finnhub returned ${r.status} for ${ticker}`);
-    const data   = await r.json();
-    const items = Array.isArray(data) ? data.slice(0, 10) : [];
-    recordProvider("Finnhub", r.ok, Date.now() - started, r.ok ? "News available" : `HTTP ${r.status}`);
+    const id = await secData.cikFor(ticker);
+    if (!id) { setCached(cacheKey, []); return res.json([]); }
+    const sub = await secData.submissions(ticker);
+    const since = new Date(Date.now() - 120 * 86400000).toISOString().slice(0, 10);
+    const items = secData.recentFilings(sub)
+      .filter(f => f.filingDate >= since && (f.form === "8-K" || /^(10-Q|10-K)$/.test(f.form)))
+      .slice(0, 10)
+      .map(f => {
+        const codes = String(f.items || "").split(",").map(x => x.trim()).filter(c => ITEM_TITLES[c]);
+        const what = f.form === "8-K" ? (codes.map(c => ITEM_TITLES[c])[0] || "Filed a current report") : f.form === "10-K" ? "Filed its annual report (10-K)" : "Filed its quarterly report (10-Q)";
+        const acc = String(f.accession || "").replace(/-/g, "");
+        return {
+          headline: `${sub.name || ticker}: ${what}`,
+          summary: codes.length > 1 ? codes.slice(1).map(c => ITEM_TITLES[c]).join("; ") : "",
+          source: `SEC ${f.form}`,
+          url: f.primaryDocument ? `https://www.sec.gov/Archives/edgar/data/${Number(id.cik)}/${acc}/${f.primaryDocument}` : null,
+          datetime: Math.floor(Date.parse((f.acceptance || f.filingDate + "T12:00:00Z")) / 1000),
+          category: "filing",
+        };
+      });
+    recordProvider("SEC EDGAR", true, Date.now() - started, `${items.length} filings for ${ticker}`);
     setCached(cacheKey, items);
     res.json(items);
   } catch (e) {
-    recordProvider("Finnhub", false, Date.now() - started, e.message);
-    console.error(`[news] error for ${ticker}:`, e.message);
+    recordProvider("SEC EDGAR", false, Date.now() - started, e.message);
     res.json([]);
   }
 });
@@ -187,60 +215,6 @@ const SCREENER_SECTOR = {
 let _screenerCache = { data: null, ts: 0 };
 const SCREENER_TTL = 20 * 60 * 1000;
 
-function yahooRaw(value) {
-  const raw = value && typeof value === "object" ? value.raw : value;
-  return raw !== null && raw !== undefined && raw !== "" && Number.isFinite(Number(raw))
-    ? Number(raw)
-    : null;
-}
-
-async function loadYahooScreenerUniverse() {
-  const screens = ["most_actives", "day_gainers", "day_losers"];
-  const settled = await Promise.allSettled(screens.map(async (screen) => {
-    const url = `https://query1.finance.yahoo.com/v1/finance/screener/predefined/saved?formatted=true&scrIds=${screen}&start=0&count=100`;
-    const response = await fetchWithTimeout(url, {
-      headers: { "User-Agent": "Mozilla/5.0" },
-    }, 8000);
-    if (!response.ok) throw new Error(`Yahoo screener ${screen} returned ${response.status}`);
-    const payload = await response.json();
-    return payload?.finance?.result?.[0]?.quotes || [];
-  }));
-
-  const byTicker = new Map();
-  settled.forEach((result) => {
-    if (result.status !== "fulfilled") return;
-    result.value.forEach((quote) => {
-      const ticker = normalizeTicker(quote?.symbol);
-      const price = yahooRaw(quote?.regularMarketPrice);
-      if (!ticker || !(price > 0) || quote?.quoteType !== "EQUITY") return;
-      const dividendRatio = yahooRaw(quote.trailingAnnualDividendYield);
-      const dividendYield = dividendRatio !== null && dividendRatio >= 0 && dividendRatio <= 0.25
-        ? dividendRatio * 100
-        : null;
-      byTicker.set(ticker, {
-        ticker,
-        name: quote.shortName || quote.longName || ticker,
-        sector: SCREENER_SECTOR[ticker] || "Other",
-        price,
-        change1D: yahooRaw(quote.regularMarketChangePercent) ?? 0,
-        change1Y: yahooRaw(quote.fiftyTwoWeekChangePercent),
-        revenueGrowth: null,
-        marketCap: yahooRaw(quote.marketCap),
-        pe: yahooRaw(quote.trailingPE) ?? yahooRaw(quote.forwardPE),
-        pb: yahooRaw(quote.priceToBook),
-        dividendYield,
-        beta: yahooRaw(quote.beta),
-        rsi: null,
-        epsGrowth: null,
-        averageVolume: yahooRaw(quote.averageDailyVolume3Month),
-        asOf: yahooRaw(quote.regularMarketTime),
-        source: quote.quoteSourceName || "Yahoo Finance screener",
-      });
-    });
-  });
-  return [...byTicker.values()];
-}
-
 /* ── Screener enrichment ─────────────────────────────────────────────────
    The screener used to be today's Yahoo most-actives/gainers/losers only,
    with sector "Other" for 90% of rows and revenue growth, EPS growth, beta
@@ -249,8 +223,7 @@ async function loadYahooScreenerUniverse() {
    beta, valuation) and a Yahoo daily chart (price, 1D/1Y change, RSI-14).
    A background job fills rows at low priority through lib/finnhub-gate, so
    it never starves someone's stock page; results are kept for a day. */
-const { finnhubJson } = require("../lib/finnhub-gate");
-const ENRICH_TTL = 5.5 * 3600 * 1000, PRICE_TTL = 20 * 60 * 1000;
+const ENRICH_TTL = 6 * 3600 * 1000, PRICE_TTL = 6 * 3600 * 1000;
 const _enrich = new Map();   // ticker -> { at, priceAt, sector, revenueGrowth, ... }
 let _enrichRunning = false;
 
@@ -268,57 +241,35 @@ function rsi14(closes) {
   }
   return l === 0 ? 100 : 100 - 100 / (1 + g / l);
 }
-async function yahooYear(ticker) {
-  try {
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yahooSymbol(ticker))}?interval=1d&range=1y&includePrePost=false`;
-    const r = await fetchWithTimeout(url, { headers: { "User-Agent": "Mozilla/5.0" } }, 8000);
-    if (!r.ok) return null;
-    const j = await r.json();
-    const res = j?.chart?.result?.[0];
-    const closes = (res?.indicators?.quote?.[0]?.close || []).filter(v => Number.isFinite(v) && v > 0);
-    if (closes.length < 20) return null;
-    const meta = res.meta || {};
-    const price = Number(meta.regularMarketPrice) || closes.at(-1);
-    const prev = closes.length >= 2 ? closes.at(-2) : null;
-    const lastIsToday = meta.regularMarketTime && Math.abs(meta.regularMarketTime - (res.timestamp || []).at(-1)) < 86400;
-    const base = lastIsToday ? prev : closes.at(-1);
-    return {
-      price, change1D: base ? (price / base - 1) * 100 : null,
-      change1Y: (price / closes[0] - 1) * 100, rsi: rsi14(closes.slice(-120)),
-      averageVolume: null, asOf: meta.regularMarketTime || null,
-      name: meta.longName || meta.shortName || null,
-    };
-  } catch (_) { return null; }
-}
+/* One screener row: company figures from SEC filings, prices from the
+   licensed provider (lib/sec-universe.js does both and also feeds the
+   LensScore peer set). Background priority, so it stops early on quota. */
 async function enrichOne(ticker) {
   const prev = _enrich.get(ticker) || {};
   const out = { ...prev };
   const now = Date.now();
-  if (!prev.at || now - prev.at > ENRICH_TTL) {
-    const [profile, metric] = await Promise.all([
-      finnhubJson(`https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${FINNHUB_KEY}`),
-      finnhubJson(`https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FINNHUB_KEY}`),
-    ]);
-    const m = metric?.metric || {};
-    if (profile || metric) peers.put(ticker, { profile, metric: m });
-    if (profile || metric) {
-      out.at = now;
-      out.sector = sectorFromIndustry(profile?.finnhubIndustry) || prev.sector || null;
-      out.name = profile?.name || prev.name || null;
-      out.marketCap = Number(profile?.marketCapitalization) > 0 ? Number(profile.marketCapitalization) * 1e6
-        : Number(m.marketCapitalization) > 0 ? Number(m.marketCapitalization) * 1e6 : prev.marketCap ?? null;
-      out.revenueGrowth = Number.isFinite(m.revenueGrowthTTMYoy) ? m.revenueGrowthTTMYoy : null;
-      out.epsGrowth = Number.isFinite(m.epsGrowthTTMYoy) ? m.epsGrowthTTMYoy : null;
-      out.beta = Number.isFinite(m.beta) ? m.beta : null;
-      out.pe = Number(m.peTTM || m.peBasicExclExtraTTM) || null;
-      out.pb = Number(m.pbQuarterly || m.pbAnnual) || null;
-      out.dividendYield = Number.isFinite(m.dividendYieldIndicatedAnnual) ? m.dividendYieldIndicatedAnnual : null;
+  try {
+    const co = await secUniverse.forTicker(ticker, { kind: "background" });
+    const m = co.metric || {};
+    const closes = (co.rows || []).map(r => r.close).filter(v => Number.isFinite(v) && v > 0);
+    out.at = now; out.priceAt = now;
+    out.name = co.name || prev.name || null;
+    out.sector = co.sector || prev.sector || null;
+    out.marketCap = Number(m.marketCapitalization) > 0 ? m.marketCapitalization * 1e6 : prev.marketCap ?? null;
+    out.revenueGrowth = Number.isFinite(m.revenueGrowthTTMYoy) ? m.revenueGrowthTTMYoy : null;
+    out.epsGrowth = Number.isFinite(m.epsGrowthTTMYoy) ? m.epsGrowthTTMYoy : null;
+    out.beta = Number.isFinite(m.beta) ? m.beta : null;
+    out.pe = Number(m.peTTM) > 0 ? Number(m.peTTM) : null;
+    out.pb = Number(m.pbQuarterly) > 0 ? Number(m.pbQuarterly) : null;
+    out.dividendYield = Number.isFinite(m.dividendYieldIndicatedAnnual) ? m.dividendYieldIndicatedAnnual : null;
+    if (closes.length >= 2) {
+      out.price = closes.at(-1);
+      out.change1D = (closes.at(-1) / closes.at(-2) - 1) * 100;
+      out.change1Y = Number.isFinite(m["52WeekPriceReturnDaily"]) ? m["52WeekPriceReturnDaily"] : (closes.at(-1) / closes[0] - 1) * 100;
+      out.rsi = rsi14(closes.slice(-120));
+      out.asOf = co.rows.at(-1)?.day ? Math.floor(Date.parse(co.rows.at(-1).day + "T21:00:00Z") / 1000) : null;
     }
-  }
-  if (!prev.priceAt || now - prev.priceAt > PRICE_TTL) {
-    const y = await yahooYear(ticker);
-    if (y) { Object.assign(out, y, { priceAt: now, name: out.name || y.name }); peers.setPrice(ticker, y.price); }
-  }
+  } catch (_) { /* ETFs and foreign listings have no SEC facts */ }
   _enrich.set(ticker, out);
 }
 function startEnrichment(tickers) {
@@ -332,8 +283,8 @@ function startEnrichment(tickers) {
   (async () => {
     try {
       const queue = todo.map(t => ({ t, tries: 0 }));
-      /* A ticker whose Finnhub calls were refused (rate limit) goes back on
-         the queue, up to three tries, instead of waiting six hours. */
+      /* A ticker that failed (SEC busy, price quota) goes back on the
+         queue, up to three tries, instead of waiting six hours. */
       const worker = async () => {
         while (queue.length) {
           const job = queue.shift();
@@ -367,7 +318,7 @@ function screenerRow(ticker, base) {
     epsGrowth: e.epsGrowth ?? null,
     averageVolume: pick(base && base.averageVolume, e.averageVolume),
     asOf: pick(base && base.asOf, e.asOf),
-    source: base ? base.source : "Yahoo Finance chart + Finnhub fundamentals",
+    source: `SEC filings + ${prices.sourceLabel()}`,
     enriched: !!e.at,
   };
   const lg = universeGrades.get(ticker);
@@ -379,7 +330,7 @@ function screenerRow(ticker, base) {
    gate's cache, so a stock page for any of them answers from cache instead of
    spending the shared per-minute quota (live audit 2026-10-06: a burst of
    page loads ran it out and metrics/analyst answered 503 for niche names). */
-if (process.env.NODE_ENV === "production" && FINNHUB_KEY) {
+if (process.env.NODE_ENV === "production") {
   const warm = () => startEnrichment([...new Set(SCREENER_TICKERS)].filter(t => !SCREENER_ETFS.has(t)));
   setTimeout(warm, 20 * 1000).unref();
   setInterval(warm, 6 * 3600 * 1000).unref();
@@ -390,18 +341,9 @@ router.get("/screener", requirePro, async (req, res) => {
     res.setHeader("X-Screener-Enriching", _enrichRunning ? "1" : "0");
     return res.json(_screenerCache.data);
   }
-  const started = Date.now();
-  let movers = [];
-  try {
-    movers = await loadYahooScreenerUniverse();
-    recordProvider("Yahoo Finance", movers.length >= 10, Date.now() - started, `${movers.length} screener movers`);
-  } catch (error) {
-    recordProvider("Yahoo Finance", false, Date.now() - started, error.message);
-  }
-  const byTicker = new Map(movers.map(m => [m.ticker, m]));
-  const universe = [...new Set([...SCREENER_TICKERS, ...byTicker.keys()])];
+  const universe = [...new Set(SCREENER_TICKERS)].filter(t => !SCREENER_ETFS.has(t));
   startEnrichment(universe);
-  const rows = universe.map(t => screenerRow(t, byTicker.get(t))).filter(r => r.price > 0);
+  const rows = universe.map(t => screenerRow(t, null)).filter(r => r.price > 0);
   if (!rows.length) return res.status(503).json({ error: "Screener data is warming up. Try again in a minute." });
   _screenerCache = { data: rows, ts: Date.now() };
   res.setHeader("X-Screener-Enriching", _enrichRunning ? "1" : "0");
@@ -433,190 +375,46 @@ router.get("/quote/:ticker", checkAnalysisLimit, async (req, res) => {
     const cached = getCached(cacheKey, 60 * 1000);
     if (cached) return res.json(cached);
 
-    const YH = {
-      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-      "Accept": "application/json, text/plain, */*",
-      "Accept-Language": "en-US,en;q=0.9",
-      "Origin": "https://finance.yahoo.com",
-      "Referer": "https://finance.yahoo.com/",
-    };
-
+    /* Prices come from lib/prices.js (Marketstack when licensed, Yahoo only
+       as a legacy fallback before that); company figures for the header
+       (market cap, P/E, beta) come from SEC filings. No unlicensed source is
+       called here. */
     let data = null;
     let source = null;
-
-    // Attempt 1: Yahoo Finance v8 chart (query2)
     try {
-      const u = `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yahooSymbol(ticker))}?interval=${interval}&range=${range}&includePrePost=false`;
-      const r = await fetchWithTimeout(u, { headers: YH }, 4000);
-      if (r.ok) {
-        const j = await r.json();
-        if (j?.chart?.result?.[0]?.timestamp?.length) {
-          console.log(`[quote] Yahoo query2 OK for ${ticker}`);
-          data = j;
-          source = "Yahoo Finance chart";
-        }
-      }
-    } catch (e) { console.log(`[quote] Yahoo query2 failed for ${ticker}: ${e.message}`); }
+      const chart = await prices.getChart(ticker, { range, interval });
+      source = chart.source;
+      data = { chart: chart.chart };
+    } catch (e) { console.log(`[quote] ${prices.sourceLabel()} failed for ${ticker}: ${e.message}`); }
 
-    // Attempt 2: Yahoo Finance v8 chart (query1)
-    if (!data) {
-      try {
-        const u = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yahooSymbol(ticker))}?interval=${interval}&range=${range}&includePrePost=false`;
-        const r = await fetchWithTimeout(u, { headers: YH }, 4000);
-        if (r.ok) {
-          const j = await r.json();
-          if (j?.chart?.result?.[0]?.timestamp?.length) {
-          console.log(`[quote] Yahoo query1 OK for ${ticker}`);
-          data = j;
-          source = "Yahoo Finance chart";
-          }
-        }
-      } catch (e) { console.log(`[quote] Yahoo query1 failed for ${ticker}: ${e.message}`); }
-    }
-
-    // Attempt 3: Yahoo Finance v7 CSV
-    if (!data) {
-      try {
-        const now2      = Math.floor(Date.now() / 1000);
-        const rangeSecs = { "1d":86400,"5d":5*86400,"1mo":30*86400,"3mo":90*86400,"6mo":180*86400,"1y":365*86400,"2y":730*86400,"5y":1825*86400,"10y":3650*86400,"max":10950*86400 };
-        // "max" → start at the epoch so we get the company's full listed history.
-        const period1   = range === "max" ? 0 : now2 - (rangeSecs[range] || 365*86400);
-        const csvInterval = (range === "5y" || range === "10y") ? "1wk" : (range === "max" ? "1mo" : "1d");
-        const csvUrl    = `https://query1.finance.yahoo.com/v7/finance/download/${encodeURIComponent(yahooSymbol(ticker))}?period1=${period1}&period2=${now2}&interval=${csvInterval}&events=history&includeAdjustedClose=true`;
-        const r         = await fetchWithTimeout(csvUrl, { headers: YH }, 4000);
-        if (r.ok) {
-          const csv   = await r.text();
-          const lines = csv.trim().split("\n").slice(1).filter(l => l && !l.startsWith("Date") && !l.includes("<") && !l.startsWith("No data"));
-          if (lines.length > 2) {
-            const timestamps=[], opens=[], highs=[], lows=[], closes=[], vols=[];
-            for (const line of lines) {
-              const [date,,o,h,l,c,,v] = line.split(",");
-              if (!date || !c || isNaN(parseFloat(c))) continue;
-              timestamps.push(Math.floor(new Date(date).getTime()/1000));
-              opens.push(parseFloat(o)||null); highs.push(parseFloat(h)||null);
-              lows.push(parseFloat(l)||null);  closes.push(parseFloat(c));
-              vols.push(parseInt(v)||null);
-            }
-            if (timestamps.length > 2) {
-              console.log(`[quote] Yahoo v7 CSV OK for ${ticker} (${timestamps.length} rows)`);
-              data = { chart: { result: [{ meta: {
-                symbol: ticker, currency: "USD", exchangeName: "", instrumentType: "EQUITY",
-                longName: ticker, shortName: ticker,
-                regularMarketPrice: closes[closes.length-1],
-                previousClose: closes[closes.length-2] || null,
-                chartPreviousClose: closes[closes.length-2] || null,
-              }, timestamp: timestamps, indicators: {
-                quote: [{ open: opens, high: highs, low: lows, close: closes, volume: vols }],
-                adjclose: [{ adjclose: closes }],
-              }}], error: null }};
-              source = "Yahoo Finance historical CSV";
-            }
-          }
-        }
-      } catch (e) { console.log(`[quote] Yahoo v7 CSV failed for ${ticker}: ${e.message}`); }
-    }
-
-    // Attempt 4: Stooq CSV
-    if (!data) {
-      try {
-        const now3     = new Date();
-        const rangeDays = { "1d":5,"5d":10,"1mo":35,"3mo":95,"6mo":185,"1y":370,"2y":740,"5y":1830,"10y":3660,"max":10960 };
-        const days     = rangeDays[range] || 370;
-        const from     = new Date(now3 - days * 86400000);
-        const fmt      = d => d.toISOString().slice(0,10).replace(/-/g,"");
-        const stooqUrl = `https://stooq.com/q/d/l/?s=${encodeURIComponent(ticker)}.US&d1=${fmt(from)}&d2=${fmt(now3)}&i=d`;
-        const r        = await fetchWithTimeout(stooqUrl, { headers: { "User-Agent": "Mozilla/5.0" } }, 8000);
-        if (r.ok) {
-          const csv   = await r.text();
-          const lines = csv.trim().split("\n").slice(1).filter(l => l && !l.startsWith("No data") && !l.includes("<"));
-          if (lines.length > 2) {
-            const timestamps=[], opens=[], highs=[], lows=[], closes=[], vols=[];
-            for (const line of lines) {
-              const [date,o,h,l,c,v] = line.split(",");
-              if (!date || !c || isNaN(parseFloat(c))) continue;
-              timestamps.push(Math.floor(new Date(date).getTime()/1000));
-              opens.push(parseFloat(o)||null); highs.push(parseFloat(h)||null);
-              lows.push(parseFloat(l)||null);  closes.push(parseFloat(c));
-              vols.push(parseInt(v)||null);
-            }
-            if (timestamps.length > 2) {
-              console.log(`[quote] Stooq OK for ${ticker} (${timestamps.length} rows)`);
-              const FH = FINNHUB_KEY;
-              const [qr, pr, mr] = await Promise.all([
-                fetchWithTimeout(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FH}`,             {}, 4000).catch(()=>null),
-                fetchWithTimeout(`https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${FH}`,   {}, 4000).catch(()=>null),
-                fetchWithTimeout(`https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FH}`, {}, 4000).catch(()=>null),
-              ]);
-              const qt = qr?.ok ? await qr.json().catch(()=>({})) : {};
-              const pf = pr?.ok ? await pr.json().catch(()=>({})) : {};
-              const mt = mr?.ok ? await mr.json().catch(()=>({})) : {};
-              const m2 = mt.metric || {};
-              const price2  = qt.c || closes[closes.length-1];
-              const shares2 = pf.shareOutstanding ? pf.shareOutstanding * 1e6 : null;
-              data = { chart: { result: [{ meta: {
-                symbol: ticker, currency: pf.currency||"USD", exchangeName: pf.exchange||"",
-                instrumentType: "EQUITY", longName: pf.name||ticker, shortName: pf.name||ticker,
-                regularMarketPrice: price2, previousClose: qt.pc||null, chartPreviousClose: qt.pc||null,
-                regularMarketVolume: qt.v||vols[vols.length-1]||null,
-                averageDailyVolume3Month: m2["3MonthAverageTradingVolume"] ? m2["3MonthAverageTradingVolume"]*1e6 : null,
-                marketCap: shares2 && price2 ? shares2*price2 : null,
-                fiftyTwoWeekHigh: m2["52WeekHigh"]||null, fiftyTwoWeekLow: m2["52WeekLow"]||null,
-                // TTM first: the annual figure lags a full fiscal year (NVDA read 47x vs 30x TTM).
-                trailingPE: m2.peBasicExclExtraTTM||m2.peNormalizedAnnual||null,
-                peBasis: m2.peBasicExclExtraTTM ? "ttm" : (m2.peNormalizedAnnual ? "annual" : null),
-                beta: Number.isFinite(Number(m2.beta)) ? Number(m2.beta) : null,
-              }, timestamp: timestamps, indicators: {
-                quote: [{ open: opens, high: highs, low: lows, close: closes, volume: vols }],
-                adjclose: [{ adjclose: closes }],
-              }}], error: null }};
-              source = "Stooq historical prices + Finnhub snapshot";
-            }
-          } else {
-            console.log(`[quote] Stooq returned no rows for ${ticker}: ${csv.slice(0,200)}`);
-          }
-        }
-      } catch (e) { console.log(`[quote] Stooq failed for ${ticker}: ${e.message}`); }
-    }
-
-    if (!data) {
-      console.log(`[quote] All sources exhausted for ${ticker}`);
+    if (!data?.chart?.result?.[0]?.timestamp?.length) {
       recordProvider("Market prices", false, Date.now() - started, `No price data for ${ticker}`);
       return res.status(404).json({ error: `No price data found for "${ticker}". Check the ticker symbol.` });
     }
 
-    // Augment meta with Finnhub real-time data if missing
     const result = data.chart.result[0];
-    if (!result.meta.marketCap || !result.meta.fiftyTwoWeekHigh) {
-      try {
-        const FH = FINNHUB_KEY;
-        const [qr, pr, mr] = await Promise.all([
-          fetchWithTimeout(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FH}`,             {}, 4000).catch(()=>null),
-          fetchWithTimeout(`https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${FH}`,   {}, 4000).catch(()=>null),
-          fetchWithTimeout(`https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FH}`, {}, 4000).catch(()=>null),
-        ]);
-        const qt = qr?.ok ? await qr.json().catch(()=>({})) : {};
-        const pf = pr?.ok ? await pr.json().catch(()=>({})) : {};
-        const mt = mr?.ok ? await mr.json().catch(()=>({})) : {};
-        const m  = mt.metric || {};
-        const shares = pf.shareOutstanding ? pf.shareOutstanding*1e6 : null;
-        const price  = qt.c || result.meta.regularMarketPrice;
-        result.meta.longName              = result.meta.longName  || pf.name || ticker;
-        result.meta.shortName             = result.meta.shortName || pf.name || ticker;
-        result.meta.regularMarketPrice    = price || result.meta.regularMarketPrice;
-        result.meta.previousClose         = qt.pc || result.meta.previousClose;
-        result.meta.chartPreviousClose    = qt.pc || result.meta.chartPreviousClose;
-        result.meta.regularMarketVolume   = qt.v  || result.meta.regularMarketVolume;
-        result.meta.marketCap             = (shares && price) ? shares*price : result.meta.marketCap;
-        result.meta.fiftyTwoWeekHigh      = m["52WeekHigh"]  || result.meta.fiftyTwoWeekHigh;
-        result.meta.fiftyTwoWeekLow       = m["52WeekLow"]   || result.meta.fiftyTwoWeekLow;
-        // TTM first: the annual normalized P/E lags a full fiscal year.
-        result.meta.trailingPE            = m.peBasicExclExtraTTM || m.peNormalizedAnnual || result.meta.trailingPE;
-        result.meta.peBasis               = m.peBasicExclExtraTTM ? "ttm" : (m.peNormalizedAnnual ? "annual" : result.meta.peBasis || null);
-        if (result.meta.beta == null && Number.isFinite(Number(m.beta))) result.meta.beta = Number(m.beta);
-        result.meta.averageDailyVolume3Month = m["3MonthAverageTradingVolume"]
-          ? m["3MonthAverageTradingVolume"]*1e6 : result.meta.averageDailyVolume3Month;
-      } catch (_) {}
-    }
+    try {
+      // Filings for a company nobody has opened yet take a few seconds; the
+      // chart does not wait for them (the next view has them cached).
+      const pending = secUniverse.forTicker(ticker, { kind: "interactive" });
+      pending.catch(() => {});
+      const co = await Promise.race([
+        pending,
+        new Promise((_, reject) => setTimeout(() => reject(new Error("slow")), 2500)),
+      ]);
+      const m = co.metric || {};
+      const price = Number(result.meta.regularMarketPrice) || co.price;
+      const shares = co.snap?.sharesOutstanding;
+      result.meta.longName = co.name || result.meta.longName || ticker;
+      result.meta.shortName = result.meta.shortName && result.meta.shortName !== ticker ? result.meta.shortName : (co.name || ticker);
+      if (shares && price) result.meta.marketCap = shares * price;
+      if (m.peTTM > 0) { result.meta.trailingPE = m.peTTM; result.meta.peBasis = "ttm"; }
+      if (Number.isFinite(m.beta)) result.meta.beta = m.beta;
+      result.meta.fiftyTwoWeekHigh = result.meta.fiftyTwoWeekHigh || m["52WeekHigh"] || null;
+      result.meta.fiftyTwoWeekLow = result.meta.fiftyTwoWeekLow || m["52WeekLow"] || null;
+      result.meta.sector = co.sector || null;
+      result.meta.industry = co.industry || null;
+    } catch (_) { /* ETFs and foreign listings have no SEC facts; the chart still shows */ }
 
     const timestamps = result.timestamp || [];
     const latestTimestamp = timestamps.length ? timestamps[timestamps.length - 1] : null;
@@ -632,11 +430,11 @@ router.get("/quote/:ticker", checkAnalysisLimit, async (req, res) => {
       marketSession: marketSessionAt(),
       delayStatus: "provider-dependent",
       delayed: null,
-      fallback: Boolean(source && (source.startsWith("Stooq") || source.includes("historical CSV"))),
+      fallback: /legacy/i.test(source || ""),
       synthetic: false,
     };
     setCached(cacheKey, data);
-    recordProvider(source?.startsWith("Stooq") ? "Stooq" : "Yahoo Finance", true, Date.now() - started, source);
+    recordProvider(prices.provider() === "marketstack" ? "Marketstack" : "Yahoo Finance", true, Date.now() - started, source);
     res.json(data);
   } catch (e) {
     recordProvider("Market prices", false, Date.now() - started, e.message);
@@ -651,63 +449,27 @@ router.get("/quote/:ticker", checkAnalysisLimit, async (req, res) => {
 // ============================================================
 //  Home-dashboard analyst signals (free — key stays server-side)
 // ============================================================
-router.get("/market/analyst-signals", async (req, res) => {
-  const raw     = String(req.query.tickers || "");
-  const tickers = raw.split(",").map(normalizeTicker).filter(Boolean).slice(0, 10);
-  if (!tickers.length) return res.json({ buy: 0, hold: 0, sell: 0 });
-  const cacheKey = `signals:${tickers.sort().join(",")}`;
-  const cached = getCached(cacheKey, 10 * 60 * 1000);
-  if (cached) return res.json(cached);
-  try {
-    const results = await Promise.allSettled(
-      tickers.map(t =>
-        fetchWithTimeout(`https://finnhub.io/api/v1/stock/recommendation?symbol=${t}&token=${FINNHUB_KEY}`)
-          .then(r => r.ok ? r.json() : null).catch(() => null)
-      )
-    );
-    let buy = 0, hold = 0, sell = 0;
-    results.forEach(res => {
-      if (res.status !== "fulfilled" || !res.value?.length) return;
-      const l = res.value[0];
-      buy  += (l.strongBuy  || 0) + (l.buy   || 0);
-      hold += (l.hold       || 0);
-      sell += (l.strongSell || 0) + (l.sell  || 0);
-    });
-    const result = { buy, hold, sell };
-    setCached(cacheKey, result);
-    res.json(result);
-  } catch (e) {
-    console.error("analyst-signals error:", e.message);
-    res.json({ buy: 0, hold: 0, sell: 0 });
-  }
+router.get("/market/analyst-signals", (_req, res) => {
+  // Analyst ratings need a licensed feed the site does not have.
+  res.json({ available: false, buy: 0, hold: 0, sell: 0 });
 });
 
 // ============================================================
 //  Market movers (gainers / losers / most active)
 // ============================================================
-router.get("/market/movers", async (req, res) => {
+/* Movers among the ~300 companies the site grades, from their latest daily
+   closes (the licensed price feed does not sell a whole-market movers list). */
+router.get("/market/movers", (req, res) => {
   const requestedType = String(req.query.type || "gainers");
   const type = ["gainers", "losers", "active"].includes(requestedType) ? requestedType : "gainers";
-  const cacheKey = `movers:${type}`;
-  const cached = getCached(cacheKey, 2 * 60 * 1000);
-  if (cached) return res.json(cached);
-  const scrIds = type === "losers" ? "day_losers" : type === "active" ? "most_actives" : "day_gainers";
-  try {
-    const url = `https://query1.finance.yahoo.com/v1/finance/screener/predefined/saved?formatted=true&scrIds=${scrIds}&start=0&count=6`;
-    const r   = await fetchWithTimeout(url, { headers: { "User-Agent": "Mozilla/5.0" } }, 6000);
-    const j   = await r.json();
-    const quotes = j?.finance?.result?.[0]?.quotes || [];
-    const items  = quotes.map(q => ({
-      symbol: q.symbol,
-      name:   q.shortName || q.longName || q.symbol,
-      price:  q.regularMarketPrice?.raw ?? q.regularMarketPrice ?? 0,
-      chgPct: q.regularMarketChangePercent?.raw ?? q.regularMarketChangePercent ?? 0,
-    }));
-    setCached(cacheKey, items);
-    return res.json(items);
-  } catch (e) {
-    return res.json([]);
-  }
+  startEnrichment([...new Set(SCREENER_TICKERS)].filter(t => !SCREENER_ETFS.has(t)));
+  const rows = [..._enrich.entries()]
+    .map(([symbol, e]) => ({ symbol, name: e.name || symbol, price: e.price, chgPct: e.change1D, cap: e.marketCap || 0 }))
+    .filter(r => Number.isFinite(r.price) && r.price > 0 && Number.isFinite(r.chgPct));
+  const sorted = type === "losers" ? rows.sort((a, b) => a.chgPct - b.chgPct)
+    : type === "active" ? rows.sort((a, b) => Math.abs(b.chgPct) * Math.log10(b.cap + 10) - Math.abs(a.chgPct) * Math.log10(a.cap + 10))
+    : rows.sort((a, b) => b.chgPct - a.chgPct);
+  res.json(sorted.slice(0, 6).map(({ cap, ...r }) => r));
 });
 
 // ============================================================
@@ -771,10 +533,6 @@ router.get("/market/landing-summary", async (req, res) => {
   const cached = getCached(cacheKey, 5 * 60 * 1000);
   if (cached) return res.json(cached);
 
-  const YH = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36",
-    Accept: "application/json, text/plain, */*",
-  };
   // The three indexes are drawn as overlaid lines on one chart, so they need
   // their own point series, not just a headline number. The sector ETFs only
   // need today's move, which is what a single daily bar already carries.
@@ -795,12 +553,12 @@ router.get("/market/landing-summary", async (req, res) => {
 
   const SERIES_LADDER = WINDOWS[chartWindow].ladder;
 
+  /* Index levels need an index licence; with the licensed provider the
+     three lines are the ETFs that track them (SPY, QQQ, DIA). */
+  const ETF_FOR = { "^GSPC": "SPY", "^IXIC": "QQQ", "^DJI": "DIA" };
   async function fetchSeries(symbol, interval, range) {
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}` +
-      `?interval=${interval}&range=${range}&includePrePost=false`;
-    const response = await fetchWithTimeout(url, { headers: YH }, 6000);
-    if (!response.ok) throw new Error(`${symbol} returned ${response.status}`);
-    const payload = await response.json();
+    const sym = prices.provider() === "marketstack" ? (ETF_FOR[symbol] || symbol) : symbol;
+    const payload = await prices.getChart(sym, { range, interval });
     const result = payload?.chart?.result?.[0];
     if (!result) throw new Error(`${symbol} returned no result`);
     const rawCloses = result?.indicators?.quote?.[0]?.close || [];
@@ -881,7 +639,9 @@ router.get("/market/landing-summary", async (req, res) => {
       : best.points;
 
     return {
-      symbol, name, price, changePct,
+      symbol,
+      name: prices.provider() === "marketstack" && ETF_FOR[symbol] ? `${name} (${ETF_FOR[symbol]})` : name,
+      price, changePct,
       closes: series.map(p => p[1]),
       stamps: wantSeries ? series.map(p => p[0]) : undefined,
       interval: used ? used.interval : null,
@@ -904,7 +664,7 @@ router.get("/market/landing-summary", async (req, res) => {
   const breadth = measured.length ? Math.round((advancing / measured.length) * 100) : null;
 
   let news = [];
-  if (FINNHUB_KEY) {
+  if (require("../lib/data-policy").finnhubAllowed() && FINNHUB_KEY) {
     try {
       const newsResponse = await fetchWithTimeout(`https://finnhub.io/api/v1/news?category=general&token=${FINNHUB_KEY}`, {}, 4500);
       if (newsResponse.ok) {
@@ -930,11 +690,11 @@ router.get("/market/landing-summary", async (req, res) => {
     measured: measured.length,
     news,
     asOf: new Date().toISOString(),
-    source: "Yahoo Finance charts" + (news.length ? " + Finnhub general news" : ""),
+    source: prices.provider() === "marketstack" ? "Marketstack · SPY, QQQ, DIA" : "Market data",
     synthetic: false,
   };
   setCached(cacheKey, result);
-  recordProvider("Yahoo Finance", Boolean(overview), Date.now() - started, `${quotes.length}/${symbols.length} landing symbols`);
+  recordProvider(prices.provider() === "marketstack" ? "Marketstack" : "Yahoo Finance", Boolean(overview), Date.now() - started, `${quotes.length}/${symbols.length} landing symbols`);
   return res.json(result);
 });
 

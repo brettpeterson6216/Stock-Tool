@@ -39,7 +39,7 @@ async function withTimeout(url, options, ms) {
 
 /** The provider's logo URL for a ticker, or "" — never anything but https. */
 async function logoUrlFor(ticker) {
-  if (!FINNHUB_KEY) return "";
+  if (!FINNHUB_KEY || !require("../lib/data-policy").finnhubAllowed()) return "";
   const response = await withTimeout(
     `https://finnhub.io/api/v1/stock/profile2?symbol=${encodeURIComponent(ticker)}&token=${FINNHUB_KEY}`,
     {}, 4000

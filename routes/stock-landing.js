@@ -102,7 +102,7 @@ function researchQuestions(name, ticker, industry, facts) {
 }
 
 async function fetchQuickQuote(ticker) {
-  if (FINNHUB_KEY) {
+  if (FINNHUB_KEY && require("../lib/data-policy").finnhubAllowed()) {
     try {
       const [qRes, pRes] = await Promise.all([
         fetch(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_KEY}`,           { signal: AbortSignal.timeout(4000) }),

@@ -57,7 +57,7 @@ function fromFinnhub(payload) {
 }
 
 async function finnhubSearch(query, timeoutMs = 3500) {
-  if (!FINNHUB_KEY) return [];
+  if (!FINNHUB_KEY || !require("../lib/data-policy").finnhubAllowed()) return [];
   const cacheKey = "fh:" + query;
   const cached = getCached(cacheKey);
   if (cached) return cached;

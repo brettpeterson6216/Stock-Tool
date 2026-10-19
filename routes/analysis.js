@@ -43,51 +43,29 @@ const AUTO_INTERVAL = {
   "ytd": "1d", "1y": "1d", "2y": "1d", "5y": "1wk", "10y": "1wk", "max": "1mo"
 };
 
-const YH_HEADERS = {
-  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-  "Accept": "application/json, text/plain, */*",
-  "Accept-Language": "en-US,en;q=0.9",
-  "Origin": "https://finance.yahoo.com",
-  "Referer": "https://finance.yahoo.com/"
-};
+const prices = require("../lib/prices");
 
-async function fetchWithTimeout(url, ms = 6000) {
-  const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), ms);
-  try {
-    return await fetch(url, { headers: YH_HEADERS, signal: ctrl.signal });
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
+/* Price series from lib/prices.js (the licensed provider, or the legacy
+   source until it is configured). */
 async function loadSeries(ticker, range, interval) {
-  const hosts = ["query2", "query1"];
-  for (const host of hosts) {
-    try {
-      const url = `https://${host}.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yahooSymbol(ticker))}` +
-        `?interval=${interval}&range=${range}&includePrePost=false`;
-      const r = await fetchWithTimeout(url);
-      if (!r.ok) continue;
-      const j = await r.json();
-      const res = j?.chart?.result?.[0];
-      if (!res?.timestamp?.length) continue;
-      const q = res.indicators?.quote?.[0] || {};
-      const rows = res.timestamp
-        .map((ts, i) => ({ ts, o: q.open?.[i], h: q.high?.[i], l: q.low?.[i], c: q.close?.[i], v: q.volume?.[i] }))
-        .filter((row) => Number.isFinite(Number(row.c)));
-      return {
-        timestamp: rows.map((r2) => r2.ts),
-        open: rows.map((r2) => Number(r2.o ?? r2.c)),
-        high: rows.map((r2) => Number(r2.h ?? r2.c)),
-        low: rows.map((r2) => Number(r2.l ?? r2.c)),
-        close: rows.map((r2) => Number(r2.c)),
-        volume: rows.map((r2) => Number(r2.v ?? 0)),
-        meta: res.meta || {}
-      };
-    } catch (_) { /* try the next host */ }
-  }
-  return null;
+  try {
+    const j = await prices.getChart(ticker, { range, interval });
+    const res = j?.chart?.result?.[0];
+    if (!res?.timestamp?.length) return null;
+    const q = res.indicators?.quote?.[0] || {};
+    const rows = res.timestamp
+      .map((ts, i) => ({ ts, o: q.open?.[i], h: q.high?.[i], l: q.low?.[i], c: q.close?.[i], v: q.volume?.[i] }))
+      .filter((row) => row.c != null && Number.isFinite(Number(row.c)));
+    return {
+      timestamp: rows.map((r2) => r2.ts),
+      open: rows.map((r2) => Number(r2.o ?? r2.c)),
+      high: rows.map((r2) => Number(r2.h ?? r2.c)),
+      low: rows.map((r2) => Number(r2.l ?? r2.c)),
+      close: rows.map((r2) => Number(r2.c)),
+      volume: rows.map((r2) => Number(r2.v ?? 0)),
+      meta: res.meta || {}
+    };
+  } catch (_) { return null; }
 }
 
 /* ── Deterministic prose, used when no model is configured ───────────────── */

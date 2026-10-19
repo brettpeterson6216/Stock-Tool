@@ -111,7 +111,9 @@
       const n = st.nextEarnings;
       const date = new Date(`${n.date}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
       const when = n.days === 0 ? "today" : n.days === 1 ? "tomorrow" : `in ${n.days} days`;
-      meta.append(chip("ti-calendar-event", `Earnings ${date}${n.when === "before the open" ? " (pre-market)" : n.when === "after the close" ? " (after close)" : ""} · ${when}`, n.days <= 7 ? "soon" : ""));
+      const c = chip("ti-calendar-event", `Earnings ${n.estimated ? "expected ~" : ""}${date}${n.when === "before the open" ? " (pre-market)" : n.when === "after the close" ? " (after close)" : ""} · ${when}`, n.days <= 7 ? "soon" : "");
+      if (n.estimated) c.title = "Estimated from the dates this company published results in past quarters (SEC filings).";
+      meta.append(c);
     }
     if (st.ratings) meta.append(chip("ti-users", `Analysts: ${st.ratings.label} (${st.ratings.total})`));
     if (st.earnings) {

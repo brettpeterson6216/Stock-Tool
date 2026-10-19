@@ -335,7 +335,7 @@
       '<p class="ilg-foot">' + esc(state.data.calendar || "") +
         (state.period === "q" ? " Fourth-quarter figures and quarterly cash flows are worked out from the annual and year-to-date reports." : "") +
         (state.data.splits && state.data.splits.length ? " Share counts and per-share figures are adjusted for stock splits." : "") +
-        (state.data.priceNote ? " " + esc(state.data.priceNote) : "") + " Source: SEC EDGAR XBRL; prices from Yahoo Finance.</p>";
+        (state.data.priceNote ? " " + esc(state.data.priceNote) : "") + " Source: SEC EDGAR XBRL; daily closing prices.</p>";
     el.innerHTML = html;
     drawCharts();
 

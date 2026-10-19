@@ -22,6 +22,9 @@
 const cfg = require("./lib/config"); // dotenv loaded here first
 // Cache, rate-limit and stale-on-error for every Finnhub call (lib/finnhub-gate.js).
 require("./lib/finnhub-gate").install();
+// Which outside data sources may be called at all (lib/data-policy.js):
+// Finnhub off unless licensed, Yahoo only until the Marketstack key is set.
+require("./lib/data-policy").install();
 const { PORT, SESSION_SECRET } = cfg;
 
 // Validate env vars at startup.
@@ -30,7 +33,6 @@ const { PORT, SESSION_SECRET } = cfg;
 (function checkEnv() {
   const isProd = process.env.NODE_ENV === "production";
   const missing = [];
-  if (!process.env.FINNHUB_KEY)   missing.push("FINNHUB_KEY");
   if (!process.env.SESSION_SECRET) missing.push("SESSION_SECRET");
   if (isProd && !process.env.STRIPE_SECRET_KEY)     missing.push("STRIPE_SECRET_KEY");
   if (isProd && !process.env.STRIPE_WEBHOOK_SECRET) missing.push("STRIPE_WEBHOOK_SECRET");
@@ -501,6 +503,9 @@ app.get("/readyz", async (_req, res) => {
     stripeCatalog,
     stripeCatalogEnforced: /^(1|true|yes)$/i.test(String(process.env.STRIPE_CATALOG_ENFORCE || "")),
     finnhubGate: require("./lib/finnhub-gate").snapshot(),
+    dataPolicy: require("./lib/data-policy").snapshot(),
+    prices: await require("./lib/prices").snapshot().catch(() => null),
+    secUniverse: require("./lib/sec-universe").status(),
     ...buildInfo,
   });
 });

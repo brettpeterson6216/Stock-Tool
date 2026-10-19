@@ -183,20 +183,20 @@ const PRO_GATE_CONFIG = {
     previewLabel: 'AAPL · illustrative sample',
   },
   earnings: {
-    title: 'EPS History &amp; Beat/Miss Tracker',
+    title: 'EPS History from SEC Filings',
     bullets: [
-      'Quarterly EPS actuals vs Wall Street consensus estimates — every quarter',
-      'Beat/miss percentage and streak — how consistently it surprises',
+      'Quarterly diluted EPS as reported to the SEC — every quarter',
+      'Growth versus the same quarter a year ago',
       'Revenue trend across the last 8+ reporting periods',
-      'The next earnings date and the estimate going into it',
+      'The expected date of the next report, from past filing dates',
     ],
-    preview: `<table class="pgc-tbl"><thead><tr><th>Quarter</th><th>Est. EPS</th><th>Act. EPS</th><th>Surprise</th></tr></thead><tbody>
-      <tr><td>Q1 FY25</td><td>$2.35</td><td>$2.40</td><td style="color:#46b184">+2.1%</td></tr>
-      <tr><td>Q4 FY24</td><td>$1.60</td><td>$1.64</td><td style="color:#46b184">+2.5%</td></tr>
-      <tr><td>Q3 FY24</td><td>$1.34</td><td>$1.40</td><td style="color:#46b184">+4.5%</td></tr>
-      <tr><td>Q2 FY24</td><td>$1.50</td><td>$1.53</td><td style="color:#46b184">+2.0%</td></tr>
+    preview: `<table class="pgc-tbl"><thead><tr><th>Quarter</th><th>EPS</th><th>Year ago</th><th>Growth</th></tr></thead><tbody>
+      <tr><td>Q1 FY25</td><td>$2.40</td><td>$2.18</td><td style="color:#46b184">+10.1%</td></tr>
+      <tr><td>Q4 FY24</td><td>$1.64</td><td>$1.46</td><td style="color:#46b184">+12.3%</td></tr>
+      <tr><td>Q3 FY24</td><td>$1.40</td><td>$1.26</td><td style="color:#46b184">+11.1%</td></tr>
+      <tr><td>Q2 FY24</td><td>$1.53</td><td>$1.52</td><td style="color:#46b184">+0.7%</td></tr>
     </tbody></table>`,
-    previewLabel: 'AAPL recent quarters · sample',
+    previewLabel: 'Illustrative sample',
   },
   secfilings: {
     title: 'SEC EDGAR Filings — Direct Access',
@@ -232,12 +232,12 @@ const PRO_GATE_CONFIG = {
     previewLabel: 'Insider trades · illustrative sample',
   },
   analyst: {
-    title: 'Analyst Ratings &amp; Earnings Track Record',
+    title: 'Company Basics from SEC Filings',
     bullets: [
-      'Buy / Hold / Sell breakdown across all covering Wall Street analysts',
-      'How the rating mix has shifted over the last few months',
-      'Earnings beats and misses against the estimate, quarter by quarter',
-      'The next earnings date, shown on the stock page and the report card',
+      'Sector and industry from the company\'s SEC registration',
+      'Market cap, P/E, price-to-sales and price-to-book from reported figures',
+      'Feeds the Valuation Lab, Projection Lab and Compare defaults',
+      'Every figure links back to a filing you can check',
     ],
     preview: null,
   },
@@ -3016,7 +3016,10 @@ async function loadAnalystSignals(tickers){
   let buy=0,hold=0,sell=0;
   try{
     const r=await fetch(`/api/market/analyst-signals?tickers=${tickers.map(t=>encodeURIComponent(t)).join(',')}`,{credentials:'same-origin'});
-    if(r.ok){const d=await r.json();buy=d.buy||0;hold=d.hold||0;sell=d.sell||0;}
+    if(r.ok){const d=await r.json();
+      // No licensed analyst-ratings feed: hide the card instead of showing zeros.
+      if(d.available===false){const card=document.getElementById('analyst-donut-chart')?.closest('.hg-signals,.hc');if(card)card.hidden=true;return;}
+      buy=d.buy||0;hold=d.hold||0;sell=d.sell||0;}
   }catch(_){}
   const total=buy+hold+sell||1,buyPct=Math.round(buy/total*100),holdPct=Math.round(hold/total*100),sellPct=100-buyPct-holdPct;
   ['analyst-bull-pct','abl-buy','abl-hold','abl-sell','analyst-note'].forEach((id,i)=>{const el=document.getElementById(id);if(el)el.textContent=[buyPct+'%',buy+' Buy',hold+' Hold',sell+' Sell',`Based on ${buy+hold+sell} analyst ratings`][i];});
@@ -3264,6 +3267,8 @@ async function loadAnalyst(ticker) {
     if (!sideEl) return;
 
     const recs = Array.isArray(d.recommendations) ? d.recommendations : [];
+    // No licensed analyst-ratings feed: leave the sidebar slot empty.
+    if (d.analystDataAvailable === false || !recs.length) { sideEl.innerHTML = ''; return; }
     // Aggregate last 3 months of recommendation data
     const counts = { strongBuy:0, buy:0, hold:0, sell:0, strongSell:0 };
     recs.slice(0, 3).forEach(r2 => {
@@ -4476,7 +4481,7 @@ async function loadAdvMetrics(ticker) {
     showDataSource(
       'advm-source',
       metData.impliedLens || finData.impliedLens,
-      'SEC EDGAR XBRL + Finnhub metrics'
+      'SEC EDGAR XBRL calculations'
     );
     // finData may be a noStatements (ETF) response or a full quoteSummary response
     const r = finData.quoteSummary && finData.quoteSummary.result && finData.quoteSummary.result[0];
@@ -4587,7 +4592,7 @@ async function loadInstitutional(ticker) {
     if(instContent) instContent.style.display='block';
     const sourceParts = [dpData.impliedLens?.source, instData.impliedLens?.source].filter(Boolean).join(' + ');
     showDataSource('inst-source', {
-      source: sourceParts || 'FINRA OTC Transparency + Finnhub institutional ownership',
+      source: sourceParts || 'FINRA OTC Transparency + SEC Form 4 filings',
       asOf: dpData.impliedLens?.asOf || instData.impliedLens?.asOf,
     });
 

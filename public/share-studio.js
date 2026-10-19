@@ -587,7 +587,7 @@
       : { timeZone: d.tz, month: "short", day: "numeric", year: "numeric" });
     var src = series
       ? "Source: company filings with the SEC · calendar quarters · Educational, not investment advice"
-      : "Price data: Yahoo Finance · as of " + asOf + (d.intraday ? " ET" : "") + " · Educational, not investment advice";
+      : "Price data as of " + asOf + (d.intraday ? " ET" : "") + " · Educational, not investment advice";
     fitFont(g, src, 500, 15 * u, F.sans, W - P * 2 - 220 * u, 10);
     g.fillText(src, P, fy);
     font(g, 700, 18 * u, F.sans); g.fillStyle = C.dark ? "#D9A441" : "#9C6C17";

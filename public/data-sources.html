@@ -158,13 +158,13 @@
     {{DATA_PROVIDER_CARDS}}
 
     <h2>Data Freshness and Delays</h2>
-    <p>Timing varies by provider, exchange, instrument, and market session. ImpliedLens displays the provider observation time when available and identifies fallback sources; it does not infer a guaranteed delay from the chart interval. Daily OHLCV history reflects the provider's latest completed observation. Analyst estimates and institutional ownership update on their providers' schedules, and FINRA OTC data is published on a delayed basis.</p>
+    <p>Timing varies by provider, exchange, instrument, and market session. ImpliedLens displays the provider observation time when available and identifies fallback sources; it does not infer a guaranteed delay from the chart interval. Daily OHLCV history reflects the provider's latest completed trading day. Company figures follow each company's SEC filing schedule, and FINRA OTC data is published on a delayed basis. ImpliedLens does not show analyst ratings, estimates or price targets.</p>
 
     <h2>Reported, Derived, and Modeled Data</h2>
     <p>ImpliedLens separates provider-supplied observations from derived calculations and user-controlled models. Reported figures come from connected providers or SEC filings. Ratios, indicators, projections, intrinsic-value estimates, and wealth scenarios are calculations whose reliability depends on their inputs and assumptions. Missing provider fields are shown as unavailable rather than silently invented.</p>
 
     <h2>LensScore Calibration Status</h2>
-    <p>LensScore 2.0 grades each company on five factors as percentiles against its sector peers, using Finnhub fundamentals and SEC-reported growth where available, then ranks the weighted result across every graded company. We started saving a daily snapshot of every score on October 8, 2026, and the <a href="/lens-score?view=leaders">leaderboard</a> publishes how each score band has performed since, with real prices and every company included. Until that record covers a meaningful period, no performance claim is made. <a href="/lens-calibration.json">The earlier timing diagnostic is still available.</a></p>
+    <p>LensScore 2.0 grades each company on five factors as percentiles against its sector peers, using figures from each company's own SEC filings and licensed daily prices, then ranks the weighted result across every graded company. Daily snapshots of every score restarted when the grades moved to SEC filings in October 2026, and the <a href="/lens-score?view=leaders">leaderboard</a> publishes how each score band has performed since, with real prices and every company included. Until that record covers a meaningful period, no performance claim is made. <a href="/lens-calibration.json">The earlier timing diagnostic is still available.</a></p>
 
     <div class="caveat">
       <p><strong>Important:</strong> Data accuracy depends on the upstream providers. ImpliedLens is not responsible for errors, delays, or omissions in data supplied by {{MARKET_PROVIDER_NAMES}}. Always verify critical figures against primary sources before making investment decisions.</p>

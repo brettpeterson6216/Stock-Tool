@@ -2,13 +2,11 @@
 
 const express = require("express");
 const { checkAnalysisLimit, normalizeTicker } = require("../lib/plan");
-const { buildResearchBundle, loadFinnhubResearch, loadCompanyFacts } = require("../lib/stock-research");
+const { buildResearchBundle, loadCompanyFacts } = require("../lib/stock-research");
 const LensScoreEngine = require("../lib/lens-score-engine");
 const LensFactors = require("../lib/lens-factors");
 const peers = require("../lib/peer-universe");
 const { buildQuarterlyHistory } = require("../lib/fundamentals-history");
-const { finnhubJson } = require("../lib/finnhub-gate");
-const { FINNHUB_KEY } = require("../lib/config");
 
 const router = express.Router();
 const responseCache = new Map();
@@ -54,81 +52,39 @@ function storePayload(ticker, payload) {
   return payload;
 }
 
-/* Latest-quarter and TTM revenue growth from the company's own SEC filings.
-   Finnhub's growth uses its own revenue definition, which is badly off for
-   some companies (lenders especially); peers still use Finnhub so the
-   comparison stays like-for-like everywhere else. */
-function secGrowth(facts) {
-  try {
-    const q = buildQuarterlyHistory(facts, { maxQuarters: 9 });
-    const last = q.at(-1);
-    if (!last || Date.now() - Date.parse(last.end) > 200 * 86400000) return {};
-    const out = {};
-    const yearAgo = q.length >= 5 ? q.at(-5) : null;
-    const gap = yearAgo ? (Date.parse(last.end) - Date.parse(yearAgo.end)) / 86400000 : 0;
-    if (yearAgo && gap > 330 && gap < 400 && last.revenue > 0 && yearAgo.revenue > 0) out.revenueGrowthQuarterlyYoy = (last.revenue / yearAgo.revenue - 1) * 100;
-    if (q.length >= 8) {
-      const sum = a => a.reduce((s, r) => s + (r.revenue || 0), 0);
-      const cur = sum(q.slice(-4)), prev = sum(q.slice(-8, -4));
-      if (q.slice(-8).every(r => r.revenue > 0) && prev > 0) out.revenueGrowthTTMYoy = (cur / prev - 1) * 100;
-    }
-    return out;
-  } catch (_) { return {}; }
-}
-
-const { summarizeStreet, nextEarnings } = require("../lib/street");
-async function streetView(ticker, fh) {
-  const today = new Date().toISOString().slice(0, 10);
-  const to = new Date(Date.now() + 120 * 86400000).toISOString().slice(0, 10);
-  const [rec, cal] = await Promise.all([
-    finnhubJson(`https://finnhub.io/api/v1/stock/recommendation?symbol=${encodeURIComponent(ticker)}&token=${FINNHUB_KEY}`, { priority: "high", timeoutMs: 6000 }),
-    finnhubJson(`https://finnhub.io/api/v1/calendar/earnings?symbol=${encodeURIComponent(ticker)}&from=${today}&to=${to}&token=${FINNHUB_KEY}`, { priority: "high", timeoutMs: 6000 }).catch(() => null),
-  ]);
-  const out = summarizeStreet(rec, fh?.earnings) || {};
-  const next = nextEarnings(cal, today);
-  if (next) out.nextEarnings = next;
-  return Object.keys(out).length ? out : null;
+/* Grades come from SEC filings (lib/sec-universe.js) and licensed prices;
+   the next earnings date is estimated from the company's past results
+   filings. Analyst ratings and estimates need a licensed feed the site does
+   not have, so the report card does not show them. */
+const secUniverse = require("../lib/sec-universe");
+const secFilings = require("../lib/sec-filings");
+const prices = require("../lib/prices");
+function streetView(co) {
+  const next = secFilings.estimateNextEarnings(co.filings || []);
+  return next ? { nextEarnings: next } : null;
 }
 
 async function gradeTicker(ticker, research) {
   await peers.load();
-  const [fh, company] = await Promise.all([
-    loadFinnhubResearch(ticker).catch(() => null),
-    loadCompanyFacts(ticker).catch(() => null),
-  ]);
-  const price = research.market?.bars?.at(-1)?.close ?? null;
-  /* The research bundle's Finnhub calls can come back empty when the shared
-     quota is busy (and that empty answer is cached for minutes). Ask again
-     directly at interactive priority, then fall back to the peer row. */
-  let profile = fh?.profile || null;
-  let fhMetric = fh?.metrics || null;
-  if (!profile || !fhMetric) {
-    const base = "https://finnhub.io/api/v1/stock";
-    const [p2, m2] = await Promise.all([
-      profile ? null : finnhubJson(`${base}/profile2?symbol=${encodeURIComponent(ticker)}&token=${FINNHUB_KEY}`, { priority: "high", timeoutMs: 6000 }),
-      fhMetric ? null : finnhubJson(`${base}/metric?symbol=${encodeURIComponent(ticker)}&metric=all&token=${FINNHUB_KEY}`, { priority: "high", timeoutMs: 6000 }),
-    ]);
-    if (!profile && p2 && p2.name) profile = p2;
-    if (!fhMetric && m2 && m2.metric) fhMetric = m2.metric;
+  const rows = (research.market?.bars || []).map(b => ({ day: new Date(b.time * 1000).toISOString().slice(0, 10), close: b.close, high: b.high, low: b.low }));
+  let facts = null;
+  try { facts = (await loadCompanyFacts(ticker))?.facts || null; } catch (_) { /* fetched below if needed */ }
+  const co = await secUniverse.forTicker(ticker, { rows, facts });
+  if (!co.sector) {
+    return { status: "not-rated", version: LensFactors.VERSION, reason: "This company's SEC industry code does not map to a sector we grade." };
   }
-  const known = peers.get(ticker);
-  const metric = { ...(fhMetric || known?.m || {}) };
-  const overrides = company?.facts ? secGrowth(company.facts) : {};
-  Object.assign(metric, overrides);
-  if (profile || fhMetric) peers.put(ticker, { profile, metric: fhMetric, price });
-  const sector = peers.sectorFor(ticker, profile?.finnhubIndustry) || known?.s || null;
   const graded = LensFactors.gradeCompany({
     ticker,
-    name: profile?.name || known?.n || research.company || ticker,
-    sector,
-    metric,
-    price,
-    marketCap: Number(profile?.marketCapitalization) > 0 ? Number(profile.marketCapitalization) * 1e6 : known?.mc || null,
+    name: co.name || research.company || ticker,
+    sector: co.sector,
+    metric: co.metric,
+    price: co.price,
+    marketCap: Number(co.metric.marketCapitalization) > 0 ? co.metric.marketCapitalization * 1e6 : null,
   }, peers.all());
-  graded.industry = profile?.finnhubIndustry || known?.i || null;
-  graded.street = await streetView(ticker, fh).catch(() => null);
-  graded.secOverrides = Object.keys(overrides);
-  graded.source = "Finnhub fundamentals and price returns for every company, ranked within sector; revenue growth from SEC filings where current.";
+  graded.industry = co.industry || null;
+  graded.street = streetView(co);
+  graded.secOverrides = [];
+  graded.source = `SEC filings for every company, ranked within sector; prices from ${prices.sourceLabel()}.`;
   graded.asOf = new Date().toISOString();
   return graded;
 }
@@ -213,9 +169,7 @@ function cardGrades(g) {
     factors: g.factors.map(f => ({ key: f.key, label: f.label, grade: f.grade, percentile: f.percentile, tone: f.tone })),
     strengths: g.strengths.slice(0, 3), watch: g.watch.slice(0, 3),
     peers: (g.peers || []).filter(p => !p.self).slice(0, 3).map(p => p.ticker),
-    street: g.street ? { ratings: g.street.ratings ? { label: g.street.ratings.label, total: g.street.ratings.total } : null,
-      earnings: g.street.earnings ? { beats: g.street.earnings.beats, of: g.street.earnings.quarters.length } : null,
-      nextEarnings: g.street.nextEarnings || null } : null,
+    street: g.street ? { ratings: null, earnings: null, nextEarnings: g.street.nextEarnings || null } : null,
   };
 }
 
@@ -351,5 +305,4 @@ function startWarmup({ firstDelayMs = 20 * 1000, everyMs = 9 * 60 * 1000 } = {})
 module.exports = router;
 module.exports.usMarketOpen = usMarketOpen;
 module.exports.cardPayload = cardPayload;
-module.exports.summarizeStreet = summarizeStreet;
 module.exports.startWarmup = startWarmup;

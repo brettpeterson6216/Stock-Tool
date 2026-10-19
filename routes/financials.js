@@ -21,6 +21,9 @@ const { requirePro, requireAccount, reconcileEffectivePlan, normalizeTicker, FRE
 const { deriveEarnings, loadCompanyFacts, loadFinnhubResearch, loadPriceHistory } = require("../lib/stock-research");
 
 const { buildQuarterlyHistory, attachPrices } = require("../lib/fundamentals-history");
+const secUniverse = require("../lib/sec-universe");
+const secFilings = require("../lib/sec-filings");
+const prices = require("../lib/prices");
 const router = express.Router();
 const UA     = "ImpliedLens/1.0 brettpeterson6216@gmail.com";
 
@@ -610,14 +613,11 @@ router.get("/metrics/:ticker", requirePro, async (req, res) => {
   const ticker = requestTicker(req, res);
   if (!ticker) return;
   try {
-    const url    = `https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FINNHUB_KEY}`;
-    const r      = await fetchWithTimeout(url);
-    if (!r.ok) return res.status(503).json({ error: "Provider metrics are currently unavailable.", synthetic: false });
-    const data = await r.json();
-    res.json({ ...data, impliedLens: sourceMeta("Finnhub metrics") });
+    const co = await secUniverse.forTicker(ticker);
+    res.json({ symbol: ticker, metric: co.metric, metricType: "all", impliedLens: sourceMeta(`SEC filings + ${prices.sourceLabel()}`, { asOf: co.snap?.asOf || null }) });
   } catch (e) {
-    console.error("metrics proxy error:", e.message);
-    res.status(503).json({ error: "Failed to fetch provider metrics.", synthetic: false });
+    console.error("metrics error:", e.message);
+    res.status(503).json({ error: "Company metrics are unavailable for this ticker (no SEC filings found).", synthetic: false });
   }
 });
 
@@ -714,128 +714,30 @@ router.get("/sec/:ticker", requirePro, async (req, res) => {
 // ============================================================
 //  GET /api/estimates/:ticker  (Pro)
 // ============================================================
+/* Consensus estimates and price targets need a licensed feed the site does
+   not have. The route still answers with what can be worked out from SEC
+   filings and prices (margin trend, a suggested discount rate) so the
+   valuation tools keep their defaults. */
 router.get("/estimates/:ticker", requirePro, async (req, res) => {
   const ticker = requestTicker(req, res);
   if (!ticker) return;
   try {
-    const FH = FINNHUB_KEY;
-    const [revResp, epsResp, metResp, ptResp] = await Promise.allSettled([
-      fetchWithTimeout(`https://finnhub.io/api/v1/stock/revenue-estimate?symbol=${ticker}&freq=annual&token=${FH}`),
-      fetchWithTimeout(`https://finnhub.io/api/v1/stock/eps-estimate?symbol=${ticker}&freq=annual&token=${FH}`),
-      fetchWithTimeout(`https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FH}`),
-      fetchWithTimeout(`https://finnhub.io/api/v1/stock/price-target?symbol=${ticker}&token=${FH}`),
-    ]);
-
-    const safe = async (p) => {
-      try { if (p.status === "fulfilled" && p.value.ok) return await p.value.json(); } catch (_) {}
-      return null;
-    };
-    const [rev, eps, met, pt] = await Promise.all([safe(revResp), safe(epsResp), safe(metResp), safe(ptResp)]);
-
-    const currentYear = String(new Date().getUTCFullYear());
-    const nextEstimatePair = (rows, field) => {
-      const future = [...(rows || [])]
-        .filter(row => row.period >= currentYear && Number(row[field]) > 0)
-        .sort((a, b) => a.period.localeCompare(b.period));
-      return [future[0] || null, future[1] || null];
-    };
-
-    let revenueGrowth = null;
-    if (rev?.data?.length >= 2) {
-      const [cur, nxt] = nextEstimatePair(rev.data, "revenueAvg");
-      if (cur && nxt && cur.revenueAvg > 0) revenueGrowth = Math.round(((nxt.revenueAvg / cur.revenueAvg) - 1) * 1000) / 10;
-    }
-
-    let epsGrowth = null;
-    if (eps?.data?.length >= 2) {
-      const [cur, nxt] = nextEstimatePair(eps.data, "epsAvg");
-      if (cur && nxt && cur.epsAvg > 0) epsGrowth = Math.round(((nxt.epsAvg / cur.epsAvg) - 1) * 1000) / 10;
-    }
-
-    const m         = met?.metric || {};
-    // Filled in below from a real forward EPS. The metric feed has no forward
-    // P/E, and its annual normalized figure is a year-old trailing number.
-    let forwardPE = null;
-
-    const marginTrend = (() => {
-      const mg3   = m["netProfitMargin3Y"]   || null;
-      const mgTTM = m["netProfitMarginTTM"]  || m["netProfitMarginAnnual"] || null;
-      if (mg3 && mgTTM) {
-        const diff = mgTTM - mg3;
-        if (diff >  1.5) return "expand";
-        if (diff < -1.5) return "compress";
-      }
-      return "flat";
-    })();
-
-    const priceTarget = pt?.targetMean || pt?.targetHigh ? {
-      mean: pt.targetMean || null, high: pt.targetHigh || null, low: pt.targetLow || null,
-    } : null;
-
-    let nextYearEPS = null;
-    if (eps?.data?.length) {
-      const future = [...eps.data]
-        .filter(d => d.period >= currentYear && d.epsAvg != null && d.epsAvg > 0)
-        .sort((a, b) => a.period.localeCompare(b.period));
-      if (future.length) nextYearEPS = future[0].epsAvg;
-    }
-
-    let fwdQuarterly = [];
-    try {
-      const qEpsResp = await fetchWithTimeout(`https://finnhub.io/api/v1/stock/eps-estimate?symbol=${ticker}&freq=quarterly&token=${FH}`);
-      if (qEpsResp.ok) {
-        const qEps = await qEpsResp.json();
-        if (qEps?.data?.length) {
-          const now = new Date().toISOString().slice(0, 7);
-          fwdQuarterly = qEps.data
-            .filter(d => d.period >= now && d.epsAvg != null)
-            .sort((a, b) => a.period.localeCompare(b.period))
-            .slice(0, 4)
-            .map(d => ({ period: d.period, epsAvg: d.epsAvg, epsHigh: d.epsHigh, epsLow: d.epsLow, numberAnalysts: d.numberAnalysts }));
-        }
-      }
-    } catch (_) {}
-
-    const beta = m["beta"] || m["betaAnnual"] || null;
-    const suggestedWACC = suggestDiscountRate(beta, m["totalDebt/totalEquityQuarterly"] ?? m["totalDebt/totalEquityAnnual"]);
-    const price = Number(m["currentPrice"]) || null;
-    if (nextYearEPS > 0 && price > 0) forwardPE = Math.round(price / nextYearEPS * 10) / 10;
-
-    const available = Boolean(rev || eps || met || pt || fwdQuarterly.length);
-    /* The estimate, EPS and target endpoints are a separate paid Finnhub
-       product. When they fail the response used to say "available" with every
-       field null, so the page drew empty cards. Say what is actually there. */
-    const hasEstimates = revenueGrowth != null || epsGrowth != null || nextYearEPS != null || !!priceTarget;
-    const upstream = { revenueEstimates: !!rev?.data, epsEstimates: !!eps?.data, priceTarget: !!pt && !pt.error };
-    if (!available) {
-      return res.status(503).json({
-        error: "Analyst estimates are unavailable from the configured provider.",
-        synthetic: false,
-      });
-    }
+    const co = await secUniverse.forTicker(ticker);
+    const m = co.metric || {};
+    const marginTrend = "flat";
     return res.json({
       ticker,
-      revenueGrowth,
-      epsGrowth,
-      forwardPE,
-      marginTrend,
-      priceTarget,
-      nextYearEPS,
-      fwdQuarterly,
-      suggestedWACC,
-      estimatesAvailable: hasEstimates,
-      upstream,
-      impliedLens: sourceMeta("Finnhub analyst estimates", {
-        asOf: null,
-        status: hasEstimates ? "available" : "unavailable",
-        note: hasEstimates
-          ? "Estimate periods are forecast periods, not source freshness dates."
-          : "Consensus estimates and price targets are not included in the current data plan.",
+      revenueGrowth: null, epsGrowth: null, forwardPE: null, marginTrend, priceTarget: null, nextYearEPS: null, fwdQuarterly: [],
+      suggestedWACC: suggestDiscountRate(m.beta, Number.isFinite(m["totalDebt/totalEquityQuarterly"]) ? m["totalDebt/totalEquityQuarterly"] * 100 : null),
+      estimatesAvailable: false,
+      upstream: { revenueEstimates: false, epsEstimates: false, priceTarget: false },
+      impliedLens: sourceMeta("SEC filings", {
+        asOf: co.snap?.asOf || null, status: "unavailable",
+        note: "Analyst estimates and price targets are not part of this site's licensed data.",
       }),
     });
   } catch (e) {
-    console.error("estimates error", e.message);
-    return res.status(503).json({ error: "Could not fetch analyst estimates.", synthetic: false });
+    return res.status(503).json({ error: "Estimates are not available for this ticker.", synthetic: false });
   }
 });
 
@@ -863,121 +765,69 @@ function sectorForIndustry(industry) {
   return hit ? hit[1] : null;
 }
 
+/* Kept for the pages that read company basics from it (Valuation Lab,
+   Projection Lab, Compare). Analyst ratings and price targets are no longer
+   included: they need a licensed feed. Everything here is from SEC filings
+   and the licensed price provider. */
+const SECTOR_LONG = {
+  "Tech": "Technology", "Health": "Healthcare", "Finance": "Financial Services", "Cons.Disc": "Consumer Cyclical",
+  "Staples": "Consumer Defensive", "Industrials": "Industrials", "Energy": "Energy", "Utilities": "Utilities",
+  "Real Est.": "Real Estate", "Comm.": "Communication", "Materials": "Basic Materials",
+};
 router.get("/analyst/:ticker", requirePro, async (req, res) => {
   const ticker = requestTicker(req, res);
   if (!ticker) return;
   try {
-    const [ptResp, recResp, profResp] = await Promise.all([
-      fetchWithTimeout(`https://finnhub.io/api/v1/stock/price-target?symbol=${ticker}&token=${FINNHUB_KEY}`),
-      fetchWithTimeout(`https://finnhub.io/api/v1/stock/recommendation?symbol=${ticker}&token=${FINNHUB_KEY}`),
-      fetchWithTimeout(`https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${FINNHUB_KEY}`, {}, 5000).catch(() => null),
-    ]);
-    const profile = profResp?.ok ? await profResp.json().catch(() => ({})) : {};
-    if (!ptResp.ok && !recResp.ok) {
-      return res.status(503).json({ error: "Analyst data is unavailable from the configured provider.", synthetic: false });
-    }
-    const [pt, rec] = await Promise.all([
-      ptResp.ok ? ptResp.json() : {},
-      recResp.ok ? recResp.json() : [],
-    ]);
-
-    let yahooFd = {};
-    try {
-      const [metricResp, quoteResp] = await Promise.all([
-        fetchWithTimeout(`https://finnhub.io/api/v1/stock/metric?symbol=${ticker}&metric=all&token=${FINNHUB_KEY}`),
-        fetchWithTimeout(`https://finnhub.io/api/v1/quote?symbol=${ticker}&token=${FINNHUB_KEY}`),
-      ]);
-      const [metricData, quoteData] = await Promise.all([metricResp.json(), quoteResp.json()]);
-      const m = metricData.metric || {};
-      yahooFd = {
+    const co = await secUniverse.forTicker(ticker);
+    const m = co.metric || {};
+    res.json({
+      priceTarget: { targetMean: null, targetHigh: null, targetLow: null, targetMedian: null, numberOfAnalysts: null, lastUpdated: null, symbol: ticker },
+      recommendations: [],
+      analystDataAvailable: false,
+      industry: co.industry || null,
+      sector: SECTOR_LONG[co.sector] || null,
+      yahooFd: {
         targetMeanPrice: null, targetHighPrice: null, targetLowPrice: null, targetMedianPrice: null,
         numberOfAnalystOpinions: null, recommendationMean: null, recommendationKey: null,
-        priceToBook:  m.pbQuarterly || null,
-        trailingPE:   m.peNormalizedAnnual || m.peBasicExclExtraTTM || null,
-        forwardPE:    null,
+        priceToBook: m.pbQuarterly || null,
+        trailingPE: m.peTTM > 0 ? m.peTTM : null,
+        forwardPE: null,
         priceToSales: m.psTTM || null,
-        marketCap:    m.marketCapitalization ? m.marketCapitalization * 1e6 : null,
+        marketCap: m.marketCapitalization ? m.marketCapitalization * 1e6 : null,
         enterpriseValue: null,
-        currentPrice: quoteData.c || null,
-      };
-    } catch (_) {}
-
-    const merged = {
-      targetMean:  pt.targetMean   || yahooFd.targetMeanPrice   || null,
-      targetHigh:  pt.targetHigh   || yahooFd.targetHighPrice   || null,
-      targetLow:   pt.targetLow    || yahooFd.targetLowPrice    || null,
-      targetMedian:pt.targetMedian || yahooFd.targetMedianPrice || null,
-      numberOfAnalysts: pt.numberOfAnalysts || yahooFd.numberOfAnalystOpinions || null,
-      lastUpdated: pt.lastUpdated || null,
-      symbol: ticker,
-    };
-    res.json({
-      priceTarget: merged,
-      recommendations: rec,
-      industry: profile.finnhubIndustry || null,
-      sector: sectorForIndustry(profile.finnhubIndustry),
-      yahooFd,
-      impliedLens: sourceMeta("Finnhub analyst data", { asOf: merged.lastUpdated }),
+        currentPrice: co.price || null,
+      },
+      impliedLens: sourceMeta(`SEC filings + ${prices.sourceLabel()}`, { asOf: co.snap?.asOf || null }),
     });
   } catch (e) {
-    console.error("analyst proxy error:", e.message);
-    res.status(503).json({ error: "Failed to fetch analyst data.", synthetic: false });
+    console.error("analyst (company basics) error:", e.message);
+    res.status(503).json({ error: "Company data is unavailable for this ticker.", synthetic: false });
   }
 });
 
 // ============================================================
 //  GET /api/institutional/:ticker  (Pro)
 // ============================================================
+/* Insider buying and selling, parsed from the insiders' own SEC Form 4
+   filings (lib/sec-filings.js). Institutional holders (13F) are not shown. */
 router.get("/institutional/:ticker", requirePro, async (req, res) => {
   const ticker = requestTicker(req, res);
   if (!ticker) return;
-  /* Finnhub's institutional-ownership endpoint is not in our plan (it answers
-     403), so this tab was blank for every stock. Insider transactions are in
-     the plan: when holders can't be had, show who inside the company has been
-     buying and selling instead, and say plainly which one the table is. */
-  const from = new Date(Date.now() - 365 * 86400000).toISOString().slice(0, 10);
   try {
-    const [r, profResp, insResp] = await Promise.all([
-      fetchWithTimeout(`https://finnhub.io/api/v1/stock/ownership?symbol=${ticker}&limit=10&token=${FINNHUB_KEY}`).catch(() => null),
-      fetchWithTimeout(`https://finnhub.io/api/v1/stock/profile2?symbol=${ticker}&token=${FINNHUB_KEY}`, {}, 5000).catch(() => null),
-      fetchWithTimeout(`https://finnhub.io/api/v1/stock/insider-transactions?symbol=${ticker}&from=${from}&token=${FINNHUB_KEY}`, {}, 6000).catch(() => null),
+    const [ins, co] = await Promise.all([
+      secFilings.insiderTrades(ticker),
+      secUniverse.forTicker(ticker).catch(() => null),
     ]);
-    const data = r && r.ok ? await r.json().catch(() => ({})) : {};
-    const profile = profResp?.ok ? await profResp.json().catch(() => ({})) : {};
-    const insiderRaw = insResp?.ok ? await insResp.json().catch(() => ({})) : {};
-    // Finnhub reports shares outstanding in millions.
-    const sharesOut = Number(profile.shareOutstanding) > 0 ? Number(profile.shareOutstanding) * 1e6 : null;
-    const ownership = (Array.isArray(data.ownership) ? data.ownership : []).map(h => ({
-      ...h,
-      reportDate: h.reportDate || h.filingDate || null,
-      percentOfShares: sharesOut && Number.isFinite(Number(h.share)) ? Number(h.share) / sharesOut : null,
-    }));
-    /* Open-market buys (P) and sells (S) only; option exercises, gifts and
-       tax withholding say little about conviction. */
-    const insiders = (Array.isArray(insiderRaw.data) ? insiderRaw.data : [])
-      .filter(t => t && (t.transactionCode === "P" || t.transactionCode === "S") && Number.isFinite(Number(t.change)))
-      .map(t => ({
-        name: t.name || "—", change: Number(t.change), shares: Number(t.share) || null,
-        price: Number(t.transactionPrice) || null, date: t.transactionDate || t.filingDate || null,
-        filed: t.filingDate || null, code: t.transactionCode,
-      }))
-      .sort((a, b) => String(b.date).localeCompare(String(a.date)))
-      .slice(0, 40);
-    const buys = insiders.filter(t => t.code === "P"), sells = insiders.filter(t => t.code === "S");
-    const value = list => list.reduce((s, t) => s + Math.abs(t.change) * (t.price || 0), 0);
-    if (!ownership.length && !insiders.length && !(r && r.ok) && !(insResp && insResp.ok)) {
-      return res.status(503).json({ error: "Ownership and insider data are currently unavailable.", synthetic: false });
-    }
     res.json({
-      ...data, ownership, sharesOutstanding: sharesOut,
-      ownershipAvailable: ownership.length > 0,
-      insiders,
-      insiderSummary: { buys: buys.length, sells: sells.length, buyValue: value(buys), sellValue: value(sells), since: from },
-      impliedLens: sourceMeta(ownership.length ? "Finnhub institutional ownership" : "Finnhub insider transactions (SEC Form 4)"),
+      ownership: [], ownershipAvailable: false,
+      sharesOutstanding: co?.snap?.sharesOutstanding || null,
+      insiders: ins.insiders.slice(0, 40).map(t => ({ name: t.name || "—", role: t.role, change: t.change, shares: t.share, price: t.price, date: t.date, filed: t.filed, code: t.code, url: t.source })),
+      insiderSummary: ins.insiderSummary,
+      impliedLens: sourceMeta("SEC EDGAR Form 4 filings", { asOf: ins.insiders[0]?.filed || null, note: ins.truncated ? "Based on the 40 most recent Form 4 filings." : null }),
     });
   } catch (e) {
-    console.error("institutional proxy error:", e.message);
-    res.status(503).json({ error: "Failed to fetch institutional data.", synthetic: false });
+    console.error("insider (Form 4) error:", e.message);
+    res.status(503).json({ error: "Insider filings are unavailable for this ticker.", synthetic: false });
   }
 });
 

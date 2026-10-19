@@ -60,7 +60,7 @@
     "LensScore report card: five factor grades against sector peers",
     "Stock screener with grade filters and presets",
     "Email alerts for price, buy zones and grade changes",
-    "Insider transactions and analyst rating trends",
+    "Insider transactions from SEC Form 4 filings",
     "FINRA OTC (off-exchange) volume",
     "Compare up to 4 stocks side by side",
     "Risk metrics: Sharpe, Sortino, Alpha, Beta, VaR",
@@ -376,7 +376,7 @@
       <div class="ihl-sectors" id="ihl-sectors" aria-label="Sector performance today"></div>
       <div class="ihl-foot">
         <span id="ihl-asof">&mdash;</span>
-        <span class="ihl-src" id="ihl-src">Yahoo Finance</span>
+        <span class="ihl-src" id="ihl-src">Market data</span>
       </div>
     </div>
     <div class="il-hero-live il-hero-live-mobile" id="il-hero-live-mobile" aria-hidden="true">
@@ -550,7 +550,7 @@
           <li><i class="ti ti-file-certificate" aria-hidden="true"></i><b>SEC-sourced financials</b><span>Income, balance sheet and cash flow straight from EDGAR XBRL.</span></li>
           <li><i class="ti ti-focus-2" aria-hidden="true"></i><b>LensScore, decomposed</b><span>Separate value and setup lenses with every component visible.</span></li>
           <li><i class="ti ti-adjustments" aria-hidden="true"></i><b>Scenario valuation</b><span>Bear, Base and Bull projections and an operating-model valuation you control.</span></li>
-          <li><i class="ti ti-filter" aria-hidden="true"></i><b>Screener and ownership</b><span>Find candidates, then check institutions, analysts and off-exchange volume.</span></li>
+          <li><i class="ti ti-filter" aria-hidden="true"></i><b>Screener and ownership</b><span>Find candidates, then check insider trades and off-exchange volume.</span></li>
         </ul>
         <a class="lx-link" href="/?view=tool&amp;section=analyze&amp;symbol=NVDA">Open the research workspace <i class="ti ti-arrow-right" aria-hidden="true"></i></a>
       </article>
@@ -599,7 +599,7 @@
           <li><i class="ti ti-check" aria-hidden="true"></i>Grade screener with ready-made presets</li>
           <li><i class="ti ti-check" aria-hidden="true"></i>Projection Lab and Valuation Lab</li>
           <li><i class="ti ti-check" aria-hidden="true"></i>50 price, buy-zone and grade-change alerts</li>
-          <li><i class="ti ti-check" aria-hidden="true"></i>SEC filings, insider trades and analyst ratings</li>
+          <li><i class="ti ti-check" aria-hidden="true"></i>SEC filings and insider buying and selling</li>
           <li><i class="ti ti-check" aria-hidden="true"></i>Risk metrics, off-exchange volume and CSV exports</li>
         </ul>
         <a class="lx-btn lx-btn-gold" href="/signup?next=%2F%3Fpricing%3D1&amp;source=landing_pricing_pro">Start {{TRIAL_DAYS}}-day free trial</a>
@@ -1000,7 +1000,7 @@
       <div class="pricing-toggle" role="group" aria-label="Pro billing period"><button class="active" id="pricing-period-monthly" onclick="setPricingPeriod('monthly')">Monthly</button><button id="pricing-period-annual" onclick="setPricingPeriod('annual')">Annual · save {{PLAN_ANNUAL_SAVINGS_PERCENT}}%</button></div>
       <div class="pricing-grid">
         <div class="pricing-card"><div class="pricing-tier">Free</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount">0</span><span class="p-per">/month</span></div><p class="p-desc">Build a repeatable research habit before paying.</p><ul class="p-features"><li>{{FREE_DAILY_LIMIT}} company analyses a day</li><li>LensScore report card</li><li>Charts and financial statements</li><li>Decision workspace and thesis tracking</li><li>Portfolio Guide</li><li>3 email alerts</li></ul><button class="btn-plan btn-plan-dark" id="pricing-free-btn">Create free account</button></div>
-        <div class="pricing-card featured"><div class="pricing-pop">{{TRIAL_DAYS}}-day free trial</div><div class="pricing-tier">Pro</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount" id="pricing-pro-amount">{{PLAN_MONTHLY_AMOUNT}}</span><span class="p-per" id="pricing-pro-period">/month</span></div><p class="p-desc" id="pricing-pro-note">Start with a {{TRIAL_DAYS}}-day free trial. Have a discount code? Enter it in Checkout.</p><ul class="p-features"><li>Unlimited company analyses</li><li>Grade screener with presets</li><li>Projection Lab and Valuation Lab</li><li>50 price and grade alerts</li><li>Filings, insider trades, analyst ratings</li><li>PDF and CSV exports</li></ul><button class="btn-plan btn-plan-gold" id="pricing-pro-btn">Start {{TRIAL_DAYS}}-day free trial &rarr;</button></div>
+        <div class="pricing-card featured"><div class="pricing-pop">{{TRIAL_DAYS}}-day free trial</div><div class="pricing-tier">Pro</div><div class="pricing-num"><span class="p-dollar">$</span><span class="p-amount" id="pricing-pro-amount">{{PLAN_MONTHLY_AMOUNT}}</span><span class="p-per" id="pricing-pro-period">/month</span></div><p class="p-desc" id="pricing-pro-note">Start with a {{TRIAL_DAYS}}-day free trial. Have a discount code? Enter it in Checkout.</p><ul class="p-features"><li>Unlimited company analyses</li><li>Grade screener with presets</li><li>Projection Lab and Valuation Lab</li><li>50 price and grade alerts</li><li>SEC filings and insider trades</li><li>PDF and CSV exports</li></ul><button class="btn-plan btn-plan-gold" id="pricing-pro-btn">Start {{TRIAL_DAYS}}-day free trial &rarr;</button></div>
       </div>
       <div class="pricing-compare" aria-label="Free and Pro feature comparison"><div class="pricing-compare-row head"><span>Capability</span><span>Free</span><span>Pro</span></div><div class="pricing-compare-row"><span>Workspace, thesis, watchlist, Portfolio Guide</span><span class="yes">Included</span><span class="yes">Included</span></div><div class="pricing-compare-row"><span>Daily stock analyses</span><span>5 / day</span><span class="yes">Unlimited</span></div><div class="pricing-compare-row"><span>Advanced valuation, calls, screener, export</span><span>Preview</span><span class="yes">Included</span></div></div>
     </div></section>
@@ -1439,7 +1439,7 @@
 
           <!-- INSTITUTIONAL & FINRA OTC ACTIVITY -->
           <div class="app-section" id="sec-institutional"><div class="acc-body" id="body-institutional" style="display:none;">
-              <div style="font-size:12px;color:var(--text4);margin-bottom:1.25rem;">FINRA-reported OTC activity with institutional ownership and short-interest context when the optional Finnhub feed is available.</div>
+              <div style="font-size:12px;color:var(--text4);margin-bottom:1.25rem;">Insider buying and selling from SEC Form 4 filings, and FINRA-reported off-exchange (OTC) activity.</div>
               <div id="inst-loading" class="loading-bar" style="display:none;"><div class="spinner"></div> Loading institutional data…</div>
               <div id="inst-nostock" style="color:var(--text5);font-size:13px;">Search for a stock in the Research tab first.</div>
               <div id="inst-content" style="display:none;">
@@ -1542,7 +1542,7 @@
           </div><!-- /sec-dcf -->
 
           <div class="app-section" id="sec-screener"><div class="acc-body" id="body-screener" style="display:none;">
-<div class="tool-intro"><div><strong>Market Screener</strong> narrows about 290 actively traded U.S. stocks by LensScore grade, valuation, size, income, momentum and sector. Sorted by LensScore.</div><div class="tool-intro-note">Yahoo Finance and optional Finnhub snapshots · refreshed automatically. Missing metrics remain unavailable rather than being treated as zero.</div></div>
+<div class="tool-intro"><div><strong>Market Screener</strong> narrows about 290 actively traded U.S. stocks by LensScore grade, valuation, size, income, momentum and sector. Sorted by LensScore.</div><div class="tool-intro-note">Company figures from SEC filings, prices from daily market data · refreshed automatically. Missing metrics remain unavailable rather than being treated as zero.</div></div>
 <div class="scr-filters">
               <div class="scr-filter-group"><label>Sector</label><select id="scr-sector" onchange="applyScreener()" style="width:100%;background:var(--card);color:var(--text);border:1px solid var(--border2);border-radius:var(--r);padding:4px 6px;font-size:11px;margin-top:6px;"><option value="ALL">All Sectors</option><option value="Tech">Technology</option><option value="Comm.">Communication</option><option value="Health">Healthcare</option><option value="Finance">Financials</option><option value="Cons.Disc">Consumer Disc.</option><option value="Staples">Consumer Staples</option><option value="Energy">Energy</option><option value="Industrials">Industrials</option><option value="Materials">Materials</option><option value="Real Est.">Real Estate</option><option value="Utilities">Utilities</option><option value="ETF">ETFs</option></select></div>
               <div class="scr-filter-group"><label>Max P/E <span id="scr-pe-val">50x</span></label><input type="range" class="scr-slider" id="scr-pe" min="5" max="200" value="50" oninput="document.getElementById('scr-pe-val').textContent=this.value+'x';applyScreener()"></div>
