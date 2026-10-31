@@ -109,6 +109,18 @@
       lastTime: last.time, meta: meta, provenance: q.provenance,
     };
   }
+  /* SEC names are filed in capitals ("NVIDIA CORP"). Prefer a mixed-case
+     name when one exists, otherwise soften the capitals ("Apple Inc"). */
+  function displayName() {
+    var names = Array.prototype.slice.call(arguments).filter(function (n) { return n && String(n).trim() && String(n).toUpperCase() !== S.t; });
+    var mixed = names.filter(function (n) { return n !== n.toUpperCase(); })[0];
+    if (mixed) return mixed;
+    var n = names[0];
+    if (!n) return S.t;
+    return n.toLowerCase().replace(/\b([a-z])/g, function (m) { return m.toUpperCase(); })
+      .replace(/\b(Inc|Corp|Co|Ltd|Plc|Llc|Lp|Sa|Nv|Ag)\b\.?/g, function (m) { return m; })
+      .replace(/\b(Ii|Iii|Iv|Usa|Us|Etf|Reit|Ai)\b/g, function (m) { return m.toUpperCase(); });
+  }
   function riskWord(vol) { return vol == null ? "—" : vol < 22 ? "Steady" : vol < 40 ? "Bumpy" : "Wild"; }
 
   /* ═════════════════════════════════════════════════════════════════════
@@ -178,7 +190,7 @@
 
   function fillHeader() {
     var p = priceFacts(), meta = p ? p.meta : {}, lens = S.lens || {};
-    var name = meta.longName || lens.company || meta.shortName || S.t;
+    var name = displayName(meta.longName, meta.shortName, lens.company);
     IL.$("#sh-name").textContent = name;
     document.title = S.t + " " + (p ? F.price(p.price) + " " : "") + "· " + name + " · ImpliedLens";
     var bits = [meta.fullExchangeName || meta.exchangeName, meta.sector, meta.industry].filter(Boolean);
