@@ -195,7 +195,7 @@
             <span><small>Revenue</small><b>${bigMoney(q.revenue)}</b>${change(q.revenueYoY)}</span>
             <span><small>Net income</small><b>${bigMoney(q.netIncome)}</b>${change(q.netIncomeYoY)}</span>
             <span><small>EPS (diluted)</small><b>${q.eps != null ? (q.eps < 0 ? "-$" : "$") + Math.abs(q.eps).toFixed(2) : "\u2014"}</b>${change(q.epsYoY)}</span>
-          </div>` : "";
+          </div>` : `<div class="il-rel-pending">The numbers appear here once the company files its 10-Q or 10-K, usually within a few weeks of the release. The release itself is ready to read.</div>`;
         return `<div class="il-call-row il-rel-row"><div class="il-call-period">${esc(q ? q.label : "Release")}</div><div class="il-call-title">${esc(r.title)}<span>Released ${esc(releaseDate(r.date))}</span>${nums}</div><div class="il-rel-actions"><button class="il-research-btn" data-release-id="${esc(r.id)}"><i class="ti ti-file-description"></i>Read release</button>${r.report ? `<a class="il-research-btn" href="${esc(r.report.url)}" target="_blank" rel="noopener noreferrer"><i class="ti ti-file-text"></i>${esc(r.report.form)}</a>` : ""}</div></div>`;
       }).join("") : `<div class="il-call-empty">No results releases are in this company's recent SEC filings. Foreign companies often file theirs on Form 6-K, which is not covered yet.</div>`;
       list.dataset.loaded = current;

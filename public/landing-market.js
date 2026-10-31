@@ -260,8 +260,11 @@
   var loaded = false;
   var authReady = !window.IL_AUTH_READY;
   function loadWhenVisible() {
-    var host = hero || root;
-    if (loaded || !authReady || document.hidden || !host.getClientRects().length) return;
+    // Either view being on screen is enough. The signed-in hero exists
+    // (hidden) on the guest page too, and checking only it meant guests
+    // never loaded "Today in the market".
+    var shown = [hero, root].some(function (el) { return el && el.getClientRects().length; });
+    if (loaded || !authReady || document.hidden || !shown) return;
     loaded = true;
     var controller = new AbortController();
     var timeout = setTimeout(function () { controller.abort(); }, 15000);

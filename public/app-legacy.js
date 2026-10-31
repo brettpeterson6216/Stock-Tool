@@ -1458,7 +1458,8 @@ function alignQuoteSeries(result) {
     high:q.high?.[index],
     low:q.low?.[index],
     volume:q.volume?.[index],
-  })).filter(row=>Number.isFinite(Number(row.close)));
+  // A null close is a bar that has not printed; Number(null) is 0, not a price.
+  })).filter(row=>row.close!=null&&row.close!==''&&Number.isFinite(Number(row.close))&&Number(row.close)>0);
   const closes=rows.map(row=>Number(row.close));
   const alignedQuote={
     ...q,

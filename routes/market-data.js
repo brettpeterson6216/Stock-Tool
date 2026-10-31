@@ -356,6 +356,25 @@ router.get("/screener", requirePro, async (req, res) => {
 // Yahoo summary helper — always returns null (Yahoo blocks server-side)
 async function getYahooSummary(_ticker, _modules) { return null; }
 
+/* Yahoo returns the session that has not opened yet as a bar with a null
+   close. Every client that did `Number(close)` turned it into a price of 0,
+   which before the open read as RSI 7, a 100% drawdown and a 107% yearly
+   swing. A bar with no close is not a price: drop it here, once, for every
+   client. */
+function dropUnprintedBars(result) {
+  const q = result?.indicators?.quote?.[0];
+  const ts = result?.timestamp;
+  if (!q || !Array.isArray(ts) || !Array.isArray(q.close)) return result;
+  const keep = ts.map((_, i) => q.close[i] != null && Number(q.close[i]) > 0);
+  if (keep.every(Boolean)) return result;
+  const pick = arr => (Array.isArray(arr) ? arr.filter((_, i) => keep[i]) : arr);
+  result.timestamp = pick(ts);
+  for (const k of ["open", "high", "low", "close", "volume"]) q[k] = pick(q[k]);
+  const adj = result.indicators.adjclose?.[0];
+  if (adj && Array.isArray(adj.adjclose)) adj.adjclose = pick(adj.adjclose);
+  return result;
+}
+
 router.get("/quote/:ticker", checkAnalysisLimit, async (req, res) => {
   const started = Date.now();
   try {
@@ -393,6 +412,7 @@ router.get("/quote/:ticker", checkAnalysisLimit, async (req, res) => {
     }
 
     const result = data.chart.result[0];
+    dropUnprintedBars(result);
     try {
       // Filings for a company nobody has opened yet take a few seconds; the
       // chart does not wait for them (the next view has them cached).
