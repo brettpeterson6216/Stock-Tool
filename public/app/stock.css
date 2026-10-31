@@ -1,0 +1,163 @@
+/* Stock page and research landing. Built only from lens.css tokens. */
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+.sh{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--s5);flex-wrap:wrap}
+.sh-id{display:flex;flex-direction:column;gap:4px;min-width:0}
+.sh-meta{display:flex;align-items:center;gap:10px;font-size:13px;flex-wrap:wrap}
+.sh-sym{font:700 12.5px var(--num);letter-spacing:.02em;padding:2px 8px;border-radius:6px;background:var(--raised);color:var(--text)}
+.sh-name{font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1.2}
+.sh-px{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-top:4px}
+.sh-price{font-size:30px;font-weight:600;letter-spacing:-.01em}
+.sh-chg{font-size:15px;font-weight:600}
+.sh-when{font-size:12.5px}
+.sh-actions{display:flex;gap:10px;flex-wrap:wrap}
+@media (max-width:760px){
+  .sh{align-items:stretch}
+  .sh-name{font-size:21px}
+  .sh-price{font-size:26px}
+  .sh-actions{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .sh-actions .primary{grid-column:1/-1}
+}
+
+/* ── Overview grid ──────────────────────────────────────────────────────── */
+.ov{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:var(--s5);align-items:start}
+.ov-main{display:flex;flex-direction:column;gap:var(--s5);min-width:0}
+@media (max-width:1080px){.ov{grid-template-columns:1fr}}
+@media (max-width:760px){.ov,.ov-main{gap:var(--s4)}}
+
+/* Key numbers: 4 across, the range spans two */
+.kv .kv-wide{grid-column:span 2}
+.kv .range{margin-top:6px}
+.kv .range .num{font-size:13px;color:var(--text2)}
+@media (max-width:1080px){.kv .kv-wide{grid-column:span 2}}
+
+/* ── Chart ──────────────────────────────────────────────────────────────── */
+.pc{gap:10px}
+.pc-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.pc-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pc-legend{display:flex;gap:14px;font-size:12.5px;color:var(--text2)}
+.pc-key{display:inline-flex;align-items:center;gap:6px;color:var(--text2)}
+.pc-key i{display:inline-block;width:14px;height:3px;border-radius:2px}
+.pc-head{display:flex;align-items:baseline;gap:10px;font-size:13px;min-height:20px;flex-wrap:wrap}
+.pc-px{font-weight:600;font-size:14px}
+.pc-canvas{position:relative;height:340px;margin:0 -6px}
+.pc-loading{position:absolute;inset:0;padding:6px}
+.pc-canvas .gate{margin:20px 6px}
+.pc-note{margin-top:-2px}
+.pc-ind{position:relative}
+.pc-ind-menu{min-width:240px}
+.pc-check{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--r-sm);font-size:13.5px;cursor:pointer}
+.pc-check:hover{background:var(--raised)}
+.pc-check span{flex:1}
+.pc-check input{accent-color:var(--gold);width:16px;height:16px}
+@media (max-width:760px){
+  .pc-canvas{height:260px}
+  .pc-bar>.seg{width:100%}
+  .pc-bar>.seg button{flex:1;padding:0 4px}
+  .pc-tools{width:100%;justify-content:space-between;flex-wrap:nowrap}
+  .pc-legend{display:none}
+}
+
+/* ── Report card aside ──────────────────────────────────────────────────── */
+.rc{gap:14px;position:sticky;top:calc(var(--top-h) + 60px)}
+@media (max-width:1080px){.rc{position:static}}
+.rc-top{display:flex;align-items:center;gap:16px}
+.rc-lab{display:flex;flex-direction:column;gap:2px;font-size:13px}
+.rc-label{font-size:17px;font-weight:700;color:var(--text)}
+.rc-verdict{font-size:13.5px;color:var(--text2);line-height:1.55}
+.rc-next{display:flex;flex-direction:column;border-top:1px solid var(--line);padding-top:10px}
+.rc-next-h{font-size:12.5px;font-weight:600;color:var(--text3);margin-bottom:4px}
+.rc-next a{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;color:var(--text);font-size:13.5px;border-top:1px solid var(--line)}
+.rc-next a:first-of-type{border-top:0}
+.rc-next a svg{color:var(--gold-text);flex:none}
+.rc-next a:hover{text-decoration:none;color:var(--gold-text)}
+.rc-foot{display:flex;gap:8px}
+.rc-foot .btn{flex:1}
+
+/* Full report card */
+.rep-f{display:flex;flex-direction:column;gap:6px;padding:10px 0;border-top:1px solid var(--line)}
+.rep-f:first-of-type{border-top:0;padding-top:0}
+.rep-f-h{display:flex;justify-content:space-between;align-items:baseline}
+.rep-f-n{font-weight:600}
+.rep-bar{height:6px;border-radius:6px;background:var(--line2);overflow:hidden}
+.rep-bar i{display:block;height:100%;border-radius:6px}
+.rep-f-s{display:flex;justify-content:space-between;gap:12px;font-size:12.5px;color:var(--text2)}
+.rep-f-s .num{flex:none}
+.rep-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+.rep-list li{position:relative;padding-left:18px;font-size:13.5px;color:var(--text2);line-height:1.5}
+.rep-list li::before{content:"";position:absolute;left:2px;top:8px;width:7px;height:7px;border-radius:999px;background:var(--text3)}
+.rep-list.good li::before{background:var(--gain)}
+.rep-list.bad li::before{background:var(--loss)}
+
+/* ── Feed (news, filings) ───────────────────────────────────────────────── */
+.feed{list-style:none;margin:0;padding:0}
+.feed li{display:flex;justify-content:space-between;gap:16px;padding:14px 20px;border-top:1px solid var(--line)}
+.feed li:first-child{border-top:0}
+.feed a{display:flex;flex-direction:column;gap:2px;min-width:0;color:var(--text)}
+.feed a:hover{text-decoration:none}
+.feed a:hover .feed-t{color:var(--gold-text)}
+.feed-t{font-weight:600;font-size:14px}
+.feed-s{font-size:13px;color:var(--text2);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.feed-m{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex:none;font-size:12.5px}
+@media (max-width:760px){.feed li{flex-direction:column;gap:8px;padding:14px 16px}.feed-m{flex-direction:row;align-items:center}}
+
+/* ── Financials ─────────────────────────────────────────────────────────── */
+#fin-body{display:flex;flex-direction:column;gap:var(--s5)}
+.fin .tbl th.sticky,.fin .tbl td.sticky{min-width:210px}
+.fin .tbl tr.em td{color:var(--text)}
+.fin .tbl td.sub{font-size:12.5px}
+.fin-chart svg{overflow:visible}
+@media (max-width:760px){.fin .tbl th.sticky,.fin .tbl td.sticky{min-width:150px;max-width:170px;white-space:normal}#fin-body{gap:var(--s4)}}
+
+/* ── Valuation ──────────────────────────────────────────────────────────── */
+.val-hero{gap:14px}
+.val-h{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:var(--s6);align-items:center}
+.val-big{font-size:44px;font-weight:600;letter-spacing:-.02em;line-height:1.1;margin:6px 0 8px;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.val-unit{font:500 15px var(--sans);color:var(--text2);letter-spacing:0}
+.val-sent{font-size:14px;line-height:1.6;max-width:620px}
+.val-cmp{display:flex;flex-direction:column;gap:12px;padding-left:var(--s6);border-left:1px solid var(--line)}
+.val-cmp>div{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.val-mid{font-size:22px;font-weight:600}
+@media (max-width:900px){.val-h{grid-template-columns:1fr;gap:var(--s4)}.val-cmp{padding-left:0;border-left:0;border-top:1px solid var(--line);padding-top:14px}.val-big{font-size:36px}}
+.val-tbl td,.val-tbl th{vertical-align:middle}
+.val-tbl th.val-bear{color:var(--loss)} .val-tbl th.val-base{color:var(--text)} .val-tbl th.val-bull{color:var(--gain)}
+.val-cell{display:inline-flex;align-items:center;gap:6px;justify-content:flex-end}
+.val-cell .input{width:88px;height:34px;text-align:right}
+.val-tbl tr.val-out td{background:var(--raised);font-size:14px}
+.val-tbl tr.val-out td:first-child{font-weight:600}
+.val-foot{display:flex;gap:24px;flex-wrap:wrap;padding:14px 20px;border-top:1px solid var(--line)}
+.val-foot .input{height:34px;text-align:right}
+
+/* ── Earnings ───────────────────────────────────────────────────────────── */
+.big-num{font-size:26px;font-weight:600;letter-spacing:-.01em;line-height:1.2}
+.rel{list-style:none;margin:0;padding:0}
+.rel-i{padding:16px 20px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:12px}
+.rel-i:first-child{border-top:0}
+.rel-h{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-start}
+.rel-t{font-weight:650;font-size:15px}
+.rel-n{display:flex;gap:20px;flex-wrap:wrap;font-size:13.5px}
+.rel-body{border-left:2px solid var(--line2);padding:4px 0 4px 16px;display:flex;flex-direction:column;gap:10px;max-height:520px;overflow:auto;font-size:13.5px;line-height:1.65;color:var(--text2)}
+@media (max-width:760px){.rel-i{padding:14px 16px}}
+
+/* ── Research landing ───────────────────────────────────────────────────── */
+.rl-hero{display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;padding:40px 0 20px}
+.rl-hero h1{font-size:34px;font-weight:700;letter-spacing:-.02em}
+.rl-hero p{max-width:620px;font-size:15px}
+.rl-search{width:min(620px,100%);max-width:none;flex:none}
+.rl-search .il-search-box{height:50px;border-radius:12px;font-size:15px}
+.rl-pop{justify-content:center}
+.rl-pop .tag:hover{background:var(--hover);text-decoration:none;color:var(--text)}
+@media (max-width:760px){.rl-hero{padding:20px 0 8px}.rl-hero h1{font-size:26px}}
+
+#ov-rep{align-items:start}
+
+#tab{display:flex;flex-direction:column;gap:var(--s5);min-width:0}
+#tab>.section-h{margin-top:var(--s2);margin-bottom:calc(-1 * var(--s2))}
+.tbl td.sub.up,.tbl td.up{color:var(--gain)}
+.tbl td.sub.down,.tbl td.down{color:var(--loss)}
+.bars-x{display:flex;margin-top:4px}
+.bars-x span{flex:1;text-align:center;font:500 11px var(--num);color:var(--text3);white-space:nowrap;overflow:hidden}
+@media (max-width:760px){#tab{gap:var(--s4)}}
+.rel-body[hidden],.il-sugg[hidden],.il-menu[hidden]{display:none}
+.rl-tools .card{color:var(--text);gap:4px;transition:border-color .15s}
+.rl-tools .card:hover{text-decoration:none;border-color:var(--line3)}

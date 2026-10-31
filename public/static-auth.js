@@ -289,7 +289,7 @@
         '<button type="submit">Go</button>' +
       '</form>' +
       '<nav aria-label="Mobile product navigation">' +
-        '<a href="/"><span aria-hidden="true">⌂</span>Dashboard</a>' +
+        '<a href="/"><span aria-hidden="true">⌂</span>Home</a>' +
         '<a href="/?view=tool&amp;section=analyze"><span aria-hidden="true">⌁</span>Research</a>' +
         '<a href="/lens-score"><span aria-hidden="true">◎</span>LensScore</a>' +
         '<a href="/?view=tool&amp;section=projection"><span aria-hidden="true">↗</span>Scenarios</a>' +

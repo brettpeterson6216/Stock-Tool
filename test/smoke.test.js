@@ -1305,3 +1305,49 @@ test("updating one saved case leaves the other alone", async () => {
   assert.equal(mine.find(r => r.label === "Bull").data.model.growth, 25, "the edit did not stick");
   assert.equal(mine.find(r => r.label === "Bear").data.model.growth, 6, "editing one case changed the other");
 });
+
+// ── Rebuilt stock page ────────────────────────────────────────
+test("the rebuilt stock page is served with 200 at /research and /research/:ticker[/tab]", async () => {
+  for (const p of ["/research", "/research/NVDA", "/research/NVDA/financials", "/research/BRK.B/ownership"]) {
+    const res = await req(p);
+    assert.equal(res.status, 200, p);
+    const html = await res.text();
+    assert.match(html, /src="\/app\/stock\.js\?v=/, p);
+    assert.match(html, /href="\/app\/lens\.css\?v=/, p);
+    // The new pages are set in Inter; the legacy Plus Jakarta preloads are not injected.
+    assert.doesNotMatch(html, /plus-jakarta/i, p);
+  }
+});
+
+test("stock page URLs are normalised and unknown tabs fall back to the overview", async () => {
+  let res = await req("/research/nvda");
+  assert.equal(res.status, 301);
+  assert.equal(res.headers.get("location"), "/research/NVDA");
+  res = await req("/research/NVDA/overview");
+  assert.equal(res.headers.get("location"), "/research/NVDA");
+  res = await req("/research/NVDA/nonsense");
+  assert.equal(res.status, 302);
+  assert.equal(res.headers.get("location"), "/research/NVDA");
+  res = await req("/research/%3Cscript%3E");
+  assert.equal(res.headers.get("location"), "/research");
+});
+
+test("old app links to a stock open the rebuilt page on the matching tab", async () => {
+  const cases = [
+    ["/?view=tool&section=analyze&symbol=nvda", "/research/NVDA"],
+    ["/?view=tool&section=financials&symbol=AAPL", "/research/AAPL/financials"],
+    ["/?view=tool&section=calls&symbol=AAPL", "/research/AAPL/earnings"],
+    ["/?view=tool&section=institutional&symbol=AAPL", "/research/AAPL/ownership"],
+    ["/?view=tool&section=analyze", "/research"],
+  ];
+  for (const [from, to] of cases) {
+    const res = await req(from);
+    assert.equal(res.status, 302, from);
+    assert.equal(res.headers.get("location"), to, from);
+  }
+  // Tools that have not been rebuilt stay in the original app.
+  for (const keep of ["/?view=tool&section=projection&symbol=AAPL", "/?view=tool&section=workspace", "/?view=tool&section=screener"]) {
+    const res = await req(keep);
+    assert.equal(res.status, 200, keep);
+  }
+});

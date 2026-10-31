@@ -266,7 +266,49 @@ app.use("/api",         logoRouter);         // /api/logo/:ticker
 // ============================================================
 const { wantsLite, liteHtml } = require("./lib/home-lite");
 let liteHomeCache;
+
+/* The rebuilt stock page. /research is the search landing; /research/NVDA is
+   the Overview and /research/NVDA/financials etc. the other tabs. */
+const RESEARCH_TABS = new Set(["overview", "financials", "valuation", "earnings", "ownership", "filings"]);
+const researchPage = path.join(__dirname, "public", "app", "research.html");
+app.get(["/research", "/research/:ticker", "/research/:ticker/:tab"], (req, res) => {
+  const t = req.params.ticker;
+  if (t) {
+    const clean = String(t).trim().toUpperCase();
+    if (!/^[A-Z0-9.^-]{1,15}$/.test(clean)) return res.redirect(302, "/research");
+    const tab = req.params.tab ? String(req.params.tab).toLowerCase() : null;
+    if (tab && !RESEARCH_TABS.has(tab)) return res.redirect(302, `/research/${encodeURIComponent(clean)}`);
+    if (clean !== t || tab === "overview") {
+      return res.redirect(301, `/research/${encodeURIComponent(clean)}${tab && tab !== "overview" ? "/" + tab : ""}`);
+    }
+  }
+  return sendPage(res, researchPage);
+});
+
+/* Old single-page-app links to a stock (?view=tool&section=analyze&symbol=X
+   and friends) now open the rebuilt stock page on the matching tab. Sections
+   that have not been rebuilt yet (watchlist, screener, Valuation Lab, compare)
+   still open in the original app. */
+const LEGACY_SECTION_TAB = {
+  analyze: "", reports: "", "lens-score": "", advmetrics: "",
+  financials: "financials", earnings: "earnings", calls: "earnings",
+  secfilings: "filings", institutional: "ownership",
+};
+function legacyStockRedirect(query) {
+  if (query.view !== "tool") return null;
+  if (!query.section && !query.symbol && !query.ticker) return null;
+  const section = String(query.section || "analyze").toLowerCase();
+  if (!Object.prototype.hasOwnProperty.call(LEGACY_SECTION_TAB, section)) return null;
+  const sym = String(query.symbol || query.ticker || "").trim().toUpperCase();
+  if (!sym) return section === "analyze" ? "/research" : null;
+  if (!/^[A-Z0-9.^-]{1,15}$/.test(sym)) return "/research";
+  const tab = LEGACY_SECTION_TAB[section];
+  return `/research/${encodeURIComponent(sym)}${tab ? "/" + tab : ""}`;
+}
+
 app.get("/", (req, res) => {
+  const moved = legacyStockRedirect(req.query || {});
+  if (moved) return res.redirect(302, moved);
   const indexPath = path.join(__dirname, "index.html");
   /* The same URL serves two documents depending on the session cookie, so no
      shared cache may hand one visitor's copy to another. */

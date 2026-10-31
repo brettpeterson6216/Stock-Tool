@@ -496,7 +496,7 @@ function openSection(id, skipProCheck) {
   // only that group's options and can never change the top tab.
   const navGroup = navGroupOf(id);
   document.querySelectorAll('#nav-links .nav-tab').forEach(el => el.classList.remove('active-tab'));
-  document.getElementById(NAV_GROUP_TAB[navGroup])?.classList.add('active-tab');
+  document.getElementById(typeof window.navTabFor === 'function' ? window.navTabFor(id) : NAV_GROUP_TAB[navGroup])?.classList.add('active-tab');
   renderSidebarGroup(navGroup);
   // Open the target section
   const sec = document.getElementById('sec-' + id);
@@ -953,7 +953,9 @@ async function loadSavedAnalysis(entry) {
     if (typeof navGoTo === 'function') navGoTo('analyze');
     else openSection('analyze');
     toast('Loading ' + ticker + '…', 'green');
-    await fetchAndRender();
+    /* A saved model reopens in the Valuation Lab, which still lives here. */
+    window.__ilKeepLegacy = entry.type === 'projection' || entry.type === 'valuation';
+    try { await fetchAndRender(); } finally { window.__ilKeepLegacy = false; }
     if (S.ticker !== ticker) return;
 
     if (entry.type === 'projection') {
@@ -2106,6 +2108,14 @@ async function fetchAndRender() {
   const requestedDataSection = [...document.querySelectorAll('.app-section.open')]
     .map(section => section.id.replace(/^sec-/, ''))
     .find(Boolean) || 'analyze';
+  /* The stock page has been rebuilt at /research/:ticker. Opening a stock
+     from anywhere in this app goes there; only the tools that have not been
+     rebuilt yet (Valuation Lab, DCF, compare, screener) keep loading here. */
+  const REBUILT = { analyze:'', reports:'', 'lens-score':'', advmetrics:'', financials:'/financials', earnings:'/earnings', calls:'/earnings', secfilings:'/filings', institutional:'/ownership', education:'', wealth:'' };
+  if (!window.__ilKeepLegacy && Object.prototype.hasOwnProperty.call(REBUILT, requestedDataSection) && /^[A-Z0-9.^-]{1,15}$/.test(ticker)) {
+    location.assign('/research/' + encodeURIComponent(ticker) + REBUILT[requestedDataSection]);
+    return;
+  }
   const btn=document.getElementById('search-btn');
   btn.disabled=true; btn.innerHTML='<span style="display:inline-flex;gap:6px;align-items:center;"><span class="spinner"></span> Loading…</span>';
   document.getElementById('analyze-loading').style.display='flex';

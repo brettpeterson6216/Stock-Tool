@@ -54,9 +54,10 @@
     var want = "";
     if (path === "/" && view === "tool") {
       if (section === "reports" || section === "workspace") want = "reports";
+      else if (section === "screener") want = "screener";
       else want = "research";
     } else if (path === "/") want = "home";
-    else if (path === "/lens-score") want = "lens-score";
+    else if (path === "/research" || path.indexOf("/research/") === 0 || path === "/lens-score") want = "research";
     /* /blog keeps working and keeps lighting the Learn tab, because the tab's
        data-nav moved from "blog" to "learn" when it started pointing at the
        lessons — a reader who lands on the blog from a link should still see
@@ -82,7 +83,8 @@
      document load. Anywhere else the href is a real URL and the browser
      handles it, which is why the markup no longer carries inline onclick
      attributes that referenced functions six of the pages never loaded. */
-  var SECTION_FOR = { research: "analyze", screener: "screener", reports: "workspace" };
+  /* Research is its own page now (/research), so only these stay in the app. */
+  var SECTION_FOR = { screener: "screener", reports: "workspace" };
   nav.addEventListener("click", function (e) {
     // Preserve the browser's open-in-new-tab and open-in-new-window actions.
     if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;

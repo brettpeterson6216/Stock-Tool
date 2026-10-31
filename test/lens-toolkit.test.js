@@ -45,14 +45,17 @@ test("the toolkit page loads the site's last stylesheet", () => {
     "lens-score still stops short of surface.css, so its surfaces differ from every other page");
 });
 
-test("the tab is LensToolkit everywhere, and the metric is still LensScore", () => {
+/* The top bar was reorganised around the rebuilt stock page (Home, Research,
+   Screener, Watchlist, Learn, Pricing): the third tab is the Screener now, and
+   LensToolkit is reached from Research. The page keeps its own name. */
+test("the third tab is the Screener everywhere, and the LensToolkit page keeps its name", () => {
   const pages = ["index.html", ...fs.readdirSync(path.join(ROOT, "public"))
     .filter(f => f.endsWith(".html")).map(f => "public/" + f), "labs/lens-score/index.html"];
   for (const p of pages) {
     const html = read(p);
     if (!html.includes("nav-lensscore-link")) continue;
-    assert.match(html, /id="nav-lensscore-link"[^>]*>LensToolkit</,
-      `${p} still labels the tab LensScore`);
+    assert.match(html, /href="\/\?view=tool&amp;section=screener" id="nav-lensscore-link"[^>]*>Screener</,
+      `${p} does not label the third tab Screener`);
   }
   // The page renames the surface, not the score it computes.
   assert.match(read("labs", "lens-score", "index.html"), /LensScore/,

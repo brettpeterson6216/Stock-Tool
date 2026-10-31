@@ -48,6 +48,9 @@
     saved: 'nav-saved-link',
   };
   const NAV_GROUP_LABEL = { research:'Research', learn:'Learn', saved:'Watchlists' };
+  /* The top bar has its own Screener tab; every other section lights its group's tab. */
+  function navTabFor(sec) { return sec === 'screener' ? 'nav-lensscore-link' : NAV_GROUP_TAB[navGroupOf(sec)]; }
+  window.navTabFor = navTabFor;
   function navGroupOf(sec) {
     for (const g in NAV_GROUPS) if (NAV_GROUPS[g].includes(sec)) return g;
     return 'research';
@@ -180,7 +183,7 @@
       document.querySelectorAll('.nav-tab').forEach(a => a.classList.remove('active-tab'));
       var _sec = activeSection || document.getElementById('view-tool')?.getAttribute('data-active-section') || 'analyze';
       var _grp = (typeof navGroupOf==='function') ? navGroupOf(_sec) : 'research';
-      var _tabId = (typeof NAV_GROUP_TAB!=='undefined' && NAV_GROUP_TAB[_grp]) ? NAV_GROUP_TAB[_grp] : 'nav-analyze';
+      var _tabId = (typeof window.navTabFor === 'function' && window.navTabFor(_sec)) || 'nav-analyze';
       var tt = document.getElementById(_tabId); if(tt) tt.classList.add('active-tab');
       notifyViewChange('tool');
     } else {

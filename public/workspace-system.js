@@ -505,6 +505,7 @@
     });
   }
   function openTicker(ticker, tab) {
+    if (!tab && /^[A-Z0-9.^-]{1,15}$/.test(String(ticker || ""))) { window.location.assign("/research/" + encodeURIComponent(ticker)); return; }
     const input = document.getElementById("main-ticker"); if (input) input.value = ticker;
     if (typeof window.fetchAndRender === "function") window.fetchAndRender();
     if (tab) { state.tab = tab; renderAll(); } else if (typeof window.openSection === "function") window.openSection("analyze");

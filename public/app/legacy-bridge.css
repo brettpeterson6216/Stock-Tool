@@ -1,0 +1,82 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Bridge: the pages that have not been rebuilt yet (dashboard, screener,
+   watchlist, Valuation Lab, marketing pages) take the new design system's
+   palette and type through the variables they already use, so moving between
+   a rebuilt page and an old one does not feel like two different products.
+
+   Compiled last into the premium layer by scripts/build-styles.js.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Type: every page is set in Inter. The old sheets name Plus Jakarta Sans
+   directly in places, so that family name now resolves to Inter as well. */
+@font-face{font-family:'Inter';font-style:normal;font-weight:100 900;font-display:swap;src:url(/vendor/fonts/inter-files/inter-latin-wght-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Inter';font-style:normal;font-weight:100 900;font-display:swap;src:url(/vendor/fonts/inter-files/inter-latin-ext-wght-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:100 900;font-display:swap;src:url(/vendor/fonts/inter-files/inter-latin-wght-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+
+:root{
+  --rp-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  --il-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  --rp-num: "IBM Plex Sans", "Inter", system-ui, sans-serif !important;
+
+  --rp-bg: #F6F5F2 !important;
+  --rp-panel: #FFFFFF !important;
+  --rp-raised: #FFFFFF !important;
+  --rp-inset: #F0EEE9 !important;
+  --rp-ink: #16181B !important;
+  --rp-copy: #4C525A !important;
+  --rp-muted: #6B7179 !important;
+  --rp-line: #E3E0D9 !important;
+  --rp-line-strong: #C5C0B5 !important;
+  --rp-green: #17804F !important;
+  --rp-red: #C23B33 !important;
+  --rp-gold: #8E6414 !important;
+  --rp-gold-accent: #8E6414 !important;
+  --rp-gold-fill: #E5B65A !important;
+  --rp-gold-grad: #E5B65A !important;
+  --rp-gold-text: linear-gradient(0deg, #8E6414, #8E6414) !important;
+  --rp-gold-glow: none !important;
+  --rp-gold-soft: rgba(201, 149, 47, .14) !important;
+  --rp-on-gold: #17130A !important;
+  --rp-panel-grad: #FFFFFF !important;
+  --rp-panel-edge: 0 0 0 0 transparent !important;
+  --rp-shadow: 0 0 0 0 transparent !important;
+  --rp-aurora: none !important;
+}
+html[data-theme="dark"]{
+  --rp-bg: #0E0F11 !important;
+  --rp-panel: #15171A !important;
+  --rp-raised: #1B1E22 !important;
+  --rp-inset: #111316 !important;
+  --rp-ink: #EDEEF0 !important;
+  --rp-copy: #A3A9B1 !important;
+  --rp-muted: #7D848D !important;
+  --rp-line: #22262B !important;
+  --rp-line-strong: #33383E !important;
+  --rp-green: #4CC38A !important;
+  --rp-red: #F07B7B !important;
+  --rp-gold: #E5B65A !important;
+  --rp-gold-accent: #E5B65A !important;
+  --rp-gold-bright: #EEC473 !important;
+  --rp-gold-fill: #E5B65A !important;
+  --rp-gold-grad: #E5B65A !important;
+  --rp-gold-text: linear-gradient(0deg, #E5B65A, #E5B65A) !important;
+  --rp-gold-glow: none !important;
+  --rp-gold-soft: rgba(229, 182, 90, .14) !important;
+  --rp-on-gold: #17130A !important;
+  --rp-panel-grad: #15171A !important;
+  --rp-panel-edge: 0 0 0 0 transparent !important;
+  --rp-shadow: 0 0 0 0 transparent !important;
+  --rp-aurora: none !important;
+}
+
+/* The shared top bar, matched to the rebuilt pages' bar: plain wordmark,
+   quiet tabs with a raised pill for the current page, one clean search box. */
+:root{ --il-tab-on: #F0EEE9 !important; }
+html[data-theme="dark"]{ --il-tab-on: #1B1E22 !important; }
+#main-nav .il-wordmark,#main-nav .il-wordmark-b{font-family:"Inter",sans-serif !important;font-style:normal !important;font-weight:700 !important;letter-spacing:-.01em !important;color:var(--rp-ink) !important;-webkit-text-fill-color:currentColor !important;background:none !important}
+#main-nav .il-wordmark-b{margin-left:0 !important}
+html body #main-nav #nav-links .nav-tab,html body #main-nav #nav-links .nav-tab:hover,html body #main-nav #nav-links .nav-tab.active-tab,html body #main-nav #nav-links .nav-tab.active,html body #main-nav #nav-links .nav-tab.active-tab:hover{height:38px !important;min-height:38px !important;align-self:center !important;margin:0 !important;transform:none !important;padding:0 12px !important;border:0 !important;border-radius:8px !important;box-shadow:none !important;background:transparent !important;background-image:none !important;font-family:"Inter",sans-serif !important;font-size:14px !important;font-weight:500 !important;letter-spacing:0 !important;color:var(--rp-copy) !important}
+html body #main-nav #nav-links .nav-tab:hover{color:var(--rp-ink) !important;background:var(--il-tab-on) !important}
+html body #main-nav #nav-links .nav-tab.active-tab,html body #main-nav #nav-links .nav-tab.active,html body #main-nav #nav-links .nav-tab[aria-current="page"]{color:var(--rp-ink) !important;font-weight:600 !important;background:var(--il-tab-on) !important}
+#main-nav .nav-tab::after,#main-nav .nav-tab.active-tab::after{display:none !important}
+#main-nav #nav-ticker-input,html body #main-nav #nav-ticker-input{border:0 !important;outline:0 !important;box-shadow:none !important;background:transparent !important}
