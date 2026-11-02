@@ -418,3 +418,50 @@ body.il-app{
 .w-dlg-h{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
 .w-big{box-shadow:none;margin:0}
 .w-big .w-tools{display:none}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Top of every page: a live market tape over a richer top bar.
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (min-width:1700px){:root{--maxw:1520px}}
+@media (min-width:2200px){:root{--maxw:1720px}}
+
+.il-tape{position:relative;isolation:isolate;display:flex;align-items:center;height:34px;font-size:12.5px;color:var(--text2);
+  background:linear-gradient(90deg,color-mix(in srgb,var(--ground) 70%,#000) 0%,var(--ground) 100%);border-bottom:1px solid var(--line);overflow:hidden}
+.il-tape::before{content:"";position:absolute;inset:0;z-index:-1;background:url(/share/atlas-v1.webp) center 38%/cover no-repeat;opacity:.16;
+  -webkit-mask-image:linear-gradient(90deg,#000,rgba(0,0,0,.4) 60%,transparent);mask-image:linear-gradient(90deg,#000,rgba(0,0,0,.4) 60%,transparent)}
+:root:not([data-theme="dark"]) .il-tape{background:linear-gradient(90deg,#EDE7DA,var(--ground))}
+:root:not([data-theme="dark"]) .il-tape::before{opacity:.12;filter:sepia(.4)}
+.il-tape-state{flex:none;display:flex;align-items:center;gap:8px;padding:0 18px 0 44px;height:100%;border-right:1px solid var(--line);white-space:nowrap}
+.il-tape-state b{color:var(--text);font-weight:650;letter-spacing:.01em}
+.il-tape-dot{width:7px;height:7px;border-radius:999px;background:var(--text3)}
+.il-tape-dot.on{background:var(--gain);box-shadow:0 0 0 0 color-mix(in srgb,var(--gain) 60%,transparent);animation:il-pulse 2s ease-out infinite}
+@keyframes il-pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--gain) 55%,transparent)}100%{box-shadow:0 0 0 8px transparent}}
+.il-tape-run{flex:1;min-width:0;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 40px,#000 calc(100% - 60px),transparent);mask-image:linear-gradient(90deg,transparent,#000 40px,#000 calc(100% - 60px),transparent)}
+.il-tape-track{display:flex;width:max-content;animation:il-tape 70s linear infinite}
+.il-tape:hover .il-tape-track{animation-play-state:paused}
+.il-tape-set{display:flex;align-items:center;padding-right:28px}
+@keyframes il-tape{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.il-tape-it{display:inline-flex;align-items:center;gap:7px;padding:0 4px;white-space:nowrap}
+.il-tape-n{color:var(--text2)}
+.il-tape-it .num{color:var(--text);font-weight:600}
+.il-tape-it .up,.il-tape-it .down{display:inline-flex;align-items:center;gap:3px;font:600 12px var(--num)}
+.il-tape-sep{color:var(--gold);opacity:.5;padding:0 14px;font-size:8px}
+.il-tape-none{padding:0 20px;color:var(--text3)}
+@media (prefers-reduced-motion:reduce){.il-tape-track{animation:none}}
+@media (max-width:760px){.il-tape{height:30px;font-size:11.5px}.il-tape-state{padding:0 12px}.il-tape-state>span:last-child{display:none}}
+
+/* The bar itself: a warm wash, icons in the nav, a gold active marker. */
+.il-top{background:linear-gradient(180deg,color-mix(in srgb,var(--gold) 5%,transparent),transparent 80%),color-mix(in srgb,var(--ground) 86%,transparent)}
+.il-top-in{gap:var(--s5)}
+.il-brand img{filter:drop-shadow(0 0 10px color-mix(in srgb,var(--gold) 35%,transparent))}
+.il-brand-word{font-size:17px}
+.il-nav a[hidden]{display:none}
+.il-nav a{position:relative;display:inline-flex;align-items:center;gap:7px;padding:8px 12px}
+.il-nav a svg{opacity:.7;transition:opacity .15s,color .15s}
+.il-nav a:hover svg{opacity:1;color:var(--gold-text)}
+.il-nav a[aria-current="page"]{background:color-mix(in srgb,var(--gold) 9%,transparent);color:var(--text)}
+.il-nav a[aria-current="page"] svg{opacity:1;color:var(--gold-text)}
+.il-nav a[aria-current="page"]::after{content:"";position:absolute;left:12px;right:12px;bottom:-11px;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);box-shadow:0 0 10px color-mix(in srgb,var(--gold) 70%,transparent)}
+.il-search-box{background:color-mix(in srgb,var(--surface) 80%,transparent)}
+@media (max-width:1180px){.il-nav a span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}.il-nav a{padding:8px 10px}}
+@media (max-width:1180px) and (min-width:761px){.il-nav a[data-k] svg{opacity:.9}}

@@ -176,6 +176,10 @@
     expand: '<path d="M4 9V4h5"/><path d="M20 9V4h-5"/><path d="M4 15v5h5"/><path d="M20 15v5h-5"/>',
     share: '<path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M5 13v6a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-6"/>',
     download: '<path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/>',
+    spark: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4"/><path d="m6.5 6.5 2 2M15.5 15.5l2 2M6.5 17.5l2-2M15.5 8.5l2-2"/>',
+    plus: '<path d="M12 5v14M5 12h14"/>',
+    globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18"/>',
+    pulse: '<path d="M3 12h4l3-7 4 14 3-7h4"/>',
   };
   IL.icon = function (name, size) {
     var s = size || 16;
@@ -211,11 +215,11 @@
         '<div class="il-top-in">' +
           '<a class="il-brand" href="/" aria-label="ImpliedLens home"><img src="/logo-mark-68.png" width="28" height="28" alt=""><span class="il-brand-word">Implied<span class="accent">Lens</span></span></a>' +
           '<nav class="il-nav" aria-label="Main">' + NAV.map(function (n) {
-            return '<a href="' + n.href + '" data-k="' + n.key + '"' + (n.key === active ? ' aria-current="page"' : "") + ">" + n.label + "</a>";
+            return '<a href="' + n.href + '" data-k="' + n.key + '" title="' + n.label + '"' + (n.key === active ? ' aria-current="page"' : "") + ">" + IL.icon(n.key === "pricing" ? "spark" : n.icon, 15) + "<span>" + n.label + "</span></a>";
           }).join("") + "</nav>" +
           '<div class="il-search" role="search">' +
             '<label class="il-search-box">' + IL.icon("search") +
-              '<input id="il-q" type="search" autocomplete="off" spellcheck="false" placeholder="Search a company or ticker" aria-label="Search a company or ticker" role="combobox" aria-expanded="false" aria-controls="il-sugg" aria-autocomplete="list">' +
+              '<input id="il-q" type="search" autocomplete="off" spellcheck="false" placeholder="Search any US stock or ticker" aria-label="Search a company or ticker" role="combobox" aria-expanded="false" aria-controls="il-sugg" aria-autocomplete="list">' +
               '<span class="il-kbd" aria-hidden="true">/</span>' +
             "</label>" +
             '<div class="il-sugg" id="il-sugg" role="listbox" hidden></div>' +
@@ -223,6 +227,7 @@
           '<div class="il-acct" id="il-acct"></div>' +
         "</div>";
       wireSearch(IL.$("#il-q"), IL.$("#il-sugg"));
+      marketTape(top);
     }
     var bottom = document.getElementById("il-bottom");
     if (bottom) {
@@ -248,6 +253,59 @@
       var q = IL.$("#il-q"); if (!q) return;
       e.preventDefault(); q.focus(); q.select();
     });
+  };
+
+
+  /* ── Market tape: a thin live strip above the top bar ─────────────────
+     The three index trackers and the sector ETFs from /api/market/
+     landing-summary (cached five minutes on the server and in this tab),
+     with the market's open/closed state in New York time. It scrolls away
+     with the page; the top bar under it stays. */
+  function marketState() {
+    var now = new Date(), ny = new Date(now.toLocaleString("en-US", { timeZone: "America/New_York" }));
+    var d = ny.getDay(), m = ny.getHours() * 60 + ny.getMinutes();
+    var open = d > 0 && d < 6 && m >= 570 && m < 960;
+    var label;
+    if (open) { var left = 960 - m; label = "Open \u00b7 closes in " + (left >= 60 ? Math.floor(left / 60) + "h " : "") + (left % 60) + "m"; }
+    else if (d > 0 && d < 6 && m < 570) label = "Closed \u00b7 opens 9:30 AM ET";
+    else label = "Closed \u00b7 opens " + (d === 5 || d === 6 || d === 0 ? "Monday" : "tomorrow") + " 9:30 AM ET";
+    return { open: open, label: label };
+  }
+  IL.marketSummary = function () {
+    try { var c = JSON.parse(sessionStorage.getItem("il-mkt") || "null"); if (c && Date.now() - c.at < 5 * 60 * 1000) return Promise.resolve(c.data); } catch (_) {}
+    return IL.api("/api/market/landing-summary?window=1M").then(function (res) {
+      if (!res.ok || !res.data) return null;
+      try { sessionStorage.setItem("il-mkt", JSON.stringify({ at: Date.now(), data: res.data })); } catch (_) {}
+      return res.data;
+    });
+  };
+  function tri(up) { return '<svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true"><path d="' + (up ? "M4 1 7.5 7h-7z" : "M4 7 .5 1h7z") + '" fill="currentColor"/></svg>'; }
+  function marketTape(top) {
+    if (document.querySelector(".il-tape")) return;
+    var st = marketState();
+    var bar = document.createElement("div");
+    bar.className = "il-tape"; bar.setAttribute("aria-label", "Market today");
+    bar.innerHTML = '<div class="il-tape-state"><span class="il-tape-dot' + (st.open ? " on" : "") + '"></span><b>US market</b><span>' + st.label + '</span></div><div class="il-tape-run"><div class="il-tape-track"></div></div>';
+    top.parentNode.insertBefore(bar, top);
+    IL.marketSummary().then(function (d) {
+      if (!d) { bar.querySelector(".il-tape-run").innerHTML = '<span class="il-tape-none">Market data is updating.</span>'; return; }
+      var items = (d.indexes || []).map(function (x) { return { n: String(x.name || x.symbol).replace(/\s*\(.*\)$/, ""), p: x.price, c: x.changePct }; })
+        .concat((d.sectors || []).map(function (x) { return { n: x.name, c: x.changePct }; }));
+      if (d.breadth !== null && d.breadth !== undefined) items.push({ n: "Sectors up", txt: (d.advancing || 0) + " of " + (d.measured || 0) });
+      var one = items.map(function (it) {
+        var up = it.c >= 0, chg = isFinite(it.c) ? '<span class="' + (up ? "up" : "down") + '">' + tri(up) + " " + IL.fmt.pct(Math.abs(it.c), 2) + "</span>" : "";
+        return '<span class="il-tape-it"><span class="il-tape-n">' + IL.h(it.n) + "</span>" + (it.p ? '<span class="num">' + IL.fmt.num(it.p, 2) + "</span>" : "") + (it.txt ? '<span class="num">' + IL.h(it.txt) + "</span>" : "") + chg + "</span>";
+      }).join('<span class="il-tape-sep" aria-hidden="true">•</span>');
+      var track = bar.querySelector(".il-tape-track");
+      track.innerHTML = '<span class="il-tape-set">' + one + '</span><span class="il-tape-set" aria-hidden="true">' + one + "</span>";
+    });
+  }
+  /* Company names from filings: drop state suffixes ("/De", "/New/") and
+     fix all-caps. */
+  IL.cleanName = function (n) {
+    n = String(n || "").replace(/\s*\/[A-Za-z]{2,4}\/?\s*$/, "").replace(/\s+\/[A-Za-z]+\//g, " ").trim();
+    if (n && n === n.toUpperCase()) n = n.toLowerCase().replace(/\b([a-z])/g, function (m) { return m.toUpperCase(); }).replace(/\b(Inc|Corp|Co|Ltd|Plc|Llc|Nv|Sa|Ag)\b/g, function (m) { return m === "Llc" ? "LLC" : m === "Plc" ? "plc" : m === "Nv" ? "N.V." : m === "Sa" ? "S.A." : m === "Ag" ? "AG" : m; });
+    return n;
   };
 
   function renderAccount(user) {

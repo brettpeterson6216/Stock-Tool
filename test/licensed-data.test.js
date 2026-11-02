@@ -64,6 +64,7 @@ test("SIC codes map to sectors, with pinned exceptions", () => {
   const { sectorFromSic } = require("../lib/sec-fundamentals");
   assert.equal(sectorFromSic(3674, "NVDA"), "Tech");
   assert.equal(sectorFromSic(2834, "LLY"), "Health");
+  assert.equal(sectorFromSic(7389, "ABNB"), "Cons.Disc", "Airbnb is consumer discretionary, not business services");
   assert.equal(sectorFromSic(6021, "JPM"), "Finance");
   assert.equal(sectorFromSic(6798, "O"), "Real Est.");
   assert.equal(sectorFromSic(4911, "NEE"), "Utilities");
