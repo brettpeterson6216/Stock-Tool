@@ -206,7 +206,7 @@
   function boot() {
     IL.shell("screener");
     shell();
-    IL.ribbon(IL.$("#sc-hero"), "sweep", 9);
+    IL.plate(IL.$("#sc-hero"), "ledger", "right 35%");
     try { var s = JSON.parse(localStorage.getItem("il-screener") || "null"); if (s && s.st) { st = Object.assign(JSON.parse(JSON.stringify(DEFAULT)), s.st); preset = s.preset || null; } } catch (_) {}
     var qp = new URLSearchParams(location.search).get("preset");
     if (qp) applyPreset(qp);

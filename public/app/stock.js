@@ -129,6 +129,10 @@
   /* ═════════════════════════════════════════════════════════════════════
      Research landing (no ticker)
      ═════════════════════════════════════════════════════════════════════ */
+  function tile(href, plate, pos, title, sub) {
+    return '<a class="card lift tile" href="' + href + '"><span class="tile-art" style="--plate:url(' + IL.plateSrc(plate) + ');--plate-pos:' + pos + '" aria-hidden="true"></span>' +
+      '<span class="tile-body"><span class="card-t">' + title + ' <span class="tile-go">' + IL.icon("arrow", 14) + '</span></span><span class="card-sub">' + sub + "</span></span></a>";
+  }
   function renderLanding() {
     document.title = "Research a stock · ImpliedLens";
     var popular = ["NVDA", "AAPL", "MSFT", "AMZN", "GOOGL", "META", "TSLA", "COST", "JPM", "LLY", "AVGO", "NFLX"];
@@ -143,19 +147,20 @@
         '<div class="row wrap rl-pop"><span class="faint">Popular:</span>' + popular.map(function (t) { return '<a class="tag" href="/research/' + t + '">' + t + "</a>"; }).join("") + "</div>" +
       "</section>" +
       '<div class="grid-3 rl-tools">' +
-        '<a class="card lift" href="/compare"><span class="card-t">Compare</span><span class="card-sub">Up to four stocks side by side, with the best in each row marked.</span></a>' +
-        '<a class="card lift" href="/screener"><span class="card-t">Screener</span><span class="card-sub">Filter about 290 US stocks by grade, value, size and momentum.</span></a>' +
-        '<a class="card lift" href="/lens-score"><span class="card-t">LensToolkit</span><span class="card-sub">Trend, timing, buy zones and alerts for any stock.</span></a>' +
-        '<a class="card lift" href="/?view=tool&section=projection"><span class="card-t">Valuation Lab</span><span class="card-sub">A full five-year model with saved versions.</span></a>' +
+        tile("/compare", "atlas", "52% 70%", "Compare", "Up to four stocks side by side, with the best in each row marked.") +
+        tile("/screener", "ledger", "60% 40%", "Screener", "Filter about 290 US stocks by grade, value, size and momentum.") +
+        tile("/lens-score", "dial", "75% 45%", "LensToolkit", "Trend, timing, buy zones and alerts for any stock.") +
+        tile("/?view=tool&section=projection", "engraved", "70% 70%", "Valuation Lab", "A full five-year model with saved versions.") +
       "</div>" +
       '<div class="section-h"><h2 class="section-t">Top-rated in each <em>sector</em></h2><span class="card-sub">Highest LensScore among the companies we grade</span></div>' +
-      '<div class="card flush" id="rl-leaders"><div style="padding:20px">' + sk(16) + "</div></div>" +
+      '<div class="card flush" id="rl-leaders" data-w="expand,csv" data-w-title="Top-rated by sector"><div style="padding:20px">' + sk(16) + "</div></div>" +
       '<div class="grid-2">' +
-        '<section class="card flush" id="rl-track"><div class="card-h"><h2 class="card-t">Does the LensScore work?</h2><span class="card-sub">Our public track record</span></div><div style="padding:20px">' + sk(80) + "</div></section>" +
-        '<section class="card flush" id="rl-movers"><div class="card-h"><h2 class="card-t">Biggest grade changes this week</h2></div><div style="padding:20px">' + sk(80) + "</div></section>" +
+        '<section class="card flush" id="rl-track" data-w="expand" data-w-title="Track record"><div class="card-h"><h2 class="card-t">Does the LensScore work?</h2><span class="card-sub">Our public track record</span></div><div style="padding:20px">' + sk(80) + "</div></section>" +
+        '<section class="card flush" id="rl-movers" data-w="expand" data-w-title="Grade changes"><div class="card-h"><h2 class="card-t">Biggest grade changes this week</h2></div><div style="padding:20px">' + sk(80) + "</div></section>" +
       "</div>";
     IL.wireSearch(IL.$("#rl-q"), IL.$("#rl-sugg"));
-    IL.ribbon(IL.$(".rl-hero"), "flanks", 5);
+    IL.plate(IL.$(".rl-hero"), "globe", "62% 30%");
+    IL.widgets(main());
     IL.api("/api/lens-leaders").then(function (res) {
       var box = IL.$("#rl-leaders");
       var d = res.data || {};
@@ -226,7 +231,7 @@
       }).join("") + "</nav>" +
       '<div id="tab"></div>';
     wireActions();
-    IL.ribbon(IL.$("#sh"), "sweep", 4);
+    IL.plate(IL.$("#sh"), "engraved", "right 32%");
   }
 
   /* A one-year sparkline with a gold wash, top right of the header. */
@@ -360,16 +365,16 @@
     box.innerHTML =
       '<div class="ov">' +
         '<div class="ov-main">' +
-          '<section class="card prime lr" aria-label="Lens Report" id="ov-lr"><div class="lr-h"><h2 class="card-t">The Lens Report</h2></div>' + sk(90) + "</section>" +
+          '<section class="card prime lr" aria-label="Lens Report" id="ov-lr" data-w="share,expand" data-w-title="The Lens Report"><div class="lr-h"><h2 class="card-t">The Lens Report</h2></div>' + sk(90) + "</section>" +
           '<section class="card pc" aria-label="Price chart" id="ov-chart"></section>' +
           '<section class="kv" aria-label="Key numbers" id="ov-kv">' + Array(8).join('<div><span class="k">' + sk(10, "60%") + '</span><span class="v">' + sk(16, "50%") + "</span></div>") + "</section>" +
           '<div class="grid-3">' +
-            '<section class="card" id="ov-q"><h2 class="card-t">Latest quarter</h2>' + sk(60) + "</section>" +
-            '<section class="card" id="ov-f"><h2 class="card-t">Famous investors</h2>' + sk(60) + "</section>" +
-            '<section class="card" id="ov-r"><h2 class="card-t">How risky has it been?</h2>' + sk(60) + "</section>" +
+            '<section class="card" id="ov-q" data-w="expand" data-w-title="Latest quarter"><h2 class="card-t">Latest quarter</h2>' + sk(60) + "</section>" +
+            '<section class="card" id="ov-f" data-w="expand" data-w-title="Famous investors"><h2 class="card-t">Famous investors</h2>' + sk(60) + "</section>" +
+            '<section class="card" id="ov-r" data-w="expand" data-w-title="Risk"><h2 class="card-t">How risky has it been?</h2>' + sk(60) + "</section>" +
           "</div>" +
         "</div>" +
-        '<aside class="card prime rc" aria-label="LensScore report card" id="ov-rc">' + sk(220) + "</aside>" +
+        '<aside class="card prime rc" aria-label="LensScore report card" id="ov-rc" data-w="share,expand" data-w-title="LensScore">' + sk(220) + "</aside>" +
       "</div>" +
       '<div class="section-h" id="report"><h2 class="section-t">Full report <em>card</em></h2><span class="card-sub" id="rep-sub"></span></div>' +
       '<div class="grid-2" id="ov-rep"><section class="card">' + sk(140) + '</section><section class="card">' + sk(140) + "</section></div>" +
@@ -379,6 +384,8 @@
       '<section class="card flush" id="ov-news"><div style="padding:20px">' + sk(60) + "</div></section>";
 
     S.chart = IL.PriceChart(IL.$("#ov-chart"), { ticker: S.t, seed: S.quote || undefined });
+    IL.widgetShare["ov-lr"] = IL.widgetShare["ov-rc"] = function () { var inp = reportInputs(); shareCard(inp, IL.analysis.flags(inp)); };
+    IL.widgets(box);
     paintKeyNumbers();
     paintRisk();
     D.lens().then(function () { paintReportCard(); paintKeyNumbers(); paintReport(); paintPeers(); paintLensReport(); });
@@ -442,56 +449,14 @@
     plain: { src: null, label: "Plain", draw: function (i, f) { return drawPlainCard(i, f); } }
   };
   function renderCard(style, inp, fl, plate) { var P = PLATES[style] || PLATES.engraved; return P.draw ? P.draw(inp, fl, plate) : drawShareCard(inp, fl, plate); }
-  var plateCache = {};
-  function loadPlate(style) {
-    if (!plateCache[style]) plateCache[style] = new Promise(function (res) { if (!PLATES[style].src) return res(null); var im = new Image(); im.onload = function () { res(im); }; im.onerror = function () { res(null); }; im.src = PLATES[style].src; });
-    return plateCache[style];
-  }
-  function shareStyle(set) {
-    try { if (set) localStorage.setItem("il-share-style", set); var v = localStorage.getItem("il-share-style"); return PLATES[v] ? v : "engraved"; } catch (_) { return set || "engraved"; }
-  }
   function shareCard(inp, fl) {
-    var fonts = ["700 40px Inter", "600 40px Inter", "500 40px Inter", "400 40px Inter", "500 40px 'IBM Plex Sans'", "600 40px 'IBM Plex Sans'"];
-    var ready = document.fonts && document.fonts.load ? Promise.all(fonts.map(function (f) { return document.fonts.load(f).catch(function () {}); })) : Promise.resolve();
-    var style = shareStyle();
-    Promise.all([ready, loadPlate(style)]).then(function (r) { openShare(inp, renderCard(style, inp, fl, r[1]), style, fl); });
-  }
-  function openShare(inp, c, style, fl) {
-    var v = inp.valuation, g = inp.grades;
-    var url = location.origin + "/research/" + S.t;
-    var text = S.t + ": " + (v && v.verdict ? v.verdict.label + ". " : "") + (g ? "LensScore " + Number(g.score).toFixed(1) + "/10. " : "") + url;
-    /* A data: URL, not blob:, because the page's CSP allows data: images. */
-    var href = c.toDataURL("image/png"), file = null;
-    function toFile(cv) { cv.toBlob(function (blob) { if (blob) file = new File([blob], S.t + "-lens-report.png", { type: "image/png" }); }, "image/png"); }
-    toFile(c);
-    var canFiles = !!(navigator.canShare && window.File);
-    var seg = '<div class="row wrap" role="group" aria-label="Background" style="gap:6px;margin:10px 0 2px">' + Object.keys(PLATES).map(function (k) {
-      return '<button class="btn' + (k === style ? " primary" : " ghost") + '" type="button" data-plate="' + k + '" aria-pressed="' + (k === style) + '">' + PLATES[k].label + "</button>";
-    }).join("") + "</div>";
-    IL.dialog('<h2>Share the ' + h(S.t) + ' report</h2><img id="sc-img" src="' + href + '" alt="" style="width:100%;border-radius:10px;border:1px solid var(--line)">' + seg +
-      '<label class="field">Suggested post<textarea class="input" rows="3" style="height:auto;padding:10px 12px" id="sc-text">' + h(text) + "</textarea></label>" +
-      '<div class="row wrap" style="justify-content:flex-end"><button class="btn ghost" type="button" data-close>Close</button><button class="btn" type="button" id="sc-copy">Copy text</button><a class="btn" id="sc-dl" href="' + href + '" download="' + S.t + '-lens-report.png">Download image</a>' +
-      (canFiles ? '<button class="btn primary" type="button" id="sc-share">Share</button>' : '<a class="btn primary" target="_blank" rel="noopener" href="https://x.com/intent/post?text=' + encodeURIComponent(text) + '">Post on X</a>') + "</div>",
-      function (d) {
-        d.style.width = "min(640px, calc(100vw - 32px))";
-        d.querySelector("#sc-copy").addEventListener("click", function () { var tx = d.querySelector("#sc-text").value; (navigator.clipboard ? navigator.clipboard.writeText(tx) : Promise.reject()).then(function () { IL.toast("Copied"); }, function () { IL.toast("Copy failed"); }); });
-        var sb = d.querySelector("#sc-share");
-        if (sb) sb.addEventListener("click", function () {
-          var payload = { text: d.querySelector("#sc-text").value };
-          if (file && navigator.canShare({ files: [file] })) payload.files = [file];
-          navigator.share(payload).catch(function () {});
-        });
-        Array.prototype.forEach.call(d.querySelectorAll("[data-plate]"), function (b) {
-          b.addEventListener("click", function () {
-            var k = b.getAttribute("data-plate"); shareStyle(k);
-            Array.prototype.forEach.call(d.querySelectorAll("[data-plate]"), function (o) { var on = o === b; o.className = "btn" + (on ? " primary" : " ghost"); o.setAttribute("aria-pressed", String(on)); });
-            loadPlate(k).then(function (im) {
-              var cv = renderCard(k, inp, fl, im), u = cv.toDataURL("image/png");
-              d.querySelector("#sc-img").src = u; d.querySelector("#sc-dl").href = u; toFile(cv);
-            });
-          });
-        });
-      });
+    var v = inp.valuation, g = inp.grades, url = location.origin + "/research/" + S.t;
+    IL.shareImage({
+      title: "Share the " + S.t + " report", file: S.t + "-lens-report",
+      text: S.t + ": " + (v && v.verdict ? v.verdict.label + ". " : "") + (g ? "LensScore " + Number(g.score).toFixed(1) + "/10. " : "") + url,
+      styles: Object.keys(PLATES),
+      render: function (style, plate) { return renderCard(style, inp, fl, plate); }
+    });
   }
   var EXCHANGE = { nasdaqgs: "NASDAQ", nasdaqgm: "NASDAQ", nasdaqcm: "NASDAQ", nasdaq: "NASDAQ", nms: "NASDAQ", ngm: "NASDAQ", ncm: "NASDAQ", nyse: "NYSE", nyq: "NYSE", "nyse arca": "NYSE ARCA", nysearca: "NYSE ARCA", pcx: "NYSE ARCA", "nyse american": "NYSE AMERICAN", ase: "NYSE AMERICAN", bats: "CBOE", cboe: "CBOE" };
   /* Monotone cubic (Fritsch-Carlson) through the real points: smooth, but it
@@ -900,6 +865,50 @@
     t("FROM SEC FILINGS AND A YEAR OF PRICES  ·  NOT INVESTMENT ADVICE", W - 56, 593, "600 11px " + sans, C.t3, "right", 1.4);
     return c;
   }
+
+  /* Valuation Lab share image: what the price implies on the left, the
+     sharer's own bear / base / bull cases on the right. */
+  function drawValuationCard(d, plate) {
+    var W = 1200, H = 630, c = document.createElement("canvas"); c.width = W; c.height = H;
+    var x = c.getContext("2d"), K = IL.cardKit(x), C = K.C, font = K.font, box = K.box, sans = K.sans, nums = K.nums;
+    var meta = S.quote ? S.quote.meta : {}, name = IL.$("#sh-name") ? IL.$("#sh-name").textContent : S.t;
+    var exRaw = String(meta.fullExchangeName || meta.exchangeName || "").trim(), ex = EXCHANGE[exRaw.toLowerCase()] || exRaw.toUpperCase();
+    K.plate(plate, W, H);
+    K.brand("VALUATION LAB  ·  " + new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }).toUpperCase());
+    box([ex, meta.sector].filter(Boolean).join("  ·  ").toUpperCase(), 48, 76, 400, 16, font(500, 12, sans), C.t2, "left", 1.2);
+    var tpx = K.fit(S.t, 700, sans, 72, 52, 392, -1.5);
+    box(S.t, 48, 94, 392, 80, font(700, tpx, sans), C.text, "left", -1.5);
+    var npx = K.fit(name, 500, sans, 24, 19, 392);
+    box(K.ellipsize(name, font(500, npx, sans), 392), 48, 180, 392, 30, font(500, npx, sans), C.t2);
+    box(F.price(d.price) + " today", 48, 220, 392, 30, font(600, 26, nums), C.text);
+
+    box("WHAT THE PRICE IMPLIES", 48, 284, 392, 18, font(600, 13, sans), C.t2, "left", 1.1);
+    if (d.implied === null || !isFinite(d.implied)) box(K.DASH, 48, 306, 392, 70, font(600, 60, nums), C.t3);
+    else {
+      var main = F.spct(d.implied * 100), r = box(main, 48, 306, 392, 70, font(600, 60, nums), C.gold);
+      x.font = font(500, 20, nums); x.fillStyle = C.t2; x.textAlign = "left"; x.fillText("/yr", 48 + r.w + 6, r.base);
+    }
+    box("Revenue growth a year for five years, at a " + F.pct(d.M.required * 100, 0) + " return", 48, 380, 392, 18, font(400, 14, sans), C.t3);
+    var dl = box("Delivered ", 48, 414, 120, 26, font(500, 18, sans), C.t2);
+    box(d.past === null ? K.DASH : F.spct(d.past * 100) + "/yr", 48 + dl.w + 4, 412, 200, 28, font(600, 24, nums), C.text);
+    box("Reported · " + d.pastLabel, 48, 446, 392, 16, font(400, 13, sans), C.t3);
+    box("Base case: " + F.pct(d.M.base.margin * 100, 0) + " net margin, " + F.mult(d.M.base.exitPE) + " P/E in year five", 48, 476, 392, 16, font(400, 13, sans), C.t3);
+
+    box("MY FIVE-YEAR CASES", 840, 96, 312, 18, font(600, 13, sans), C.t2, "left", 1.6);
+    var rows = [["bear", "Bear case", C.loss], ["base", "Base case", C.text], ["bull", "Bull case", C.gain]];
+    rows.forEach(function (rw, i) {
+      var y = 132 + i * 128, o = d.outs[rw[0]], m = d.M[rw[0]];
+      if (i) { x.fillStyle = C.rule; x.fillRect(840, y - 14, 312, 1); }
+      box(rw[1], 840, y, 160, 20, font(600, 15, sans), rw[2]);
+      box(F.spct(m.growth * 100, 0) + " growth · " + F.pct(m.margin * 100, 0) + " margin · " + F.mult(m.exitPE), 840, y + 24, 312, 16, font(400, 13, sans), C.t3);
+      box(o ? F.price(o.futurePrice) : K.DASH, 840, y + 46, 200, 40, font(600, 32, nums), C.text);
+      if (o) box(F.spct(o.annualReturn * 100) + "/yr", 952, y + 54, 200, 28, font(600, 22, nums), o.annualReturn >= 0 ? C.gain : C.loss, "right");
+      box("price in five years", 840, y + 88, 200, 14, font(400, 12, sans), C.t3);
+      box("yearly return", 952, y + 88, 200, 14, font(400, 12, sans), C.t3, "right");
+    });
+    K.footer("impliedlens.com/research/" + S.t + "/valuation");
+    return c;
+  }
   function roundRect(x, X, Y, w, hh, r) {
     x.beginPath(); x.moveTo(X + r, Y); x.arcTo(X + w, Y, X + w, Y + hh, r); x.arcTo(X + w, Y + hh, X, Y + hh, r); x.arcTo(X, Y + hh, X, Y, r); x.arcTo(X, Y, X + w, Y, r); x.closePath();
   }
@@ -1294,9 +1303,9 @@
     var cases = ["bear", "base", "bull"], label = { bear: "Bear case", base: "Base case", bull: "Bull case" };
     function pctIn(v) { return (Math.round(v * 1000) / 10).toString(); }
     box.innerHTML =
-      '<section class="card prime val-hero hero-band" id="val-hero"></section>' +
+      '<section class="card prime val-hero hero-band plate" id="val-hero" data-w="share" data-w-title="your valuation" style="--plate:url(/share/ledger-v1.webp);--plate-pos:right 40%"></section>' +
       '<div class="section-h"><div><h2 class="section-t">Valuation Lab</h2><p class="card-sub">Five years out. Start from what the company has done; change any number.</p></div><div class="row wrap"><select class="input val-versions" id="val-versions" aria-label="Saved versions"><option value="">Saved versions</option></select><button class="btn sm" type="button" id="val-save">Save version</button><button class="btn sm ghost" type="button" id="val-reset">Reset</button></div></div>' +
-      '<section class="card flush"><div class="tbl-wrap"><table class="tbl val-tbl"><thead><tr><th></th>' + cases.map(function (c) { return '<th class="val-' + c + '">' + label[c] + "</th>"; }).join("") + "</tr></thead><tbody>" +
+      '<section class="card flush" id="val-cases" data-w="csv" data-w-title="Valuation cases"><div class="tbl-wrap"><table class="tbl val-tbl"><thead><tr><th></th>' + cases.map(function (c) { return '<th class="val-' + c + '">' + label[c] + "</th>"; }).join("") + "</tr></thead><tbody>" +
         valRow("growth", "Revenue growth per year", "%", "How fast sales grow each year for the next five years.") +
         valRow("margin", "Net profit margin", "%", "Share of revenue kept as profit in year five. " + (ctx.margin !== null ? "Last 12 months: " + F.pct(ctx.margin * 100) + "." : "")) +
         valRow("exitPE", "P/E in five years", "×", "What investors pay for each $1 of earnings in year five. Fast growers usually get higher multiples; mature companies lower. " + (ctx.pe ? "Today: " + F.mult(ctx.pe) + "." : "")) +
@@ -1306,8 +1315,8 @@
       "</tbody></table></div>" +
       '<div class="val-foot"><label class="field" style="flex-direction:row;align-items:center;gap:10px">Return you require <input class="input num val-in" style="width:84px" id="v-req" inputmode="decimal" value="' + pctIn(M.required) + '"> %</label>' +
         '<label class="field" style="flex-direction:row;align-items:center;gap:10px">Share count change per year ' + IL.tip("Negative if the company buys back shares; positive if it issues new ones (for example to pay staff).") + ' <input class="input num val-in" style="width:84px" id="v-sh" inputmode="decimal" value="' + pctIn(M.shareChange) + '"> %</label></div></section>' +
-      '<section class="card flush"><div class="card-h"><h3 class="card-t">Year by year</h3><div class="seg" role="group" aria-label="Case" id="val-yr-seg"><button type="button" data-yr="bear" aria-pressed="false">Bear</button><button type="button" data-yr="base" aria-pressed="true">Base</button><button type="button" data-yr="bull" aria-pressed="false">Bull</button></div></div><div class="tbl-wrap"><table class="tbl" id="val-yr"></table></div><p class="note" style="padding:10px 20px 14px">The margin moves in a straight line from today\u2019s to the year-five target. \u201cPrice at the exit P/E\u201d shows what each year\u2019s earnings would be worth at that multiple.</p></section>' +
-      '<section class="card flush"><div class="card-h"><h3 class="card-t">What if? Yearly return from today ' + IL.tip("Base case, with revenue growth and the year-five P/E changed. Green beats the return you require; amber makes money but less than that; red loses money.") + '</h3><span class="card-sub">Base-case margin, rows = revenue growth, columns = P/E in five years</span></div><div class="tbl-wrap"><table class="tbl val-sens" id="val-sens"></table></div></section>' +
+      '<section class="card flush" id="val-years" data-w="expand,csv" data-w-title="Year by year"><div class="card-h"><h3 class="card-t">Year by year</h3><div class="seg" role="group" aria-label="Case" id="val-yr-seg"><button type="button" data-yr="bear" aria-pressed="false">Bear</button><button type="button" data-yr="base" aria-pressed="true">Base</button><button type="button" data-yr="bull" aria-pressed="false">Bull</button></div></div><div class="tbl-wrap"><table class="tbl" id="val-yr"></table></div><p class="note" style="padding:10px 20px 14px">The margin moves in a straight line from today\u2019s to the year-five target. \u201cPrice at the exit P/E\u201d shows what each year\u2019s earnings would be worth at that multiple.</p></section>' +
+      '<section class="card flush" id="val-whatif" data-w="expand,csv" data-w-title="What if"><div class="card-h"><h3 class="card-t">What if? Yearly return from today ' + IL.tip("Base case, with revenue growth and the year-five P/E changed. Green beats the return you require; amber makes money but less than that; red loses money.") + '</h3><span class="card-sub">Base-case margin, rows = revenue growth, columns = P/E in five years</span></div><div class="tbl-wrap"><table class="tbl val-sens" id="val-sens"></table></div></section>' +
       '<div class="grid-2">' +
         '<section class="card"><h3 class="card-t">Starting point</h3><div>' +
           '<div class="stat"><span class="k">Price</span><span class="v">' + F.price(ctx.price) + "</span></div>" +
@@ -1413,6 +1422,21 @@
       box.addEventListener("input", function (e) { if (e.target.classList.contains("val-in")) { box.__read(); box.__compute(); } });
     }
     box.__read = read; box.__compute = compute;
+    IL.widgetShare["val-hero"] = function () {
+      var outs = {};
+      cases.forEach(function (c) { outs[c] = V.project({ price: ctx.price, revenue: ctx.revenue, shares: ctx.shares, years: 5, growth: M[c].growth, margin: M[c].margin, exitPE: M[c].exitPE, shareChange: M.shareChange, required: M.required }); });
+      var g = V.impliedGrowth({ price: ctx.price, revenue: ctx.revenue, shares: ctx.shares, years: 5, margin: M.base.margin, exitPE: M.base.exitPE, shareChange: M.shareChange, required: M.required });
+      var past = ctx.growth3y !== null ? ctx.growth3y : ctx.growth1y;
+      var d = { implied: g, past: past, pastLabel: ctx.growth3y !== null ? "3-year annual rate" : "last 12 months", price: ctx.price, M: M, outs: outs };
+      var fr = function (o) { return o ? F.spct(o.annualReturn * 100) + "/yr" : "\u2014"; };
+      IL.shareImage({
+        title: "Share your " + S.t + " valuation", file: S.t + "-valuation",
+        text: S.t + ": the price implies " + (g === null ? "\u2014" : F.spct(g * 100)) + " a year revenue growth" + (past !== null ? "; it has delivered " + F.spct(past * 100) + "." : ".") + " My five-year cases: bear " + fr(outs.bear) + ", base " + fr(outs.base) + ", bull " + fr(outs.bull) + ". " + location.origin + "/research/" + S.t + "/valuation",
+        styles: ["engraved", "atlas", "globe", "ledger"],
+        render: function (style, plate) { return drawValuationCard(d, plate); }
+      });
+    };
+    IL.widgets(box);
     IL.$("#val-yr-seg").addEventListener("click", function (e) {
       var b = e.target.closest("[data-yr]"); if (!b) return;
       yrCase = b.getAttribute("data-yr");

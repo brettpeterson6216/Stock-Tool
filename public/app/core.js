@@ -173,6 +173,9 @@
     check: '<path d="m5 12 5 5 9-10"/>',
     info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 8h.01"/>',
     doc: '<path d="M7 3h7l5 5v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v5h5"/>',
+    expand: '<path d="M4 9V4h5"/><path d="M20 9V4h-5"/><path d="M4 15v5h5"/><path d="M20 15v5h-5"/>',
+    share: '<path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M5 13v6a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-6"/>',
+    download: '<path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/>',
   };
   IL.icon = function (name, size) {
     var s = size || 16;
@@ -427,6 +430,192 @@
       '<div class="gate-t">' + IL.h(what || "Create a free account to see this") + "</div>" +
       '<div class="gate-s">' + IL.h(opts.why || "A free account unlocks financial statements, earnings history and a watchlist. No card needed.") + "</div>" +
       '<div class="row wrap"><a class="btn primary" href="' + IL.signupHref() + '">Create a free account</a><a class="btn ghost" href="' + IL.loginHref() + '">Log in</a></div></div>';
+  };
+
+
+  /* ── Plates: the engraved art behind the top of a page ───────────────── */
+  var PLATE_SRC = { engraved: "/share/engraved-v1.webp", atlas: "/share/atlas-v1.webp", globe: "/share/globe-v1.webp", ledger: "/share/ledger-v1.webp", dial: "/share/dial-v1.webp" };
+  IL.plateSrc = function (name) { return PLATE_SRC[name] || PLATE_SRC.engraved; };
+  /* Put a plate behind a hero block. The art sits to the right and fades
+     out to the left and the bottom, so text and numbers stay on calm ground. */
+  IL.plate = function (host, name, pos) {
+    if (!host) return;
+    host.classList.add("plate");
+    host.style.setProperty("--plate", "url(" + IL.plateSrc(name) + ")");
+    if (pos) host.style.setProperty("--plate-pos", pos);
+  };
+
+
+  /* ── Share images: one dialog for every exportable widget ───────────────
+     IL.shareImage({ title, text, file, styles: ["engraved", …],
+                     render: function (style, plateImage) { return canvas; } })
+     Shows the image with a background switch (remembered per viewer), a
+     suggested post, Copy, Download and Share / Post on X. */
+  var STYLE_LABEL = { engraved: "Engraved", atlas: "Atlas", globe: "Globe", ledger: "Ledger", dial: "Dial", plain: "Plain" };
+  var plateImgs = {};
+  IL.loadPlate = function (style) {
+    if (!plateImgs[style]) plateImgs[style] = new Promise(function (res) {
+      if (style === "plain" || !PLATE_SRC[style]) return res(null);
+      var im = new Image(); im.onload = function () { res(im); }; im.onerror = function () { res(null); }; im.src = PLATE_SRC[style];
+    });
+    return plateImgs[style];
+  };
+  IL.shareFonts = function () {
+    var fonts = ["700 40px Inter", "600 40px Inter", "500 40px Inter", "400 40px Inter", "500 40px 'IBM Plex Sans'", "600 40px 'IBM Plex Sans'"];
+    return document.fonts && document.fonts.load ? Promise.all(fonts.map(function (f) { return document.fonts.load(f).catch(function () {}); })) : Promise.resolve();
+  };
+  function pickStyle(styles, set) {
+    var v = null;
+    try { if (set) localStorage.setItem("il-share-style", set); v = localStorage.getItem("il-share-style"); } catch (_) { v = set; }
+    return styles.indexOf(v) >= 0 ? v : styles[0];
+  }
+  IL.shareImage = function (o) {
+    var styles = o.styles && o.styles.length ? o.styles : ["engraved"];
+    var style = pickStyle(styles), name = (o.file || "impliedlens") + ".png";
+    Promise.all([IL.shareFonts(), IL.loadPlate(style)]).then(function (r) {
+      var c = o.render(style, r[1]), href = c.toDataURL("image/png"), file = null;
+      function toFile(cv) { if (cv.toBlob && window.File) cv.toBlob(function (b) { if (b) file = new File([b], name, { type: "image/png" }); }, "image/png"); }
+      toFile(c);
+      var canShare = !!(navigator.canShare && window.File);
+      var seg = styles.length > 1 ? '<div class="row wrap" role="group" aria-label="Background" style="gap:6px;margin:10px 0 2px">' + styles.map(function (k) {
+        return '<button class="btn' + (k === style ? " primary" : " ghost") + '" type="button" data-plate="' + k + '" aria-pressed="' + (k === style) + '">' + (STYLE_LABEL[k] || k) + "</button>";
+      }).join("") + "</div>" : "";
+      IL.dialog('<h2>' + IL.h(o.title || "Share") + '</h2><img id="sc-img" src="' + href + '" alt="" style="width:100%;border-radius:10px;border:1px solid var(--line)">' + seg +
+        '<label class="field">Suggested post<textarea class="input" rows="3" style="height:auto;padding:10px 12px" id="sc-text">' + IL.h(o.text || "") + "</textarea></label>" +
+        '<div class="row wrap" style="justify-content:flex-end"><button class="btn ghost" type="button" data-close>Close</button><button class="btn" type="button" id="sc-copy">Copy text</button><a class="btn" id="sc-dl" href="' + href + '" download="' + IL.h(name) + '">Download image</a>' +
+        (canShare ? '<button class="btn primary" type="button" id="sc-share">Share</button>' : '<a class="btn primary" target="_blank" rel="noopener" href="https://x.com/intent/post?text=' + encodeURIComponent(o.text || "") + '">Post on X</a>') + "</div>",
+        function (d) {
+          d.style.width = "min(640px, calc(100vw - 32px))";
+          d.querySelector("#sc-copy").addEventListener("click", function () { var tx = d.querySelector("#sc-text").value; (navigator.clipboard ? navigator.clipboard.writeText(tx) : Promise.reject()).then(function () { IL.toast("Copied"); }, function () { IL.toast("Copy failed"); }); });
+          var sb = d.querySelector("#sc-share");
+          if (sb) sb.addEventListener("click", function () {
+            var payload = { text: d.querySelector("#sc-text").value };
+            if (file && navigator.canShare({ files: [file] })) payload.files = [file];
+            navigator.share(payload).catch(function () {});
+          });
+          Array.prototype.forEach.call(d.querySelectorAll("[data-plate]"), function (b) {
+            b.addEventListener("click", function () {
+              var k = pickStyle(styles, b.getAttribute("data-plate"));
+              Array.prototype.forEach.call(d.querySelectorAll("[data-plate]"), function (x) { var on = x === b; x.className = "btn" + (on ? " primary" : " ghost"); x.setAttribute("aria-pressed", String(on)); });
+              IL.loadPlate(k).then(function (im) { var cv = o.render(k, im), u = cv.toDataURL("image/png"); d.querySelector("#sc-img").src = u; d.querySelector("#sc-dl").href = u; toFile(cv); });
+            });
+          });
+        });
+    });
+  };
+  /* Drawing helpers for 1200×630 share images. */
+  IL.cardKit = function (x) {
+    var hasLS = "letterSpacing" in x;
+    var K = {
+      C: { bg: "#10110F", text: "#F3F0E7", t2: "#B9B6AB", t3: "#8C897F", gold: "#E5B65A", gain: "#4CC38A", gradeB: "#8FD0A4", amber: "#E5B65A", loss: "#F07B7B", rule: "rgba(243,240,231,0.12)" },
+      sans: "Inter, system-ui, sans-serif", nums: "'IBM Plex Sans', Inter, sans-serif", DASH: "—",
+      font: function (w, px, fam) { return w + " " + px + "px " + fam; },
+      width: function (str, f, track) { x.font = f; if (hasLS) x.letterSpacing = (track || 0) + "px"; var w = x.measureText(str).width; if (hasLS) x.letterSpacing = "0px"; return w; },
+      box: function (str, X, Y, w, h, f, color, align, track) {
+        x.font = f; x.fillStyle = color; x.textAlign = align || "left"; x.textBaseline = "alphabetic";
+        if (hasLS) x.letterSpacing = (track || 0) + "px";
+        var m = x.measureText("Hg0"), asc = m.actualBoundingBoxAscent, desc = m.actualBoundingBoxDescent;
+        var base = Y + (h - (asc + desc)) / 2 + asc, ax = align === "center" ? X + w / 2 : align === "right" ? X + w : X;
+        x.fillText(str, ax, base); var tw = x.measureText(str).width;
+        if (hasLS) x.letterSpacing = "0px";
+        return { w: tw, base: base };
+      },
+      fit: function (str, wt, fam, max, min, maxW, track) { var px = max; while (px > min && K.width(str, K.font(wt, px, fam), track) > maxW) px -= 1; return px; },
+      ellipsize: function (str, f, maxW) { str = String(str || ""); if (K.width(str, f) <= maxW) return str; while (str.length > 1 && K.width(str + "…", f) > maxW) str = str.slice(0, -1); return str.replace(/\s+$/, "") + "…"; },
+      gradeCol: function (g) { g = String(g || "").charAt(0); return g === "A" ? K.C.gain : g === "B" ? K.C.gradeB : g === "C" ? K.C.amber : g ? K.C.loss : K.C.t3; },
+      /* The plate with feathered veils: two text columns, a lit middle. */
+      plate: function (plate, W, H) {
+        x.fillStyle = K.C.bg; x.fillRect(0, 0, W, H);
+        if (plate) x.drawImage(plate, 0, 0, W, H);
+        var vl = x.createLinearGradient(0, 0, 600, 0);
+        vl.addColorStop(0, "rgba(16,17,15,0.86)"); vl.addColorStop(0.62, "rgba(16,17,15,0.72)"); vl.addColorStop(0.86, "rgba(16,17,15,0.28)"); vl.addColorStop(1, "rgba(16,17,15,0)");
+        x.fillStyle = vl; x.fillRect(0, 0, 600, H);
+        var vr = x.createLinearGradient(740, 0, W, 0);
+        vr.addColorStop(0, "rgba(16,17,15,0)"); vr.addColorStop(0.3, "rgba(16,17,15,0.6)"); vr.addColorStop(0.55, "rgba(16,17,15,0.8)"); vr.addColorStop(1, "rgba(16,17,15,0.86)");
+        x.fillStyle = vr; x.fillRect(740, 0, W - 740, H);
+        var vb = x.createLinearGradient(0, 540, 0, H);
+        vb.addColorStop(0, "rgba(16,17,15,0)"); vb.addColorStop(0.45, "rgba(16,17,15,0.8)"); vb.addColorStop(1, "rgba(16,17,15,0.92)");
+        x.fillStyle = vb; x.fillRect(0, 540, W, H - 540);
+      },
+      /* The plate under one even veil, for layouts with text everywhere. */
+      plateFlat: function (plate, W, H, a) {
+        x.fillStyle = K.C.bg; x.fillRect(0, 0, W, H);
+        if (plate) x.drawImage(plate, 0, 0, W, H);
+        x.fillStyle = "rgba(16,17,15," + (a || 0.72) + ")"; x.fillRect(0, 0, W, H);
+        var vb = x.createLinearGradient(0, 540, 0, H); vb.addColorStop(0, "rgba(16,17,15,0)"); vb.addColorStop(1, "rgba(16,17,15,0.9)");
+        x.fillStyle = vb; x.fillRect(0, 540, W, H - 540);
+      },
+      brand: function (label) {
+        var bw = K.box("Implied", 48, 32, 240, 28, K.font(700, 23, K.sans), K.C.text).w;
+        K.box("Lens", 48 + bw, 32, 240, 28, K.font(700, 23, K.sans), K.C.gold);
+        if (label) K.box(label, 692, 38, 460, 20, K.font(500, 13, K.sans), K.C.t2, "right", 1);
+      },
+      footer: function (url) {
+        x.fillStyle = K.C.rule; x.fillRect(48, 566, 1104, 1);
+        K.box(url, 48, 586, 690, 23, K.font(600, 18, K.sans), K.C.text);
+        K.box("Educational research · not investment advice", 792, 590, 360, 18, K.font(400, 13, K.sans), K.C.t3, "right");
+      }
+    };
+    return K;
+  };
+
+  /* ── Widgets: one frame and one set of tools for every tool on the site ──
+     <section data-w="expand,share,csv" data-w-title="…">. The tools sit top
+     right and survive the section being repainted. Actions:
+       expand  open the widget large in a dialog
+       share   IL.widgetShare[id]() if the page registers one
+       csv     download the widget's first table as CSV */
+  IL.widgetShare = {};
+  function tableCsv(el, name) {
+    var t = el.querySelector("table"); if (!t) { IL.toast("Nothing to export yet."); return; }
+    var rows = Array.prototype.map.call(t.querySelectorAll("tr"), function (tr) {
+      return Array.prototype.map.call(tr.querySelectorAll("th,td"), function (c) { var v = c.innerText.replace(/\s+/g, " ").trim(); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }).join(",");
+    }).join("\n");
+    var a = document.createElement("a");
+    a.href = "data:text/csv;charset=utf-8," + encodeURIComponent(rows); a.download = (name || "impliedlens") + ".csv";
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+  function expandWidget(el) {
+    var clone = el.cloneNode(true);
+    var tools = clone.querySelector(".w-tools"); if (tools) tools.remove();
+    var src = el.querySelectorAll("canvas"), dst = clone.querySelectorAll("canvas");
+    Array.prototype.forEach.call(dst, function (c, i) { try { c.getContext("2d").drawImage(src[i], 0, 0); } catch (_) {} });
+    clone.removeAttribute("id"); clone.classList.add("w-big");
+    IL.dialog('<div class="w-dlg-h"><h2>' + IL.h(el.getAttribute("data-w-title") || "") + '</h2><button class="btn ghost" type="button" data-close>Close</button></div>', function (d) {
+      d.classList.add("w-dlg"); d.querySelector(".il-dialog-in").appendChild(clone);
+    });
+  }
+  function toolsHtml(el) {
+    var kinds = String(el.getAttribute("data-w") || "").split(",").map(function (k) { return k.trim(); }).filter(Boolean);
+    var title = el.getAttribute("data-w-title") || "this";
+    var label = { expand: "Open " + title + " larger", share: "Share " + title + " as an image", csv: "Download " + title + " as CSV" };
+    var icon = { expand: "expand", share: "share", csv: "download" };
+    return kinds.filter(function (k) { return icon[k] && (k !== "share" || IL.widgetShare[el.id]); }).map(function (k) {
+      return '<button class="w-btn" type="button" data-w-act="' + k + '" aria-label="' + IL.h(label[k]) + '" title="' + IL.h(label[k]) + '">' + IL.icon(icon[k], 15) + "</button>";
+    }).join("");
+  }
+  function ensureTools(el) {
+    if (el.querySelector(":scope > .w-tools")) return;
+    var html = toolsHtml(el); if (!html) return;
+    var box = document.createElement("div"); box.className = "w-tools"; box.innerHTML = html;
+    el.appendChild(box);
+  }
+  IL.widgets = function (root) {
+    root = root || document;
+    Array.prototype.forEach.call(root.querySelectorAll("[data-w]"), function (el) {
+      el.classList.add("w");
+      ensureTools(el);
+      if (el.__wObs) return;
+      el.__wObs = new MutationObserver(function () { ensureTools(el); });
+      el.__wObs.observe(el, { childList: true });
+      el.addEventListener("click", function (e) {
+        var b = e.target.closest("[data-w-act]"); if (!b || !el.contains(b)) return;
+        var k = b.getAttribute("data-w-act");
+        if (k === "expand") expandWidget(el);
+        else if (k === "csv") tableCsv(el, (el.getAttribute("data-w-title") || "table").toLowerCase().replace(/[^a-z0-9]+/g, "-"));
+        else if (k === "share" && IL.widgetShare[el.id]) IL.widgetShare[el.id]();
+      });
+    });
   };
 
   /* ── Brand pieces ────────────────────────────────────────────────────── */

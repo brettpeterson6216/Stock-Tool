@@ -219,3 +219,12 @@
 .rc.card.prime{position:sticky}
 @media (max-width:1080px){.rc.card.prime{position:relative;top:auto}}
 .mono.lg{font-size:14px}
+
+/* Research landing hero on a plate: words left, the globe right. */
+.rl-hero.plate{align-items:flex-start;text-align:left;padding:56px 48px 48px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg,var(--card-top),var(--card-bot));margin-top:8px}
+.rl-hero.plate .display{max-width:560px}
+.rl-hero.plate p{max-width:520px}
+.rl-hero.plate .rl-search{width:min(560px,100%)}
+.rl-hero.plate .rl-pop{justify-content:flex-start;max-width:560px}
+@media (max-width:760px){.rl-hero.plate{padding:28px 18px}}
+.sh.plate{min-height:168px}

@@ -108,11 +108,11 @@
       (tickers.length < 2
         ? '<div class="gate center"><div class="gate-t">Pick at least two companies</div><div class="gate-s">Search above, or try one of the groups. Tip: compare a company with its closest rivals, not with the whole market.</div></div>'
         : '<section class="card"><div class="card-h"><h2 class="card-t">Performance, past year</h2><span class="card-sub">Rebased to 0% a year ago</span></div><div class="cmp-legend" id="cmp-legend"></div><div class="cmp-chart" id="cmp-chart"></div></section>' +
-          '<section class="card flush"><div class="tbl-wrap"><table class="tbl cmp-tbl" id="cmp-tbl"><tbody><tr><td>' + '<span class="sk" style="height:200px"></span>' + "</td></tr></tbody></table></div></section>" +
+          '<section class="card flush" id="cmp-table" data-w="share,expand,csv" data-w-title="the comparison"><div class="tbl-wrap"><table class="tbl cmp-tbl" id="cmp-tbl"><tbody><tr><td>' + '<span class="sk" style="height:200px"></span>' + "</td></tr></tbody></table></div></section>" +
           '<div class="grid-2" id="cmp-flags"></div>' +
           '<p class="note">Best value in each row is marked. Grades compare each company with its own sector. Figures from SEC filings and a year of prices; not investment advice.</p>');
     IL.wireSearchPick(IL.$("#cmp-q"), IL.$("#cmp-sugg"), add);
-    IL.ribbon(IL.$("#cmp-hero"), "sweep", 8);
+    IL.plate(IL.$("#cmp-hero"), "dial", "right 40%");
     writeUrl();
     if (tickers.length >= 2) Promise.all(tickers.map(load)).then(paint);
   }
@@ -167,6 +167,55 @@
         '<a class="card-foot" href="/research/' + h(d.t) + '">Open the full report →</a></section>';
     }).join("");
     drawChart(list);
+    IL.widgetShare["cmp-table"] = function () { shareCompare(list); };
+    IL.widgets(IL.$("main") || document);
+  }
+
+  /* Share image: up to four companies side by side on a plate. */
+  function shareCompare(list) {
+    var url = location.origin + "/compare?t=" + list.map(function (d) { return d.t; }).join(",");
+    IL.shareImage({
+      title: "Share this comparison", file: list.map(function (d) { return d.t; }).join("-vs-"),
+      text: list.map(function (d) { return d.t + (d.g ? " " + Number(d.g.score).toFixed(1) : ""); }).join(" vs ") + " on LensScore. " + url,
+      styles: ["engraved", "atlas", "globe", "ledger"],
+      render: function (style, plate) { return drawCompare(list, plate); }
+    });
+  }
+  function drawCompare(list, plate) {
+    var W = 1200, H = 630, c = document.createElement("canvas"); c.width = W; c.height = H;
+    var x = c.getContext("2d"), K = IL.cardKit(x), C = K.C, font = K.font, box = K.box, sans = K.sans, nums = K.nums;
+    K.plateFlat(plate, W, H, 0.74);
+    K.brand("COMPARE  \u00b7  " + new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }).toUpperCase());
+    var title = list.map(function (d) { return d.t; }).join("  vs  ");
+    box(title, 48, 74, 1104, 50, font(700, K.fit(title, 700, sans, 44, 28, 1104, -1), sans), C.text, "left", -1);
+    var n = list.length, gap = 24, cw = (1104 - gap * (n - 1)) / n;
+    var keys = ["value", "growth", "profitability", "health", "momentum"], short = { value: "Val", growth: "Gro", profitability: "Pro", health: "Hea", momentum: "Mom" };
+    list.forEach(function (d, i) {
+      var X = 48 + i * (cw + gap);
+      x.fillStyle = COLORS[i]; x.fillRect(X, 146, 28, 3);
+      box(d.t, X, 158, cw, 34, font(700, 30, sans), C.text);
+      box(K.ellipsize(d.name, font(500, 14, sans), cw), X, 194, cw, 18, font(500, 14, sans), C.t2);
+      box("LENSSCORE", X, 228, cw, 14, font(600, 11, sans), C.t3, "left", 1.6);
+      if (d.g) {
+        var r = box(Number(d.g.score).toFixed(1), X, 244, cw, 64, font(600, 60, nums), C.gold);
+        x.font = font(500, 16, nums); x.fillStyle = C.t2; x.textAlign = "left"; x.fillText("/10", X + r.w + 6, r.base);
+        if (d.g.rank) box("#" + d.g.rank.position + " of " + d.g.rank.of + " \u00b7 " + (d.g.rank.sectorName || ""), X, 312, cw, 16, font(400, 13, sans), C.t2);
+      } else box(K.DASH, X, 244, cw, 64, font(600, 60, nums), C.t3);
+      var gw = Math.min(46, cw / 5);
+      keys.forEach(function (k, j) {
+        var f = d.g && (d.g.factors || []).filter(function (z) { return z.key === k; })[0];
+        box(short[k], X + j * gw, 342, gw, 12, font(500, 11, sans), C.t3, "left");
+        box(f && f.grade ? f.grade : K.DASH, X + j * gw, 358, gw, 26, font(600, 20, nums), f && f.grade ? K.gradeCol(f.grade) : C.t3, "left");
+      });
+      x.fillStyle = C.rule; x.fillRect(X, 400, cw, 1);
+      function stat(label, val, y, col) { box(label, X, y, cw, 14, font(500, 12, sans), C.t3); box(val, X, y + 16, cw, 26, font(600, 22, nums), col || C.text); }
+      stat("Growth priced in", d.v && d.v.implied !== null ? F.spct(d.v.implied * 100, 0) + "/yr" : K.DASH, 412, C.gold);
+      stat("Delivered", d.v && d.v.delivered !== null ? F.spct(d.v.delivered * 100, 0) + "/yr" : K.DASH, 462);
+      var yr = d.p && d.p.yearReturn;
+      stat("Past year", yr !== null && yr !== undefined && isFinite(yr) ? F.spct(yr, 0) : K.DASH, 512, yr >= 0 ? C.gain : C.loss);
+    });
+    K.footer("impliedlens.com/compare?t=" + list.map(function (d) { return d.t; }).join(","));
+    return c;
   }
 
   function drawChart(list) {
