@@ -433,10 +433,18 @@
      implied-vs-delivered growth on the left, the LensScore and grades on the
      right. No panels. Two plates; the sharer picks, and the pick is
      remembered. */
-  var PLATES = { engraved: { src: "/share/engraved-v1.webp", label: "Engraved" }, atlas: { src: "/share/atlas-v1.webp", label: "Atlas" }, globe: { src: "/share/globe-v1.webp", label: "Globe" }, ledger: { src: "/share/ledger-v1.webp", label: "Ledger" } };
+  var PLATES = {
+    engraved: { src: "/share/engraved-v1.webp", label: "Engraved" },
+    atlas: { src: "/share/atlas-v1.webp", label: "Atlas" },
+    globe: { src: "/share/globe-v1.webp", label: "Globe" },
+    ledger: { src: "/share/ledger-v1.webp", label: "Ledger" },
+    dial: { src: "/share/dial-v1.webp", label: "Dial", draw: function (i, f, p) { return drawDialCard(i, f, p); } },
+    plain: { src: null, label: "Plain", draw: function (i, f) { return drawPlainCard(i, f); } }
+  };
+  function renderCard(style, inp, fl, plate) { var P = PLATES[style] || PLATES.engraved; return P.draw ? P.draw(inp, fl, plate) : drawShareCard(inp, fl, plate); }
   var plateCache = {};
   function loadPlate(style) {
-    if (!plateCache[style]) plateCache[style] = new Promise(function (res) { var im = new Image(); im.onload = function () { res(im); }; im.onerror = function () { res(null); }; im.src = PLATES[style].src; });
+    if (!plateCache[style]) plateCache[style] = new Promise(function (res) { if (!PLATES[style].src) return res(null); var im = new Image(); im.onload = function () { res(im); }; im.onerror = function () { res(null); }; im.src = PLATES[style].src; });
     return plateCache[style];
   }
   function shareStyle(set) {
@@ -446,7 +454,7 @@
     var fonts = ["700 40px Inter", "600 40px Inter", "500 40px Inter", "400 40px Inter", "500 40px 'IBM Plex Sans'", "600 40px 'IBM Plex Sans'"];
     var ready = document.fonts && document.fonts.load ? Promise.all(fonts.map(function (f) { return document.fonts.load(f).catch(function () {}); })) : Promise.resolve();
     var style = shareStyle();
-    Promise.all([ready, loadPlate(style)]).then(function (r) { openShare(inp, drawShareCard(inp, fl, r[1]), style, fl); });
+    Promise.all([ready, loadPlate(style)]).then(function (r) { openShare(inp, renderCard(style, inp, fl, r[1]), style, fl); });
   }
   function openShare(inp, c, style, fl) {
     var v = inp.valuation, g = inp.grades;
@@ -457,7 +465,7 @@
     function toFile(cv) { cv.toBlob(function (blob) { if (blob) file = new File([blob], S.t + "-lens-report.png", { type: "image/png" }); }, "image/png"); }
     toFile(c);
     var canFiles = !!(navigator.canShare && window.File);
-    var seg = '<div class="row" role="group" aria-label="Background" style="gap:6px;margin:10px 0 2px">' + Object.keys(PLATES).map(function (k) {
+    var seg = '<div class="row wrap" role="group" aria-label="Background" style="gap:6px;margin:10px 0 2px">' + Object.keys(PLATES).map(function (k) {
       return '<button class="btn' + (k === style ? " primary" : " ghost") + '" type="button" data-plate="' + k + '" aria-pressed="' + (k === style) + '">' + PLATES[k].label + "</button>";
     }).join("") + "</div>";
     IL.dialog('<h2>Share the ' + h(S.t) + ' report</h2><img id="sc-img" src="' + href + '" alt="" style="width:100%;border-radius:10px;border:1px solid var(--line)">' + seg +
@@ -478,7 +486,7 @@
             var k = b.getAttribute("data-plate"); shareStyle(k);
             Array.prototype.forEach.call(d.querySelectorAll("[data-plate]"), function (o) { var on = o === b; o.className = "btn" + (on ? " primary" : " ghost"); o.setAttribute("aria-pressed", String(on)); });
             loadPlate(k).then(function (im) {
-              var cv = drawShareCard(inp, fl, im), u = cv.toDataURL("image/png");
+              var cv = renderCard(k, inp, fl, im), u = cv.toDataURL("image/png");
               d.querySelector("#sc-img").src = u; d.querySelector("#sc-dl").href = u; toFile(cv);
             });
           });
@@ -662,6 +670,234 @@
     x.fillStyle = C.rule; x.fillRect(48, 566, 1104, 1);
     box("impliedlens.com/research/" + S.t, 48, 586, 690, 23, font(600, 18, sans), C.text);
     box("Educational research · not investment advice", 792, 590, 360, 18, font(400, 13, sans), C.t3, "right");
+    return c;
+  }
+  /* "Plain": the first data-first card, no picture behind it. */
+  function drawPlainCard(inp, fl) {
+    var W = 1200, H = 630, c = document.createElement("canvas");
+    c.width = W; c.height = H;
+    var x = c.getContext("2d");
+    var C = { bg: "#0F1012", line: "#24272C", grid: "#1C1F23", text: "#ECEDEF", t2: "#A1A7AF", t3: "#6F767F", gold: "#E5B65A", gain: "#4CC38A", gradeB: "#8FD0A4", amber: "#D9A441", loss: "#F07B7B" };
+    var sans = "Inter, system-ui, sans-serif", nums = "'IBM Plex Sans', Inter, sans-serif";
+    function t(str, X, Y, font, color, align) { x.font = font; x.fillStyle = color; x.textAlign = align || "left"; x.fillText(str, X, Y); return x.measureText(str).width; }
+    function hline(X0, X1, Y, col) { x.fillStyle = col || C.line; x.fillRect(X0, Math.round(Y), X1 - X0, 1); }
+    function gradeCol(gr) { gr = String(gr || "").charAt(0); return gr === "A" ? C.gain : gr === "B" ? C.gradeB : gr === "C" ? C.amber : gr ? C.loss : C.t3; }
+    var p = inp.price, g = inp.grades, v = inp.valuation, f = inp.fundamentals, meta = inp.meta || {};
+    var sector = meta.sector || (g && (g.sectorName || (g.rank && g.rank.sectorName))) || "";
+    var L = 56, R = W - 56;
+
+    x.fillStyle = C.bg; x.fillRect(0, 0, W, H);
+
+    /* Header: ticker and name left, price and moves right. */
+    var tw = t(S.t, L, 92, "700 40px " + sans, C.text);
+    t(String(inp.name || "").slice(0, 36), L + tw + 16, 92, "500 24px " + sans, C.t2);
+    t([meta.fullExchangeName || meta.exchangeName, sector].filter(Boolean).join("  ·  "), L, 124, "500 17px " + sans, C.t3);
+    if (p) {
+      t(F.price(p.price), R, 92, "600 40px " + nums, C.text, "right");
+      var yrRet = p.yearReturn;
+      x.font = "500 18px " + nums;
+      var s1 = F.spct(p.chgPct, 2) + " today", s2 = yrRet !== null && isFinite(yrRet) ? F.spct(yrRet, 1) + " past year" : "";
+      var w2 = s2 ? x.measureText(s2).width : 0;
+      if (s2) t(s2, R, 124, "500 18px " + nums, yrRet >= 0 ? C.gain : C.loss, "right");
+      t(s1 + (s2 ? "   " : ""), R - w2, 124, "500 18px " + nums, p.chg >= 0 ? C.gain : C.loss, "right");
+    }
+
+    /* The chart: one year of closes, lightly smoothed, with real axes. */
+    var cx0 = L, cx1 = 790, cy0 = 172, cy1 = 432;
+    if (S.quote && S.quote.bars.length > 20) {
+      var bars = S.quote.bars, endT = bars[bars.length - 1].time, yr = bars.filter(function (b) { return b.time >= endT - 366 * 86400; });
+      var sm = yr.map(function (b, i) { var a = yr.slice(Math.max(0, i - 2), i + 3), s = 0; a.forEach(function (z) { s += z.close; }); return s / a.length; });
+      sm[sm.length - 1] = yr[yr.length - 1].close;
+      var pts = [], step = Math.max(1, Math.round(yr.length / 90));
+      for (var i = 0; i < yr.length; i += step) pts.push([i, sm[i]]);
+      if (pts[pts.length - 1][0] !== yr.length - 1) pts.push([yr.length - 1, sm[yr.length - 1]]);
+      var lo = Math.min.apply(null, sm), hi = Math.max.apply(null, sm);
+      var raw = (hi - lo) / 4 || 1, mag = Math.pow(10, Math.floor(Math.log10(raw))), nice = [1, 2, 2.5, 5, 10].map(function (k) { return k * mag; }).filter(function (k) { return k >= raw; })[0];
+      var gLo = Math.floor(lo / nice) * nice, gHi = Math.ceil(hi / nice) * nice;
+      var plotR = cx1 - 64;
+      var X = function (i) { return cx0 + (plotR - cx0) * i / (yr.length - 1); };
+      var Y = function (val) { return cy1 - (val - gLo) / ((gHi - gLo) || 1) * (cy1 - cy0); };
+      for (var gv = gLo; gv <= gHi + nice / 2; gv += nice) {
+        hline(cx0, plotR + 8, Y(gv), C.grid);
+        t(F.price(gv).replace(/\.00$/, ""), cx1, Y(gv) + 5, "500 14px " + nums, C.t3, "right");
+      }
+      var lastMonth = -1;
+      yr.forEach(function (b, i) {
+        var d = new Date(b.time * 1000), m = d.getUTCMonth();
+        if (m !== lastMonth && i > 3 && m % 2 === 0) t(d.toLocaleString("en-US", { month: "short", timeZone: "UTC" }), X(i), cy1 + 26, "500 14px " + sans, C.t3, "center");
+        if (m !== lastMonth) lastMonth = m;
+      });
+      var P = pts.map(function (q) { return [X(q[0]), Y(q[1])]; });
+      function curve() { x.moveTo(P[0][0], P[0][1]); for (var k = 0; k < P.length - 1; k++) { var a0 = P[k - 1] || P[k], a1 = P[k], a2 = P[k + 1], a3 = P[k + 2] || a2; x.bezierCurveTo(a1[0] + (a2[0] - a0[0]) / 6, a1[1] + (a2[1] - a0[1]) / 6, a2[0] - (a3[0] - a1[0]) / 6, a2[1] - (a3[1] - a1[1]) / 6, a2[0], a2[1]); } }
+      var wash = x.createLinearGradient(0, cy0, 0, cy1); wash.addColorStop(0, "rgba(229,182,90,0.14)"); wash.addColorStop(1, "rgba(229,182,90,0)");
+      x.beginPath(); curve(); x.lineTo(P[P.length - 1][0], cy1); x.lineTo(P[0][0], cy1); x.closePath(); x.fillStyle = wash; x.fill();
+      x.beginPath(); curve(); x.strokeStyle = C.gold; x.lineWidth = 2.5; x.lineJoin = "round"; x.lineCap = "round"; x.stroke();
+      var lp = P[P.length - 1];
+      x.fillStyle = C.gold; x.beginPath(); x.arc(lp[0], lp[1], 4.5, 0, Math.PI * 2); x.fill();
+    }
+
+    /* The LensScore column: the number, the rank, the five grades as rows. */
+    var rx = 846;
+    x.fillStyle = C.line; x.fillRect(rx - 28, 172, 1, 262);
+    t("LENSSCORE", rx, 186, "600 14px " + sans, C.t3);
+    if (g) {
+      var sc = Number(g.score), sw = t(sc.toFixed(1), rx, 250, "600 60px " + nums, C.text);
+      t("/ 10", rx + sw + 10, 250, "500 20px " + nums, C.t3);
+      t([g.label, g.rank ? "#" + g.rank.position + " of " + g.rank.of : ""].filter(Boolean).join("  ·  "), rx, 282, "500 17px " + sans, C.t2);
+      var gy = 322;
+      (g.factors || []).slice(0, 5).forEach(function (fc) {
+        var col = gradeCol(fc.grade), fill = IL.gradeFill(fc.grade) / 100;
+        t(FACTOR_LABEL[fc.key] || fc.label, rx, gy, "500 16px " + sans, C.t2);
+        x.fillStyle = C.grid; x.fillRect(rx + 104, gy - 6, 150, 4);
+        x.fillStyle = col; x.fillRect(rx + 104, gy - 6, Math.max(4, 150 * fill), 4);
+        t(fc.grade || "—", R, gy, "600 16px " + nums, col, "right");
+        gy += 26;
+      });
+    } else {
+      t("Not graded", rx, 240, "600 26px " + sans, C.t2);
+      t("Funds and foreign listings", rx, 272, "500 16px " + sans, C.t3);
+      t("aren’t compared with peers.", rx, 296, "500 16px " + sans, C.t3);
+    }
+
+    /* The numbers behind the call. */
+    hline(L, R, 468);
+    var cells = [
+      ["Market cap", meta.marketCap ? F.money(meta.marketCap) : "—", C.text],
+      ["P/E", N(meta.trailingPE) ? N(meta.trailingPE).toFixed(1) : "—", C.text],
+      ["Sales growth", f && f.growth1y !== null ? F.spct(f.growth1y, 0) : "—", f && f.growth1y !== null ? (f.growth1y >= 0 ? C.gain : C.loss) : C.text],
+      ["Net margin", f && f.netMargin !== null ? f.netMargin.toFixed(0) + "%" : "—", C.text],
+      ["Growth priced in", v && v.implied !== null ? F.spct(v.implied * 100, 0) + "/yr" : "—", C.text],
+      ["Growth delivered", v && v.delivered !== null ? F.spct(v.delivered * 100, 0) + "/yr" : "—", v && v.delivered !== null && v.implied !== null ? (v.delivered >= v.implied ? C.gain : C.loss) : C.text]
+    ];
+    var cw = (R - L) / cells.length;
+    cells.forEach(function (cl, i) {
+      var X0 = L + i * cw;
+      if (i) { x.fillStyle = C.line; x.fillRect(Math.round(X0) - 16, 488, 1, 56); }
+      t(cl[0], X0, 506, "500 15px " + sans, C.t3);
+      t(cl[1], X0, 540, "600 26px " + nums, cl[2]);
+    });
+
+    /* Footer. */
+    hline(L, R, 568);
+    var ww = t("Implied", L, 604, "700 19px " + sans, C.text);
+    t("Lens", L + ww, 604, "700 19px " + sans, C.gold);
+    t("impliedlens.com/research/" + S.t + "   ·   Not investment advice", R, 604, "500 15px " + sans, C.t3, "right");
+    return c;
+  }
+  /* "Dial": the first plate (an engraved chart-book page with a lens dial)
+     with frosted widgets and the LensScore set inside the dial. */
+  function drawDialCard(inp, fl, plate) {
+    var DIAL = { x: 900, y: 300 };
+    var W = 1200, H = 630, c = document.createElement("canvas");
+    c.width = W; c.height = H;
+    var x = c.getContext("2d");
+    var C = { text: "#F1EEE8", t2: "#B9B2A6", t3: "#8A8378", gold: "#E5B65A", gain: "#4CC38A", gradeB: "#8FD0A4", amber: "#D9A441", loss: "#F07B7B" };
+    var sans = "Inter, system-ui, sans-serif", nums = "'IBM Plex Sans', Inter, sans-serif";
+    var hasLS = "letterSpacing" in x;
+    function t(str, X, Y, font, color, align, track) {
+      x.font = font; x.fillStyle = color; x.textAlign = align || "left";
+      if (hasLS) x.letterSpacing = track ? track + "px" : "0px";
+      x.fillText(str, X, Y); var w = x.measureText(str).width;
+      if (hasLS) x.letterSpacing = "0px";
+      return w;
+    }
+    function gradeCol(gr) { gr = String(gr || "").charAt(0); return gr === "A" ? C.gain : gr === "B" ? C.gradeB : gr === "C" ? C.amber : gr ? C.loss : C.t3; }
+    /* A widget: frosted glass over the plate, a thin gold edge. */
+    function widget(X, Y, w, hh) {
+      x.save(); roundRect(x, X, Y, w, hh, 14); x.clip();
+      if (plate && "filter" in x) { x.filter = "blur(10px)"; x.drawImage(plate, 0, 0, W, H); x.filter = "none"; }
+      x.fillStyle = "rgba(10,9,7,0.62)"; x.fillRect(X, Y, w, hh);
+      var sh = x.createLinearGradient(0, Y, 0, Y + 60); sh.addColorStop(0, "rgba(229,182,90,0.07)"); sh.addColorStop(1, "rgba(229,182,90,0)"); x.fillStyle = sh; x.fillRect(X, Y, w, 60);
+      x.restore();
+      x.strokeStyle = "rgba(229,182,90,0.26)"; x.lineWidth = 1; roundRect(x, X + 0.5, Y + 0.5, w - 1, hh - 1, 14); x.stroke();
+    }
+    var p = inp.price, g = inp.grades, v = inp.valuation, f = inp.fundamentals, meta = inp.meta || {};
+    var sector = meta.sector || (g && (g.sectorName || (g.rank && g.rank.sectorName))) || "";
+
+    /* The plate. */
+    if (plate) x.drawImage(plate, 0, 0, W, H); else { x.fillStyle = "#0C0A07"; x.fillRect(0, 0, W, H); }
+
+    /* Top line: the wordmark and the report date, in small tracked capitals. */
+    var ww = t("Implied", 56, 52, "700 20px " + sans, C.text);
+    t("Lens", 56 + ww, 52, "700 20px " + sans, C.gold);
+    t("LENS REPORT  ·  " + new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }).toUpperCase(), W - 56, 50, "600 13px " + sans, C.t3, "right", 2.2);
+
+    /* Identity: ticker, company, price. Straight on the plate. */
+    var tw = t(S.t, 56, 140, "700 64px " + sans, C.text, "left", -1.5);
+    t(String(inp.name || "").slice(0, 28), 56 + tw + 18, 138, "500 22px " + sans, C.t2);
+    t([meta.fullExchangeName || meta.exchangeName, sector].filter(Boolean).join("  ·  ").toUpperCase(), 56 + tw + 18, 112, "600 12px " + sans, C.t3, "left", 1.8);
+    if (p) {
+      var pw = t(F.price(p.price), 56, 200, "600 40px " + nums, C.text);
+      t(F.spct(p.chgPct, 2) + " today", 56 + pw + 18, 198, "500 19px " + nums, p.chg >= 0 ? C.gain : C.loss);
+    }
+
+    /* Widget: one year of price. */
+    var wx = 56, wy = 232, wW = 560, wH = 176;
+    widget(wx, wy, wW, wH);
+    t("PAST YEAR", wx + 20, wy + 30, "600 12px " + sans, C.t3, "left", 2);
+    if (p && p.yearReturn !== null && isFinite(p.yearReturn)) t(F.spct(p.yearReturn, 1), wx + wW - 20, wy + 31, "600 17px " + nums, p.yearReturn >= 0 ? C.gain : C.loss, "right");
+    if (S.quote && S.quote.bars.length > 20) {
+      var bars = S.quote.bars, endT = bars[bars.length - 1].time, yr = bars.filter(function (b) { return b.time >= endT - 366 * 86400; });
+      var sm = yr.map(function (b, i) { var a = yr.slice(Math.max(0, i - 2), i + 3), s = 0; a.forEach(function (z) { s += z.close; }); return s / a.length; });
+      sm[sm.length - 1] = yr[yr.length - 1].close;
+      var step = Math.max(1, Math.round(yr.length / 80)), pts = [];
+      for (var i = 0; i < yr.length; i += step) pts.push([i, sm[i]]);
+      if (pts[pts.length - 1][0] !== yr.length - 1) pts.push([yr.length - 1, sm[yr.length - 1]]);
+      var lo = Math.min.apply(null, sm), hi = Math.max.apply(null, sm);
+      var cx0 = wx + 20, cx1 = wx + wW - 26, cy0 = wy + 50, cy1 = wy + wH - 20;
+      var P = pts.map(function (q) { return [cx0 + (cx1 - cx0) * q[0] / (yr.length - 1), cy1 - (q[1] - lo) / ((hi - lo) || 1) * (cy1 - cy0)]; });
+      function curve() { x.moveTo(P[0][0], P[0][1]); for (var k = 0; k < P.length - 1; k++) { var a0 = P[k - 1] || P[k], a1 = P[k], a2 = P[k + 1], a3 = P[k + 2] || a2; x.bezierCurveTo(a1[0] + (a2[0] - a0[0]) / 6, a1[1] + (a2[1] - a0[1]) / 6, a2[0] - (a3[0] - a1[0]) / 6, a2[1] - (a3[1] - a1[1]) / 6, a2[0], a2[1]); } }
+      var wash = x.createLinearGradient(0, cy0, 0, cy1); wash.addColorStop(0, "rgba(229,182,90,0.20)"); wash.addColorStop(1, "rgba(229,182,90,0)");
+      x.beginPath(); curve(); x.lineTo(P[P.length - 1][0], cy1); x.lineTo(P[0][0], cy1); x.closePath(); x.fillStyle = wash; x.fill();
+      x.beginPath(); curve(); x.strokeStyle = C.gold; x.lineWidth = 2.5; x.lineJoin = "round"; x.lineCap = "round"; x.stroke();
+      var lp = P[P.length - 1]; x.fillStyle = C.gold; x.beginPath(); x.arc(lp[0], lp[1], 4.5, 0, Math.PI * 2); x.fill();
+    }
+
+    /* Widget: the numbers behind the call. */
+    var sx = 56, sy = 424, sW = 560, sH = 120;
+    widget(sx, sy, sW, sH);
+    var cells = [
+      ["MARKET CAP", meta.marketCap ? F.money(meta.marketCap) : "—", C.text],
+      ["P/E", N(meta.trailingPE) ? N(meta.trailingPE).toFixed(1) : "—", C.text],
+      ["IMPLIED GROWTH", v && v.implied !== null ? F.spct(v.implied * 100, 0) + "/yr" : "—", C.text],
+      ["DELIVERED", v && v.delivered !== null ? F.spct(v.delivered * 100, 0) + "/yr" : (f && f.growth1y !== null ? F.spct(f.growth1y, 0) : "—"), v && v.delivered !== null && v.implied !== null ? (v.delivered >= v.implied ? C.gain : C.loss) : C.text]
+    ];
+    var cws = [118, 86, 168, 148], cx = sx + 20;
+    cells.forEach(function (cl, i) {
+      var X0 = cx; cx += cws[i];
+      if (i) { x.fillStyle = "rgba(229,182,90,0.16)"; x.fillRect(Math.round(X0) - 12, sy + 24, 1, sH - 48); }
+      t(cl[0], X0, sy + 46, "600 11px " + sans, C.t3, "left", 1.6);
+      t(cl[1], X0, sy + 84, "600 25px " + nums, cl[2]);
+    });
+
+    /* The LensScore, set inside the plate's dial like a watch face. */
+    var dx = DIAL.x, dy = DIAL.y;
+    var face = x.createRadialGradient(dx, dy, 0, dx, dy, 186);
+    face.addColorStop(0, "rgba(10,9,7,0.9)"); face.addColorStop(0.8, "rgba(10,9,7,0.84)"); face.addColorStop(1, "rgba(10,9,7,0.2)");
+    x.fillStyle = face; x.beginPath(); x.arc(dx, dy, 190, 0, Math.PI * 2); x.fill();
+    t("LENSSCORE", dx, dy - 104, "600 13px " + sans, C.t3, "center", 3);
+    if (g) {
+      var sc = Number(g.score), tone = IL.scoreTone(sc), arcCol = tone === "good" ? C.gain : tone === "mid" ? C.gold : C.loss;
+      /* The score as an arc on the dial's inner ring. */
+      x.strokeStyle = "rgba(229,182,90,0.14)"; x.lineWidth = 3; x.beginPath(); x.arc(dx, dy, 190, 0, Math.PI * 2); x.stroke();
+      x.strokeStyle = arcCol; x.lineCap = "round"; x.beginPath(); x.arc(dx, dy, 190, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.max(0.02, Math.min(1, sc / 10))); x.stroke(); x.lineCap = "butt";
+      t(sc.toFixed(1), dx, dy - 6, "600 100px " + nums, C.gold, "center", -2);
+      t([g.label, g.rank ? "#" + g.rank.position + " of " + g.rank.of + " in " + (g.rank.sectorName || g.sectorName || "sector") : ""].filter(Boolean).join("  ·  "), dx, dy + 32, "500 16px " + sans, C.t2, "center");
+      var fs = (g.factors || []).slice(0, 5), gw = 58, gap = 5, gx0 = dx - (fs.length * gw + (fs.length - 1) * gap) / 2, gy = dy + 52;
+      fs.forEach(function (fc, i) {
+        var X0 = gx0 + i * (gw + gap), col = gradeCol(fc.grade);
+        x.strokeStyle = "rgba(229,182,90,0.22)"; x.lineWidth = 1; roundRect(x, X0 + 0.5, gy + 0.5, gw - 1, 52, 10); x.stroke();
+        t(fc.grade || "—", X0 + gw / 2, gy + 25, "600 19px " + nums, col, "center");
+        t((FACTOR_LABEL[fc.key] || fc.label || "").toUpperCase(), X0 + gw / 2, gy + 42, "600 8.5px " + sans, C.t3, "center", 0.6);
+      });
+    } else {
+      t("Not graded", dx, dy + 6, "600 30px " + sans, C.t2, "center");
+      t("Funds and foreign listings aren’t compared with peers.", dx, dy + 38, "500 15px " + sans, C.t3, "center");
+    }
+
+    /* Footer: the link and the small print. */
+    t("impliedlens.com/research/" + S.t, 56, 594, "600 17px " + sans, C.text);
+    t("FROM SEC FILINGS AND A YEAR OF PRICES  ·  NOT INVESTMENT ADVICE", W - 56, 593, "600 11px " + sans, C.t3, "right", 1.4);
     return c;
   }
   function roundRect(x, X, Y, w, hh, r) {
