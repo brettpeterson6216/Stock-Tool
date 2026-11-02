@@ -428,123 +428,185 @@
   }
 
   /* ── Share card: a 1200×630 image of the report, made in the browser ──
-     Data first, no slogans: ticker and price, a real one-year chart with
-     price and month labels, the LensScore with its five grades, and a strip
-     of the numbers behind the call. Flat, quiet, one accent colour. */
+     "The Research Folio": one fixed background (public/share/folio-v1.webp,
+     an open research volume, the same for every stock) with the live data
+     set cleanly on top. Three anchors: the stock, the LensScore, and the
+     growth the price implies against the growth delivered. No panels. */
+  var PLATE = "/share/folio-v1.webp";
   function shareCard(inp, fl) {
-    var fonts = ["700 40px Inter", "600 40px Inter", "500 40px Inter", "500 40px 'IBM Plex Sans'", "600 40px 'IBM Plex Sans'"];
+    var fonts = ["700 40px Inter", "600 40px Inter", "500 40px Inter", "400 40px Inter", "500 40px 'IBM Plex Sans'", "600 40px 'IBM Plex Sans'"];
     var ready = document.fonts && document.fonts.load ? Promise.all(fonts.map(function (f) { return document.fonts.load(f).catch(function () {}); })) : Promise.resolve();
-    ready.then(function () { drawShareCard(inp, fl); });
+    var plate = new Promise(function (res) { var im = new Image(); im.onload = function () { res(im); }; im.onerror = function () { res(null); }; im.src = PLATE; });
+    Promise.all([ready, plate]).then(function (r) { drawShareCard(inp, fl, r[1]); });
   }
-  function drawShareCard(inp, fl) {
+  var EXCHANGE = { nasdaqgs: "NASDAQ", nasdaqgm: "NASDAQ", nasdaqcm: "NASDAQ", nasdaq: "NASDAQ", nms: "NASDAQ", ngm: "NASDAQ", ncm: "NASDAQ", nyse: "NYSE", nyq: "NYSE", "nyse arca": "NYSE ARCA", nysearca: "NYSE ARCA", pcx: "NYSE ARCA", "nyse american": "NYSE AMERICAN", ase: "NYSE AMERICAN", bats: "CBOE", cboe: "CBOE" };
+  /* Monotone cubic (Fritsch-Carlson) through the real points: smooth, but it
+     never overshoots or invents peaks, so highs and lows stay true. */
+  function monotonePath(x, P) {
+    var n = P.length; if (n < 2) return;
+    var d = [], m = [];
+    for (var i = 0; i < n - 1; i++) d.push((P[i + 1][1] - P[i][1]) / ((P[i + 1][0] - P[i][0]) || 1));
+    m[0] = d[0]; m[n - 1] = d[n - 2];
+    for (i = 1; i < n - 1; i++) m[i] = d[i - 1] * d[i] <= 0 ? 0 : (d[i - 1] + d[i]) / 2;
+    for (i = 0; i < n - 1; i++) {
+      if (d[i] === 0) { m[i] = 0; m[i + 1] = 0; continue; }
+      var a = m[i] / d[i], b = m[i + 1] / d[i], s = a * a + b * b;
+      if (s > 9) { var tt = 3 / Math.sqrt(s); m[i] = tt * a * d[i]; m[i + 1] = tt * b * d[i]; }
+    }
+    x.moveTo(P[0][0], P[0][1]);
+    for (i = 0; i < n - 1; i++) {
+      var h = (P[i + 1][0] - P[i][0]) / 3;
+      x.bezierCurveTo(P[i][0] + h, P[i][1] + m[i] * h, P[i + 1][0] - h, P[i + 1][1] - m[i + 1] * h, P[i + 1][0], P[i + 1][1]);
+    }
+  }
+  function drawShareCard(inp, fl, plate) {
     var W = 1200, H = 630, c = document.createElement("canvas");
     c.width = W; c.height = H;
     var x = c.getContext("2d");
-    var C = { bg: "#0F1012", line: "#24272C", grid: "#1C1F23", text: "#ECEDEF", t2: "#A1A7AF", t3: "#6F767F", gold: "#E5B65A", gain: "#4CC38A", gradeB: "#8FD0A4", amber: "#D9A441", loss: "#F07B7B" };
+    var C = { bg: "#10110F", text: "#F3F0E7", t2: "#B9B6AB", t3: "#8C897F", gold: "#E5B65A", gain: "#4CC38A", gradeB: "#8FD0A4", amber: "#E5B65A", loss: "#F07B7B", rule: "rgba(243,240,231,0.12)" };
     var sans = "Inter, system-ui, sans-serif", nums = "'IBM Plex Sans', Inter, sans-serif";
-    function t(str, X, Y, font, color, align) { x.font = font; x.fillStyle = color; x.textAlign = align || "left"; x.fillText(str, X, Y); return x.measureText(str).width; }
-    function hline(X0, X1, Y, col) { x.fillStyle = col || C.line; x.fillRect(X0, Math.round(Y), X1 - X0, 1); }
+    var hasLS = "letterSpacing" in x, DASH = "—";
+    function font(w, px, fam) { return w + " " + px + "px " + fam; }
+    function width(str, f, track) { x.font = f; if (hasLS) x.letterSpacing = (track || 0) + "px"; var w = x.measureText(str).width; if (hasLS) x.letterSpacing = "0px"; return w; }
+    /* Draw text inside a box (top-left x,y and height): the ink is centred
+       vertically in the box using the font's real cap and descender metrics. */
+    function box(str, X, Y, w, h, f, color, align, track) {
+      x.font = f; x.fillStyle = color; x.textAlign = align || "left"; x.textBaseline = "alphabetic";
+      if (hasLS) x.letterSpacing = (track || 0) + "px";
+      var m = x.measureText("Hg0"), asc = m.actualBoundingBoxAscent, desc = m.actualBoundingBoxDescent;
+      var base = Y + (h - (asc + desc)) / 2 + asc;
+      var ax = align === "center" ? X + w / 2 : align === "right" ? X + w : X;
+      x.fillText(str, ax, base);
+      var tw = x.measureText(str).width;
+      if (hasLS) x.letterSpacing = "0px";
+      return { w: tw, base: base };
+    }
+    function fit(str, wt, fam, max, min, maxW, track) { var px = max; while (px > min && width(str, font(wt, px, fam), track) > maxW) px -= 1; return px; }
+    function ellipsize(str, f, maxW) { if (width(str, f) <= maxW) return str; while (str.length > 1 && width(str + "…", f) > maxW) str = str.slice(0, -1); return str.replace(/\s+$/, "") + "…"; }
+    function wrap2(str, f, maxW) {
+      var words = String(str).split(" "), lines = [""];
+      words.forEach(function (wd) { var t = lines[lines.length - 1] ? lines[lines.length - 1] + " " + wd : wd; if (width(t, f) > maxW && lines[lines.length - 1]) lines.push(wd); else lines[lines.length - 1] = t; });
+      if (lines.length > 2) { lines = [lines[0], ellipsize(lines.slice(1).join(" "), f, maxW)]; }
+      return lines;
+    }
     function gradeCol(gr) { gr = String(gr || "").charAt(0); return gr === "A" ? C.gain : gr === "B" ? C.gradeB : gr === "C" ? C.amber : gr ? C.loss : C.t3; }
+    function signed(v, d) { return F.spct(v, d); }
+
     var p = inp.price, g = inp.grades, v = inp.valuation, f = inp.fundamentals, meta = inp.meta || {};
     var sector = meta.sector || (g && (g.sectorName || (g.rank && g.rank.sectorName))) || "";
-    var L = 56, R = W - 56;
+    var exRaw = String(meta.fullExchangeName || meta.exchangeName || "").trim();
+    var ex = EXCHANGE[exRaw.toLowerCase()] || exRaw.toUpperCase();
+    var asOf = p && p.lastTime ? new Date(p.lastTime * 1000) : new Date();
 
+    /* Background: the fixed folio, or plain ground if it fails to load. */
     x.fillStyle = C.bg; x.fillRect(0, 0, W, H);
+    if (plate) x.drawImage(plate, 0, 0, W, H);
 
-    /* Header: ticker and name left, price and moves right. */
-    var tw = t(S.t, L, 92, "700 40px " + sans, C.text);
-    t(String(inp.name || "").slice(0, 36), L + tw + 16, 92, "500 24px " + sans, C.t2);
-    t([meta.fullExchangeName || meta.exchangeName, sector].filter(Boolean).join("  ·  "), L, 124, "500 17px " + sans, C.t3);
-    if (p) {
-      t(F.price(p.price), R, 92, "600 40px " + nums, C.text, "right");
-      var yrRet = p.yearReturn;
-      x.font = "500 18px " + nums;
-      var s1 = F.spct(p.chgPct, 2) + " today", s2 = yrRet !== null && isFinite(yrRet) ? F.spct(yrRet, 1) + " past year" : "";
-      var w2 = s2 ? x.measureText(s2).width : 0;
-      if (s2) t(s2, R, 124, "500 18px " + nums, yrRet >= 0 ? C.gain : C.loss, "right");
-      t(s1 + (s2 ? "   " : ""), R - w2, 124, "500 18px " + nums, p.chg >= 0 ? C.gain : C.loss, "right");
-    }
+    /* Header: brand and the report date (the date of the data shown). */
+    var bw = box("Implied", 48, 32, 240, 28, font(700, 23, sans), C.text).w;
+    box("Lens", 48 + bw, 32, 240, 28, font(700, 23, sans), C.gold);
+    box("LENS REPORT  ·  " + asOf.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "America/New_York" }).toUpperCase(), 792, 38, 360, 20, font(500, 13, sans), C.t2, "right", 1);
 
-    /* The chart: one year of closes, lightly smoothed, with real axes. */
-    var cx0 = L, cx1 = 790, cy0 = 172, cy1 = 432;
-    if (S.quote && S.quote.bars.length > 20) {
-      var bars = S.quote.bars, endT = bars[bars.length - 1].time, yr = bars.filter(function (b) { return b.time >= endT - 366 * 86400; });
-      var sm = yr.map(function (b, i) { var a = yr.slice(Math.max(0, i - 2), i + 3), s = 0; a.forEach(function (z) { s += z.close; }); return s / a.length; });
-      sm[sm.length - 1] = yr[yr.length - 1].close;
-      var pts = [], step = Math.max(1, Math.round(yr.length / 90));
-      for (var i = 0; i < yr.length; i += step) pts.push([i, sm[i]]);
-      if (pts[pts.length - 1][0] !== yr.length - 1) pts.push([yr.length - 1, sm[yr.length - 1]]);
-      var lo = Math.min.apply(null, sm), hi = Math.max.apply(null, sm);
-      var raw = (hi - lo) / 4 || 1, mag = Math.pow(10, Math.floor(Math.log10(raw))), nice = [1, 2, 2.5, 5, 10].map(function (k) { return k * mag; }).filter(function (k) { return k >= raw; })[0];
-      var gLo = Math.floor(lo / nice) * nice, gHi = Math.ceil(hi / nice) * nice;
-      var plotR = cx1 - 64;
-      var X = function (i) { return cx0 + (plotR - cx0) * i / (yr.length - 1); };
-      var Y = function (val) { return cy1 - (val - gLo) / ((gHi - gLo) || 1) * (cy1 - cy0); };
-      for (var gv = gLo; gv <= gHi + nice / 2; gv += nice) {
-        hline(cx0, plotR + 8, Y(gv), C.grid);
-        t(F.price(gv).replace(/\.00$/, ""), cx1, Y(gv) + 5, "500 14px " + nums, C.t3, "right");
+    /* Identity: exchange and sector, the ticker, the company. */
+    box([ex, sector].filter(Boolean).join("  ·  ").toUpperCase(), 48, 76, 640, 16, font(500, 12, sans), C.t2, "left", 1.2);
+    var tpx = fit(S.t, 700, sans, 72, 56, 420, -1.5);
+    box(S.t, 48, 94, 420, 80, font(700, tpx, sans), C.text, "left", -1.5);
+    var npx = fit(String(inp.name || ""), 500, sans, 24, 20, 640);
+    box(ellipsize(String(inp.name || ""), font(500, npx, sans), 640), 48, 180, 640, 30, font(500, npx, sans), C.t2);
+
+    /* Price and today's move. */
+    var cur = meta.currency && meta.currency !== "USD" ? meta.currency + " " : "";
+    var priceStr = p ? (cur ? cur + F.num(p.price, 2) : F.price(p.price)) : DASH;
+    var ppx = fit(priceStr, 600, nums, 40, 32, 224);
+    var pr = box(priceStr, 48, 220, 224, 48, font(600, ppx, nums), C.text);
+    if (p && isFinite(p.chgPct)) box(signed(p.chgPct, 2) + " today", 48 + pr.w + 18, 235, 360, 26, font(500, 20, nums), p.chg >= 0 ? C.gain : C.loss);
+
+    /* The signature comparison: growth the price implies vs growth delivered. */
+    box("ANNUAL SALES GROWTH", 48, 291, 640, 18, font(600, 13, sans), C.t2, "left", 1.1);
+    box("Implied by price", 48, 324, 284, 21, font(500, 18, sans), C.t2);
+    box("Delivered", 360, 324, 328, 21, font(500, 18, sans), C.t2);
+    function growth(val, X, w, color) {
+      if (val === null || val === undefined || !isFinite(val)) {
+        box(DASH, X, 349, w, 64, font(600, 56, nums), C.t3);
+        return false;
       }
-      var lastMonth = -1;
-      yr.forEach(function (b, i) {
-        var d = new Date(b.time * 1000), m = d.getUTCMonth();
-        if (m !== lastMonth && i > 3 && m % 2 === 0) t(d.toLocaleString("en-US", { month: "short", timeZone: "UTC" }), X(i), cy1 + 26, "500 14px " + sans, C.t3, "center");
-        if (m !== lastMonth) lastMonth = m;
-      });
-      var P = pts.map(function (q) { return [X(q[0]), Y(q[1])]; });
-      function curve() { x.moveTo(P[0][0], P[0][1]); for (var k = 0; k < P.length - 1; k++) { var a0 = P[k - 1] || P[k], a1 = P[k], a2 = P[k + 1], a3 = P[k + 2] || a2; x.bezierCurveTo(a1[0] + (a2[0] - a0[0]) / 6, a1[1] + (a2[1] - a0[1]) / 6, a2[0] - (a3[0] - a1[0]) / 6, a2[1] - (a3[1] - a1[1]) / 6, a2[0], a2[1]); } }
-      var wash = x.createLinearGradient(0, cy0, 0, cy1); wash.addColorStop(0, "rgba(229,182,90,0.14)"); wash.addColorStop(1, "rgba(229,182,90,0)");
-      x.beginPath(); curve(); x.lineTo(P[P.length - 1][0], cy1); x.lineTo(P[0][0], cy1); x.closePath(); x.fillStyle = wash; x.fill();
-      x.beginPath(); curve(); x.strokeStyle = C.gold; x.lineWidth = 2.5; x.lineJoin = "round"; x.lineCap = "round"; x.stroke();
-      var lp = P[P.length - 1];
-      x.fillStyle = C.gold; x.beginPath(); x.arc(lp[0], lp[1], 4.5, 0, Math.PI * 2); x.fill();
+      var main = signed(val * 100, 0), px = 56;
+      while (px > 42 && width(main, font(600, px, nums)) + 6 + width("/yr", font(500, 20, nums)) > w) px -= 1;
+      var r = box(main, X, 349, w, 64, font(600, px, nums), color);
+      x.font = font(500, 20, nums); x.fillStyle = C.t2; x.textAlign = "left"; x.fillText("/yr", X + r.w + 6, r.base);
+      return true;
+    }
+    var hasImp = growth(v ? v.implied : null, 48, 284, C.gold);
+    var delivered = v && v.delivered !== null && v.delivered !== undefined ? v.delivered : null;
+    var hasDel = growth(delivered, 360, 328, C.text);
+    var impBasis = hasImp ? ["Model estimate", "next 5 years"] : ["Not available"];
+    var delBasis = hasDel ? ["Reported", f && f.growth3y !== null ? "3-year annual rate" : "last 12 months vs prior"] : ["Not available"];
+    box(impBasis.join(" · "), 48, 418, 284, 16, font(400, 14, sans), C.t3);
+    box(delBasis.join(" · "), 360, 418, 328, 16, font(400, 14, sans), C.t3);
+
+    /* Price over the past year: the real daily closes, no axes or fill. */
+    box("PRICE  ·  PAST YEAR", 48, 460, 180, 18, font(500, 12, sans), C.t2, "left", 1);
+    var yrRet = p && p.yearReturn !== null && isFinite(p.yearReturn) ? p.yearReturn : null;
+    if (yrRet !== null) box(signed(yrRet, 1), 488, 456, 200, 25, font(500, 20, nums), yrRet >= 0 ? C.gain : C.loss, "right");
+    if (S.quote && S.quote.bars.length > 1) {
+      var bars = S.quote.bars.filter(function (b) { return b && isFinite(b.time) && isFinite(b.close) && b.close > 0; }).slice().sort(function (a, b) { return a.time - b.time; });
+      var endT = bars.length ? bars[bars.length - 1].time : 0, yr = bars.filter(function (b) { return b.time >= endT - 366 * 86400; });
+      if (yr.length > 1) {
+        var t0 = yr[0].time, t1 = yr[yr.length - 1].time, lo = Infinity, hi = -Infinity;
+        yr.forEach(function (b) { lo = Math.min(lo, b.close); hi = Math.max(hi, b.close); });
+        var cx0 = 48, cx1 = 688, cy0 = 492, cy1 = 542;
+        var Xt = function (t) { return cx0 + (cx1 - cx0) * (t - t0) / ((t1 - t0) || 1); };
+        var Yv = function (val) { return hi === lo ? (cy0 + cy1) / 2 : cy1 - (val - lo) / (hi - lo) * (cy1 - cy0); };
+        /* Break the line at real gaps in the data (more than 10 days). */
+        /* Plot each week's real closing price (the last trading day of the
+           week, plus the year's high and low days) so day-to-day noise
+           doesn't read as jagged at this size; highs and lows stay true. */
+        var wk = {}, keep = [];
+        yr.forEach(function (b) { wk[Math.floor((b.time + 3 * 86400) / (7 * 86400))] = b; });
+        Object.keys(wk).forEach(function (k) { keep.push(wk[k]); });
+        yr.forEach(function (b) { if (b.close === lo || b.close === hi) keep.push(b); });
+        keep.push(yr[0]); keep.push(yr[yr.length - 1]);
+        keep = keep.sort(function (a, b) { return a.time - b.time; }).filter(function (b, i, arr) { return !i || b.time !== arr[i - 1].time; });
+        var seg = [], segs = [seg];
+        keep.forEach(function (b, i) { if (i && b.time - keep[i - 1].time > 14 * 86400) { seg = []; segs.push(seg); } seg.push([Xt(b.time), Yv(b.close)]); });
+        x.strokeStyle = C.gold; x.lineWidth = 2.5; x.lineJoin = "round"; x.lineCap = "round";
+        segs.forEach(function (sg) { if (sg.length < 2) return; x.beginPath(); monotonePath(x, sg); x.stroke(); });
+        var last = segs[segs.length - 1], lp = last[last.length - 1];
+        x.fillStyle = C.gold; x.beginPath(); x.arc(lp[0], lp[1], 3.5, 0, Math.PI * 2); x.fill();
+      }
     }
 
-    /* The LensScore column: the number, the rank, the five grades as rows. */
-    var rx = 846;
-    x.fillStyle = C.line; x.fillRect(rx - 28, 172, 1, 262);
-    t("LENSSCORE", rx, 186, "600 14px " + sans, C.t3);
-    if (g) {
-      var sc = Number(g.score), sw = t(sc.toFixed(1), rx, 250, "600 60px " + nums, C.text);
-      t("/ 10", rx + sw + 10, 250, "500 20px " + nums, C.t3);
-      t([g.label, g.rank ? "#" + g.rank.position + " of " + g.rank.of : ""].filter(Boolean).join("  ·  "), rx, 282, "500 17px " + sans, C.t2);
-      var gy = 322;
-      (g.factors || []).slice(0, 5).forEach(function (fc) {
-        var col = gradeCol(fc.grade), fill = IL.gradeFill(fc.grade) / 100;
-        t(FACTOR_LABEL[fc.key] || fc.label, rx, gy, "500 16px " + sans, C.t2);
-        x.fillStyle = C.grid; x.fillRect(rx + 104, gy - 6, 150, 4);
-        x.fillStyle = col; x.fillRect(rx + 104, gy - 6, Math.max(4, 150 * fill), 4);
-        t(fc.grade || "—", R, gy, "600 16px " + nums, col, "right");
-        gy += 26;
-      });
+    /* The LensScore: an unframed number, always gold; words carry the meaning. */
+    box("LENSSCORE", 760, 143, 392, 20, font(600, 14, sans), C.t2, "center", 2);
+    if (g && isFinite(Number(g.score))) {
+      var sc = Number(g.score).toFixed(1), fN = font(600, 128, nums), fU = font(500, 24, nums);
+      var wN = width(sc, fN), wU = width("/10", fU), gx0 = 760 + (392 - (wN + 8 + wU)) / 2;
+      var sr = box(sc, gx0, 176, wN, 148, fN, C.gold);
+      x.font = fU; x.fillStyle = C.t2; x.textAlign = "left"; x.fillText("/10", gx0 + wN + 8, sr.base);
+      if (g.label) box(g.label, 760, 332, 392, 26, font(500, 21, sans), C.text, "center");
+      if (g.rank) {
+        var rk = "#" + g.rank.position + " of " + g.rank.of + "  ·  " + (g.rank.sectorName || g.sectorName || sector || "");
+        var lines = wrap2(rk.replace(/\s+·\s+$/, ""), font(400, 18, sans), 392);
+        lines.forEach(function (ln, i) { box(ln, 760, 368 + i * 22, 392, 22, font(400, 18, sans), C.t2, "center"); });
+      }
     } else {
-      t("Not graded", rx, 240, "600 26px " + sans, C.t2);
-      t("Funds and foreign listings", rx, 272, "500 16px " + sans, C.t3);
-      t("aren’t compared with peers.", rx, 296, "500 16px " + sans, C.t3);
+      box(DASH, 760, 176, 392, 148, font(600, 128, nums), C.t3, "center");
+      box("Not graded", 760, 332, 392, 26, font(500, 21, sans), C.t2, "center");
     }
-
-    /* The numbers behind the call. */
-    hline(L, R, 468);
-    var cells = [
-      ["Market cap", meta.marketCap ? F.money(meta.marketCap) : "—", C.text],
-      ["P/E", N(meta.trailingPE) ? N(meta.trailingPE).toFixed(1) : "—", C.text],
-      ["Sales growth", f && f.growth1y !== null ? F.spct(f.growth1y, 0) : "—", f && f.growth1y !== null ? (f.growth1y >= 0 ? C.gain : C.loss) : C.text],
-      ["Net margin", f && f.netMargin !== null ? f.netMargin.toFixed(0) + "%" : "—", C.text],
-      ["Growth priced in", v && v.implied !== null ? F.spct(v.implied * 100, 0) + "/yr" : "—", C.text],
-      ["Growth delivered", v && v.delivered !== null ? F.spct(v.delivered * 100, 0) + "/yr" : "—", v && v.delivered !== null && v.implied !== null ? (v.delivered >= v.implied ? C.gain : C.loss) : C.text]
-    ];
-    var cw = (R - L) / cells.length;
-    cells.forEach(function (cl, i) {
-      var X0 = L + i * cw;
-      if (i) { x.fillStyle = C.line; x.fillRect(Math.round(X0) - 16, 488, 1, 56); }
-      t(cl[0], X0, 506, "500 15px " + sans, C.t3);
-      t(cl[1], X0, 540, "600 26px " + nums, cl[2]);
+    x.fillStyle = C.rule; x.fillRect(760, 429, 392, 1);
+    var fs = g && g.factors ? g.factors.slice(0, 5) : [];
+    ["value", "growth", "profitability", "health", "momentum"].forEach(function (key, i) {
+      var fc = fs.filter(function (z) { return z.key === key; })[0] || fs[i] || null;
+      var X0 = 760 + 80 * i;
+      box(FACTOR_LABEL[key], X0, 447, 72, 18, font(500, 12, sans), C.t2, "center");
+      var gr = fc && fc.grade ? fc.grade : DASH;
+      box(gr, X0, 475, 72, 43, font(600, 32, nums), fc && fc.grade ? gradeCol(fc.grade) : C.t3, "center");
     });
 
     /* Footer. */
-    hline(L, R, 568);
-    var ww = t("Implied", L, 604, "700 19px " + sans, C.text);
-    t("Lens", L + ww, 604, "700 19px " + sans, C.gold);
-    t("impliedlens.com/research/" + S.t + "   ·   Not investment advice", R, 604, "500 15px " + sans, C.t3, "right");
+    x.fillStyle = C.rule; x.fillRect(48, 566, 1104, 1);
+    box("impliedlens.com/research/" + S.t, 48, 586, 690, 23, font(600, 18, sans), C.text);
+    box("Educational research · not investment advice", 792, 590, 360, 18, font(400, 13, sans), C.t3, "right");
     c.toBlob(function (blob) {
       if (!blob) { IL.toast("Could not make the image."); return; }
       var file = new File([blob], S.t + "-lens-report.png", { type: "image/png" });
