@@ -253,7 +253,8 @@
   };
   function navGoTo(id, attempt) {
     if (id === 'adveducation') id = 'education';
-    /* Compare has been rebuilt as its own page. */
+    /* Screener and Compare have been rebuilt as their own pages. */
+    if (id === 'screener') { window.location.assign('/screener'); return; }
     if (id === 'compare') {
       var cur = (document.getElementById('main-ticker') || {}).value;
       window.location.assign('/compare' + (cur && /^[A-Z0-9.^-]{1,15}$/i.test(cur.trim()) ? '?t=' + encodeURIComponent(cur.trim().toUpperCase()) : ''));

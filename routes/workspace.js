@@ -352,6 +352,21 @@ router.delete("/workspace/positions/:ticker", validateCsrf, async (req, res) => 
   } catch (error) { workspaceError(res, error); }
 });
 
+/* The weekly grade email on/off switch (Watchlist page). */
+router.get("/workspace/digest", async (req, res) => {
+  try {
+    const r = await db.execute({ sql: "SELECT COALESCE(digest_opt_out,0) AS off FROM users WHERE id=?", args: [req.session.userId] });
+    res.json({ on: !Number(r.rows[0] && r.rows[0].off) });
+  } catch (error) { workspaceError(res, error); }
+});
+router.put("/workspace/digest", validateCsrf, async (req, res) => {
+  try {
+    const on = !!(req.body && req.body.on);
+    await db.execute({ sql: "UPDATE users SET digest_opt_out=? WHERE id=?", args: [on ? 0 : 1, req.session.userId] });
+    res.json({ on });
+  } catch (error) { workspaceError(res, error); }
+});
+
 router.get("/workspace/watchlist", async (req, res) => {
   try {
     const result = await db.execute({ sql: "SELECT * FROM watchlist_items WHERE user_id=? ORDER BY created_at DESC LIMIT 200", args: [req.session.userId] });

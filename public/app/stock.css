@@ -185,3 +185,10 @@
 .rl-tools{grid-template-columns:repeat(4,minmax(0,1fr))}
 @media (max-width:1080px){.rl-tools{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:760px){.rl-tools{grid-template-columns:1fr}}
+.val-versions{height:32px;width:auto;max-width:240px;font-size:13px;padding-left:10px}
+.val-sens td{text-align:center}
+.val-sens th:not(:first-child){text-align:center}
+.val-sens td.s-good{color:var(--gain);background:var(--gain-soft)}
+.val-sens td.s-mid{color:var(--amber);background:var(--amber-soft)}
+.val-sens td.s-bad{color:var(--loss);background:var(--loss-soft)}
+.val-sens td.s-base{font-weight:800;box-shadow:inset 0 0 0 2px var(--text3)}

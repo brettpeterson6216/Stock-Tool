@@ -140,7 +140,7 @@
       "</section>" +
       '<div class="grid-3 rl-tools">' +
         '<a class="card" href="/compare"><span class="card-t">Compare</span><span class="card-sub">Up to four stocks side by side, with the best in each row marked.</span></a>' +
-        '<a class="card" href="/?view=tool&section=screener"><span class="card-t">Screener</span><span class="card-sub">Filter about 290 US stocks by grade, value, size and momentum.</span></a>' +
+        '<a class="card" href="/screener"><span class="card-t">Screener</span><span class="card-sub">Filter about 290 US stocks by grade, value, size and momentum.</span></a>' +
         '<a class="card" href="/lens-score"><span class="card-t">LensToolkit</span><span class="card-sub">Trend, timing, buy zones and alerts for any stock.</span></a>' +
         '<a class="card" href="/?view=tool&section=projection"><span class="card-t">Valuation Lab</span><span class="card-sub">A full five-year model with saved versions.</span></a>' +
       "</div>" +
@@ -884,7 +884,7 @@
     function pctIn(v) { return (Math.round(v * 1000) / 10).toString(); }
     box.innerHTML =
       '<section class="card val-hero" id="val-hero"></section>' +
-      '<div class="section-h"><div><h2 class="section-t">Build your own cases</h2><p class="card-sub">Five years out. Start from what the company has done; change any number.</p></div><div class="row"><button class="btn sm ghost" type="button" id="val-reset">Reset</button></div></div>' +
+      '<div class="section-h"><div><h2 class="section-t">Valuation Lab</h2><p class="card-sub">Five years out. Start from what the company has done; change any number.</p></div><div class="row wrap"><select class="input val-versions" id="val-versions" aria-label="Saved versions"><option value="">Saved versions</option></select><button class="btn sm" type="button" id="val-save">Save version</button><button class="btn sm ghost" type="button" id="val-reset">Reset</button></div></div>' +
       '<section class="card flush"><div class="tbl-wrap"><table class="tbl val-tbl"><thead><tr><th></th>' + cases.map(function (c) { return '<th class="val-' + c + '">' + label[c] + "</th>"; }).join("") + "</tr></thead><tbody>" +
         valRow("growth", "Revenue growth per year", "%", "How fast sales grow each year for the next five years.") +
         valRow("margin", "Net profit margin", "%", "Share of revenue kept as profit in year five. " + (ctx.margin !== null ? "Last 12 months: " + F.pct(ctx.margin * 100) + "." : "")) +
@@ -895,6 +895,8 @@
       "</tbody></table></div>" +
       '<div class="val-foot"><label class="field" style="flex-direction:row;align-items:center;gap:10px">Return you require <input class="input num val-in" style="width:84px" id="v-req" inputmode="decimal" value="' + pctIn(M.required) + '"> %</label>' +
         '<label class="field" style="flex-direction:row;align-items:center;gap:10px">Share count change per year ' + IL.tip("Negative if the company buys back shares; positive if it issues new ones (for example to pay staff).") + ' <input class="input num val-in" style="width:84px" id="v-sh" inputmode="decimal" value="' + pctIn(M.shareChange) + '"> %</label></div></section>' +
+      '<section class="card flush"><div class="card-h"><h3 class="card-t">Year by year</h3><div class="seg" role="group" aria-label="Case" id="val-yr-seg"><button type="button" data-yr="bear" aria-pressed="false">Bear</button><button type="button" data-yr="base" aria-pressed="true">Base</button><button type="button" data-yr="bull" aria-pressed="false">Bull</button></div></div><div class="tbl-wrap"><table class="tbl" id="val-yr"></table></div><p class="note" style="padding:10px 20px 14px">The margin moves in a straight line from today\u2019s to the year-five target. \u201cPrice at the exit P/E\u201d shows what each year\u2019s earnings would be worth at that multiple.</p></section>' +
+      '<section class="card flush"><div class="card-h"><h3 class="card-t">What if? Yearly return from today ' + IL.tip("Base case, with revenue growth and the year-five P/E changed. Green beats the return you require; amber makes money but less than that; red loses money.") + '</h3><span class="card-sub">Base-case margin, rows = revenue growth, columns = P/E in five years</span></div><div class="tbl-wrap"><table class="tbl val-sens" id="val-sens"></table></div></section>' +
       '<div class="grid-2">' +
         '<section class="card"><h3 class="card-t">Starting point</h3><div>' +
           '<div class="stat"><span class="k">Price</span><span class="v">' + F.price(ctx.price) + "</span></div>" +
@@ -905,8 +907,8 @@
           '<div class="stat"><span class="k">Diluted shares</span><span class="v">' + F.count(ctx.shares) + "</span></div>" +
         "</div></section>" +
         '<section class="card"><h3 class="card-t">How to read this</h3><p class="muted" style="font-size:13.5px">A stock price is a bet on the future. Instead of guessing a “fair value”, start with what the price already assumes, then ask whether the company can beat it. If the growth it needs is well above anything it has done, the stock is priced for perfection. If it is below, the market may be too gloomy.</p>' +
-          '<p class="muted" style="font-size:13.5px">For a full discounted-cash-flow model with year-by-year margins, reinvestment and saved versions, open the Valuation Lab.</p>' +
-          '<a class="card-foot" href="/?view=tool&section=projection&symbol=' + h(S.t) + '">Open the Valuation Lab →</a></section>' +
+          '<p class="muted" style="font-size:13.5px">Want a discounted-cash-flow model with reinvestment and a cost of capital? The classic DCF model is still available.</p>' +
+          '<a class="card-foot" href="/?view=tool&section=projection&symbol=' + h(S.t) + '">Open the classic DCF model →</a></section>' +
       "</div>";
 
     function valRow(field, text, unit, tip) {
@@ -935,7 +937,43 @@
         IL.$("#o-vt-" + c).innerHTML = out ? '<span class="num">' + F.price(out.valueToday) + '</span> <span class="num ' + F.cls(out.upside) + '" style="font-size:12px">' + F.spct(out.upside * 100, 0) + "</span>" : "—";
       });
       hero();
+      years();
+      sensitivity();
       try { localStorage.setItem(key, JSON.stringify({ v: 1, m: M })); } catch (_) {}
+    }
+    var yrCase = "base";
+    function years() {
+      var c = M[yrCase], m0 = ctx.margin !== null ? ctx.margin : c.margin, rows = [];
+      var sh = ctx.shares, rev = ctx.revenue;
+      rows.push({ y: "Today", rev: rev, g: null, m: m0, ni: rev * m0, sh: sh });
+      for (var y = 1; y <= 5; y++) {
+        rev = rev * (1 + c.growth); sh = sh * (1 + M.shareChange);
+        var m = m0 + (c.margin - m0) * y / 5;
+        rows.push({ y: "Year " + y, rev: rev, g: c.growth, m: m, ni: rev * m, sh: sh });
+      }
+      var cols = rows.map(function (r) { return r; });
+      var line = function (label, fn, cls) { return "<tr" + (cls ? ' class="' + cls + '"' : "") + "><td>" + label + "</td>" + cols.map(function (r, i) { return "<td>" + fn(r, i) + "</td>"; }).join("") + "</tr>"; };
+      IL.$("#val-yr").innerHTML = "<thead><tr><th></th>" + cols.map(function (r) { return "<th>" + r.y + "</th>"; }).join("") + "</tr></thead><tbody>" +
+        line("Revenue", function (r) { return F.money(r.rev); }, "em") +
+        line("Growth", function (r) { return r.g === null ? "" : F.spct(r.g * 100); }) +
+        line("Net margin", function (r) { return F.pct(r.m * 100); }) +
+        line("Net income", function (r) { return F.money(r.ni); }) +
+        line("Diluted shares", function (r) { return F.count(r.sh); }) +
+        line("Earnings per share", function (r) { return F.eps(r.ni / r.sh); }, "em") +
+        line("Price at the exit P/E", function (r, i) { return i === 0 ? '<span class="faint">' + F.price(ctx.price) + " now</span>" : F.price(r.ni / r.sh * c.exitPE); }) +
+        "</tbody>";
+    }
+    function sensitivity() {
+      var b = M.base, gs = [-0.08, -0.04, 0, 0.04, 0.08].map(function (d) { return b.growth + d; }), pes = [0.6, 0.8, 1, 1.2, 1.4].map(function (k) { return Math.max(3, Math.round(b.exitPE * k)); });
+      IL.$("#val-sens").innerHTML = "<thead><tr><th>Growth \u2193 / P/E \u2192</th>" + pes.map(function (pe) { return "<th>" + pe + "\u00d7</th>"; }).join("") + "</tr></thead><tbody>" +
+        gs.map(function (g, gi) {
+          return "<tr><td" + (gi === 2 ? ' class="em"' : "") + ">" + F.spct(g * 100) + " a year</td>" + pes.map(function (pe, pi) {
+            var out = V.project({ price: ctx.price, revenue: ctx.revenue, shares: ctx.shares, years: 5, growth: g, margin: b.margin, exitPE: pe, shareChange: M.shareChange, required: M.required });
+            var r = out ? out.annualReturn : null;
+            var tone = r === null ? "" : r >= M.required ? "s-good" : r >= 0 ? "s-mid" : "s-bad";
+            return '<td class="' + tone + (gi === 2 && pi === 2 ? " s-base" : "") + '">' + (r === null ? "\u2014" : F.spct(r * 100, 0)) + "</td>";
+          }).join("") + "</tr>";
+        }).join("") + "</tbody>";
     }
     function hero() {
       var m = M.base.margin, pe = M.base.exitPE;
@@ -959,7 +997,49 @@
           "</div></div>" +
         (def.unprofitable ? '<p class="callout">' + IL.icon("info") + "<span><b>Not profitable yet.</b> The margin here is a target for year five, not today’s figure.</span></p>" : "");
     }
-    box.addEventListener("input", function (e) { if (e.target.classList.contains("val-in")) { read(); compute(); } });
+    if (!box.__valWired) {
+      box.__valWired = true;
+      box.addEventListener("input", function (e) { if (e.target.classList.contains("val-in")) { box.__read(); box.__compute(); } });
+    }
+    box.__read = read; box.__compute = compute;
+    IL.$("#val-yr-seg").addEventListener("click", function (e) {
+      var b = e.target.closest("[data-yr]"); if (!b) return;
+      yrCase = b.getAttribute("data-yr");
+      IL.$$("#val-yr-seg [data-yr]").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+      years();
+    });
+    var versions = [];
+    function loadVersions(selectId) {
+      IL.api("/api/saves", { fresh: true }).then(function (res) {
+        versions = (res.ok && Array.isArray(res.data) ? res.data : []).filter(function (x) { return x.type === "implied" && x.ticker === S.t && x.data && x.data.m; });
+        var sel = IL.$("#val-versions"); if (!sel) return;
+        sel.innerHTML = '<option value="">' + (versions.length ? "Saved versions (" + versions.length + ")" : "No saved versions") + "</option>" +
+          versions.map(function (v) { return '<option value="' + v.id + '">' + h(v.label || "Version") + " \u00b7 " + h(F.date(v.created_at, { year: undefined })) + "</option>"; }).join("");
+        if (selectId) sel.value = String(selectId);
+        var want = new URLSearchParams(location.search).get("save");
+        if (want && !box.__loadedSave) { box.__loadedSave = true; var hit = versions.filter(function (v) { return String(v.id) === want; })[0]; if (hit) useVersion(hit); }
+      });
+    }
+    function useVersion(v) {
+      M = JSON.parse(JSON.stringify(v.data.m));
+      renderValuation(box, ctx, M, def, key);
+      IL.toast("Loaded \u201c" + (v.label || "version") + "\u201d");
+    }
+    IL.$("#val-versions").addEventListener("change", function (e) {
+      var v = versions.filter(function (x) { return String(x.id) === e.target.value; })[0];
+      if (v) useVersion(v);
+    });
+    IL.$("#val-save").addEventListener("click", function () {
+      IL.dialog('<h2>Save this version</h2><label class="field">Name<input class="input" id="vs-label" maxlength="80" value="' + h("Base " + F.spct(M.base.growth * 100, 0) + " growth, " + M.base.exitPE + "\u00d7 exit") + '"></label><p class="note" id="vs-err"></p><div class="row" style="justify-content:flex-end"><button class="btn ghost" type="button" data-close>Cancel</button><button class="btn primary" type="button" id="vs-go">Save</button></div>', function (d) {
+        d.querySelector("#vs-go").addEventListener("click", function () {
+          IL.api("/api/saves", { method: "POST", body: { ticker: S.t, type: "implied", label: d.querySelector("#vs-label").value, data: { v: 1, m: M, price: ctx.price } } }).then(function (res) {
+            if (!res.ok) { d.querySelector("#vs-err").textContent = (res.data && res.data.error) || "Could not save."; return; }
+            d.close(); IL.toast("Saved. Find it on your Watchlist page too."); loadVersions(res.data.id);
+          });
+        });
+      });
+    });
+    loadVersions();
     IL.$("#val-reset").addEventListener("click", function () {
       try { localStorage.removeItem(key); } catch (_) {}
       M = JSON.parse(JSON.stringify(def));

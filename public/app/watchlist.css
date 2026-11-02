@@ -1,0 +1,22 @@
+/* Watchlist. Built only from lens.css tokens. */
+.wl-add{flex:0 1 300px;min-width:220px}
+.wl-tbl td a{color:var(--text)}
+.wl-tbl td a:hover{color:var(--gold-text);text-decoration:none}
+.wl-name{font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis}
+.wl-bell{display:inline-flex;align-items:center;gap:2px;color:var(--gold-text)}
+.wl-bell svg{display:inline}
+.wl-tbl .wl-in{width:96px;height:32px;text-align:right;font-size:13px}
+.wl-tbl .wl-note-td{min-width:220px;text-align:left}
+.wl-tbl .wl-note{height:32px;font-size:13px;min-width:200px}
+.wl-gr{white-space:nowrap}
+.wl-gr span{display:inline-block;min-width:24px;text-align:center;font:700 12.5px var(--num)}
+.wl-act{white-space:nowrap}
+.wl-act .btn{width:32px;padding:0}
+#sv-box .mini li .btn{flex:none}
+@media (max-width:760px){.wl-gr{display:none}}
+@media (min-width:761px){.dh>.row.wrap{flex-wrap:nowrap}}
+#al-box td a{color:var(--text)}
+.wl-digest{flex-direction:row;align-items:flex-start;gap:12px;cursor:pointer;padding:14px 18px}
+.wl-digest[hidden]{display:none}
+.wl-digest input{accent-color:var(--gold);width:18px;height:18px;margin-top:2px;flex:none}
+.wl-digest>span{display:flex;flex-direction:column;gap:2px;font-size:13.5px}

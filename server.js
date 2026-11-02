@@ -286,6 +286,26 @@ app.get(["/research", "/research/:ticker", "/research/:ticker/:tab"], (req, res)
 });
 
 app.get("/compare", (_req, res) => sendPage(res, path.join(__dirname, "public", "app", "compare.html")));
+/* One-click unsubscribe from the weekly grade email. GET from the link in
+   the email; POST from mail providers' one-click button (RFC 8058). */
+const weeklyDigest = require("./lib/weekly-digest");
+async function weeklyUnsubscribe(req, res) {
+  const u = Number(req.query.u), t = String(req.query.t || "");
+  const ok = Number.isInteger(u) && u > 0 && weeklyDigest.verifyUnsubscribe(u, t);
+  if (ok) { try { await weeklyDigest.setOptOut(u, true); } catch (_) { return res.status(503).type("text").send("Please try again in a minute."); } }
+  if (req.method === "POST") return res.status(ok ? 200 : 400).json({ ok });
+  res.setHeader("Cache-Control", "no-store");
+  return res.status(ok ? 200 : 400).type("html").send(`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Unsubscribed · ImpliedLens</title>
+<body style="margin:0;background:#0E0F11;color:#EDEEF0;font:16px/1.5 Arial,Helvetica,sans-serif;display:grid;place-items:center;min-height:100vh"><main style="max-width:440px;padding:24px;text-align:center">
+<h1 style="font-size:22px">${ok ? "You’re unsubscribed" : "That link did not work"}</h1>
+<p style="color:#A3A9B1">${ok ? "You won’t get the weekly grade email any more. You can turn it back on from your Watchlist page." : "The link may be incomplete. You can turn the weekly email off from your Watchlist page."}</p>
+<p><a href="/watchlist" style="color:#E5B65A;font-weight:bold">Go to your watchlist</a></p></main></body>`);
+}
+app.get("/unsubscribe/weekly", weeklyUnsubscribe);
+app.post("/unsubscribe/weekly", weeklyUnsubscribe);
+
+app.get("/screener", (_req, res) => sendPage(res, path.join(__dirname, "public", "app", "screener.html")));
+app.get("/watchlist", (_req, res) => sendPage(res, path.join(__dirname, "public", "app", "watchlist.html")));
 
 /* Old single-page-app links to a stock (?view=tool&section=analyze&symbol=X
    and friends) now open the rebuilt stock page on the matching tab. Sections
@@ -300,6 +320,8 @@ function legacyStockRedirect(query) {
   if (query.view !== "tool") return null;
   if (!query.section && !query.symbol && !query.ticker) return null;
   const section = String(query.section || "analyze").toLowerCase();
+  if (section === "screener") return "/screener";
+  if (section === "workspace" && String(query.workspace_tab || "") === "watchlist") return "/watchlist";
   if (section === "compare") {
     const list = String(query.symbol || query.ticker || query.t || "").toUpperCase().split(",").filter(t => /^[A-Z0-9.^-]{1,15}$/.test(t)).slice(0, 4);
     return "/compare" + (list.length ? "?t=" + list.join(",") : "");
@@ -693,6 +715,10 @@ if (require.main === module) {
 
        Landing facts are hydrated on request instead, behind a cap, and only
        for pages we publish. See lib/stock-landing-facts.js. */
+    // Weekly grade email: checks hourly, sends only on Saturday morning ET,
+    // once per member per week.
+    setTimeout(() => weeklyDigest.runWeeklyDigest(), 3 * 60 * 1000);
+    setInterval(() => weeklyDigest.runWeeklyDigest(), 60 * 60 * 1000);
     setTimeout(runReviewDigests, 90 * 1000);               // shortly after boot
     setInterval(runReviewDigests, 6 * 60 * 60 * 1000);     // then every 6 hours
   }).catch(err => { console.error("DB init failed:", err); process.exit(1); });

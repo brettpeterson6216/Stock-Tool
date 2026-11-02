@@ -1339,6 +1339,8 @@ test("old app links to a stock open the rebuilt page on the matching tab", async
     ["/?view=tool&section=calls&symbol=AAPL", "/research/AAPL/earnings"],
     ["/?view=tool&section=institutional&symbol=AAPL", "/research/AAPL/ownership"],
     ["/?view=tool&section=analyze", "/research"],
+    ["/?view=tool&section=screener", "/screener"],
+    ["/?view=tool&section=workspace&workspace_tab=watchlist", "/watchlist"],
   ];
   for (const [from, to] of cases) {
     const res = await req(from);
@@ -1346,7 +1348,7 @@ test("old app links to a stock open the rebuilt page on the matching tab", async
     assert.equal(res.headers.get("location"), to, from);
   }
   // Tools that have not been rebuilt stay in the original app.
-  for (const keep of ["/?view=tool&section=projection&symbol=AAPL", "/?view=tool&section=workspace", "/?view=tool&section=screener"]) {
+  for (const keep of ["/?view=tool&section=projection&symbol=AAPL", "/?view=tool&section=workspace"]) {
     const res = await req(keep);
     assert.equal(res.status, 200, keep);
   }
@@ -1379,4 +1381,27 @@ test("the watchlist price snapshot answers without counting lookups", async () =
   const body = await res.json();
   assert.deepEqual(body.quotes.map(q => q.symbol), ["AAPL", "MSFT"]);
   assert.equal((await req("/api/market/snapshot")).status, 400);
+});
+
+test("the weekly email can be switched off from the email and back on from the Watchlist page", async () => {
+  const { cookie, csrfToken } = await makeSession("weekly_member", "weekly_member@test.com");
+  const me = await (await req("/api/auth/me", { headers: { cookie } })).json();
+  const id = me.user.id;
+  const W = require("../lib/weekly-digest");
+  assert.equal((await req(`/unsubscribe/weekly?u=${id}&t=wrong`)).status, 400);
+  assert.deepEqual(await (await req("/api/workspace/digest", { headers: { cookie } })).json(), { on: true });
+  const off = await req(`/unsubscribe/weekly?u=${id}&t=${W.unsubscribeToken(id)}`);
+  assert.equal(off.status, 200);
+  assert.match(await off.text(), /unsubscribed/);
+  assert.deepEqual(await (await req("/api/workspace/digest", { headers: { cookie } })).json(), { on: false });
+  const on = await req("/api/workspace/digest", { method: "PUT", headers: { cookie, "X-CSRF-Token": csrfToken }, body: { on: true } });
+  assert.deepEqual(await on.json(), { on: true });
+});
+
+test("the rebuilt Screener and Watchlist pages are served", async () => {
+  for (const [p, js] of [["/screener", "screener"], ["/watchlist", "watchlist"]]) {
+    const res = await req(p);
+    assert.equal(res.status, 200, p);
+    assert.match(await res.text(), new RegExp(`src="/app/${js}\\.js\\?v=`), p);
+  }
 });

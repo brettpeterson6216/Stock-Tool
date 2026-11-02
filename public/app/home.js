@@ -22,9 +22,9 @@
     var main = document.getElementById("main");
     main.innerHTML =
       '<div class="dh"><div><h1 class="dh-t">' + h(greet(user && user.username)) + '</h1><p class="muted">Here is what changed on your stocks.</p></div>' +
-        '<div class="row wrap"><a class="btn" href="/compare">Compare stocks</a><a class="btn primary" href="/?view=tool&section=screener">Find new ideas</a></div></div>' +
+        '<div class="row wrap"><a class="btn" href="/compare">Compare stocks</a><a class="btn primary" href="/screener">Find new ideas</a></div></div>' +
       '<div class="dash">' +
-        '<section class="card flush dash-wl" aria-label="Your watchlist"><div class="card-h"><h2 class="card-t">Your watchlist</h2><a class="link" href="/?view=tool&section=workspace&workspace_tab=watchlist">Manage →</a></div><div id="d-wl"><div style="padding:20px">' + sk(140) + "</div></div></section>" +
+        '<section class="card flush dash-wl" aria-label="Your watchlist"><div class="card-h"><h2 class="card-t">Your watchlist</h2><a class="link" href="/watchlist">Manage →</a></div><div id="d-wl"><div style="padding:20px">' + sk(140) + "</div></div></section>" +
         '<section class="card dash-since" aria-label="Since your last visit"><h2 class="card-t">Since your last visit</h2><div id="d-since">' + sk(90) + "</div></section>" +
       "</div>" +
       '<div class="grid-3">' +

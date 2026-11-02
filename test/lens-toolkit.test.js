@@ -54,7 +54,7 @@ test("the third tab is the Screener everywhere, and the LensToolkit page keeps i
   for (const p of pages) {
     const html = read(p);
     if (!html.includes("nav-lensscore-link")) continue;
-    assert.match(html, /href="\/\?view=tool&amp;section=screener" id="nav-lensscore-link"[^>]*>Screener</,
+    assert.match(html, /href="\/screener" id="nav-lensscore-link"[^>]*>Screener</,
       `${p} does not label the third tab Screener`);
   }
   // The page renames the surface, not the score it computes.

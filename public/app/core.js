@@ -193,8 +193,8 @@
   var NAV = [
     { key: "home", label: "Home", href: "/", icon: "home" },
     { key: "research", label: "Research", href: "/research", icon: "research" },
-    { key: "screener", label: "Screener", href: "/?view=tool&section=screener", icon: "screener" },
-    { key: "watchlist", label: "Watchlist", href: "/?view=tool&section=workspace&workspace_tab=watchlist", icon: "star" },
+    { key: "screener", label: "Screener", href: "/screener", icon: "screener" },
+    { key: "watchlist", label: "Watchlist", href: "/watchlist", icon: "star" },
     { key: "learn", label: "Learn", href: "/learn", icon: "learn" },
     { key: "pricing", label: "Pricing", href: "/pricing", icon: "arrow" },
   ];
@@ -264,7 +264,7 @@
         '<button class="il-avatar" id="il-avatar" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Account">' + IL.h(initial) + "</button>" +
         '<div class="il-menu" id="il-menu" role="menu" hidden>' +
           '<div class="il-menu-head"><strong>' + IL.h(user.username || "Your account") + "</strong>" + (user.plan === "pro" ? "Pro member" : user.plan === "trial" ? "Pro trial" : "Free plan") + "</div>" +
-          '<a role="menuitem" href="/?view=tool&section=workspace">' + IL.icon("folder") + "Saved work</a>" +
+          '<a role="menuitem" href="/watchlist">' + IL.icon("folder") + "Watchlist and saved work</a>" +
           '<a role="menuitem" href="/?view=tool&section=projection">' + IL.icon("research") + "Valuation Lab</a>" +
           '<a role="menuitem" href="/?account=1">' + IL.icon("user") + "Account settings</a>" +
           '<button role="menuitem" type="button" id="il-billing">' + IL.icon("doc") + (IL.isPro(user) ? "Subscription and billing" : "See Pro plans") + "</button>" +
