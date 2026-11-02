@@ -23,17 +23,24 @@
     if (!n || /@/.test(n)) return "";
     return n.charAt(0).toUpperCase() + n.slice(1);
   }
-  /* A tool: what it is and what it does. No art: plates belong behind page
-     tops only. */
-  function tile(href, title, sub) {
-    return '<a class="card lift tool" href="' + href + '"><span class="card-t">' + title + '</span><span class="card-sub">' + sub + '</span><span class="tool-go">Open \u2192</span></a>';
+  /* A tool card with its engraved plate: the four ways into the product,
+     first thing under the greeting. */
+  function tile(href, plate, pos, title, sub) {
+    return '<a class="card lift tile" href="' + href + '"><span class="tile-art" style="--plate:url(' + IL.plateSrc(plate) + ');--plate-pos:' + pos + '" aria-hidden="true"></span>' +
+      '<span class="tile-body"><span class="card-t">' + title + ' <span class="tile-go">' + IL.icon("arrow", 14) + '</span></span><span class="card-sub">' + sub + "</span></span></a>";
   }
 
   function render(user) {
     var main = document.getElementById("main"), name = displayName(user);
     main.innerHTML =
       '<div class="dh hero-band card prime" id="dh"><div class="stack" style="gap:10px"><h1 class="display">' + h(greet()) + (name ? ', <em>' + h(name) + '.</em>' : ".") + '</h1><p class="muted" id="dh-sum">Here is what changed on your stocks.</p></div>' +
-        '<div class="row wrap"><a class="btn" href="/compare">Compare stocks</a><a class="btn primary" href="/screener">Find new ideas</a></div></div>' +
+        '</div>' +
+      '<nav class="grid-3 rl-tools d-tools" aria-label="Tools">' +
+        tile("/research", "globe", "62% 40%", "Research a stock", "A plain-English report card, the financials and what the price assumes.") +
+        tile("/screener", "ledger", "60% 40%", "Screener", "Filter about 290 US stocks by grade, value, size and momentum.") +
+        tile("/compare", "atlas", "52% 70%", "Compare", "Up to four stocks side by side, with the best in each row marked.") +
+        tile("/lens-score", "engraved", "70% 70%", "LensToolkit", "Trend, timing, buy zones and alerts for any stock.") +
+      "</nav>" +
       '<div class="dcols">' +
       '<div class="dcol dcol-main">' +
         '<section class="card flush dash-wl" id="w-wl" data-w="expand,csv" data-w-title="Your watchlist" aria-label="Your watchlist"><div class="card-h"><h2 class="card-t">Your watchlist</h2><a class="link" href="/watchlist">Manage →</a></div><div id="d-wl"><div style="padding:20px">' + sk(140) + "</div></div></section>" +
@@ -48,13 +55,6 @@
         '<section class="card flush" id="w-mv" data-w="expand" data-w-title="Biggest movers"><div class="card-h"><h2 class="card-t">Biggest movers</h2><div class="seg" role="group" aria-label="Movers"><button type="button" data-mv="gainers" aria-pressed="true">Up</button><button type="button" data-mv="losers" aria-pressed="false">Down</button></div></div><div id="d-mv"><div style="padding:20px">' + sk(120) + "</div></div></section>" +
         '<section class="card flush dlearn" id="d-learn"><div class="d-pad">' + sk(90) + "</div></section>" +
       "</div>" +
-      "</div>" +
-      '<div class="section-h"><h2 class="section-t">Tools</h2><span class="card-sub">Everything you need to research a company</span></div>' +
-      '<div class="d-tools">' +
-        tile("/research", "Research a stock", "A plain-English report card, the financials and what the price assumes.") +
-        tile("/screener", "Screener", "Filter about 290 US stocks by grade, value, size and momentum.") +
-        tile("/compare", "Compare", "Up to four stocks side by side, with the best in each row marked.") +
-        tile("/lens-score", "LensToolkit", "Trend, timing, buy zones and alerts for any stock.") +
       "</div>";
     IL.plate(IL.$("#dh"), "engraved", "right 30%");
     loadWatchlist();

@@ -152,7 +152,8 @@ test("GET / serves the homepage with a successful status", async () => {
   // stylesheet comes first so its cascade layer is declared first.
   assert.equal((html.match(/rel="stylesheet"/g) || []).length, 2);
   assert.ok(html.indexOf('href="/app/shell.css') > -1 && html.indexOf('href="/app/shell.css') < html.indexOf('href="/bundles/'));
-  assert.match(html, /<il-top id="il-top"><\/il-top>/);
+  assert.match(html, /<il-top id="il-top"><template shadowrootmode="open">/);
+  assert.match(html, /data-k="home" aria-current="page">Home<\/a>/);
   assert.match(appSource, /__initialWorkspaceTab/);
   assert.match(res.headers.get("cache-control"), /no-cache/);
 });

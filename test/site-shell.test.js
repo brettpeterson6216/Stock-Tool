@@ -13,8 +13,8 @@ test("older pages get the shared bar, first stylesheet, and their own bar retire
   const out = injectShell(legacy);
   assert.match(out, /<html lang="en" class="il-shell-legacy">/);
   assert.ok(out.indexOf("/app/shell.css") < out.indexOf("/a.css"), "shell.css must be the first stylesheet");
-  assert.match(out, /<body>\n<il-top id="il-top"><\/il-top>/);
-  assert.match(out, /<il-tabbar id="il-bottom"><\/il-tabbar>\n<\/body>/);
+  assert.match(out, /<body>\n<il-top id="il-top"><template shadowrootmode="open"><style>/);
+  assert.match(out, /<il-tabbar id="il-bottom"><template shadowrootmode="open">[\s\S]*<\/il-tabbar>\n<\/body>/);
   assert.match(out, /<script defer src="\/app\/shell\.js" data-auto data-il-shell><\/script>/);
   for (const id of ["main-nav", "mobile-bottom-nav", "mobile-more-menu"]) {
     const tag = out.match(new RegExp('<[a-z]+[^>]*id="' + id + '"[^>]*>'))[0];
@@ -25,9 +25,21 @@ test("older pages get the shared bar, first stylesheet, and their own bar retire
   assert.equal(injectShell(out), out, "injecting twice changes nothing");
 });
 
+test("the bar is in the HTML, current tab marked, before any script runs", () => {
+  const out = injectShell(legacy, "learn");
+  assert.match(out, /data-k="learn" aria-current="page">Learn<\/a>/);
+  assert.equal((out.match(/aria-current="page">/g) || []).length, 2, "one tab in the top bar, one in the phone bar");
+  // Every account state is in the markup; the page's CSS picks one.
+  for (const part of ["guest", "free", "pro", "member", "upgrade", "sun", "moon"]) assert.match(out, new RegExp('part="' + part + '"'), part);
+  const app = '<html><head><meta name="il-app" content="1"></head><body><il-top id="il-top"></il-top><main></main><il-tabbar id="il-bottom"></il-tabbar></body></html>';
+  const drawn = injectShell(app, "screener");
+  assert.match(drawn, /data-k="screener" aria-current="page">/);
+  assert.doesNotMatch(drawn, /il-shell-legacy/);
+});
+
 test("rebuilt app pages and pages without a bar are left alone", () => {
   const app = '<html><head><meta name="il-app" content="1"></head><body><nav id="main-nav"></nav></body></html>';
-  assert.equal(injectShell(app), app);
+  assert.equal(injectShell(app), app, "an app page is never treated as an older page");
   const bare = "<html><head></head><body>hi</body></html>";
   assert.equal(injectShell(bare), bare);
 });

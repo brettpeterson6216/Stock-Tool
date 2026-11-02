@@ -52,6 +52,24 @@
     document.documentElement.classList.add("il-hint-unknown");
   }
 
+  /* ── account tier for the site bar, before first paint ───────────────────
+     shell.js remembers the last sign-in answer under "il-shell-auth". The bar
+     and every sign-up / upgrade prompt key off these classes (shell.css), so
+     a member never sees "Sign up" or a Pricing tab flash on the way in. */
+  try {
+    var shellTier = localStorage.getItem("il-shell-auth");
+    document.documentElement.classList.add(
+      shellTier === "guest" || shellTier === "free" || shellTier === "pro" ? "il-" + shellTier : "il-auth-pending"
+    );
+    /* The account button's letter, so it is not an empty circle until the
+       sign-in check returns. shell.js stores it; the bar reads it through
+       this inherited custom property. */
+    var initial = localStorage.getItem("il-shell-initial");
+    if (initial && /^[A-Z0-9]$/.test(initial)) document.documentElement.style.setProperty("--il-initial", '"' + initial + '"');
+  } catch (e) {
+    document.documentElement.classList.add("il-auth-pending");
+  }
+
   /* ── which view and section, resolved before first paint ─────────────────
      Measured on a cold load of /?view=tool&section=screener:
 

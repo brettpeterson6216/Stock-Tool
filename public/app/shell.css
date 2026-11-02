@@ -15,16 +15,47 @@
 @font-face{font-family:'Inter';font-style:normal;font-weight:100 900;font-display:swap;src:url(/vendor/fonts/inter-files/inter-latin-wght-normal.woff2) format('woff2-variations'),url(/vendor/fonts/inter-files/inter-latin-wght-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 @font-face{font-family:'Instrument Serif';font-style:italic;font-weight:400;font-display:swap;src:url(/vendor/fonts/instrument-serif-files/instrument-serif-latin-400-italic.woff2) format('woff2')}
 
+/* Moving between pages: the browser cross-fades the content and keeps the
+   bar where it is, instead of blanking the whole window. Pages are separate
+   documents; this makes them feel like one place. */
+@view-transition{navigation:auto}
+@media (prefers-reduced-motion:reduce){@view-transition{navigation:none}}
+
 @layer il-shell{
+/* ── The bar's colours ─────────────────────────────────────────────────────
+   Set here on the elements, not inside the shadow root, so the page's theme
+   (set on <html> before the first paint) is right in the very first frame.
+   Custom properties inherit into the shadow root. */
+il-top,il-tabbar{
+  --sh-ground:#F7F5EF;--sh-surface:#FFFFFF;--sh-raised:#F0EEE9;--sh-line:#E4E0D7;--sh-line2:#D6D1C6;
+  --sh-text:#16171A;--sh-text2:#4E535B;--sh-text3:#7A7F87;--sh-gold:#C9952F;--sh-gold-text:#8E6414;--sh-gold-soft:rgba(201,149,47,.12);--sh-gold-ink:#17130A;
+  --sh-shadow:0 12px 32px -12px rgba(30,24,10,.25)}
+html[data-theme="dark"] il-top,html[data-theme="dark"] il-tabbar{
+  --sh-ground:#0E0F11;--sh-surface:#15171A;--sh-raised:#1F2328;--sh-line:#22262B;--sh-line2:#33383E;
+  --sh-text:#EDEEF0;--sh-text2:#A3A9B1;--sh-text3:#7D848D;--sh-gold:#E5B65A;--sh-gold-text:#E5B65A;--sh-gold-soft:rgba(229,182,90,.12);--sh-gold-ink:#17130A;
+  --sh-shadow:0 16px 40px -16px rgba(0,0,0,.8)}
+
+/* ── What the bar shows for each account, from the first frame ─────────────
+   The bar's markup carries every state; these hide what does not apply.
+   They only ever hide (display:none), so the bar's own layout rules,
+   including its phone layout, stay in charge of everything shown. */
+html:not(.il-guest):not(.il-auth-pending) il-top::part(guest),
+html:not(.il-free) il-top::part(free),
+html:not(.il-pro) il-top::part(pro),
+html:not(.il-free):not(.il-pro) il-top::part(member),
+html.il-pro il-top::part(upgrade),
+html[data-theme="dark"] il-top::part(moon),
+html:not([data-theme="dark"]) il-top::part(sun){display:none}
+
 /* ── Where the bars sit ────────────────────────────────────────────────── */
 /* !important throughout: older pages carry broad rules (body > *, nav,
    header) that would otherwise pad or move the bars. */
 il-top,il-tabbar{margin:0 !important;padding:0 !important;border:0 !important;width:auto !important;height:auto !important;max-width:none !important;transform:none !important;float:none !important}
-il-top{display:block !important;position:sticky !important;top:0 !important;z-index:1000 !important;min-height:calc(61px + env(safe-area-inset-top,0px)) !important}
+il-top{display:block !important;position:sticky !important;top:0 !important;z-index:1000 !important;min-height:calc(61px + env(safe-area-inset-top,0px)) !important;view-transition-name:il-top}
 html.il-shell-legacy il-top{position:fixed !important;left:0 !important;right:0 !important}
 il-tabbar{display:none !important}
 @media (max-width:760px){
-  il-tabbar{display:block !important;position:fixed !important;left:0 !important;right:0 !important;bottom:0 !important;top:auto !important;z-index:1000 !important}
+  il-tabbar{display:block !important;position:fixed !important;left:0 !important;right:0 !important;bottom:0 !important;top:auto !important;z-index:1000 !important;view-transition-name:il-tabbar}
   html.il-shell-on body{padding-bottom:calc(62px + env(safe-area-inset-bottom,0px))}
 }
 

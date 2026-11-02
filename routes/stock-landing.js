@@ -661,7 +661,7 @@ router.get("/stock/:ticker", async (req, res) => {
   res.setHeader("Content-Type", "text/html; charset=utf-8");
   // Cache for 5 minutes on CDN, 60s stale-while-revalidate
   res.setHeader("Cache-Control", "public, max-age=300, stale-while-revalidate=60");
-  res.send(stampHtml(html));
+  res.send(stampHtml(html, "research"));
 });
 
 module.exports = router;

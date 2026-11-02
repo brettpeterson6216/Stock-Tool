@@ -410,7 +410,7 @@ app.get(["/lens-score", "/lens-score/"], async (_req, res) => {
     // asset stamp applied by hand or its stylesheets keep a week-old cache
     // through every deploy like the rest of the site used to.
     res.setHeader("Cache-Control", "no-cache, must-revalidate");
-    res.type("html").send(stampHtml(html));
+    res.type("html").send(stampHtml(html, "research"));
   } catch (error) {
     console.error("[lens-score-page]", error.message);
     res.status(500).send("LensScore is temporarily unavailable.");

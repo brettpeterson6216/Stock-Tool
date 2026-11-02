@@ -82,11 +82,13 @@
 .dcol .card>[id^="d-"]{flex:1;display:flex;flex-direction:column}
 .dcol .card>[id^="d-"]>.tbl-wrap{flex:none}
 
-/* Tools: four plain cards, the same height, a single gold call to open. */
-.d-tools{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s5)}
-@media (max-width:1080px){.d-tools{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (max-width:560px){.d-tools{grid-template-columns:1fr;gap:var(--s3)}}
-.tool{display:flex;flex-direction:column;gap:6px;padding:18px 20px;color:var(--text)}
-.tool:hover{text-decoration:none}
-.tool .card-sub{flex:1}
-.tool-go{margin-top:8px;font-size:13px;font-weight:600;color:var(--gold-text)}
+/* Tools: the four plate cards, right under the greeting. Shorter plates
+   than elsewhere so the watchlist still starts near the top of the screen. */
+.d-tools .tile-art{height:84px}
+.d-tools .card-sub{font-size:13px}
+@media (max-width:760px){
+  .rl-tools.d-tools{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s3)}
+  .d-tools .tile-art{height:58px}
+  .d-tools .tile-body{padding:4px 14px 14px}
+  .d-tools .card-sub{display:none}
+}
