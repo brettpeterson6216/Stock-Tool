@@ -433,7 +433,7 @@
      implied-vs-delivered growth on the left, the LensScore and grades on the
      right. No panels. Two plates; the sharer picks, and the pick is
      remembered. */
-  var PLATES = { engraved: { src: "/share/engraved-v1.webp", label: "Engraved" }, atlas: { src: "/share/atlas-v1.webp", label: "Atlas" } };
+  var PLATES = { engraved: { src: "/share/engraved-v1.webp", label: "Engraved" }, atlas: { src: "/share/atlas-v1.webp", label: "Atlas" }, globe: { src: "/share/globe-v1.webp", label: "Globe" }, ledger: { src: "/share/ledger-v1.webp", label: "Ledger" } };
   var plateCache = {};
   function loadPlate(style) {
     if (!plateCache[style]) plateCache[style] = new Promise(function (res) { var im = new Image(); im.onload = function () { res(im); }; im.onerror = function () { res(null); }; im.src = PLATES[style].src; });
