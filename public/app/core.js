@@ -292,12 +292,14 @@
     top.parentNode.insertBefore(bar, narrow ? top.nextSibling : top);
     IL.marketSummary().then(function (d) {
       if (!d) { bar.querySelector(".il-tape-run").innerHTML = '<span class="il-tape-none">Market data is updating.</span>'; return; }
-      var items = (d.indexes || []).map(function (x) { return { n: String(x.name || x.symbol).replace(/\s*\(.*\)$/, ""), p: x.price, c: x.changePct }; })
+      /* With the licensed feed the "indexes" are the funds that track them
+         (SPY, QQQ, DIA), so say so: an S&P 500 at 684 would look wrong. */
+      var items = (d.indexes || []).map(function (x) { var etf = (String(x.name || "").match(/\((\w+)\)$/) || [])[1]; return { n: String(x.name || x.symbol).replace(/\s*\(.*\)$/, ""), tag: etf, p: x.price, c: x.changePct }; })
         .concat((d.sectors || []).map(function (x) { return { n: x.name, c: x.changePct }; }));
       if (d.breadth !== null && d.breadth !== undefined) items.push({ n: "Sectors up", txt: (d.advancing || 0) + " of " + (d.measured || 0) });
       var one = items.map(function (it) {
         var up = it.c >= 0, chg = isFinite(it.c) ? '<span class="' + (up ? "up" : "down") + '">' + tri(up) + " " + IL.fmt.pct(Math.abs(it.c), 2) + "</span>" : "";
-        return '<span class="il-tape-it"><span class="il-tape-n">' + IL.h(it.n) + "</span>" + (it.p ? '<span class="num">' + IL.fmt.num(it.p, 2) + "</span>" : "") + (it.txt ? '<span class="num">' + IL.h(it.txt) + "</span>" : "") + chg + "</span>";
+        return '<span class="il-tape-it"><span class="il-tape-n">' + IL.h(it.n) + "</span>" + (it.tag ? '<span class="il-tape-tag">' + IL.h(it.tag) + "</span>" : "") + (it.p ? '<span class="num">' + IL.fmt.num(it.p, 2) + "</span>" : "") + (it.txt ? '<span class="num">' + IL.h(it.txt) + "</span>" : "") + chg + "</span>";
       }).join('<span class="il-tape-sep" aria-hidden="true">•</span>');
       var track = bar.querySelector(".il-tape-track");
       track.innerHTML = '<span class="il-tape-set">' + one + '</span><span class="il-tape-set" aria-hidden="true">' + one + "</span>";

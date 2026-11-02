@@ -443,6 +443,7 @@ body.il-app{
 @keyframes il-tape{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 .il-tape-it{display:inline-flex;align-items:center;gap:7px;padding:0 4px;white-space:nowrap}
 .il-tape-n{color:var(--text2)}
+.il-tape-tag{font:600 10.5px var(--num);color:var(--text3);border:1px solid var(--line2);border-radius:4px;padding:0 4px;letter-spacing:.03em}
 .il-tape-it .num{color:var(--text);font-weight:600}
 .il-tape-it .up,.il-tape-it .down{display:inline-flex;align-items:center;gap:3px;font:600 12px var(--num)}
 .il-tape-sep{color:var(--gold);opacity:.5;padding:0 14px;font-size:8px}

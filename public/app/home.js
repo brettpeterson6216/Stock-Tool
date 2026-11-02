@@ -33,14 +33,20 @@
     main.innerHTML =
       '<div class="dh hero-band card prime" id="dh"><div class="stack" style="gap:10px">' + IL.eyebrow("Your dashboard", "home") + '<h1 class="display">' + h(greet()) + (name ? ', <em>' + h(name) + '.</em>' : ".") + '</h1><p class="muted" id="dh-sum">Here is what changed on your stocks.</p></div>' +
         '<div class="row wrap"><a class="btn" href="/compare">Compare stocks</a><a class="btn primary" href="/screener">Find new ideas</a></div></div>' +
-      '<div class="dgrid">' +
-        '<section class="card flush prime dash-wl d8" id="w-wl" data-w="expand,csv" data-w-title="Your watchlist" aria-label="Your watchlist"><div class="card-h"><h2 class="card-t">' + IL.icon("star", 15) + ' Your watchlist</h2><a class="link" href="/watchlist">Manage →</a></div><div id="d-wl"><div style="padding:20px">' + sk(140) + "</div></div></section>" +
-        '<section class="card flush d4 dmkt" id="w-mkt" data-w="expand" data-w-title="Market today" aria-label="Market today"><div class="card-h"><h2 class="card-t">' + IL.icon("pulse", 15) + ' Market today</h2><span class="card-sub" id="d-mkt-st"></span></div><div id="d-mkt"><div style="padding:20px">' + sk(150) + "</div></div></section>" +
-        '<section class="card flush d4" id="w-since" data-w="expand" data-w-title="Since your last visit" aria-label="Since your last visit"><div class="card-h"><h2 class="card-t">' + IL.icon("bell", 15) + ' Since your last visit</h2></div><div id="d-since" class="d-pad">' + sk(90) + "</div></section>" +
-        '<section class="card flush d4" id="w-mv" data-w="expand" data-w-title="Biggest movers"><div class="card-h"><h2 class="card-t">' + IL.icon("research", 15) + ' Biggest movers</h2><div class="seg" role="group" aria-label="Movers"><button type="button" data-mv="gainers" aria-pressed="true">Up</button><button type="button" data-mv="losers" aria-pressed="false">Down</button></div></div><div id="d-mv"><div style="padding:20px">' + sk(120) + "</div></div></section>" +
-        '<section class="card flush d4" id="w-chg" data-w="expand" data-w-title="Grade changes this week"><div class="card-h"><h2 class="card-t">' + IL.icon("spark", 15) + ' Grade changes this week</h2><a class="link" href="/research">More →</a></div><div id="d-chg"><div style="padding:20px">' + sk(120) + "</div></div></section>" +
-        '<section class="card flush d8" id="w-top" data-w="expand,csv" data-w-title="Top-rated by sector"><div class="card-h"><h2 class="card-t">' + IL.icon("screener", 15) + ' Top-rated in each sector</h2><a class="link" href="/research">All sectors →</a></div><div id="d-top"><div style="padding:20px">' + sk(160) + "</div></div></section>" +
-        '<section class="card flush d4 dlearn" id="d-learn"><span class="tile-art" style="--plate:url(' + IL.plateSrc("dial") + ');--plate-pos:72% 45%" aria-hidden="true"></span><div class="d-pad">' + sk(90) + "</div></section>" +
+      '<div class="dcols">' +
+      '<div class="dcol dcol-main">' +
+        '<section class="card flush prime dash-wl" id="w-wl" data-w="expand,csv" data-w-title="Your watchlist" aria-label="Your watchlist"><div class="card-h"><h2 class="card-t">' + IL.icon("star", 15) + ' Your watchlist</h2><a class="link" href="/watchlist">Manage →</a></div><div id="d-wl"><div style="padding:20px">' + sk(140) + "</div></div></section>" +
+        '<div class="dpair">' +
+        '<section class="card flush" id="w-since" data-w="expand" data-w-title="Since your last visit" aria-label="Since your last visit"><div class="card-h"><h2 class="card-t">' + IL.icon("bell", 15) + ' Since your last visit</h2></div><div id="d-since" class="d-pad">' + sk(90) + "</div></section>" +
+        '<section class="card flush" id="w-chg" data-w="expand" data-w-title="Grade changes this week"><div class="card-h"><h2 class="card-t">' + IL.icon("spark", 15) + ' Grade changes this week</h2><a class="link" href="/research">More →</a></div><div id="d-chg"><div style="padding:20px">' + sk(120) + "</div></div></section>" +
+        "</div>" +
+        '<section class="card flush" id="w-top" data-w="expand,csv" data-w-title="Top-rated by sector"><div class="card-h"><h2 class="card-t">' + IL.icon("screener", 15) + ' Top-rated in each sector</h2><a class="link" href="/research">All sectors →</a></div><div id="d-top"><div style="padding:20px">' + sk(160) + "</div></div></section>" +
+      "</div>" +
+      '<div class="dcol dcol-side">' +
+        '<section class="card flush dmkt" id="w-mkt" data-w="expand" data-w-title="Market today" aria-label="Market today"><div class="card-h"><h2 class="card-t">' + IL.icon("pulse", 15) + ' Market today</h2><span class="card-sub" id="d-mkt-st"></span></div><div id="d-mkt"><div style="padding:20px">' + sk(150) + "</div></div></section>" +
+        '<section class="card flush" id="w-mv" data-w="expand" data-w-title="Biggest movers"><div class="card-h"><h2 class="card-t">' + IL.icon("research", 15) + ' Biggest movers</h2><div class="seg" role="group" aria-label="Movers"><button type="button" data-mv="gainers" aria-pressed="true">Up</button><button type="button" data-mv="losers" aria-pressed="false">Down</button></div></div><div id="d-mv"><div style="padding:20px">' + sk(120) + "</div></div></section>" +
+        '<section class="card flush dlearn" id="d-learn"><span class="tile-art" style="--plate:url(' + IL.plateSrc("dial") + ');--plate-pos:72% 45%" aria-hidden="true"></span><div class="d-pad">' + sk(90) + "</div></section>" +
+      "</div>" +
       "</div>" +
       '<div class="section-h"><h2 class="section-t">Your <em>tools</em></h2><span class="card-sub">Everything you need to research a company</span></div>' +
       '<div class="grid-3 rl-tools">' +
@@ -93,7 +99,7 @@
       var maxAbs = Math.max.apply(null, (d.sectors || []).map(function (x) { return Math.abs(x.changePct || 0); }).concat([0.5]));
       box.innerHTML = '<ul class="d-idx">' + d.indexes.map(function (x) {
         var nm = String(x.name || x.symbol).replace(/\s*\((\w+)\)$/, ""), etf = (String(x.name || "").match(/\((\w+)\)$/) || [])[1];
-        return '<li><div><b>' + h(nm) + "</b>" + (etf ? '<span class="faint"> ' + h(etf) + "</span>" : "") + '<div class="num d-idx-p">' + F.num(x.price, 2) + '</div></div>' + spark(x.closes, x.changePct >= 0) + '<span class="num ' + F.cls(x.changePct) + '">' + F.spct(x.changePct, 2) + "</span></li>";
+        return '<li><div><b>' + h(nm) + '</b><div class="num d-idx-p">' + (etf ? h(etf) + " " : "") + F.price(x.price) + '</div></div>' + spark(x.closes, x.changePct >= 0) + '<span class="num ' + F.cls(x.changePct) + '">' + F.spct(x.changePct, 2) + "</span></li>";
       }).join("") + "</ul>" +
         '<div class="d-sec"><div class="d-sec-h"><span>Sectors today</span><span class="faint">' + (d.advancing || 0) + " of " + (d.measured || 0) + " up</span></div>" +
         (d.sectors || []).map(function (x) {
@@ -101,7 +107,7 @@
           return '<div class="d-sec-r"><span>' + h(x.name) + '</span><span class="d-sec-bar"><i class="' + (up ? "up" : "dn") + '" style="width:' + w.toFixed(1) + '%"></i></span><span class="num ' + F.cls(x.changePct) + '">' + F.spct(x.changePct, 2) + "</span></div>";
         }).join("") + "</div>";
     });
-    var st = IL.$("#d-mkt-st"); if (st) st.textContent = "1-month lines";
+    var st = IL.$("#d-mkt-st"); if (st) st.textContent = "Lines: past month";
   }
 
   function loadWatchlist() {
@@ -112,14 +118,14 @@
       if (!rows.length) {
         var picks = ["NVDA", "AAPL", "MSFT", "COST", "LLY", "JPM"];
         box.innerHTML = '<div class="dash-empty"><p><b>Start your watchlist.</b> Follow a few companies and this fills with their prices, grades and what changed.</p><div class="d-picks" id="d-picks">' +
-          picks.map(function (t) { return '<div class="d-pick"><a href="/research/' + t + '">' + IL.mono(t, "", "") + '<span class="d-li-t"><b>' + t + '</b><span class="faint" data-pn="' + t + '">&nbsp;</span></span></a><button class="btn sm" type="button" data-watch="' + t + '">' + IL.icon("plus", 14) + ' Watch</button></div>'; }).join("") + "</div>" +
+          picks.map(function (t) { return '<div class="d-pick"><a href="/research/' + t + '">' + IL.mono(t, "", "") + '<span class="d-li-t"><b>' + t + '</b><span class="faint" data-pn="' + t + '">LensScore \u2014</span></span></a><button class="btn sm" type="button" data-watch="' + t + '">' + IL.icon("plus", 14) + ' Watch</button></div>'; }).join("") + "</div>" +
           '<ul class="d-tips"><li>' + IL.icon("star", 15) + '<span><b>Write why you follow it</b> and the price you would act at.</span></li><li>' + IL.icon("bell", 15) + '<span><b>Get an alert</b> when the price hits your level or a grade changes.</span></li><li>' + IL.icon("doc", 15) + '<span><b>A weekly email</b> every Saturday with what moved on your stocks.</span></li></ul></div>';
         IL.api("/api/lens-grades?tickers=" + picks.join(",")).then(function (r) {
           var g = (r.data && r.data.grades) || {};
           picks.forEach(function (t) { var el = box.querySelector('[data-pn="' + t + '"]'); if (el && g[t]) el.innerHTML = 'LensScore <b class="num" style="color:var(--text)">' + F.num(g[t].score, 1) + "</b>"; });
         });
         since.innerHTML = '<p class="muted" style="font-size:13.5px">Once you follow a few stocks, grade changes on them show up here.</p><a class="card-foot" style="margin-top:auto" href="/screener">Find ideas in the Screener \u2192</a>';
-        var sum = IL.$("#dh-sum"); if (sum) sum.textContent = "Follow a few companies to see what changes on them each day.";
+        var sum = IL.$("#dh-sum"); if (sum) sum.textContent = "Here is the market today and a few places to start.";
         return;
       }
       var tickers = rows.map(function (r) { return String(r.ticker).toUpperCase(); }).slice(0, 40);

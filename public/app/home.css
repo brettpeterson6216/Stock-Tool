@@ -89,3 +89,15 @@
 .d-tips b{color:var(--text);font-weight:600}
 @media (max-width:760px){.d-tips{grid-template-columns:1fr}}
 .d-pick .d-li-t .faint{font-size:11.5px}
+
+/* Two stacks instead of rows, so no card is stretched into empty space. */
+.dcols{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:var(--s5);align-items:start}
+.dcol{display:flex;flex-direction:column;gap:var(--s5);min-width:0}
+.dpair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s5);align-items:stretch}
+@media (max-width:1180px){.dcols{grid-template-columns:1fr}}
+@media (max-width:760px){.dcols,.dcol,.dpair{gap:var(--s4)}.dpair{grid-template-columns:1fr}}
+.dcol .card{display:flex;flex-direction:column}
+.dcol .card-t{display:flex;align-items:center;gap:8px}
+.dcol .card-t svg{color:var(--gold-text);opacity:.9}
+.dcol .card>[id^="d-"]{flex:1;display:flex;flex-direction:column}
+.dcol .card>[id^="d-"]>.tbl-wrap{flex:none}
