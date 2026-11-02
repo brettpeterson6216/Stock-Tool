@@ -433,7 +433,8 @@
      middle, with the live data in two darkened side columns: the stock and
      its implied-vs-delivered growth on the left, the LensScore and grades on
      the right. No panels. */
-  var PLATE = "/share/engraved-v1.webp";
+  var STYLE = /[?&]card=lens/.test(location.search) ? "lens" : "engraved";
+  var PLATE = STYLE === "lens" ? "/share/lens-v1.webp" : "/share/engraved-v1.webp";
   function shareCard(inp, fl) {
     var fonts = ["700 40px Inter", "600 40px Inter", "500 40px Inter", "400 40px Inter", "500 40px 'IBM Plex Sans'", "600 40px 'IBM Plex Sans'"];
     var ready = document.fonts && document.fonts.load ? Promise.all(fonts.map(function (f) { return document.fonts.load(f).catch(function () {}); })) : Promise.resolve();
@@ -502,6 +503,7 @@
     /* Background: the fixed folio, or plain ground if it fails to load. */
     x.fillStyle = C.bg; x.fillRect(0, 0, W, H);
     if (plate) x.drawImage(plate, 0, 0, W, H);
+    if (STYLE !== "lens") {
     /* Feathered veils so the text columns read and the globe stays lit. */
     var vl = x.createLinearGradient(0, 0, 600, 0);
     vl.addColorStop(0, "rgba(16,17,15,0.86)"); vl.addColorStop(0.62, "rgba(16,17,15,0.72)"); vl.addColorStop(0.86, "rgba(16,17,15,0.28)"); vl.addColorStop(1, "rgba(16,17,15,0)");
@@ -617,6 +619,79 @@
     x.fillStyle = C.rule; x.fillRect(48, 566, 1104, 1);
     box("impliedlens.com/research/" + S.t, 48, 586, 690, 23, font(600, 18, sans), C.text);
     box("Educational research · not investment advice", 792, 590, 360, 18, font(400, 13, sans), C.t3, "right");
+    } else {
+      /* The lens plate: a magnifier over a gold chart. The LensScore sits
+         inside the lens; the stock and its growth stay in the dark top left. */
+      var vl2 = x.createLinearGradient(0, 0, 560, 0);
+      vl2.addColorStop(0, "rgba(16,17,15,0.82)"); vl2.addColorStop(0.55, "rgba(16,17,15,0.62)"); vl2.addColorStop(1, "rgba(16,17,15,0)");
+      x.fillStyle = vl2; x.fillRect(0, 0, 560, H);
+      x.save(); x.translate(676, 196); x.scale(1, 0.58);
+      var lv = x.createRadialGradient(0, 0, 20, 0, 0, 300);
+      lv.addColorStop(0, "rgba(14,15,13,0.78)"); lv.addColorStop(0.6, "rgba(14,15,13,0.6)"); lv.addColorStop(1, "rgba(14,15,13,0)");
+      x.fillStyle = lv; x.beginPath(); x.arc(0, 0, 300, 0, Math.PI * 2); x.fill(); x.restore();
+      var vb2 = x.createLinearGradient(0, 420, 0, H);
+      vb2.addColorStop(0, "rgba(16,17,15,0)"); vb2.addColorStop(0.4, "rgba(16,17,15,0.7)"); vb2.addColorStop(1, "rgba(16,17,15,0.92)");
+      x.fillStyle = vb2; x.fillRect(0, 420, W, H - 420);
+
+      var bw2 = box("Implied", 48, 32, 240, 28, font(700, 23, sans), C.text).w;
+      box("Lens", 48 + bw2, 32, 240, 28, font(700, 23, sans), C.gold);
+      box([ex, sector].filter(Boolean).join("  ·  ").toUpperCase(), 48, 76, 300, 16, font(500, 12, sans), C.t2, "left", 1.2);
+      var tpx2 = fit(S.t, 700, sans, 72, 48, 300, -1.5);
+      box(S.t, 48, 94, 300, 80, font(700, tpx2, sans), C.text, "left", -1.5);
+      var npx2 = fit(String(inp.name || ""), 500, sans, 22, 18, 300);
+      box(ellipsize(String(inp.name || ""), font(500, npx2, sans), 300), 48, 178, 300, 28, font(500, npx2, sans), C.t2);
+      var cur2 = meta.currency && meta.currency !== "USD" ? meta.currency + " " : "";
+      var priceStr2 = p ? (cur2 ? cur2 + F.num(p.price, 2) : F.price(p.price)) : DASH;
+      var pr2 = box(priceStr2, 48, 216, 220, 46, font(600, fit(priceStr2, 600, nums, 38, 30, 220), nums), C.text);
+      if (p && isFinite(p.chgPct)) box(signed(p.chgPct, 2) + " today", 48 + pr2.w + 16, 229, 200, 24, font(500, 18, nums), p.chg >= 0 ? C.gain : C.loss);
+      var yr2 = p && p.yearReturn !== null && isFinite(p.yearReturn) ? p.yearReturn : null;
+      if (yr2 !== null) { var pl = box("Past year ", 48, 266, 120, 22, font(500, 16, sans), C.t2); box(signed(yr2, 1), 48 + pl.w + 4, 266, 120, 22, font(600, 16, nums), yr2 >= 0 ? C.gain : C.loss); }
+
+      box("ANNUAL SALES GROWTH", 48, 322, 360, 18, font(600, 12, sans), C.t2, "left", 1.1);
+      box("Implied by price", 48, 350, 170, 20, font(500, 16, sans), C.t2);
+      box("Delivered", 232, 350, 170, 20, font(500, 16, sans), C.t2);
+      function growth2(val, X, color) {
+        if (val === null || val === undefined || !isFinite(val)) { box(DASH, X, 374, 170, 54, font(600, 44, nums), C.t3); return false; }
+        var main = signed(val * 100, 0), px = 44;
+        while (px > 32 && width(main, font(600, px, nums)) + 5 + width("/yr", font(500, 16, nums)) > 170) px -= 1;
+        var r = box(main, X, 374, 170, 54, font(600, px, nums), color);
+        x.font = font(500, 16, nums); x.fillStyle = C.t2; x.textAlign = "left"; x.fillText("/yr", X + r.w + 5, r.base);
+        return true;
+      }
+      var hi2 = growth2(v ? v.implied : null, 48, C.gold);
+      var dv2 = v && v.delivered !== null && v.delivered !== undefined ? v.delivered : null;
+      var hd2 = growth2(dv2, 232, C.text);
+      var ib2 = hi2 ? ["Model estimate", "next 5 years"] : ["Not available"];
+      var db2 = hd2 ? ["Reported", f && f.growth3y !== null ? "3-year annual rate" : "last 12 months"] : ["Not available"];
+      [[ib2, 48], [db2, 232]].forEach(function (b) { b[0].forEach(function (ln, i) { box(ln, b[1], 436 + i * 17, 170, 16, font(400, 13, sans), C.t3); }); });
+
+      /* Inside the lens. */
+      box("LENSSCORE", 476, 86, 400, 18, font(600, 13, sans), C.t2, "center", 2.2);
+      if (g && isFinite(Number(g.score))) {
+        var sc2 = Number(g.score).toFixed(1), fN2 = font(600, 108, nums), fU2 = font(500, 22, nums);
+        var wN2 = width(sc2, fN2), wU2 = width("/10", fU2), gx2 = 476 + (400 - (wN2 + 8 + wU2)) / 2;
+        var sr2 = box(sc2, gx2, 108, wN2, 116, fN2, C.gold);
+        x.font = fU2; x.fillStyle = C.t2; x.textAlign = "left"; x.fillText("/10", gx2 + wN2 + 8, sr2.base);
+        var sub = [g.label, g.rank ? "#" + g.rank.position + " of " + g.rank.of + " in " + (g.rank.sectorName || g.sectorName || sector || "sector") : ""].filter(Boolean).join("  ·  ");
+        box(ellipsize(sub, font(500, 17, sans), 420), 466, 236, 420, 24, font(500, 17, sans), C.text, "center");
+      } else {
+        box(DASH, 476, 108, 400, 116, font(600, 108, nums), C.t3, "center");
+        box("Not graded", 476, 236, 400, 24, font(500, 17, sans), C.t2, "center");
+      }
+
+      /* Grades along the bottom right. */
+      x.fillStyle = C.rule; x.fillRect(700, 470, 452, 1);
+      var fs2 = g && g.factors ? g.factors.slice(0, 5) : [];
+      ["value", "growth", "profitability", "health", "momentum"].forEach(function (key, i) {
+        var fc = fs2.filter(function (z) { return z.key === key; })[0] || fs2[i] || null, X0 = 700 + 90.4 * i;
+        box(FACTOR_LABEL[key], X0, 484, 90.4, 16, font(500, 12, sans), C.t2, "center");
+        box(fc && fc.grade ? fc.grade : DASH, X0, 506, 90.4, 40, font(600, 30, nums), fc && fc.grade ? gradeCol(fc.grade) : C.t3, "center");
+      });
+      box("LENS REPORT  ·  " + asOf.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "America/New_York" }).toUpperCase(), 700, 444, 452, 18, font(500, 12, sans), C.t3, "right", 1);
+      x.fillStyle = C.rule; x.fillRect(48, 566, 1104, 1);
+      box("impliedlens.com/research/" + S.t, 48, 586, 690, 23, font(600, 18, sans), C.text);
+      box("Educational research · not investment advice", 792, 590, 360, 18, font(400, 13, sans), C.t3, "right");
+    }
     c.toBlob(function (blob) {
       if (!blob) { IL.toast("Could not make the image."); return; }
       var file = new File([blob], S.t + "-lens-report.png", { type: "image/png" });
