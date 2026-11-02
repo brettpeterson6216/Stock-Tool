@@ -427,102 +427,170 @@
     var sh = IL.$("#lr-share"); if (sh) sh.addEventListener("click", function () { shareCard(inp, fl); });
   }
 
-  /* ── Share card: a 1200×630 image of the report, made in the browser ── */
+  /* ── Share card: a 1200×630 image of the report, made in the browser ──
+     Drawn like the app's own pages: a display headline with a serif italic
+     gold accent, a monogram, a prime card for the LensScore with grade chips,
+     and a smooth one-year curve. Short words, big type: it has to read at
+     thumbnail size in an X feed. */
+  var HEADLINE = {
+    cheap: [["Doing more than"], ["\n"], ["its price "], ["assumes.", "em"]],
+    fair: [["Priced about "], ["right.", "em"], ["\n"], ["For what it has done."]],
+    full: [["The price asks"], ["\n"], ["for a little "], ["more.", "em"]],
+    rich: [["Priced for"], ["\n"], ["perfection.", "em"]]
+  };
   function shareCard(inp, fl) {
+    var fonts = ["700 40px Inter", "600 40px Inter", "italic 400 40px 'Instrument Serif'", "600 40px 'IBM Plex Sans'", "700 40px 'IBM Plex Sans'"];
+    var ready = document.fonts && document.fonts.load ? Promise.all(fonts.map(function (f) { return document.fonts.load(f).catch(function () {}); })) : Promise.resolve();
+    ready.then(function () { drawShareCard(inp, fl); });
+  }
+  function drawShareCard(inp, fl) {
     var W = 1200, H = 630, c = document.createElement("canvas");
     c.width = W; c.height = H;
     var x = c.getContext("2d");
-    var C = { bg: "#0E0F11", panel: "#15171A", line: "#262A2F", text: "#EDEEF0", t2: "#A3A9B1", t3: "#7D848D", gold: "#E5B65A", gain: "#4CC38A", loss: "#F07B7B" };
-    var sans = "Inter, system-ui, sans-serif", nums = "'IBM Plex Sans', Inter, sans-serif";
-    x.fillStyle = C.bg; x.fillRect(0, 0, W, H);
-    /* Atmosphere: a warm glow, a faint blueprint grid, the gold hairline. */
-    var gl = x.createRadialGradient(220, -40, 10, 220, -40, 720); gl.addColorStop(0, "rgba(229,182,90,0.22)"); gl.addColorStop(1, "rgba(229,182,90,0)");
-    x.fillStyle = gl; x.fillRect(0, 0, W, H);
-    x.strokeStyle = "rgba(255,255,255,0.035)"; x.lineWidth = 1;
-    for (var gx = 0; gx <= W; gx += 40) { x.beginPath(); x.moveTo(gx + 0.5, 0); x.lineTo(gx + 0.5, H); x.stroke(); }
-    for (var gy = 0; gy <= H; gy += 40) { x.beginPath(); x.moveTo(0, gy + 0.5); x.lineTo(W, gy + 0.5); x.stroke(); }
-    var topbar = x.createLinearGradient(0, 0, W, 0); topbar.addColorStop(0, "#C9952F"); topbar.addColorStop(0.5, "#F2CF85"); topbar.addColorStop(1, "#C9952F");
-    x.fillStyle = topbar; x.fillRect(0, 0, W, 6);
-    function t(str, X, Y, font, color, align) { x.font = font; x.fillStyle = color; x.textAlign = align || "left"; x.fillText(str, X, Y); }
+    var C = { bg: "#0E0F11", line: "#2A2E34", text: "#EDEEF0", t2: "#A3A9B1", t3: "#7D848D", gold: "#E5B65A", gain: "#4CC38A", gradeB: "#8FD0A4", loss: "#F07B7B" };
+    var sans = "Inter, system-ui, sans-serif", nums = "'IBM Plex Sans', Inter, sans-serif", serif = "'Instrument Serif', Georgia, serif";
+    function t(str, X, Y, font, color, align) { x.font = font; x.fillStyle = color; x.textAlign = align || "left"; x.fillText(str, X, Y); return x.measureText(str).width; }
     function wrap(str, X, Y, maxW, lineH, font, color, maxLines) {
       x.font = font; x.fillStyle = color; x.textAlign = "left";
       var words = String(str).split(" "), line = "", n = 0;
       for (var i = 0; i < words.length; i++) {
         var test = line ? line + " " + words[i] : words[i];
         if (x.measureText(test).width > maxW && line) {
-          if (++n >= maxLines) { x.fillText(line.replace(/[,.;]?$/, "\u2026"), X, Y); return Y + lineH; }
+          if (++n >= maxLines) { x.fillText(line.replace(/[,.;]?$/, "…"), X, Y); return Y + lineH; }
           x.fillText(line, X, Y); Y += lineH; line = words[i];
         } else line = test;
       }
       if (line) { x.fillText(line, X, Y); Y += lineH; }
       return Y;
     }
-    var p = inp.price, g = inp.grades;
-    t(S.t, 60, 92, "700 30px " + sans, C.gold);
-    t(String(inp.name || "").slice(0, 40), 60 + x.measureText(S.t).width + 20, 92, "600 30px " + sans, C.text);
+    function tint(hex, a) { var n = parseInt(hex.slice(1), 16); return "rgba(" + (n >> 16) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + a + ")"; }
+    function gradeCol(gr) { gr = String(gr || "").charAt(0); return gr === "A" ? C.gain : gr === "B" ? C.gradeB : gr === "C" ? C.gold : gr ? C.loss : C.t3; }
+
+    /* Atmosphere, as on every app page: warm glows and a faint dot grid. */
+    x.fillStyle = C.bg; x.fillRect(0, 0, W, H);
+    [[140, -160, 760, 0.16], [1080, -80, 620, 0.07]].forEach(function (gw) {
+      var gr = x.createRadialGradient(gw[0], gw[1], 0, gw[0], gw[1], gw[2]);
+      gr.addColorStop(0, "rgba(229,182,90," + gw[3] + ")"); gr.addColorStop(1, "rgba(229,182,90,0)");
+      x.fillStyle = gr; x.fillRect(0, 0, W, H);
+    });
+    x.fillStyle = "rgba(255,255,255,0.045)";
+    for (var dx = 14; dx < W; dx += 28) for (var dy = 14; dy < H; dy += 28) { x.beginPath(); x.arc(dx, dy, 1.1, 0, Math.PI * 2); x.fill(); }
+
+    var p = inp.price, g = inp.grades, v = inp.valuation, meta = inp.meta || {};
+    var sector = meta.sector || (g && (g.sectorName || (g.rank && g.rank.sectorName))) || "";
+
+    /* Top row: monogram + company on the left, the wordmark on the right. */
+    var hue = IL.monoHue(S.t, sector), mx = 90, my = 86;
+    var mg = x.createRadialGradient(mx - 8, my - 10, 2, mx, my, 28);
+    mg.addColorStop(0, "hsl(" + hue + " 55% 34%)"); mg.addColorStop(1, "hsl(" + hue + " 45% 16%)");
+    x.fillStyle = mg; x.beginPath(); x.arc(mx, my, 26, 0, Math.PI * 2); x.fill();
+    x.strokeStyle = "hsla(" + hue + ",60%,50%,.5)"; x.lineWidth = 1.5; x.stroke();
+    t(S.t.replace(/[^A-Z0-9]/g, "").slice(0, 4), mx, my + 6, "700 " + (S.t.length > 3 ? 14 : 17) + "px " + sans, "hsl(" + hue + " 70% 82%)", "center");
+    t(String(inp.name || S.t).slice(0, 34), 132, 80, "650 26px " + sans, C.text);
+    t([S.t, sector].filter(Boolean).join("  ·  "), 132, 108, "500 18px " + sans, C.t3);
+    x.font = "italic 400 34px " + serif; var lw = x.measureText("Lens").width;
+    t("Lens", W - 64, 92, "italic 400 34px " + serif, C.gold, "right");
+    t("Implied", W - 64 - lw - 2, 92, "700 26px " + sans, C.text, "right");
+
+    /* The headline: plain words, one gold serif accent. */
+    var key = v && v.verdict ? v.verdict.key : null;
+    var parts = HEADLINE[key] || [[String(inp.name || S.t).split(/[ ,]/)[0] + ","], ["\n"], ["at a ", ""], ["glance.", "em"]];
+    var hx = 64, hy = 214, lineH = 70;
+    x.textAlign = "left";
+    parts.forEach(function (seg) {
+      if (seg[0] === "\n") { hx = 64; hy += lineH; return; }
+      var em = seg[1] === "em";
+      x.font = em ? "italic 400 72px " + serif : "700 60px " + sans;
+      if ("letterSpacing" in x) x.letterSpacing = em ? "0px" : "-2px";
+      if (hx + x.measureText(seg[0]).width > 700 && hx > 64) { hx = 64; hy += lineH; }
+      x.fillStyle = em ? C.gold : C.text; x.fillText(seg[0], hx, hy);
+      hx += x.measureText(seg[0]).width;
+    });
+    if ("letterSpacing" in x) x.letterSpacing = "0px";
+    var sub = v && v.implied !== null && v.delivered !== null
+      ? "The price needs " + F.spct(v.implied * 100, 0) + " a year of sales growth. Lately it has delivered " + F.spct(v.delivered * 100, 0) + "."
+      : (fl.filter(function (f) { return f.tone === "good"; })[0] || {}).title || "Graded against its sector peers on value, growth, profit, health and momentum.";
+    wrap(sub, 64, hy + 54, 620, 32, "500 23px " + sans, C.t2, 2);
+
+    /* Price, today's move and the past year as pills. */
+    var py = 452;
     if (p) {
-      t(F.price(p.price), 60, 160, "600 56px " + nums, C.text);
-      x.font = "600 56px " + nums;
-      var pw = x.measureText(F.price(p.price)).width;
-      t(F.spct(p.chgPct, 2) + " today", 60 + pw + 20, 158, "600 26px " + nums, p.chg >= 0 ? C.gain : C.loss);
+      var pw = t(F.price(p.price), 64, py, "600 46px " + nums, C.text);
+      var px = 64 + pw + 18;
+      function pill(label, col) {
+        x.font = "600 19px " + nums; var w = x.measureText(label).width + 26;
+        x.fillStyle = tint(col, 0.14); roundRect(x, px, py - 29, w, 36, 18); x.fill();
+        t(label, px + 13, py - 5, "600 19px " + nums, col); px += w + 10;
+      }
+      pill(F.spct(p.chgPct, 2) + " today", p.chg >= 0 ? C.gain : C.loss);
+      if (S.quote && S.quote.bars.length > 20) {
+        var bb = S.quote.bars, e = bb[bb.length - 1].time, y0 = bb.filter(function (b) { return b.time >= e - 366 * 86400; })[0];
+        if (y0 && y0.close) { var yc = (bb[bb.length - 1].close / y0.close - 1) * 100; pill(F.spct(yc, 0) + " past year", yc >= 0 ? C.gain : C.loss); }
+      }
     }
-    var v = inp.valuation;
-    var Y = 220;
-    if (v && v.verdict) {
-      x.font = "700 22px " + sans;
-      var lw = x.measureText(v.verdict.label).width + 32;
-      x.fillStyle = "rgba(229,182,90,.14)"; roundRect(x, 60, Y - 28, lw, 40, 10); x.fill();
-      t(v.verdict.label, 76, Y, "700 22px " + sans, C.gold);
-      if (v.implied !== null && v.delivered !== null) { t("The price needs " + F.spct(v.implied * 100, 0) + " a year of sales growth; it has delivered " + F.spct(v.delivered * 100, 0) + ".", 60, Y + 42, "500 21px " + sans, C.t2); Y += 40; }
-      Y += 60;
-    }
-    var good = fl.filter(function (f) { return f.tone === "good"; }).slice(0, 2), bad = fl.filter(function (f) { return f.tone === "bad"; }).slice(0, 2);
-    t("WHAT\u2019S WORKING", 60, Y + 10, "700 16px " + sans, C.gain);
-    t("WARNING SIGNS", 400, Y + 10, "700 16px " + sans, C.loss);
-    var y1 = Y + 46, y2 = Y + 46;
-    good.forEach(function (f) { t("+  " + f.title, 60, y1, "600 22px " + sans, C.text); y1 += 38; });
-    if (!good.length) t("Nothing stands out", 60, y1, "500 22px " + sans, C.t3);
-    bad.forEach(function (f) { t("!  " + f.title, 400, y2, "600 22px " + sans, C.text); y2 += 38; });
-    if (!bad.length) t("None in our checks", 400, y2, "500 22px " + sans, C.t3);
-    // LensScore panel
-    x.fillStyle = C.panel; roundRect(x, 790, 60, 350, 450, 18); x.fill();
-    x.strokeStyle = C.line; x.lineWidth = 2; roundRect(x, 790, 60, 350, 450, 18); x.stroke();
-    t("LensScore", 820, 108, "700 22px " + sans, C.text);
-    if (g) {
-      var sc = Number(g.score), col = sc >= 7 ? C.gain : sc >= 4 ? C.gold : C.loss;
-      x.lineWidth = 12; x.strokeStyle = C.line; x.beginPath(); x.arc(890, 190, 56, 0, Math.PI * 2); x.stroke();
-      x.strokeStyle = col; x.lineCap = "round"; x.beginPath(); x.arc(890, 190, 56, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.max(0.02, sc / 10)); x.stroke(); x.lineCap = "butt";
-      t(sc.toFixed(1), 890, 204, "700 38px " + nums, C.text, "center");
-      t(g.label || "", 970, 180, "700 22px " + sans, C.text);
-      if (g.rank) t("#" + g.rank.position + " of " + g.rank.of, 970, 210, "500 18px " + sans, C.t2);
-      if (g.rank) t(String(g.rank.sectorName || g.sectorName || ""), 970, 234, "500 18px " + sans, C.t2);
-      var gy = 300;
-      (g.factors || []).forEach(function (f) {
-        t(FACTOR_LABEL[f.key] || f.label, 820, gy, "500 20px " + sans, C.t2);
-        t(f.grade || "\u2014", 1110, gy, "700 20px " + nums, f.grade && /^A/.test(f.grade) ? C.gain : /^B/.test(f.grade || "") ? "#8FD0A4" : /^C/.test(f.grade || "") ? C.gold : C.loss, "right");
-        gy += 40;
-      });
-    } else {
-      wrap("Not graded: funds and foreign listings are not compared with sector peers.", 820, 160, 290, 28, "500 19px " + sans, C.t2, 4);
-    }
-    /* A smooth one-year price curve with a gold wash, bottom left. */
+
+    /* A smooth one-year curve under the price: weekly averages, then a
+       Catmull-Rom spline, so daily noise never looks jagged. */
     if (S.quote && S.quote.bars.length > 20) {
       var bars = S.quote.bars, endT = bars[bars.length - 1].time, yr = bars.filter(function (b) { return b.time >= endT - 366 * 86400; });
-      var cx0 = 60, cx1 = 750, cy0 = 432, cy1 = 536, lo = Infinity, hi = -Infinity;
-      yr.forEach(function (b) { lo = Math.min(lo, b.close); hi = Math.max(hi, b.close); });
-      var P = yr.map(function (b, i) { return [cx0 + (cx1 - cx0) * i / (yr.length - 1), cy1 - (b.close - lo) / ((hi - lo) || 1) * (cy1 - cy0)]; });
-      function curve() { x.moveTo(P[0][0], P[0][1]); for (var k = 0; k < P.length - 1; k++) { var a0 = P[k - 1] || P[k], a1 = P[k], a2 = P[k + 1], a3 = P[k + 2] || a2; x.bezierCurveTo(a1[0] + (a2[0] - a0[0]) / 6, a1[1] + (a2[1] - a0[1]) / 6, a2[0] - (a3[0] - a1[0]) / 6, a2[1] - (a3[1] - a1[1]) / 6, a2[0], a2[1]); } }
-      var wash = x.createLinearGradient(0, cy0, 0, cy1 + 10); wash.addColorStop(0, "rgba(229,182,90,0.30)"); wash.addColorStop(1, "rgba(229,182,90,0)");
-      x.beginPath(); curve(); x.lineTo(cx1, cy1 + 10); x.lineTo(cx0, cy1 + 10); x.closePath(); x.fillStyle = wash; x.fill();
-      x.beginPath(); curve(); x.strokeStyle = C.gold; x.lineWidth = 3; x.shadowColor = "rgba(229,182,90,0.6)"; x.shadowBlur = 12; x.stroke(); x.shadowBlur = 0;
-      var lp = P[P.length - 1]; x.fillStyle = C.gold; x.beginPath(); x.arc(lp[0], lp[1], 6, 0, Math.PI * 2); x.fill();
-      var yc = (yr[yr.length - 1].close / yr[0].close - 1) * 100;
-      t("Past year " + F.spct(yc, 0), cx1, cy0 - 10, "600 18px " + nums, yc >= 0 ? C.gain : C.loss, "right");
+      var wk = [], half = 10;
+      for (var k = 0; k < yr.length; k += 6) {
+        var sl = yr.slice(Math.max(0, k - half), k + half + 1), s = 0;
+        sl.forEach(function (b) { s += b.close; }); wk.push(s / sl.length);
+      }
+      wk.push(yr[yr.length - 1].close);
+      var cx0 = 64, cx1 = 700, cy0 = 486, cy1 = 548, lo = Math.min.apply(null, wk), hi = Math.max.apply(null, wk);
+      var P = wk.map(function (val, i) { return [cx0 + (cx1 - cx0) * i / (wk.length - 1), cy1 - (val - lo) / ((hi - lo) || 1) * (cy1 - cy0)]; });
+      function curve() { x.moveTo(P[0][0], P[0][1]); for (var q = 0; q < P.length - 1; q++) { var a0 = P[q - 1] || P[q], a1 = P[q], a2 = P[q + 1], a3 = P[q + 2] || a2; x.bezierCurveTo(a1[0] + (a2[0] - a0[0]) / 6, a1[1] + (a2[1] - a0[1]) / 6, a2[0] - (a3[0] - a1[0]) / 6, a2[1] - (a3[1] - a1[1]) / 6, a2[0], a2[1]); } }
+      var wash = x.createLinearGradient(0, cy0, 0, cy1 + 8); wash.addColorStop(0, "rgba(229,182,90,0.26)"); wash.addColorStop(1, "rgba(229,182,90,0)");
+      x.beginPath(); curve(); x.lineTo(cx1, cy1 + 8); x.lineTo(cx0, cy1 + 8); x.closePath(); x.fillStyle = wash; x.fill();
+      var fade = x.createLinearGradient(cx0, 0, cx1, 0); fade.addColorStop(0, "rgba(229,182,90,0.25)"); fade.addColorStop(1, C.gold);
+      x.beginPath(); curve(); x.strokeStyle = fade; x.lineWidth = 3; x.lineCap = "round"; x.shadowColor = "rgba(229,182,90,0.55)"; x.shadowBlur = 10; x.stroke(); x.shadowBlur = 0;
+      var lp = P[P.length - 1];
+      x.fillStyle = "rgba(229,182,90,0.25)"; x.beginPath(); x.arc(lp[0], lp[1], 11, 0, Math.PI * 2); x.fill();
+      x.fillStyle = C.gold; x.beginPath(); x.arc(lp[0], lp[1], 5.5, 0, Math.PI * 2); x.fill();
     }
-    var hair = x.createLinearGradient(60, 0, W - 60, 0); hair.addColorStop(0, "rgba(229,182,90,0)"); hair.addColorStop(0.5, "rgba(240,201,120,0.9)"); hair.addColorStop(1, "rgba(229,182,90,0)");
-    x.fillStyle = hair; x.fillRect(60, 556, W - 120, 2);
-    t("impliedlens.com/research/" + S.t, 60, 594, "600 22px " + sans, C.text);
-    t("From SEC filings and a year of prices \u00b7 not investment advice", W - 60, 594, "500 18px " + sans, C.t3, "right");
+
+    /* The LensScore as a prime card: gold hairline, glowing ring, grade chips. */
+    var bx = 768, by = 140, bw = 368, bh = 410;
+    x.save(); x.shadowColor = "rgba(0,0,0,0.6)"; x.shadowBlur = 40; x.shadowOffsetY = 18;
+    var surf = x.createLinearGradient(0, by, 0, by + bh); surf.addColorStop(0, "#1A1C20"); surf.addColorStop(1, "#141619");
+    x.fillStyle = surf; roundRect(x, bx, by, bw, bh, 22); x.fill(); x.restore();
+    var wash2 = x.createLinearGradient(0, by, 0, by + 160); wash2.addColorStop(0, "rgba(229,182,90,0.09)"); wash2.addColorStop(1, "rgba(229,182,90,0)");
+    x.fillStyle = wash2; roundRect(x, bx, by, bw, bh, 22); x.fill();
+    x.strokeStyle = "rgba(229,182,90,0.22)"; x.lineWidth = 1.5; roundRect(x, bx, by, bw, bh, 22); x.stroke();
+    var hl = x.createLinearGradient(bx + 20, 0, bx + bw - 20, 0); hl.addColorStop(0, "rgba(229,182,90,0)"); hl.addColorStop(0.5, "rgba(240,201,120,0.95)"); hl.addColorStop(1, "rgba(229,182,90,0)");
+    x.fillStyle = hl; x.fillRect(bx + 20, by - 1, bw - 40, 2);
+    t("LENSSCORE", bx + bw / 2, by + 44, "700 15px " + sans, C.t3, "center");
+    if (g) {
+      var sc = Number(g.score), tone = IL.scoreTone(sc);
+      var ca = tone === "good" ? "#3FB37F" : tone === "mid" ? "#D9A441" : "#E06A6A", cb = tone === "good" ? "#9BE3BC" : tone === "mid" ? "#F3D18A" : "#F7A9A9";
+      var rx = bx + bw / 2, ry = by + 138, rr = 66;
+      x.lineWidth = 13; x.strokeStyle = "#262A2F"; x.beginPath(); x.arc(rx, ry, rr, 0, Math.PI * 2); x.stroke();
+      var rg = x.createLinearGradient(rx - rr, ry + rr, rx + rr, ry - rr); rg.addColorStop(0, ca); rg.addColorStop(1, cb);
+      x.strokeStyle = rg; x.lineCap = "round"; x.shadowColor = tint(ca, 0.55); x.shadowBlur = 16;
+      x.beginPath(); x.arc(rx, ry, rr, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.max(0.02, Math.min(1, sc / 10))); x.stroke();
+      x.shadowBlur = 0; x.lineCap = "butt";
+      t(sc.toFixed(1), rx, ry + 15, "700 44px " + nums, C.text, "center");
+      t(g.label || "", rx, by + 252, "700 24px " + sans, C.text, "center");
+      if (g.rank) t("#" + g.rank.position + " of " + g.rank.of + " in " + (g.rank.sectorName || g.sectorName || "its sector"), rx, by + 282, "500 18px " + sans, C.t2, "center");
+      var fs = (g.factors || []).slice(0, 5), cw = 64, gap = 6, tw = fs.length * cw + (fs.length - 1) * gap, fx = bx + (bw - tw) / 2, fy = by + 312;
+      fs.forEach(function (f, i) {
+        var X = fx + i * (cw + gap), col = gradeCol(f.grade);
+        x.fillStyle = tint(col, 0.13); roundRect(x, X, fy, cw, 66, 12); x.fill();
+        x.strokeStyle = tint(col, 0.28); x.lineWidth = 1; roundRect(x, X, fy, cw, 66, 12); x.stroke();
+        t(f.grade || "—", X + cw / 2, fy + 32, "700 23px " + nums, col, "center");
+        t(FACTOR_LABEL[f.key] || f.label || "", X + cw / 2, fy + 54, "600 11px " + sans, C.t3, "center");
+      });
+    } else {
+      wrap("Not graded. Funds and foreign listings aren’t compared with sector peers.", bx + 32, by + 110, bw - 64, 30, "500 21px " + sans, C.t2, 5);
+    }
+
+    /* Footer: the link and the small print. */
+    var hair = x.createLinearGradient(64, 0, W - 64, 0); hair.addColorStop(0, "rgba(229,182,90,0)"); hair.addColorStop(0.5, "rgba(240,201,120,0.55)"); hair.addColorStop(1, "rgba(229,182,90,0)");
+    x.fillStyle = hair; x.fillRect(64, 572, W - 128, 1);
+    t("impliedlens.com/research/" + S.t, 64, 606, "600 20px " + sans, C.text);
+    t("From SEC filings and a year of prices · not investment advice", W - 64, 606, "500 16px " + sans, C.t3, "right");
     c.toBlob(function (blob) {
       if (!blob) { IL.toast("Could not make the image."); return; }
       var file = new File([blob], S.t + "-lens-report.png", { type: "image/png" });

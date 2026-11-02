@@ -431,11 +431,16 @@
 
   /* ── Brand pieces ────────────────────────────────────────────────────── */
   var SECTOR_HUE = { tech: 212, technology: 212, health: 158, "health care": 158, healthcare: 158, financ: 42, bank: 42, consumer: 18, retail: 18, communication: 278, media: 278, energy: 28, util: 192, industr: 0, "real est": 330, reit: 330, staple: 95, material: 120 };
+  IL.monoHue = function (t, sector) {
+    t = String(t || "?").toUpperCase();
+    var s = String(sector || "").toLowerCase();
+    for (var k in SECTOR_HUE) { if (s.indexOf(k) >= 0) return SECTOR_HUE[k]; }
+    var hsh = 0; for (var i = 0; i < t.length; i++) hsh = (hsh * 31 + t.charCodeAt(i)) % 360;
+    return hsh;
+  };
   IL.mono = function (t, sector, size) {
     t = String(t || "?").toUpperCase();
-    var s = String(sector || "").toLowerCase(), hue = null;
-    for (var k in SECTOR_HUE) { if (s.indexOf(k) >= 0) { hue = SECTOR_HUE[k]; break; } }
-    if (hue === null) { var hsh = 0; for (var i = 0; i < t.length; i++) hsh = (hsh * 31 + t.charCodeAt(i)) % 360; hue = hsh; }
+    var hue = IL.monoHue(t, sector);
     var label = t.replace(/[^A-Z0-9]/g, "").slice(0, t.length > 4 ? 3 : 4);
     return '<span class="mono' + (size ? " " + size : "") + '" style="--h:' + hue + '" aria-hidden="true">' + IL.h(label.length > 3 && size !== "lg" ? label.slice(0, 3) : label) + "</span>";
   };
