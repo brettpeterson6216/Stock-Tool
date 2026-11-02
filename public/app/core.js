@@ -173,6 +173,9 @@
     check: '<path d="m5 12 5 5 9-10"/>',
     info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 8h.01"/>',
     doc: '<path d="M7 3h7l5 5v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v5h5"/>',
+    expand: '<path d="M4 9V4h5"/><path d="M20 9V4h-5"/><path d="M4 15v5h5"/><path d="M20 15v5h-5"/>',
+    share: '<path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M5 13v6a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-6"/>',
+    download: '<path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/>',
   };
   IL.icon = function (name, size) {
     var s = size || 16;
@@ -427,6 +430,78 @@
       '<div class="gate-t">' + IL.h(what || "Create a free account to see this") + "</div>" +
       '<div class="gate-s">' + IL.h(opts.why || "A free account unlocks financial statements, earnings history and a watchlist. No card needed.") + "</div>" +
       '<div class="row wrap"><a class="btn primary" href="' + IL.signupHref() + '">Create a free account</a><a class="btn ghost" href="' + IL.loginHref() + '">Log in</a></div></div>';
+  };
+
+
+  /* ── Plates: the engraved art behind the top of a page ───────────────── */
+  var PLATE_SRC = { engraved: "/share/engraved-v1.webp", atlas: "/share/atlas-v1.webp", globe: "/share/globe-v1.webp", ledger: "/share/ledger-v1.webp", dial: "/share/dial-v1.webp" };
+  IL.plateSrc = function (name) { return PLATE_SRC[name] || PLATE_SRC.engraved; };
+  /* Put a plate behind a hero block. The art sits to the right and fades
+     out to the left and the bottom, so text and numbers stay on calm ground. */
+  IL.plate = function (host, name, pos) {
+    if (!host) return;
+    host.classList.add("plate");
+    host.style.setProperty("--plate", "url(" + IL.plateSrc(name) + ")");
+    if (pos) host.style.setProperty("--plate-pos", pos);
+  };
+
+  /* ── Widgets: one frame and one set of tools for every tool on the site ──
+     <section data-w="expand,share,csv" data-w-title="…">. The tools sit top
+     right and survive the section being repainted. Actions:
+       expand  open the widget large in a dialog
+       share   IL.widgetShare[id]() if the page registers one
+       csv     download the widget's first table as CSV */
+  IL.widgetShare = {};
+  function tableCsv(el, name) {
+    var t = el.querySelector("table"); if (!t) { IL.toast("Nothing to export yet."); return; }
+    var rows = Array.prototype.map.call(t.querySelectorAll("tr"), function (tr) {
+      return Array.prototype.map.call(tr.querySelectorAll("th,td"), function (c) { var v = c.innerText.replace(/\s+/g, " ").trim(); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }).join(",");
+    }).join("\n");
+    var a = document.createElement("a");
+    a.href = "data:text/csv;charset=utf-8," + encodeURIComponent(rows); a.download = (name || "impliedlens") + ".csv";
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+  function expandWidget(el) {
+    var clone = el.cloneNode(true);
+    var tools = clone.querySelector(".w-tools"); if (tools) tools.remove();
+    var src = el.querySelectorAll("canvas"), dst = clone.querySelectorAll("canvas");
+    Array.prototype.forEach.call(dst, function (c, i) { try { c.getContext("2d").drawImage(src[i], 0, 0); } catch (_) {} });
+    clone.removeAttribute("id"); clone.classList.add("w-big");
+    IL.dialog('<div class="w-dlg-h"><h2>' + IL.h(el.getAttribute("data-w-title") || "") + '</h2><button class="btn ghost" type="button" data-close>Close</button></div>', function (d) {
+      d.classList.add("w-dlg"); d.querySelector(".il-dialog-in").appendChild(clone);
+    });
+  }
+  function toolsHtml(el) {
+    var kinds = String(el.getAttribute("data-w") || "").split(",").map(function (k) { return k.trim(); }).filter(Boolean);
+    var title = el.getAttribute("data-w-title") || "this";
+    var label = { expand: "Open " + title + " larger", share: "Share " + title + " as an image", csv: "Download " + title + " as CSV" };
+    var icon = { expand: "expand", share: "share", csv: "download" };
+    return kinds.filter(function (k) { return icon[k] && (k !== "share" || IL.widgetShare[el.id]); }).map(function (k) {
+      return '<button class="w-btn" type="button" data-w-act="' + k + '" aria-label="' + IL.h(label[k]) + '" title="' + IL.h(label[k]) + '">' + IL.icon(icon[k], 15) + "</button>";
+    }).join("");
+  }
+  function ensureTools(el) {
+    if (el.querySelector(":scope > .w-tools")) return;
+    var html = toolsHtml(el); if (!html) return;
+    var box = document.createElement("div"); box.className = "w-tools"; box.innerHTML = html;
+    el.appendChild(box);
+  }
+  IL.widgets = function (root) {
+    root = root || document;
+    Array.prototype.forEach.call(root.querySelectorAll("[data-w]"), function (el) {
+      el.classList.add("w");
+      ensureTools(el);
+      if (el.__wObs) return;
+      el.__wObs = new MutationObserver(function () { ensureTools(el); });
+      el.__wObs.observe(el, { childList: true });
+      el.addEventListener("click", function (e) {
+        var b = e.target.closest("[data-w-act]"); if (!b || !el.contains(b)) return;
+        var k = b.getAttribute("data-w-act");
+        if (k === "expand") expandWidget(el);
+        else if (k === "csv") tableCsv(el, (el.getAttribute("data-w-title") || "table").toLowerCase().replace(/[^a-z0-9]+/g, "-"));
+        else if (k === "share" && IL.widgetShare[el.id]) IL.widgetShare[el.id]();
+      });
+    });
   };
 
   /* ── Brand pieces ────────────────────────────────────────────────────── */

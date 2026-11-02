@@ -375,3 +375,46 @@ body.il-app{
 .dh.card,.sc-head.card,.cmp-head.card{flex-direction:row;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px;padding:26px 28px}
 .dh.card p,.sc-head.card p,.cmp-head.card p{max-width:620px}
 @media (max-width:760px){.dh.card,.sc-head.card,.cmp-head.card{flex-direction:column;align-items:stretch;padding:20px}}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Plates and widgets.
+   Plates: the engraved art (the share-card backgrounds) behind the top of a
+   page. Art sits right, fades out to the left and the bottom; text and
+   numbers always sit on calm ground. Never behind tables or charts.
+   Widgets: every tool gets the same frame and the same corner tools.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.plate{position:relative;isolation:isolate;overflow:hidden}
+.plate::before,.card.prime.plate::before{content:"";position:absolute;inset:0;left:0;right:0;top:0;height:auto;z-index:-1;pointer-events:none;
+  background:var(--plate) var(--plate-pos,right center)/cover no-repeat;opacity:var(--plate-o,.95);
+  -webkit-mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.18) 28%,rgba(0,0,0,.75) 55%,#000 78%);
+          mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.18) 28%,rgba(0,0,0,.75) 55%,#000 78%)}
+.plate::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:linear-gradient(180deg,transparent 55%,color-mix(in srgb,var(--card-bot) 85%,transparent) 100%)}
+.plate>.il-ribbon{display:none}
+:root:not([data-theme="dark"]) .plate::before{opacity:.2;filter:sepia(.35) saturate(.8)}
+@media (max-width:760px){.plate::before{opacity:.45;-webkit-mask-image:linear-gradient(180deg,#000,transparent 85%);mask-image:linear-gradient(180deg,#000,transparent 85%)}}
+
+/* Tool tiles: a crop of a plate on top, the words below. */
+.tile{display:flex;flex-direction:column;gap:0;padding:0;overflow:hidden}
+.tile-art{display:block;height:104px;background:var(--plate) var(--plate-pos,center)/cover no-repeat;
+  -webkit-mask-image:linear-gradient(180deg,#000 40%,transparent);mask-image:linear-gradient(180deg,#000 40%,transparent);
+  transition:transform .4s ease,opacity .3s ease;opacity:.85}
+.tile:hover .tile-art{transform:scale(1.04);opacity:1}
+.tile-body{display:flex;flex-direction:column;gap:6px;padding:4px 18px 18px}
+.tile-go{display:inline-flex;vertical-align:-2px;color:var(--gold-text);opacity:0;transform:translateX(-4px);transition:opacity .2s,transform .2s}
+.tile:hover .tile-go{opacity:1;transform:none}
+:root:not([data-theme="dark"]) .tile-art{opacity:.55;filter:sepia(.3)}
+
+/* Widgets: corner tools, quiet until the widget is hovered or focused. */
+.w{position:relative}
+.w-tools{position:absolute;top:12px;right:12px;display:flex;gap:2px;opacity:.55;transition:opacity .15s ease;z-index:2}
+.w:hover>.w-tools,.w:focus-within>.w-tools{opacity:1}
+.w-btn{width:30px;height:30px;display:grid;place-items:center;border-radius:8px;border:1px solid transparent;background:transparent;color:var(--text2);cursor:pointer}
+.w-btn:hover{border-color:var(--line2);background:var(--raised);color:var(--gold-text)}
+.w-btn:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.card.w>.card-h,.card.w>.lr-h,.w>.lr-h{padding-right:88px}
+.card.w:not(.flush)>.card-t:first-child{padding-right:80px}
+.w-dlg{width:min(1100px,calc(100vw - 32px))}
+.w-dlg-h{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.w-big{box-shadow:none;margin:0}
+.w-big .w-tools{display:none}

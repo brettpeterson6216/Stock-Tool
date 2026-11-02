@@ -129,6 +129,10 @@
   /* ═════════════════════════════════════════════════════════════════════
      Research landing (no ticker)
      ═════════════════════════════════════════════════════════════════════ */
+  function tile(href, plate, pos, title, sub) {
+    return '<a class="card lift tile" href="' + href + '"><span class="tile-art" style="--plate:url(' + IL.plateSrc(plate) + ');--plate-pos:' + pos + '" aria-hidden="true"></span>' +
+      '<span class="tile-body"><span class="card-t">' + title + ' <span class="tile-go">' + IL.icon("arrow", 14) + '</span></span><span class="card-sub">' + sub + "</span></span></a>";
+  }
   function renderLanding() {
     document.title = "Research a stock · ImpliedLens";
     var popular = ["NVDA", "AAPL", "MSFT", "AMZN", "GOOGL", "META", "TSLA", "COST", "JPM", "LLY", "AVGO", "NFLX"];
@@ -143,19 +147,20 @@
         '<div class="row wrap rl-pop"><span class="faint">Popular:</span>' + popular.map(function (t) { return '<a class="tag" href="/research/' + t + '">' + t + "</a>"; }).join("") + "</div>" +
       "</section>" +
       '<div class="grid-3 rl-tools">' +
-        '<a class="card lift" href="/compare"><span class="card-t">Compare</span><span class="card-sub">Up to four stocks side by side, with the best in each row marked.</span></a>' +
-        '<a class="card lift" href="/screener"><span class="card-t">Screener</span><span class="card-sub">Filter about 290 US stocks by grade, value, size and momentum.</span></a>' +
-        '<a class="card lift" href="/lens-score"><span class="card-t">LensToolkit</span><span class="card-sub">Trend, timing, buy zones and alerts for any stock.</span></a>' +
-        '<a class="card lift" href="/?view=tool&section=projection"><span class="card-t">Valuation Lab</span><span class="card-sub">A full five-year model with saved versions.</span></a>' +
+        tile("/compare", "atlas", "52% 70%", "Compare", "Up to four stocks side by side, with the best in each row marked.") +
+        tile("/screener", "ledger", "60% 40%", "Screener", "Filter about 290 US stocks by grade, value, size and momentum.") +
+        tile("/lens-score", "dial", "75% 45%", "LensToolkit", "Trend, timing, buy zones and alerts for any stock.") +
+        tile("/?view=tool&section=projection", "engraved", "70% 70%", "Valuation Lab", "A full five-year model with saved versions.") +
       "</div>" +
       '<div class="section-h"><h2 class="section-t">Top-rated in each <em>sector</em></h2><span class="card-sub">Highest LensScore among the companies we grade</span></div>' +
-      '<div class="card flush" id="rl-leaders"><div style="padding:20px">' + sk(16) + "</div></div>" +
+      '<div class="card flush" id="rl-leaders" data-w="expand,csv" data-w-title="Top-rated by sector"><div style="padding:20px">' + sk(16) + "</div></div>" +
       '<div class="grid-2">' +
-        '<section class="card flush" id="rl-track"><div class="card-h"><h2 class="card-t">Does the LensScore work?</h2><span class="card-sub">Our public track record</span></div><div style="padding:20px">' + sk(80) + "</div></section>" +
-        '<section class="card flush" id="rl-movers"><div class="card-h"><h2 class="card-t">Biggest grade changes this week</h2></div><div style="padding:20px">' + sk(80) + "</div></section>" +
+        '<section class="card flush" id="rl-track" data-w="expand" data-w-title="Track record"><div class="card-h"><h2 class="card-t">Does the LensScore work?</h2><span class="card-sub">Our public track record</span></div><div style="padding:20px">' + sk(80) + "</div></section>" +
+        '<section class="card flush" id="rl-movers" data-w="expand" data-w-title="Grade changes"><div class="card-h"><h2 class="card-t">Biggest grade changes this week</h2></div><div style="padding:20px">' + sk(80) + "</div></section>" +
       "</div>";
     IL.wireSearch(IL.$("#rl-q"), IL.$("#rl-sugg"));
-    IL.ribbon(IL.$(".rl-hero"), "flanks", 5);
+    IL.plate(IL.$(".rl-hero"), "globe", "62% 30%");
+    IL.widgets(main());
     IL.api("/api/lens-leaders").then(function (res) {
       var box = IL.$("#rl-leaders");
       var d = res.data || {};
@@ -226,7 +231,7 @@
       }).join("") + "</nav>" +
       '<div id="tab"></div>';
     wireActions();
-    IL.ribbon(IL.$("#sh"), "sweep", 4);
+    IL.plate(IL.$("#sh"), "engraved", "right 32%");
   }
 
   /* A one-year sparkline with a gold wash, top right of the header. */
@@ -360,16 +365,16 @@
     box.innerHTML =
       '<div class="ov">' +
         '<div class="ov-main">' +
-          '<section class="card prime lr" aria-label="Lens Report" id="ov-lr"><div class="lr-h"><h2 class="card-t">The Lens Report</h2></div>' + sk(90) + "</section>" +
+          '<section class="card prime lr" aria-label="Lens Report" id="ov-lr" data-w="share,expand" data-w-title="The Lens Report"><div class="lr-h"><h2 class="card-t">The Lens Report</h2></div>' + sk(90) + "</section>" +
           '<section class="card pc" aria-label="Price chart" id="ov-chart"></section>' +
           '<section class="kv" aria-label="Key numbers" id="ov-kv">' + Array(8).join('<div><span class="k">' + sk(10, "60%") + '</span><span class="v">' + sk(16, "50%") + "</span></div>") + "</section>" +
           '<div class="grid-3">' +
-            '<section class="card" id="ov-q"><h2 class="card-t">Latest quarter</h2>' + sk(60) + "</section>" +
-            '<section class="card" id="ov-f"><h2 class="card-t">Famous investors</h2>' + sk(60) + "</section>" +
-            '<section class="card" id="ov-r"><h2 class="card-t">How risky has it been?</h2>' + sk(60) + "</section>" +
+            '<section class="card" id="ov-q" data-w="expand" data-w-title="Latest quarter"><h2 class="card-t">Latest quarter</h2>' + sk(60) + "</section>" +
+            '<section class="card" id="ov-f" data-w="expand" data-w-title="Famous investors"><h2 class="card-t">Famous investors</h2>' + sk(60) + "</section>" +
+            '<section class="card" id="ov-r" data-w="expand" data-w-title="Risk"><h2 class="card-t">How risky has it been?</h2>' + sk(60) + "</section>" +
           "</div>" +
         "</div>" +
-        '<aside class="card prime rc" aria-label="LensScore report card" id="ov-rc">' + sk(220) + "</aside>" +
+        '<aside class="card prime rc" aria-label="LensScore report card" id="ov-rc" data-w="share,expand" data-w-title="LensScore">' + sk(220) + "</aside>" +
       "</div>" +
       '<div class="section-h" id="report"><h2 class="section-t">Full report <em>card</em></h2><span class="card-sub" id="rep-sub"></span></div>' +
       '<div class="grid-2" id="ov-rep"><section class="card">' + sk(140) + '</section><section class="card">' + sk(140) + "</section></div>" +
@@ -379,6 +384,8 @@
       '<section class="card flush" id="ov-news"><div style="padding:20px">' + sk(60) + "</div></section>";
 
     S.chart = IL.PriceChart(IL.$("#ov-chart"), { ticker: S.t, seed: S.quote || undefined });
+    IL.widgetShare["ov-lr"] = IL.widgetShare["ov-rc"] = function () { var inp = reportInputs(); shareCard(inp, IL.analysis.flags(inp)); };
+    IL.widgets(box);
     paintKeyNumbers();
     paintRisk();
     D.lens().then(function () { paintReportCard(); paintKeyNumbers(); paintReport(); paintPeers(); paintLensReport(); });
@@ -1294,7 +1301,7 @@
     var cases = ["bear", "base", "bull"], label = { bear: "Bear case", base: "Base case", bull: "Bull case" };
     function pctIn(v) { return (Math.round(v * 1000) / 10).toString(); }
     box.innerHTML =
-      '<section class="card prime val-hero hero-band" id="val-hero"></section>' +
+      '<section class="card prime val-hero hero-band plate" id="val-hero" style="--plate:url(/share/ledger-v1.webp);--plate-pos:right 40%"></section>' +
       '<div class="section-h"><div><h2 class="section-t">Valuation Lab</h2><p class="card-sub">Five years out. Start from what the company has done; change any number.</p></div><div class="row wrap"><select class="input val-versions" id="val-versions" aria-label="Saved versions"><option value="">Saved versions</option></select><button class="btn sm" type="button" id="val-save">Save version</button><button class="btn sm ghost" type="button" id="val-reset">Reset</button></div></div>' +
       '<section class="card flush"><div class="tbl-wrap"><table class="tbl val-tbl"><thead><tr><th></th>' + cases.map(function (c) { return '<th class="val-' + c + '">' + label[c] + "</th>"; }).join("") + "</tr></thead><tbody>" +
         valRow("growth", "Revenue growth per year", "%", "How fast sales grow each year for the next five years.") +

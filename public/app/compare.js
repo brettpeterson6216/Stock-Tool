@@ -112,7 +112,7 @@
           '<div class="grid-2" id="cmp-flags"></div>' +
           '<p class="note">Best value in each row is marked. Grades compare each company with its own sector. Figures from SEC filings and a year of prices; not investment advice.</p>');
     IL.wireSearchPick(IL.$("#cmp-q"), IL.$("#cmp-sugg"), add);
-    IL.ribbon(IL.$("#cmp-hero"), "sweep", 8);
+    IL.plate(IL.$("#cmp-hero"), "dial", "right 40%");
     writeUrl();
     if (tickers.length >= 2) Promise.all(tickers.map(load)).then(paint);
   }

@@ -32,7 +32,7 @@
         '<section class="card flush"><div class="card-h"><h2 class="card-t">Top-rated by sector</h2><a class="link" href="/research">All →</a></div><div id="d-top"><div style="padding:20px">' + sk(120) + "</div></div></section>" +
         '<section class="card" id="d-learn"><h2 class="card-t">Keep learning</h2>' + sk(90) + "</section>" +
       "</div>";
-    IL.ribbon(IL.$("#dh"), "sweep", 7);
+    IL.plate(IL.$("#dh"), "engraved", "right 30%");
     loadWatchlist();
     loadMovers("gainers");
     loadLeaders();

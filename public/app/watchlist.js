@@ -26,7 +26,7 @@
       '<div class="section-h"><h2 class="section-t">Saved work</h2><a class="link" href="/?view=tool&section=workspace">Theses and positions →</a></div>' +
       '<section class="card flush" id="sv-box"><div style="padding:20px">' + sk(60) + "</div></section>";
     IL.wireSearchPick(IL.$("#wl-q"), IL.$("#wl-sugg"), add);
-    IL.ribbon(IL.$("#wl-hero"), "sweep", 6);
+    IL.plate(IL.$("#wl-hero"), "atlas", "right 30%");
   }
 
   function load() {
