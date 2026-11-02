@@ -61,3 +61,11 @@ test("history queries never alias a column to an SQL keyword", () => {
   const src = require("node:fs").readFileSync(require("node:path").join(__dirname, "..", "lib", "lens-history.js"), "utf8");
   assert.doesNotMatch(src, /\bAS\s+(then|when|case|end|order|group|select|from|where)\b/i);
 });
+
+test("a cover-page share count far below the income statement's is not used for market cap", () => {
+  const { metricsFrom } = require("../lib/sec-fundamentals.js");
+  const m = metricsFrom({ sharesOutstanding: 7800, ttm: { netIncome: 2e9, eps: 6, revenue: 6e9 } }, { price: 200 });
+  assert.ok(Math.abs(m.marketCapitalization - 200 * (2e9 / 6) / 1e6) < 1, `got ${m.marketCapitalization}`);
+  const ok = metricsFrom({ sharesOutstanding: 3.3e8, ttm: { netIncome: 2e9, eps: 6, revenue: 6e9 } }, { price: 200 });
+  assert.equal(ok.marketCapitalization, 200 * 3.3e8 / 1e6);
+});

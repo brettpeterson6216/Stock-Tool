@@ -116,7 +116,7 @@
           "<td>" + (r.lensScore != null ? '<span class="pill ' + IL.scoreTone(r.lensScore) + '">' + F.num(r.lensScore, 1) + "</span>" : "—") + "</td>" +
           KEYS.map(function (k) { return '<td class="sc-g" style="color:' + IL.gradeTone(g[k]) + '">' + h(g[k] || "—") + "</td>"; }).join("") +
           "<td>" + F.price(r.price) + '</td><td class="' + F.cls(r.change1D) + '">' + F.spct(r.change1D) + '</td><td class="' + F.cls(r.change1Y) + '">' + F.spct(r.change1Y, 0) + "</td>" +
-          '<td class="' + F.cls(r.revenueGrowth) + '">' + F.spct(r.revenueGrowth, 0) + "</td><td>" + F.mult(r.pe) + "</td><td>" + F.money(r.marketCap) + "</td><td>" + (r.dividendYield > 0 ? F.pct(r.dividendYield) : "—") + "</td></tr>";
+          '<td class="' + F.cls(r.revenueGrowth) + '">' + F.spct(r.revenueGrowth, 0) + "</td><td>" + F.mult(r.pe) + "</td><td>" + F.money(r.marketCap) + "</td><td>" + (r.dividendYield >= 0.05 ? F.pct(r.dividendYield) : r.dividendYield > 0 ? "<0.1%" : "—") + "</td></tr>";
       }).join("") : '<tr><td colspan="' + (COLS.length + 1) + '"><div class="empty">No company passes every filter. Loosen one, or reset.</div></td></tr>') +
       "</tbody>";
     paintActions();
