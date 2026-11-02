@@ -428,11 +428,12 @@
   }
 
   /* ── Share card: a 1200×630 image of the report, made in the browser ──
-     "The Research Folio": one fixed background (public/share/folio-v1.webp,
-     an open research volume, the same for every stock) with the live data
-     set cleanly on top. Three anchors: the stock, the LensScore, and the
-     growth the price implies against the growth delivered. No panels. */
-  var PLATE = "/share/folio-v1.webp";
+     One fixed engraved plate (public/share/engraved-v1.webp: a globe, the
+     exchange and a rising chart ribbon, the same for every stock) lit in the
+     middle, with the live data in two darkened side columns: the stock and
+     its implied-vs-delivered growth on the left, the LensScore and grades on
+     the right. No panels. */
+  var PLATE = "/share/engraved-v1.webp";
   function shareCard(inp, fl) {
     var fonts = ["700 40px Inter", "600 40px Inter", "500 40px Inter", "400 40px Inter", "500 40px 'IBM Plex Sans'", "600 40px 'IBM Plex Sans'"];
     var ready = document.fonts && document.fonts.load ? Promise.all(fonts.map(function (f) { return document.fonts.load(f).catch(function () {}); })) : Promise.resolve();
@@ -501,6 +502,16 @@
     /* Background: the fixed folio, or plain ground if it fails to load. */
     x.fillStyle = C.bg; x.fillRect(0, 0, W, H);
     if (plate) x.drawImage(plate, 0, 0, W, H);
+    /* Feathered veils so the text columns read and the globe stays lit. */
+    var vl = x.createLinearGradient(0, 0, 600, 0);
+    vl.addColorStop(0, "rgba(16,17,15,0.86)"); vl.addColorStop(0.62, "rgba(16,17,15,0.72)"); vl.addColorStop(0.86, "rgba(16,17,15,0.28)"); vl.addColorStop(1, "rgba(16,17,15,0)");
+    x.fillStyle = vl; x.fillRect(0, 0, 600, H);
+    var vr = x.createLinearGradient(740, 0, W, 0);
+    vr.addColorStop(0, "rgba(16,17,15,0)"); vr.addColorStop(0.3, "rgba(16,17,15,0.6)"); vr.addColorStop(0.55, "rgba(16,17,15,0.8)"); vr.addColorStop(1, "rgba(16,17,15,0.86)");
+    x.fillStyle = vr; x.fillRect(740, 0, W - 740, H);
+    var vb = x.createLinearGradient(0, 540, 0, H);
+    vb.addColorStop(0, "rgba(16,17,15,0)"); vb.addColorStop(0.45, "rgba(16,17,15,0.8)"); vb.addColorStop(1, "rgba(16,17,15,0.92)");
+    x.fillStyle = vb; x.fillRect(0, 540, W, H - 540);
 
     /* Header: brand and the report date (the date of the data shown). */
     var bw = box("Implied", 48, 32, 240, 28, font(700, 23, sans), C.text).w;
@@ -508,11 +519,11 @@
     box("LENS REPORT  ·  " + asOf.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "America/New_York" }).toUpperCase(), 792, 38, 360, 20, font(500, 13, sans), C.t2, "right", 1);
 
     /* Identity: exchange and sector, the ticker, the company. */
-    box([ex, sector].filter(Boolean).join("  ·  ").toUpperCase(), 48, 76, 640, 16, font(500, 12, sans), C.t2, "left", 1.2);
-    var tpx = fit(S.t, 700, sans, 72, 56, 420, -1.5);
-    box(S.t, 48, 94, 420, 80, font(700, tpx, sans), C.text, "left", -1.5);
-    var npx = fit(String(inp.name || ""), 500, sans, 24, 20, 640);
-    box(ellipsize(String(inp.name || ""), font(500, npx, sans), 640), 48, 180, 640, 30, font(500, npx, sans), C.t2);
+    box([ex, sector].filter(Boolean).join("  ·  ").toUpperCase(), 48, 76, 400, 16, font(500, 12, sans), C.t2, "left", 1.2);
+    var tpx = fit(S.t, 700, sans, 72, 52, 392, -1.5);
+    box(S.t, 48, 94, 392, 80, font(700, tpx, sans), C.text, "left", -1.5);
+    var npx = fit(String(inp.name || ""), 500, sans, 24, 19, 392);
+    box(ellipsize(String(inp.name || ""), font(500, npx, sans), 392), 48, 180, 392, 30, font(500, npx, sans), C.t2);
 
     /* Price and today's move. */
     var cur = meta.currency && meta.currency !== "USD" ? meta.currency + " " : "";
@@ -522,39 +533,38 @@
     if (p && isFinite(p.chgPct)) box(signed(p.chgPct, 2) + " today", 48 + pr.w + 18, 235, 360, 26, font(500, 20, nums), p.chg >= 0 ? C.gain : C.loss);
 
     /* The signature comparison: growth the price implies vs growth delivered. */
-    box("ANNUAL SALES GROWTH", 48, 291, 640, 18, font(600, 13, sans), C.t2, "left", 1.1);
-    box("Implied by price", 48, 324, 284, 21, font(500, 18, sans), C.t2);
-    box("Delivered", 360, 324, 328, 21, font(500, 18, sans), C.t2);
+    box("ANNUAL SALES GROWTH", 48, 291, 392, 18, font(600, 13, sans), C.t2, "left", 1.1);
+    box("Implied by price", 48, 324, 190, 21, font(500, 17, sans), C.t2);
+    box("Delivered", 252, 324, 190, 21, font(500, 17, sans), C.t2);
     function growth(val, X, w, color) {
       if (val === null || val === undefined || !isFinite(val)) {
-        box(DASH, X, 349, w, 64, font(600, 56, nums), C.t3);
+        box(DASH, X, 349, w, 60, font(600, 48, nums), C.t3);
         return false;
       }
-      var main = signed(val * 100, 0), px = 56;
-      while (px > 42 && width(main, font(600, px, nums)) + 6 + width("/yr", font(500, 20, nums)) > w) px -= 1;
-      var r = box(main, X, 349, w, 64, font(600, px, nums), color);
-      x.font = font(500, 20, nums); x.fillStyle = C.t2; x.textAlign = "left"; x.fillText("/yr", X + r.w + 6, r.base);
+      var main = signed(val * 100, 0), px = 48;
+      while (px > 34 && width(main, font(600, px, nums)) + 5 + width("/yr", font(500, 18, nums)) > w) px -= 1;
+      var r = box(main, X, 349, w, 60, font(600, px, nums), color);
+      x.font = font(500, 18, nums); x.fillStyle = C.t2; x.textAlign = "left"; x.fillText("/yr", X + r.w + 5, r.base);
       return true;
     }
-    var hasImp = growth(v ? v.implied : null, 48, 284, C.gold);
+    var hasImp = growth(v ? v.implied : null, 48, 190, C.gold);
     var delivered = v && v.delivered !== null && v.delivered !== undefined ? v.delivered : null;
-    var hasDel = growth(delivered, 360, 328, C.text);
+    var hasDel = growth(delivered, 252, 190, C.text);
     var impBasis = hasImp ? ["Model estimate", "next 5 years"] : ["Not available"];
     var delBasis = hasDel ? ["Reported", f && f.growth3y !== null ? "3-year annual rate" : "last 12 months vs prior"] : ["Not available"];
-    box(impBasis.join(" · "), 48, 418, 284, 16, font(400, 14, sans), C.t3);
-    box(delBasis.join(" · "), 360, 418, 328, 16, font(400, 14, sans), C.t3);
+    [[impBasis, 48], [delBasis, 252]].forEach(function (b) { b[0].forEach(function (ln, i) { box(ln, b[1], 414 + i * 17, 190, 16, font(400, 13, sans), C.t3); }); });
 
     /* Price over the past year: the real daily closes, no axes or fill. */
-    box("PRICE  ·  PAST YEAR", 48, 460, 180, 18, font(500, 12, sans), C.t2, "left", 1);
+    box("PRICE  ·  PAST YEAR", 48, 468, 180, 18, font(500, 12, sans), C.t2, "left", 1);
     var yrRet = p && p.yearReturn !== null && isFinite(p.yearReturn) ? p.yearReturn : null;
-    if (yrRet !== null) box(signed(yrRet, 1), 488, 456, 200, 25, font(500, 20, nums), yrRet >= 0 ? C.gain : C.loss, "right");
+    if (yrRet !== null) box(signed(yrRet, 1), 242, 464, 198, 25, font(500, 20, nums), yrRet >= 0 ? C.gain : C.loss, "right");
     if (S.quote && S.quote.bars.length > 1) {
       var bars = S.quote.bars.filter(function (b) { return b && isFinite(b.time) && isFinite(b.close) && b.close > 0; }).slice().sort(function (a, b) { return a.time - b.time; });
       var endT = bars.length ? bars[bars.length - 1].time : 0, yr = bars.filter(function (b) { return b.time >= endT - 366 * 86400; });
       if (yr.length > 1) {
         var t0 = yr[0].time, t1 = yr[yr.length - 1].time, lo = Infinity, hi = -Infinity;
         yr.forEach(function (b) { lo = Math.min(lo, b.close); hi = Math.max(hi, b.close); });
-        var cx0 = 48, cx1 = 688, cy0 = 492, cy1 = 542;
+        var cx0 = 48, cx1 = 440, cy0 = 498, cy1 = 544;
         var Xt = function (t) { return cx0 + (cx1 - cx0) * (t - t0) / ((t1 - t0) || 1); };
         var Yv = function (val) { return hi === lo ? (cy0 + cy1) / 2 : cy1 - (val - lo) / (hi - lo) * (cy1 - cy0); };
         /* Break the line at real gaps in the data (more than 10 days). */
@@ -577,30 +587,30 @@
     }
 
     /* The LensScore: an unframed number, always gold; words carry the meaning. */
-    box("LENSSCORE", 760, 143, 392, 20, font(600, 14, sans), C.t2, "center", 2);
+    box("LENSSCORE", 840, 118, 312, 20, font(600, 14, sans), C.t2, "center", 2);
     if (g && isFinite(Number(g.score))) {
-      var sc = Number(g.score).toFixed(1), fN = font(600, 128, nums), fU = font(500, 24, nums);
-      var wN = width(sc, fN), wU = width("/10", fU), gx0 = 760 + (392 - (wN + 8 + wU)) / 2;
-      var sr = box(sc, gx0, 176, wN, 148, fN, C.gold);
+      var sc = Number(g.score).toFixed(1), fN = font(600, 112, nums), fU = font(500, 22, nums);
+      var wN = width(sc, fN), wU = width("/10", fU), gx0 = 840 + (312 - (wN + 8 + wU)) / 2;
+      var sr = box(sc, gx0, 146, wN, 128, fN, C.gold);
       x.font = fU; x.fillStyle = C.t2; x.textAlign = "left"; x.fillText("/10", gx0 + wN + 8, sr.base);
-      if (g.label) box(g.label, 760, 332, 392, 26, font(500, 21, sans), C.text, "center");
+      if (g.label) box(g.label, 840, 286, 312, 26, font(500, 21, sans), C.text, "center");
       if (g.rank) {
         var rk = "#" + g.rank.position + " of " + g.rank.of + "  ·  " + (g.rank.sectorName || g.sectorName || sector || "");
-        var lines = wrap2(rk.replace(/\s+·\s+$/, ""), font(400, 18, sans), 392);
-        lines.forEach(function (ln, i) { box(ln, 760, 368 + i * 22, 392, 22, font(400, 18, sans), C.t2, "center"); });
+        var lines = wrap2(rk.replace(/\s+·\s+$/, ""), font(400, 17, sans), 312);
+        lines.forEach(function (ln, i) { box(ln, 840, 318 + i * 22, 312, 22, font(400, 17, sans), C.t2, "center"); });
       }
     } else {
-      box(DASH, 760, 176, 392, 148, font(600, 128, nums), C.t3, "center");
-      box("Not graded", 760, 332, 392, 26, font(500, 21, sans), C.t2, "center");
+      box(DASH, 840, 146, 312, 128, font(600, 112, nums), C.t3, "center");
+      box("Not graded", 840, 286, 312, 26, font(500, 21, sans), C.t2, "center");
     }
-    x.fillStyle = C.rule; x.fillRect(760, 429, 392, 1);
+    x.fillStyle = C.rule; x.fillRect(840, 384, 312, 1);
     var fs = g && g.factors ? g.factors.slice(0, 5) : [];
     ["value", "growth", "profitability", "health", "momentum"].forEach(function (key, i) {
       var fc = fs.filter(function (z) { return z.key === key; })[0] || fs[i] || null;
-      var X0 = 760 + 80 * i;
-      box(FACTOR_LABEL[key], X0, 447, 72, 18, font(500, 12, sans), C.t2, "center");
+      var X0 = 840 + 62.4 * i;
+      box(FACTOR_LABEL[key], X0, 400, 62.4, 16, font(500, 11, sans), C.t2, "center");
       var gr = fc && fc.grade ? fc.grade : DASH;
-      box(gr, X0, 475, 72, 43, font(600, 32, nums), fc && fc.grade ? gradeCol(fc.grade) : C.t3, "center");
+      box(gr, X0, 424, 62.4, 40, font(600, 30, nums), fc && fc.grade ? gradeCol(fc.grade) : C.t3, "center");
     });
 
     /* Footer. */
