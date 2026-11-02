@@ -433,8 +433,8 @@
      middle, with the live data in two darkened side columns: the stock and
      its implied-vs-delivered growth on the left, the LensScore and grades on
      the right. No panels. */
-  var STYLE = /[?&]card=lens/.test(location.search) ? "lens" : "engraved";
-  var PLATE = STYLE === "lens" ? "/share/lens-v1.webp" : "/share/engraved-v1.webp";
+  var STYLE = (location.search.match(/[?&]card=(lens|atlas)/) || [])[1] || "engraved";
+  var PLATE = { lens: "/share/lens-v1.webp", atlas: "/share/atlas-v1.webp", engraved: "/share/engraved-v1.webp" }[STYLE];
   function shareCard(inp, fl) {
     var fonts = ["700 40px Inter", "600 40px Inter", "500 40px Inter", "400 40px Inter", "500 40px 'IBM Plex Sans'", "600 40px 'IBM Plex Sans'"];
     var ready = document.fonts && document.fonts.load ? Promise.all(fonts.map(function (f) { return document.fonts.load(f).catch(function () {}); })) : Promise.resolve();
