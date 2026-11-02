@@ -424,10 +424,10 @@ router.get("/quote/:ticker", checkAnalysisLimit, async (req, res) => {
       ]);
       const m = co.metric || {};
       const price = Number(result.meta.regularMarketPrice) || co.price;
-      const shares = co.snap?.sharesOutstanding;
+      const basis = require("../lib/sec-fundamentals").quoteBasis(co.snap, { ticker, price });
       result.meta.longName = co.name || result.meta.longName || ticker;
       result.meta.shortName = result.meta.shortName && result.meta.shortName !== ticker ? result.meta.shortName : (co.name || ticker);
-      if (shares && price) result.meta.marketCap = shares * price;
+      if (basis.plausible && basis.mcap > 0) result.meta.marketCap = basis.mcap;
       if (m.peTTM > 0) { result.meta.trailingPE = m.peTTM; result.meta.peBasis = "ttm"; }
       if (Number.isFinite(m.beta)) result.meta.beta = m.beta;
       result.meta.fiftyTwoWeekHigh = result.meta.fiftyTwoWeekHigh || m["52WeekHigh"] || null;

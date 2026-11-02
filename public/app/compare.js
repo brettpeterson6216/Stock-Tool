@@ -161,7 +161,8 @@
     IL.$("#cmp-flags").className = list.length === 3 ? "grid-3" : "grid-2";
     IL.$("#cmp-flags").innerHTML = list.map(function (d, i) {
       var good = d.flags.filter(function (x) { return x.tone === "good"; }), bad = d.flags.filter(function (x) { return x.tone === "bad"; });
-      return '<section class="card"><div class="card-h"><h3 class="card-t"><i class="cmp-dot" style="background:' + COLORS[i] + '"></i>' + h(d.t) + ' <span class="muted" style="font-weight:500">' + h(d.name) + '</span></h3><span class="card-sub"><span class="up">' + good.length + ' working</span> · <span class="down">' + bad.length + " warning" + (bad.length === 1 ? "" : "s") + "</span></span></div>" +
+      return '<section class="card"><div class="card-h"><h3 class="card-t"><i class="cmp-dot" style="background:' + COLORS[i] + '"></i>' + h(d.t) + ' <span class="muted" style="font-weight:500">' + h(d.name) + '</span></h3><span class="card-sub">' + (d.f ? '<span class="up">' + good.length + ' working</span> · <span class="down">' + bad.length + " warning" + (bad.length === 1 ? "" : "s") + "</span>" : "Report-card points only") + "</span></div>" +
+        (d.f ? "" : '<p class="note">Sales, margin, cash-flow and dilution checks did not run' + (d.histRes && d.histRes.gate ? ': they need a free account.' : ': SEC filings aren’t available for this company.') + "</p>") +
         '<ul class="lr-flags good">' + good.slice(0, 3).map(function (x) { return '<li><span class="lr-ico">+</span><div><b>' + h(x.title) + "</b><span>" + h(x.detail) + "</span></div></li>"; }).join("") + "</ul>" +
         '<ul class="lr-flags bad">' + bad.slice(0, 3).map(function (x) { return '<li><span class="lr-ico">!</span><div><b>' + h(x.title) + "</b><span>" + h(x.detail) + "</span></div></li>"; }).join("") + "</ul>" +
         '<a class="card-foot" href="/research/' + h(d.t) + '">Open the full report →</a></section>';

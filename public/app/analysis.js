@@ -152,6 +152,15 @@
         else if (f.shareChange <= -1.5) add("good", "buybacks", "Buying back shares", "Diluted shares down " + p0(-f.shareChange) + " in a year.");
       }
     }
+    /* What the full report card says, so the summary never contradicts it.
+       Its watch-outs always count; its strengths stand in when the
+       statement checks above could not run (guests, missing filings). */
+    function fromCard(item) {
+      var t = String(item && (item.text || item) || "").trim(), i = t.indexOf(":");
+      return i > 0 ? { title: t.slice(0, i), detail: t.slice(i + 1).trim().replace(/^./, function (c) { return c.toUpperCase(); }) } : { title: t.replace(/\.$/, ""), detail: "From the LensScore report card." };
+    }
+    if (g && g.watch) g.watch.slice(0, 2).forEach(function (w, i) { var c = fromCard(w); if (c.title) add("bad", "card-watch-" + i, c.title, c.detail); });
+    if (!f && g && g.strengths) g.strengths.slice(0, 3).forEach(function (w, i) { var c = fromCard(w); if (c.title) add("good", "card-strength-" + i, c.title, c.detail); });
     if (g && g.factors) {
       var health = g.factors.filter(function (x) { return x.key === "health"; })[0];
       if (health && /^[DF]/.test(health.grade || "")) add("bad", "health", "Weak balance sheet", "Financial health graded " + health.grade + " against sector peers.");
@@ -199,7 +208,13 @@
   function best(fs) { var b = (fs || []).slice().sort(function (a, c) { return RANK(c.grade) - RANK(a.grade); })[0]; return b ? LABEL[b.key] || b.label : "—"; }
   function worst(fs) { var b = (fs || []).slice().sort(function (a, c) { return RANK(a.grade) - RANK(c.grade); })[0]; return b ? LABEL[b.key] || b.label : "—"; }
 
-  var api = { num: num, quarters: quarters, fundamentals: fundamentals, priceFacts: priceFacts, valuation: valuation, flags: flags, story: story, gradeRank: RANK };
+  /* Which checks actually ran. A check that could not run is "not
+     checked", never "nothing found". */
+  function coverage(input) {
+    return { statements: !!input.fundamentals, prices: !!input.price, grades: !!(input.grades && input.grades.factors) };
+  }
+
+  var api = { coverage: coverage, num: num, quarters: quarters, fundamentals: fundamentals, priceFacts: priceFacts, valuation: valuation, flags: flags, story: story, gradeRank: RANK };
   if (typeof module === "object" && module.exports) module.exports = api;
   else { root.IL = root.IL || {}; root.IL.analysis = api; }
 })(typeof window !== "undefined" ? window : globalThis);

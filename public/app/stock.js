@@ -409,7 +409,8 @@
     var box = IL.$("#ov-lr"); if (!box) return;
     if (!S.histRes && once.hist) return;   // the history request is still on its way
     var inp = reportInputs(), A = IL.analysis;
-    var fl = A.flags(inp), st = A.story(inp);
+    var fl = A.flags(inp), st = A.story(inp), cov = A.coverage(inp);
+    var notRun = S.histRes && S.histRes.gate ? "Not checked: the sales, margin, cash-flow and dilution checks need a free account." : "Not checked: SEC filings for these checks aren’t available for this company.";
     var good = fl.filter(function (x) { return x.tone === "good"; }), bad = fl.filter(function (x) { return x.tone === "bad"; });
     var v = inp.valuation;
     var verdict = v && v.verdict
@@ -426,8 +427,8 @@
       '<div class="lr-h"><h2 class="card-t lr-title">The Lens <em>Report</em> ' + IL.tip("Written automatically from the company’s SEC filings, its grades against sector peers and a year of prices. Every point shows the number behind it. Not investment advice.") + "</h2>" + verdict + "</div>" +
       (st.length ? '<p class="lr-story">' + st.map(h).join(" ") + "</p>" : '<p class="muted">Not enough data to write a report for this company yet.</p>') +
       '<div class="lr-cols">' +
-        '<div><h3 class="lr-sub good">What’s working</h3>' + list(good, "good", "Nothing stands out yet.") + "</div>" +
-        '<div><h3 class="lr-sub bad">Warning signs</h3>' + list(bad, "bad", "No warning signs in the numbers we check.") + "</div>" +
+        '<div><h3 class="lr-sub good">What’s working</h3>' + list(good, "good", cov.statements ? "Nothing stands out in the checks we ran." : notRun) + "</div>" +
+        '<div><h3 class="lr-sub bad">Warning signs</h3>' + list(bad, "bad", cov.statements ? "No warning signs in the checks we ran." : notRun) + "</div>" +
       "</div>" +
       (gated ? '<p class="lr-gate">' + IL.icon("lock", 14) + ' <span>Sales, margin, cash-flow and dilution checks need a free account. <a href="' + IL.signupHref() + '">Create one</a> · no card.</span></p>' : "") +
       '<div class="lr-foot"><a class="link" href="/research/' + h(S.t) + '/valuation" data-tab="valuation">Test the price yourself →</a><button class="link" type="button" id="lr-share">Share this report</button></div>';
@@ -1304,6 +1305,7 @@
     function pctIn(v) { return (Math.round(v * 1000) / 10).toString(); }
     box.innerHTML =
       '<section class="card prime val-hero hero-band plate" id="val-hero" data-w="share" data-w-title="your valuation" style="--plate:url(/share/ledger-v1.webp);--plate-pos:right 40%"></section>' +
+      '<p class="callout val-err" id="val-err" role="alert" hidden></p>' +
       '<div class="section-h"><div><h2 class="section-t">Valuation Lab</h2><p class="card-sub">Five years out. Start from what the company has done; change any number.</p></div><div class="row wrap"><select class="input val-versions" id="val-versions" aria-label="Saved versions"><option value="">Saved versions</option></select><button class="btn sm" type="button" id="val-save">Save version</button><button class="btn sm ghost" type="button" id="val-reset">Reset</button></div></div>' +
       '<section class="card flush" id="val-cases" data-w="csv" data-w-title="Valuation cases"><div class="tbl-wrap"><table class="tbl val-tbl"><thead><tr><th></th>' + cases.map(function (c) { return '<th class="val-' + c + '">' + label[c] + "</th>"; }).join("") + "</tr></thead><tbody>" +
         valRow("growth", "Revenue growth per year", "%", "How fast sales grow each year for the next five years.") +
@@ -1349,7 +1351,17 @@
       if (isFinite(r)) M.required = r / 100;
       if (isFinite(s)) M.shareChange = s / 100;
     }
+    function problem() {
+      for (var k = 0; k < cases.length; k++) {
+        var c = cases[k];
+        var bad = V.validate({ price: ctx.price, revenue: ctx.revenue, shares: ctx.shares, years: 5, growth: M[c].growth, margin: M[c].margin, exitPE: M[c].exitPE, shareChange: M.shareChange, required: M.required });
+        if (bad) return (bad.field === "shareChange" || bad.field === "required" ? "" : label[c] + ": ") + bad.message;
+      }
+      return null;
+    }
     function compute() {
+      var msg = problem(), err = IL.$("#val-err");
+      if (err) { err.hidden = !msg; err.textContent = msg || ""; }
       cases.forEach(function (c) {
         var out = V.project({ price: ctx.price, revenue: ctx.revenue, shares: ctx.shares, years: 5, growth: M[c].growth, margin: M[c].margin, exitPE: M[c].exitPE, shareChange: M.shareChange, required: M.required });
         IL.$("#o-fp-" + c).innerHTML = out ? '<b class="num">' + F.price(out.futurePrice) + "</b>" : "—";
@@ -1423,6 +1435,7 @@
     }
     box.__read = read; box.__compute = compute;
     IL.widgetShare["val-hero"] = function () {
+      var msg = problem(); if (msg) { IL.toast("Fix the inputs first: " + msg); return; }
       var outs = {};
       cases.forEach(function (c) { outs[c] = V.project({ price: ctx.price, revenue: ctx.revenue, shares: ctx.shares, years: 5, growth: M[c].growth, margin: M[c].margin, exitPE: M[c].exitPE, shareChange: M.shareChange, required: M.required }); });
       var g = V.impliedGrowth({ price: ctx.price, revenue: ctx.revenue, shares: ctx.shares, years: 5, margin: M.base.margin, exitPE: M.base.exitPE, shareChange: M.shareChange, required: M.required });

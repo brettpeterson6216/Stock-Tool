@@ -228,3 +228,5 @@
 .rl-hero.plate .rl-pop{justify-content:flex-start;max-width:560px}
 @media (max-width:760px){.rl-hero.plate{padding:28px 18px}}
 .sh.plate{min-height:168px}
+.callout[hidden]{display:none}
+.val-err{border:1px solid color-mix(in srgb,var(--loss) 45%,var(--line));color:var(--text)}

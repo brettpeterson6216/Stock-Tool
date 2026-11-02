@@ -32,3 +32,34 @@ test("default cases bracket the base and mark unprofitable companies", () => {
   assert.equal(loss.unprofitable, true);
   assert.ok(loss.base.margin > 0);
 });
+
+/* Codex audit F02: a 0% required return used to fall back to 10%. */
+test("a 0% required return is used as 0%, not swapped for 10%", () => {
+  const i = { price: 10, revenue: 100, shares: 10, years: 5, growth: 0, margin: 0.1, exitPE: 10, shareChange: 0 };
+  const near = (a, b) => Math.abs(a - b) < 1e-4;
+  assert.ok(near(V.project({ ...i, required: 0 }).valueToday, 10));
+  assert.ok(near(V.project({ ...i, required: 0.05 }).valueToday, 7.8353));
+  assert.ok(near(V.project({ ...i, required: 0.1 }).valueToday, 6.2092));
+  const g = (r) => V.impliedGrowth({ ...i, required: r });
+  assert.ok(Math.abs(g(0)) < 1e-9);
+  assert.ok(near(g(0.05), 0.05));
+  assert.ok(near(g(0.1), 0.1));
+  for (const r of [0, 0.05, 0.1, 0.2]) {
+    const out = V.project({ ...i, required: r, growth: g(r) });
+    assert.ok(near(out.valueToday, i.price), "round trip at " + r);
+  }
+});
+
+/* Codex audit F07: impossible inputs must not produce Infinity or NaN. */
+test("impossible inputs are refused with a reason, never Infinity", () => {
+  const i = { price: 10, revenue: 100, shares: 10, years: 5, growth: 0.05, margin: 0.1, exitPE: 10, shareChange: 0, required: 0.1 };
+  assert.equal(V.project({ ...i, shareChange: -1 }), null);
+  assert.equal(V.validate({ ...i, shareChange: -1 }).field, "shareChange");
+  assert.equal(V.project({ ...i, required: -1 }), null);
+  assert.equal(V.validate({ ...i, required: -1.5 }).field, "required");
+  assert.equal(V.project({ ...i, growth: NaN }), null);
+  assert.equal(V.impliedGrowth({ ...i, shareChange: -1 }), null);
+  assert.equal(V.validate(i), null);
+  const shrinking = V.project({ ...i, growth: -0.2 });
+  assert.ok(shrinking && Number.isFinite(shrinking.valueToday), "negative growth stays usable");
+});

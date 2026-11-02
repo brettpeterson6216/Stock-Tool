@@ -69,3 +69,14 @@ test("a cover-page share count far below the income statement's is not used for 
   const ok = metricsFrom({ sharesOutstanding: 3.3e8, ttm: { netIncome: 2e9, eps: 6, revenue: 6e9 } }, { price: 200 });
   assert.equal(ok.marketCapitalization, 200 * 3.3e8 / 1e6);
 });
+
+/* Codex audit F03: missing statements must never read as a clean report. */
+test("without statements the summary carries the report card and says what did not run", () => {
+  const A = require("../public/app/analysis.js");
+  const grades = { factors: [{ key: "health", grade: "B" }], strengths: [{ text: "Return on capital 30%: well above peers." }], watch: [{ text: "Price to sales of 24x is higher than 70% of peers." }] };
+  const input = { fundamentals: null, price: null, grades, valuation: null };
+  const fl = A.flags(input);
+  assert.ok(fl.some(f => f.tone === "bad" && /Price to sales/.test(f.title)), "the report card's watch-out appears as a warning");
+  assert.ok(fl.some(f => f.tone === "good" && /Return on capital/.test(f.title)), "the report card's strength stands in");
+  assert.equal(A.coverage(input).statements, false);
+});
