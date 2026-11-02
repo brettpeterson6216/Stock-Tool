@@ -286,7 +286,10 @@
     var bar = document.createElement("div");
     bar.className = "il-tape"; bar.setAttribute("aria-label", "Market today");
     bar.innerHTML = '<div class="il-tape-state"><span class="il-tape-dot' + (st.open ? " on" : "") + '"></span><b>US market</b><span>' + st.label + '</span></div><div class="il-tape-run"><div class="il-tape-track"></div></div>';
-    top.parentNode.insertBefore(bar, top);
+    /* On phones the bar stays pinned under the status bar, so the tape goes
+       under it and scrolls away; on wider screens it sits above the bar. */
+    var narrow = window.matchMedia && window.matchMedia("(max-width:760px)").matches;
+    top.parentNode.insertBefore(bar, narrow ? top.nextSibling : top);
     IL.marketSummary().then(function (d) {
       if (!d) { bar.querySelector(".il-tape-run").innerHTML = '<span class="il-tape-none">Market data is updating.</span>'; return; }
       var items = (d.indexes || []).map(function (x) { return { n: String(x.name || x.symbol).replace(/\s*\(.*\)$/, ""), p: x.price, c: x.changePct }; })

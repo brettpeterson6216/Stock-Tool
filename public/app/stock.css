@@ -59,7 +59,7 @@
 }
 
 /* ── Report card aside ──────────────────────────────────────────────────── */
-.rc{gap:14px;position:sticky;top:calc(var(--top-h) + 60px)}
+.rc{gap:14px;position:sticky;top:calc(var(--top-h) + var(--safe-top,0px) + 60px)}
 @media (max-width:1080px){.rc{position:static}}
 .rc-top{display:flex;align-items:center;gap:16px}
 .rc-lab{display:flex;flex-direction:column;gap:2px;font-size:13px}
