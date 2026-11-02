@@ -1351,3 +1351,32 @@ test("old app links to a stock open the rebuilt page on the matching tab", async
     assert.equal(res.status, 200, keep);
   }
 });
+
+test("signed-in members get the rebuilt dashboard on plain / and can still reach the app", async () => {
+  const { cookie } = await makeSession("dash_member", "dash_member@test.com");
+  const home = await req("/", { headers: { cookie } });
+  assert.equal(home.status, 200);
+  assert.match(await home.text(), /src="\/app\/home\.js\?v=/);
+  const app = await req("/?view=home", { headers: { cookie } });
+  assert.match(await app.text(), /src="\/app-legacy\.js/);
+  // Visitors keep the landing page.
+  const guest = await (await req("/")).text();
+  assert.doesNotMatch(guest, /\/app\/home\.js/);
+});
+
+test("Compare is its own page and old compare links open it", async () => {
+  const res = await req("/compare?t=NVDA,AMD");
+  assert.equal(res.status, 200);
+  assert.match(await res.text(), /src="\/app\/compare\.js\?v=/);
+  const old = await req("/?view=tool&section=compare&symbol=nvda");
+  assert.equal(old.status, 302);
+  assert.equal(old.headers.get("location"), "/compare?t=NVDA");
+});
+
+test("the watchlist price snapshot answers without counting lookups", async () => {
+  const res = await req("/api/market/snapshot?tickers=AAPL,msft,bad%20ticker");
+  assert.equal(res.status, 200);
+  const body = await res.json();
+  assert.deepEqual(body.quotes.map(q => q.symbol), ["AAPL", "MSFT"]);
+  assert.equal((await req("/api/market/snapshot")).status, 400);
+});

@@ -271,3 +271,11 @@ select.input{appearance:none;background-image:linear-gradient(45deg,transparent 
 .il-foot a{color:var(--text3)}
 .il-foot a:hover{color:var(--text2)}
 @media (max-width:760px){.il-foot{padding:20px var(--s4) 28px}}
+.mini{list-style:none;margin:0;padding:0}
+.mini li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 20px;border-top:1px solid var(--line)}
+.mini li:first-child{border-top:0}
+.mini a{display:flex;flex-direction:column;min-width:0;color:var(--text)}
+.mini a:hover{text-decoration:none}
+.mini a:hover b{color:var(--gold-text)}
+.mini a span{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mini .num{font-weight:600}

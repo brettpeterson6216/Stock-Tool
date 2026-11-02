@@ -479,6 +479,24 @@ router.get("/market/analyst-signals", (_req, res) => {
 // ============================================================
 /* Movers among the ~300 companies the site grades, from their latest daily
    closes (the licensed price feed does not sell a whole-market movers list). */
+/* Last close and day change for a short list of tickers (a watchlist), from
+   the daily figures the screener already keeps. Does not count against the
+   daily lookup limit: it is the same public data the movers list shows.
+   Tickers we have not priced yet are queued in the background and come back
+   with price null until then. */
+router.get("/market/snapshot", (req, res) => {
+  const tickers = [...new Set(String(req.query.tickers || "").split(",").map(t => normalizeTicker(t)).filter(Boolean))].slice(0, 40);
+  if (!tickers.length) return res.status(400).json({ error: "Pass tickers=AAPL,MSFT." });
+  const missing = tickers.filter(t => !Number.isFinite((_enrich.get(t) || {}).price));
+  if (missing.length) startEnrichment(missing.slice(0, 20));
+  res.setHeader("Cache-Control", "private, max-age=60");
+  res.json({ quotes: tickers.map(t => {
+    const e = _enrich.get(t) || {};
+    return { symbol: t, name: e.name || null, price: Number.isFinite(e.price) ? e.price : null, chgPct: Number.isFinite(e.change1D) ? e.change1D : null,
+      change1Y: Number.isFinite(e.change1Y) ? e.change1Y : null, asOf: e.asOf ? new Date(e.asOf * 1000).toISOString().slice(0, 10) : null };
+  }) });
+});
+
 router.get("/market/movers", (req, res) => {
   const requestedType = String(req.query.type || "gainers");
   const type = ["gainers", "losers", "active"].includes(requestedType) ? requestedType : "gainers";

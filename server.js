@@ -264,7 +264,7 @@ app.use("/api",         logoRouter);         // /api/logo/:ticker
 // ============================================================
 //  Static HTML pages
 // ============================================================
-const { wantsLite, liteHtml } = require("./lib/home-lite");
+const { wantsLite, liteHtml, isPlainHomeQuery } = require("./lib/home-lite");
 let liteHomeCache;
 
 /* The rebuilt stock page. /research is the search landing; /research/NVDA is
@@ -285,6 +285,8 @@ app.get(["/research", "/research/:ticker", "/research/:ticker/:tab"], (req, res)
   return sendPage(res, researchPage);
 });
 
+app.get("/compare", (_req, res) => sendPage(res, path.join(__dirname, "public", "app", "compare.html")));
+
 /* Old single-page-app links to a stock (?view=tool&section=analyze&symbol=X
    and friends) now open the rebuilt stock page on the matching tab. Sections
    that have not been rebuilt yet (watchlist, screener, Valuation Lab, compare)
@@ -298,6 +300,10 @@ function legacyStockRedirect(query) {
   if (query.view !== "tool") return null;
   if (!query.section && !query.symbol && !query.ticker) return null;
   const section = String(query.section || "analyze").toLowerCase();
+  if (section === "compare") {
+    const list = String(query.symbol || query.ticker || query.t || "").toUpperCase().split(",").filter(t => /^[A-Z0-9.^-]{1,15}$/.test(t)).slice(0, 4);
+    return "/compare" + (list.length ? "?t=" + list.join(",") : "");
+  }
   if (!Object.prototype.hasOwnProperty.call(LEGACY_SECTION_TAB, section)) return null;
   const sym = String(query.symbol || query.ticker || "").trim().toUpperCase();
   if (!sym) return section === "analyze" ? "/research" : null;
@@ -309,6 +315,12 @@ function legacyStockRedirect(query) {
 app.get("/", (req, res) => {
   const moved = legacyStockRedirect(req.query || {});
   if (moved) return res.redirect(302, moved);
+  /* Signed-in members get the rebuilt dashboard on plain "/". The original
+     app (and its home view) stays reachable at /?view=home and /?view=tool. */
+  if (req.session && req.session.userId && isPlainHomeQuery(req.query)) {
+    res.setHeader("Vary", "Cookie");
+    return sendPage(res, path.join(__dirname, "public", "app", "home.html"));
+  }
   const indexPath = path.join(__dirname, "index.html");
   /* The same URL serves two documents depending on the session cookie, so no
      shared cache may hand one visitor's copy to another. */

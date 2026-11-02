@@ -1,0 +1,30 @@
+/* Compare page. Built only from lens.css tokens. */
+.cmp-title{font-size:26px;font-weight:700;letter-spacing:-.02em}
+.cmp-head p{margin-top:4px}
+.cmp-pick{gap:12px}
+.cmp-chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.cmp-chip{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 6px 0 12px;border:1px solid var(--line2);border-radius:var(--r-md);background:var(--raised);font-weight:700}
+.cmp-chip a{color:var(--text)}
+.cmp-chip i,.cmp-th i,.cmp-key i,.cmp-dot{display:inline-block;width:10px;height:10px;border-radius:999px;flex:none}
+.cmp-chip button{width:26px;height:26px;border:0;border-radius:6px;background:transparent;color:var(--text3);font-size:18px;line-height:1;cursor:pointer}
+.cmp-chip button:hover{background:var(--hover);color:var(--text)}
+.cmp-add{flex:1 1 240px;max-width:340px}
+.cmp-presets .tag{border:0;cursor:pointer;font:inherit;font-size:12px;font-weight:600}
+.cmp-presets .tag:hover{background:var(--hover);color:var(--text)}
+.cmp-legend{display:flex;gap:18px;flex-wrap:wrap;font-size:13px}
+.cmp-key{display:inline-flex;align-items:center;gap:6px;font-weight:600}
+.cmp-chart{height:300px;margin:0 -6px}
+.cmp-tbl{table-layout:fixed;min-width:640px}
+.cmp-tbl th:first-child,.cmp-tbl td:first-child{width:230px}
+.cmp-tbl th{vertical-align:bottom}
+.cmp-th{display:flex;flex-direction:column;align-items:flex-end;gap:2px;color:var(--text)}
+.cmp-th:hover{text-decoration:none}
+.cmp-th b{display:flex;align-items:center;gap:6px;font-size:15px}
+.cmp-th span{font-size:12px;color:var(--text2);font-weight:500;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+
+.cmp-tbl tr.cmp-group td{background:var(--raised);font:650 12.5px var(--sans);color:var(--text2);padding-top:9px;padding-bottom:9px}
+.cmp-tbl td.best{font-weight:700}
+.best-dot{display:inline-block;width:7px;height:7px;border-radius:999px;background:var(--gain);margin-right:8px;vertical-align:middle}
+.cmp-dot{margin-right:8px;vertical-align:1px}
+#cmp-flags .lr-flags{margin-bottom:6px}
+@media (max-width:760px){.cmp-title{font-size:22px}.cmp-chart{height:240px}.cmp-tbl th:first-child,.cmp-tbl td:first-child{width:150px;white-space:normal}}

@@ -253,6 +253,12 @@
   };
   function navGoTo(id, attempt) {
     if (id === 'adveducation') id = 'education';
+    /* Compare has been rebuilt as its own page. */
+    if (id === 'compare') {
+      var cur = (document.getElementById('main-ticker') || {}).value;
+      window.location.assign('/compare' + (cur && /^[A-Z0-9.^-]{1,15}$/i.test(cur.trim()) ? '?t=' + encodeURIComponent(cur.trim().toUpperCase()) : ''));
+      return;
+    }
     if (id === 'home') { showLandingPage(); updateNavToolLink(true); return; }
     if (typeof openSection !== 'function' || !document.getElementById('sec-' + id)) {
       const nextAttempt = (attempt || 0) + 1;

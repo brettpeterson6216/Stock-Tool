@@ -304,8 +304,9 @@
     if (sym) location.href = "/research/" + encodeURIComponent(sym);
   };
 
-  function wireSearch(input, list) {
+  function wireSearch(input, list, onPick) {
     if (!input || !list) return;
+    var pick = function (sym) { if (onPick) { input.value = ""; close(); onPick(String(sym || "").trim().toUpperCase()); } else IL.go(sym); };
     var items = [], sel = -1, seq = 0, timer = null;
     function close() { list.hidden = true; input.setAttribute("aria-expanded", "false"); sel = -1; }
     function paint() {
@@ -336,16 +337,17 @@
     input.addEventListener("keydown", function (e) {
       if (e.key === "ArrowDown" && items.length) { e.preventDefault(); sel = (sel + 1) % items.length; paint(); }
       else if (e.key === "ArrowUp" && items.length) { e.preventDefault(); sel = (sel - 1 + items.length) % items.length; paint(); }
-      else if (e.key === "Enter") { e.preventDefault(); IL.go(sel >= 0 && items[sel] ? items[sel].symbol : input.value); }
+      else if (e.key === "Enter") { e.preventDefault(); pick(sel >= 0 && items[sel] ? items[sel].symbol : input.value); }
       else if (e.key === "Escape") { close(); input.blur(); }
     });
     list.addEventListener("mousedown", function (e) { e.preventDefault(); });
     list.addEventListener("click", function (e) {
-      var b = e.target.closest("[data-sym]"); if (b) IL.go(b.getAttribute("data-sym"));
+      var b = e.target.closest("[data-sym]"); if (b) pick(b.getAttribute("data-sym"));
     });
     input.addEventListener("blur", function () { setTimeout(close, 120); });
   }
   IL.wireSearch = wireSearch;
+  IL.wireSearchPick = function (input, list, onPick) { wireSearch(input, list, onPick); };
 
   /* ── Toast ───────────────────────────────────────────────────────────── */
   var toastEl = null, toastTimer = null;

@@ -47,7 +47,7 @@
   var D = {
     quote: function () { return get("quote", "/api/quote/" + S.t + "?range=2y"); },
     lens: function () { return get("lens", "/api/lens-score/" + S.t + "?card=1"); },
-    hist: function () { return get("hist", "/api/fundamentals/history/" + S.t); },
+    hist: function () { return get("hist", "/api/fundamentals/history/" + S.t).then(function (r) { S.histRes = r; return r; }); },
     annual: function () { return get("annual", "/api/financials/" + S.t); },
     funds: function () { return get("funds", "/api/funds/" + S.t); },
     news: function () { return get("news", "/api/news/" + S.t); },
@@ -139,20 +139,27 @@
         '<div class="row wrap rl-pop"><span class="faint">Popular:</span>' + popular.map(function (t) { return '<a class="tag" href="/research/' + t + '">' + t + "</a>"; }).join("") + "</div>" +
       "</section>" +
       '<div class="grid-3 rl-tools">' +
+        '<a class="card" href="/compare"><span class="card-t">Compare</span><span class="card-sub">Up to four stocks side by side, with the best in each row marked.</span></a>' +
         '<a class="card" href="/?view=tool&section=screener"><span class="card-t">Screener</span><span class="card-sub">Filter about 290 US stocks by grade, value, size and momentum.</span></a>' +
         '<a class="card" href="/lens-score"><span class="card-t">LensToolkit</span><span class="card-sub">Trend, timing, buy zones and alerts for any stock.</span></a>' +
         '<a class="card" href="/?view=tool&section=projection"><span class="card-t">Valuation Lab</span><span class="card-sub">A full five-year model with saved versions.</span></a>' +
       "</div>" +
       '<div class="section-h"><h2 class="section-t">Top-rated in each sector</h2><span class="card-sub">Highest LensScore among the companies we grade</span></div>' +
-      '<div class="card flush" id="rl-leaders"><div style="padding:20px">' + sk(16) + "</div></div>";
+      '<div class="card flush" id="rl-leaders"><div style="padding:20px">' + sk(16) + "</div></div>" +
+      '<div class="grid-2">' +
+        '<section class="card flush" id="rl-track"><div class="card-h"><h2 class="card-t">Does the LensScore work?</h2><span class="card-sub">Our public track record</span></div><div style="padding:20px">' + sk(80) + "</div></section>" +
+        '<section class="card flush" id="rl-movers"><div class="card-h"><h2 class="card-t">Biggest grade changes this week</h2></div><div style="padding:20px">' + sk(80) + "</div></section>" +
+      "</div>";
     IL.wireSearch(IL.$("#rl-q"), IL.$("#rl-sugg"));
     IL.api("/api/lens-leaders").then(function (res) {
       var box = IL.$("#rl-leaders");
       var d = res.data || {};
+      paintTrack(d); paintGradeMovers(d);
       var rows = (d.sectors || []).filter(function (s) { return s.top && s.top.length; });
       rows.sort(function (a, b) { return (b.count || 0) - (a.count || 0); });
       if (!res.ok || !rows.length) { box.innerHTML = '<div class="empty">Grades are still loading. Search for a company above.</div>'; return; }
       var keys = ["value", "growth", "profitability", "health", "momentum"];
+      var head = IL.$("#peers"); if (head && !head.querySelector(".link")) head.insertAdjacentHTML("beforeend", '<a class="link" href="/compare?t=' + list.slice(0, 4).join(",") + '">Compare side by side \u2192</a>');
       box.innerHTML = '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Sector</th><th style="text-align:left">Top-rated</th><th>LensScore</th>' + keys.map(function (k) { return "<th>" + FACTOR_LABEL[k] + "</th>"; }).join("") + '<th style="text-align:left">Runners-up</th></tr></thead><tbody>' +
         rows.map(function (r) {
           var top = r.top[0];
@@ -162,6 +169,33 @@
         }).join("") + "</tbody></table></div>";
     });
     main().addEventListener("click", function (e) { var r = e.target.closest("[data-go]"); if (r) IL.go(r.getAttribute("data-go")); });
+  }
+
+  /* The score's own record: how each score band has done since the first
+     daily snapshot, against the average of every graded company. */
+  function paintTrack(d) {
+    var box = IL.$("#rl-track"); if (!box) return;
+    var tr = d && d.trackRecord, start = d && d.historyStarts;
+    if (!tr || !tr.bands || !tr.companies) {
+      box.innerHTML = '<div class="card-h"><h2 class="card-t">Does the LensScore work?</h2></div><p class="muted" style="padding:16px 20px">' +
+        (start ? "We save every grade each trading day, starting " + h(F.date(start)) + ". Results by score band appear here as the record grows, good or bad." : "The daily record of every grade starts soon. Results appear here as they build up.") + "</p>";
+      return;
+    }
+    var days = tr.startDay && tr.endDay ? Math.round((Date.parse(tr.endDay) - Date.parse(tr.startDay)) / 864e5) : null;
+    box.innerHTML = '<div class="card-h"><h2 class="card-t">Does the LensScore work?</h2><span class="card-sub">Price change since ' + h(F.date(tr.startDay)) + ", by starting score</span></div>" +
+      '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Score on day one</th><th>Companies</th><th>Average change</th><th>vs all graded</th></tr></thead><tbody>' +
+      tr.bands.filter(function (b) { return b.count; }).map(function (b) {
+        return "<tr><td>" + h(b.label) + "</td><td>" + b.count + '</td><td class="' + F.cls(b.averageReturn) + '">' + F.spct(b.averageReturn) + '</td><td class="' + F.cls(b.beatAll) + '">' + F.spct(b.beatAll) + "</td></tr>";
+      }).join("") + '<tr class="em"><td>All graded</td><td>' + tr.companies + '</td><td class="' + F.cls(tr.allAverage) + '">' + F.spct(tr.allAverage) + "</td><td></td></tr></tbody></table></div>" +
+      '<p class="note" style="padding:10px 20px 14px">' + (days !== null && days < 90 ? "Only " + days + " days so far: far too short to judge. " : "") + "Price change only, no dividends. Past results do not predict future ones; we publish them either way.</p>";
+  }
+  function paintGradeMovers(d) {
+    var box = IL.$("#rl-movers"); if (!box) return;
+    var m = d && d.movers;
+    if (!m || (!m.up.length && !m.down.length)) { box.innerHTML = '<div class="card-h"><h2 class="card-t">Biggest grade changes this week</h2></div><p class="muted" style="padding:16px 20px">No score changes yet this week.</p>'; return; }
+    var row = function (x) { return '<li><a href="/research/' + h(x.ticker) + '"><b>' + h(x.ticker) + '</b><span class="faint">' + h(x.name || "") + '</span></a><span class="num"><span class="faint">' + F.num(x.then, 1) + ' \u2192 </span><b class="' + F.cls(x.change) + '">' + F.num(x.now, 1) + "</b></span></li>"; };
+    box.innerHTML = '<div class="card-h"><h2 class="card-t">Biggest grade changes this week</h2><span class="card-sub">LensScore since ' + h(F.date(m.since, { year: undefined })) + "</span></div>" +
+      '<ul class="mini">' + m.up.slice(0, 4).map(row).join("") + m.down.slice(0, 3).map(row).join("") + "</ul>";
   }
 
   /* ═════════════════════════════════════════════════════════════════════
@@ -295,6 +329,7 @@
     box.innerHTML =
       '<div class="ov">' +
         '<div class="ov-main">' +
+          '<section class="card lr" aria-label="Lens Report" id="ov-lr"><div class="lr-h"><h2 class="card-t">The Lens Report</h2></div>' + sk(90) + "</section>" +
           '<section class="card pc" aria-label="Price chart" id="ov-chart"></section>' +
           '<section class="kv" aria-label="Key numbers" id="ov-kv">' + Array(8).join('<div><span class="k">' + sk(10, "60%") + '</span><span class="v">' + sk(16, "50%") + "</span></div>") + "</section>" +
           '<div class="grid-3">' +
@@ -315,10 +350,147 @@
     S.chart = IL.PriceChart(IL.$("#ov-chart"), { ticker: S.t, seed: S.quote || undefined });
     paintKeyNumbers();
     paintRisk();
-    D.lens().then(function () { paintReportCard(); paintKeyNumbers(); paintReport(); paintPeers(); });
+    D.lens().then(function () { paintReportCard(); paintKeyNumbers(); paintReport(); paintPeers(); paintLensReport(); });
+    D.hist().then(paintLensReport);
     paintLatestQuarter();
     paintFunds(IL.$("#ov-f"), true);
     paintNews(IL.$("#ov-news"), 6);
+  }
+
+  /* ── The Lens Report: verdict, story, green and red flags ─────────────── */
+  function reportInputs() {
+    var A = IL.analysis;
+    var f = S.histRes && S.histRes.ok ? A.fundamentals(S.histRes.data) : null;
+    var p = S.quote ? A.priceFacts(S.quote.bars, S.quote.meta) : null;
+    var g = S.lens && S.lens.grades && S.lens.grades.status === "graded" ? S.lens.grades : null;
+    var v = A.valuation(f, p, S.quote ? N(S.quote.meta.trailingPE) : null);
+    var meta = S.quote ? S.quote.meta : {};
+    return { ticker: S.t, name: IL.$("#sh-name") ? IL.$("#sh-name").textContent : S.t, fundamentals: f, price: p, grades: g, valuation: v, meta: meta };
+  }
+  function paintLensReport() {
+    var box = IL.$("#ov-lr"); if (!box) return;
+    if (!S.histRes && once.hist) return;   // the history request is still on its way
+    var inp = reportInputs(), A = IL.analysis;
+    var fl = A.flags(inp), st = A.story(inp);
+    var good = fl.filter(function (x) { return x.tone === "good"; }), bad = fl.filter(function (x) { return x.tone === "bad"; });
+    var v = inp.valuation;
+    var verdict = v && v.verdict
+      ? '<span class="tag ' + (v.verdict.tone === "good" ? "good" : v.verdict.tone === "bad" ? "bad" : "gold") + '">' + h(v.verdict.label) + "</span>"
+      : "";
+    function list(items, cls, empty) {
+      if (!items.length) return '<p class="muted lr-empty">' + h(empty) + "</p>";
+      return '<ul class="lr-flags ' + cls + '">' + items.slice(0, 5).map(function (x) {
+        return '<li><span class="lr-ico" aria-hidden="true">' + (cls === "good" ? "+" : "!") + '</span><div><b>' + h(x.title) + '</b><span>' + h(x.detail) + "</span></div></li>";
+      }).join("") + "</ul>";
+    }
+    var gated = S.histRes && S.histRes.gate;
+    box.innerHTML =
+      '<div class="lr-h"><h2 class="card-t">The Lens Report ' + IL.tip("Written automatically from the company’s SEC filings, its grades against sector peers and a year of prices. Every point shows the number behind it. Not investment advice.") + "</h2>" + verdict + "</div>" +
+      (st.length ? '<p class="lr-story">' + st.map(h).join(" ") + "</p>" : '<p class="muted">Not enough data to write a report for this company yet.</p>') +
+      '<div class="lr-cols">' +
+        '<div><h3 class="lr-sub good">What’s working</h3>' + list(good, "good", "Nothing stands out yet.") + "</div>" +
+        '<div><h3 class="lr-sub bad">Warning signs</h3>' + list(bad, "bad", "No warning signs in the numbers we check.") + "</div>" +
+      "</div>" +
+      (gated ? '<p class="lr-gate">' + IL.icon("lock", 14) + ' <span>Sales, margin, cash-flow and dilution checks need a free account. <a href="' + IL.signupHref() + '">Create one</a> · no card.</span></p>' : "") +
+      '<div class="lr-foot"><a class="link" href="/research/' + h(S.t) + '/valuation" data-tab="valuation">Test the price yourself →</a><button class="link" type="button" id="lr-share">Share this report</button></div>';
+    var sh = IL.$("#lr-share"); if (sh) sh.addEventListener("click", function () { shareCard(inp, fl); });
+  }
+
+  /* ── Share card: a 1200×630 image of the report, made in the browser ── */
+  function shareCard(inp, fl) {
+    var W = 1200, H = 630, c = document.createElement("canvas");
+    c.width = W; c.height = H;
+    var x = c.getContext("2d");
+    var C = { bg: "#0E0F11", panel: "#15171A", line: "#262A2F", text: "#EDEEF0", t2: "#A3A9B1", t3: "#7D848D", gold: "#E5B65A", gain: "#4CC38A", loss: "#F07B7B" };
+    var sans = "Inter, system-ui, sans-serif", nums = "'IBM Plex Sans', Inter, sans-serif";
+    x.fillStyle = C.bg; x.fillRect(0, 0, W, H);
+    x.fillStyle = C.gold; x.fillRect(0, 0, W, 6);
+    function t(str, X, Y, font, color, align) { x.font = font; x.fillStyle = color; x.textAlign = align || "left"; x.fillText(str, X, Y); }
+    function wrap(str, X, Y, maxW, lineH, font, color, maxLines) {
+      x.font = font; x.fillStyle = color; x.textAlign = "left";
+      var words = String(str).split(" "), line = "", n = 0;
+      for (var i = 0; i < words.length; i++) {
+        var test = line ? line + " " + words[i] : words[i];
+        if (x.measureText(test).width > maxW && line) {
+          if (++n >= maxLines) { x.fillText(line.replace(/[,.;]?$/, "\u2026"), X, Y); return Y + lineH; }
+          x.fillText(line, X, Y); Y += lineH; line = words[i];
+        } else line = test;
+      }
+      if (line) { x.fillText(line, X, Y); Y += lineH; }
+      return Y;
+    }
+    var p = inp.price, g = inp.grades;
+    t(S.t, 60, 92, "700 30px " + sans, C.gold);
+    t(String(inp.name || "").slice(0, 40), 60 + x.measureText(S.t).width + 20, 92, "600 30px " + sans, C.text);
+    if (p) {
+      t(F.price(p.price), 60, 160, "600 56px " + nums, C.text);
+      x.font = "600 56px " + nums;
+      var pw = x.measureText(F.price(p.price)).width;
+      t(F.spct(p.chgPct, 2) + " today", 60 + pw + 20, 158, "600 26px " + nums, p.chg >= 0 ? C.gain : C.loss);
+    }
+    var v = inp.valuation;
+    var Y = 220;
+    if (v && v.verdict) {
+      x.font = "700 22px " + sans;
+      var lw = x.measureText(v.verdict.label).width + 32;
+      x.fillStyle = "rgba(229,182,90,.14)"; roundRect(x, 60, Y - 28, lw, 40, 10); x.fill();
+      t(v.verdict.label, 76, Y, "700 22px " + sans, C.gold);
+      if (v.implied !== null && v.delivered !== null) { t("The price needs " + F.spct(v.implied * 100, 0) + " a year of sales growth; it has delivered " + F.spct(v.delivered * 100, 0) + ".", 60, Y + 42, "500 21px " + sans, C.t2); Y += 40; }
+      Y += 60;
+    }
+    var good = fl.filter(function (f) { return f.tone === "good"; }).slice(0, 3), bad = fl.filter(function (f) { return f.tone === "bad"; }).slice(0, 3);
+    t("WHAT\u2019S WORKING", 60, Y + 10, "700 16px " + sans, C.gain);
+    t("WARNING SIGNS", 400, Y + 10, "700 16px " + sans, C.loss);
+    var y1 = Y + 46, y2 = Y + 46;
+    good.forEach(function (f) { t("+  " + f.title, 60, y1, "600 22px " + sans, C.text); y1 += 38; });
+    if (!good.length) t("Nothing stands out", 60, y1, "500 22px " + sans, C.t3);
+    bad.forEach(function (f) { t("!  " + f.title, 400, y2, "600 22px " + sans, C.text); y2 += 38; });
+    if (!bad.length) t("None in our checks", 400, y2, "500 22px " + sans, C.t3);
+    // LensScore panel
+    x.fillStyle = C.panel; roundRect(x, 790, 60, 350, 450, 18); x.fill();
+    x.strokeStyle = C.line; x.lineWidth = 2; roundRect(x, 790, 60, 350, 450, 18); x.stroke();
+    t("LensScore", 820, 108, "700 22px " + sans, C.text);
+    if (g) {
+      var sc = Number(g.score), col = sc >= 7 ? C.gain : sc >= 4 ? C.gold : C.loss;
+      x.lineWidth = 12; x.strokeStyle = C.line; x.beginPath(); x.arc(890, 190, 56, 0, Math.PI * 2); x.stroke();
+      x.strokeStyle = col; x.lineCap = "round"; x.beginPath(); x.arc(890, 190, 56, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.max(0.02, sc / 10)); x.stroke(); x.lineCap = "butt";
+      t(sc.toFixed(1), 890, 204, "700 38px " + nums, C.text, "center");
+      t(g.label || "", 970, 180, "700 22px " + sans, C.text);
+      if (g.rank) t("#" + g.rank.position + " of " + g.rank.of, 970, 210, "500 18px " + sans, C.t2);
+      if (g.rank) t(String(g.rank.sectorName || g.sectorName || ""), 970, 234, "500 18px " + sans, C.t2);
+      var gy = 300;
+      (g.factors || []).forEach(function (f) {
+        t(FACTOR_LABEL[f.key] || f.label, 820, gy, "500 20px " + sans, C.t2);
+        t(f.grade || "\u2014", 1110, gy, "700 20px " + nums, f.grade && /^A/.test(f.grade) ? C.gain : /^B/.test(f.grade || "") ? "#8FD0A4" : /^C/.test(f.grade || "") ? C.gold : C.loss, "right");
+        gy += 40;
+      });
+    } else {
+      wrap("Not graded: funds and foreign listings are not compared with sector peers.", 820, 160, 290, 28, "500 19px " + sans, C.t2, 4);
+    }
+    x.fillStyle = C.line; x.fillRect(60, 556, W - 120, 2);
+    t("impliedlens.com/research/" + S.t, 60, 594, "600 22px " + sans, C.text);
+    t("From SEC filings and a year of prices \u00b7 not investment advice", W - 60, 594, "500 18px " + sans, C.t3, "right");
+    c.toBlob(function (blob) {
+      if (!blob) { IL.toast("Could not make the image."); return; }
+      var file = new File([blob], S.t + "-lens-report.png", { type: "image/png" });
+      var url = location.origin + "/research/" + S.t;
+      var text = S.t + ": " + (v && v.verdict ? v.verdict.label + ". " : "") + (g ? "LensScore " + Number(g.score).toFixed(1) + "/10. " : "") + url;
+      /* A data: URL, not blob:, because the page's CSP allows data: images. */
+      var href = c.toDataURL("image/png");
+      IL.dialog('<h2>Share the ' + h(S.t) + ' report</h2><img src="' + href + '" alt="" style="width:100%;border-radius:10px;border:1px solid var(--line)">' +
+        '<label class="field">Suggested post<textarea class="input" rows="3" style="height:auto;padding:10px 12px" id="sc-text">' + h(text) + "</textarea></label>" +
+        '<div class="row wrap" style="justify-content:flex-end"><button class="btn ghost" type="button" data-close>Close</button><button class="btn" type="button" id="sc-copy">Copy text</button><a class="btn" href="' + href + '" download="' + S.t + '-lens-report.png">Download image</a>' +
+        (navigator.canShare && navigator.canShare({ files: [file] }) ? '<button class="btn primary" type="button" id="sc-share">Share</button>' : '<a class="btn primary" target="_blank" rel="noopener" href="https://x.com/intent/post?text=' + encodeURIComponent(text) + '">Post on X</a>') + "</div>",
+        function (d) {
+          d.style.width = "min(640px, calc(100vw - 32px))";
+          d.querySelector("#sc-copy").addEventListener("click", function () { var tx = d.querySelector("#sc-text").value; (navigator.clipboard ? navigator.clipboard.writeText(tx) : Promise.reject()).then(function () { IL.toast("Copied"); }, function () { IL.toast("Copy failed"); }); });
+          var sb = d.querySelector("#sc-share");
+          if (sb) sb.addEventListener("click", function () { navigator.share({ files: [file], text: d.querySelector("#sc-text").value }).catch(function () {}); });
+        });
+    }, "image/png");
+  }
+  function roundRect(x, X, Y, w, hh, r) {
+    x.beginPath(); x.moveTo(X + r, Y); x.arcTo(X + w, Y, X + w, Y + hh, r); x.arcTo(X + w, Y + hh, X, Y + hh, r); x.arcTo(X, Y + hh, X, Y, r); x.arcTo(X, Y, X + w, Y, r); x.closePath();
   }
 
   function nextEarnings() {
@@ -390,7 +562,7 @@
       '<div class="rc-next"><span class="rc-next-h">What to check next</span>' + checks.slice(0, 3).map(function (c) {
         return '<a href="/research/' + h(S.t) + (c.tab ? "/" + c.tab : "") + '" data-tab="' + (c.tab || "overview") + '"' + (c.anchor ? ' data-anchor="' + c.anchor + '"' : "") + "><span>" + h(c.text) + "</span>" + IL.icon("arrow", 14) + "</a>";
       }).join("") + "</div>" +
-      '<div class="rc-foot"><a class="btn sm" href="#report" data-scroll="report">Full report card</a><a class="btn sm ghost" href="#peers" data-scroll="peers">Compare peers</a></div>';
+      '<div class="rc-foot"><a class="btn sm" href="#report" data-scroll="report">Full report card</a><a class="btn sm ghost" href="/compare?t=' + [S.t].concat((g.peers || []).filter(function (x) { return x !== S.t; })).slice(0, 4).join(",") + '">Compare peers</a></div>';
   }
   document.addEventListener("click", function (e) {
     var a = e.target.closest("[data-scroll]"); if (!a) return;

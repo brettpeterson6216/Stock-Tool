@@ -1,0 +1,23 @@
+/* Member dashboard. Built only from lens.css tokens. */
+.dh{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.dh-t{font-size:28px;font-weight:700;letter-spacing:-.02em}
+.dh p{margin-top:4px}
+.dash{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:var(--s5);align-items:start}
+@media (max-width:1080px){.dash{grid-template-columns:1fr}}
+.dash-name{font-size:12px;max-width:220px;overflow:hidden;text-overflow:ellipsis}
+.dash-grades{white-space:nowrap}
+.dash-grades span{display:inline-block;min-width:26px;text-align:center;font:700 12.5px var(--num)}
+.dash-empty{padding:20px;display:flex;flex-direction:column;gap:12px;font-size:14px;color:var(--text2)}
+.dash-empty b{color:var(--text)}
+.dash-empty .tag:hover{background:var(--hover);text-decoration:none}
+.since{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.since li{display:flex;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line);font-size:13.5px}
+.since li:first-child{border-top:0}
+.since a{color:var(--text)}
+.since-dot{width:8px;height:8px;border-radius:999px;flex:none}
+.since-dot.good{background:var(--gain)} .since-dot.bad{background:var(--loss)}
+.card.flush>.card-h .seg{margin:-4px 0}
+@media (max-width:760px){.dh-t{font-size:23px}.dash-grades{display:none}}
+.dash-wl .tbl td a{color:var(--text)}
+.dash-wl .tbl td a:hover{color:var(--gold-text);text-decoration:none}
+.dash-wl th.dash-grades{letter-spacing:.02em}
