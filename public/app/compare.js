@@ -68,7 +68,7 @@
     ] },
     { title: "Grades against sector peers", rows: ["value", "growth", "profitability", "health", "momentum"].map(function (k) {
       return { k: { value: "Value", growth: "Growth", profitability: "Profitability", health: "Financial health", momentum: "Momentum" }[k], get: grade(k), rank: true, better: "high",
-        f: function (v) { return v ? '<span style="color:' + IL.gradeTone(v) + ';font-weight:700">' + h(v) + "</span>" : "—"; }, html: true };
+        f: function (v) { return IL.gchip(v); }, html: true };
     }) },
     { title: "Valuation", rows: [
       { k: "P/E (trailing)", get: function (d) { var v = IL.n(d.meta.trailingPE); return v > 0 ? v : null; }, f: F.mult, better: "low", tip: "Price divided by the last 12 months of earnings per share." },
@@ -96,7 +96,7 @@
   function render() {
     var main = document.getElementById("main");
     main.innerHTML =
-      '<div class="cmp-head"><div><h1 class="cmp-title">Compare stocks</h1><p class="muted">Up to four companies side by side: grades, what each price assumes, growth, margins and risk.</p></div></div>' +
+      '<div class="cmp-head hero-band card prime" id="cmp-hero"><div class="stack" style="gap:10px">' + IL.eyebrow("Compare", "research") + '<h1 class="display">Side by side, <em>honestly.</em></h1><p class="muted">Up to four companies side by side: grades, what each price assumes, growth, margins and risk.</p></div></div>' +
       '<div class="cmp-pick card">' +
         '<div class="cmp-chips" id="cmp-chips">' + tickers.map(function (t, i) {
           return '<span class="cmp-chip"><i style="background:' + COLORS[i] + '"></i><a href="/research/' + h(t) + '">' + h(t) + '</a><button type="button" data-rm="' + h(t) + '" aria-label="Remove ' + h(t) + '">×</button></span>';
@@ -112,6 +112,7 @@
           '<div class="grid-2" id="cmp-flags"></div>' +
           '<p class="note">Best value in each row is marked. Grades compare each company with its own sector. Figures from SEC filings and a year of prices; not investment advice.</p>');
     IL.wireSearchPick(IL.$("#cmp-q"), IL.$("#cmp-sugg"), add);
+    IL.ribbon(IL.$("#cmp-hero"), "sweep", 8);
     writeUrl();
     if (tickers.length >= 2) Promise.all(tickers.map(load)).then(paint);
   }
@@ -189,7 +190,7 @@
       var year = bars.filter(function (b) { return b.time >= end - 366 * 86400; });
       if (!year.length) return;
       var base = year[0].close;
-      var s = chart.addSeries(L.LineSeries, { color: COLORS[i], lineWidth: 2, priceLineVisible: false, lastValueVisible: true, crosshairMarkerRadius: 3 });
+      var s = chart.addSeries(L.LineSeries, { color: COLORS[i], lineWidth: 2.5, lineType: 2, priceLineVisible: false, lastValueVisible: true, crosshairMarkerRadius: 3 });
       s.setData(year.map(function (b) { return { time: b.time, value: (b.close / base - 1) * 100 }; }));
       var last = (year[year.length - 1].close / base - 1) * 100;
       legend.push('<span class="cmp-key"><i style="background:' + COLORS[i] + '"></i>' + h(d.t) + ' <b class="num ' + F.cls(last) + '">' + F.spct(last) + "</b></span>");

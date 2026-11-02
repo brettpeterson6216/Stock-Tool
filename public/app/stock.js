@@ -63,13 +63,16 @@
   function sk(hgt, w) { return '<span class="sk" style="height:' + (hgt || 14) + "px" + (w ? ";width:" + w : "") + '"></span>'; }
   function scoreRing(score, size) {
     size = size || 92;
-    var r = size / 2 - 6, c = 2 * Math.PI * r, pct = Math.max(0, Math.min(1, Number(score) / 10));
-    var tone = IL.scoreTone(score), col = tone === "good" ? "var(--gain)" : tone === "mid" ? "var(--amber)" : "var(--loss)";
-    return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 ' + size + " " + size + '" role="img" aria-label="LensScore ' + h(F.num(score, 1)) + ' out of 10">' +
-      '<circle cx="' + size / 2 + '" cy="' + size / 2 + '" r="' + r + '" fill="none" stroke="var(--line2)" stroke-width="8"/>' +
-      '<circle cx="' + size / 2 + '" cy="' + size / 2 + '" r="' + r + '" fill="none" stroke="' + col + '" stroke-width="8" stroke-linecap="round" stroke-dasharray="' + (c * pct).toFixed(1) + " " + c.toFixed(1) + '" transform="rotate(-90 ' + size / 2 + " " + size / 2 + ')"/>' +
-      '<text x="50%" y="50%" dy="0.35em" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-weight="700" font-size="' + Math.round(size * 0.26) + '" fill="var(--text)">' + h(F.num(score, 1)) + "</text></svg>";
+    var r = size / 2 - 7, c = 2 * Math.PI * r, pct = Math.max(0, Math.min(1, Number(score) / 10));
+    var tone = IL.scoreTone(score), a = tone === "good" ? "#3FB37F" : tone === "mid" ? "#D9A441" : "#E06A6A", b = tone === "good" ? "#9BE3BC" : tone === "mid" ? "#F3D18A" : "#F7A9A9";
+    var id = "rg" + Math.random().toString(36).slice(2, 7), mid = size / 2;
+    return '<svg class="ring" width="' + size + '" height="' + size + '" viewBox="0 0 ' + size + " " + size + '" role="img" aria-label="LensScore ' + h(F.num(score, 1)) + ' out of 10">' +
+      '<defs><linearGradient id="' + id + '" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="' + a + '"/><stop offset="1" stop-color="' + b + '"/></linearGradient></defs>' +
+      '<circle cx="' + mid + '" cy="' + mid + '" r="' + r + '" fill="none" stroke="var(--line2)" stroke-width="9"/>' +
+      '<circle cx="' + mid + '" cy="' + mid + '" r="' + r + '" fill="none" stroke="url(#' + id + ')" stroke-width="9" stroke-linecap="round" stroke-dasharray="' + (c * pct).toFixed(1) + " " + c.toFixed(1) + '" transform="rotate(-90 ' + mid + " " + mid + ')" style="filter:drop-shadow(0 0 6px ' + a + '66)"/>' +
+      '<text x="50%" y="50%" dy="0.36em" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-weight="700" font-size="' + Math.round(size * 0.28) + '" fill="var(--text)">' + h(F.num(score, 1)) + "</text></svg>";
   }
+
   function quarterly(hist) {
     var q = (hist && hist.quarters ? hist.quarters.slice() : []).filter(function (x) { return x && x.end; });
     q.sort(function (a, b) { return a.end < b.end ? -1 : 1; });
@@ -131,7 +134,8 @@
     var popular = ["NVDA", "AAPL", "MSFT", "AMZN", "GOOGL", "META", "TSLA", "COST", "JPM", "LLY", "AVGO", "NFLX"];
     main().innerHTML =
       '<section class="rl-hero">' +
-        '<h1>Research any US stock</h1>' +
+        IL.eyebrow("Stock research for every level", "research") +
+        '<h1 class="display">Research any stock like a <em>professional.</em></h1>' +
         '<p class="muted">A plain-English report card, the full financials, what the price is assuming, earnings releases and who owns it. Straight from SEC filings.</p>' +
         '<div class="il-search rl-search" role="search"><label class="il-search-box">' + IL.icon("search", 18) +
           '<input id="rl-q" type="search" autocomplete="off" spellcheck="false" placeholder="Company name or ticker, e.g. Apple or AAPL" aria-label="Search a company or ticker" role="combobox" aria-expanded="false" aria-controls="rl-sugg"></label>' +
@@ -139,18 +143,19 @@
         '<div class="row wrap rl-pop"><span class="faint">Popular:</span>' + popular.map(function (t) { return '<a class="tag" href="/research/' + t + '">' + t + "</a>"; }).join("") + "</div>" +
       "</section>" +
       '<div class="grid-3 rl-tools">' +
-        '<a class="card" href="/compare"><span class="card-t">Compare</span><span class="card-sub">Up to four stocks side by side, with the best in each row marked.</span></a>' +
-        '<a class="card" href="/screener"><span class="card-t">Screener</span><span class="card-sub">Filter about 290 US stocks by grade, value, size and momentum.</span></a>' +
-        '<a class="card" href="/lens-score"><span class="card-t">LensToolkit</span><span class="card-sub">Trend, timing, buy zones and alerts for any stock.</span></a>' +
-        '<a class="card" href="/?view=tool&section=projection"><span class="card-t">Valuation Lab</span><span class="card-sub">A full five-year model with saved versions.</span></a>' +
+        '<a class="card lift" href="/compare"><span class="card-t">Compare</span><span class="card-sub">Up to four stocks side by side, with the best in each row marked.</span></a>' +
+        '<a class="card lift" href="/screener"><span class="card-t">Screener</span><span class="card-sub">Filter about 290 US stocks by grade, value, size and momentum.</span></a>' +
+        '<a class="card lift" href="/lens-score"><span class="card-t">LensToolkit</span><span class="card-sub">Trend, timing, buy zones and alerts for any stock.</span></a>' +
+        '<a class="card lift" href="/?view=tool&section=projection"><span class="card-t">Valuation Lab</span><span class="card-sub">A full five-year model with saved versions.</span></a>' +
       "</div>" +
-      '<div class="section-h"><h2 class="section-t">Top-rated in each sector</h2><span class="card-sub">Highest LensScore among the companies we grade</span></div>' +
+      '<div class="section-h"><h2 class="section-t">Top-rated in each <em>sector</em></h2><span class="card-sub">Highest LensScore among the companies we grade</span></div>' +
       '<div class="card flush" id="rl-leaders"><div style="padding:20px">' + sk(16) + "</div></div>" +
       '<div class="grid-2">' +
         '<section class="card flush" id="rl-track"><div class="card-h"><h2 class="card-t">Does the LensScore work?</h2><span class="card-sub">Our public track record</span></div><div style="padding:20px">' + sk(80) + "</div></section>" +
         '<section class="card flush" id="rl-movers"><div class="card-h"><h2 class="card-t">Biggest grade changes this week</h2></div><div style="padding:20px">' + sk(80) + "</div></section>" +
       "</div>";
     IL.wireSearch(IL.$("#rl-q"), IL.$("#rl-sugg"));
+    IL.ribbon(IL.$(".rl-hero"), "flanks", 5);
     IL.api("/api/lens-leaders").then(function (res) {
       var box = IL.$("#rl-leaders");
       var d = res.data || {};
@@ -163,8 +168,8 @@
       box.innerHTML = '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Sector</th><th style="text-align:left">Top-rated</th><th>LensScore</th>' + keys.map(function (k) { return "<th>" + FACTOR_LABEL[k] + "</th>"; }).join("") + '<th style="text-align:left">Runners-up</th></tr></thead><tbody>' +
         rows.map(function (r) {
           var top = r.top[0];
-          return '<tr class="click" data-go="' + h(top.ticker) + '"><td>' + h(r.sectorName || r.sector) + ' <span class="faint num">(' + (r.count || "") + ')</span></td><td style="text-align:left;font-family:var(--sans)"><b>' + h(top.ticker) + '</b> <span class="muted">' + h(top.name || "") + '</span></td><td><span class="pill ' + IL.scoreTone(top.score) + '">' + F.num(top.score, 1) + "</span></td>" +
-            keys.map(function (k) { var gr = top.grades && top.grades[k]; return '<td style="color:' + IL.gradeTone(gr) + ';font-weight:650">' + h(gr || "—") + "</td>"; }).join("") +
+          return '<tr class="click" data-go="' + h(top.ticker) + '"><td>' + h(r.sectorName || r.sector) + ' <span class="faint num">(' + (r.count || "") + ')</span></td><td style="text-align:left;font-family:var(--sans)"><span class="cell-co">' + IL.mono(top.ticker, r.sectorName, "sm") + '<span><b>' + h(top.ticker) + '</b> <span class="muted">' + h(top.name || "") + '</span></span></span></td><td><span class="pill ' + IL.scoreTone(top.score) + '">' + F.num(top.score, 1) + "</span></td>" +
+            keys.map(function (k) { return "<td>" + IL.gchip(top.grades && top.grades[k]) + "</td>"; }).join("") +
             '<td style="text-align:left;font-family:var(--sans)">' + r.top.slice(1, 3).map(function (x) { return '<a href="/research/' + h(x.ticker) + '">' + h(x.ticker) + ' <span class="num faint">' + F.num(x.score, 1) + "</span></a>"; }).join(" · ") + "</td></tr>";
         }).join("") + "</tbody></table></div>";
     });
@@ -203,12 +208,13 @@
      ═════════════════════════════════════════════════════════════════════ */
   function renderFrame() {
     main().innerHTML =
-      '<section class="sh" id="sh">' +
+      '<section class="sh card prime hero-band" id="sh">' +
         '<div class="sh-id">' +
-          '<div class="sh-meta"><span class="sh-sym">' + h(S.t) + '</span><span id="sh-sector" class="muted"></span></div>' +
-          '<h1 class="sh-name" id="sh-name">' + sk(26, "260px") + "</h1>" +
+          '<div class="sh-top"><span id="sh-mono">' + IL.mono(S.t, "", "lg") + '</span><div><div class="sh-meta"><span class="sh-sym">' + h(S.t) + '</span><span id="sh-sector" class="muted"></span></div>' +
+          '<h1 class="sh-name" id="sh-name">' + sk(26, "260px") + "</h1></div></div>" +
           '<div class="sh-px" id="sh-px">' + sk(30, "220px") + "</div>" +
         "</div>" +
+        '<div class="sh-spark" id="sh-spark" aria-hidden="true"></div>' +
         '<div class="sh-actions">' +
           '<button class="btn" type="button" id="act-watch" aria-pressed="false">' + IL.icon("star") + '<span>Watch</span></button>' +
           '<button class="btn" type="button" id="act-alert">' + IL.icon("bell") + "<span>Alert</span></button>" +
@@ -220,6 +226,29 @@
       }).join("") + "</nav>" +
       '<div id="tab"></div>';
     wireActions();
+    IL.ribbon(IL.$("#sh"), "sweep", 4);
+  }
+
+  /* A one-year sparkline with a gold wash, top right of the header. */
+  function spark() {
+    var box = IL.$("#sh-spark"); if (!box || !S.quote || !S.quote.bars.length) return;
+    var bars = S.quote.bars, end = bars[bars.length - 1].time;
+    var yr = bars.filter(function (b) { return b.time >= end - 366 * 86400; });
+    if (yr.length < 10) return;
+    var W = 260, H = 76, lo = Math.min.apply(null, yr.map(function (b) { return b.close; })), hi = Math.max.apply(null, yr.map(function (b) { return b.close; }));
+    var pts = yr.map(function (b, i) { return [i / (yr.length - 1) * W, H - 6 - (b.close - lo) / ((hi - lo) || 1) * (H - 14)]; });
+    /* Smooth the line (Catmull-Rom to Bezier) so it reads as a curve. */
+    var d = "M" + pts[0][0].toFixed(1) + " " + pts[0][1].toFixed(1);
+    for (var i = 0; i < pts.length - 1; i++) {
+      var p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
+      d += " C" + (p1[0] + (p2[0] - p0[0]) / 6).toFixed(1) + " " + (p1[1] + (p2[1] - p0[1]) / 6).toFixed(1) + " " + (p2[0] - (p3[0] - p1[0]) / 6).toFixed(1) + " " + (p2[1] - (p3[1] - p1[1]) / 6).toFixed(1) + " " + p2[0].toFixed(1) + " " + p2[1].toFixed(1);
+    }
+    var up = yr[yr.length - 1].close >= yr[0].close, chg = (yr[yr.length - 1].close / yr[0].close - 1) * 100;
+    var col = up ? "var(--gain)" : "var(--loss)";
+    box.innerHTML = '<svg viewBox="0 0 ' + W + " " + H + '" width="' + W + '" height="' + H + '"><defs><linearGradient id="spk" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#E5B65A" stop-opacity=".32"/><stop offset="1" stop-color="#E5B65A" stop-opacity="0"/></linearGradient></defs>' +
+      '<path d="' + d + " L" + W + " " + H + " L0 " + H + ' Z" fill="url(#spk)"/><path d="' + d + '" fill="none" stroke="#E5B65A" stroke-width="2" stroke-linecap="round"/>' +
+      '<circle cx="' + pts[pts.length - 1][0].toFixed(1) + '" cy="' + pts[pts.length - 1][1].toFixed(1) + '" r="3.5" fill="#E5B65A"/></svg>' +
+      '<span class="sh-spark-l">Past year <b class="num" style="color:' + col + '">' + F.spct(chg, 0) + "</b></span>";
   }
 
   function fillHeader() {
@@ -229,6 +258,8 @@
     document.title = S.t + " " + (p ? F.price(p.price) + " " : "") + "· " + name + " · ImpliedLens";
     var bits = [meta.fullExchangeName || meta.exchangeName, meta.sector, meta.industry].filter(Boolean);
     IL.$("#sh-sector").textContent = bits.join(" · ");
+    var mono = IL.$("#sh-mono"); if (mono) mono.innerHTML = IL.mono(S.t, meta.sector || (lens.grades && lens.grades.sectorName), "lg");
+    spark();
     if (!p) { IL.$("#sh-px").innerHTML = '<span class="muted">Price unavailable</span>'; return; }
     var session = p.provenance && p.provenance.marketSession;
     var when = session === "regular"
@@ -329,7 +360,7 @@
     box.innerHTML =
       '<div class="ov">' +
         '<div class="ov-main">' +
-          '<section class="card lr" aria-label="Lens Report" id="ov-lr"><div class="lr-h"><h2 class="card-t">The Lens Report</h2></div>' + sk(90) + "</section>" +
+          '<section class="card prime lr" aria-label="Lens Report" id="ov-lr"><div class="lr-h"><h2 class="card-t">The Lens Report</h2></div>' + sk(90) + "</section>" +
           '<section class="card pc" aria-label="Price chart" id="ov-chart"></section>' +
           '<section class="kv" aria-label="Key numbers" id="ov-kv">' + Array(8).join('<div><span class="k">' + sk(10, "60%") + '</span><span class="v">' + sk(16, "50%") + "</span></div>") + "</section>" +
           '<div class="grid-3">' +
@@ -338,11 +369,11 @@
             '<section class="card" id="ov-r"><h2 class="card-t">How risky has it been?</h2>' + sk(60) + "</section>" +
           "</div>" +
         "</div>" +
-        '<aside class="card rc" aria-label="LensScore report card" id="ov-rc">' + sk(220) + "</aside>" +
+        '<aside class="card prime rc" aria-label="LensScore report card" id="ov-rc">' + sk(220) + "</aside>" +
       "</div>" +
-      '<div class="section-h" id="report"><h2 class="section-t">Full report card</h2><span class="card-sub" id="rep-sub"></span></div>' +
+      '<div class="section-h" id="report"><h2 class="section-t">Full report <em>card</em></h2><span class="card-sub" id="rep-sub"></span></div>' +
       '<div class="grid-2" id="ov-rep"><section class="card">' + sk(140) + '</section><section class="card">' + sk(140) + "</section></div>" +
-      '<div class="section-h" id="peers"><h2 class="section-t">Compared with peers</h2><span class="card-sub">Same sector, graded the same way</span></div>' +
+      '<div class="section-h" id="peers"><h2 class="section-t">Compared with <em>peers</em></h2><span class="card-sub">Same sector, graded the same way</span></div>' +
       '<section class="card flush" id="ov-peers"><div style="padding:20px">' + sk(80) + "</div></section>" +
       '<div class="section-h"><h2 class="section-t">Latest from the company</h2><a class="link" href="/research/' + h(S.t) + '/filings" data-tab="filings">All filings →</a></div>' +
       '<section class="card flush" id="ov-news"><div style="padding:20px">' + sk(60) + "</div></section>";
@@ -385,7 +416,7 @@
     }
     var gated = S.histRes && S.histRes.gate;
     box.innerHTML =
-      '<div class="lr-h"><h2 class="card-t">The Lens Report ' + IL.tip("Written automatically from the company’s SEC filings, its grades against sector peers and a year of prices. Every point shows the number behind it. Not investment advice.") + "</h2>" + verdict + "</div>" +
+      '<div class="lr-h"><h2 class="card-t lr-title">The Lens <em>Report</em> ' + IL.tip("Written automatically from the company’s SEC filings, its grades against sector peers and a year of prices. Every point shows the number behind it. Not investment advice.") + "</h2>" + verdict + "</div>" +
       (st.length ? '<p class="lr-story">' + st.map(h).join(" ") + "</p>" : '<p class="muted">Not enough data to write a report for this company yet.</p>') +
       '<div class="lr-cols">' +
         '<div><h3 class="lr-sub good">What’s working</h3>' + list(good, "good", "Nothing stands out yet.") + "</div>" +
@@ -404,7 +435,14 @@
     var C = { bg: "#0E0F11", panel: "#15171A", line: "#262A2F", text: "#EDEEF0", t2: "#A3A9B1", t3: "#7D848D", gold: "#E5B65A", gain: "#4CC38A", loss: "#F07B7B" };
     var sans = "Inter, system-ui, sans-serif", nums = "'IBM Plex Sans', Inter, sans-serif";
     x.fillStyle = C.bg; x.fillRect(0, 0, W, H);
-    x.fillStyle = C.gold; x.fillRect(0, 0, W, 6);
+    /* Atmosphere: a warm glow, a faint blueprint grid, the gold hairline. */
+    var gl = x.createRadialGradient(220, -40, 10, 220, -40, 720); gl.addColorStop(0, "rgba(229,182,90,0.22)"); gl.addColorStop(1, "rgba(229,182,90,0)");
+    x.fillStyle = gl; x.fillRect(0, 0, W, H);
+    x.strokeStyle = "rgba(255,255,255,0.035)"; x.lineWidth = 1;
+    for (var gx = 0; gx <= W; gx += 40) { x.beginPath(); x.moveTo(gx + 0.5, 0); x.lineTo(gx + 0.5, H); x.stroke(); }
+    for (var gy = 0; gy <= H; gy += 40) { x.beginPath(); x.moveTo(0, gy + 0.5); x.lineTo(W, gy + 0.5); x.stroke(); }
+    var topbar = x.createLinearGradient(0, 0, W, 0); topbar.addColorStop(0, "#C9952F"); topbar.addColorStop(0.5, "#F2CF85"); topbar.addColorStop(1, "#C9952F");
+    x.fillStyle = topbar; x.fillRect(0, 0, W, 6);
     function t(str, X, Y, font, color, align) { x.font = font; x.fillStyle = color; x.textAlign = align || "left"; x.fillText(str, X, Y); }
     function wrap(str, X, Y, maxW, lineH, font, color, maxLines) {
       x.font = font; x.fillStyle = color; x.textAlign = "left";
@@ -438,7 +476,7 @@
       if (v.implied !== null && v.delivered !== null) { t("The price needs " + F.spct(v.implied * 100, 0) + " a year of sales growth; it has delivered " + F.spct(v.delivered * 100, 0) + ".", 60, Y + 42, "500 21px " + sans, C.t2); Y += 40; }
       Y += 60;
     }
-    var good = fl.filter(function (f) { return f.tone === "good"; }).slice(0, 3), bad = fl.filter(function (f) { return f.tone === "bad"; }).slice(0, 3);
+    var good = fl.filter(function (f) { return f.tone === "good"; }).slice(0, 2), bad = fl.filter(function (f) { return f.tone === "bad"; }).slice(0, 2);
     t("WHAT\u2019S WORKING", 60, Y + 10, "700 16px " + sans, C.gain);
     t("WARNING SIGNS", 400, Y + 10, "700 16px " + sans, C.loss);
     var y1 = Y + 46, y2 = Y + 46;
@@ -467,7 +505,22 @@
     } else {
       wrap("Not graded: funds and foreign listings are not compared with sector peers.", 820, 160, 290, 28, "500 19px " + sans, C.t2, 4);
     }
-    x.fillStyle = C.line; x.fillRect(60, 556, W - 120, 2);
+    /* A smooth one-year price curve with a gold wash, bottom left. */
+    if (S.quote && S.quote.bars.length > 20) {
+      var bars = S.quote.bars, endT = bars[bars.length - 1].time, yr = bars.filter(function (b) { return b.time >= endT - 366 * 86400; });
+      var cx0 = 60, cx1 = 750, cy0 = 432, cy1 = 536, lo = Infinity, hi = -Infinity;
+      yr.forEach(function (b) { lo = Math.min(lo, b.close); hi = Math.max(hi, b.close); });
+      var P = yr.map(function (b, i) { return [cx0 + (cx1 - cx0) * i / (yr.length - 1), cy1 - (b.close - lo) / ((hi - lo) || 1) * (cy1 - cy0)]; });
+      function curve() { x.moveTo(P[0][0], P[0][1]); for (var k = 0; k < P.length - 1; k++) { var a0 = P[k - 1] || P[k], a1 = P[k], a2 = P[k + 1], a3 = P[k + 2] || a2; x.bezierCurveTo(a1[0] + (a2[0] - a0[0]) / 6, a1[1] + (a2[1] - a0[1]) / 6, a2[0] - (a3[0] - a1[0]) / 6, a2[1] - (a3[1] - a1[1]) / 6, a2[0], a2[1]); } }
+      var wash = x.createLinearGradient(0, cy0, 0, cy1 + 10); wash.addColorStop(0, "rgba(229,182,90,0.30)"); wash.addColorStop(1, "rgba(229,182,90,0)");
+      x.beginPath(); curve(); x.lineTo(cx1, cy1 + 10); x.lineTo(cx0, cy1 + 10); x.closePath(); x.fillStyle = wash; x.fill();
+      x.beginPath(); curve(); x.strokeStyle = C.gold; x.lineWidth = 3; x.shadowColor = "rgba(229,182,90,0.6)"; x.shadowBlur = 12; x.stroke(); x.shadowBlur = 0;
+      var lp = P[P.length - 1]; x.fillStyle = C.gold; x.beginPath(); x.arc(lp[0], lp[1], 6, 0, Math.PI * 2); x.fill();
+      var yc = (yr[yr.length - 1].close / yr[0].close - 1) * 100;
+      t("Past year " + F.spct(yc, 0), cx1, cy0 - 10, "600 18px " + nums, yc >= 0 ? C.gain : C.loss, "right");
+    }
+    var hair = x.createLinearGradient(60, 0, W - 60, 0); hair.addColorStop(0, "rgba(229,182,90,0)"); hair.addColorStop(0.5, "rgba(240,201,120,0.9)"); hair.addColorStop(1, "rgba(229,182,90,0)");
+    x.fillStyle = hair; x.fillRect(60, 556, W - 120, 2);
     t("impliedlens.com/research/" + S.t, 60, 594, "600 22px " + sans, C.text);
     t("From SEC filings and a year of prices \u00b7 not investment advice", W - 60, 594, "500 18px " + sans, C.t3, "right");
     c.toBlob(function (blob) {
@@ -553,10 +606,10 @@
     box.innerHTML =
       '<div class="card-h"><h2 class="card-t">LensScore ' + IL.tip("A 0–10 grade of the business against its sector peers on five things, from SEC filings and price history. It describes the company today; it is not a price prediction.") + "</h2>" +
         (g.rank ? '<span class="card-sub">#' + g.rank.position + " of " + g.rank.of + " in " + h(g.rank.sectorName || g.sectorName || "its sector") + "</span>" : "") + "</div>" +
-      '<div class="rc-top">' + scoreRing(g.score) +
+      '<div class="rc-top">' + scoreRing(g.score, 104) +
         '<div class="rc-lab"><span class="rc-label">' + h(g.label || "") + '</span><span class="muted">Graded against ' + h(g.sectorName || "sector") + " peers on five things.</span></div></div>" +
       '<div class="grades">' + f.map(function (x) {
-        return '<div class="grade"><span>' + h(FACTOR_LABEL[x.key] || x.label) + '</span><div class="bar"><i style="width:' + IL.gradeFill(x.grade) + "%;background:" + IL.gradeTone(x.grade) + '"></i></div><span class="g" style="color:' + IL.gradeTone(x.grade) + '">' + h(x.grade || "—") + "</span></div>";
+        return '<div class="grade"><span>' + h(FACTOR_LABEL[x.key] || x.label) + '</span><div class="bar"><i style="width:' + IL.gradeFill(x.grade) + "%;background:" + IL.gradeTone(x.grade) + '"></i></div><span class="g">' + IL.gchip(x.grade) + "</span></div>";
       }).join("") + "</div>" +
       (g.verdict ? '<p class="rc-verdict">' + h(g.verdict) + "</p>" : "") +
       '<div class="rc-next"><span class="rc-next-h">What to check next</span>' + checks.slice(0, 3).map(function (c) {
@@ -582,7 +635,7 @@
     IL.$("#rep-sub").textContent = "Percentile = share of " + (g.sectorName || "sector") + " peers it beats";
     var rows = (g.factors || []).map(function (x) {
       var pct = N(x.percentile);
-      return '<div class="rep-f"><div class="rep-f-h"><span class="rep-f-n">' + h(FACTOR_LABEL[x.key] || x.label) + '</span><span class="num" style="color:' + IL.gradeTone(x.grade) + ';font-weight:700">' + h(x.grade || "—") + "</span></div>" +
+      return '<div class="rep-f"><div class="rep-f-h"><span class="rep-f-n">' + h(FACTOR_LABEL[x.key] || x.label) + '</span>' + IL.gchip(x.grade) + "</div>" +
         '<div class="rep-bar"><i style="width:' + (pct === null ? 0 : Math.max(2, Math.min(100, pct))) + "%;background:" + IL.gradeTone(x.grade) + '"></i></div>' +
         '<div class="rep-f-s"><span>' + h(FACTOR_HELP[x.key] || "") + '</span><span class="num faint">' + (pct === null ? "" : "Beats " + Math.round(pct) + "%") + "</span></div></div>";
     }).join("");
@@ -610,8 +663,8 @@
         list.map(function (t) {
           var x = gg[t]; if (!x) return "";
           var me = t === S.t;
-          return '<tr class="' + (me ? "em" : "click") + '"' + (me ? "" : ' data-go="' + h(t) + '"') + "><td><b>" + h(t) + "</b>" + (me ? ' <span class="tag gold">This stock</span>' : "") + '</td><td><span class="pill ' + IL.scoreTone(x.score) + '">' + F.num(x.score, 1) + "</span></td>" +
-            keys.map(function (k) { var gr = x.grades && x.grades[k]; return '<td style="color:' + IL.gradeTone(gr) + ';font-weight:650">' + h(gr || "—") + "</td>"; }).join("") + "</tr>";
+          return '<tr class="' + (me ? "em" : "click") + '"' + (me ? "" : ' data-go="' + h(t) + '"') + '><td><span class="cell-co">' + IL.mono(t, x.sectorName, "sm") + "<b>" + h(t) + "</b></span>" + (me ? ' <span class="tag gold">This stock</span>' : "") + '</td><td><span class="pill ' + IL.scoreTone(x.score) + '">' + F.num(x.score, 1) + "</span></td>" +
+            keys.map(function (k) { var gr = x.grades && x.grades[k]; return "<td>" + IL.gchip(gr) + "</td>"; }).join("") + "</tr>";
         }).join("") + "</tbody></table></div>";
     });
   }
@@ -883,7 +936,7 @@
     var cases = ["bear", "base", "bull"], label = { bear: "Bear case", base: "Base case", bull: "Bull case" };
     function pctIn(v) { return (Math.round(v * 1000) / 10).toString(); }
     box.innerHTML =
-      '<section class="card val-hero" id="val-hero"></section>' +
+      '<section class="card prime val-hero hero-band" id="val-hero"></section>' +
       '<div class="section-h"><div><h2 class="section-t">Valuation Lab</h2><p class="card-sub">Five years out. Start from what the company has done; change any number.</p></div><div class="row wrap"><select class="input val-versions" id="val-versions" aria-label="Saved versions"><option value="">Saved versions</option></select><button class="btn sm" type="button" id="val-save">Save version</button><button class="btn sm ghost" type="button" id="val-reset">Reset</button></div></div>' +
       '<section class="card flush"><div class="tbl-wrap"><table class="tbl val-tbl"><thead><tr><th></th>' + cases.map(function (c) { return '<th class="val-' + c + '">' + label[c] + "</th>"; }).join("") + "</tr></thead><tbody>" +
         valRow("growth", "Revenue growth per year", "%", "How fast sales grow each year for the next five years.") +

@@ -70,7 +70,7 @@
   function shell() {
     var main = document.getElementById("main");
     main.innerHTML =
-      '<div class="sc-head"><div><h1 class="sc-title">Screener</h1><p class="muted">Every company graded against its own sector. Pick a starting idea, then narrow it down.</p></div><div class="row" id="sc-actions"></div></div>' +
+      '<div class="sc-head hero-band card prime" id="sc-hero"><div class="stack" style="gap:10px">' + IL.eyebrow("Screener \u00b7 about 280 graded stocks", "screener") + '<h1 class="display">Find your next <em>idea.</em></h1><p class="muted">Every company graded against its own sector. Pick a starting idea, then narrow it down.</p></div><div class="row" id="sc-actions"></div></div>' +
       '<div class="sc-presets" id="sc-presets">' + PRESETS.map(function (p) {
         return '<button type="button" class="sc-preset" data-preset="' + p.key + '" aria-pressed="false"><b>' + h(p.label) + "</b><span>" + h(p.why) + "</span></button>";
       }).join("") + "</div>" +
@@ -112,9 +112,9 @@
       (list.length ? list.slice(0, 300).map(function (r) {
         var g = r.grades || {}, chk = picked.indexOf(r.ticker) >= 0;
         return '<tr class="click" data-go="' + h(r.ticker) + '"><td class="sc-pick"><input type="checkbox" aria-label="Pick ' + h(r.ticker) + ' to compare" data-pick="' + h(r.ticker) + '"' + (chk ? " checked" : "") + "></td>" +
-          '<td class="l"><a href="/research/' + h(r.ticker) + '"><b>' + h(r.ticker) + '</b></a><div class="faint sc-name">' + h(nice(r.name)) + " · " + h(r.sector || "") + "</div></td>" +
+          '<td class="l"><span class="cell-co">' + IL.mono(r.ticker, r.sector, "sm") + '<span><a href="/research/' + h(r.ticker) + '"><b>' + h(r.ticker) + '</b></a><div class="faint sc-name">' + h(nice(r.name)) + " · " + h(r.sector || "") + "</div></span></span></td>" +
           "<td>" + (r.lensScore != null ? '<span class="pill ' + IL.scoreTone(r.lensScore) + '">' + F.num(r.lensScore, 1) + "</span>" : "—") + "</td>" +
-          KEYS.map(function (k) { return '<td class="sc-g" style="color:' + IL.gradeTone(g[k]) + '">' + h(g[k] || "—") + "</td>"; }).join("") +
+          KEYS.map(function (k) { return '<td class="sc-g">' + IL.gchip(g[k]) + "</td>"; }).join("") +
           "<td>" + F.price(r.price) + '</td><td class="' + F.cls(r.change1D) + '">' + F.spct(r.change1D) + '</td><td class="' + F.cls(r.change1Y) + '">' + F.spct(r.change1Y, 0) + "</td>" +
           '<td class="' + F.cls(r.revenueGrowth) + '">' + F.spct(r.revenueGrowth, 0) + "</td><td>" + F.mult(r.pe) + "</td><td>" + F.money(r.marketCap) + "</td><td>" + (r.dividendYield >= 0.05 ? F.pct(r.dividendYield) : r.dividendYield > 0 ? "<0.1%" : "—") + "</td></tr>";
       }).join("") : '<tr><td colspan="' + (COLS.length + 1) + '"><div class="empty">No company passes every filter. Loosen one, or reset.</div></td></tr>') +
@@ -125,7 +125,7 @@
 
   function paintActions() {
     var a = IL.$("#sc-actions"); if (!a) return;
-    a.innerHTML = (picked.length ? '<a class="btn" href="/compare?t=' + picked.join(",") + '">Compare ' + picked.length + " picked</a>" : '<span class="faint" style="font-size:13px">Tick up to 4 rows to compare</span>') +
+    a.innerHTML = (picked.length ? '<a class="btn" href="/compare?t=' + picked.join(",") + '">Compare ' + picked.length + " picked</a>" : "") +
       '<button class="btn" type="button" id="sc-csv">Download CSV</button>';
   }
 
@@ -196,7 +196,7 @@
         top.map(function (r) {
           var g = r.grades || {};
           return '<tr class="click" data-go="' + h(r.ticker) + '"><td class="l"><b>' + h(r.ticker) + '</b><div class="faint sc-name">' + h(nice(r.name)) + "</div></td><td>" + '<span class="pill ' + IL.scoreTone(r.score) + '">' + F.num(r.score, 1) + "</span></td>" +
-            KEYS.map(function (k) { return '<td class="sc-g" style="color:' + IL.gradeTone(g[k]) + '">' + h(g[k] || "—") + "</td>"; }).join("") +
+            KEYS.map(function (k) { return '<td class="sc-g">' + IL.gchip(g[k]) + "</td>"; }).join("") +
             "<td>" + (r.sectorRank ? "#" + r.sectorRank + " of " + r.sectorCount + " " + h(r.sectorName || "") : h(r.sectorName || "")) + "</td></tr>";
         }).join("") + "</tbody></table></div></section>";
     });
@@ -206,6 +206,7 @@
   function boot() {
     IL.shell("screener");
     shell();
+    IL.ribbon(IL.$("#sc-hero"), "sweep", 9);
     try { var s = JSON.parse(localStorage.getItem("il-screener") || "null"); if (s && s.st) { st = Object.assign(JSON.parse(JSON.stringify(DEFAULT)), s.st); preset = s.preset || null; } } catch (_) {}
     var qp = new URLSearchParams(location.search).get("preset");
     if (qp) applyPreset(qp);

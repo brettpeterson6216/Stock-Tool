@@ -186,22 +186,25 @@
         });
         main.setData(view.map(function (b) { return { time: b.time, open: b.open, high: b.high, low: b.low, close: b.close }; }));
       } else {
+        /* The brand line: gold, smoothed, with a gold wash and a pulsing
+           last-price dot. Up or down shows in the header, not the fill. */
         main = chart.addSeries(L.AreaSeries, {
-          lineColor: lineColor, lineWidth: 2,
-          topColor: up ? "rgba(76,195,138,0.16)" : "rgba(240,123,123,0.14)", bottomColor: "rgba(0,0,0,0)",
-          priceLineVisible: false, lastValueVisible: true, crosshairMarkerRadius: 4,
-          crosshairMarkerBorderColor: css("--surface"), crosshairMarkerBackgroundColor: lineColor,
+          lineColor: gold, lineWidth: 2.5, lineType: 2,
+          topColor: "rgba(229,182,90,0.30)", bottomColor: "rgba(229,182,90,0)",
+          priceLineVisible: false, lastValueVisible: true, crosshairMarkerRadius: 5,
+          crosshairMarkerBorderColor: css("--surface"), crosshairMarkerBackgroundColor: gold,
+          lastPriceAnimation: r.intraday ? 1 : 0,
         });
         main.setData(view.map(function (b) { return { time: b.time, value: b.close }; }));
       }
       var daily = !!(r.days || r.ytd);
       var start = view[0].time;
       if (daily && state.show.ma50) {
-        ma50 = chart.addSeries(L.LineSeries, { color: gold, lineWidth: 1.5, priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false });
+        ma50 = chart.addSeries(L.LineSeries, { color: css("--text2"), lineWidth: 1.5, lineType: 2, lineStyle: 0, priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false });
         ma50.setData(sma(all, 50).filter(function (p) { return p.time >= start; }));
       }
       if (daily && state.show.ma200) {
-        ma200 = chart.addSeries(L.LineSeries, { color: css("--blue"), lineWidth: 1.5, priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false });
+        ma200 = chart.addSeries(L.LineSeries, { color: css("--blue"), lineWidth: 1.5, lineType: 2, priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false });
         ma200.setData(sma(all, 200).filter(function (p) { return p.time >= start; }));
       }
       if (state.show.volume) {
@@ -236,7 +239,7 @@
     function legend(r) {
       var el = root.querySelector("#pc-legend");
       var daily = !!(r.days || r.ytd), parts = [];
-      if (daily && state.show.ma50) parts.push('<span class="pc-key"><i style="background:var(--gold)"></i>50-day avg</span>');
+      if (daily && state.show.ma50) parts.push('<span class="pc-key"><i style="background:var(--text2)"></i>50-day avg</span>');
       if (daily && state.show.ma200) parts.push('<span class="pc-key"><i style="background:var(--blue)"></i>200-day avg</span>');
       el.innerHTML = parts.join("");
     }

@@ -192,3 +192,30 @@
 .val-sens td.s-mid{color:var(--amber);background:var(--amber-soft)}
 .val-sens td.s-bad{color:var(--loss);background:var(--loss-soft)}
 .val-sens td.s-base{font-weight:800;box-shadow:inset 0 0 0 2px var(--text3)}
+
+/* ── Brand pass: header band, ring, chips ───────────────────────────────── */
+.sh.card{flex-direction:row;align-items:flex-end;padding:22px 24px;gap:20px}
+.sh-top{display:flex;align-items:center;gap:14px}
+.sh .sh-name{font-size:30px;letter-spacing:-.03em}
+.sh .sh-price{font-size:40px;font-weight:600;letter-spacing:-.02em}
+.sh-id{gap:10px}
+.sh-spark{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:4px;align-self:center}
+.sh-spark svg{display:block;overflow:visible}
+.sh-spark-l{font-size:12px;color:var(--text2)}
+.sh .sh-actions{align-self:flex-end}
+@media (max-width:1080px){.sh-spark{display:none}}
+@media (max-width:760px){.sh.card{flex-direction:column;align-items:stretch;padding:18px}.sh .sh-name{font-size:22px}.sh .sh-price{font-size:30px}.sh-top .mono.lg{width:44px;height:44px;font-size:14px}}
+.lr-title em{font-family:var(--serif);font-style:italic;font-weight:400;color:var(--gold-text);font-size:1.15em}
+.rc .ring{flex:none}
+.rc-label{font-size:19px}
+.grade{grid-template-columns:84px 1fr 38px}
+.grade .g{text-align:right}
+.rep-f-h .gchip{margin-left:auto}
+.cell-co{display:inline-flex;align-items:center;gap:10px}
+.rl-hero{position:relative}
+.rl-hero .display{max-width:820px}
+.rl-hero>.il-ribbon{opacity:.6}
+.rl-hero>*:not(.il-ribbon){position:relative;z-index:1}
+.rc.card.prime{position:sticky}
+@media (max-width:1080px){.rc.card.prime{position:relative;top:auto}}
+.mono.lg{font-size:14px}

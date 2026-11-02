@@ -12,19 +12,19 @@
   var SHORT = { value: "V", growth: "G", profitability: "P", health: "H", momentum: "M" };
   var LAST = "il-dash-last";
 
-  function greet(name) {
+  function greet() {
     var hr = new Date().getHours();
-    return (hr < 12 ? "Good morning" : hr < 18 ? "Good afternoon" : "Good evening") + (name ? ", " + name : "");
+    return hr < 12 ? "Good morning" : hr < 18 ? "Good afternoon" : "Good evening";
   }
   function sk(hh) { return '<span class="sk" style="height:' + hh + 'px"></span>'; }
 
   function render(user) {
     var main = document.getElementById("main");
     main.innerHTML =
-      '<div class="dh"><div><h1 class="dh-t">' + h(greet(user && user.username)) + '</h1><p class="muted">Here is what changed on your stocks.</p></div>' +
+      '<div class="dh hero-band card prime" id="dh"><div class="stack" style="gap:10px">' + IL.eyebrow("Your dashboard", "home") + '<h1 class="display">' + h(greet()) + (user && user.username ? ', <em>' + h(user.username) + '.</em>' : "") + '</h1><p class="muted">Here is what changed on your stocks.</p></div>' +
         '<div class="row wrap"><a class="btn" href="/compare">Compare stocks</a><a class="btn primary" href="/screener">Find new ideas</a></div></div>' +
       '<div class="dash">' +
-        '<section class="card flush dash-wl" aria-label="Your watchlist"><div class="card-h"><h2 class="card-t">Your watchlist</h2><a class="link" href="/watchlist">Manage →</a></div><div id="d-wl"><div style="padding:20px">' + sk(140) + "</div></div></section>" +
+        '<section class="card flush prime dash-wl" aria-label="Your watchlist"><div class="card-h"><h2 class="card-t">Your watchlist</h2><a class="link" href="/watchlist">Manage →</a></div><div id="d-wl"><div style="padding:20px">' + sk(140) + "</div></div></section>" +
         '<section class="card dash-since" aria-label="Since your last visit"><h2 class="card-t">Since your last visit</h2><div id="d-since">' + sk(90) + "</div></section>" +
       "</div>" +
       '<div class="grid-3">' +
@@ -32,6 +32,7 @@
         '<section class="card flush"><div class="card-h"><h2 class="card-t">Top-rated by sector</h2><a class="link" href="/research">All →</a></div><div id="d-top"><div style="padding:20px">' + sk(120) + "</div></div></section>" +
         '<section class="card" id="d-learn"><h2 class="card-t">Keep learning</h2>' + sk(90) + "</section>" +
       "</div>";
+    IL.ribbon(IL.$("#dh"), "sweep", 7);
     loadWatchlist();
     loadMovers("gainers");
     loadLeaders();
@@ -64,11 +65,11 @@
         box.innerHTML = '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Company</th><th>Last close</th><th>Day</th><th>LensScore</th><th>Week</th><th class="dash-grades" title="Value, Growth, Profitability, Health, Momentum">V &nbsp;G &nbsp;P &nbsp;H &nbsp;M</th></tr></thead><tbody>' +
           tickers.map(function (t) {
             var x = q[t] || {}, s = g[t];
-            return '<tr class="click" data-go="' + h(t) + '"><td><a href="/research/' + h(t) + '"><b>' + h(t) + '</b></a><div class="faint dash-name">' + h(nice(x.name || "")) + "</div></td>" +
+            return '<tr class="click" data-go="' + h(t) + '"><td><span class="cell-co">' + IL.mono(t, s && s.sectorName, "sm") + '<span><a href="/research/' + h(t) + '"><b>' + h(t) + '</b></a><div class="faint dash-name">' + h(nice(x.name || "")) + "</div></span></span></td>" +
               "<td>" + F.price(x.price) + '</td><td class="' + F.cls(x.chgPct) + '">' + F.spct(x.chgPct, 2) + "</td>" +
               "<td>" + (s ? '<span class="pill ' + IL.scoreTone(s.score) + '">' + F.num(s.score, 1) + "</span>" : '<span class="faint">—</span>') + "</td>" +
               '<td class="' + F.cls(s && s.change) + '">' + (s && s.change ? F.schg(s.change).replace(/\.?0+$/, "") : "—") + "</td>" +
-              '<td class="dash-grades">' + (s && s.grades ? KEYS.map(function (k) { var gr = s.grades[k]; return '<span title="' + k + '" style="color:' + IL.gradeTone(gr) + '">' + h(gr || "—") + "</span>"; }).join("") : "") + "</td></tr>";
+              '<td class="dash-grades">' + (s && s.grades ? KEYS.map(function (k) { return IL.gchip(s.grades[k]); }).join("") : "") + "</td></tr>";
           }).join("") + "</tbody></table></div>" +
           '<p class="note" style="padding:10px 20px">Prices are daily closes and update after each trading day. Week = change in LensScore over about five trading days.</p>';
         paintSince(tickers, g);

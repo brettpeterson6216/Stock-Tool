@@ -206,7 +206,7 @@
       top.className = "il-top";
       top.innerHTML =
         '<div class="il-top-in">' +
-          '<a class="il-brand" href="/" aria-label="ImpliedLens home"><img src="/logo-mark-68.png" width="28" height="28" alt=""><span class="il-brand-word">ImpliedLens</span></a>' +
+          '<a class="il-brand" href="/" aria-label="ImpliedLens home"><img src="/logo-mark-68.png" width="28" height="28" alt=""><span class="il-brand-word">Implied<span class="accent">Lens</span></span></a>' +
           '<nav class="il-nav" aria-label="Main">' + NAV.map(function (n) {
             return '<a href="' + n.href + '" data-k="' + n.key + '"' + (n.key === active ? ' aria-current="page"' : "") + ">" + n.label + "</a>";
           }).join("") + "</nav>" +
@@ -427,6 +427,33 @@
       '<div class="gate-t">' + IL.h(what || "Create a free account to see this") + "</div>" +
       '<div class="gate-s">' + IL.h(opts.why || "A free account unlocks financial statements, earnings history and a watchlist. No card needed.") + "</div>" +
       '<div class="row wrap"><a class="btn primary" href="' + IL.signupHref() + '">Create a free account</a><a class="btn ghost" href="' + IL.loginHref() + '">Log in</a></div></div>';
+  };
+
+  /* ── Brand pieces ────────────────────────────────────────────────────── */
+  var SECTOR_HUE = { tech: 212, technology: 212, health: 158, "health care": 158, healthcare: 158, financ: 42, bank: 42, consumer: 18, retail: 18, communication: 278, media: 278, energy: 28, util: 192, industr: 0, "real est": 330, reit: 330, staple: 95, material: 120 };
+  IL.mono = function (t, sector, size) {
+    t = String(t || "?").toUpperCase();
+    var s = String(sector || "").toLowerCase(), hue = null;
+    for (var k in SECTOR_HUE) { if (s.indexOf(k) >= 0) { hue = SECTOR_HUE[k]; break; } }
+    if (hue === null) { var hsh = 0; for (var i = 0; i < t.length; i++) hsh = (hsh * 31 + t.charCodeAt(i)) % 360; hue = hsh; }
+    var label = t.replace(/[^A-Z0-9]/g, "").slice(0, t.length > 4 ? 3 : 4);
+    return '<span class="mono' + (size ? " " + size : "") + '" style="--h:' + hue + '" aria-hidden="true">' + IL.h(label.length > 3 && size !== "lg" ? label.slice(0, 3) : label) + "</span>";
+  };
+  IL.eyebrow = function (text, icon) { return '<span class="eyebrow">' + (icon ? IL.icon(icon, 13) : "") + IL.h(text) + "</span>"; };
+  IL.gchip = function (g) { return g ? '<span class="gchip" style="color:' + IL.gradeTone(g) + '">' + IL.h(g) + "</span>" : '<span class="faint">\u2014</span>'; };
+  /* The brand ribbon behind a hero block (il-ribbon.js loads on demand). */
+  IL.ribbon = function (host, path, seed) {
+    if (!host || host.querySelector(".il-ribbon")) return;
+    var r = document.createElement("div");
+    r.className = "il-ribbon"; r.setAttribute("data-path", path || "sweep"); r.setAttribute("data-seed", String(seed || 3));
+    host.insertBefore(r, host.firstChild);
+    function go() { if (window.ILRibbon) window.ILRibbon.mount(r); }
+    if (window.ILRibbon) go();
+    else if (!document.getElementById("il-ribbon-js")) {
+      var sc = document.createElement("script"); sc.id = "il-ribbon-js"; sc.src = "/il-ribbon.js"; sc.defer = true;
+      sc.onload = function () { IL.$$(".il-ribbon").forEach(function (x) { if (!x.__ilr && window.ILRibbon) window.ILRibbon.mount(x); }); };
+      document.head.appendChild(sc);
+    }
   };
 
   /* ── Score tone ──────────────────────────────────────────────────────── */

@@ -17,15 +17,16 @@
 
   function shell() {
     document.getElementById("main").innerHTML =
-      '<div class="dh"><div><h1 class="dh-t">Watchlist</h1><p class="muted">Write down why you follow each company and the price you would act at. We’ll keep the numbers current.</p></div>' +
+      '<div class="dh hero-band card prime" id="wl-hero"><div class="stack" style="gap:10px">' + IL.eyebrow("Watchlist", "star") + '<h1 class="display">The companies you <em>follow.</em></h1><p class="muted">Write down why you follow each company and the price you would act at. We’ll keep the numbers current.</p></div>' +
         '<div class="row wrap"><div class="il-search wl-add" role="search"><label class="il-search-box">' + IL.icon("search") + '<input id="wl-q" type="search" autocomplete="off" placeholder="Add a company" aria-label="Add a company to your watchlist" role="combobox" aria-expanded="false" aria-controls="wl-sugg"></label><div class="il-sugg" id="wl-sugg" role="listbox" hidden></div></div><a class="btn" id="wl-compare" href="/compare">Compare</a></div></div>' +
-      '<section class="card flush"><div class="tbl-wrap"><table class="tbl wl-tbl" id="wl-tbl"><tbody><tr><td>' + sk(160) + "</td></tr></tbody></table></div></section>" +
+      '<section class="card flush prime"><div class="tbl-wrap"><table class="tbl wl-tbl" id="wl-tbl"><tbody><tr><td>' + sk(160) + "</td></tr></tbody></table></div></section>" +
       '<label class="wl-digest card" id="wl-digest" hidden><input type="checkbox" id="wl-digest-on"><span><b>Weekly grade email</b><span class="muted">Every Saturday morning: your watchlist\u2019s LensScores, what changed and the week\u2019s biggest movers.</span></span></label>' +
       '<div class="section-h"><h2 class="section-t">Alerts</h2><span class="card-sub" id="al-sub"></span></div>' +
       '<section class="card flush" id="al-box"><div style="padding:20px">' + sk(60) + "</div></section>" +
       '<div class="section-h"><h2 class="section-t">Saved work</h2><a class="link" href="/?view=tool&section=workspace">Theses and positions →</a></div>' +
       '<section class="card flush" id="sv-box"><div style="padding:20px">' + sk(60) + "</div></section>";
     IL.wireSearchPick(IL.$("#wl-q"), IL.$("#wl-sugg"), add);
+    IL.ribbon(IL.$("#wl-hero"), "sweep", 6);
   }
 
   function load() {
@@ -59,12 +60,12 @@
         var gap = q.price && tgt ? (q.price / tgt - 1) * 100 : null;
         var al = alerts.filter(function (a) { return a.ticker === t && a.active; }).length;
         return "<tr>" +
-          '<td><a href="/research/' + h(t) + '"><b>' + h(t) + '</b></a><div class="faint wl-name">' + h(nice(q.name || "")) + (al ? ' · <span class="wl-bell">' + IL.icon("bell", 11) + " " + al + "</span>" : "") + "</div></td>" +
+          '<td><span class="cell-co">' + IL.mono(t, g && g.sectorName, "sm") + '<span><a href="/research/' + h(t) + '"><b>' + h(t) + '</b></a><div class="faint wl-name">' + h(nice(q.name || "")) + (al ? ' · <span class="wl-bell">' + IL.icon("bell", 11) + " " + al + "</span>" : "") + "</div></span></span></td>" +
           "<td>" + F.price(q.price) + '</td><td class="' + F.cls(q.chgPct) + '">' + F.spct(q.chgPct, 2) + "</td>" +
           '<td><input class="input num wl-in" inputmode="decimal" data-target="' + h(t) + '" value="' + (tgt ? Number(tgt).toFixed(2) : "") + '" placeholder="$" aria-label="Target price for ' + h(t) + '"></td>' +
           '<td class="' + (gap === null ? "" : gap <= 0 ? "up" : "") + '">' + (gap === null ? "—" : gap <= 0 ? "At or below" : F.pct(gap) + " above") + "</td>" +
           "<td>" + (g ? '<span class="pill ' + IL.scoreTone(g.score) + '">' + F.num(g.score, 1) + "</span>" + (g.change ? ' <span class="num ' + F.cls(g.change) + '" style="font-size:12px">' + F.schg(g.change).replace(/\.?0+$/, "") + "</span>" : "") : "—") + "</td>" +
-          '<td class="wl-gr">' + (g && g.grades ? KEYS.map(function (k) { return '<span style="color:' + IL.gradeTone(g.grades[k]) + '">' + h(g.grades[k] || "—") + "</span>"; }).join("") : "") + "</td>" +
+          '<td class="wl-gr">' + (g && g.grades ? KEYS.map(function (k) { return IL.gchip(g.grades[k]); }).join("") : "") + "</td>" +
           '<td class="wl-note-td"><input class="input wl-note" data-note="' + h(t) + '" value="' + h(r.note || "") + '" maxlength="500" placeholder="' + (i ? "Add a note" : "e.g. Buy under $180 if margins hold") + '" aria-label="Note for ' + h(t) + '"></td>' +
           '<td class="wl-act"><button class="btn sm ghost" type="button" data-alert="' + h(t) + '" aria-label="Alert for ' + h(t) + '">' + IL.icon("bell", 14) + '</button><button class="btn sm ghost" type="button" data-rm="' + h(t) + '" aria-label="Remove ' + h(t) + '">×</button></td></tr>';
       }).join("") + "</tbody>";
