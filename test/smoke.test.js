@@ -148,7 +148,11 @@ test("GET / serves the homepage with a successful status", async () => {
   assert.match(legacyCss, /\.nav-acct-wrap,\.nav-acct-btn\{min-width:0;max-width:100%\}/);
   assert.match(legacyCss, /\.nav-acct-menu\{right:0;min-width:min\(220px,calc\(100vw - 1\.5rem\)\)/);
   assert.match(html, /workspace-system\.js\?v=[\w.-]+/);
-  assert.equal((html.match(/rel="stylesheet"/g) || []).length, 1);
+  // The page's own styles arrive as one bundle; the site shell's small
+  // stylesheet comes first so its cascade layer is declared first.
+  assert.equal((html.match(/rel="stylesheet"/g) || []).length, 2);
+  assert.ok(html.indexOf('href="/app/shell.css') > -1 && html.indexOf('href="/app/shell.css') < html.indexOf('href="/bundles/'));
+  assert.match(html, /<il-top id="il-top"><\/il-top>/);
   assert.match(appSource, /__initialWorkspaceTab/);
   assert.match(res.headers.get("cache-control"), /no-cache/);
 });

@@ -14,12 +14,10 @@
 .since li{display:flex;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line);font-size:13.5px}
 .since li:first-child{border-top:0}
 .since a{color:var(--text)}
-.since-dot{width:8px;height:8px;border-radius:999px;flex:none}
-.since-dot.good{background:var(--gain)} .since-dot.bad{background:var(--loss)}
 .card.flush>.card-h .seg{margin:-4px 0}
 @media (max-width:760px){.dh-t{font-size:23px}.dash-grades{display:none}}
-.dash-wl .tbl td a{color:var(--text)}
-.dash-wl .tbl td a:hover{color:var(--gold-text);text-decoration:none}
+.dcol .tbl td a{color:var(--text)}
+.dcol .tbl td a:hover{color:var(--gold-text);text-decoration:none}
 .dash-wl th.dash-grades{letter-spacing:.02em}
 
 /* Dashboard grid: twelve columns, rows of widgets that line up. */
@@ -30,7 +28,6 @@
 @media (max-width:760px){.dgrid{gap:var(--s4)}.dgrid>.d4{grid-column:span 12}}
 .dgrid>.card{display:flex;flex-direction:column}
 .dgrid .card-t{display:flex;align-items:center;gap:8px}
-.dgrid .card-t svg{color:var(--gold-text);opacity:.9}
 .d-pad{padding:16px 20px 18px;display:flex;flex-direction:column;gap:10px;flex:1}
 .d-note{padding:10px 20px 14px;margin-top:auto}
 
@@ -44,27 +41,14 @@
 .d-li-t{display:flex;flex-direction:column;min-width:0}
 .d-li-t .faint{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px}
 .d-list .num{font-weight:600;white-space:nowrap}
-.d-mv-bar{width:64px;height:6px;border-radius:6px;background:var(--line);overflow:hidden;flex:none}
-.d-mv-bar i{display:block;height:100%;border-radius:6px}
-.d-mv-bar i.up{background:linear-gradient(90deg,color-mix(in srgb,var(--gain) 40%,transparent),var(--gain))}
-.d-mv-bar i.dn{background:linear-gradient(90deg,color-mix(in srgb,var(--loss) 40%,transparent),var(--loss))}
 
-/* Market today. */
-.d-idx{list-style:none;margin:0;padding:6px 0}
-.d-idx li{display:grid;grid-template-columns:minmax(0,1fr) 120px 70px;align-items:center;gap:10px;padding:10px 20px;border-top:1px solid var(--line)}
-.d-idx li:first-child{border-top:0}
-.d-idx b{font-weight:650}
-.d-idx-p{font-size:13px;color:var(--text2)}
-.d-idx .num:last-child{text-align:right;font-weight:600}
-.d-sec{padding:12px 20px 16px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:7px;margin-top:auto}
-.d-sec-h{display:flex;justify-content:space-between;font-size:12px;color:var(--text2);font-weight:600;letter-spacing:.02em;margin-bottom:2px}
-.d-sec-r{display:grid;grid-template-columns:110px minmax(0,1fr) 56px;align-items:center;gap:10px;font-size:12.5px}
-.d-sec-r .num{text-align:right;font-weight:600}
-.d-sec-bar{position:relative;height:6px;background:var(--line);border-radius:6px}
-.d-sec-bar::before{content:"";position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:var(--line3)}
-.d-sec-bar i{position:absolute;top:0;bottom:0;border-radius:6px}
-.d-sec-bar i.up{left:50%;background:var(--gain)}
-.d-sec-bar i.dn{right:50%;background:var(--loss)}
+/* Market today: two plain tables. */
+.d-mkt-t th:first-child,.d-mkt-t td:first-child{padding-left:20px}
+.d-mkt-t th:last-child,.d-mkt-t td:last-child{padding-right:20px}
+.d-mkt-t td b{font-weight:650}
+.d-mkt-t td .faint{font-size:12px;margin-left:4px}
+.d-sec-t{border-top:1px solid var(--line)}
+.d-sec-t td{font-size:13px;padding-top:7px;padding-bottom:7px}
 
 /* Empty watchlist: picks with a Watch button. */
 .d-picks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
@@ -76,16 +60,13 @@
 .d-pick a .faint{font-size:12px;white-space:nowrap}
 .d-pick .btn{flex:none}
 
-/* Keep learning with a plate on top. */
-.dlearn{overflow:hidden}
-.dlearn .tile-art{height:92px}
+/* Keep learning. */
 .dlearn .card-foot{margin-top:auto}
 
 .dgrid>.card>[id^="d-"]{flex:1;display:flex;flex-direction:column}
 .dgrid>.card>[id^="d-"]>.tbl-wrap{flex:none}
 .d-tips{list-style:none;margin:6px 0 0;padding:14px 0 0;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
 .d-tips li{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--text2);line-height:1.45}
-.d-tips svg{color:var(--gold-text);flex:none;margin-top:2px}
 .d-tips b{color:var(--text);font-weight:600}
 @media (max-width:760px){.d-tips{grid-template-columns:1fr}}
 .d-pick .d-li-t .faint{font-size:11.5px}
@@ -98,6 +79,14 @@
 @media (max-width:760px){.dcols,.dcol,.dpair{gap:var(--s4)}.dpair{grid-template-columns:1fr}}
 .dcol .card{display:flex;flex-direction:column}
 .dcol .card-t{display:flex;align-items:center;gap:8px}
-.dcol .card-t svg{color:var(--gold-text);opacity:.9}
 .dcol .card>[id^="d-"]{flex:1;display:flex;flex-direction:column}
 .dcol .card>[id^="d-"]>.tbl-wrap{flex:none}
+
+/* Tools: four plain cards, the same height, a single gold call to open. */
+.d-tools{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s5)}
+@media (max-width:1080px){.d-tools{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.d-tools{grid-template-columns:1fr;gap:var(--s3)}}
+.tool{display:flex;flex-direction:column;gap:6px;padding:18px 20px;color:var(--text)}
+.tool:hover{text-decoration:none}
+.tool .card-sub{flex:1}
+.tool-go{margin-top:8px;font-size:13px;font-weight:600;color:var(--gold-text)}

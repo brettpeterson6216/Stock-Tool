@@ -140,12 +140,12 @@
   var mePromise = null;
   IL.me = function () {
     if (!mePromise) {
-      mePromise = IL.api("/api/auth/me").then(function (res) {
+      /* One sign-in check per page: shell.js makes it, the app reads it. */
+      mePromise = (window.ILShell ? window.ILShell.me() : IL.api("/api/auth/me").then(function (res) {
         var u = res.ok && res.data && res.data.user ? res.data.user : null;
         if (u) u.plan = u.effectivePlan || u.plan || "free";
-        IL.user = u;
         return u;
-      });
+      })).then(function (u) { IL.user = u; return u; });
     }
     return mePromise;
   };
@@ -196,81 +196,23 @@
     document.dispatchEvent(new CustomEvent("il:theme", { detail: t }));
   };
 
-  /* ── Shell: top bar, bottom bar, footer ─────────────────────────────── */
-  var NAV = [
-    { key: "home", label: "Home", href: "/", icon: "home" },
-    { key: "research", label: "Research", href: "/research", icon: "research" },
-    { key: "screener", label: "Screener", href: "/screener", icon: "screener" },
-    { key: "watchlist", label: "Watchlist", href: "/watchlist", icon: "star" },
-    { key: "learn", label: "Learn", href: "/learn", icon: "learn" },
-    { key: "pricing", label: "Pricing", href: "/pricing", icon: "arrow" },
-  ];
-
+  /* ── Shell: top bar and phone tab bar come from shell.js, the same file
+     every page on the site uses; this adds the app's footer. ─────────── */
   IL.shell = function (active) {
     document.body.classList.add("il-app");
-    var top = document.getElementById("il-top");
-    if (top) {
-      top.className = "il-top";
-      top.innerHTML =
-        '<div class="il-top-in">' +
-          '<a class="il-brand" href="/" aria-label="ImpliedLens home"><img src="/logo-mark-68.png" width="28" height="28" alt=""><span class="il-brand-word">Implied<span class="accent">Lens</span></span></a>' +
-          '<nav class="il-nav" aria-label="Main">' + NAV.map(function (n) {
-            return '<a href="' + n.href + '" data-k="' + n.key + '" title="' + n.label + '"' + (n.key === active ? ' aria-current="page"' : "") + ">" + IL.icon(n.key === "pricing" ? "spark" : n.icon, 15) + "<span>" + n.label + "</span></a>";
-          }).join("") + "</nav>" +
-          '<div class="il-search" role="search">' +
-            '<label class="il-search-box">' + IL.icon("search") +
-              '<input id="il-q" type="search" autocomplete="off" spellcheck="false" placeholder="Search any US stock or ticker" aria-label="Search a company or ticker" role="combobox" aria-expanded="false" aria-controls="il-sugg" aria-autocomplete="list">' +
-              '<span class="il-kbd" aria-hidden="true">/</span>' +
-            "</label>" +
-            '<div class="il-sugg" id="il-sugg" role="listbox" hidden></div>' +
-          "</div>" +
-          '<div class="il-acct" id="il-acct"></div>' +
-        "</div>";
-      wireSearch(IL.$("#il-q"), IL.$("#il-sugg"));
-      marketTape(top);
-    }
-    var bottom = document.getElementById("il-bottom");
-    if (bottom) {
-      bottom.className = "il-bottom";
-      bottom.setAttribute("aria-label", "Main");
-      bottom.innerHTML = NAV.slice(0, 4).map(function (n) {
-        return '<a href="' + n.href + '"' + (n.key === active ? ' aria-current="page"' : "") + ">" + IL.icon(n.icon, 22) + "<span>" + n.label + "</span></a>";
-      }).join("");
-    }
+    if (window.ILShell) window.ILShell.mount({ active: active });
     var foot = document.getElementById("il-foot");
     if (foot) {
       foot.className = "il-foot";
       foot.innerHTML =
-        "<span>© " + new Date().getFullYear() + " ImpliedLens. Research, not investment advice.</span>" +
-        '<a href="/data-sources">Data sources</a><a href="/pricing">Pricing</a><a href="/learn">Learn</a>' +
+        "<span>\u00a9 " + new Date().getFullYear() + " ImpliedLens. Research, not investment advice.</span>" +
+        '<a href="/data-sources">Data sources</a><a href="/pricing" data-show="upgrade">Pricing</a><a href="/learn">Learn</a>' +
         '<a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/support">Support</a>';
     }
-    IL.me().then(renderAccount);
-    document.addEventListener("keydown", function (e) {
-      if (e.key !== "/" || e.metaKey || e.ctrlKey || e.altKey) return;
-      var t = e.target;
-      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT" || t.isContentEditable)) return;
-      var q = IL.$("#il-q"); if (!q) return;
-      e.preventDefault(); q.focus(); q.select();
-    });
   };
 
-
-  /* ── Market tape: a thin live strip above the top bar ─────────────────
-     The three index trackers and the sector ETFs from /api/market/
-     landing-summary (cached five minutes on the server and in this tab),
-     with the market's open/closed state in New York time. It scrolls away
-     with the page; the top bar under it stays. */
-  function marketState() {
-    var now = new Date(), ny = new Date(now.toLocaleString("en-US", { timeZone: "America/New_York" }));
-    var d = ny.getDay(), m = ny.getHours() * 60 + ny.getMinutes();
-    var open = d > 0 && d < 6 && m >= 570 && m < 960;
-    var label;
-    if (open) { var left = 960 - m; label = "Open \u00b7 closes in " + (left >= 60 ? Math.floor(left / 60) + "h " : "") + (left % 60) + "m"; }
-    else if (d > 0 && d < 6 && m < 570) label = "Closed \u00b7 opens 9:30 AM ET";
-    else label = "Closed \u00b7 opens " + (d === 5 || d === 6 || d === 0 ? "Monday" : "tomorrow") + " 9:30 AM ET";
-    return { open: open, label: label };
-  }
+  /* Index funds and sector ETFs for the day, from /api/market/landing-summary
+     (cached five minutes on the server and in this tab). */
   IL.marketSummary = function () {
     try { var c = JSON.parse(sessionStorage.getItem("il-mkt") || "null"); if (c && Date.now() - c.at < 5 * 60 * 1000) return Promise.resolve(c.data); } catch (_) {}
     return IL.api("/api/market/landing-summary?window=1M").then(function (res) {
@@ -279,32 +221,6 @@
       return res.data;
     });
   };
-  function tri(up) { return '<svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true"><path d="' + (up ? "M4 1 7.5 7h-7z" : "M4 7 .5 1h7z") + '" fill="currentColor"/></svg>'; }
-  function marketTape(top) {
-    if (document.querySelector(".il-tape")) return;
-    var st = marketState();
-    var bar = document.createElement("div");
-    bar.className = "il-tape"; bar.setAttribute("aria-label", "Market today");
-    bar.innerHTML = '<div class="il-tape-state"><span class="il-tape-dot' + (st.open ? " on" : "") + '"></span><b>US market</b><span>' + st.label + '</span></div><div class="il-tape-run"><div class="il-tape-track"></div></div>';
-    /* On phones the bar stays pinned under the status bar, so the tape goes
-       under it and scrolls away; on wider screens it sits above the bar. */
-    var narrow = window.matchMedia && window.matchMedia("(max-width:760px)").matches;
-    top.parentNode.insertBefore(bar, narrow ? top.nextSibling : top);
-    IL.marketSummary().then(function (d) {
-      if (!d) { bar.querySelector(".il-tape-run").innerHTML = '<span class="il-tape-none">Market data is updating.</span>'; return; }
-      /* With the licensed feed the "indexes" are the funds that track them
-         (SPY, QQQ, DIA), so say so: an S&P 500 at 684 would look wrong. */
-      var items = (d.indexes || []).map(function (x) { var etf = (String(x.name || "").match(/\((\w+)\)$/) || [])[1]; return { n: String(x.name || x.symbol).replace(/\s*\(.*\)$/, ""), tag: etf, p: x.price, c: x.changePct }; })
-        .concat((d.sectors || []).map(function (x) { return { n: x.name, c: x.changePct }; }));
-      if (d.breadth !== null && d.breadth !== undefined) items.push({ n: "Sectors up", txt: (d.advancing || 0) + " of " + (d.measured || 0) });
-      var one = items.map(function (it) {
-        var up = it.c >= 0, chg = isFinite(it.c) ? '<span class="' + (up ? "up" : "down") + '">' + tri(up) + " " + IL.fmt.pct(Math.abs(it.c), 2) + "</span>" : "";
-        return '<span class="il-tape-it"><span class="il-tape-n">' + IL.h(it.n) + "</span>" + (it.tag ? '<span class="il-tape-tag">' + IL.h(it.tag) + "</span>" : "") + (it.p ? '<span class="num">' + IL.fmt.num(it.p, 2) + "</span>" : "") + (it.txt ? '<span class="num">' + IL.h(it.txt) + "</span>" : "") + chg + "</span>";
-      }).join('<span class="il-tape-sep" aria-hidden="true">•</span>');
-      var track = bar.querySelector(".il-tape-track");
-      track.innerHTML = '<span class="il-tape-set">' + one + '</span><span class="il-tape-set" aria-hidden="true">' + one + "</span>";
-    });
-  }
   /* Company names from filings: drop state suffixes ("/De", "/New/") and
      fix all-caps. */
   IL.cleanName = function (n) {
@@ -312,57 +228,6 @@
     if (n && n === n.toUpperCase()) n = n.toLowerCase().replace(/\b([a-z])/g, function (m) { return m.toUpperCase(); }).replace(/\b(Inc|Corp|Co|Ltd|Plc|Llc|Nv|Sa|Ag)\b/g, function (m) { return m === "Llc" ? "LLC" : m === "Plc" ? "plc" : m === "Nv" ? "N.V." : m === "Sa" ? "S.A." : m === "Ag" ? "AG" : m; });
     return n;
   };
-
-  function renderAccount(user) {
-    var box = IL.$("#il-acct"); if (!box) return;
-    var pricingTab = IL.$('.il-nav [data-k="pricing"]');
-    if (pricingTab) pricingTab.hidden = IL.isPro(user);
-    var themeBtn = '<button class="il-iconbtn il-theme" id="il-theme" type="button" aria-label="Switch to ' + (IL.theme() === "dark" ? "light" : "dark") + ' theme">' + IL.icon(IL.theme() === "dark" ? "sun" : "moon", 18) + "</button>";
-    if (!user) {
-      box.innerHTML = themeBtn +
-        '<a class="btn ghost sm" href="' + IL.loginHref() + '">Log in</a>' +
-        '<a class="btn primary sm il-signup" href="' + IL.signupHref() + '">Sign up free</a>';
-    } else {
-      var initial = (user.username || user.email || "?").trim().charAt(0).toUpperCase();
-      var plan = user.plan === "pro" ? '<span class="il-plan">PRO</span>' : user.plan === "trial" ? '<span class="il-plan trial">PRO TRIAL</span>' : '<a class="btn sm" href="/pricing">Upgrade</a>';
-      box.style.position = "relative";
-      box.innerHTML = plan + themeBtn +
-        '<button class="il-avatar" id="il-avatar" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Account">' + IL.h(initial) + "</button>" +
-        '<div class="il-menu" id="il-menu" role="menu" hidden>' +
-          '<div class="il-menu-head"><strong>' + IL.h(user.username || "Your account") + "</strong>" + (user.plan === "pro" ? "Pro member" : user.plan === "trial" ? "Pro trial" : "Free plan") + "</div>" +
-          '<a role="menuitem" href="/watchlist">' + IL.icon("folder") + "Watchlist and saved work</a>" +
-          '<a role="menuitem" href="/?view=tool&section=projection">' + IL.icon("research") + "Valuation Lab</a>" +
-          '<a role="menuitem" href="/?account=1">' + IL.icon("user") + "Account settings</a>" +
-          '<button role="menuitem" type="button" id="il-billing">' + IL.icon("doc") + (IL.isPro(user) ? "Subscription and billing" : "See Pro plans") + "</button>" +
-          '<button role="menuitem" type="button" id="il-theme2">' + IL.icon(IL.theme() === "dark" ? "sun" : "moon") + (IL.theme() === "dark" ? "Light theme" : "Dark theme") + "</button>" +
-          "<hr>" +
-          '<button role="menuitem" type="button" id="il-logout">' + IL.icon("out") + "Log out</button>" +
-        "</div>";
-      var av = IL.$("#il-avatar"), menu = IL.$("#il-menu");
-      av.addEventListener("click", function (e) {
-        e.stopPropagation();
-        var open = menu.hidden;
-        menu.hidden = !open; av.setAttribute("aria-expanded", String(open));
-      });
-      document.addEventListener("click", function (e) { if (!menu.contains(e.target)) { menu.hidden = true; av.setAttribute("aria-expanded", "false"); } });
-      document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !menu.hidden) { menu.hidden = true; av.focus(); } });
-      IL.$("#il-theme2").addEventListener("click", function () { IL.setTheme(IL.theme() === "dark" ? "light" : "dark"); renderAccount(user); });
-      IL.$("#il-billing").addEventListener("click", function () {
-        if (!IL.isPro(user)) { location.href = "/pricing"; return; }
-        IL.api("/api/stripe/portal", { method: "POST", body: {} }).then(function (res) {
-          if (res.ok && res.data && res.data.url) location.href = res.data.url;
-          else location.href = "mailto:support@impliedlens.com?subject=ImpliedLens%20billing";
-        });
-      });
-      IL.$("#il-logout").addEventListener("click", function () {
-        IL.api("/api/auth/logout", { method: "POST", body: {} }).then(function () { location.href = "/"; });
-      });
-    }
-    IL.$("#il-theme").addEventListener("click", function () {
-      IL.setTheme(IL.theme() === "dark" ? "light" : "dark");
-      renderAccount(user);
-    });
-  }
 
   /* ── Search with suggestions ─────────────────────────────────────────── */
   IL.go = function (sym) {

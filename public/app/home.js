@@ -23,37 +23,38 @@
     if (!n || /@/.test(n)) return "";
     return n.charAt(0).toUpperCase() + n.slice(1);
   }
-  function tile(href, plate, pos, title, sub) {
-    return '<a class="card lift tile" href="' + href + '"><span class="tile-art" style="--plate:url(' + IL.plateSrc(plate) + ');--plate-pos:' + pos + '" aria-hidden="true"></span>' +
-      '<span class="tile-body"><span class="card-t">' + title + ' <span class="tile-go">' + IL.icon("arrow", 14) + '</span></span><span class="card-sub">' + sub + "</span></span></a>";
+  /* A tool: what it is and what it does. No art: plates belong behind page
+     tops only. */
+  function tile(href, title, sub) {
+    return '<a class="card lift tool" href="' + href + '"><span class="card-t">' + title + '</span><span class="card-sub">' + sub + '</span><span class="tool-go">Open \u2192</span></a>';
   }
 
   function render(user) {
     var main = document.getElementById("main"), name = displayName(user);
     main.innerHTML =
-      '<div class="dh hero-band card prime" id="dh"><div class="stack" style="gap:10px">' + IL.eyebrow("Your dashboard", "home") + '<h1 class="display">' + h(greet()) + (name ? ', <em>' + h(name) + '.</em>' : ".") + '</h1><p class="muted" id="dh-sum">Here is what changed on your stocks.</p></div>' +
+      '<div class="dh hero-band card prime" id="dh"><div class="stack" style="gap:10px"><h1 class="display">' + h(greet()) + (name ? ', <em>' + h(name) + '.</em>' : ".") + '</h1><p class="muted" id="dh-sum">Here is what changed on your stocks.</p></div>' +
         '<div class="row wrap"><a class="btn" href="/compare">Compare stocks</a><a class="btn primary" href="/screener">Find new ideas</a></div></div>' +
       '<div class="dcols">' +
       '<div class="dcol dcol-main">' +
-        '<section class="card flush prime dash-wl" id="w-wl" data-w="expand,csv" data-w-title="Your watchlist" aria-label="Your watchlist"><div class="card-h"><h2 class="card-t">' + IL.icon("star", 15) + ' Your watchlist</h2><a class="link" href="/watchlist">Manage →</a></div><div id="d-wl"><div style="padding:20px">' + sk(140) + "</div></div></section>" +
+        '<section class="card flush dash-wl" id="w-wl" data-w="expand,csv" data-w-title="Your watchlist" aria-label="Your watchlist"><div class="card-h"><h2 class="card-t">Your watchlist</h2><a class="link" href="/watchlist">Manage →</a></div><div id="d-wl"><div style="padding:20px">' + sk(140) + "</div></div></section>" +
         '<div class="dpair">' +
-        '<section class="card flush" id="w-since" data-w="expand" data-w-title="Since your last visit" aria-label="Since your last visit"><div class="card-h"><h2 class="card-t">' + IL.icon("bell", 15) + ' Since your last visit</h2></div><div id="d-since" class="d-pad">' + sk(90) + "</div></section>" +
-        '<section class="card flush" id="w-chg" data-w="expand" data-w-title="Grade changes this week"><div class="card-h"><h2 class="card-t">' + IL.icon("spark", 15) + ' Grade changes this week</h2><a class="link" href="/research">More →</a></div><div id="d-chg"><div style="padding:20px">' + sk(120) + "</div></div></section>" +
+        '<section class="card flush" id="w-since" data-w="expand" data-w-title="Since your last visit" aria-label="Since your last visit"><div class="card-h"><h2 class="card-t">Since your last visit</h2></div><div id="d-since" class="d-pad">' + sk(90) + "</div></section>" +
+        '<section class="card flush" id="w-chg" data-w="expand" data-w-title="Grade changes this week"><div class="card-h"><h2 class="card-t">Grade changes this week</h2><a class="link" href="/research">More →</a></div><div id="d-chg"><div style="padding:20px">' + sk(120) + "</div></div></section>" +
         "</div>" +
-        '<section class="card flush" id="w-top" data-w="expand,csv" data-w-title="Top-rated by sector"><div class="card-h"><h2 class="card-t">' + IL.icon("screener", 15) + ' Top-rated in each sector</h2><a class="link" href="/research">All sectors →</a></div><div id="d-top"><div style="padding:20px">' + sk(160) + "</div></div></section>" +
+        '<section class="card flush" id="w-top" data-w="expand,csv" data-w-title="Top-rated by sector"><div class="card-h"><h2 class="card-t">Top-rated in each sector</h2><a class="link" href="/research">All sectors →</a></div><div id="d-top"><div style="padding:20px">' + sk(160) + "</div></div></section>" +
       "</div>" +
       '<div class="dcol dcol-side">' +
-        '<section class="card flush dmkt" id="w-mkt" data-w="expand" data-w-title="Market today" aria-label="Market today"><div class="card-h"><h2 class="card-t">' + IL.icon("pulse", 15) + ' Market today</h2><span class="card-sub" id="d-mkt-st"></span></div><div id="d-mkt"><div style="padding:20px">' + sk(150) + "</div></div></section>" +
-        '<section class="card flush" id="w-mv" data-w="expand" data-w-title="Biggest movers"><div class="card-h"><h2 class="card-t">' + IL.icon("research", 15) + ' Biggest movers</h2><div class="seg" role="group" aria-label="Movers"><button type="button" data-mv="gainers" aria-pressed="true">Up</button><button type="button" data-mv="losers" aria-pressed="false">Down</button></div></div><div id="d-mv"><div style="padding:20px">' + sk(120) + "</div></div></section>" +
-        '<section class="card flush dlearn" id="d-learn"><span class="tile-art" style="--plate:url(' + IL.plateSrc("dial") + ');--plate-pos:72% 45%" aria-hidden="true"></span><div class="d-pad">' + sk(90) + "</div></section>" +
+        '<section class="card flush dmkt" id="w-mkt" data-w="expand" data-w-title="Market today" aria-label="Market today"><div class="card-h"><h2 class="card-t">Market today</h2><span class="card-sub" id="d-mkt-st"></span></div><div id="d-mkt"><div style="padding:20px">' + sk(150) + "</div></div></section>" +
+        '<section class="card flush" id="w-mv" data-w="expand" data-w-title="Biggest movers"><div class="card-h"><h2 class="card-t">Biggest movers</h2><div class="seg" role="group" aria-label="Movers"><button type="button" data-mv="gainers" aria-pressed="true">Up</button><button type="button" data-mv="losers" aria-pressed="false">Down</button></div></div><div id="d-mv"><div style="padding:20px">' + sk(120) + "</div></div></section>" +
+        '<section class="card flush dlearn" id="d-learn"><div class="d-pad">' + sk(90) + "</div></section>" +
       "</div>" +
       "</div>" +
-      '<div class="section-h"><h2 class="section-t">Your <em>tools</em></h2><span class="card-sub">Everything you need to research a company</span></div>' +
-      '<div class="grid-3 rl-tools">' +
-        tile("/research", "globe", "62% 40%", "Research a stock", "A plain-English report card, the financials and what the price assumes.") +
-        tile("/screener", "ledger", "60% 40%", "Screener", "Filter about 290 US stocks by grade, value, size and momentum.") +
-        tile("/compare", "atlas", "52% 70%", "Compare", "Up to four stocks side by side, with the best in each row marked.") +
-        tile("/lens-score", "engraved", "70% 70%", "LensToolkit", "Trend, timing, buy zones and alerts for any stock.") +
+      '<div class="section-h"><h2 class="section-t">Tools</h2><span class="card-sub">Everything you need to research a company</span></div>' +
+      '<div class="d-tools">' +
+        tile("/research", "Research a stock", "A plain-English report card, the financials and what the price assumes.") +
+        tile("/screener", "Screener", "Filter about 290 US stocks by grade, value, size and momentum.") +
+        tile("/compare", "Compare", "Up to four stocks side by side, with the best in each row marked.") +
+        tile("/lens-score", "LensToolkit", "Trend, timing, buy zones and alerts for any stock.") +
       "</div>";
     IL.plate(IL.$("#dh"), "engraved", "right 30%");
     loadWatchlist();
@@ -77,37 +78,35 @@
     });
   }
 
-  /* Market today: the three index trackers with a month's line, sector
-     moves as bars, and how many sectors are up. */
-  function spark(closes, up) {
-    if (!closes || closes.length < 2) return "";
-    var W = 120, H = 34, lo = Math.min.apply(null, closes), hi = Math.max.apply(null, closes);
-    var pts = closes.map(function (v, i) { return [i / (closes.length - 1) * W, H - 3 - (v - lo) / ((hi - lo) || 1) * (H - 6)]; });
-    var d = "M" + pts[0][0].toFixed(1) + " " + pts[0][1].toFixed(1);
-    for (var i = 0; i < pts.length - 1; i++) {
-      var p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
-      d += " C" + (p1[0] + (p2[0] - p0[0]) / 6).toFixed(1) + " " + (p1[1] + (p2[1] - p0[1]) / 6).toFixed(1) + " " + (p2[0] - (p3[0] - p1[0]) / 6).toFixed(1) + " " + (p2[1] - (p3[1] - p1[1]) / 6).toFixed(1) + " " + p2[0].toFixed(1) + " " + p2[1].toFixed(1);
-    }
-    var col = up ? "var(--gain)" : "var(--loss)", id = "sp" + Math.random().toString(36).slice(2, 7);
-    return '<svg class="d-spark" viewBox="0 0 ' + W + " " + H + '" width="' + W + '" height="' + H + '" aria-hidden="true"><defs><linearGradient id="' + id + '" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#E5B65A" stop-opacity=".28"/><stop offset="1" stop-color="#E5B65A" stop-opacity="0"/></linearGradient></defs>' +
-      '<path d="' + d + " L" + W + " " + H + " L0 " + H + ' Z" fill="url(#' + id + ')"/><path d="' + d + '" fill="none" stroke="#E5B65A" stroke-width="1.8" stroke-linecap="round"/><circle cx="' + pts[pts.length - 1][0].toFixed(1) + '" cy="' + pts[pts.length - 1][1].toFixed(1) + '" r="2.6" fill="' + col + '"/></svg>';
+  /* Market today: the three index trackers and the sector funds, as numbers.
+     Day is today against the previous close; 1 month is the first close in
+     the returned month against the latest. No lines: a 120px sparkline with
+     no axis said less than the number beside it. */
+  function monthPct(closes) {
+    if (!closes || closes.length < 2 || !(closes[0] > 0)) return null;
+    return (closes[closes.length - 1] / closes[0] - 1) * 100;
   }
   function loadMarket() {
     IL.marketSummary().then(function (d) {
       var box = IL.$("#d-mkt"); if (!box) return;
       if (!d || !(d.indexes || []).length) { box.innerHTML = '<div class="empty">Market data is updating. Check back in a minute.</div>'; return; }
-      var maxAbs = Math.max.apply(null, (d.sectors || []).map(function (x) { return Math.abs(x.changePct || 0); }).concat([0.5]));
-      box.innerHTML = '<ul class="d-idx">' + d.indexes.map(function (x) {
-        var nm = String(x.name || x.symbol).replace(/\s*\((\w+)\)$/, ""), etf = (String(x.name || "").match(/\((\w+)\)$/) || [])[1];
-        return '<li><div><b>' + h(nm) + '</b><div class="num d-idx-p">' + (etf ? h(etf) + " " : "") + F.price(x.price) + '</div></div>' + spark(x.closes, x.changePct >= 0) + '<span class="num ' + F.cls(x.changePct) + '">' + F.spct(x.changePct, 2) + "</span></li>";
-      }).join("") + "</ul>" +
-        '<div class="d-sec"><div class="d-sec-h"><span>Sectors today</span><span class="faint">' + (d.advancing || 0) + " of " + (d.measured || 0) + " up</span></div>" +
-        (d.sectors || []).map(function (x) {
-          var w = Math.min(50, Math.abs(x.changePct || 0) / maxAbs * 50), up = (x.changePct || 0) >= 0;
-          return '<div class="d-sec-r"><span>' + h(x.name) + '</span><span class="d-sec-bar"><i class="' + (up ? "up" : "dn") + '" style="width:' + w.toFixed(1) + '%"></i></span><span class="num ' + F.cls(x.changePct) + '">' + F.spct(x.changePct, 2) + "</span></div>";
-        }).join("") + "</div>";
+      var sectors = (d.sectors || []).filter(function (x) { return x.changePct != null; })
+        .sort(function (a, b) { return b.changePct - a.changePct; });
+      box.innerHTML =
+        '<table class="tbl d-mkt-t"><thead><tr><th>Index</th><th>Last</th><th>Day</th><th>1 month</th></tr></thead><tbody>' +
+        d.indexes.map(function (x) {
+          var nm = String(x.name || x.symbol).replace(/\s*\((\w+)\)$/, ""), etf = (String(x.name || "").match(/\((\w+)\)$/) || [])[1];
+          var m = monthPct(x.closes);
+          return "<tr><td><b>" + h(nm) + "</b>" + (etf ? ' <span class="faint">' + h(etf) + "</span>" : "") + '</td><td class="num">' + F.price(x.price) + '</td><td class="num ' + F.cls(x.changePct) + '">' + F.spct(x.changePct, 2) + '</td><td class="num ' + F.cls(m) + '">' + (m == null ? "\u2014" : F.spct(m, 1)) + "</td></tr>";
+        }).join("") + "</tbody></table>" +
+        (sectors.length
+          ? '<table class="tbl d-mkt-t d-sec-t"><thead><tr><th>Sector</th><th>Day</th></tr></thead><tbody>' +
+            sectors.map(function (x) { return "<tr><td>" + h(x.name) + '</td><td class="num ' + F.cls(x.changePct) + '">' + F.spct(x.changePct, 2) + "</td></tr>"; }).join("") +
+            "</tbody></table>"
+          : "");
+      var st = IL.$("#d-mkt-st");
+      if (st && d.measured) st.textContent = d.advancing + " of " + d.measured + " sectors up";
     });
-    var st = IL.$("#d-mkt-st"); if (st) st.textContent = "Lines: past month";
   }
 
   function loadWatchlist() {
@@ -118,8 +117,8 @@
       if (!rows.length) {
         var picks = ["NVDA", "AAPL", "MSFT", "COST", "LLY", "JPM"];
         box.innerHTML = '<div class="dash-empty"><p><b>Start your watchlist.</b> Follow a few companies and this fills with their prices, grades and what changed.</p><div class="d-picks" id="d-picks">' +
-          picks.map(function (t) { return '<div class="d-pick"><a href="/research/' + t + '">' + IL.mono(t, "", "") + '<span class="d-li-t"><b>' + t + '</b><span class="faint" data-pn="' + t + '">LensScore \u2014</span></span></a><button class="btn sm" type="button" data-watch="' + t + '">' + IL.icon("plus", 14) + ' Watch</button></div>'; }).join("") + "</div>" +
-          '<ul class="d-tips"><li>' + IL.icon("star", 15) + '<span><b>Write why you follow it</b> and the price you would act at.</span></li><li>' + IL.icon("bell", 15) + '<span><b>Get an alert</b> when the price hits your level or a grade changes.</span></li><li>' + IL.icon("doc", 15) + '<span><b>A weekly email</b> every Saturday with what moved on your stocks.</span></li></ul></div>';
+          picks.map(function (t) { return '<div class="d-pick"><a href="/research/' + t + '">' + IL.mono(t, "", "") + '<span class="d-li-t"><b>' + t + '</b><span class="faint" data-pn="' + t + '">LensScore \u2014</span></span></a><button class="btn sm" type="button" data-watch="' + t + '">Watch</button></div>'; }).join("") + "</div>" +
+          '<ul class="d-tips"><li><span><b>Write why you follow it</b> and the price you would act at.</span></li><li><span><b>Get an alert</b> when the price hits your level or a grade changes.</span></li><li><span><b>A weekly email</b> every Saturday with what moved on your stocks.</span></li></ul></div>';
         IL.api("/api/lens-grades?tickers=" + picks.join(",")).then(function (r) {
           var g = (r.data && r.data.grades) || {};
           picks.forEach(function (t) { var el = box.querySelector('[data-pn="' + t + '"]'); if (el && g[t]) el.innerHTML = 'LensScore <b class="num" style="color:var(--text)">' + F.num(g[t].score, 1) + "</b>"; });
@@ -177,7 +176,7 @@
     });
     var when = prev && prev.at ? new Date(prev.at).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : null;
     box.innerHTML = (items.length
-      ? '<ul class="since">' + items.slice(0, 8).map(function (x) { return '<li><span class="since-dot ' + x.tone + '"></span><a href="/research/' + h(x.t) + '">' + x.text + "</a></li>"; }).join("") + "</ul>"
+      ? '<ul class="since">' + items.slice(0, 8).map(function (x) { return '<li><a href="/research/' + h(x.t) + '">' + x.text + "</a></li>"; }).join("") + "</ul>"
       : '<p class="muted" style="font-size:13.5px">No grade changes on your stocks' + (when ? " since " + h(when) : " yet") + ".</p>") +
       '<p class="note">' + (when ? "Compared with your visit on " + h(when) + "." : "We’ll compare against today next time you visit.") + "</p>" +
       '<a class="card-foot" style="margin-top:auto" href="/watchlist">Open your watchlist \u2192</a>';
@@ -193,9 +192,8 @@
       var box = IL.$("#d-mv"); if (!box) return;
       var rows = Array.isArray(res.data) ? res.data : [];
       if (!rows.length) { box.innerHTML = '<div class="empty">Movers appear once today’s closes are in.</div>'; return; }
-      var mx = Math.max.apply(null, rows.map(function (r) { return Math.abs(r.chgPct); }).concat([1]));
       box.innerHTML = '<ul class="d-list">' + rows.slice(0, 5).map(function (r) {
-        return '<li><a href="/research/' + h(r.symbol) + '">' + IL.mono(r.symbol, "", "sm") + '<span class="d-li-t"><b>' + h(r.symbol) + '</b><span class="faint">' + h(IL.cleanName(r.name || "")) + '</span></span></a><span class="d-mv-bar"><i class="' + (r.chgPct >= 0 ? "up" : "dn") + '" style="width:' + (Math.abs(r.chgPct) / mx * 100).toFixed(0) + '%"></i></span><span class="num ' + F.cls(r.chgPct) + '">' + F.spct(r.chgPct) + "</span></li>";
+        return '<li><a href="/research/' + h(r.symbol) + '">' + IL.mono(r.symbol, "", "sm") + '<span class="d-li-t"><b>' + h(r.symbol) + '</b><span class="faint">' + h(IL.cleanName(r.name || "")) + '</span></span></a><span class="num ' + F.cls(r.chgPct) + '">' + F.spct(r.chgPct) + "</span></li>";
       }).join("") + "</ul>" + (rows[0] && rows[0].asOf ? '<p class="note d-note">Among the ~280 stocks we grade \u00b7 close of ' + F.date(rows[0].asOf, { year: undefined }) + "</p>" : "");
     });
   }

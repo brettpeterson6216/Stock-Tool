@@ -65,62 +65,6 @@ img,svg{display:block}
 :focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:6px}
 ::selection{background:var(--gold-soft)}
 
-/* ── Top bar ────────────────────────────────────────────────────────────── */
-.il-top{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--ground) 92%,transparent);backdrop-filter:saturate(1.4) blur(10px);-webkit-backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid var(--line)}
-.il-top-in{height:var(--top-h);display:flex;align-items:center;gap:var(--s5);padding:0 44px}
-.il-brand{display:flex;align-items:center;gap:10px;color:var(--text);font-weight:700;font-size:16px;letter-spacing:-.01em;flex:none}
-.il-brand:hover{text-decoration:none}
-.il-nav{display:flex;gap:2px;flex:none}
-.il-nav a{padding:8px 12px;border-radius:var(--r-sm);color:var(--text2);font-weight:500}
-.il-nav a:hover{color:var(--text);background:var(--raised);text-decoration:none}
-.il-nav a[aria-current="page"]{color:var(--text);font-weight:600;background:var(--raised)}
-.il-acct{margin-left:auto;display:flex;align-items:center;gap:10px;flex:none}
-.il-plan{font-size:11.5px;font-weight:700;letter-spacing:.04em;color:var(--gold-ink);background:var(--gold);border-radius:999px;padding:3px 9px}
-.il-plan.trial{background:var(--gold-soft);color:var(--gold-text)}
-.il-avatar{width:34px;height:34px;border-radius:999px;border:1px solid var(--line3);background:var(--raised);font-weight:600;font-size:13px;cursor:pointer;display:grid;place-items:center}
-.il-iconbtn{width:36px;height:36px;border-radius:var(--r-md);border:1px solid transparent;background:transparent;color:var(--text2);display:grid;place-items:center;cursor:pointer}
-.il-iconbtn:hover{background:var(--raised);color:var(--text)}
-
-/* ── Search ─────────────────────────────────────────────────────────────── */
-.il-search{position:relative;flex:1 1 280px;max-width:440px;min-width:0}
-.il-search-box{display:flex;align-items:center;gap:8px;height:38px;padding:0 10px 0 12px;border:1px solid var(--line2);border-radius:var(--r-md);background:var(--surface);color:var(--text3)}
-.il-search-box:focus-within{border-color:var(--line3);box-shadow:0 0 0 3px var(--gold-soft)}
-.il-search input{flex:1;min-width:0;border:0;background:transparent;color:var(--text);font:inherit;outline:none}
-.il-search input::placeholder{color:var(--text3)}
-.il-kbd{font:600 11px var(--num);color:var(--text3);border:1px solid var(--line3);border-radius:5px;padding:1px 6px}
-.il-sugg{position:absolute;left:0;right:0;top:calc(100% + 6px);background:var(--surface);border:1px solid var(--line2);border-radius:var(--r-lg);box-shadow:var(--shadow);padding:6px;z-index:60;max-height:min(420px,70vh);overflow:auto}
-.il-sugg[hidden]{display:none}
-.il-sugg-item{display:flex;align-items:center;gap:12px;width:100%;padding:9px 10px;border-radius:var(--r-sm);border:0;background:transparent;text-align:left;cursor:pointer;color:var(--text)}
-.il-sugg-item[aria-selected="true"],.il-sugg-item:hover{background:var(--raised)}
-.il-sugg-sym{font-weight:700;min-width:58px}
-.il-sugg-name{color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.il-sugg-empty{padding:12px;color:var(--text2);font-size:13px}
-.il-sugg-head{padding:8px 10px 4px;font-size:12px;color:var(--text3);font-weight:600}
-
-/* ── Account menu ───────────────────────────────────────────────────────── */
-.il-menu{position:absolute;right:0;top:calc(100% + 8px);min-width:220px;background:var(--surface);border:1px solid var(--line2);border-radius:var(--r-lg);box-shadow:var(--shadow);padding:6px;z-index:70}
-.il-menu[hidden]{display:none}
-.il-menu a,.il-menu button{display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border-radius:var(--r-sm);border:0;background:transparent;color:var(--text);font-size:13.5px;text-align:left;cursor:pointer}
-.il-menu a:hover,.il-menu button:hover{background:var(--raised);text-decoration:none}
-.il-menu hr{border:0;border-top:1px solid var(--line);margin:6px 4px}
-.il-menu-head{padding:8px 10px 10px;font-size:12.5px;color:var(--text2)}
-.il-menu-head strong{display:block;color:var(--text);font-size:13.5px}
-
-/* ── Phone bottom bar ───────────────────────────────────────────────────── */
-.il-bottom{display:none}
-@media (max-width:760px){
-  .il-top-in{gap:var(--s3);padding:0 var(--s4)}
-  .il-nav,.il-brand-word{display:none}
-  .il-search{max-width:none}
-  .il-search .il-kbd{display:none}
-  .il-plan,.il-acct .il-theme,.il-acct .il-signup{display:none}
-  .il-bottom{display:grid;grid-template-columns:repeat(4,1fr);position:fixed;left:0;right:0;bottom:0;z-index:50;height:calc(var(--bottom-h) + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:color-mix(in srgb,var(--surface) 94%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line)}
-  .il-bottom a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--text3);font-size:11px;font-weight:600}
-  .il-bottom a:hover{text-decoration:none}
-  .il-bottom a[aria-current="page"]{color:var(--gold-text)}
-  body.il-app{padding-bottom:calc(var(--bottom-h) + env(safe-area-inset-bottom))}
-}
-
 /* ── Layout ─────────────────────────────────────────────────────────────── */
 .il-main{max-width:var(--maxw);margin:0 auto;padding:var(--s6) var(--s6) 72px;display:flex;flex-direction:column;gap:var(--s5)}
 @media (max-width:760px){.il-main{padding:var(--s4) var(--s4) var(--s7);gap:var(--s4)}}
@@ -315,8 +259,6 @@ body.il-app{
     var(--ground);
   background-attachment:scroll,scroll,fixed,scroll;
 }
-.il-top{background:color-mix(in srgb,var(--ground) 82%,transparent)}
-.il-top::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;background:var(--hair);opacity:.55;pointer-events:none}
 
 /* Cards get depth: a soft top-lit surface and a shadow, not a flat box. */
 .card,.kv{background:linear-gradient(180deg,var(--card-top),var(--card-bot));box-shadow:var(--depth)}
@@ -353,8 +295,9 @@ body.il-app{
 .grade .bar i{background-image:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.22))!important}
 
 /* Company monogram: a round badge tinted by sector. */
-.mono{--h:40;display:inline-grid;place-items:center;flex:none;width:40px;height:40px;border-radius:999px;font:700 13px var(--sans);letter-spacing:-.02em;color:hsl(var(--h) 70% 82%);background:radial-gradient(circle at 30% 25%,hsl(var(--h) 55% 34%),hsl(var(--h) 45% 16%));box-shadow:inset 0 0 0 1px hsl(var(--h) 60% 50% / .45),0 6px 16px -8px hsl(var(--h) 60% 40% / .8)}
-:root:not([data-theme="dark"]) .mono{color:hsl(var(--h) 55% 28%);background:radial-gradient(circle at 30% 25%,hsl(var(--h) 70% 94%),hsl(var(--h) 55% 84%));box-shadow:inset 0 0 0 1px hsl(var(--h) 45% 60% / .5)}
+/* Ticker monogram: a neutral token, not a colour per company. Colour on
+   this site means gold (brand, action) or gain/loss on a signed number. */
+.mono{display:inline-grid;place-items:center;flex:none;width:40px;height:40px;border-radius:999px;font:650 12.5px var(--sans);letter-spacing:-.01em;color:var(--text2);background:var(--raised);box-shadow:inset 0 0 0 1px var(--line2)}
 .mono.sm{width:30px;height:30px;font-size:11px}
 .mono.lg{width:56px;height:56px;font-size:17px}
 
@@ -419,58 +362,33 @@ body.il-app{
 .w-big{box-shadow:none;margin:0}
 .w-big .w-tools{display:none}
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   Top of every page: a live market tape over a richer top bar.
-   ═══════════════════════════════════════════════════════════════════════════ */
+/* Wider pages on big screens. */
 @media (min-width:1700px){:root{--maxw:1520px}}
 @media (min-width:2200px){:root{--maxw:1720px}}
-
-.il-tape{position:relative;isolation:isolate;display:flex;align-items:center;height:34px;font-size:12.5px;color:var(--text2);
-  background:linear-gradient(90deg,color-mix(in srgb,var(--ground) 70%,#000) 0%,var(--ground) 100%);border-bottom:1px solid var(--line);overflow:hidden}
-.il-tape::before{content:"";position:absolute;inset:0;z-index:-1;background:url(/share/atlas-v1.webp) center 38%/cover no-repeat;opacity:.16;
-  -webkit-mask-image:linear-gradient(90deg,#000,rgba(0,0,0,.4) 60%,transparent);mask-image:linear-gradient(90deg,#000,rgba(0,0,0,.4) 60%,transparent)}
-:root:not([data-theme="dark"]) .il-tape{background:linear-gradient(90deg,#EDE7DA,var(--ground))}
-:root:not([data-theme="dark"]) .il-tape::before{opacity:.12;filter:sepia(.4)}
-.il-tape-state{flex:none;display:flex;align-items:center;gap:8px;padding:0 18px 0 44px;height:100%;border-right:1px solid var(--line);white-space:nowrap}
-.il-tape-state b{color:var(--text);font-weight:650;letter-spacing:.01em}
-.il-tape-dot{width:7px;height:7px;border-radius:999px;background:var(--text3)}
-.il-tape-dot.on{background:var(--gain);box-shadow:0 0 0 0 color-mix(in srgb,var(--gain) 60%,transparent);animation:il-pulse 2s ease-out infinite}
-@keyframes il-pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--gain) 55%,transparent)}100%{box-shadow:0 0 0 8px transparent}}
-.il-tape-run{flex:1;min-width:0;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 40px,#000 calc(100% - 60px),transparent);mask-image:linear-gradient(90deg,transparent,#000 40px,#000 calc(100% - 60px),transparent)}
-.il-tape-track{display:flex;width:max-content;animation:il-tape 70s linear infinite}
-.il-tape:hover .il-tape-track{animation-play-state:paused}
-.il-tape-set{display:flex;align-items:center;padding-right:28px}
-@keyframes il-tape{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-.il-tape-it{display:inline-flex;align-items:center;gap:7px;padding:0 4px;white-space:nowrap}
-.il-tape-n{color:var(--text2)}
-.il-tape-tag{font:600 10.5px var(--num);color:var(--text3);border:1px solid var(--line2);border-radius:4px;padding:0 4px;letter-spacing:.03em}
-.il-tape-it .num{color:var(--text);font-weight:600}
-.il-tape-it .up,.il-tape-it .down{display:inline-flex;align-items:center;gap:3px;font:600 12px var(--num)}
-.il-tape-sep{color:var(--gold);opacity:.5;padding:0 14px;font-size:8px}
-.il-tape-none{padding:0 20px;color:var(--text3)}
-@media (prefers-reduced-motion:reduce){.il-tape-track{animation:none}}
-@media (max-width:760px){.il-tape{height:30px;font-size:11.5px}.il-tape-state{padding:0 12px}.il-tape-state>span:last-child{display:none}}
-
-/* The bar itself: a warm wash, icons in the nav, a gold active marker. */
-.il-top{background:linear-gradient(180deg,color-mix(in srgb,var(--gold) 5%,transparent),transparent 80%),color-mix(in srgb,var(--ground) 86%,transparent)}
-.il-top-in{gap:var(--s5)}
-.il-brand img{filter:drop-shadow(0 0 10px color-mix(in srgb,var(--gold) 35%,transparent))}
-.il-brand-word{font-size:17px}
-.il-nav a[hidden]{display:none}
-.il-nav a{position:relative;display:inline-flex;align-items:center;gap:7px;padding:8px 12px}
-.il-nav a svg{opacity:.7;transition:opacity .15s,color .15s}
-.il-nav a:hover svg{opacity:1;color:var(--gold-text)}
-.il-nav a[aria-current="page"]{background:color-mix(in srgb,var(--gold) 9%,transparent);color:var(--text)}
-.il-nav a[aria-current="page"] svg{opacity:1;color:var(--gold-text)}
-.il-nav a[aria-current="page"]::after{content:"";position:absolute;left:12px;right:12px;bottom:-11px;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);box-shadow:0 0 10px color-mix(in srgb,var(--gold) 70%,transparent)}
-.il-search-box{background:color-mix(in srgb,var(--surface) 80%,transparent)}
-@media (max-width:1180px){.il-nav a span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}.il-nav a{padding:8px 10px}}
-@media (max-width:1180px) and (min-width:761px){.il-nav a[data-k] svg{opacity:.9}}
-
-/* Phones and the home-screen app: the status bar (clock, signal, battery)
-   sits over the top of the page, so the bar starts below it. */
-.il-top{padding-top:var(--safe-top)}
-.il-top-in{padding-left:max(44px,env(safe-area-inset-left,0px));padding-right:max(44px,env(safe-area-inset-right,0px))}
-@media (max-width:760px){.il-top-in{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}}
+/* Sticky parts sit under the top bar, which starts below the phone's status
+   bar (see shell.css). */
 .tabs{top:calc(var(--top-h) + var(--safe-top))}
-.il-sugg{max-height:min(420px,calc(70vh - var(--safe-top)))}
+
+/* In-page dropdown menus (the chart's indicator picker). The account menu
+   lives inside the site shell and is styled there. */
+.il-menu{position:absolute;right:0;top:calc(100% + 8px);min-width:220px;background:var(--surface);border:1px solid var(--line2);border-radius:var(--r-lg);box-shadow:var(--shadow);padding:6px;z-index:70}
+.il-menu[hidden]{display:none}
+.il-menu a,.il-menu button{display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border-radius:var(--r-sm);border:0;background:transparent;color:var(--text);font-size:13.5px;text-align:left;cursor:pointer}
+.il-menu a:hover,.il-menu button:hover{background:var(--raised);text-decoration:none}
+
+/* In-page search boxes (the Research landing). The site bar's search is
+   drawn inside the shell and styled there. */
+.il-search{position:relative;flex:1 1 280px;max-width:440px;min-width:0}
+.il-search-box{display:flex;align-items:center;gap:8px;height:38px;padding:0 10px 0 12px;border:1px solid var(--line2);border-radius:var(--r-md);background:var(--surface);color:var(--text3)}
+.il-search-box:focus-within{border-color:var(--line3);box-shadow:0 0 0 3px var(--gold-soft)}
+.il-search input{flex:1;min-width:0;border:0;background:transparent;color:var(--text);font:inherit;outline:none}
+.il-search input::placeholder{color:var(--text3)}
+.il-sugg{position:absolute;left:0;right:0;top:calc(100% + 6px);background:var(--surface);border:1px solid var(--line2);border-radius:var(--r-lg);box-shadow:var(--shadow);padding:6px;z-index:60;max-height:min(420px,70vh);overflow:auto}
+.il-sugg[hidden]{display:none}
+.il-sugg-item{display:flex;align-items:center;gap:12px;width:100%;padding:9px 10px;border-radius:var(--r-sm);border:0;background:transparent;text-align:left;cursor:pointer;color:var(--text)}
+.il-sugg-item[aria-selected="true"],.il-sugg-item:hover{background:var(--raised)}
+.il-sugg-sym{font-weight:700;min-width:58px}
+.il-sugg-name{color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.il-sugg-empty{padding:12px;color:var(--text2);font-size:13px}
+.il-sugg-head{padding:8px 10px 4px;font-size:12px;color:var(--text3);font-weight:600}
+@media (max-width:760px){.il-search{max-width:none}}

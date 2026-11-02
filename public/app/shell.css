@@ -1,0 +1,54 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   The site shell, page side. The bar itself is drawn inside a shadow root by
+   shell.js, so no page stylesheet, old or new, can reach it: it is pixel for
+   pixel the same on every page. This file holds only what has to live on the
+   page: the bar's fonts, where the bar sits, the one rule for calls to
+   action, and retiring the older pages' own bars.
+
+   Everything here sits in the il-shell cascade layer, and this file is the
+   first stylesheet on every page, so il-shell is the first layer declared.
+   For !important rules the first layer wins over every later layer and over
+   unlayered styles, which is what lets "hide this sign-up button from a
+   member" hold against the older stylesheets' own !important rules.
+   ═══════════════════════════════════════════════════════════════════════════ */
+@layer il-shell;
+@font-face{font-family:'Inter';font-style:normal;font-weight:100 900;font-display:swap;src:url(/vendor/fonts/inter-files/inter-latin-wght-normal.woff2) format('woff2-variations'),url(/vendor/fonts/inter-files/inter-latin-wght-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Instrument Serif';font-style:italic;font-weight:400;font-display:swap;src:url(/vendor/fonts/instrument-serif-files/instrument-serif-latin-400-italic.woff2) format('woff2')}
+
+@layer il-shell{
+/* ── Where the bars sit ────────────────────────────────────────────────── */
+/* !important throughout: older pages carry broad rules (body > *, nav,
+   header) that would otherwise pad or move the bars. */
+il-top,il-tabbar{margin:0 !important;padding:0 !important;border:0 !important;width:auto !important;height:auto !important;max-width:none !important;transform:none !important;float:none !important}
+il-top{display:block !important;position:sticky !important;top:0 !important;z-index:1000 !important;min-height:calc(61px + env(safe-area-inset-top,0px)) !important}
+html.il-shell-legacy il-top{position:fixed !important;left:0 !important;right:0 !important}
+il-tabbar{display:none !important}
+@media (max-width:760px){
+  il-tabbar{display:block !important;position:fixed !important;left:0 !important;right:0 !important;bottom:0 !important;top:auto !important;z-index:1000 !important}
+  html.il-shell-on body{padding-bottom:calc(62px + env(safe-area-inset-bottom,0px))}
+}
+
+/* ── One rule for calls to action, on every page ───────────────────────────
+   data-show="guest"   visitors only (sign-up prompts)
+   data-show="upgrade" visitors and free accounts (trial / upgrade prompts)
+   data-show="free"    free accounts only
+   data-show="pro"     Pro and trial accounts only
+   data-show="member"  any signed-in account
+   Until the first sign-in check returns, the page assumes a visitor, so the
+   landing page never jumps; members carry a hint and are right from paint. */
+html.il-auth-pending [data-show="free"],html.il-auth-pending [data-show="pro"],html.il-auth-pending [data-show="member"],
+html.il-free [data-show="guest"],html.il-pro [data-show="guest"],
+html.il-guest [data-show="free"],html.il-pro [data-show="free"],
+html.il-guest [data-show="pro"],html.il-free [data-show="pro"],
+html.il-pro [data-show="upgrade"],
+html.il-guest [data-show="member"]{display:none !important}
+[data-show][aria-disabled="true"]{pointer-events:none;cursor:default;opacity:.75}
+
+/* ── Older pages: their own bars are retired ───────────────────────────────
+   lib/asset-stamp.js hides #main-nav and the old phone menus inline; these
+   cover the drawers some older scripts add at run time. */
+html.il-shell-legacy #main-nav,html.il-shell-legacy .il-mobile-drawer,html.il-shell-legacy #mobile-menu,html.il-shell-legacy .mobile-menu,
+html.il-shell-legacy #mobile-bottom-nav,html.il-shell-legacy #mobile-more-menu{display:none !important}
+/* The old app's email-verification strip sits under the bar, not over it. */
+html.il-shell-legacy #verif-banner{top:calc(61px + env(safe-area-inset-top,0px)) !important;z-index:999 !important}
+}

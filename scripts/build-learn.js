@@ -109,16 +109,16 @@ ${g.items.map(l => `        <li><a href="/learn/${l.slug}" data-lesson="${l.slug
       </div>
       <div class="lxl-hero-actions">
         <a href="/learn/${lessons[0].slug}" class="lxl-btn lxl-btn-gold" id="lxl-continue">Start lesson 1 →</a>
-        <a href="/signup?source=learn_index" class="lxl-btn lxl-btn-ghost">Create a free account</a>
+        <a href="/signup?source=learn_index" class="lxl-btn lxl-btn-ghost" data-show="guest">Create a free account</a>
       </div>
     </header>
 ${sections}
-    <aside class="lxl-cta">
+    <aside class="lxl-cta" data-show="guest">
       <div>
         <h2>Practise on real companies</h2>
         <p>Every lesson links to the tool it teaches. A free account gives you ${"{{FREE_DAILY_LIMIT}}"} analyses a day, SEC financial statements and watchlists.</p>
       </div>
-      <a href="/signup?source=learn_index_cta" class="lxl-btn lxl-btn-gold">Create free account</a>
+      <a href="/signup?source=learn_index_cta" class="lxl-btn lxl-btn-gold" data-show="guest">Create free account</a>
     </aside>
   </main>
 `

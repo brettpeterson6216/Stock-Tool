@@ -11,8 +11,13 @@
    at one width — which is how it reported "identical" while four more page
    types, three more account states and every phone width went untested.
 
-   It now sweeps:
-     · every document that contains a #main-nav, plus all five lesson pages,
+   Since November 2026 there is one bar, drawn by public/app/shell.js inside a
+   shadow root (<il-top>), on the rebuilt app pages and the older pages alike.
+   This sweep measures that bar from inside the shadow root, including its
+   position on the page, and fails if any older page still shows #main-nav.
+
+   It sweeps:
+     · the app pages, every older document, all lesson pages,
        two /stock/ acquisition pages and /verify-email
      · four account states, because the right-hand cluster is what changes:
        signed out, free, trial, pro
@@ -43,10 +48,11 @@ const ALL_ROUTES = [
   "/login", "/signup", "/reset-password", "/admin-analytics", "/verify-email",
   ...lessons.map(l => `/learn/${l.slug}`),
   "/stock/AAPL", "/stock/NVDA",
+  "/research", "/research/AAPL", "/screener", "/watchlist", "/compare",
 ];
 // A representative spread for the state and width sweeps: one of each kind of
 // document, always including the one that was broken.
-const SAMPLE = ["/pricing", "/lens-score", "/", "/about", "/login", "/learn/site-tour", "/stock/AAPL"];
+const SAMPLE = ["/pricing", "/lens-score", "/", "/about", "/login", "/learn/site-tour", "/stock/AAPL", "/research", "/watchlist"];
 
 const STATES = {
   out:   null,
@@ -55,50 +61,33 @@ const STATES = {
   pro:   { id: 1, username: "checkbar", plan: "pro",   effectivePlan: "pro",   email_verified: 1 },
 };
 
-const PARTS = ["#main-nav", ".nav-logo", ".il-wordmark", "#nav-links", "#nav-search",
-               "#nav-ticker-input", "#theme-toggle-btn", ".il-global-actions",
-               "#nav-acct-wrap", "#nav-acct-btn", "#nav-acct-name", "#nav-acct-badge",
-               "#nav-login", "#nav-signup"];
+const PARTS = ["host", ".bar", ".in", ".brand", ".nav", ".search", ".box", "#il-q", ".acct",
+               ".acct .gold", ".acct .ghost", ".plan", "#theme", "#avatar", "OLD #main-nav"];
 
 const PROBE = (parts) => {
   const out = {};
+  const host = document.querySelector("il-top");
+  const root = host && host.shadowRoot;
   for (const sel of parts) {
-    const el = document.querySelector(sel);
+    let el;
+    if (sel === "host") el = host;
+    else if (sel.startsWith("OLD ")) {
+      el = document.querySelector(sel.slice(4));
+      out[sel] = el && el.getClientRects().length ? "VISIBLE" : "retired";
+      continue;
+    } else el = root && root.querySelector(sel);
     if (!el) { out[sel] = "ABSENT"; continue; }
     const c = getComputedStyle(el), r = el.getBoundingClientRect();
     const shown = c.display !== "none" && c.visibility !== "hidden" && !el.hidden;
-    // Size, type, colour and whether it is on screen at all. Not x/y: the tab
-    // row's own width legitimately depends on which tab is marked current.
-    out[sel] = [shown ? "shown" : "hidden", Math.round(r.width), Math.round(r.height),
-      c.fontSize, c.fontWeight, c.color, c.backgroundColor,
+    // Position and size included: with one bar there is no excuse for it to
+    // sit even a pixel differently from one page to the next.
+    out[sel] = [shown ? "shown" : "hidden", Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height),
+      c.fontFamily.split(",")[0], c.fontSize, c.fontWeight, c.color, c.backgroundColor,
       parseFloat(c.borderTopWidth) ? c.borderTopWidth + " " + c.borderTopColor : "none",
       c.borderTopLeftRadius, c.padding, c.display].join(" | ");
   }
   return out;
 };
-
-
-/* The bar is a two-column grid. `.nav-logo` and `.il-global-actions` are the
-   flexible pair: the actions cluster sizes to its content and the logo takes
-   what is left, so their widths are content-derived BY DESIGN and drift a few
-   px between routes — 166/180 on /pricing against 160/186 on /login at phone
-   width, always summing to the same total.
-   That is not the bug this script exists to catch. Everything that is actually
-   pinned — type, weight, colour, background, border, radius, padding, display
-   and whether the thing is on screen at all — is still compared exactly, and
-   the two totals must still agree, so a real change in either column is caught
-   by the other side of the pair. Only these two, only width, only ≤8px. */
-const FLEX_PAIR = new Set([".nav-logo", ".il-global-actions"]);
-function withinFlexTolerance(sel, a, b) {
-  if (!FLEX_PAIR.has(sel)) return false;
-  const A = a.split(" | "), B = b.split(" | ");
-  if (A.length !== B.length) return false;
-  for (let i = 0; i < A.length; i++) {
-    if (i === 1) continue;                       // width, handled below
-    if (A[i] !== B[i]) return false;             // anything else must match exactly
-  }
-  return Math.abs(Number(A[1]) - Number(B[1])) <= 8;
-}
 
 (async () => {
   const server = spawn(process.execPath, [path.join(__dirname, "..", "server.js")], {
@@ -140,7 +129,7 @@ function withinFlexTolerance(sel, a, b) {
             .map(i => new Promise(r => { i.addEventListener("load", r); i.addEventListener("error", r); })),
         ])).catch(() => {});
         await page.waitForTimeout(1300);
-        const hasBar = await page.evaluate(() => !!document.getElementById("main-nav"));
+        const hasBar = await page.evaluate(() => !!document.querySelector("il-top"));
         if (!hasBar) { await page.close(); continue; }      // not every route has one
         seen[route] = await page.evaluate(PROBE, PARTS);
         loads += 1;
@@ -155,7 +144,6 @@ function withinFlexTolerance(sel, a, b) {
     for (const route of names.slice(1)) {
       for (const sel of PARTS) {
         if (ref[sel] === seen[route][sel]) continue;
-        if (withinFlexTolerance(sel, ref[sel], seen[route][sel])) continue;
         problems.push(`[${label}] ${route}  ${sel}\n      ${refRoute}: ${ref[sel]}\n      ${route}: ${seen[route][sel]}`);
       }
     }

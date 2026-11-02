@@ -408,7 +408,7 @@
       <h1 class="il-display"><span class="il-d1">Research stocks</span> <span class="il-d2">like a <em>professional.</em></span></h1>
       <p>Free lessons take you from your first stock to a full valuation model. Then put it to work on any company with SEC financials, a transparent 0&ndash;10 LensScore, and Bear/Base/Bull scenarios you control.</p>
       <div class="il-landing-actions il-cta-pair">
-        <a class="il-landing-secondary il-cta-solid" id="il-hero-secondary" href="/signup?source=hero_free">Create free account <i class="ti ti-arrow-right" aria-hidden="true"></i></a>
+        <a class="il-landing-secondary il-cta-solid" id="il-hero-secondary" href="/signup?source=hero_free" data-show="guest">Create free account <i class="ti ti-arrow-right" aria-hidden="true"></i></a>
         <a class="il-landing-primary il-cta-ghost" id="il-hero-primary" href="#lx-demo"><i class="ti ti-player-play" aria-hidden="true"></i> See it on a real stock</a>
       </div>
       <div class="il-landing-search" role="search">
@@ -588,7 +588,7 @@
           <li><i class="ti ti-check" aria-hidden="true"></i>Every lesson in the Academy and the leaderboard</li>
           <li><i class="ti ti-check" aria-hidden="true"></i>Watchlists and 3 email alerts</li>
         </ul>
-        <a class="lx-btn lx-btn-ghost" href="/signup?source=landing_pricing_free">Create free account</a>
+        <a class="lx-btn lx-btn-ghost" href="/signup?source=landing_pricing_free" data-show="guest">Create free account</a>
       </article>
       <article class="lx-plan lx-plan-pro">
         <span class="lx-plan-badge">Most complete</span>
@@ -603,7 +603,7 @@
           <li><i class="ti ti-check" aria-hidden="true"></i>SEC filings, insider trades and famous investors&rsquo; holdings</li>
           <li><i class="ti ti-check" aria-hidden="true"></i>Risk metrics, off-exchange volume and CSV exports</li>
         </ul>
-        <a class="lx-btn lx-btn-gold" href="/signup?next=%2F%3Fpricing%3D1&amp;source=landing_pricing_pro">Start {{TRIAL_DAYS}}-day free trial</a>
+        <a class="lx-btn lx-btn-gold" href="/signup?next=%2F%3Fpricing%3D1&amp;source=landing_pricing_pro" data-show="upgrade">Start {{TRIAL_DAYS}}-day free trial</a>
         <p class="lx-fine">{{TRIAL_CARD_SHORT}} for the trial. Cancel anytime before it ends and you pay nothing. Have a discount code? Enter it in Checkout.</p>
       </article>
     </div>
@@ -624,11 +624,11 @@
     </div>
   </section>
 
-  <section class="lx-section lx-final" aria-labelledby="lx-final-title">
+  <section class="lx-section lx-final" aria-labelledby="lx-final-title" data-show="guest">
     <h2 id="lx-final-title">Your next stock deserves <em>more than a headline.</em></h2>
     <p>Create a free account in under a minute. No card needed.</p>
     <div class="lx-final-actions">
-      <a class="lx-btn lx-btn-gold" href="/signup?source=landing_final">Create free account <i class="ti ti-arrow-right" aria-hidden="true"></i></a>
+      <a class="lx-btn lx-btn-gold" href="/signup?source=landing_final" data-show="guest">Create free account <i class="ti ti-arrow-right" aria-hidden="true"></i></a>
       <a class="lx-btn lx-btn-ghost" href="/learn">Browse the lessons</a>
     </div>
   </section>
@@ -1635,7 +1635,7 @@
               </div>
               <!-- List -->
               <div id="sa-guest-banner" style="display:none;background:rgba(185,138,61,.08);border:1px solid rgba(185,138,61,.2);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--ink3);">
-  <strong>You're not signed in.</strong> Saved analyses are stored locally on this device. <a href="/signup" style="color:var(--il-gold-ink,var(--gold));font-weight:600;">Create a free account</a> to sync across devices.
+  <strong>You're not signed in.</strong> Saved analyses are stored locally on this device. <a href="/signup" data-show="guest" style="color:var(--il-gold-ink,var(--gold));font-weight:600;">Create a free account</a> to sync across devices.
 </div>
 <div id="sa-sync-banner" style="display:none;background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.18);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--ink3);">
   <span style="color:var(--market-up);font-weight:600;">✓ Signed in</span> — your saved analyses sync across devices automatically.

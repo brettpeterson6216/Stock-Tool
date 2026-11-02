@@ -173,8 +173,9 @@
           <li><i class="ti ti-check" aria-hidden="true"></i>Every Academy lesson and the LensScore leaderboard</li>
           <li><i class="ti ti-check" aria-hidden="true"></i>Watchlists and 3 email alerts</li>
         </ul>
-        <a class="lxp-btn lxp-btn-ghost" href="/signup?source=pricing_free">Create free account</a>
-        <p class="lxp-fine">No card. Or try {{GUEST_DAILY_LIMIT}} analyses a day without an account.</p>
+        <a class="lxp-btn lxp-btn-ghost" href="/signup?source=pricing_free" data-show="guest">Create free account</a>
+        <span class="lxp-btn lxp-btn-ghost lxp-current" data-show="free" aria-disabled="true">Your current plan</span>
+        <p class="lxp-fine" data-show="guest">No card. Or try {{GUEST_DAILY_LIMIT}} analyses a day without an account.</p>
       </article>
       <article class="lxp-plan lxp-plan-pro">
         <span class="lxp-badge">Most complete</span>
@@ -189,8 +190,9 @@
           <li><i class="ti ti-check" aria-hidden="true"></i>SEC filings, insider trades and famous investors&rsquo; holdings</li>
           <li><i class="ti ti-check" aria-hidden="true"></i>Risk metrics, off-exchange volume and CSV exports</li>
         </ul>
-        <a class="lxp-btn lxp-btn-gold" href="/?pricing=1">Start {{TRIAL_DAYS}}-day free trial</a>
-        <p class="lxp-fine">The {{TRIAL_DAYS}}-day trial includes everything in Pro. {{TRIAL_CARD_COPY}} Cancel before the trial ends and you pay nothing. {{PROMOTION_COPY}}</p>
+        <a class="lxp-btn lxp-btn-gold" href="/?pricing=1" data-show="upgrade">Start {{TRIAL_DAYS}}-day free trial</a>
+        <span class="lxp-btn lxp-btn-ghost lxp-current" data-show="pro" aria-disabled="true">Your current plan</span>
+        <p class="lxp-fine" data-show="upgrade">The {{TRIAL_DAYS}}-day trial includes everything in Pro. {{TRIAL_CARD_COPY}} Cancel before the trial ends and you pay nothing. {{PROMOTION_COPY}}</p>
       </article>
     </section>
 
@@ -242,10 +244,10 @@
       <details><summary>Is this investment advice?</summary><p>No. ImpliedLens is not investment advice. It provides market data, models and education for your own research, and nothing on the site is a recommendation to buy or sell any security.</p></details>
     </section>
 
-    <section class="lxp-final">
+    <section class="lxp-final" data-show="guest">
       <h2>Start with the free plan today.</h2>
       <div class="lxp-final-actions">
-        <a class="lxp-btn lxp-btn-gold" href="/signup?source=pricing_final">Create free account</a>
+        <a class="lxp-btn lxp-btn-gold" href="/signup?source=pricing_final" data-show="guest">Create free account</a>
         <a class="lxp-btn lxp-btn-ghost" href="/?view=tool&amp;section=analyze&amp;symbol=NVDA">Try a stock first</a>
       </div>
     </section>

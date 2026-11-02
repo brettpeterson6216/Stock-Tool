@@ -16,22 +16,24 @@
 <link rel="manifest" href="/site.webmanifest">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/vendor/fonts/inter-files/inter-latin-wght-normal.woff2">
 <script src="/theme-bootstrap.js"></script>
+<link rel="stylesheet" href="/app/shell.css">
 <link rel="stylesheet" href="/app/lens.css">
 <link rel="stylesheet" href="/app/stock.css">
 <link rel="stylesheet" href="/app/screener.css">
+<script defer src="/app/shell.js"></script>
 <script defer src="/app/core.js"></script>
 
 <script defer src="/app/screener.js"></script>
 </head>
 <body>
 <a class="sr-only" href="#main">Skip to content</a>
-<header id="il-top"></header>
+<il-top id="il-top"></il-top>
 <main class="il-main" id="main" tabindex="-1">
   <div class="sk" style="height:84px;border-radius:14px"></div>
   <div class="sk" style="height:420px;border-radius:14px"></div>
 </main>
 <footer id="il-foot"></footer>
-<nav id="il-bottom"></nav>
+<il-tabbar id="il-bottom"></il-tabbar>
 <noscript><p style="padding:24px">ImpliedLens needs JavaScript to show live research.</p></noscript>
 </body>
 </html>
