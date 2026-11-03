@@ -150,7 +150,7 @@
         tile("/compare", "atlas", "52% 70%", "Compare", "Up to four stocks side by side, with the best in each row marked.") +
         tile("/screener", "ledger", "60% 40%", "Screener", "Filter the <span data-graded>~280</span> US stocks we grade by grade, value, size and momentum.") +
         tile("/lens-score", "dial", "75% 45%", "LensToolkit", "Trend, timing, buy zones and alerts for any stock.") +
-        tile("/?view=tool&section=projection", "engraved", "70% 70%", "Valuation Lab", "A full five-year model with saved versions.") +
+        tile("/?view=tool&section=projection", "engraved", "70% 70%", "Valuation Lab", "Pro: a year-by-year operating model and DCF, with saved versions.") +
       "</div>" +
       '<div class="section-h"><h2 class="section-t">Top-rated in each <em>sector</em></h2><span class="card-sub">Highest LensScore among the companies we grade</span></div>' +
       '<div class="card flush" id="rl-leaders" data-w="expand,csv" data-w-title="Top-rated by sector"><div style="padding:20px">' + sk(16) + "</div></div>" +
@@ -869,7 +869,7 @@
     return c;
   }
 
-  /* Valuation Lab share image: what the price implies on the left, the
+  /* Valuation share image: what the price implies on the left, the
      sharer's own bear / base / bull cases on the right. */
   function drawValuationCard(d, plate) {
     var W = 1200, H = 630, c = document.createElement("canvas"); c.width = W; c.height = H;
@@ -877,7 +877,7 @@
     var meta = S.quote ? S.quote.meta : {}, name = IL.$("#sh-name") ? IL.$("#sh-name").textContent : S.t;
     var exRaw = String(meta.fullExchangeName || meta.exchangeName || "").trim(), ex = EXCHANGE[exRaw.toLowerCase()] || exRaw.toUpperCase();
     K.plate(plate, W, H);
-    K.brand("VALUATION LAB  ·  " + new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }).toUpperCase());
+    K.brand("VALUATION  ·  " + new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }).toUpperCase());
     box([ex, meta.sector].filter(Boolean).join("  ·  ").toUpperCase(), 48, 76, 400, 16, font(500, 12, sans), C.t2, "left", 1.2);
     var tpx = K.fit(S.t, 700, sans, 72, 52, 392, -1.5);
     box(S.t, 48, 94, 392, 80, font(700, tpx, sans), C.text, "left", -1.5);
@@ -1017,7 +1017,7 @@
       '<section class="card"><h3 class="card-t">The five grades</h3>' + rows + "</section>" +
       '<section class="card"><h3 class="card-t">Strengths</h3>' + list(g.strengths, "good") +
         '<h3 class="card-t" style="margin-top:8px">Things to watch</h3>' + list(g.watch, "bad") +
-        '<p class="note">Grades compare the company with its sector using SEC filings and a year of prices. ' + (S.lens.provenance && S.lens.provenance.asOf && S.lens.provenance.asOf.fundamentals ? "Filings as of " + F.date(S.lens.provenance.asOf.fundamentals) + ". " : "") + '<a href="/learn/lens-score">How the LensScore works</a></p></section>';
+        '<p class="note">The five grades compare the company with its own sector; the 0–10 LensScore combines them and ranks it across every company we grade. Entry timing on the chart is separate and not part of the score. ' + (S.lens.provenance && S.lens.provenance.asOf && S.lens.provenance.asOf.fundamentals ? "Filings as of " + F.date(S.lens.provenance.asOf.fundamentals) + ". " : "") + '<a href="/learn/lens-score">How the LensScore works</a></p></section>';
   }
 
   function paintPeers() {
@@ -1308,7 +1308,7 @@
     box.innerHTML =
       '<section class="card prime val-hero hero-band plate" id="val-hero" data-w="share" data-w-title="your valuation" style="--plate:url(/share/ledger-v1.webp);--plate-pos:right 40%"></section>' +
       '<p class="callout val-err" id="val-err" role="alert" hidden></p>' +
-      '<div class="section-h"><div><h2 class="section-t">Valuation Lab</h2><p class="card-sub">Five years out. Start from what the company has done; change any number.</p></div><div class="row wrap"><select class="input val-versions" id="val-versions" aria-label="Saved versions"><option value="">Saved versions</option></select><button class="btn sm" type="button" id="val-save">Save version</button><button class="btn sm ghost" type="button" id="val-reset">Reset</button></div></div>' +
+      '<div class="section-h"><div><h2 class="section-t">Valuation</h2><p class="card-sub">Five years out. Start from what the company has done; change any number.</p></div><div class="row wrap"><select class="input val-versions" id="val-versions" aria-label="Saved versions"><option value="">Saved versions</option></select><button class="btn sm" type="button" id="val-save">Save version</button><button class="btn sm ghost" type="button" id="val-reset">Reset</button></div></div>' +
       '<section class="card flush" id="val-cases" data-w="csv" data-w-title="Valuation cases"><div class="tbl-wrap"><table class="tbl val-tbl"><thead><tr><th></th>' + cases.map(function (c) { return '<th class="val-' + c + '">' + label[c] + "</th>"; }).join("") + "</tr></thead><tbody>" +
         valRow("growth", "Revenue growth per year", "%", "How fast sales grow each year for the next five years.") +
         valRow("margin", "Net profit margin", "%", "Share of revenue kept as profit in year five. " + (ctx.margin !== null ? "Last 12 months: " + F.pct(ctx.margin * 100) + "." : "")) +

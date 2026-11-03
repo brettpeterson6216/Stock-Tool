@@ -1333,8 +1333,20 @@ test("stock page URLs are normalised and unknown tabs fall back to the overview"
   res = await req("/research/NVDA/nonsense");
   assert.equal(res.status, 302);
   assert.equal(res.headers.get("location"), "/research/NVDA");
+  // Not a ticker: a real not-found page that says so, not a silent redirect (F17).
   res = await req("/research/%3Cscript%3E");
-  assert.equal(res.headers.get("location"), "/research");
+  assert.equal(res.status, 404);
+  const body = await res.text();
+  assert.match(body, /<title>Page not found · ImpliedLens<\/title>/);
+  assert.doesNotMatch(body, /<script>/i);
+});
+
+test("unknown addresses get the not-found page with a 404, not the homepage", async () => {
+  const res = await req("/definitely-not-a-page");
+  assert.equal(res.status, 404);
+  const body = await res.text();
+  assert.match(body, /We can&rsquo;t find that page/);
+  assert.doesNotMatch(body, /il-landing/);
 });
 
 test("old app links to a stock open the rebuilt page on the matching tab", async () => {

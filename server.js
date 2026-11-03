@@ -275,7 +275,7 @@ app.get(["/research", "/research/:ticker", "/research/:ticker/:tab"], (req, res)
   const t = req.params.ticker;
   if (t) {
     const clean = String(t).trim().toUpperCase();
-    if (!/^[A-Z0-9.^-]{1,15}$/.test(clean)) return res.redirect(302, "/research");
+    if (!/^[A-Z0-9.^-]{1,15}$/.test(clean)) return sendPage(res, path.join(__dirname, "public", "app", "not-found.html"), 404);
     const tab = req.params.tab ? String(req.params.tab).toLowerCase() : null;
     if (tab && !RESEARCH_TABS.has(tab)) return res.redirect(302, `/research/${encodeURIComponent(clean)}`);
     if (clean !== t || tab === "overview") {
@@ -612,7 +612,12 @@ app.get("/api/version", (_req, res) => {
 app.use("/api", (_req, res) => res.status(404).json({ error: "API route not found." }));
 
 // SPA catch-all — must be last
-app.get("*", (_req, res) => sendPage(res, path.join(__dirname, "index.html"), 404));
+/* Unknown addresses get a real not-found page with the correct status,
+   not the homepage under a 404 (audit F17). */
+app.get("*", (_req, res) => {
+  res.setHeader("Cache-Control", "no-cache");
+  sendPage(res, path.join(__dirname, "public", "app", "not-found.html"), 404);
+});
 
 // ============================================================
 //  Start
