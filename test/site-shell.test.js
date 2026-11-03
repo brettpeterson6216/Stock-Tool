@@ -30,7 +30,7 @@ test("the bar is in the HTML, current tab marked, before any script runs", () =>
   assert.match(out, /data-k="learn" aria-current="page">Learn<\/a>/);
   assert.equal((out.match(/aria-current="page">/g) || []).length, 2, "one tab in the top bar, one in the phone bar");
   // Every account state is in the markup; the page's CSS picks one.
-  for (const part of ["guest", "free", "pro", "member", "upgrade", "sun", "moon"]) assert.match(out, new RegExp('part="' + part + '"'), part);
+  for (const part of ["guest", "free", "pro", "member", "upgrade", "knob"]) assert.match(out, new RegExp('part="' + part + '"'), part);
   const app = '<html><head><meta name="il-app" content="1"></head><body><il-top id="il-top"></il-top><main></main><il-tabbar id="il-bottom"></il-tabbar></body></html>';
   const drawn = injectShell(app, "screener");
   assert.match(drawn, /data-k="screener" aria-current="page">/);
@@ -62,4 +62,16 @@ test("sign-up prompts on content pages follow the shared rule", () => {
       assert.match(m[0], /data-show="(guest|upgrade)"/, f + ": " + m[0]);
     }
   }
+});
+
+test("Compare and Saved have their own tabs; the account menu holds only account items", () => {
+  const { render, activeFor } = require("../public/app/shell.js");
+  const top = render("saved").top;
+  for (const k of ["compare", "watchlist", "saved"]) assert.match(top, new RegExp(`data-k="${k}"`), k);
+  assert.match(top, /data-k="saved"[^>]*aria-current="page">Saved</);
+  assert.doesNotMatch(top, /Watchlist and saved work|Compare stocks/);
+  assert.match(top, /role="switch"[^>]*aria-checked/);
+  assert.equal(activeFor("/compare"), "compare");
+  assert.equal(activeFor("/saved"), "saved");
+  assert.equal(activeFor("/research/NVDA"), "research");
 });

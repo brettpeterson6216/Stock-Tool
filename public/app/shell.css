@@ -43,9 +43,9 @@ html:not(.il-guest):not(.il-auth-pending) il-top::part(guest),
 html:not(.il-free) il-top::part(free),
 html:not(.il-pro) il-top::part(pro),
 html:not(.il-free):not(.il-pro) il-top::part(member),
-html.il-pro il-top::part(upgrade),
-html[data-theme="dark"] il-top::part(moon),
-html:not([data-theme="dark"]) il-top::part(sun){display:none}
+html.il-pro il-top::part(upgrade){display:none}
+/* The theme switch's knob sits over the moon in dark mode. */
+html[data-theme="dark"] il-top::part(knob){transform:translateX(22px)}
 
 /* ── Where the bars sit ────────────────────────────────────────────────── */
 /* !important throughout: older pages carry broad rules (body > *, nav,
@@ -54,7 +54,7 @@ il-top,il-tabbar{margin:0 !important;padding:0 !important;border:0 !important;wi
 il-top{display:block !important;position:sticky !important;top:0 !important;z-index:1000 !important;min-height:calc(61px + env(safe-area-inset-top,0px)) !important;view-transition-name:il-top}
 html.il-shell-legacy il-top{position:fixed !important;left:0 !important;right:0 !important}
 il-tabbar{display:none !important}
-@media (max-width:760px){
+@media (max-width:1023px){
   il-tabbar{display:block !important;position:fixed !important;left:0 !important;right:0 !important;bottom:0 !important;top:auto !important;z-index:1000 !important;view-transition-name:il-tabbar}
   html.il-shell-on body{padding-bottom:calc(62px + env(safe-area-inset-bottom,0px))}
 }

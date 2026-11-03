@@ -345,6 +345,9 @@ app.post("/unsubscribe/weekly", weeklyUnsubscribe);
 
 app.get("/screener", (_req, res) => sendPage(res, path.join(__dirname, "public", "app", "screener.html")));
 app.get("/watchlist", (_req, res) => sendPage(res, path.join(__dirname, "public", "app", "watchlist.html")));
+/* Saved work has its own place: valuations, comparisons and notes you kept.
+   The watchlist is the companies you follow. Same script, two pages. */
+app.get("/saved", (_req, res) => sendPage(res, path.join(__dirname, "public", "app", "saved.html")));
 
 /* Old single-page-app links to a stock (?view=tool&section=analyze&symbol=X
    and friends) now open the rebuilt stock page on the matching tab. Sections

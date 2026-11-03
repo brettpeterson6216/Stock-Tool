@@ -28,11 +28,15 @@
 (function () {
   "use strict";
 
+  /* Watchlist is the companies you follow; Saved is the work you kept
+     (valuations, comparisons, notes). Two places, two names, side by side. */
   var NAV = [
     { key: "home", label: "Home", href: "/" },
     { key: "research", label: "Research", href: "/research" },
+    { key: "compare", label: "Compare", href: "/compare", title: "Put up to four stocks side by side" },
     { key: "screener", label: "Screener", href: "/screener" },
-    { key: "watchlist", label: "Watchlist", href: "/watchlist" },
+    { key: "watchlist", label: "Watchlist", href: "/watchlist", title: "The companies you follow, with notes, targets and alerts" },
+    { key: "saved", label: "Saved", href: "/saved", title: "Valuations, comparisons and notes you saved" },
     { key: "learn", label: "Learn", href: "/learn" },
     { key: "pricing", label: "Pricing", href: "/pricing" },
   ];
@@ -42,11 +46,12 @@
     research: '<path d="M4 19V5"/><path d="M4 19h16"/><path d="m7 15 4-4 3 3 5-6"/>',
     screener: '<path d="M4 6h16"/><path d="M7 12h10"/><path d="M10 18h4"/>',
     watchlist: '<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>',
+    saved: '<path d="M6.5 3.5h11a1 1 0 0 1 1 1V21l-6.5-4.2L5.5 21V4.5a1 1 0 0 1 1-1z"/>',
     learn: '<path d="M3 7l9-4 9 4-9 4z"/><path d="M7 9v5c0 1.5 2.5 3 5 3s5-1.5 5-3V9"/>',
   };
   var SEARCH_ICON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14Z"/><path d="m20 20-3.5-3.5"/></svg>';
-  var SUN = '<svg part="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
-  var MOON = '<svg part="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5Z"/></svg>';
+  var SUN = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+  var MOON = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5Z"/></svg>';
 
   var CSS = String.raw`:host{all:initial;display:block;box-sizing:border-box;
   font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:14px;line-height:1.5;color:var(--sh-text);
@@ -66,7 +71,9 @@ svg{display:block}
 .brand img{display:block;width:28px;height:28px}
 .accent{font-family:"Instrument Serif",Georgia,serif;font-style:italic;font-weight:400;color:var(--sh-gold-text);font-size:1.12em;padding-left:1px}
 .nav{display:flex;gap:2px;flex:none}
-.nav a{padding:7px 12px;border-radius:8px;color:var(--sh-text2);font-weight:500;white-space:nowrap}
+.nav a{padding:7px 11px;border-radius:8px;color:var(--sh-text2);font-weight:500;white-space:nowrap}
+@media (max-width:1320px){.in{gap:16px}.nav a{padding:7px 8px}.kbd{display:none}}
+@media (max-width:1120px){.word{display:none}.nav a{padding:7px 7px;font-size:13.5px}}
 .nav a:hover{color:var(--sh-text);background:var(--sh-raised)}
 .nav a[aria-current="page"]{color:var(--sh-gold-text);background:var(--sh-gold-soft)}
 
@@ -86,8 +93,14 @@ input::-webkit-search-cancel-button{display:none}
 .gold{background:var(--sh-gold);color:var(--sh-gold-ink)}
 .gold:hover{filter:brightness(1.06)}
 .plan{font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--sh-gold-text);border:1px solid color-mix(in srgb,var(--sh-gold) 45%,transparent);border-radius:999px;padding:2px 9px}
-.theme{width:36px;height:36px;padding:0;margin:0;border-radius:9px;border:1px solid transparent;background:transparent;color:var(--sh-text2);display:grid;place-items:center;cursor:pointer}
-.theme:hover{background:var(--sh-raised);color:var(--sh-text)}
+.theme{height:36px;padding:0 2px;margin:0;border:0;background:transparent;display:grid;place-items:center;cursor:pointer;border-radius:999px}
+.sw{position:relative;display:block;width:50px;height:28px;border-radius:999px;background:var(--sh-raised);box-shadow:inset 0 0 0 1px var(--sh-line2)}
+.sw-i{position:absolute;top:5px;width:18px;height:18px;display:grid;place-items:center;color:var(--sh-text3)}
+.sw-i svg{width:14px;height:14px}
+.sw-sun{left:5px}.sw-moon{right:5px}
+.sw-knob{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:999px;background:var(--sh-gold);box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .2s ease}
+.theme:hover .sw{box-shadow:inset 0 0 0 1px var(--sh-text3)}
+@media (prefers-reduced-motion:reduce){.sw-knob{transition:none}}
 .avatar{width:34px;height:34px;padding:0;margin:0;border-radius:999px;border:1px solid var(--sh-line2);background:var(--sh-raised);color:var(--sh-text);font-weight:600;font-size:13px;cursor:pointer;display:grid;place-items:center}
 .avatar:empty::before{content:var(--il-initial,"")}
 
@@ -108,14 +121,14 @@ input::-webkit-search-cancel-button{display:none}
 .head strong{display:block;color:var(--sh-text);font-size:13.5px;font-weight:600}
 
 /* Phone tab bar */
-.tabs{display:grid;grid-template-columns:repeat(5,1fr);height:calc(62px + env(safe-area-inset-bottom,0px));padding-bottom:env(safe-area-inset-bottom,0px);
+.tabs{display:grid;grid-template-columns:repeat(6,1fr);height:calc(62px + env(safe-area-inset-bottom,0px));padding-bottom:env(safe-area-inset-bottom,0px);
   background:color-mix(in srgb,var(--sh-surface) 94%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-top:1px solid var(--sh-line)}
 .tabs a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--sh-text3);font-size:11px;font-weight:600}
 .tabs a[aria-current="page"]{color:var(--sh-gold-text)}
 
-@media (max-width:760px){
+@media (max-width:1023px){   /* tablets and phones: tab bar at the bottom, search gets the room */
   .in{gap:12px;padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px))}
-  .nav,.word,.kbd,.plan,.theme,.acct .ghost{display:none}
+  .nav,.word,.kbd,.plan,.acct .ghost{display:none}
   .search{max-width:none}
 }`;
 
@@ -132,7 +145,9 @@ input::-webkit-search-cancel-button{display:none}
   function activeFor(path) {
     path = String(path || "/");
     if (path === "/" || path === "/index.html") return "home";
-    if (/^\/(research|compare|lens-score|stock)(\/|$|\?)/.test(path)) return "research";
+    if (/^\/compare(\/|$|\?)/.test(path)) return "compare";
+    if (/^\/(research|lens-score|stock)(\/|$|\?)/.test(path)) return "research";
+    if (/^\/saved/.test(path)) return "saved";
     if (/^\/screener/.test(path)) return "screener";
     if (/^\/watchlist/.test(path)) return "watchlist";
     if (/^\/learn/.test(path)) return "learn";
@@ -147,7 +162,7 @@ input::-webkit-search-cancel-button{display:none}
     return '<div class="bar" role="banner"><div class="in">' +
       '<a class="brand" href="/" aria-label="ImpliedLens home"><img src="/logo-mark-68.png" width="28" height="28" alt=""><span class="word">Implied<span class="accent">Lens</span></span></a>' +
       '<nav class="nav" aria-label="Main">' + NAV.map(function (n) {
-        return '<a href="' + n.href + '" data-k="' + n.key + '"' + (n.key === active ? ' aria-current="page"' : "") + (n.key === "pricing" ? ' part="upgrade"' : "") + ">" + n.label + "</a>";
+        return '<a href="' + n.href + '" data-k="' + n.key + '"' + (n.title ? ' title="' + n.title + '"' : "") + (n.key === active ? ' aria-current="page"' : "") + (n.key === "pricing" ? ' part="upgrade"' : "") + ">" + n.label + "</a>";
       }).join("") + "</nav>" +
       '<div class="search" role="search">' +
         '<label class="box">' + SEARCH_ICON +
@@ -159,14 +174,17 @@ input::-webkit-search-cancel-button{display:none}
       '<div class="acct" id="acct">' +
         '<span class="plan" id="plan" part="pro">PRO</span>' +
         '<a class="btn gold" part="free" href="/pricing">Upgrade</a>' +
-        '<button class="theme" id="theme" type="button" aria-label="Switch theme">' + SUN + MOON + "</button>" +
+        /* A real switch: sun on the left, moon on the right, the gold knob
+           sits over the current theme. The page's CSS moves the knob from
+           the first frame (::part(knob)); the script keeps aria-checked. */
+        '<button class="theme" id="theme" type="button" role="switch" aria-checked="false" aria-label="Dark mode" title="Light / dark">' +
+          '<span class="sw"><span class="sw-i sw-sun">' + SUN + '</span><span class="sw-i sw-moon">' + MOON + '</span><span class="sw-knob" part="knob"></span></span>' +
+        "</button>" +
         '<a class="btn ghost" part="guest" id="login" href="/login">Log in</a>' +
         '<a class="btn gold" part="guest" id="signup" href="/signup">Sign up free</a>' +
         '<button class="avatar" part="member" id="avatar" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="menu" aria-label="Account menu"></button>' +
         '<div class="menu" id="menu" role="menu" hidden>' +
           '<div class="head" id="mhead"></div>' +
-          '<a role="menuitem" href="/watchlist">Watchlist and saved work</a>' +
-          '<a role="menuitem" href="/compare">Compare stocks</a>' +
           '<a role="menuitem" href="/?account=1">Account settings</a>' +
           '<button role="menuitem" type="button" id="billing">See Pro plans</button>' +
           "<hr>" +
@@ -316,7 +334,7 @@ input::-webkit-search-cancel-button{display:none}
     var here = encodeURIComponent(location.pathname + location.search);
     top.getElementById("login").href = "/login?next=" + here;
     top.getElementById("signup").href = "/signup?next=" + here;
-    function label() { themeBtn.setAttribute("aria-label", "Switch to " + (theme() === "dark" ? "light" : "dark") + " theme"); }
+    function label() { themeBtn.setAttribute("aria-checked", String(theme() === "dark")); }
     label();
     themeBtn.addEventListener("click", function () { setTheme(theme() === "dark" ? "light" : "dark"); });
     new MutationObserver(label).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });

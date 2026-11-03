@@ -252,7 +252,7 @@
   }
 
   function boot() {
-    IL.shell("research");
+    IL.shell("compare");
     readUrl();
     render();
   }

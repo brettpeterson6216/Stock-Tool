@@ -4,7 +4,10 @@
 
    Each row keeps a note and a target price (saved to your account), shows
    the last close, how far it is from your target, the LensScore and grades,
-   and its alerts. Below: every alert and your saved work.
+   and its alerts. Below: every alert.
+
+   /saved is the other half, kept apart on purpose: the work you saved
+   (valuations, comparisons, notes), not the companies you follow.
    ═══════════════════════════════════════════════════════════════════════════ */
 (function () {
   "use strict";
@@ -13,7 +16,8 @@
   var items = [], quotes = {}, grades = {}, alerts = [], alertLimit = null;
 
   function sk(hh) { return '<span class="sk" style="height:' + hh + 'px"></span>'; }
-  function nice(n) { n = String(n || ""); return n === n.toUpperCase() ? n.toLowerCase().replace(/\b([a-z])/g, function (m) { return m.toUpperCase(); }) : n; }
+  function nice(n) { return IL.cleanName(n); }
+  var SAVED = /^\/saved/.test(location.pathname);
 
   function shell() {
     document.getElementById("main").innerHTML =
@@ -23,10 +27,35 @@
       '<label class="wl-digest card" id="wl-digest" hidden><input type="checkbox" id="wl-digest-on"><span><b>Weekly grade email</b><span class="muted">Every Saturday morning: your watchlist\u2019s LensScores, what changed and the week\u2019s biggest movers.</span></span></label>' +
       '<div class="section-h"><h2 class="section-t">Alerts</h2><span class="card-sub" id="al-sub"></span></div>' +
       '<section class="card flush" id="al-box"><div style="padding:20px">' + sk(60) + "</div></section>" +
-      '<div class="section-h"><h2 class="section-t">Saved work</h2><a class="link" href="/?view=tool&section=workspace">Theses and positions →</a></div>' +
-      '<section class="card flush" id="sv-box"><div style="padding:20px">' + sk(60) + "</div></section>";
+      '<p class="note wl-pointer">Valuations, comparisons and notes you save live in <a href="/saved">Saved</a>.</p>';
     IL.wireSearchPick(IL.$("#wl-q"), IL.$("#wl-sugg"), add);
     IL.plate(IL.$("#wl-hero"), "atlas", "right 30%");
+  }
+
+  /* ── Saved work page ─────────────────────────────────────────────────── */
+  function savedShell() {
+    document.getElementById("main").innerHTML =
+      '<div class="dh hero-band card prime" id="sv-hero"><div class="stack" style="gap:10px">' + IL.eyebrow("Saved") + '<h1 class="display">Your saved <em>work.</em></h1>' +
+        '<p class="muted">The valuations, comparisons and notes you kept, newest first. The companies you follow are on your <a href="/watchlist">Watchlist</a>.</p></div></div>' +
+      '<div id="sv-box">' + '<section class="card"><div style="padding:4px">' + sk(80) + "</div></section></div>" +
+      '<p class="note">Older theses and positions from the classic workspace are <a href="/?view=tool&section=workspace">here</a>.</p>';
+    IL.plate(IL.$("#sv-hero"), "ledger", "right 30%");
+  }
+  var SAVE_TYPE = { implied: "Valuation", valuation: "Valuation Lab (classic)", projection: "Projection (classic)", dcf: "DCF (classic)", compare: "Comparison", note: "Note", lensscore: "LensToolkit", price: "Analysis" };
+  var SAVE_GROUP = [
+    ["Valuations", ["implied", "valuation", "projection", "dcf"]],
+    ["Comparisons", ["compare"]],
+    ["Notes and analyses", ["note", "lensscore", "price"]],
+  ];
+  function saveHref(s) {
+    if (s.type === "implied") return "/research/" + encodeURIComponent(s.ticker) + "/valuation?save=" + s.id;
+    if (s.type === "compare" && s.ticker) return "/compare?t=" + encodeURIComponent(s.ticker);
+    return "/?view=tool&section=reports";
+  }
+  function savedRows(list) {
+    return '<ul class="mini">' + list.map(function (s) {
+      return '<li><a href="' + saveHref(s) + '"><b>' + h(s.ticker) + " · " + h(s.label || SAVE_TYPE[s.type] || "Saved") + '</b><span class="faint">' + h(SAVE_TYPE[s.type] || s.type) + " · " + h(F.date(s.created_at)) + '</span></a><button class="btn sm ghost" type="button" data-del-save="' + s.id + '">Delete</button></li>';
+    }).join("") + "</ul>";
   }
 
   function load() {
@@ -113,13 +142,23 @@
 
   function loadSaves() {
     IL.api("/api/saves", { fresh: true }).then(function (res) {
-      var box = IL.$("#sv-box"), list = res.ok && Array.isArray(res.data) ? res.data : [];
-      if (!list.length) { box.innerHTML = '<p class="muted" style="padding:16px 20px;font-size:13.5px">Valuations you save from a stock’s Valuation tab appear here.</p>'; return; }
-      var TYPE = { implied: "Valuation", valuation: "Valuation Lab (classic)", projection: "Projection (classic)", dcf: "DCF (classic)", compare: "Compare", note: "Note", lensscore: "LensToolkit", price: "Analysis" };
-      box.innerHTML = '<ul class="mini">' + list.slice(0, 30).map(function (s) {
-        var href = s.type === "implied" ? "/research/" + encodeURIComponent(s.ticker) + "/valuation?save=" + s.id : "/?view=tool&section=reports";
-        return '<li><a href="' + href + '"><b>' + h(s.ticker) + " · " + h(s.label || TYPE[s.type] || "Saved") + '</b><span class="faint">' + h(TYPE[s.type] || s.type) + " · " + h(F.date(s.created_at)) + '</span></a><button class="btn sm ghost" type="button" data-del-save="' + s.id + '">Delete</button></li>';
-      }).join("") + "</ul>";
+      var box = IL.$("#sv-box"); if (!box) return;
+      var list = res.ok && Array.isArray(res.data) ? res.data : [];
+      if (!list.length) {
+        box.innerHTML = '<section class="card"><div class="dash-empty"><p><b>Nothing saved yet.</b> Save a valuation from any stock’s Valuation tab, or a set of companies from Compare, and it appears here.</p><div class="row wrap"><a class="btn" href="/research/NVDA/valuation">Value a stock</a><a class="btn ghost" href="/compare">Compare stocks</a></div></div></section>';
+        return;
+      }
+      var known = {};
+      box.innerHTML = SAVE_GROUP.map(function (g) {
+        var rows = list.filter(function (s) { return g[1].indexOf(s.type) >= 0; });
+        rows.forEach(function (s) { known[s.id] = 1; });
+        return rows.length ? '<div class="section-h"><h2 class="section-t">' + g[0] + '</h2><span class="card-sub">' + rows.length + "</span></div>" + '<section class="card flush">' + savedRows(rows) + "</section>" : "";
+      }).join("") + (function () {
+        var rest = list.filter(function (s) { return !known[s.id]; });
+        return rest.length ? '<div class="section-h"><h2 class="section-t">Other</h2></div><section class="card flush">' + savedRows(rest) + "</section>" : "";
+      })();
+      return;
+
     });
   }
 
@@ -171,8 +210,14 @@
   }
 
   function boot() {
-    IL.shell("watchlist");
+    IL.shell(SAVED ? "saved" : "watchlist");
     IL.me().then(function (u) {
+      if (!u && SAVED) {
+        document.getElementById("main").innerHTML = '<div class="dh"><div><h1 class="dh-t">Saved work</h1><p class="muted">Valuations, comparisons and notes you keep.</p></div></div>' +
+          IL.gate("login", "Create a free account to save your work", { why: "Free accounts keep the valuations you build and the companies you compare, so you can come back to them." });
+        return;
+      }
+      if (SAVED) { savedShell(); wire(); loadSaves(); return; }
       if (!u) {
         document.getElementById("main").innerHTML = '<div class="dh"><div><h1 class="dh-t">Watchlist</h1><p class="muted">Follow companies, note why, set a target price and get an email when it’s reached.</p></div></div>' +
           IL.gate("login", "Create a free account to keep a watchlist", { why: "Free accounts keep a watchlist with notes and target prices, see grade changes on the dashboard and get 3 email alerts. No card needed.", center: true });
@@ -190,7 +235,6 @@
         });
       });
       Promise.all([load(), loadAlerts()]);
-      loadSaves();
     });
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot); else boot();

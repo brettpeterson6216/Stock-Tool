@@ -1453,3 +1453,11 @@ test("logos stay off, and say so, until a Logo.dev key is set", async () => {
   assert.equal((await (await req("/api/logo-status")).json()).enabled, false);
   if (saved === undefined) delete process.env.LOGO_DEV_TOKEN; else process.env.LOGO_DEV_TOKEN = saved;
 });
+
+test("/saved is its own page with the Saved tab marked", async () => {
+  const res = await req("/saved");
+  assert.equal(res.status, 200);
+  const html = await res.text();
+  assert.match(html, /<title>Saved work · ImpliedLens<\/title>/);
+  assert.match(html, /data-k="saved"[^>]*aria-current="page"/);
+});
