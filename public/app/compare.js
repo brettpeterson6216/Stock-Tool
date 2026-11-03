@@ -137,7 +137,7 @@
     if (gate) { tbl.parentNode.innerHTML = '<div style="padding:16px">' + IL.gate(gate.quoteRes.gate) + "</div>"; return; }
     var histGate = list.filter(function (d) { return d.histRes.gate; })[0];
     var head = "<thead><tr><th></th>" + list.map(function (d, i) {
-      return '<th><a class="cmp-th" href="/research/' + h(d.t) + '"><b><i style="background:' + COLORS[i] + '"></i>' + h(d.t) + '</b><span>' + h(d.name) + "</span></a></th>";
+      return '<th><a class="cmp-th" href="/research/' + h(d.t) + '"><b><i style="background:' + COLORS[i] + '"></i>' + h(d.t) + '</b><span>' + h(IL.cleanName(d.name)) + "</span></a></th>";
     }).join("") + "</tr></thead>";
     var body = GROUPS.map(function (gr) {
       var rows = gr.rows.map(function (r) {
@@ -161,7 +161,7 @@
     IL.$("#cmp-flags").className = list.length === 3 ? "grid-3" : "grid-2";
     IL.$("#cmp-flags").innerHTML = list.map(function (d, i) {
       var good = d.flags.filter(function (x) { return x.tone === "good"; }), bad = d.flags.filter(function (x) { return x.tone === "bad"; });
-      return '<section class="card"><div class="card-h"><h3 class="card-t"><i class="cmp-dot" style="background:' + COLORS[i] + '"></i>' + h(d.t) + ' <span class="muted" style="font-weight:500">' + h(d.name) + '</span></h3><span class="card-sub">' + (d.f ? '<span class="up">' + good.length + ' working</span> · <span class="down">' + bad.length + " warning" + (bad.length === 1 ? "" : "s") + "</span>" : "Report-card points only") + "</span></div>" +
+      return '<section class="card"><div class="card-h"><h3 class="card-t"><i class="cmp-dot" style="background:' + COLORS[i] + '"></i>' + h(d.t) + ' <span class="muted" style="font-weight:500">' + h(IL.cleanName(d.name)) + '</span></h3><span class="card-sub">' + (d.f ? '<span class="up">' + good.length + ' working</span> · <span class="down">' + bad.length + " warning" + (bad.length === 1 ? "" : "s") + "</span>" : "Report-card points only") + "</span></div>" +
         (d.f ? "" : '<p class="note">Sales, margin, cash-flow and dilution checks did not run' + (d.histRes && d.histRes.gate ? ': they need a free account.' : ': SEC filings aren’t available for this company.') + "</p>") +
         '<ul class="lr-flags good">' + good.slice(0, 3).map(function (x) { return '<li><span class="lr-ico">+</span><div><b>' + h(x.title) + "</b><span>" + h(x.detail) + "</span></div></li>"; }).join("") + "</ul>" +
         '<ul class="lr-flags bad">' + bad.slice(0, 3).map(function (x) { return '<li><span class="lr-ico">!</span><div><b>' + h(x.title) + "</b><span>" + h(x.detail) + "</span></div></li>"; }).join("") + "</ul>" +

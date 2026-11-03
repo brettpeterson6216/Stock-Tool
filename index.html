@@ -514,11 +514,11 @@
         <div class="ilm-head"><span class="ilm-title">Market sentiment</span><span class="ilm-badge live">Sector breadth</span></div>
         <div class="ilm-gauge-wrap">
           <div class="ilm-gauge" id="ilm-gauge"><div><strong id="ilm-breadth-score">—</strong><span id="ilm-breadth-label">Loading</span></div></div>
-          <div class="ilm-breadth-copy"><strong id="ilm-breadth-count">—</strong><span>sectors advancing</span></div>
+          <div class="ilm-breadth-copy"><strong id="ilm-breadth-count">—</strong><span id="ilm-breadth-basis">sector funds up today</span></div>
         </div>
       </div>
       <div class="ilm-card ilm-news-card" aria-label="Recent market news">
-        <div class="ilm-head"><span class="ilm-title">Recent news</span><span class="ilm-badge live" id="ilm-source-label">Verified feed</span></div>
+        <div class="ilm-head"><span class="ilm-title" id="ilm-news-title">Recent news</span><span class="ilm-badge" id="ilm-source-label">Headlines</span></div>
         <div class="ilm-news-list" id="ilm-news-list" aria-live="polite"><span class="ilm-loading-line"></span><span class="ilm-loading-line"></span><span class="ilm-loading-line"></span></div>
       </div>
     </div>
@@ -1555,7 +1555,7 @@
           </div><!-- /sec-dcf -->
 
           <div class="app-section" id="sec-screener"><div class="acc-body" id="body-screener" style="display:none;">
-<div class="tool-intro"><div><strong>Market Screener</strong> narrows about 290 actively traded U.S. stocks by LensScore grade, valuation, size, income, momentum and sector. Sorted by LensScore.</div><div class="tool-intro-note">Company figures from SEC filings, prices from daily market data · refreshed automatically. Missing metrics remain unavailable rather than being treated as zero.</div></div>
+<div class="tool-intro"><div><strong>Market Screener</strong> narrows the U.S. stocks we grade (about 280) by LensScore grade, valuation, size, income, momentum and sector. Sorted by LensScore.</div><div class="tool-intro-note">Company figures from SEC filings, prices from daily market data · refreshed automatically. Missing metrics remain unavailable rather than being treated as zero.</div></div>
 <div class="scr-filters">
               <div class="scr-filter-group"><label>Sector</label><select id="scr-sector" onchange="applyScreener()" style="width:100%;background:var(--card);color:var(--text);border:1px solid var(--border2);border-radius:var(--r);padding:4px 6px;font-size:11px;margin-top:6px;"><option value="ALL">All Sectors</option><option value="Tech">Technology</option><option value="Comm.">Communication</option><option value="Health">Healthcare</option><option value="Finance">Financials</option><option value="Cons.Disc">Consumer Disc.</option><option value="Staples">Consumer Staples</option><option value="Energy">Energy</option><option value="Industrials">Industrials</option><option value="Materials">Materials</option><option value="Real Est.">Real Estate</option><option value="Utilities">Utilities</option><option value="ETF">ETFs</option></select></div>
               <div class="scr-filter-group"><label>Max P/E <span id="scr-pe-val">50x</span></label><input type="range" class="scr-slider" id="scr-pe" min="5" max="200" value="50" oninput="document.getElementById('scr-pe-val').textContent=this.value+'x';applyScreener()"></div>

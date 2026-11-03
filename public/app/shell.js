@@ -119,6 +119,13 @@ input::-webkit-search-cancel-button{display:none}
   .search{max-width:none}
 }`;
 
+  /* Display names: SEC filer names carry suffixes like /DE/ and come in
+     capitals. Same rules as IL.cleanName. */
+  function cleanName(n) {
+    n = String(n || "").replace(/\s*\/[A-Za-z]{2,4}\/?\s*$/, "").replace(/\s+\/[A-Za-z]+\//g, " ").trim();
+    if (n && n === n.toUpperCase()) n = n.toLowerCase().replace(/\b([a-z])/g, function (m) { return m.toUpperCase(); });
+    return n;
+  }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
 
   /* Which tab a URL belongs to. Pages that are not a tab mark none. */
@@ -236,7 +243,7 @@ input::-webkit-search-cancel-button{display:none}
       list.innerHTML = items.length
         ? items.map(function (it, i) {
             return '<button type="button" role="option" class="item" id="sugg-' + i + '" data-sym="' + esc(it.symbol) + '" aria-selected="' + (i === sel) + '">' +
-              '<span class="sym">' + esc(it.symbol) + '</span><span class="name">' + esc(it.name || "") + "</span></button>";
+              '<span class="sym">' + esc(it.symbol) + '</span><span class="name">' + esc(cleanName(it.name)) + "</span></button>";
           }).join("")
         : '<div class="empty">No match. Press Enter to open ' + esc(input.value.trim().toUpperCase()) + " anyway.</div>";
       list.hidden = false; input.setAttribute("aria-expanded", "true");

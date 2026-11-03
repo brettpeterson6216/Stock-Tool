@@ -228,6 +228,7 @@ const _enrich = new Map();   // ticker -> { at, priceAt, sector, revenueGrowth, 
 let _enrichRunning = false;
 
 const peers = require("../lib/peer-universe");
+const secFundamentals = require("../lib/sec-fundamentals");
 const universeGrades = require("../lib/universe-grades");
 const sectorFromIndustry = peers.sectorFromIndustry;
 function rsi14(closes) {
@@ -265,7 +266,9 @@ async function enrichOne(ticker) {
     if (closes.length >= 2) {
       out.price = closes.at(-1);
       out.change1D = (closes.at(-1) / closes.at(-2) - 1) * 100;
-      out.change1Y = Number.isFinite(m["52WeekPriceReturnDaily"]) ? m["52WeekPriceReturnDaily"] : (closes.at(-1) / closes[0] - 1) * 100;
+      // The same 52-week rule as the momentum grade and every page's "past year" (audit F04).
+      const yr = Number.isFinite(m["52WeekPriceReturnDaily"]) ? m["52WeekPriceReturnDaily"] : secFundamentals.returnOver(co.rows, 52);
+      out.change1Y = Number.isFinite(yr) ? yr : null;
       out.rsi = rsi14(closes.slice(-120));
       out.asOf = co.rows.at(-1)?.day ? Math.floor(Date.parse(co.rows.at(-1).day + "T21:00:00Z") / 1000) : null;
     }
@@ -438,11 +441,15 @@ router.get("/quote/:ticker", checkAnalysisLimit, async (req, res) => {
 
     const timestamps = result.timestamp || [];
     const latestTimestamp = timestamps.length ? timestamps[timestamps.length - 1] : null;
-    const ageSeconds = latestTimestamp ? Math.max(0, Math.round(Date.now() / 1000 - latestTimestamp)) : null;
+    // The bar's stamp is the session's start; the price is its close (F15).
+    const times = require("../lib/quote-time").quoteTimes({ latestTimestamp, regularMarketTime: result.meta?.regularMarketTime, interval });
+    const ageSeconds = times.asOf ? Math.max(0, Math.round((Date.now() - Date.parse(times.asOf)) / 1000)) : null;
     data.impliedLens = {
       source: source || "Aggregated market data",
       retrievedAt: new Date().toISOString(),
-      asOf: latestTimestamp ? new Date(latestTimestamp * 1000).toISOString() : null,
+      asOf: times.asOf,
+      barDate: times.barDate,
+      quoteTime: times.quoteTime,
       latestTimestamp,
       ageSeconds,
       interval,

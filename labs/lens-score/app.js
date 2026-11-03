@@ -159,9 +159,10 @@
       });
     }
     const date = new Date(value);
+    /* Market times are New York times, and say so (audit F15). */
     return Number.isNaN(date.getTime())
       ? String(value)
-      : date.toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
+      : `${date.toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short", timeZone: "America/New_York" })} ET`;
   }
 
   function renderZoneRows(containerSelector, zones, type) {
@@ -208,7 +209,8 @@
   function renderTiming(result) {
     const timing = result.technical.timing;
     const score = Number(timing.timingScore);
-    $("#timing-heading").textContent = (TIMING_PLAIN[timing.key] || TIMING_PLAIN.unknown)[0];
+    const [timingLabel, timingText] = timingCopy(timing.key, result.technical.trendRegime);
+    $("#timing-heading").textContent = timingLabel;
     $("#timing-value").textContent = Number.isFinite(score) ? `${score.toFixed(1)} / 10` : "—";
     $("#timing-marker").style.left = Number.isFinite(score)
       ? `${Math.max(0, Math.min(100, score * 10))}%`
@@ -225,11 +227,14 @@
       chip.textContent = `${labels[key]} ${direction === "up" ? "favorable" : direction === "down" ? "extended" : "balanced"}`;
       return chip;
     }));
+    const down = trendSide(result.technical.trendRegime) === "down";
     $("#timing-copy").textContent = timing.condition === "buyer-extreme"
-      ? "Every momentum gauge says the stock has been sold hard. That is where rebounds often start, but confirm the trend and the support zone hold first."
+      ? (down
+        ? "Every momentum gauge says the stock has been sold hard, and the main trend is down. Rebounds can start here, but in a downtrend they often fail. Wait for the trend to turn or support to hold."
+        : "Every momentum gauge says the stock has been sold hard. That is where rebounds often start, but confirm the trend and the support zone hold first.")
       : timing.condition === "seller-extreme"
         ? "Every momentum gauge says the stock has run up hard. Even a great company can be a poor buy right after a spike."
-        : (TIMING_PLAIN[timing.key] || TIMING_PLAIN.unknown)[1];
+        : timingText;
   }
 
   function renderTrendRegime(result) {
@@ -268,7 +273,7 @@
       ? `${tech.trendRegime.trendScore.toFixed(1)} / 10`
       : "—";
     const metrics = [
-      ["Lens Timing", `${tech.timing.timingScore.toFixed(1)} / 10`, (TIMING_PLAIN[tech.timing.key] || TIMING_PLAIN.unknown)[0]],
+      ["Lens Timing", `${tech.timing.timingScore.toFixed(1)} / 10`, timingCopy(tech.timing.key, tech.trendRegime)[0]],
       ["Setup confirmation", `${(tech.confirmation / 10).toFixed(1)} / 10`, "Price recovery and momentum follow-through"],
       ["Lens Trend", regimeValue, tech.trendRegime.label],
       ["Trend agreement", `${tech.trendRegime.agreement} / ${tech.trendRegime.total}`, "Price and moving-average structure"],
@@ -878,7 +883,13 @@
       }));
       setText("#rc-peek-title", `Top of ${g.rank.sectorName}`);
     }
-    setText("#rc-peer-foot", `Ranked by LensScore among ${g.rank.of} ${g.rank.sectorName} companies we cover. Grades compare each company with its own sector.`);
+    /* The grading group and the ranked list can differ by a company or two:
+       a company can be graded against its sector before it has every input
+       a full LensScore needs. Say which number is which (audit F16). */
+    const unranked = Number(g.peerCount) - Number(g.rank.of);
+    setText("#rc-peer-foot", `Ranked by LensScore among the ${g.rank.of} ${g.rank.sectorName} companies with a full score` +
+      (unranked > 0 && g.basis === "sector" ? ` (${g.peerCount} are graded; ${unranked} ${unranked === 1 ? "lacks" : "lack"} an input the score needs).` : ".") +
+      " Grades compare each company with its own sector.");
   }
 
   function fillList(selector, items, emptyMessage) {
@@ -890,15 +901,40 @@
   }
 
   /* ── Entry timing (chart engine) ─────────────────────────────────────── */
-  const TIMING_PLAIN = {
-    "maximum-opportunity": ["Sharp pullback", "The stock has dropped hard in the short term. Pullbacks like this are where buyers have often stepped in, but only if the trend and support hold."],
-    "favorable": ["Pulled back", "Short-term momentum has cooled off without breaking the trend, which is usually a calmer moment to buy than after a big run."],
-    "mildly-favorable": ["Slight pullback", "The stock has eased a little from recent strength. Neither stretched nor deeply pulled back."],
-    "balanced": ["Neutral", "Short-term momentum is balanced. Nothing in the chart argues strongly for waiting or for hurrying."],
-    "extended": ["Stretched", "The stock has run up quickly. Buying after a sharp run raises the chance of a near-term pullback."],
-    "maximum-risk": ["Very stretched", "The stock is far above its recent range on every momentum gauge. Historically a risky moment to chase."],
-    unknown: ["Not enough data", "At least 60 trading days of prices are needed."],
+  /* Entry timing is read together with the main trend. A pullback inside an
+     uptrend and a pullback inside a downtrend are different situations, and
+     the copy must never describe the second as the first (audit F05). */
+  const TIMING_BAND = {
+    "maximum-opportunity": "pullback", "favorable": "pullback", "mildly-favorable": "pullback",
+    "balanced": "neutral", "extended": "stretched", "maximum-risk": "stretched",
   };
+  const TIMING_COPY = {
+    pullback: {
+      up: ["Pulled back in an uptrend", "Short-term momentum has cooled while the main trend still points up. Pullbacks inside an intact uptrend are usually a calmer moment to buy than after a big run."],
+      flat: ["Pulled back, no clear trend", "The stock has eased while the main trend is flat. Without a trend behind it, a pullback is only an entry if a support level holds."],
+      down: ["Pulled back in a downtrend", "The stock has fallen further, and the main trend is down. A dip in a falling stock is not the same as a dip in a rising one: it can keep falling. Waiting for the trend to turn, or for support to hold, is the cautious read."],
+    },
+    neutral: {
+      up: ["Neutral, uptrend", "Short-term momentum is balanced and the main trend points up. Nothing in the chart argues strongly for waiting or for hurrying."],
+      flat: ["Neutral", "Short-term momentum is balanced and the main trend is flat. The chart gives no strong timing signal either way."],
+      down: ["Neutral, downtrend", "Short-term momentum is balanced, but the main trend is down. The chart is not giving a buy signal."],
+    },
+    stretched: {
+      up: ["Stretched in an uptrend", "The stock has run up quickly. Buying after a sharp run raises the chance of a near-term pullback, even with the trend behind it."],
+      flat: ["Stretched", "The stock has jumped quickly without a trend behind it. Sharp moves like this often give some of it back."],
+      down: ["Bounce in a downtrend", "The stock has bounced sharply, but the main trend is still down. Rallies inside a downtrend often fade."],
+    },
+  };
+  function trendSide(regime) {
+    const s = Number(regime?.trendScore);
+    if (!Number.isFinite(s)) return "flat";
+    return s >= 5.5 ? "up" : s <= 4.5 ? "down" : "flat";
+  }
+  function timingCopy(key, regime) {
+    const band = TIMING_BAND[key];
+    if (!band) return ["Not enough data", "At least 60 trading days of prices are needed."];
+    return TIMING_COPY[band][trendSide(regime)];
+  }
   function renderTimingCard(result) {
     const tech = result?.technical;
     if (!tech || tech.status !== "ok") {
@@ -908,12 +944,12 @@
       return;
     }
     const t = tech.timing;
-    const [label, copy] = TIMING_PLAIN[t.key] || TIMING_PLAIN.unknown;
+    const [label, copy] = timingCopy(t.key, tech.trendRegime);
     setText("#rc-timing-title", label);
     setText("#rc-timing-score", finite(t.timingScore) ? `${Number(t.timingScore).toFixed(1)} / 10` : "—");
     const marker = $("#rc-timing-marker");
     if (marker) marker.style.left = `${finite(t.timingScore) ? Math.max(0, Math.min(100, t.timingScore * 10)) : 50}%`;
-    const trend = tech.trendRegime?.label ? ` Trend: ${tech.trendRegime.label.toLowerCase()}.` : "";
+    const trend = tech.trendRegime?.label ? ` Main trend: ${tech.trendRegime.label.toLowerCase()}.` : "";
     setText("#rc-timing-copy", `${copy}${trend}`);
     const support = tech.zones?.support?.[0];
     if (support) {

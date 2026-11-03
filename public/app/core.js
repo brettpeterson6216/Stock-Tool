@@ -229,6 +229,39 @@
     return n;
   };
 
+  /* ── One definition of "past year" for every surface (audit F04) ───────
+     52 weeks back from the latest daily close, using the last close on or
+     before that date: the same rule lib/sec-fundamentals.js returnOver()
+     uses for the momentum grade. bars: [{ time (seconds), close }]. */
+  IL.YEAR_DAYS = 364;
+  IL.windowStart = function (bars, days) {
+    if (!bars || !bars.length) return 0;
+    var from = bars[bars.length - 1].time - days * 86400, at = -1;
+    for (var i = bars.length - 1; i >= 0; i--) if (bars[i].time <= from) { at = i; break; }
+    return at < 0 ? 0 : at;
+  };
+  IL.yearReturn = function (bars) {
+    if (!bars || bars.length < 2) return null;
+    var last = bars[bars.length - 1], from = last.time - IL.YEAR_DAYS * 86400;
+    if (bars[0].time > from + 4 * 86400) return null;      // less than a year of history
+    var base = bars[IL.windowStart(bars, IL.YEAR_DAYS)];
+    return base && base.close > 0 ? (last.close / base.close - 1) * 100 : null;
+  };
+
+  /* ── How many companies we grade: one number, from one response ────────
+     Copy that mentions the count marks it with data-graded; the text inside
+     is the fallback until the leaderboard answers (audit F16). */
+  var gradedP = null;
+  IL.graded = function () {
+    if (!gradedP) gradedP = IL.api("/api/lens-leaders").then(function (r) { return r && r.data && r.data.universe > 0 ? r.data.universe : null; }).catch(function () { return null; });
+    return gradedP;
+  };
+  IL.fillGraded = function (root) {
+    var els = (root || document).querySelectorAll("[data-graded]");
+    if (!els.length) return;
+    IL.graded().then(function (n) { if (n) Array.prototype.forEach.call(els, function (el) { el.textContent = String(n); }); });
+  };
+
   /* ── Search with suggestions ─────────────────────────────────────────── */
   IL.go = function (sym) {
     sym = String(sym || "").trim().toUpperCase().replace(/[^A-Z0-9.^-]/g, "");
@@ -246,7 +279,7 @@
       } else {
         list.innerHTML = items.map(function (it, i) {
           return '<button type="button" role="option" class="il-sugg-item" id="il-sugg-' + i + '" data-sym="' + IL.h(it.symbol) + '" aria-selected="' + (i === sel) + '">' +
-            '<span class="il-sugg-sym">' + IL.h(it.symbol) + '</span><span class="il-sugg-name">' + IL.h(it.name || "") + "</span></button>";
+            '<span class="il-sugg-sym">' + IL.h(it.symbol) + '</span><span class="il-sugg-name">' + IL.h(IL.cleanName(it.name || "")) + "</span></button>";
         }).join("");
       }
       list.hidden = false; input.setAttribute("aria-expanded", "true");
@@ -530,6 +563,7 @@
   }
   IL.widgets = function (root) {
     root = root || document;
+    IL.fillGraded(root);
     Array.prototype.forEach.call(root.querySelectorAll("[data-w]"), function (el) {
       el.classList.add("w");
       ensureTools(el);

@@ -190,7 +190,7 @@
     IL.api("/api/lens-leaders").then(function (res) {
       var top = (res.data && res.data.top) || [];
       IL.$("#sc-body").innerHTML =
-        IL.gate("pro", "Filter all ~280 graded stocks with Pro", { why: "Set minimum grades, P/E, size, growth, dividends and risk, sort any column, pick stocks to compare and download the results. Pro is $7.99 a month after a 30-day free trial." }) +
+        IL.gate("pro", "Filter every stock we grade with Pro", { why: "Set minimum grades, P/E, size, growth, dividends and risk, sort any column, pick stocks to compare and download the results. Pro is $7.99 a month after a 30-day free trial." }) +
         '<div class="section-h"><h2 class="section-t">The ten highest-rated right now</h2><span class="card-sub">Free for everyone</span></div>' +
         '<section class="card flush"><div class="tbl-wrap"><table class="tbl"><thead><tr><th class="l">Company</th><th>LensScore</th>' + KEYS.map(function (k) { return "<th>" + KLABEL[k].charAt(0) + "</th>"; }).join("") + "<th>Sector rank</th></tr></thead><tbody>" +
         top.map(function (r) {

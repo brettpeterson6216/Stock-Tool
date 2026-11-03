@@ -55,9 +55,22 @@
     rows.forEach(function (t) { var li = document.createElement("li"); li.textContent = t; el.appendChild(li); });
   }
 
+  /* "Past year" here means what it means on every other page (audit F04):
+     the latest close against the last close on or before 52 weeks earlier.
+     Same rule as IL.yearReturn and lib/sec-fundamentals.js returnOver(). */
+  function yearWindow(bars) {
+    var b = (bars || []).filter(function (x) { return x && Number.isFinite(Number(x.close)) && Number.isFinite(Number(x.time)); });
+    if (b.length < 2) return { closes: [], ret: null };
+    var unit = Number(b[b.length - 1].time) > 1e12 ? 1000 : 1;       // ms or seconds
+    var from = Number(b[b.length - 1].time) - 364 * 86400 * unit, at = 0;
+    for (var i = b.length - 1; i >= 0; i--) if (Number(b[i].time) <= from) { at = i; break; }
+    var full = Number(b[0].time) <= from + 4 * 86400 * unit;
+    var closes = b.slice(at).map(function (x) { return Number(x.close); });
+    return { closes: closes, ret: full ? (closes[closes.length - 1] / closes[0] - 1) * 100 : null };
+  }
   function drawChart(bars) {
-    var closes = (bars || []).map(function (b) { return Number(b && b.close); }).filter(Number.isFinite);
-    closes = closes.slice(-252);
+    var win = yearWindow(bars);
+    var closes = win.closes;
     var line = $("lx-demo-line"), area = $("lx-demo-area");
     if (!line || !area) return null;
     if (closes.length < 2) { line.setAttribute("d", ""); area.setAttribute("d", ""); return null; }
@@ -70,9 +83,9 @@
     });
     line.setAttribute("d", "M" + pts.join(" L"));
     area.setAttribute("d", "M" + pts.join(" L") + " L" + W + " " + H + " L0 " + H + " Z");
-    var change = (closes[closes.length - 1] / closes[0] - 1) * 100;
+    var change = win.ret;
     var card = $("lx-demo-card");
-    if (card) card.dataset.dir = change >= 0 ? "up" : "down";
+    if (card) card.dataset.dir = (closes[closes.length - 1] >= closes[0]) ? "up" : "down";
     return change;
   }
 

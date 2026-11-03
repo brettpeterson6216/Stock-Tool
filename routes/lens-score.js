@@ -173,6 +173,19 @@ function cardGrades(g) {
   };
 }
 
+/* The past 52 weeks of closes with their dates, starting at the close on or
+   before 52 weeks ago, so the card's "past year" is the same figure as the
+   research page's (audit F04). */
+function yearBars(bars) {
+  const list = (bars || []).filter(b => b && Number.isFinite(Number(b.close)) && Number.isFinite(Number(b.time)));
+  if (!list.length) return [];
+  const last = Number(list.at(-1).time), unit = last > 1e12 ? 1000 : 1;
+  const from = last - 364 * 86400 * unit;
+  let at = 0;
+  for (let i = list.length - 1; i >= 0; i--) if (Number(list[i].time) <= from) { at = i; break; }
+  return list.slice(at).map(b => ({ time: Number(b.time), close: Number(b.close) }));
+}
+
 function cardPayload(payload) {
   const score = payload.score || {};
   const tech = score.technical || {};
@@ -181,7 +194,7 @@ function cardPayload(payload) {
     schemaVersion: payload.schemaVersion,
     ticker: payload.ticker,
     company: payload.company,
-    score: { ...score, technical: { ...techRest, bars: (bars || []).slice(-252).map(bar => ({ close: bar.close })) } },
+    score: { ...score, technical: { ...techRest, bars: yearBars(bars) } },
     timing: timing && Number.isFinite(Number(timing.timingScore)) ? { score: Number(timing.timingScore), key: timing.key || null } : null,
     buyZone: zones?.support?.[0] ? { lower: zones.support[0].lower, upper: zones.support[0].upper } : null,
     grades: payload.grades ? cardGrades(payload.grades) : null,

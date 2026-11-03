@@ -94,7 +94,7 @@
     var bars = q.bars, meta = q.meta || {}, last = bars[bars.length - 1];
     var price = N(meta.regularMarketPrice) || last.close;
     var prev = bars.length > 1 ? bars[bars.length - 2].close : N(meta.previousClose);
-    var year = bars.filter(function (b) { return b.time >= last.time - 366 * 86400; });
+    var year = bars.slice(IL.windowStart(bars, IL.YEAR_DAYS));
     var hi = Math.max.apply(null, year.map(function (b) { return b.high || b.close; }));
     var lo = Math.min.apply(null, year.map(function (b) { return b.low || b.close; }));
     var rets = [];
@@ -105,7 +105,7 @@
     year.forEach(function (b) { peak = Math.max(peak, b.close); dd = Math.min(dd, b.close / peak - 1); });
     var worst = rets.length ? (Math.exp(Math.min.apply(null, rets)) - 1) * 100 : null;
     var ma = function (n) { if (bars.length < n) return null; var s = 0; for (var j = bars.length - n; j < bars.length; j++) s += bars[j].close; return s / n; };
-    var yr = year.length ? (last.close / year[0].close - 1) * 100 : null;
+    var yr = IL.yearReturn(bars);
     return {
       price: price, prev: prev, chg: prev ? price - prev : null, chgPct: prev ? (price / prev - 1) * 100 : null,
       hi: hi, lo: lo, vol: vol, drawdown: dd * 100, worstDay: worst, ma50: ma(50), ma200: ma(200), yearReturn: yr,
@@ -148,7 +148,7 @@
       "</section>" +
       '<div class="grid-3 rl-tools">' +
         tile("/compare", "atlas", "52% 70%", "Compare", "Up to four stocks side by side, with the best in each row marked.") +
-        tile("/screener", "ledger", "60% 40%", "Screener", "Filter about 290 US stocks by grade, value, size and momentum.") +
+        tile("/screener", "ledger", "60% 40%", "Screener", "Filter the <span data-graded>~280</span> US stocks we grade by grade, value, size and momentum.") +
         tile("/lens-score", "dial", "75% 45%", "LensToolkit", "Trend, timing, buy zones and alerts for any stock.") +
         tile("/?view=tool&section=projection", "engraved", "70% 70%", "Valuation Lab", "A full five-year model with saved versions.") +
       "</div>" +
@@ -173,7 +173,7 @@
       box.innerHTML = '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Sector</th><th style="text-align:left">Top-rated</th><th>LensScore</th>' + keys.map(function (k) { return "<th>" + FACTOR_LABEL[k] + "</th>"; }).join("") + '<th style="text-align:left">Runners-up</th></tr></thead><tbody>' +
         rows.map(function (r) {
           var top = r.top[0];
-          return '<tr class="click" data-go="' + h(top.ticker) + '"><td>' + h(r.sectorName || r.sector) + ' <span class="faint num">(' + (r.count || "") + ')</span></td><td style="text-align:left;font-family:var(--sans)"><span class="cell-co">' + IL.mono(top.ticker, r.sectorName, "sm") + '<span><b>' + h(top.ticker) + '</b> <span class="muted">' + h(top.name || "") + '</span></span></span></td><td><span class="pill ' + IL.scoreTone(top.score) + '">' + F.num(top.score, 1) + "</span></td>" +
+          return '<tr class="click" data-go="' + h(top.ticker) + '"><td>' + h(r.sectorName || r.sector) + ' <span class="faint num">(' + (r.count || "") + ')</span></td><td style="text-align:left;font-family:var(--sans)"><span class="cell-co">' + IL.mono(top.ticker, r.sectorName, "sm") + '<span><b>' + h(top.ticker) + '</b> <span class="muted">' + h(IL.cleanName(top.name || "")) + '</span></span></span></td><td><span class="pill ' + IL.scoreTone(top.score) + '">' + F.num(top.score, 1) + "</span></td>" +
             keys.map(function (k) { return "<td>" + IL.gchip(top.grades && top.grades[k]) + "</td>"; }).join("") +
             '<td style="text-align:left;font-family:var(--sans)">' + r.top.slice(1, 3).map(function (x) { return '<a href="/research/' + h(x.ticker) + '">' + h(x.ticker) + ' <span class="num faint">' + F.num(x.score, 1) + "</span></a>"; }).join(" · ") + "</td></tr>";
         }).join("") + "</tbody></table></div>";
@@ -203,7 +203,7 @@
     var box = IL.$("#rl-movers"); if (!box) return;
     var m = d && d.movers;
     if (!m || (!m.up.length && !m.down.length)) { box.innerHTML = '<div class="card-h"><h2 class="card-t">Biggest grade changes this week</h2></div><p class="muted" style="padding:16px 20px">No score changes yet this week.</p>'; return; }
-    var row = function (x) { return '<li><a href="/research/' + h(x.ticker) + '"><b>' + h(x.ticker) + '</b><span class="faint">' + h(x.name || "") + '</span></a><span class="num"><span class="faint">' + F.num(x.then, 1) + ' \u2192 </span><b class="' + F.cls(x.change) + '">' + F.num(x.now, 1) + "</b></span></li>"; };
+    var row = function (x) { return '<li><a href="/research/' + h(x.ticker) + '"><b>' + h(x.ticker) + '</b><span class="faint">' + h(IL.cleanName(x.name || "")) + '</span></a><span class="num"><span class="faint">' + F.num(x.then, 1) + ' \u2192 </span><b class="' + F.cls(x.change) + '">' + F.num(x.now, 1) + "</b></span></li>"; };
     box.innerHTML = '<div class="card-h"><h2 class="card-t">Biggest grade changes this week</h2><span class="card-sub">LensScore since ' + h(F.date(m.since, { year: undefined })) + "</span></div>" +
       '<ul class="mini">' + m.up.slice(0, 4).map(row).join("") + m.down.slice(0, 3).map(row).join("") + "</ul>";
   }
@@ -268,7 +268,9 @@
     if (!p) { IL.$("#sh-px").innerHTML = '<span class="muted">Price unavailable</span>'; return; }
     var session = p.provenance && p.provenance.marketSession;
     var when = session === "regular"
-      ? "Delayed price · " + new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: "America/New_York" }) + " ET"
+      /* The provider's own quote time when it sends one; never the bar's
+         start-of-day stamp, and never just "now" (audit F15). */
+      ? "Delayed price · " + new Date((p.provenance.quoteTime || p.provenance.asOf || p.provenance.retrievedAt) || Date.now()).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: "America/New_York" }) + " ET"
       : "Close · " + F.date(p.lastTime, { year: undefined, timeZone: "America/New_York" });
     IL.$("#sh-px").innerHTML =
       '<span class="num sh-price">' + F.price(p.price) + "</span>" +

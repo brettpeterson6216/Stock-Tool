@@ -19,7 +19,7 @@
     { key: "1M", fetch: "2y", days: 31 },
     { key: "6M", fetch: "2y", days: 183 },
     { key: "YTD", fetch: "2y", ytd: true },
-    { key: "1Y", fetch: "2y", days: 366 },
+    { key: "1Y", fetch: "2y", days: 364 },
     { key: "5Y", fetch: "5y", weekly: true },
     { key: "Max", fetch: "max", monthly: true },
   ];
@@ -164,7 +164,8 @@
       if (!all.length) return all;
       if (r.days || r.ytd) {
         var end = all[all.length - 1].time;
-        var start = r.ytd ? Date.UTC(new Date(end * 1000).getUTCFullYear(), 0, 1) / 1000 : end - r.days * 86400;
+        if (!r.ytd) return all.slice(IL.windowStart(all, r.days));   // anchored on the close on or before the start, like every "past year" figure
+        var start = Date.UTC(new Date(end * 1000).getUTCFullYear(), 0, 1) / 1000;
         return all.filter(function (b) { return b.time >= start; });
       }
       return all;

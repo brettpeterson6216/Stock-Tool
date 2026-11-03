@@ -37,7 +37,7 @@
         '</div>' +
       '<nav class="grid-3 rl-tools d-tools" aria-label="Tools">' +
         tile("/research", "globe", "62% 40%", "Research a stock", "A plain-English report card, the financials and what the price assumes.") +
-        tile("/screener", "ledger", "60% 40%", "Screener", "Filter about 290 US stocks by grade, value, size and momentum.") +
+        tile("/screener", "ledger", "60% 40%", "Screener", "Filter the <span data-graded>~280</span> US stocks we grade by grade, value, size and momentum.") +
         tile("/compare", "atlas", "52% 70%", "Compare", "Up to four stocks side by side, with the best in each row marked.") +
         tile("/lens-score", "engraved", "70% 70%", "LensToolkit", "Trend, timing, buy zones and alerts for any stock.") +
       "</nav>" +
@@ -194,7 +194,8 @@
       if (!rows.length) { box.innerHTML = '<div class="empty">Movers appear once today’s closes are in.</div>'; return; }
       box.innerHTML = '<ul class="d-list">' + rows.slice(0, 5).map(function (r) {
         return '<li><a href="/research/' + h(r.symbol) + '">' + IL.mono(r.symbol, "", "sm") + '<span class="d-li-t"><b>' + h(r.symbol) + '</b><span class="faint">' + h(IL.cleanName(r.name || "")) + '</span></span></a><span class="num ' + F.cls(r.chgPct) + '">' + F.spct(r.chgPct) + "</span></li>";
-      }).join("") + "</ul>" + (rows[0] && rows[0].asOf ? '<p class="note d-note">Among the ~280 stocks we grade \u00b7 close of ' + F.date(rows[0].asOf, { year: undefined }) + "</p>" : "");
+      }).join("") + "</ul>" + (rows[0] && rows[0].asOf ? '<p class="note d-note">Among the <span data-graded>~280</span> stocks we grade \u00b7 close of ' + F.date(rows[0].asOf, { year: undefined }) + "</p>" : "");
+      IL.fillGraded(box);
     });
   }
 

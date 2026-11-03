@@ -119,6 +119,9 @@
     scoreEl.textContent = Math.round(score);
     labelEl.textContent = score >= 67 ? 'Bullish' : score <= 33 ? 'Bearish' : 'Balanced';
     countEl.textContent = String(data.advancing || 0) + '/' + String(data.measured || 0);
+    // Breadth here is the tracked sector funds, not the whole market.
+    var basis = document.getElementById('ilm-breadth-basis');
+    if (basis) basis.textContent = 'of the ' + String(data.measured || 0) + ' sector funds we track are up today';
   }
 
   function ageLabel(epochSeconds) {
@@ -139,7 +142,15 @@
         ['See where every number comes from', '/data-sources', 'Data sources'],
         ['Read quality, value, and setup together', '/lens-score', 'LensScore'],
       ];
-      document.getElementById('ilm-source-label').textContent = 'ImpliedLens';
+      /* No headlines came back. Say so, and label what is shown instead as
+         our own guides: never present evergreen pages as current news. */
+      var title = document.getElementById('ilm-news-title');
+      if (title) title.textContent = 'Research guides';
+      var badge = document.getElementById('ilm-source-label');
+      badge.textContent = 'News unavailable';
+      badge.classList.remove('live');
+      var card = list.closest('.ilm-news-card');
+      if (card) card.setAttribute('aria-label', 'Research guides');
       links.forEach(function (entry) {
         var link = document.createElement('a');
         link.href = entry[1];
@@ -149,6 +160,7 @@
       });
       return;
     }
+    document.getElementById('ilm-source-label').textContent = 'Market headlines';
     items.forEach(function (item) {
       var link = document.createElement('a');
       link.href = item.url || '/blog';

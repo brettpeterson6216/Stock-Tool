@@ -939,7 +939,13 @@
     } else if (technical.trendRegime.trendScore <= 3.5 && technical.trendRegime.agreement >= 4) {
       concerns.push(`${technical.trendRegime.agreement} of ${technical.trendRegime.total} trend checks point down.`);
     }
-    if (technical.timing.timingScore >= 7.5) strengths.push("Entry timing is favorable: the stock has pulled back without breaking its trend.");
+    if (technical.timing.timingScore >= 7.5) {
+      // A pullback only counts in the stock's favour while the main trend is up.
+      const trendUp = Number(technical.trendRegime?.trendScore) >= 5.5;
+      const trendDown = Number(technical.trendRegime?.trendScore) <= 4.5;
+      if (trendUp) strengths.push("Entry timing is favorable: the stock has pulled back while its main trend still points up.");
+      else if (trendDown) concerns.push("The stock has pulled back, but its main trend is down: a dip in a falling stock can keep falling.");
+    }
     else if (technical.timing.timingScore <= 2.5) concerns.push("Entry timing is poor: the stock is stretched or sellers are in control.");
     if (technical.setupSignals.length) strengths.push(technical.setupSignals[0]);
     if (technical.setupGuardrails.length) concerns.push(technical.setupGuardrails[0]);
