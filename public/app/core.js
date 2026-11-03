@@ -226,11 +226,25 @@
   };
   /* Company names from filings: drop state suffixes ("/De", "/New/") and
      fix all-caps. */
+  /* Company names as people write them. SEC filer names arrive in capitals,
+     sometimes only partly ("NEWMONT Corp", "ELI LILLY & Co"), with suffixes
+     like /DE/. When a name is written in capitals, its capitalised words are
+     set in title case, except real acronyms and brands written in capitals. */
+  var NAME_AS = { NVIDIA: "NVIDIA", ONEOK: "ONEOK", JPMORGAN: "JPMorgan", INTL: "International", HSBC: "HSBC", ASML: "ASML", AMETEK: "AMETEK", AECOM: "AECOM", IDEXX: "IDEXX", NASDAQ: "Nasdaq", PAYPAL: "PayPal", EBAY: "eBay", FEDEX: "FedEx", MCDONALDS: "McDonald's", "MCDONALD'S": "McDonald's" };
+  var ACRONYM = /^(IBM|AMD|CVS|UPS|AES|PPG|CSX|BNY|HCA|DTE|PNC|KLA|NXP|RTX|CME|AMC|GE|HP|LLC|LP|PLC|NV|SA|AG|US|USA|II|III|REIT|ETF|SPDR|DR|NRG|ADM|CF|EOG|EQT|IQVIA|MSCI|TJX|WEC|AIG|ICE|MGM|PTC|STE|TPR|ON|AT|PG|ATO|CBRE|CDW|LKQ|NOV|DXC|SBA|EPAM|IPG)$/;
   IL.cleanName = function (n) {
     n = String(n || "").replace(/\s*\/[A-Za-z]{2,4}\/?\s*$/, "").replace(/\s+\/[A-Za-z]+\//g, " ").trim();
-    if (n && n === n.toUpperCase()) n = n.toLowerCase().replace(/\b([a-z])/g, function (m) { return m.toUpperCase(); }).replace(/\b(Inc|Corp|Co|Ltd|Plc|Llc|Nv|Sa|Ag)\b/g, function (m) { return m === "Llc" ? "LLC" : m === "Plc" ? "plc" : m === "Nv" ? "N.V." : m === "Sa" ? "S.A." : m === "Ag" ? "AG" : m; });
-    return n;
+    if (!/\b[A-Z]{4,}\b/.test(n) && n !== n.toUpperCase()) return n;      // already written normally
+    return n.split(/(\s+)/).map(function (w) {
+      var core = w.replace(/[.,]+$/, ""), tail = w.slice(core.length);
+      if (!/^[A-Z][A-Z'.]+$/.test(core)) return w;                      // mixed case, digits or & (3M, AT&T)
+      if (NAME_AS[core]) return NAME_AS[core] + tail;
+      if (ACRONYM.test(core)) return w;
+      if (/^(INC|CORP|CO|LTD)$/.test(core)) return core.charAt(0) + core.slice(1).toLowerCase() + tail;
+      return core.charAt(0) + core.slice(1).toLowerCase() + tail;
+    }).join("");
   };
+
 
   /* ── One definition of "past year" for every surface (audit F04) ───────
      52 weeks back from the latest daily close, using the last close on or
@@ -600,10 +614,19 @@
      Logos come from /api/logo, our own cached copy, so visitors never load
      a third party. Nothing is requested until the server says logos are on. */
   var logosOn = null;
+  /* Marks only show when logos are on: an empty circle with letters in it is
+     filler. The last answer is remembered so the slot is right from paint. */
+  try { if (localStorage.getItem("il-logos") === "1") document.documentElement.classList.add("il-logos"); } catch (_) {}
   IL.logos = function () {
-    if (!logosOn) logosOn = fetch("/api/logo-status", { credentials: "same-origin" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { return !!(j && j.enabled); }).catch(function () { return false; });
+    if (!logosOn) logosOn = fetch("/api/logo-status", { credentials: "same-origin" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { return !!(j && j.enabled); }).catch(function () { return false; })
+      .then(function (on) {
+        document.documentElement.classList.toggle("il-logos", on);
+        try { localStorage.setItem("il-logos", on ? "1" : "0"); } catch (_) {}
+        return on;
+      });
     return logosOn;
   };
+  IL.logos();
   function fillLogos(root) {
     IL.logos().then(function (on) {
       if (!on) return;
@@ -632,7 +655,12 @@
     return '<span class="mono' + (size ? " " + size : "") + '" data-t="' + IL.h(t) + '" aria-hidden="true"><span class="mono-l">' + IL.h(letter) + "</span></span>";
   };
   IL.eyebrow = function (text) { return '<span class="eyebrow">' + IL.h(text) + "</span>"; };
-  IL.gchip = function (g) { return g ? '<span class="gchip" style="color:' + IL.gradeTone(g) + '">' + IL.h(g) + "</span>" : '<span class="faint">\u2014</span>'; };
+  /* A grade is a letter, set like type, not a coloured badge. Its tone steps
+     down from A to F in lightness only (see .gchip in lens.css). */
+  IL.gchip = function (g) {
+    if (!g) return '<span class="gchip" data-g="">\u2014</span>';
+    return '<span class="gchip" data-g="' + IL.h(String(g).charAt(0)) + '">' + IL.h(String(g).replace("-", "\u2212")) + "</span>";
+  };
   /* The brand ribbon behind a hero block (il-ribbon.js loads on demand). */
   IL.ribbon = function (host, path, seed) {
     if (!host || host.querySelector(".il-ribbon")) return;

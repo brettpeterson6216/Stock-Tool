@@ -9,7 +9,7 @@
   "use strict";
   var IL = window.IL, F = IL.fmt, h = IL.h;
   var KEYS = ["value", "growth", "profitability", "health", "momentum"];
-  var SHORT = { value: "V", growth: "G", profitability: "P", health: "H", momentum: "M" };
+  var SHORT = { value: "Value", growth: "Growth", profitability: "Profit", health: "Health", momentum: "Momentum" };
   var LAST = "il-dash-last";
 
   function greet() {
@@ -134,7 +134,7 @@
       ]).then(function (r) {
         var q = {}; ((r[0].data && r[0].data.quotes) || []).forEach(function (x) { q[x.symbol] = x; });
         var g = (r[1].data && r[1].data.grades) || {};
-        box.innerHTML = '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Company</th><th>Last close</th><th>Day</th><th>LensScore</th><th>Week</th><th class="dash-grades" title="Value, Growth, Profitability, Health, Momentum">V &nbsp;G &nbsp;P &nbsp;H &nbsp;M</th></tr></thead><tbody>' +
+        box.innerHTML = '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Company</th><th>Last close</th><th>Day</th><th>LensScore</th><th>Week</th><th class="dash-grades" title="Value, growth, profitability, health, momentum">Grades</th></tr></thead><tbody>' +
           tickers.map(function (t) {
             var x = q[t] || {}, s = g[t];
             return '<tr class="click" data-go="' + h(t) + '"><td><span class="cell-co">' + IL.mono(t, s && s.sectorName, "sm") + '<span><a href="/research/' + h(t) + '"><b>' + h(t) + '</b></a><div class="faint dash-name">' + h(IL.cleanName(x.name || "")) + "</div></span></span></td>" +
@@ -150,10 +150,7 @@
       });
     });
   }
-  function nice(n) {
-    n = String(n || "");
-    return n === n.toUpperCase() ? n.toLowerCase().replace(/\b([a-z])/g, function (m) { return m.toUpperCase(); }) : n;
-  }
+  function nice(n) { return IL.cleanName(n); }
 
   /* Grade changes since this browser last opened the dashboard. */
   function paintSince(tickers, grades) {

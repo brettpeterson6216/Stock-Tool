@@ -419,3 +419,25 @@ body.il-app{background:var(--ground)}
 .mono.has-logo .mono-img{opacity:1}
 .mono.has-logo{box-shadow:inset 0 0 0 1px var(--line2)}
 .mono.has-logo .mono-l{visibility:hidden}
+
+/* ── Grades and scores set as type (2026-11) ───────────────────────────────
+   Coloured badges in every cell read as a generated dashboard. A grade is a
+   letter in the number face; it steps down from A to F in lightness only,
+   so a column scans at a glance without a rainbow. */
+.gchip{display:inline-block;min-width:28px;height:auto;padding:0;border-radius:0;background:none;box-shadow:none;text-align:center;
+  font:600 13.5px/1.2 var(--num);letter-spacing:.01em;color:var(--text3)}
+.gchip[data-g="A"]{color:var(--text)}
+.gchip[data-g="B"]{color:color-mix(in srgb,var(--text) 78%,var(--text3))}
+.gchip[data-g="C"]{color:var(--text2)}
+.gchip[data-g="D"],.gchip[data-g="F"]{color:var(--text3)}
+.gchip[data-g=""]{color:var(--text3)}
+/* The LensScore in a table is a number, set a little heavier, not a pill. */
+.pill.score,.pill.score.good,.pill.score.mid,.pill.score.bad{background:none;border:0;padding:0;min-width:0;color:var(--text);font:650 14px var(--num)}
+/* Report-card bars: one quiet colour; the letter carries the verdict. */
+.rep-bar i{background:color-mix(in srgb,var(--text) 55%,transparent)!important}
+/* Company marks only appear when real logos are on. */
+.mono{display:none}
+html.il-logos .mono{display:inline-grid}
+/* A grade alone in a cell lines up with its column heading. */
+.tbl td > .gchip:only-child{min-width:0}
+.dash-grades .gchip,.wl-gr .gchip{font:600 13px/1.2 var(--num);min-width:26px}

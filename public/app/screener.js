@@ -62,7 +62,7 @@
   var COLS = [
     { k: "ticker", label: "Company", left: true },
     { k: "lensScore", label: "LensScore" },
-    { k: "value", label: "V", tip: "Value grade" }, { k: "growth", label: "G", tip: "Growth grade" }, { k: "profitability", label: "P", tip: "Profitability grade" }, { k: "health", label: "H", tip: "Financial health grade" }, { k: "momentum", label: "M", tip: "Momentum grade" },
+    { k: "value", label: "Value", tip: "Value grade" }, { k: "growth", label: "Growth", tip: "Growth grade" }, { k: "profitability", label: "Profit", tip: "Profitability grade" }, { k: "health", label: "Health", tip: "Financial health grade" }, { k: "momentum", label: "Mom.", tip: "Momentum grade" },
     { k: "price", label: "Price" }, { k: "change1D", label: "Day" }, { k: "change1Y", label: "1 year" },
     { k: "revenueGrowth", label: "Rev growth" }, { k: "pe", label: "P/E" }, { k: "marketCap", label: "Mkt cap" }, { k: "dividendYield", label: "Yield" },
   ];
@@ -121,7 +121,7 @@
       "</tbody>";
     paintActions();
   }
-  function nice(n) { n = String(n || ""); return n === n.toUpperCase() ? n.toLowerCase().replace(/\b([a-z])/g, function (m) { return m.toUpperCase(); }) : n; }
+  function nice(n) { return IL.cleanName(n); }
 
   function paintActions() {
     var a = IL.$("#sc-actions"); if (!a) return;

@@ -14,7 +14,7 @@ const { cardPayload } = require("../routes/lens-score");
 
 function loadIL() {
   const noop = () => {};
-  const el = () => ({ addEventListener: noop, setAttribute: noop, classList: { add: noop, remove: noop, contains: () => false }, style: {}, querySelector: () => null, querySelectorAll: () => [] });
+  const el = () => ({ addEventListener: noop, setAttribute: noop, classList: { add: noop, remove: noop, toggle: noop, contains: () => false }, style: {}, querySelector: () => null, querySelectorAll: () => [] });
   const doc = { documentElement: el(), readyState: "complete", addEventListener: noop, querySelector: () => null, querySelectorAll: () => [], getElementById: () => null, createElement: el, head: el(), body: el() };
   const win = { document: doc, addEventListener: noop, matchMedia: () => ({ matches: false, addEventListener: noop }), localStorage: { getItem: () => null, setItem: noop }, location: { pathname: "/", search: "" }, fetch: () => Promise.reject(new Error("no network")), navigator: {} };
   win.window = win; win.self = win;

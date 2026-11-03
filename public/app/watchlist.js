@@ -54,7 +54,7 @@
         ["NVDA", "AAPL", "MSFT", "COST", "LLY"].map(function (t) { return '<button class="tag" type="button" data-add="' + t + '">+ ' + t + "</button>"; }).join("") + "</div></div></td></tr></tbody>";
       return;
     }
-    tbl.innerHTML = "<thead><tr><th>Company</th><th>Last close</th><th>Day</th><th>Your target</th><th>From target</th><th>LensScore</th><th class=\"wl-gr\">V G P H M</th><th>Why you follow it</th><th></th></tr></thead><tbody>" +
+    tbl.innerHTML = "<thead><tr><th>Company</th><th>Last close</th><th>Day</th><th>Your target</th><th>From target</th><th>LensScore</th><th class=\"wl-gr\" title=\"Value, growth, profitability, health, momentum\">Grades</th><th>Why you follow it</th><th></th></tr></thead><tbody>" +
       items.map(function (r, i) {
         var t = r.ticker, q = quotes[t] || {}, g = grades[t], tgt = r.target_price;
         var gap = q.price && tgt ? (q.price / tgt - 1) * 100 : null;
