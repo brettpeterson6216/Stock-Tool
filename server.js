@@ -271,6 +271,42 @@ let liteHomeCache;
    the Overview and /research/NVDA/financials etc. the other tabs. */
 const RESEARCH_TABS = new Set(["overview", "financials", "valuation", "earnings", "ownership", "filings"]);
 const researchPage = path.join(__dirname, "public", "app", "research.html");
+/* A shared /research/NVDA link is what people post, so the HTML that comes
+   back without running any script names the stock: title, description,
+   canonical and social tags (audit F06). The app takes over from there. */
+const RESEARCH_TAB_LABEL = { financials: "Financials", valuation: "Valuation", earnings: "Earnings", ownership: "Ownership", filings: "SEC filings" };
+function escAttr(v) { return String(v).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+function sendResearchForTicker(res, ticker, tab) {
+  const name = tickerIndex.nameFor(ticker) || "";
+  const who = name ? `${ticker} (${name})` : ticker;
+  const tabLabel = tab && RESEARCH_TAB_LABEL[tab] ? ` ${RESEARCH_TAB_LABEL[tab]}` : "";
+  const title = `${who}${tabLabel} · LensScore report card and research · ImpliedLens`;
+  const desc = `${who}: a five-grade LensScore report card against sector peers, financials from SEC filings, what the price implies and earnings, in plain English.`;
+  const base = (cfg.APP_URL || "https://impliedlens.com").replace(/\/$/, "");
+  const url = `${base}/research/${encodeURIComponent(ticker)}${tab && tab !== "overview" ? "/" + tab : ""}`;
+  const html = readStamped(researchPage)
+    .replace(/<title>[^<]*<\/title>/, `<title>${escAttr(title)}</title>`)
+    .replace(/<meta name="description" content="[^"]*">/, `<meta name="description" content="${escAttr(desc)}">`)
+    .replace("</head>", [
+      `<link rel="canonical" href="${escAttr(url)}">`,
+      `<meta property="og:type" content="website">`,
+      `<meta property="og:site_name" content="ImpliedLens">`,
+      `<meta property="og:title" content="${escAttr(`${who} · LensScore report card`)}">`,
+      `<meta property="og:description" content="${escAttr(desc)}">`,
+      `<meta property="og:url" content="${escAttr(url)}">`,
+      `<meta property="og:image" content="${base}/social-card.png">`,
+      `<meta property="og:image:width" content="1200">`,
+      `<meta property="og:image:height" content="630">`,
+      `<meta name="twitter:card" content="summary_large_image">`,
+      `<meta name="twitter:site" content="@ImpliedLens">`,
+      `<meta name="twitter:title" content="${escAttr(`${who} · LensScore report card`)}">`,
+      `<meta name="twitter:description" content="${escAttr(desc)}">`,
+      `<meta name="twitter:image" content="${base}/social-card.png">`,
+      "</head>",
+    ].join("\n"));
+  res.setHeader("Cache-Control", "no-cache, must-revalidate");
+  return res.type("html").send(html);
+}
 app.get(["/research", "/research/:ticker", "/research/:ticker/:tab"], (req, res) => {
   const t = req.params.ticker;
   if (t) {
@@ -282,6 +318,7 @@ app.get(["/research", "/research/:ticker", "/research/:ticker/:tab"], (req, res)
       return res.redirect(301, `/research/${encodeURIComponent(clean)}${tab && tab !== "overview" ? "/" + tab : ""}`);
     }
   }
+  if (t) return sendResearchForTicker(res, String(t).trim().toUpperCase(), req.params.tab ? String(req.params.tab).toLowerCase() : null);
   return sendPage(res, researchPage);
 });
 

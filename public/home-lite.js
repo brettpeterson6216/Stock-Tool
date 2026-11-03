@@ -5,8 +5,8 @@
    nav search - which on the full page switch views without a reload. Here
    they become real navigations to URLs that get the full page.
 
-   Once the landing page has settled, the held-back scripts are prefetched at
-   idle priority, so the first move into the app comes from the cache. */
+   When a visitor reaches for search or a stock, the rebuilt research page's
+   few files are prefetched so the first move into the app is quick. */
 (function () {
   "use strict";
 
@@ -19,8 +19,7 @@
   }
   function toTicker(t) {
     t = String(t || "").trim().toUpperCase().replace(/[^A-Z0-9.\-^]/g, "").slice(0, 12);
-    if (!t) return toSection("analyze");
-    go("/?view=tool&section=analyze&symbol=" + encodeURIComponent(t));
+    go(t ? "/research/" + encodeURIComponent(t) : "/research");
   }
 
   var homeNav = window.navGoTo;
@@ -40,11 +39,17 @@
   try { delete window.navSearchGo; } catch (e) { window.navSearchGo = undefined; }
   if (typeof window._setMobileNav !== "function") window._setMobileNav = function () {};
 
-  /* ── warm the cache ─────────────────────────────────────────────────── */
-  function bundle() {
-    try { return JSON.parse((document.getElementById("il-home-lite") || { dataset: {} }).dataset.bundle || "[]"); }
-    catch (e) { return []; }
-  }
+  /* ── warm the cache, on intent only (audit F08) ─────────────────────────
+     The old version prefetched ~1.2 MB of the legacy application at idle on
+     every visit. The likely next page is the rebuilt research page, whose
+     whole set is a few small files; fetch those only once a visitor reaches
+     for search, a stock or a research link. */
+  var NEXT = [
+    ["/app/lens.css", "style"], ["/app/stock.css", "style"],
+    ["/app/core.js", "script"], ["/app/stock.js", "script"], ["/app/chart.js", "script"],
+    ["/app/analysis.js", "script"], ["/app/valuation.js", "script"],
+    ["/vendor/lightweight-charts.standalone.production.js", "script"],
+  ];
   function frugal() {
     var c = navigator.connection;
     return !!(c && (c.saveData || /(^|-)2g$/.test(c.effectiveType || "")));
@@ -53,24 +58,16 @@
   function warm() {
     if (warmed || frugal()) return;
     warmed = true;
-    bundle().forEach(function (href) {
+    NEXT.forEach(function (f) {
       var l = document.createElement("link");
       l.rel = "prefetch";
-      l.as = "script";
-      l.href = href;
+      l.as = f[1];
+      l.href = f[0];
       document.head.appendChild(l);
     });
   }
-  function later() {
-    var idle = window.requestIdleCallback || function (fn) { return setTimeout(fn, 1); };
-    setTimeout(function () { idle(warm, { timeout: 3000 }); }, 2500);
-  }
-  if (document.readyState === "complete") later();
-  else window.addEventListener("load", later, { once: true });
-
-  // A visitor reaching for the app should not wait for the idle timer.
   function intent(e) {
-    var a = e.target && e.target.closest && e.target.closest('a[href*="view=tool"], #nav-search, #landing-search, [data-lx-ticker], .mobile-bottom-nav, #lx-demo-open');
+    var a = e.target && e.target.closest && e.target.closest('a[href^="/research"], a[href*="view=tool"], #nav-search, #landing-search, [data-lx-ticker], #lx-demo-open, il-top');
     if (a) warm();
   }
   document.addEventListener("pointerover", intent, { passive: true });

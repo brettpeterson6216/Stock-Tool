@@ -1422,3 +1422,17 @@ test("the rebuilt Screener and Watchlist pages are served", async () => {
     assert.match(await res.text(), new RegExp(`src="/app/${js}\\.js\\?v=`), p);
   }
 });
+
+test("a shared /research/TICKER link names the stock without running any script (F06)", async () => {
+  for (const t of ["NVDA", "AAPL"]) {
+    const res = await req(`/research/${t}`);
+    assert.equal(res.status, 200);
+    const html = await res.text();
+    assert.match(html, new RegExp(`<title>${t}[^<]*ImpliedLens</title>`));
+    assert.match(html, new RegExp(`<link rel="canonical" href="[^"]*/research/${t}">`));
+    assert.match(html, new RegExp(`<meta property="og:title" content="${t}`));
+    assert.match(html, /<meta name="twitter:card" content="summary_large_image">/);
+  }
+  const map = await (await req("/sitemap.xml")).text();
+  assert.match(map, /\/research\/NVDA<\/loc>/);
+});
