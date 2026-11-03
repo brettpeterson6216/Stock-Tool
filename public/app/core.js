@@ -207,7 +207,10 @@
       foot.innerHTML =
         "<span>\u00a9 " + new Date().getFullYear() + " ImpliedLens. Research, not investment advice.</span>" +
         '<a href="/data-sources">Data sources</a><a href="/pricing" data-show="upgrade">Pricing</a><a href="/learn">Learn</a>' +
-        '<a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/support">Support</a>';
+        '<a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/support">Support</a>' +
+        '<a class="il-foot-credit" href="https://logo.dev" target="_blank" rel="noopener" hidden>Logos provided by Logo.dev</a>';
+      /* Logo.dev's free plan asks for this credit wherever its logos appear. */
+      IL.logos().then(function (on) { var c = foot.querySelector(".il-foot-credit"); if (c && on) c.hidden = false; });
     }
   };
 
@@ -592,13 +595,42 @@
     var hsh = 0; for (var i = 0; i < t.length; i++) hsh = (hsh * 31 + t.charCodeAt(i)) % 360;
     return hsh;
   };
+  /* Company mark: the real logo when we have one, otherwise one letter in a
+     neutral circle (not the ticker again, which sits right beside it).
+     Logos come from /api/logo, our own cached copy, so visitors never load
+     a third party. Nothing is requested until the server says logos are on. */
+  var logosOn = null;
+  IL.logos = function () {
+    if (!logosOn) logosOn = fetch("/api/logo-status", { credentials: "same-origin" }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { return !!(j && j.enabled); }).catch(function () { return false; });
+    return logosOn;
+  };
+  function fillLogos(root) {
+    IL.logos().then(function (on) {
+      if (!on) return;
+      Array.prototype.forEach.call((root || document).querySelectorAll(".mono[data-t]:not([data-logo])"), function (m) {
+        m.setAttribute("data-logo", "1");
+        var img = new Image();
+        img.className = "mono-img"; img.alt = ""; img.decoding = "async"; img.loading = "lazy";
+        img.onload = function () { if (img.naturalWidth > 1) m.classList.add("has-logo"); else img.remove(); };
+        img.onerror = function () { img.remove(); };
+        img.src = "/api/logo/" + encodeURIComponent(m.getAttribute("data-t"));
+        m.appendChild(img);
+      });
+    });
+  }
+  IL.fillLogos = fillLogos;
+  if (window.MutationObserver) {
+    var pend = false;
+    new MutationObserver(function () {
+      if (pend) return; pend = true;
+      (window.requestAnimationFrame || setTimeout)(function () { pend = false; if (document.querySelector(".mono[data-t]:not([data-logo])")) fillLogos(document); });
+    }).observe(document.documentElement, { childList: true, subtree: true });
+  }
   IL.mono = function (t, sector, size) {
     t = String(t || "?").toUpperCase();
-    var hue = IL.monoHue(t, sector);
-    var label = t.replace(/[^A-Z0-9]/g, "").slice(0, t.length > 4 ? 3 : 4);
-    return '<span class="mono' + (size ? " " + size : "") + '" style="--h:' + hue + '" aria-hidden="true">' + IL.h(label.length > 3 && size !== "lg" ? label.slice(0, 3) : label) + "</span>";
+    var letter = t.replace(/[^A-Z0-9]/g, "").charAt(0) || "?";
+    return '<span class="mono' + (size ? " " + size : "") + '" data-t="' + IL.h(t) + '" aria-hidden="true"><span class="mono-l">' + IL.h(letter) + "</span></span>";
   };
-  /* Eyebrows are words only: no decorative icons (rulebook 5). */
   IL.eyebrow = function (text) { return '<span class="eyebrow">' + IL.h(text) + "</span>"; };
   IL.gchip = function (g) { return g ? '<span class="gchip" style="color:' + IL.gradeTone(g) + '">' + IL.h(g) + "</span>" : '<span class="faint">\u2014</span>'; };
   /* The brand ribbon behind a hero block (il-ribbon.js loads on demand). */

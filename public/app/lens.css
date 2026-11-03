@@ -409,3 +409,13 @@ body.il-app{background:var(--ground)}
    every table on the site. */
 .tbl td a{color:var(--text)}
 .tbl td a:hover{color:var(--gold-text);text-decoration:none}
+
+/* Company logo inside the mark. Logos are drawn for light backgrounds, so
+   they sit on white, contained, with room around them; until one loads (or
+   when there is none) the letter shows. */
+.mono{position:relative;overflow:hidden}
+.mono-l{position:relative}
+.mono-img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:17%;background:#fff;border-radius:inherit;opacity:0;transition:opacity .15s}
+.mono.has-logo .mono-img{opacity:1}
+.mono.has-logo{box-shadow:inset 0 0 0 1px var(--line2)}
+.mono.has-logo .mono-l{visibility:hidden}

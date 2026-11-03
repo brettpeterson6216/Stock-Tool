@@ -1436,3 +1436,20 @@ test("a shared /research/TICKER link names the stock without running any script 
   const map = await (await req("/sitemap.xml")).text();
   assert.match(map, /\/research\/NVDA<\/loc>/);
 });
+
+test("logos stay off, and say so, until a Logo.dev key is set", async () => {
+  const saved = process.env.LOGO_DEV_TOKEN;
+  delete process.env.LOGO_DEV_TOKEN;
+  let res = await req("/api/logo-status");
+  assert.equal(res.status, 200);
+  assert.equal((await res.json()).enabled, false);
+  res = await req("/api/logo/NVDA");
+  assert.equal(res.status, 404);
+  assert.match(res.headers.get("cache-control") || "", /max-age=86400/);
+  process.env.LOGO_DEV_TOKEN = "pk_test_example_key";
+  res = await req("/api/logo-status");
+  assert.deepEqual(await res.json(), { enabled: true, source: "logo.dev" });
+  process.env.LOGO_DEV_TOKEN = "not-a-publishable-key";
+  assert.equal((await (await req("/api/logo-status")).json()).enabled, false);
+  if (saved === undefined) delete process.env.LOGO_DEV_TOKEN; else process.env.LOGO_DEV_TOKEN = saved;
+});

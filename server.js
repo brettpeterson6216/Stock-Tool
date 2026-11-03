@@ -245,8 +245,10 @@ app.use([
   "/api/lens-leaders",
   "/api/lens-grades",
   "/api/search",
-  "/api/logo",
 ], marketDataLimiter);
+/* Logos get their own allowance: a screener page shows dozens at once, and
+   they should not use up the budget for prices and grades. */
+app.use("/api/logo", rateLimit({ windowMs: 60 * 1000, max: 600, standardHeaders: true, legacyHeaders: false }));
 
 app.use("/api",         authRouter);        // /api/auth/*, /api/saves, /api/admin/*
 app.use("/api",         billingRouter);     // /api/stripe/*
