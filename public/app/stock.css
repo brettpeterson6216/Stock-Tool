@@ -22,7 +22,9 @@
 /* ── Overview grid ──────────────────────────────────────────────────────── */
 .ov{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:var(--s5);align-items:start}
 .ov-main{display:flex;flex-direction:column;gap:var(--s5);min-width:0}
-@media (max-width:1080px){.ov{grid-template-columns:1fr}}
+/* One column: the LensScore report card leads, right under the stock's
+   header, instead of several screens down (audit F10). */
+@media (max-width:1080px){.ov{grid-template-columns:1fr}.ov-main{display:contents}#ov-rc{order:-1}}
 @media (max-width:760px){.ov,.ov-main{gap:var(--s4)}}
 
 /* Key numbers: 4 across, the range spans two */

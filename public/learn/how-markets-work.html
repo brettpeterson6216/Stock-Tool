@@ -200,28 +200,31 @@
       <div class="lxl-q" data-answer="1">
         <p class="lxl-q-text"><b>1.</b> You place a market buy order. Which price do you pay?</p>
         <ol class="lxl-opts" type="A">
-          <li><button type="button" data-opt="0">The bid</button></li>
-          <li><button type="button" data-opt="1">The ask</button></li>
-          <li><button type="button" data-opt="2">The last traded price, guaranteed</button></li>
+          <li><button type="button" data-opt="0" aria-pressed="false">The bid</button></li>
+          <li><button type="button" data-opt="1" aria-pressed="false">The ask</button></li>
+          <li><button type="button" data-opt="2" aria-pressed="false">The last traded price, guaranteed</button></li>
         </ol>
+        <p class="lxl-verdict" role="status" aria-live="polite"></p>
         <details class="lxl-why"><summary>Show answer</summary><p><b>The ask.</b> Buyers taking liquidity pay the ask. The last trade is just history and is not guaranteed.</p></details>
       </div>
       <div class="lxl-q" data-answer="1">
         <p class="lxl-q-text"><b>2.</b> Which order guarantees your price but not that you get filled?</p>
         <ol class="lxl-opts" type="A">
-          <li><button type="button" data-opt="0">Market order</button></li>
-          <li><button type="button" data-opt="1">Limit order</button></li>
-          <li><button type="button" data-opt="2">Stop order</button></li>
+          <li><button type="button" data-opt="0" aria-pressed="false">Market order</button></li>
+          <li><button type="button" data-opt="1" aria-pressed="false">Limit order</button></li>
+          <li><button type="button" data-opt="2" aria-pressed="false">Stop order</button></li>
         </ol>
+        <p class="lxl-verdict" role="status" aria-live="polite"></p>
         <details class="lxl-why"><summary>Show answer</summary><p><b>Limit order.</b> A limit order only fills at your price or better, so it may never fill.</p></details>
       </div>
       <div class="lxl-q" data-answer="0">
         <p class="lxl-q-text"><b>3.</b> Why are spreads usually wider after hours?</p>
         <ol class="lxl-opts" type="A">
-          <li><button type="button" data-opt="0">Fewer buyers and sellers are active</button></li>
-          <li><button type="button" data-opt="1">Exchanges charge more at night</button></li>
-          <li><button type="button" data-opt="2">Prices are not real after 4pm</button></li>
+          <li><button type="button" data-opt="0" aria-pressed="false">Fewer buyers and sellers are active</button></li>
+          <li><button type="button" data-opt="1" aria-pressed="false">Exchanges charge more at night</button></li>
+          <li><button type="button" data-opt="2" aria-pressed="false">Prices are not real after 4pm</button></li>
         </ol>
+        <p class="lxl-verdict" role="status" aria-live="polite"></p>
         <details class="lxl-why"><summary>Show answer</summary><p><b>Fewer buyers and sellers are active.</b> Thinner participation means fewer competing quotes, so the gap between bid and ask widens.</p></details>
       </div>
     </section>

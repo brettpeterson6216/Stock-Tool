@@ -491,3 +491,9 @@ body.il-tool-active #view-tool .app-sidebar { height: 100% !important; }
   color: var(--rp-gold-text, #d9b25f); font: 600 13px/1 var(--rp-sans, inherit);
 }
 #landing-page .lx-demo-retry:hover { background: var(--rp-gold-soft, rgba(201,162,74,.12)); }
+
+/* Quiz verdict, in words (audit F09). Empty until an answer is picked. */
+.lxl-verdict { margin: 8px 0 0 !important; font: 600 13.5px/1.5 var(--rp-sans) !important; }
+.lxl-verdict:empty { display: none !important; }
+.lxl-verdict.is-right { color: var(--rp-up, #4fbf8a) !important; }
+.lxl-verdict.is-wrong { color: var(--rp-copy) !important; }

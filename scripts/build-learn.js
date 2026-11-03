@@ -134,8 +134,9 @@ function quizHtml(l) {
 ${l.quiz.map((q, i) => `      <div class="lxl-q" data-answer="${q.answer}">
         <p class="lxl-q-text"><b>${i + 1}.</b> ${esc(q.q)}</p>
         <ol class="lxl-opts" type="A">
-${q.options.map((o, j) => `          <li><button type="button" data-opt="${j}">${esc(o)}</button></li>`).join("\n")}
+${q.options.map((o, j) => `          <li><button type="button" data-opt="${j}" aria-pressed="false">${esc(o)}</button></li>`).join("\n")}
         </ol>
+        <p class="lxl-verdict" role="status" aria-live="polite"></p>
         <details class="lxl-why"><summary>Show answer</summary><p><b>${esc(q.options[q.answer])}.</b> ${esc(q.why)}</p></details>
       </div>`).join("\n")}
     </section>`;

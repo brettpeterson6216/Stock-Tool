@@ -173,12 +173,12 @@
       box.innerHTML = '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Sector</th><th style="text-align:left">Top-rated</th><th>LensScore</th>' + keys.map(function (k) { return "<th>" + FACTOR_LABEL[k] + "</th>"; }).join("") + '<th style="text-align:left">Runners-up</th></tr></thead><tbody>' +
         rows.map(function (r) {
           var top = r.top[0];
-          return '<tr class="click" data-go="' + h(top.ticker) + '"><td>' + h(r.sectorName || r.sector) + ' <span class="faint num">(' + (r.count || "") + ')</span></td><td style="text-align:left;font-family:var(--sans)"><span class="cell-co">' + IL.mono(top.ticker, r.sectorName, "sm") + '<span><b>' + h(top.ticker) + '</b> <span class="muted">' + h(IL.cleanName(top.name || "")) + '</span></span></span></td><td><span class="pill ' + IL.scoreTone(top.score) + '">' + F.num(top.score, 1) + "</span></td>" +
+          return '<tr class="click" data-go="' + h(top.ticker) + '"><td>' + h(r.sectorName || r.sector) + ' <span class="faint num">(' + (r.count || "") + ')</span></td><td style="text-align:left;font-family:var(--sans)"><span class="cell-co">' + IL.mono(top.ticker, r.sectorName, "sm") + '<span><a href="/research/' + h(top.ticker) + '"><b>' + h(top.ticker) + '</b></a> <span class="muted">' + h(IL.cleanName(top.name || "")) + '</span></span></span></td><td><span class="pill ' + IL.scoreTone(top.score) + '">' + F.num(top.score, 1) + "</span></td>" +
             keys.map(function (k) { return "<td>" + IL.gchip(top.grades && top.grades[k]) + "</td>"; }).join("") +
             '<td style="text-align:left;font-family:var(--sans)">' + r.top.slice(1, 3).map(function (x) { return '<a href="/research/' + h(x.ticker) + '">' + h(x.ticker) + ' <span class="num faint">' + F.num(x.score, 1) + "</span></a>"; }).join(" · ") + "</td></tr>";
         }).join("") + "</tbody></table></div>";
     });
-    main().addEventListener("click", function (e) { var r = e.target.closest("[data-go]"); if (r) IL.go(r.getAttribute("data-go")); });
+    main().addEventListener("click", function (e) { var r = e.target.closest("[data-go]"); if (r && !e.target.closest("a,button,input")) IL.go(r.getAttribute("data-go")); });
   }
 
   /* The score's own record: how each score band has done since the first
@@ -553,10 +553,12 @@
     var pr = box(priceStr, 48, 220, 224, 48, font(600, ppx, nums), C.text);
     if (p && isFinite(p.chgPct)) box(signed(p.chgPct, 2) + " today", 48 + pr.w + 18, 235, 360, 26, font(500, 20, nums), p.chg >= 0 ? C.gain : C.loss);
 
-    /* The signature comparison: growth the price implies vs growth delivered. */
-    box("ANNUAL SALES GROWTH", 48, 291, 392, 18, font(600, 13, sans), C.t2, "left", 1.1);
-    box("Implied by price", 48, 324, 190, 21, font(500, 17, sans), C.t2);
-    box("Delivered", 252, 324, 190, 21, font(500, 17, sans), C.t2);
+    /* The signature comparison: growth the price implies vs growth delivered.
+       When neither figure exists (a visitor, or a company without the
+       filings), the slot shows the year's trading range instead of two big
+       empty dashes (audit F14). Nothing is ever estimated to fill it. */
+    var impVal = v && isFinite(v.implied) ? v.implied : null;
+    var delivered = v && v.delivered !== null && v.delivered !== undefined && isFinite(v.delivered) ? v.delivered : null;
     function growth(val, X, w, color) {
       if (val === null || val === undefined || !isFinite(val)) {
         box(DASH, X, 349, w, 60, font(600, 48, nums), C.t3);
@@ -568,12 +570,28 @@
       x.font = font(500, 18, nums); x.fillStyle = C.t2; x.textAlign = "left"; x.fillText("/yr", X + r.w + 5, r.base);
       return true;
     }
-    var hasImp = growth(v ? v.implied : null, 48, 190, C.gold);
-    var delivered = v && v.delivered !== null && v.delivered !== undefined ? v.delivered : null;
-    var hasDel = growth(delivered, 252, 190, C.text);
-    var impBasis = hasImp ? ["Model estimate", "next 5 years"] : ["Not available"];
-    var delBasis = hasDel ? ["Reported", f && f.growth3y !== null ? "3-year annual rate" : "last 12 months vs prior"] : ["Not available"];
-    [[impBasis, 48], [delBasis, 252]].forEach(function (b) { b[0].forEach(function (ln, i) { box(ln, b[1], 414 + i * 17, 190, 16, font(400, 13, sans), C.t3); }); });
+    if (impVal === null && delivered === null && p && isFinite(p.lo) && isFinite(p.hi)) {
+      box("52-WEEK RANGE", 48, 291, 392, 18, font(600, 13, sans), C.t2, "left", 1.1);
+      box("Low", 48, 324, 190, 21, font(500, 17, sans), C.t2);
+      box("High", 252, 324, 190, 21, font(500, 17, sans), C.t2);
+      [[p.lo, 48], [p.hi, 252]].forEach(function (c) {
+        var s0 = F.price(c[0]), px = 44;
+        while (px > 30 && width(s0, font(600, px, nums)) > 190) px -= 1;
+        box(s0, c[1], 352, 190, 56, font(600, px, nums), C.text);
+      });
+      var off = p.hi > 0 ? (p.price / p.hi - 1) * 100 : null;
+      box(off !== null && isFinite(off) ? (off >= -0.05 ? "At its 52-week high" : signed(off, 1) + " below the high") : "", 48, 414, 392, 16, font(400, 13, sans), C.t3);
+      if (isFinite(p.drawdown)) box("Worst drop from a high: " + signed(p.drawdown, 1), 48, 431, 392, 16, font(400, 13, sans), C.t3);
+    } else {
+      box("ANNUAL SALES GROWTH", 48, 291, 392, 18, font(600, 13, sans), C.t2, "left", 1.1);
+      box("Implied by price", 48, 324, 190, 21, font(500, 17, sans), C.t2);
+      box("Delivered", 252, 324, 190, 21, font(500, 17, sans), C.t2);
+      var hasImp = growth(impVal, 48, 190, C.gold);
+      var hasDel = growth(delivered, 252, 190, C.text);
+      var impBasis = hasImp ? ["Model estimate", "next 5 years"] : ["Not available"];
+      var delBasis = hasDel ? ["Reported", f && f.growth3y !== null ? "3-year annual rate" : "last 12 months vs prior"] : ["Not available"];
+      [[impBasis, 48], [delBasis, 252]].forEach(function (b) { b[0].forEach(function (ln, i) { box(ln, b[1], 414 + i * 17, 190, 16, font(400, 13, sans), C.t3); }); });
+    }
 
     /* Price over the past year: the real daily closes, no axes or fill. */
     box("PRICE  ·  PAST YEAR", 48, 468, 180, 18, font(500, 12, sans), C.t2, "left", 1);
@@ -581,7 +599,7 @@
     if (yrRet !== null) box(signed(yrRet, 1), 242, 464, 198, 25, font(500, 20, nums), yrRet >= 0 ? C.gain : C.loss, "right");
     if (S.quote && S.quote.bars.length > 1) {
       var bars = S.quote.bars.filter(function (b) { return b && isFinite(b.time) && isFinite(b.close) && b.close > 0; }).slice().sort(function (a, b) { return a.time - b.time; });
-      var endT = bars.length ? bars[bars.length - 1].time : 0, yr = bars.filter(function (b) { return b.time >= endT - 366 * 86400; });
+      var yr = bars.slice(IL.windowStart(bars, IL.YEAR_DAYS));      // the same year as the figure beside it
       if (yr.length > 1) {
         var t0 = yr[0].time, t1 = yr[yr.length - 1].time, lo = Infinity, hi = -Infinity;
         yr.forEach(function (b) { lo = Math.min(lo, b.close); hi = Math.max(hi, b.close); });
@@ -673,7 +691,7 @@
     /* The chart: one year of closes, lightly smoothed, with real axes. */
     var cx0 = L, cx1 = 790, cy0 = 172, cy1 = 432;
     if (S.quote && S.quote.bars.length > 20) {
-      var bars = S.quote.bars, endT = bars[bars.length - 1].time, yr = bars.filter(function (b) { return b.time >= endT - 366 * 86400; });
+      var bars = S.quote.bars, yr = bars.slice(IL.windowStart(bars, IL.YEAR_DAYS));
       var sm = yr.map(function (b, i) { var a = yr.slice(Math.max(0, i - 2), i + 3), s = 0; a.forEach(function (z) { s += z.close; }); return s / a.length; });
       sm[sm.length - 1] = yr[yr.length - 1].close;
       var pts = [], step = Math.max(1, Math.round(yr.length / 90));
@@ -805,7 +823,7 @@
     t("PAST YEAR", wx + 20, wy + 30, "600 12px " + sans, C.t3, "left", 2);
     if (p && p.yearReturn !== null && isFinite(p.yearReturn)) t(F.spct(p.yearReturn, 1), wx + wW - 20, wy + 31, "600 17px " + nums, p.yearReturn >= 0 ? C.gain : C.loss, "right");
     if (S.quote && S.quote.bars.length > 20) {
-      var bars = S.quote.bars, endT = bars[bars.length - 1].time, yr = bars.filter(function (b) { return b.time >= endT - 366 * 86400; });
+      var bars = S.quote.bars, yr = bars.slice(IL.windowStart(bars, IL.YEAR_DAYS));
       var sm = yr.map(function (b, i) { var a = yr.slice(Math.max(0, i - 2), i + 3), s = 0; a.forEach(function (z) { s += z.close; }); return s / a.length; });
       sm[sm.length - 1] = yr[yr.length - 1].close;
       var step = Math.max(1, Math.round(yr.length / 80)), pts = [];
@@ -1033,7 +1051,7 @@
         list.map(function (t) {
           var x = gg[t]; if (!x) return "";
           var me = t === S.t;
-          return '<tr class="' + (me ? "em" : "click") + '"' + (me ? "" : ' data-go="' + h(t) + '"') + '><td><span class="cell-co">' + IL.mono(t, x.sectorName, "sm") + "<b>" + h(t) + "</b></span>" + (me ? ' <span class="tag gold">This stock</span>' : "") + '</td><td><span class="pill ' + IL.scoreTone(x.score) + '">' + F.num(x.score, 1) + "</span></td>" +
+          return '<tr class="' + (me ? "em" : "click") + '"' + (me ? "" : ' data-go="' + h(t) + '"') + '><td><span class="cell-co">' + IL.mono(t, x.sectorName, "sm") + (me ? "<b>" + h(t) + "</b>" : '<a href="/research/' + h(t) + '"><b>' + h(t) + "</b></a>") + "</span>" + (me ? ' <span class="tag gold">This stock</span>' : "") + '</td><td><span class="pill ' + IL.scoreTone(x.score) + '">' + F.num(x.score, 1) + "</span></td>" +
             keys.map(function (k) { var gr = x.grades && x.grades[k]; return "<td>" + IL.gchip(gr) + "</td>"; }).join("") + "</tr>";
         }).join("") + "</tbody></table></div>";
     });

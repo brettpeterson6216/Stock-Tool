@@ -195,7 +195,7 @@
         '<section class="card flush"><div class="tbl-wrap"><table class="tbl"><thead><tr><th class="l">Company</th><th>LensScore</th>' + KEYS.map(function (k) { return "<th>" + KLABEL[k].charAt(0) + "</th>"; }).join("") + "<th>Sector rank</th></tr></thead><tbody>" +
         top.map(function (r) {
           var g = r.grades || {};
-          return '<tr class="click" data-go="' + h(r.ticker) + '"><td class="l"><b>' + h(r.ticker) + '</b><div class="faint sc-name">' + h(nice(r.name)) + "</div></td><td>" + '<span class="pill ' + IL.scoreTone(r.score) + '">' + F.num(r.score, 1) + "</span></td>" +
+          return '<tr class="click" data-go="' + h(r.ticker) + '"><td class="l"><a href="/research/' + h(r.ticker) + '"><b>' + h(r.ticker) + '</b></a><div class="faint sc-name">' + h(nice(r.name)) + "</div></td><td>" + '<span class="pill ' + IL.scoreTone(r.score) + '">' + F.num(r.score, 1) + "</span></td>" +
             KEYS.map(function (k) { return '<td class="sc-g">' + IL.gchip(g[k]) + "</td>"; }).join("") +
             "<td>" + (r.sectorRank ? "#" + r.sectorRank + " of " + r.sectorCount + " " + h(r.sectorName || "") : h(r.sectorName || "")) + "</td></tr>";
         }).join("") + "</tbody></table></div></section>";

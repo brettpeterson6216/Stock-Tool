@@ -332,6 +332,9 @@
     var d = document.createElement("dialog");
     d.className = "il-dialog";
     d.innerHTML = '<div class="il-dialog-in">' + html + "</div>";
+    /* Every dialog is named by its own heading (audit F09). */
+    var hd = d.querySelector("h1, h2, h3");
+    if (hd) { if (!hd.id) hd.id = "il-dlg-" + Math.random().toString(36).slice(2, 8); d.setAttribute("aria-labelledby", hd.id); }
     document.body.appendChild(d);
     d.addEventListener("close", function () { d.remove(); });
     d.addEventListener("click", function (e) { if (e.target === d) d.close(); });
@@ -441,7 +444,7 @@
       var seg = styles.length > 1 ? '<div class="row wrap" role="group" aria-label="Background" style="gap:6px;margin:10px 0 2px">' + styles.map(function (k) {
         return '<button class="btn' + (k === style ? " primary" : " ghost") + '" type="button" data-plate="' + k + '" aria-pressed="' + (k === style) + '">' + (STYLE_LABEL[k] || k) + "</button>";
       }).join("") + "</div>" : "";
-      IL.dialog('<h2>' + IL.h(o.title || "Share") + '</h2><img id="sc-img" src="' + href + '" alt="" style="width:100%;border-radius:10px;border:1px solid var(--line)">' + seg +
+      IL.dialog('<h2>' + IL.h(o.title || "Share") + '</h2><img id="sc-img" src="' + href + '" alt="' + IL.h(o.alt || ("Share image preview. " + (o.text || o.title || "ImpliedLens"))) + '" style="width:100%;border-radius:10px;border:1px solid var(--line)">' + seg +
         '<label class="field">Suggested post<textarea class="input" rows="3" style="height:auto;padding:10px 12px" id="sc-text">' + IL.h(o.text || "") + "</textarea></label>" +
         '<div class="row wrap" style="justify-content:flex-end"><button class="btn ghost" type="button" data-close>Close</button><button class="btn" type="button" id="sc-copy">Copy text</button><a class="btn" id="sc-dl" href="' + href + '" download="' + IL.h(name) + '">Download image</a>' +
         (canShare ? '<button class="btn primary" type="button" id="sc-share">Share</button>' : '<a class="btn primary" target="_blank" rel="noopener" href="https://x.com/intent/post?text=' + encodeURIComponent(o.text || "") + '">Post on X</a>') + "</div>",

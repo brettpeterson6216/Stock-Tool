@@ -31,8 +31,24 @@
           q.classList.add("is-answered");
           var pick = Number(b.getAttribute("data-opt"));
           b.classList.add(pick === answer ? "is-right" : "is-wrong");
+          b.setAttribute("aria-pressed", "true");
           var right = q.querySelector('button[data-opt="' + answer + '"]');
           if (right) right.classList.add("is-right");
+          /* Say it in words, not only colour, and announce it (audit F09). */
+          var letters = "ABCDEFGH";
+          q.querySelectorAll("button[data-opt]").forEach(function (o) {
+            var n = Number(o.getAttribute("data-opt"));
+            if (n === answer) o.setAttribute("aria-label", letters[n] + ". " + o.textContent + " (correct answer)");
+            else if (o === b) o.setAttribute("aria-label", letters[n] + ". " + o.textContent + " (your answer, incorrect)");
+            o.setAttribute("aria-disabled", "true");
+          });
+          var verdict = q.querySelector(".lxl-verdict");
+          if (verdict) {
+            verdict.textContent = pick === answer
+              ? "Correct."
+              : "Not quite. The answer is " + letters[answer] + ": " + (right ? right.textContent : "") + ".";
+            verdict.className = "lxl-verdict " + (pick === answer ? "is-right" : "is-wrong");
+          }
           var why = q.querySelector(".lxl-why");
           if (why) why.open = true;
           var all = document.querySelectorAll(".lxl-q");
