@@ -485,7 +485,7 @@ function renderPage(ticker, q, facts) {
 
     <div class="cta-section">
       <a id="analyze-cta" href="${esc(analyzeUrl)}" class="cta-btn">Analyze ${esc(ticker)} in depth →</a>
-      <div class="cta-note">Free to try, no account needed. <a id="landing-signup-cta" href="${esc(signupUrl)}">Create a free account</a> for ${PRODUCT_CONFIG.analysisLimits.registeredFreeDaily} analyses a day, financial statements and watchlists.</div>
+      <div class="cta-note" data-show="guest">Free to try, no account needed. <a id="landing-signup-cta" href="${esc(signupUrl)}">Create a free account</a> for ${PRODUCT_CONFIG.analysisLimits.registeredFreeDaily} analyses a day, financial statements and watchlists.</div>
     </div>
   </div>
 

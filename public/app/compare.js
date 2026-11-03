@@ -9,7 +9,9 @@
   "use strict";
   var IL = window.IL, F = IL.fmt, h = IL.h, A = function () { return IL.analysis; };
   var MAX = 4;
-  var COLORS = ["#E5B65A", "#6EA8FE", "#3CC9A0", "#F08A4B"];
+  /* Series colours tell the lines apart. None is green or red, which mean
+     gain and loss everywhere else on the site. */
+  var COLORS = ["#E5B65A", "#6EA8FE", "#C9CDD3", "#B39DEB"];
   var PRESETS = [
     { label: "Chip makers", t: ["NVDA", "AMD", "AVGO", "INTC"] },
     { label: "Big tech", t: ["AAPL", "MSFT", "GOOGL", "AMZN"] },
@@ -63,7 +65,7 @@
       { k: "Today", get: function (d) { return d.p && d.p.chgPct; }, f: function (v) { return F.spct(v, 2); }, color: true },
       { k: "Market cap", get: function (d) { return IL.n(d.meta.marketCap); }, f: F.money },
       { k: "Past year", get: function (d) { return d.p && d.p.yearReturn; }, f: F.spct, color: true, better: "high" },
-      { k: "LensScore", get: function (d) { return d.g ? Number(d.g.score) : null; }, f: function (v) { return v == null ? "—" : '<span class="pill ' + IL.scoreTone(v) + '">' + F.num(v, 1) + "</span>"; }, better: "high", html: true, tip: "0–10 grade against sector peers on value, growth, profitability, financial health and momentum." },
+      { k: "LensScore", get: function (d) { return d.g ? Number(d.g.score) : null; }, f: function (v) { return v == null ? "—" : '<span class="pill score ' + IL.scoreTone(v) + '">' + F.num(v, 1) + "</span>"; }, better: "high", html: true, tip: "0–10 grade against sector peers on value, growth, profitability, financial health and momentum." },
       { k: "Sector rank", withRow: true, get: function (d) { return d.g && d.g.rank ? d.g.rank.position / d.g.rank.of : null; }, f: function (v, d) { return d.g && d.g.rank ? "#" + d.g.rank.position + " of " + d.g.rank.of + " " + h(d.g.rank.sectorName || "") : "—"; }, html: true },
     ] },
     { title: "Grades against sector peers", rows: ["value", "growth", "profitability", "health", "momentum"].map(function (k) {
@@ -75,7 +77,7 @@
       { k: "Price / sales", get: function (d) { var m = IL.n(d.meta.marketCap); return m && d.f && d.f.revenue ? m / d.f.revenue : null; }, f: F.mult, better: "low", tip: "Market cap divided by the last 12 months of revenue." },
       { k: "Growth the price needs", get: function (d) { return d.v && d.v.implied !== null ? d.v.implied * 100 : null; }, f: F.spct, better: "low", tip: "Yearly revenue growth over five years that today’s price assumes, at the base-case margin and P/E and a 10% return." },
       { k: "Growth delivered", get: function (d) { return d.v && d.v.delivered !== null ? d.v.delivered * 100 : null; }, f: F.spct, better: "high", color: true, tip: "Average yearly revenue growth over the last three years (or the last year when three are not available)." },
-      { k: "Verdict", get: function (d) { return d.v && d.v.verdict ? d.v.verdict : null; }, f: function (v) { return v ? '<span class="tag ' + (v.tone === "good" ? "good" : v.tone === "bad" ? "bad" : "gold") + '">' + h(v.label) + "</span>" : "—"; }, html: true },
+      { k: "Verdict", get: function (d) { return d.v && d.v.verdict ? d.v.verdict : null; }, f: function (v) { return v ? '<span class="tag">' + h(v.label) + "</span>" : "—"; }, html: true },
     ] },
     { title: "Growth and profit, last 12 months", rows: [
       { k: "Revenue", get: function (d) { return d.f && d.f.revenue; }, f: F.money },
@@ -163,8 +165,8 @@
       var good = d.flags.filter(function (x) { return x.tone === "good"; }), bad = d.flags.filter(function (x) { return x.tone === "bad"; });
       return '<section class="card"><div class="card-h"><h3 class="card-t"><i class="cmp-dot" style="background:' + COLORS[i] + '"></i>' + h(d.t) + ' <span class="muted" style="font-weight:500">' + h(IL.cleanName(d.name)) + '</span></h3><span class="card-sub">' + (d.f ? '<span class="up">' + good.length + ' working</span> · <span class="down">' + bad.length + " warning" + (bad.length === 1 ? "" : "s") + "</span>" : "Report-card points only") + "</span></div>" +
         (d.f ? "" : '<p class="note">Sales, margin, cash-flow and dilution checks did not run' + (d.histRes && d.histRes.gate ? ': they need a free account.' : ': SEC filings aren’t available for this company.') + "</p>") +
-        '<ul class="lr-flags good">' + good.slice(0, 3).map(function (x) { return '<li><span class="lr-ico">+</span><div><b>' + h(x.title) + "</b><span>" + h(x.detail) + "</span></div></li>"; }).join("") + "</ul>" +
-        '<ul class="lr-flags bad">' + bad.slice(0, 3).map(function (x) { return '<li><span class="lr-ico">!</span><div><b>' + h(x.title) + "</b><span>" + h(x.detail) + "</span></div></li>"; }).join("") + "</ul>" +
+        '<ul class="lr-flags good">' + good.slice(0, 3).map(function (x) { return '<li><span class="lr-ico" aria-hidden="true"></span><div><b>' + h(x.title) + "</b><span>" + h(x.detail) + "</span></div></li>"; }).join("") + "</ul>" +
+        '<ul class="lr-flags bad">' + bad.slice(0, 3).map(function (x) { return '<li><span class="lr-ico" aria-hidden="true"></span><div><b>' + h(x.title) + "</b><span>" + h(x.detail) + "</span></div></li>"; }).join("") + "</ul>" +
         '<a class="card-foot" href="/research/' + h(d.t) + '">Open the full report →</a></section>';
     }).join("");
     drawChart(list);
@@ -236,8 +238,8 @@
     var legend = [];
     list.forEach(function (d, i) {
       if (!d.series || !d.series.bars.length) return;
-      var bars = d.series.bars, end = bars[bars.length - 1].time;
-      var year = bars.filter(function (b) { return b.time >= end - 366 * 86400; });
+      var bars = d.series.bars;
+      var year = bars.slice(IL.windowStart(bars, IL.YEAR_DAYS));      // same year as every "past year" figure
       if (!year.length) return;
       var base = year[0].close;
       var s = chart.addSeries(L.LineSeries, { color: COLORS[i], lineWidth: 2.5, lineType: 2, priceLineVisible: false, lastValueVisible: true, crosshairMarkerRadius: 3 });

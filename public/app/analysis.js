@@ -77,7 +77,12 @@
     meta = meta || {};
     var last = bars[bars.length - 1];
     var price = num(meta.regularMarketPrice) || last.close;
-    var year = bars.filter(function (b) { return b.time >= last.time - 366 * 86400; });
+    /* "Past year" = 52 weeks back to the close on or before (audit F04);
+       the same rule as IL.yearReturn and lib/sec-fundamentals.js. */
+    var from = last.time - 364 * 86400, at = 0;
+    for (var yi = bars.length - 1; yi >= 0; yi--) if (bars[yi].time <= from) { at = yi; break; }
+    var fullYear = bars[0].time <= from + 4 * 86400;
+    var year = bars.slice(at);
     var rets = [];
     for (var i = 1; i < year.length; i++) rets.push(Math.log(year[i].close / year[i - 1].close));
     var mean = rets.reduce(function (s, x) { return s + x; }, 0) / (rets.length || 1);
@@ -92,7 +97,7 @@
       lo: Math.min.apply(null, year.map(function (b) { return b.low || b.close; })),
       vol: vol, drawdown: dd * 100, fromHigh: (price / Math.max.apply(null, year.map(function (b) { return b.close; })) - 1) * 100,
       worstDay: rets.length ? (Math.exp(Math.min.apply(null, rets)) - 1) * 100 : null,
-      ma50: ma(50), ma200: ma(200), yearReturn: year.length ? (last.close / year[0].close - 1) * 100 : null,
+      ma50: ma(50), ma200: ma(200), yearReturn: year.length && fullYear ? (last.close / year[0].close - 1) * 100 : null,
       lastTime: last.time,
     };
   }

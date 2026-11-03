@@ -139,7 +139,7 @@
             var x = q[t] || {}, s = g[t];
             return '<tr class="click" data-go="' + h(t) + '"><td><span class="cell-co">' + IL.mono(t, s && s.sectorName, "sm") + '<span><a href="/research/' + h(t) + '"><b>' + h(t) + '</b></a><div class="faint dash-name">' + h(IL.cleanName(x.name || "")) + "</div></span></span></td>" +
               "<td>" + F.price(x.price) + '</td><td class="' + F.cls(x.chgPct) + '">' + F.spct(x.chgPct, 2) + "</td>" +
-              "<td>" + (s ? '<span class="pill ' + IL.scoreTone(s.score) + '">' + F.num(s.score, 1) + "</span>" : '<span class="faint">—</span>') + "</td>" +
+              "<td>" + (s ? '<span class="pill score ' + IL.scoreTone(s.score) + '">' + F.num(s.score, 1) + "</span>" : '<span class="faint">—</span>') + "</td>" +
               '<td class="' + F.cls(s && s.change) + '">' + (s && s.change ? F.schg(s.change).replace(/\.?0+$/, "") : "—") + "</td>" +
               '<td class="dash-grades">' + (s && s.grades ? KEYS.map(function (k) { return IL.gchip(s.grades[k]); }).join("") : "") + "</td></tr>";
           }).join("") + "</tbody></table></div>" +
@@ -209,7 +209,7 @@
         box.innerHTML = '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Company</th><th style="text-align:left">Sector</th><th>LensScore</th>' + KEYS.map(function (k) { return '<th class="dash-grades">' + SHORT[k] + "</th>"; }).join("") + "</tr></thead><tbody>" +
           s.slice(0, 8).map(function (x) {
             var t = x.top[0];
-            return '<tr class="click" data-go="' + h(t.ticker) + '"><td><span class="cell-co">' + IL.mono(t.ticker, x.sectorName, "sm") + '<span><a href="/research/' + h(t.ticker) + '"><b>' + h(t.ticker) + '</b></a><div class="faint dash-name">' + h(IL.cleanName(t.name || "")) + '</div></span></span></td><td style="text-align:left;font-family:var(--sans)" class="muted">' + h(x.sectorName || x.sector) + '</td><td><span class="pill ' + IL.scoreTone(t.score) + '">' + F.num(t.score, 1) + "</span></td>" +
+            return '<tr class="click" data-go="' + h(t.ticker) + '"><td><span class="cell-co">' + IL.mono(t.ticker, x.sectorName, "sm") + '<span><a href="/research/' + h(t.ticker) + '"><b>' + h(t.ticker) + '</b></a><div class="faint dash-name">' + h(IL.cleanName(t.name || "")) + '</div></span></span></td><td style="text-align:left;font-family:var(--sans)" class="muted">' + h(x.sectorName || x.sector) + '</td><td><span class="pill score ' + IL.scoreTone(t.score) + '">' + F.num(t.score, 1) + "</span></td>" +
               KEYS.map(function (k) { return '<td class="dash-grades">' + IL.gchip(t.grades && t.grades[k]) + "</td>"; }).join("") + "</tr>";
           }).join("") + "</tbody></table></div>";
       }

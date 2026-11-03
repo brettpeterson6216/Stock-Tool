@@ -122,7 +122,7 @@
 .val-mid{font-size:22px;font-weight:600}
 @media (max-width:900px){.val-h{grid-template-columns:1fr;gap:var(--s4)}.val-cmp{padding-left:0;border-left:0;border-top:1px solid var(--line);padding-top:14px}.val-big{font-size:36px}}
 .val-tbl td,.val-tbl th{vertical-align:middle}
-.val-tbl th.val-bear{color:var(--loss)} .val-tbl th.val-base{color:var(--text)} .val-tbl th.val-bull{color:var(--gain)}
+.val-tbl th.val-bear,.val-tbl th.val-base,.val-tbl th.val-bull{color:var(--text)}   /* case names, not gains or losses */
 .val-cell{display:inline-flex;align-items:center;gap:6px;justify-content:flex-end}
 .val-cell .input{width:88px;height:34px;text-align:right}
 .val-tbl tr.val-out td{background:var(--raised);font-size:14px}
@@ -177,9 +177,11 @@
 .lr-flags li div{display:flex;flex-direction:column;gap:1px;min-width:0}
 .lr-flags li b{font-size:13.5px;font-weight:650}
 .lr-flags li span{font-size:12.5px;color:var(--text2);line-height:1.45}
-.lr-ico{flex:none;width:20px;height:20px;border-radius:999px;display:grid;place-items:center;font:700 12px var(--num);margin-top:1px}
-.lr-flags.good .lr-ico{background:var(--gain-soft);color:var(--gain)}
-.lr-flags.bad .lr-ico{background:var(--loss-soft);color:var(--loss)}
+/* A small mark, not a boxed glyph: the column heading already says which
+   side each point is on. */
+.lr-ico{flex:none;width:6px;height:6px;border-radius:999px;margin-top:7px;background:var(--text3)}
+.lr-flags.good .lr-ico{background:var(--gain)}
+.lr-flags.bad .lr-ico{background:var(--loss)}
 .lr-empty{font-size:13px}
 .lr-gate{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--text2);padding:10px 12px;border-radius:var(--r-md);background:var(--raised)}
 .lr-gate svg{flex:none;color:var(--gold-text)}

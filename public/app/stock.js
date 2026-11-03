@@ -64,12 +64,12 @@
   function scoreRing(score, size) {
     size = size || 92;
     var r = size / 2 - 7, c = 2 * Math.PI * r, pct = Math.max(0, Math.min(1, Number(score) / 10));
-    var tone = IL.scoreTone(score), a = tone === "good" ? "#3FB37F" : tone === "mid" ? "#D9A441" : "#E06A6A", b = tone === "good" ? "#9BE3BC" : tone === "mid" ? "#F3D18A" : "#F7A9A9";
-    var id = "rg" + Math.random().toString(36).slice(2, 7), mid = size / 2;
+    /* Gold, flat, no glow: the score is the brand's number, not a gain or a
+       loss, so it does not take green or red (rulebook 3, 4). */
+    var mid = size / 2;
     return '<svg class="ring" width="' + size + '" height="' + size + '" viewBox="0 0 ' + size + " " + size + '" role="img" aria-label="LensScore ' + h(F.num(score, 1)) + ' out of 10">' +
-      '<defs><linearGradient id="' + id + '" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="' + a + '"/><stop offset="1" stop-color="' + b + '"/></linearGradient></defs>' +
       '<circle cx="' + mid + '" cy="' + mid + '" r="' + r + '" fill="none" stroke="var(--line2)" stroke-width="9"/>' +
-      '<circle cx="' + mid + '" cy="' + mid + '" r="' + r + '" fill="none" stroke="url(#' + id + ')" stroke-width="9" stroke-linecap="round" stroke-dasharray="' + (c * pct).toFixed(1) + " " + c.toFixed(1) + '" transform="rotate(-90 ' + mid + " " + mid + ')" style="filter:drop-shadow(0 0 6px ' + a + '66)"/>' +
+      '<circle cx="' + mid + '" cy="' + mid + '" r="' + r + '" fill="none" stroke="var(--gold)" stroke-width="9" stroke-linecap="round" stroke-dasharray="' + (c * pct).toFixed(1) + " " + c.toFixed(1) + '" transform="rotate(-90 ' + mid + " " + mid + ')"/>' +
       '<text x="50%" y="50%" dy="0.36em" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-weight="700" font-size="' + Math.round(size * 0.28) + '" fill="var(--text)">' + h(F.num(score, 1)) + "</text></svg>";
   }
 
@@ -173,7 +173,7 @@
       box.innerHTML = '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Sector</th><th style="text-align:left">Top-rated</th><th>LensScore</th>' + keys.map(function (k) { return "<th>" + FACTOR_LABEL[k] + "</th>"; }).join("") + '<th style="text-align:left">Runners-up</th></tr></thead><tbody>' +
         rows.map(function (r) {
           var top = r.top[0];
-          return '<tr class="click" data-go="' + h(top.ticker) + '"><td>' + h(r.sectorName || r.sector) + ' <span class="faint num">(' + (r.count || "") + ')</span></td><td style="text-align:left;font-family:var(--sans)"><span class="cell-co">' + IL.mono(top.ticker, r.sectorName, "sm") + '<span><a href="/research/' + h(top.ticker) + '"><b>' + h(top.ticker) + '</b></a> <span class="muted">' + h(IL.cleanName(top.name || "")) + '</span></span></span></td><td><span class="pill ' + IL.scoreTone(top.score) + '">' + F.num(top.score, 1) + "</span></td>" +
+          return '<tr class="click" data-go="' + h(top.ticker) + '"><td>' + h(r.sectorName || r.sector) + ' <span class="faint num">(' + (r.count || "") + ')</span></td><td style="text-align:left;font-family:var(--sans)"><span class="cell-co">' + IL.mono(top.ticker, r.sectorName, "sm") + '<span><a href="/research/' + h(top.ticker) + '"><b>' + h(top.ticker) + '</b></a> <span class="muted">' + h(IL.cleanName(top.name || "")) + '</span></span></span></td><td><span class="pill score ' + IL.scoreTone(top.score) + '">' + F.num(top.score, 1) + "</span></td>" +
             keys.map(function (k) { return "<td>" + IL.gchip(top.grades && top.grades[k]) + "</td>"; }).join("") +
             '<td style="text-align:left;font-family:var(--sans)">' + r.top.slice(1, 3).map(function (x) { return '<a href="/research/' + h(x.ticker) + '">' + h(x.ticker) + ' <span class="num faint">' + F.num(x.score, 1) + "</span></a>"; }).join(" · ") + "</td></tr>";
         }).join("") + "</tbody></table></div>";
@@ -219,7 +219,6 @@
           '<h1 class="sh-name" id="sh-name">' + sk(26, "260px") + "</h1></div></div>" +
           '<div class="sh-px" id="sh-px">' + sk(30, "220px") + "</div>" +
         "</div>" +
-        '<div class="sh-spark" id="sh-spark" aria-hidden="true"></div>' +
         '<div class="sh-actions">' +
           '<button class="btn" type="button" id="act-watch" aria-pressed="false">' + IL.icon("star") + '<span>Watch</span></button>' +
           '<button class="btn" type="button" id="act-alert">' + IL.icon("bell") + "<span>Alert</span></button>" +
@@ -235,26 +234,11 @@
   }
 
   /* A one-year sparkline with a gold wash, top right of the header. */
-  function spark() {
-    var box = IL.$("#sh-spark"); if (!box || !S.quote || !S.quote.bars.length) return;
-    var bars = S.quote.bars, end = bars[bars.length - 1].time;
-    var yr = bars.filter(function (b) { return b.time >= end - 366 * 86400; });
-    if (yr.length < 10) return;
-    var W = 260, H = 76, lo = Math.min.apply(null, yr.map(function (b) { return b.close; })), hi = Math.max.apply(null, yr.map(function (b) { return b.close; }));
-    var pts = yr.map(function (b, i) { return [i / (yr.length - 1) * W, H - 6 - (b.close - lo) / ((hi - lo) || 1) * (H - 14)]; });
-    /* Smooth the line (Catmull-Rom to Bezier) so it reads as a curve. */
-    var d = "M" + pts[0][0].toFixed(1) + " " + pts[0][1].toFixed(1);
-    for (var i = 0; i < pts.length - 1; i++) {
-      var p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
-      d += " C" + (p1[0] + (p2[0] - p0[0]) / 6).toFixed(1) + " " + (p1[1] + (p2[1] - p0[1]) / 6).toFixed(1) + " " + (p2[0] - (p3[0] - p1[0]) / 6).toFixed(1) + " " + (p2[1] - (p3[1] - p1[1]) / 6).toFixed(1) + " " + p2[0].toFixed(1) + " " + p2[1].toFixed(1);
-    }
-    var up = yr[yr.length - 1].close >= yr[0].close, chg = (yr[yr.length - 1].close / yr[0].close - 1) * 100;
-    var col = up ? "var(--gain)" : "var(--loss)";
-    box.innerHTML = '<svg viewBox="0 0 ' + W + " " + H + '" width="' + W + '" height="' + H + '"><defs><linearGradient id="spk" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#E5B65A" stop-opacity=".32"/><stop offset="1" stop-color="#E5B65A" stop-opacity="0"/></linearGradient></defs>' +
-      '<path d="' + d + " L" + W + " " + H + " L0 " + H + ' Z" fill="url(#spk)"/><path d="' + d + '" fill="none" stroke="#E5B65A" stroke-width="2" stroke-linecap="round"/>' +
-      '<circle cx="' + pts[pts.length - 1][0].toFixed(1) + '" cy="' + pts[pts.length - 1][1].toFixed(1) + '" r="3.5" fill="#E5B65A"/></svg>' +
-      '<span class="sh-spark-l">Past year <b class="num" style="color:' + col + '">' + F.spct(chg, 0) + "</b></span>";
-  }
+  /* The header used to carry a small unlabelled sparkline and its own
+     "past year" figure. The full chart with axes sits just below and the
+     key numbers give the past year, so the header keeps to identity, price
+     and actions (rulebook 6). */
+
 
   function fillHeader() {
     var p = priceFacts(), meta = p ? p.meta : {}, lens = S.lens || {};
@@ -264,7 +248,6 @@
     var bits = [meta.fullExchangeName || meta.exchangeName, meta.sector, meta.industry].filter(Boolean);
     IL.$("#sh-sector").textContent = bits.join(" · ");
     var mono = IL.$("#sh-mono"); if (mono) mono.innerHTML = IL.mono(S.t, meta.sector || (lens.grades && lens.grades.sectorName), "lg");
-    spark();
     if (!p) { IL.$("#sh-px").innerHTML = '<span class="muted">Price unavailable</span>'; return; }
     var session = p.provenance && p.provenance.marketSession;
     var when = session === "regular"
@@ -416,12 +399,12 @@
     var good = fl.filter(function (x) { return x.tone === "good"; }), bad = fl.filter(function (x) { return x.tone === "bad"; });
     var v = inp.valuation;
     var verdict = v && v.verdict
-      ? '<span class="tag ' + (v.verdict.tone === "good" ? "good" : v.verdict.tone === "bad" ? "bad" : "gold") + '">' + h(v.verdict.label) + "</span>"
+      ? '<span class="tag">' + h(v.verdict.label) + "</span>"     /* a reading, not a gain or loss: neutral (rulebook 3) */
       : "";
     function list(items, cls, empty) {
       if (!items.length) return '<p class="muted lr-empty">' + h(empty) + "</p>";
       return '<ul class="lr-flags ' + cls + '">' + items.slice(0, 5).map(function (x) {
-        return '<li><span class="lr-ico" aria-hidden="true">' + (cls === "good" ? "+" : "!") + '</span><div><b>' + h(x.title) + '</b><span>' + h(x.detail) + "</span></div></li>";
+        return '<li><span class="lr-ico" aria-hidden="true"></span><div><b>' + h(x.title) + '</b><span>' + h(x.detail) + "</span></div></li>";
       }).join("") + "</ul>";
     }
     var gated = S.histRes && S.histRes.gate;
@@ -965,7 +948,7 @@
     var p = priceFacts();
     if (!p) { box.innerHTML = '<h2 class="card-t">How risky has it been?</h2><p class="muted">Needs price history.</p>'; return; }
     var beta = N(p.meta.beta);
-    box.innerHTML = '<div class="card-h"><h2 class="card-t">How risky has it been?</h2><span class="tag ' + (p.vol < 22 ? "good" : p.vol < 40 ? "gold" : "bad") + '">' + riskWord(p.vol) + "</span></div>" +
+    box.innerHTML = '<div class="card-h"><h2 class="card-t">How risky has it been?</h2><span class="tag">' + riskWord(p.vol) + "</span></div>" +
       '<span class="card-sub">Past year</span>' +
       '<div><div class="stat"><span class="k">Typical yearly swing ' + IL.tip("Annualized volatility: how far the price usually moves in a year, up or down. The S&P 500 is usually around 15%.") + '</span><span class="v">' + F.pct(p.vol) + "</span></div>" +
       '<div class="stat"><span class="k">Worst drop from a high ' + IL.tip("The largest fall from a peak to a later low over the past year (maximum drawdown).") + '</span><span class="v down">' + F.spct(p.drawdown) + "</span></div>" +
@@ -1051,7 +1034,7 @@
         list.map(function (t) {
           var x = gg[t]; if (!x) return "";
           var me = t === S.t;
-          return '<tr class="' + (me ? "em" : "click") + '"' + (me ? "" : ' data-go="' + h(t) + '"') + '><td><span class="cell-co">' + IL.mono(t, x.sectorName, "sm") + (me ? "<b>" + h(t) + "</b>" : '<a href="/research/' + h(t) + '"><b>' + h(t) + "</b></a>") + "</span>" + (me ? ' <span class="tag gold">This stock</span>' : "") + '</td><td><span class="pill ' + IL.scoreTone(x.score) + '">' + F.num(x.score, 1) + "</span></td>" +
+          return '<tr class="' + (me ? "em" : "click") + '"' + (me ? "" : ' data-go="' + h(t) + '"') + '><td><span class="cell-co">' + IL.mono(t, x.sectorName, "sm") + (me ? "<b>" + h(t) + "</b>" : '<a href="/research/' + h(t) + '"><b>' + h(t) + "</b></a>") + "</span>" + (me ? ' <span class="tag gold">This stock</span>' : "") + '</td><td><span class="pill score ' + IL.scoreTone(x.score) + '">' + F.num(x.score, 1) + "</span></td>" +
             keys.map(function (k) { var gr = x.grades && x.grades[k]; return "<td>" + IL.gchip(gr) + "</td>"; }).join("") + "</tr>";
         }).join("") + "</tbody></table></div>";
     });
@@ -1437,6 +1420,7 @@
         if (gap > 0.05) { verdict = "The price asks for faster growth than the company has delivered."; tone = "bad"; }
         else if (gap < -0.05) { verdict = "The price asks for slower growth than the company has delivered."; tone = "good"; }
         else { verdict = "The price asks for roughly the growth the company has delivered."; tone = "gold"; }
+        tone = "";      // a reading, not a gain or a loss: shown neutral (rulebook 3)
       }
       IL.$("#val-hero").innerHTML =
         '<div class="val-h"><div><span class="card-sub">What the price implies ' + IL.tip("Solved backwards from today’s price: the yearly revenue growth that, with the base-case margin and P/E, earns exactly your required return.") + "</span>" +

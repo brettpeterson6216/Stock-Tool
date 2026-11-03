@@ -122,7 +122,7 @@ body.il-lens-page .rc-rank-note { margin: 10px 0 0; color: var(--ink-faint); fon
 body.il-lens-page .rc-timing-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-top: 2px; }
 body.il-lens-page .rc-timing-head h3 { margin: 0; font-size: 20px; }
 body.il-lens-page .rc-timing-head strong { font-family: var(--rc-num); font-size: 16px; color: var(--ink-soft); }
-body.il-lens-page .rc-timing-scale { position: relative; height: 8px; margin: 14px 0 6px; border-radius: 99px; background: linear-gradient(90deg, var(--rc-f), var(--rc-c) 50%, var(--rc-a)); opacity: .9; }
+body.il-lens-page .rc-timing-scale { position: relative; height: 8px; margin: 14px 0 6px; border-radius: 99px; background: var(--line, rgba(127,127,127,.25)); }  /* a plain track: the marker and its label carry the reading (rulebook 4) */
 body.il-lens-page .rc-timing-scale i { position: absolute; top: 50%; width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 50%; background: var(--surface); border: 3px solid var(--ink); transition: left 400ms ease; }
 body.il-lens-page .rc-timing-ends { display: flex; justify-content: space-between; color: var(--ink-faint); font-size: 11px; }
 body.il-lens-page #rc-timing-copy { margin: 12px 0 14px; color: var(--ink-soft); font-size: 13.5px; line-height: 1.55; }

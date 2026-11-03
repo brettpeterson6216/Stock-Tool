@@ -407,7 +407,7 @@ html[data-theme="light"] .score-ring[data-tone="strong"] { --score-color: var(--
 }
 .score-meta strong { color: var(--ink-soft); font-weight:  700; }
 .score-scale { padding-top: 16px; border-top: 1px solid var(--line); }
-.scale-track { position: relative; height: 7px; border-radius:  999px; background: linear-gradient(90deg, #a95353, #cb8558 30%, #d3b35e 50%, #8db678 70%, #52b980); }
+.scale-track { position: relative; height: 7px; border-radius:  999px; background: var(--line, rgba(127,127,127,.25)); }
 .scale-marker {
   position: absolute;
   top: 50%;
@@ -555,7 +555,7 @@ html[data-theme="light"] .chart-tooltip { background: rgba(255,253,248,.97); box
   background: linear-gradient(145deg, rgba(104,199,141,.06), rgba(227,118,118,.04));
 }
 .timing-card { margin-bottom: 12px; background: linear-gradient(145deg, rgba(0,230,118,.07), rgba(255,77,90,.04)); }
-.timing-meter { background: linear-gradient(90deg, var(--red) 0%, #a98055 32%, #6f756f 50%, #16894d 70%, var(--green) 100%); }
+.timing-meter { background: var(--line, rgba(127,127,127,.25)); }
 #timing-value { margin: 0; font-family: var(--mono); font-size:  22px; }
 .trend-regime-head { display: flex; align-items: end; justify-content: space-between; gap: 14px; }
 .trend-regime-head span { display: block; color: var(--ink-faint); font-size:  11px; font-weight:  700; text-transform:none; }

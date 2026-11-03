@@ -598,7 +598,8 @@
     var label = t.replace(/[^A-Z0-9]/g, "").slice(0, t.length > 4 ? 3 : 4);
     return '<span class="mono' + (size ? " " + size : "") + '" style="--h:' + hue + '" aria-hidden="true">' + IL.h(label.length > 3 && size !== "lg" ? label.slice(0, 3) : label) + "</span>";
   };
-  IL.eyebrow = function (text, icon) { return '<span class="eyebrow">' + (icon ? IL.icon(icon, 13) : "") + IL.h(text) + "</span>"; };
+  /* Eyebrows are words only: no decorative icons (rulebook 5). */
+  IL.eyebrow = function (text) { return '<span class="eyebrow">' + IL.h(text) + "</span>"; };
   IL.gchip = function (g) { return g ? '<span class="gchip" style="color:' + IL.gradeTone(g) + '">' + IL.h(g) + "</span>" : '<span class="faint">\u2014</span>'; };
   /* The brand ribbon behind a hero block (il-ribbon.js loads on demand). */
   IL.ribbon = function (host, path, seed) {

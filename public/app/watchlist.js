@@ -64,7 +64,7 @@
           "<td>" + F.price(q.price) + '</td><td class="' + F.cls(q.chgPct) + '">' + F.spct(q.chgPct, 2) + "</td>" +
           '<td><input class="input num wl-in" inputmode="decimal" data-target="' + h(t) + '" value="' + (tgt ? Number(tgt).toFixed(2) : "") + '" placeholder="$" aria-label="Target price for ' + h(t) + '"></td>' +
           '<td class="' + (gap === null ? "" : gap <= 0 ? "up" : "") + '">' + (gap === null ? "—" : gap <= 0 ? "At or below" : F.pct(gap) + " above") + "</td>" +
-          "<td>" + (g ? '<span class="pill ' + IL.scoreTone(g.score) + '">' + F.num(g.score, 1) + "</span>" + (g.change ? ' <span class="num ' + F.cls(g.change) + '" style="font-size:12px">' + F.schg(g.change).replace(/\.?0+$/, "") + "</span>" : "") : "—") + "</td>" +
+          "<td>" + (g ? '<span class="pill score ' + IL.scoreTone(g.score) + '">' + F.num(g.score, 1) + "</span>" + (g.change ? ' <span class="num ' + F.cls(g.change) + '" style="font-size:12px">' + F.schg(g.change).replace(/\.?0+$/, "") + "</span>" : "") : "—") + "</td>" +
           '<td class="wl-gr">' + (g && g.grades ? KEYS.map(function (k) { return IL.gchip(g.grades[k]); }).join("") : "") + "</td>" +
           '<td class="wl-note-td"><input class="input wl-note" data-note="' + h(t) + '" value="' + h(r.note || "") + '" maxlength="500" placeholder="' + (i ? "Add a note" : "e.g. Buy under $180 if margins hold") + '" aria-label="Note for ' + h(t) + '"></td>' +
           '<td class="wl-act"><button class="btn sm ghost" type="button" data-alert="' + h(t) + '" aria-label="Alert for ' + h(t) + '">' + IL.icon("bell", 14) + '</button><button class="btn sm ghost" type="button" data-rm="' + h(t) + '" aria-label="Remove ' + h(t) + '">×</button></td></tr>';

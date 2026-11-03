@@ -1916,3 +1916,12 @@ html[data-theme="dark"] #view-tool .il-rel-nums em.is-drop { color: #f2737b !imp
 #view-tool .il-fq-link { background: none !important; border: 0 !important; padding: 0 !important; color: var(--rp-gold) !important; font: inherit !important; text-decoration: underline !important; cursor: pointer !important; }
 @media (max-width: 640px) { #view-tool .il-fq-period { margin-left: 0 !important; } }
 #view-tool .il-rel-pending { margin-top: 8px !important; font: 400 12.5px/1.5 var(--rp-sans) !important; color: var(--rp-muted) !important; max-width: 60ch !important; }
+
+/* ── Rulebook pass (2026-11): no decorative hairlines, no rainbow tracks ───
+   Gold hairlines along the tops of cards and the red-to-green meter tracks
+   were decoration. Cards keep their surface; meters keep a plain track and
+   the marker and words that carry the reading. */
+:root { --il-card-bg: var(--rp-panel-grad); }
+:is(.il-hero-live, #landing-page .lx-demo-card, #view-tool .result-header, #lab-main .score-card, .quote-card, .il-auth-page .auth-card)::before,
+#il-home-member .il-firstrun::before { display: none !important; }
+#lab-main .scale-track { background: var(--rp-line-strong, rgba(127,127,127,.25)) !important; }
