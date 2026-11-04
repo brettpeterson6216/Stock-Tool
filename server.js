@@ -286,6 +286,11 @@ function sendResearchForTicker(res, ticker, tab) {
   const desc = `${who}: a five-grade LensScore report card against sector peers, financials from SEC filings, what the price implies and earnings, in plain English.`;
   const base = (cfg.APP_URL || "https://impliedlens.com").replace(/\/$/, "");
   const url = `${base}/research/${encodeURIComponent(ticker)}${tab && tab !== "overview" ? "/" + tab : ""}`;
+  /* The stock's own card when we grade it (routes/og-image.js); the date in
+     the URL lets X and others pick up a fresh one each day. */
+  const graded = require("./lib/universe-grades").get(ticker);
+  const day = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+  const image = graded ? `${base}/og/research/${encodeURIComponent(ticker)}.png?d=${day}` : `${base}/social-card.png`;
   const html = readStamped(researchPage)
     .replace(/<title>[^<]*<\/title>/, `<title>${escAttr(title)}</title>`)
     .replace(/<meta name="description" content="[^"]*">/, `<meta name="description" content="${escAttr(desc)}">`)
@@ -296,19 +301,21 @@ function sendResearchForTicker(res, ticker, tab) {
       `<meta property="og:title" content="${escAttr(`${who} · LensScore report card`)}">`,
       `<meta property="og:description" content="${escAttr(desc)}">`,
       `<meta property="og:url" content="${escAttr(url)}">`,
-      `<meta property="og:image" content="${base}/social-card.png">`,
+      `<meta property="og:image" content="${escAttr(image)}">`,
+      `<meta property="og:image:alt" content="${escAttr(`${ticker} LensScore report card`)}">`,
       `<meta property="og:image:width" content="1200">`,
       `<meta property="og:image:height" content="630">`,
       `<meta name="twitter:card" content="summary_large_image">`,
       `<meta name="twitter:site" content="@ImpliedLens">`,
       `<meta name="twitter:title" content="${escAttr(`${who} · LensScore report card`)}">`,
       `<meta name="twitter:description" content="${escAttr(desc)}">`,
-      `<meta name="twitter:image" content="${base}/social-card.png">`,
+      `<meta name="twitter:image" content="${escAttr(image)}">`,
       "</head>",
     ].join("\n"));
   res.setHeader("Cache-Control", "no-cache, must-revalidate");
   return res.type("html").send(html);
 }
+app.use(require("./routes/og-image"));
 app.get(["/research", "/research/:ticker", "/research/:ticker/:tab"], (req, res) => {
   const t = req.params.ticker;
   if (t) {

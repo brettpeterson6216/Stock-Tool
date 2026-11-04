@@ -754,3 +754,5 @@ router._test = { sectorFromIndustry: (...a) => sectorFromIndustry(...a), rsi14: 
 /* Yahoo spells share classes with a dash (BRK-B); SEC and most users use a
    dot (BRK.B). Without this, Berkshire's quote and chart returned 404. */
 function yahooSymbol(t) { return String(t || "").replace(/^([A-Z]{1,5})\.([A-Z]{1,2})$/, "$1-$2"); }
+/* Today's figures for one ticker as the screener holds them (no fetch). */
+module.exports.snapshotFor = ticker => _enrich.get(String(ticker || "").toUpperCase()) || null;
