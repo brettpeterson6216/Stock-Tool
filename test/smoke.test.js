@@ -142,7 +142,7 @@ test("GET / serves the homepage with a successful status", async () => {
   assert.match(html, /id="mbn-workspace"/);
   assert.match(html, /aria-label="Home"/);
   assert.match(html, /viewport-fit=cover/);
-  assert.match(html, /\/bundles\/site-[a-f0-9]+\.css\?v=[\w.-]+/);
+  assert.match(html, /\/bundles\/(?:site-[a-f0-9]+|landing-lite)\.css\?v=[\w.-]+/);
   assert.match(legacyCss, /input,select,textarea\{font-size:16px!important\}/);
   assert.match(legacyCss, /#main-nav\[data-view="tool"\] #nav-ticker-bar\{display:none!important\}/);
   assert.match(legacyCss, /\.nav-acct-wrap,\.nav-acct-btn\{min-width:0;max-width:100%\}/);
@@ -491,7 +491,9 @@ test("canonical visual system is served and included on primary product surfaces
     const page = await req(pagePath);
     assert.equal(page.status, 200);
     const markup = await page.text();
-    const bundleUrl = markup.match(/href="(\/bundles\/site-[a-f0-9]+\.css\?v=[\w.-]+)"/)?.[1];
+    /* The signed-out landing page links its own trimmed cut of the bundle
+       (lib/landing-css.js); every other page links the bundle itself. */
+    const bundleUrl = markup.match(/href="(\/bundles\/(?:site-[a-f0-9]+|landing-lite)\.css\?v=[\w.-]+)"/)?.[1];
     assert.ok(bundleUrl, `${pagePath} must serve the compiled visual system`);
     const bundle = await req(bundleUrl);
     assert.equal(bundle.status, 200);
