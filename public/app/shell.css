@@ -79,7 +79,7 @@ html.il-guest [data-show="member"]{display:none !important}
    lib/asset-stamp.js hides #main-nav and the old phone menus inline; these
    cover the drawers some older scripts add at run time. */
 html.il-shell-legacy #main-nav,html.il-shell-legacy .il-mobile-drawer,html.il-shell-legacy #mobile-menu,html.il-shell-legacy .mobile-menu,
-html.il-shell-legacy #mobile-bottom-nav,html.il-shell-legacy #mobile-more-menu{display:none !important}
+html.il-shell-legacy #mobile-bottom-nav,html.il-shell-legacy #mobile-more-menu,html.il-shell-legacy #static-navigation-drawer{display:none !important}
 /* The old app's email-verification strip sits under the bar, not over it. */
 html.il-shell-legacy #verif-banner{top:calc(61px + env(safe-area-inset-top,0px)) !important;z-index:999 !important}
 }
