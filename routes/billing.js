@@ -135,7 +135,7 @@ router.post("/stripe/create-checkout", validateCsrf, async (req, res) => {
       line_items: [{ price: priceId, quantity: 1 }],
       subscription_data: { trial_period_days: PRODUCT_CONFIG.trial.days, metadata },
       success_url: `${APP_URL}/?upgraded=1`,
-      cancel_url:  `${APP_URL}/?checkout=cancelled`,
+      cancel_url:  `${APP_URL}/pricing?checkout=cancelled`,
       client_reference_id: String(req.session.userId),
       metadata,
       allow_promotion_codes: PRODUCT_CONFIG.checkout.allowPromotionCodes,

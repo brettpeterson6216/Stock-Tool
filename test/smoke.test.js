@@ -1461,3 +1461,14 @@ test("/saved is its own page with the Saved tab marked", async () => {
   assert.match(html, /<title>Saved work · ImpliedLens<\/title>/);
   assert.match(html, /data-k="saved"[^>]*aria-current="page"/);
 });
+
+test("trial buttons go straight to checkout, not through the old app", async () => {
+  const html = await (await req("/pricing")).text();
+  assert.match(html, /data-checkout="monthly"/);
+  assert.match(html, /data-checkout="annual"/);
+  assert.doesNotMatch(html, /href="\/\?pricing=1"/);
+  const shell = require("node:fs").readFileSync(require("node:path").join(__dirname, "..", "public", "app", "shell.js"), "utf8");
+  assert.match(shell, /\/api\/stripe\/create-checkout/);
+  const { isPlainHomeQuery } = require("../lib/home-lite");
+  assert.ok(isPlainHomeQuery({ upgraded: "1" }) && isPlainHomeQuery({ verif: "ok" }) && isPlainHomeQuery({ checkout: "cancelled" }));
+});

@@ -497,3 +497,7 @@ body.il-tool-active #view-tool .app-sidebar { height: 100% !important; }
 .lxl-verdict:empty { display: none !important; }
 .lxl-verdict.is-right { color: var(--rp-up, #4fbf8a) !important; }
 .lxl-verdict.is-wrong { color: var(--rp-copy) !important; }
+
+/* Yearly-billing link under the trial button (pricing). */
+.lxp-annual { display: block !important; margin: 10px 0 0 !important; text-align: center !important; font: 500 13px/1.4 var(--rp-sans) !important; color: var(--rp-gold) !important; text-decoration: underline !important; text-underline-offset: 3px !important; }
+.lxp-plan [data-checkout][aria-busy="true"] { opacity: .75 !important; pointer-events: none !important; }

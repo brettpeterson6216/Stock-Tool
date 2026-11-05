@@ -129,6 +129,7 @@ input::-webkit-search-cancel-button{display:none}
 @media (max-width:1023px){   /* tablets and phones: tab bar at the bottom, search gets the room */
   .in{gap:12px;padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px))}
   .nav,.word,.kbd,.plan,.acct .ghost{display:none}
+  @media (max-width:480px){.acct [part="free"]{display:none}.acct{gap:8px}}   /* phones: Pro plans are in the account menu; search keeps its room */
   .search{max-width:none}
 }`;
 
@@ -320,13 +321,136 @@ input::-webkit-search-cancel-button{display:none}
     });
   }
 
-  function post(path) {
+  function post(path, body) {
     return fetch("/api/csrf", { credentials: "same-origin" }).then(function (r) { return r.json(); }).catch(function () { return {}; })
       .then(function (c) {
-        return fetch(path, { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json", Accept: "application/json", "X-CSRF-Token": c && c.token ? c.token : "" }, body: "{}" });
+        return fetch(path, { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json", Accept: "application/json", "X-CSRF-Token": c && c.token ? c.token : "" }, body: JSON.stringify(body || {}) });
       })
       .then(function (r) { return r.json().catch(function () { return null; }); })
       .catch(function () { return null; });
+  }
+  function track(event, props) {
+    try { fetch("/api/track", { method: "POST", credentials: "same-origin", keepalive: true, headers: { "Content-Type": "application/json" }, body: JSON.stringify({ event: event, properties: props || {} }) }).catch(function () {}); } catch (_) {}
+  }
+
+  /* ── Messages: a toast and a small sheet, in their own shadow root ─────
+     They appear on every page, old and new, so like the bar they cannot be
+     reached by page stylesheets. */
+  var OVERLAY_CSS = ":host{all:initial;font-family:Inter,system-ui,sans-serif;color:var(--sh-text,#EDEEF0)}*{box-sizing:border-box}" +
+    ".toast{position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:2000;max-width:min(520px,calc(100vw - 32px));padding:12px 16px;border-radius:12px;background:var(--sh-surface,#15171A);border:1px solid var(--sh-line2,#33383E);box-shadow:var(--sh-shadow);font-size:14px;line-height:1.45}" +
+    ".scrim{position:fixed;inset:0;z-index:2001;background:rgba(0,0,0,.5);display:grid;place-items:center;padding:16px}" +
+    ".sheet{width:min(440px,100%);padding:24px;border-radius:16px;background:var(--sh-surface,#15171A);border:1px solid var(--sh-line2,#33383E);box-shadow:var(--sh-shadow)}" +
+    "h2{margin:0 0 8px;font-size:20px;font-weight:700;letter-spacing:-.01em}p{margin:0 0 18px;font-size:14.5px;line-height:1.55;color:var(--sh-text2,#A3A9B1)}" +
+    ".row{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}" +
+    "button{font:inherit;font-size:14px;font-weight:600;height:40px;padding:0 16px;border-radius:10px;cursor:pointer;border:1px solid var(--sh-line2,#33383E);background:transparent;color:inherit}" +
+    "button.gold{background:var(--sh-gold,#E5B65A);border-color:transparent;color:var(--sh-gold-ink,#17130A)}" +
+    "button:focus-visible{outline:2px solid var(--sh-gold,#E5B65A);outline-offset:2px}";
+  var overlayRoot = null;
+  function overlay() {
+    if (overlayRoot) return overlayRoot;
+    var host = document.createElement("il-overlay");
+    host.style.cssText = "position:static!important;display:block!important";
+    /* Same colours as the bar: copy its custom properties onto this host. */
+    var top = document.getElementById("il-top");
+    if (top) ["--sh-surface", "--sh-line2", "--sh-text", "--sh-text2", "--sh-gold", "--sh-gold-ink", "--sh-shadow"].forEach(function (k) { var v = getComputedStyle(top).getPropertyValue(k); if (v) host.style.setProperty(k, v); });
+    document.body.appendChild(host);
+    overlayRoot = host.attachShadow({ mode: "open" });
+    overlayRoot.innerHTML = "<style>" + OVERLAY_CSS + "</style>";
+    return overlayRoot;
+  }
+  var toastTimer = null;
+  function toast(msg, ms) {
+    var root = overlay(), el = root.querySelector(".toast");
+    if (!el) { el = document.createElement("div"); el.className = "toast"; el.setAttribute("role", "status"); root.appendChild(el); }
+    el.textContent = msg; el.hidden = false;
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { el.hidden = true; }, ms || 5200);
+  }
+  function sheet(title, text, actions) {
+    var root = overlay(), back = document.createElement("div");
+    back.className = "scrim";
+    back.innerHTML = '<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-t"><h2 id="sh-t"></h2><p></p><div class="row"></div></div>';
+    back.querySelector("h2").textContent = title; back.querySelector("p").textContent = text;
+    var row = back.querySelector(".row");
+    function close() { back.remove(); document.removeEventListener("keydown", onKey); }
+    function onKey(e) { if (e.key === "Escape") close(); }
+    actions.forEach(function (a) {
+      var b = document.createElement("button"); b.type = "button"; b.textContent = a.label; if (a.gold) b.className = "gold";
+      b.addEventListener("click", function () { if (a.run) a.run(b, close); else close(); });
+      row.appendChild(b);
+    });
+    back.addEventListener("click", function (e) { if (e.target === back) close(); });
+    document.addEventListener("keydown", onKey);
+    root.appendChild(back);
+    var first = row.querySelector("button.gold") || row.querySelector("button"); if (first) first.focus();
+    return close;
+  }
+
+  /* ── Starting a Pro trial, from any page ───────────────────────────────
+     Any element with data-checkout="monthly|annual" starts Stripe checkout:
+       visitor     → sign up first, then come straight back and continue
+       free        → secure checkout opens
+       email not yet verified → we say so, offer to resend, and continue on
+                     their own once the link in the email is opened
+       already Pro → nothing to buy
+     The old app's upgrade dialog is no longer on the way to paying. */
+  var PENDING = "il-pending-checkout";
+  function startCheckout(plan, btn) {
+    plan = plan === "annual" ? "annual" : "monthly";
+    return me().then(function (u) {
+      if (!u) {
+        track("checkout_requires_signup", { plan: plan, path: location.pathname });
+        location.href = "/signup?source=checkout&next=" + encodeURIComponent("/pricing?checkout=" + plan);
+        return;
+      }
+      if (tier(u) === "pro") { toast(u.plan === "trial" ? "You are already on a Pro trial." : "You are already on Pro."); return; }
+      var label = btn ? btn.textContent : "";
+      if (btn) { btn.setAttribute("aria-busy", "true"); btn.textContent = "Opening secure checkout\u2026"; }
+      function restore() { if (btn) { btn.removeAttribute("aria-busy"); btn.textContent = label; } }
+      return post("/api/stripe/create-checkout", { annual: plan === "annual" }).then(function (j) {
+        if (j && j.url && /^https:\/\//.test(j.url)) { try { localStorage.removeItem(PENDING); } catch (_) {} location.href = j.url; return; }
+        restore();
+        if (j && j.requiresEmailVerification) {
+          try { localStorage.setItem(PENDING, plan); } catch (_) {}
+          track("checkout_blocked_unverified", { plan: plan });
+          sheet("Verify your email to start the trial",
+            "We sent a link to " + (u.email || "your inbox") + ". Open it in this browser and checkout picks up where you left off. Nothing is charged during the trial.",
+            [{ label: "Resend the email", run: function (b) { b.disabled = true; post("/api/auth/resend-verification").then(function (r) { b.textContent = r && !r.error ? "Sent \u2713" : "Could not send"; }); } },
+             { label: "OK", gold: true }]);
+          return;
+        }
+        if (j && j.hasSubscription) { post("/api/stripe/portal").then(function (r) { if (r && r.url) location.href = r.url; else toast("You already have a subscription. Manage it from your account menu."); }); return; }
+        toast((j && j.error) || "Checkout could not open. Please try again in a moment.");
+      });
+    });
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest("[data-checkout]");
+    if (!b) return;
+    e.preventDefault();
+    startCheckout(b.getAttribute("data-checkout"), b);
+  });
+  /* Arriving back: from sign-up (?checkout=monthly), from the verification
+     email (?verif=ok), or from Stripe (?upgraded=1 / ?checkout=cancelled). */
+  function arrivals() {
+    var q = new URLSearchParams(location.search), clean = false, pending = null;
+    try { pending = localStorage.getItem(PENDING); } catch (_) {}
+    var c = q.get("checkout"), v = q.get("verif");
+    if (q.get("upgraded") === "1") { clean = true; toast("Welcome to Pro. Your trial has started and every feature is unlocked."); track("checkout_redirect", { source: "stripe_success" }); try { localStorage.removeItem(PENDING); localStorage.setItem(HINT, "pro"); } catch (_) {} }
+    if (c === "cancelled") { clean = true; toast("Checkout cancelled. Nothing was charged and your plan has not changed."); track("checkout_cancelled", { source: "stripe_checkout" }); }
+    if (c === "monthly" || c === "annual") { clean = true; startCheckout(c); }
+    if (v) {
+      clean = true;
+      if (v === "ok" || v === "already") {
+        toast(v === "ok" ? "Email verified." : "Your email was already verified.");
+        if (pending) startCheckout(pending);
+      } else if (v === "expired") toast("That verification link has expired. Ask for a new one from your account menu or the trial button.");
+      else toast("That verification link did not work. Ask for a new one from the trial button.");
+    }
+    if (clean) {
+      ["upgraded", "checkout", "verif"].forEach(function (k) { q.delete(k); });
+      var rest = q.toString();
+      history.replaceState(null, "", location.pathname + (rest ? "?" + rest : "") + location.hash);
+    }
   }
 
   function wireAccount(top) {
@@ -398,11 +522,12 @@ input::-webkit-search-cancel-button{display:none}
     return me().then(function (u) {
       setTier(tier(u));
       if (fill) fill(u);
+      try { arrivals(); } catch (_) {}
       return u;
     });
   }
 
-  window.ILShell = { mount: mount, me: me, tier: tier, activeFor: activeFor, setTheme: setTheme, theme: theme, markup: markup };
+  window.ILShell = { mount: mount, me: me, tier: tier, activeFor: activeFor, setTheme: setTheme, theme: theme, markup: markup, startCheckout: startCheckout, toast: toast };
 
   /* Older pages carry data-auto on the script tag and mount themselves;
      the app pages mount through IL.shell() with their own active tab. */
