@@ -189,7 +189,7 @@
     var bearStart = start > 0 ? start * 0.6 : start - 0.05, bullStart = start > 0 ? Math.min(0.6, start * 1.3) : start + 0.05;
     return {
       bear: { growth: round(bearStart, 0.005), growthEnd: 0.02, margin: round(unprofitable ? 0.04 : m * 0.85, 0.005), exitPE: Math.max(6, round(pe * 0.8, 1)) },
-      base: { growth: start, growthEnd: 0.04, margin: round(m, 0.005), exitPE: pe },
+      base: { growth: start, growthEnd: 0.04, margin: round(m, 0.001), exitPE: pe },
       bull: { growth: round(bullStart, 0.005), growthEnd: 0.06, margin: round(unprofitable ? 0.12 : Math.min(0.65, m * 1.12), 0.005), exitPE: round(pe * 1.2, 1) },
       weights: { bear: 0.25, base: 0.5, bull: 0.25 },
       required: 0.1, years: 5, shareChange: shareChange, unprofitable: unprofitable,

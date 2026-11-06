@@ -1525,17 +1525,21 @@
     }
     function hero() {
       var m = M.base.margin, pe = M.base.exitPE, g = implied(), past = delivered();
+      /* The base case's own average growth: the fair thing to hold the
+         implied rate against, since the base fades rather than staying flat. */
+      var avg = outs.base ? Math.pow(outs.base.revenue[outs.base.years - 1] / ctx.revenue, 1 / outs.base.years) - 1 : null;
       var verdict = "";
-      if (g !== null && past.v !== null) {
-        var gap = g - past.v;
-        verdict = gap > 0.05 ? "The price asks for faster growth than the company is delivering." : gap < -0.05 ? "The price asks for slower growth than the company is delivering." : "The price asks for roughly the growth the company is delivering.";
+      if (g !== null && avg !== null) {
+        var gap = g - avg;
+        verdict = gap > 0.02 ? "The price needs more growth than your base case gives it." : gap < -0.02 ? "Your base case gives more growth than the price needs." : "The price needs about the growth your base case gives it.";
       }
       IL.$("#val-hero").innerHTML =
         '<div class="val-h"><div><span class="card-sub">What the price implies ' + IL.tip("Solved backwards from today’s price: the steady yearly revenue growth that, with the base-case margin and final P/E, earns exactly your required return.") + "</span>" +
           '<div class="val-big num">' + (g === null ? "—" : F.spct(g * 100)) + '<span class="val-unit">revenue growth a year</span></div>' +
           '<p class="muted val-sent">At ' + F.price(ctx.price) + ", " + h(S.t) + " earns a " + F.pct(M.required * 100, 0) + " yearly return if revenue grows about " + (g === null ? "—" : F.pct(g * 100)) + " a year for " + M.years + " years, it keeps a " + F.pct(m * 100) + " net margin, and investors still pay " + F.mult(pe) + " earnings at the end.</p></div>" +
           '<div class="val-cmp">' +
-            '<div><span class="card-sub">Priced in</span><span class="num val-mid">' + (g === null ? "—" : F.spct(g * 100)) + "</span></div>" +
+            '<div><span class="card-sub">Priced in, ' + M.years + ' years</span><span class="num val-mid">' + (g === null ? "—" : F.spct(g * 100)) + "</span></div>" +
+            '<div><span class="card-sub">Your base case, average</span><span class="num val-mid">' + (avg === null ? "—" : F.spct(avg * 100)) + "</span></div>" +
             '<div><span class="card-sub">Delivering, ' + past.label + '</span><span class="num val-mid ' + F.cls(past.v) + '">' + (past.v === null ? "—" : F.spct(past.v * 100)) + "</span></div>" +
             (verdict ? '<span class="tag" style="white-space:normal">' + h(verdict) + "</span>" : "") +
           "</div></div>" +
