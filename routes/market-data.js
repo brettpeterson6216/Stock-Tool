@@ -340,7 +340,15 @@ function screenerRow(ticker, base) {
 const universeMembers = require("../lib/universe-members");
 const POPULAR = () => [...new Set([...SCREENER_TICKERS, ...require("../lib/acquisition-tickers").ACQUISITION_TICKERS])].filter(t => !SCREENER_ETFS.has(t));
 universeMembers.setFallback(POPULAR);
-function gradedUniverse() { return universeMembers.list().filter(t => !SCREENER_ETFS.has(t)); }
+/* On the legacy Yahoo chart feed (no Marketstack key set), every stock costs
+   one unbatched request per refresh, so the list is held to the popular
+   names plus the 300 largest others (about 600) until the licensed feed is on. */
+function gradedUniverse() {
+  const list = universeMembers.list().filter(t => !SCREENER_ETFS.has(t));
+  if (prices.provider() === "marketstack") return list;
+  const popular = new Set(POPULAR());
+  return [...new Set([...list.filter(t => !popular.has(t)).slice(0, 300), ...popular])];
+}
 async function warmUniverse() {
   await universeMembers.ensureLoaded().catch(() => null);
   const list = gradedUniverse();

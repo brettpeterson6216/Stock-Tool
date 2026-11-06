@@ -92,7 +92,8 @@ test("the universe is the largest listed companies by public float, one common t
   const frames = [{ data: [{ cik: 1, val: 2e12, end: "2025-06-30" }, { cik: 2, val: 3e11, end: "2025-06-30" }, { cik: 3, val: 9e12, end: "2025-06-30" }, { cik: 4, val: 1e9, end: "2025-06-30" }] }];
   const list = members.buildList(listed, frames, { size: 2, prefer: new Set(["GOOGL"]) });
   assert.deepEqual(list.map(c => c.ticker), ["GOOGL", "BB"]);
-  assert.deepEqual(members.recentQuarters(new Date("2026-11-06T00:00:00Z")), ["CY2026Q3I", "CY2026Q2I", "CY2026Q1I", "CY2025Q4I"]);
+  assert.deepEqual(members.recentQuarters(new Date("2026-11-06T00:00:00Z")), ["CY2026Q3I", "CY2026Q2I", "CY2026Q1I", "CY2025Q4I", "CY2025Q3I", "CY2025Q2I", "CY2025Q1I", "CY2024Q4I"],
+    "a December company's latest float (June 2025, filed Feb 2026) is in CY2025Q2I");
 });
 
 test("a stock outside the universe is graded against it but never joins it", () => {
