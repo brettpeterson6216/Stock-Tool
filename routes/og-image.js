@@ -18,8 +18,6 @@ const cache = new Map();
 function dataFor(ticker, base) {
   const g = universeGrades.get(ticker);
   if (!g || !Number.isFinite(g.score)) return null;
-  const sector = universeGrades.current().rows.filter(r => r.sectorName === g.sectorName).sort((a, b) => b.score - a.score);
-  const pos = sector.findIndex(r => r.ticker === ticker) + 1;
   const peer = peers.get(ticker) || {};
   const m = peer.m || {};
   let snap = null;
@@ -29,13 +27,14 @@ function dataFor(ticker, base) {
     ticker,
     name: nameFromIndex || g.name || ticker,
     sectorName: g.sectorName,
+    groupName: g.groupName || g.sectorName,
     price: snap && Number.isFinite(snap.price) ? snap.price : (Number.isFinite(g.price) ? g.price : null),
     changePct: snap && Number.isFinite(snap.change1D) ? snap.change1D : null,
     yearPct: Number.isFinite(m["52WeekPriceReturnDaily"]) ? m["52WeekPriceReturnDaily"] : (snap && Number.isFinite(snap.change1Y) ? snap.change1Y : null),
     marketCap: Number.isFinite(g.marketCap) ? g.marketCap : null,
     score: g.score,
     label: g.label,
-    rank: pos > 0 ? { position: pos, of: sector.length } : null,
+    rank: g.groupRank ? { position: g.groupRank, of: g.groupCount } : null,
     grades: g.grades,
     url: `${base.replace(/^https?:\/\//, "")}/research/${ticker}`,
   };

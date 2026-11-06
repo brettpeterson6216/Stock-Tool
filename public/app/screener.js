@@ -70,7 +70,7 @@
   function shell() {
     var main = document.getElementById("main");
     main.innerHTML =
-      '<div class="sc-head hero-band card prime" id="sc-hero"><div class="stack" style="gap:10px">' + IL.eyebrow("Screener") + '<h1 class="display">Find your next <em>idea.</em></h1><p class="muted">Every company graded against its own sector. Pick a starting idea, then narrow it down.</p></div><div class="row" id="sc-actions"></div></div>' +
+      '<div class="sc-head hero-band card prime" id="sc-hero"><div class="stack" style="gap:10px">' + IL.eyebrow("Screener") + '<h1 class="display">Find your next <em>idea.</em></h1><p class="muted">Every company graded against its own industry. Pick a starting idea, then narrow it down.</p></div><div class="row" id="sc-actions"></div></div>' +
       '<div class="sc-presets" id="sc-presets">' + PRESETS.map(function (p) {
         return '<button type="button" class="sc-preset" data-preset="' + p.key + '" aria-pressed="false"><b>' + h(p.label) + "</b><span>" + h(p.why) + "</span></button>";
       }).join("") + "</div>" +

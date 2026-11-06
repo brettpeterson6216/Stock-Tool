@@ -441,3 +441,23 @@ html.il-logos .mono{display:inline-grid}
 /* A grade alone in a cell lines up with its column heading. */
 .tbl td > .gchip:only-child{min-width:0}
 .dash-grades .gchip,.wl-gr .gchip{font:600 13px/1.2 var(--num);min-width:26px}
+
+/* ── /methodology ──────────────────────────────────────────────────────── */
+.meth .card-h{align-items:baseline}
+.meth-body{display:flex;flex-direction:column;gap:12px;font-size:14px;line-height:1.6;color:var(--text2)}
+.meth-body>p{max-width:72ch}
+.meth-lede{max-width:72ch;font-size:15px;line-height:1.6}
+.meth-facts{gap:8px 24px;font-size:13.5px;margin-top:4px}
+.meth-verdict{font-size:16px;font-weight:600;color:var(--text)}
+.meth-h3{font-size:14px;font-weight:650;color:var(--text);margin-top:8px}
+.meth-stats{display:flex;flex-wrap:wrap;gap:8px 28px;font-size:13.5px}
+.meth-list{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;max-width:72ch}
+.meth-tbl td{vertical-align:top}
+.meth-tbl .meth-fh td{background:var(--raised);font-family:var(--sans);text-align:left;white-space:normal}
+.meth-why{font-size:12.5px;line-height:1.45;margin-top:3px;max-width:56ch}
+@media (max-width:640px){.meth-tbl td:nth-child(3),.meth-tbl th:nth-child(3){display:none}}
+@media (max-width:640px){
+  .meth-band th:nth-child(2),.meth-band td:nth-child(2),.meth-band th:nth-child(4),.meth-band td:nth-child(4),
+  .meth-gauge th:nth-child(2),.meth-gauge td:nth-child(2){display:none}
+  .meth-band td,.meth-band th,.meth-gauge td,.meth-gauge th{white-space:normal}
+}

@@ -16,6 +16,7 @@ function seed() {
     sector: "Tech", sectorName: "Technology", price: 100 + i, marketCap: (40 - i) * 1e11,
     score: Math.round((9.9 - i * 0.2) * 10) / 10, label: i === 0 ? "Top-rated" : "Graded",
     grades: { value: "B-", growth: "A+", profitability: "A+", health: "B+", momentum: "B-" },
+    basis: "industry", groupName: "Semiconductors", groupRank: i + 1, groupCount: 40,
   }));
   universeGrades.current = () => ({ rows });
   universeGrades.get = t => rows.find(r => r.ticker === t) || null;
@@ -30,7 +31,8 @@ test("a graded stock gets its own card; one we do not grade gets none", () => {
   assert.equal(d.ticker, "NVDA");
   assert.ok(Number.isFinite(d.score));
   assert.equal(d.url, "impliedlens.com/research/NVDA");
-  assert.ok(d.rank && d.rank.of === 40);
+  assert.ok(d.rank && d.rank.of === 40 && d.rank.position === 1);
+  assert.equal(d.groupName, "Semiconductors", "the card names the peer group the rank is within");
   assert.equal(d.yearPct, -5);
   assert.equal(dataFor("ZZZZ", "https://impliedlens.com"), null);
 });

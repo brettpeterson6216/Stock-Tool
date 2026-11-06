@@ -120,3 +120,33 @@ test("home tiles ask for previews; the chart someone opened does not", () => {
     assert.match(fs.readFileSync(path.join(__dirname, "..", f), "utf8"), /range=1d&preview=1/, f);
   }
 });
+
+test("the graded universe tops up 100 stocks per call, not one call each", () => withKey(async () => {
+  T._reset();
+  T._setClock(() => at("2026-11-05T23:00:00Z"));   // Thursday evening, Thursday's bar published
+  const tickers = Array.from({ length: 250 }, (_, i) => `T${String(i).padStart(3, "0")}`);
+  for (const t of tickers) {
+    const e = await T.loadStored(t);
+    e.rows = [{ day: "2026-11-03", o: 10, h: 10, l: 10, c: 10, v: 1 }];
+    e.checkedAt = 0;
+  }
+  const calls = [];
+  global.fetch = async url => {
+    const u = new URL(String(url));
+    const syms = u.searchParams.get("symbols").split(",");
+    calls.push(syms.length);
+    const data = syms.flatMap(s => [
+      { symbol: s, date: "2026-11-04T00:00:00+0000", open: 11, high: 11, low: 11, close: 11, volume: 1 },
+      { symbol: s, date: "2026-11-05T00:00:00+0000", open: 12, high: 12, low: 12, close: 12, volume: 1 },
+    ]);
+    return { ok: true, status: 200, json: async () => ({ data, pagination: { total: data.length } }) };
+  };
+  const res = await prices.topUpMany(tickers);
+  assert.deepEqual(calls, [100, 100, 50], "three calls for 250 stocks");
+  assert.equal(res.updated, 250);
+  assert.equal(T.daily.get("T000").rows.at(-1).day, "2026-11-05");
+  assert.equal(T.daily.get("T249").rows.at(-1).c, 12);
+  calls.length = 0;
+  await prices.topUpMany(tickers);
+  assert.equal(calls.length, 0, "already current: nothing spent");
+}));

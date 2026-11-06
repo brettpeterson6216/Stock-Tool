@@ -66,7 +66,7 @@
       { k: "Market cap", get: function (d) { return IL.n(d.meta.marketCap); }, f: F.money },
       { k: "Past year", get: function (d) { return d.p && d.p.yearReturn; }, f: F.spct, color: true, better: "high" },
       { k: "LensScore", get: function (d) { return d.g ? Number(d.g.score) : null; }, f: function (v) { return v == null ? "—" : '<span class="pill score ' + IL.scoreTone(v) + '">' + F.num(v, 1) + "</span>"; }, better: "high", html: true, tip: "0–10 grade against sector peers on value, growth, profitability, financial health and momentum." },
-      { k: "Sector rank", withRow: true, get: function (d) { return d.g && d.g.rank ? d.g.rank.position / d.g.rank.of : null; }, f: function (v, d) { return d.g && d.g.rank ? "#" + d.g.rank.position + " of " + d.g.rank.of + " " + h(d.g.rank.sectorName || "") : "—"; }, html: true },
+      { k: "Peer rank", withRow: true, get: function (d) { return d.g && d.g.rank ? d.g.rank.position / d.g.rank.of : null; }, f: function (v, d) { return d.g && d.g.rank ? "#" + d.g.rank.position + " of " + d.g.rank.of + " " + h(d.g.rank.sectorName || "") : "—"; }, html: true },
     ] },
     { title: "Grades against sector peers", rows: ["value", "growth", "profitability", "health", "momentum"].map(function (k) {
       return { k: { value: "Value", growth: "Growth", profitability: "Profitability", health: "Financial health", momentum: "Momentum" }[k], get: grade(k), rank: true, better: "high",

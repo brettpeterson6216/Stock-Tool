@@ -978,7 +978,7 @@
       '<div class="card-h"><h2 class="card-t">LensScore ' + IL.tip("A 0–10 grade of the business against its sector peers on five things, from SEC filings and price history. It describes the company today; it is not a price prediction.") + "</h2>" +
         (g.rank ? '<span class="card-sub">#' + g.rank.position + " of " + g.rank.of + " in " + h(g.rank.sectorName || g.sectorName || "its sector") + "</span>" : "") + "</div>" +
       '<div class="rc-top">' + scoreRing(g.score, 104) +
-        '<div class="rc-lab"><span class="rc-label">' + h(g.label || "") + '</span><span class="muted">Graded against ' + h(g.sectorName || "sector") + " peers on five things.</span></div></div>" +
+        '<div class="rc-lab"><span class="rc-label">' + h(g.label || "") + '</span><span class="muted">Graded against ' + h(g.groupName || g.sectorName || "sector") + " peers on five things.</span></div></div>" +
       '<div class="grades">' + f.map(function (x) {
         return '<div class="grade"><span>' + h(FACTOR_LABEL[x.key] || x.label) + '</span><div class="bar"><i style="width:' + IL.gradeFill(x.grade) + "%;background:" + IL.gradeTone(x.grade) + '"></i></div><span class="g">' + IL.gchip(x.grade) + "</span></div>";
       }).join("") + "</div>" +
@@ -1003,7 +1003,7 @@
       IL.$("#rep-sub").textContent = "";
       return;
     }
-    IL.$("#rep-sub").textContent = "Percentile = share of " + (g.sectorName || "sector") + " peers it beats";
+    IL.$("#rep-sub").textContent = "Percentile = share of " + (g.groupName || g.sectorName || "sector") + " peers it beats";
     var rows = (g.factors || []).map(function (x) {
       var pct = N(x.percentile);
       return '<div class="rep-f"><div class="rep-f-h"><span class="rep-f-n">' + h(FACTOR_LABEL[x.key] || x.label) + '</span>' + IL.gchip(x.grade) + "</div>" +
@@ -1018,7 +1018,7 @@
       '<section class="card"><h3 class="card-t">The five grades</h3>' + rows + "</section>" +
       '<section class="card"><h3 class="card-t">Strengths</h3>' + list(g.strengths, "good") +
         '<h3 class="card-t" style="margin-top:8px">Things to watch</h3>' + list(g.watch, "bad") +
-        '<p class="note">The five grades compare the company with its own sector; the 0–10 LensScore combines them and ranks it across every company we grade. Entry timing on the chart is separate and not part of the score. ' + (S.lens.provenance && S.lens.provenance.asOf && S.lens.provenance.asOf.fundamentals ? "Filings as of " + F.date(S.lens.provenance.asOf.fundamentals) + ". " : "") + '<a href="/learn/lens-score">How the LensScore works</a></p></section>';
+        '<p class="note">The five grades compare the company with its own industry (or sector, when we grade too few of its industry); the 0–10 LensScore combines them and ranks it across the graded universe. Entry timing on the chart is separate and not part of the score. ' + (S.lens.provenance && S.lens.provenance.asOf && S.lens.provenance.asOf.fundamentals ? "Filings as of " + F.date(S.lens.provenance.asOf.fundamentals) + ". " : "") + '<a href="/learn/lens-score">How to read it</a> \u00b7 <a href="/methodology">Method and test results</a></p></section>';
   }
 
   function paintPeers() {

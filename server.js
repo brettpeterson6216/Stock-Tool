@@ -242,6 +242,7 @@ app.use([
   "/api/darkpool",
   "/api/lens-score",
   "/api/lens-history",
+  "/api/lens-method",
   "/api/lens-leaders",
   "/api/lens-grades",
   "/api/search",
@@ -355,6 +356,7 @@ app.get("/watchlist", (_req, res) => sendPage(res, path.join(__dirname, "public"
 /* Saved work has its own place: valuations, comparisons and notes you kept.
    The watchlist is the companies you follow. Same script, two pages. */
 app.get("/saved", (_req, res) => sendPage(res, path.join(__dirname, "public", "app", "saved.html")));
+app.get(["/methodology", "/method"], (_req, res) => sendPage(res, path.join(__dirname, "public", "app", "methodology.html")));
 
 /* Old single-page-app links to a stock (?view=tool&section=analyze&symbol=X
    and friends) now open the rebuilt stock page on the matching tab. Sections

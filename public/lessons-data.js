@@ -791,13 +791,13 @@
       "minutes": 7,
       "summary": "What the 0–10 LensScore measures, how its five grades are built, and why a single number never replaces reading the grades.",
       "opening": "A single number that tells you whether to buy a stock would be worth a great deal of money, and nobody has one. LensScore is not that. It is a report card: five grades that show where a company is strong and where it is weak compared with the companies it actually competes with, plus one number that ranks the whole card against every other company we cover.",
-      "body": "Each company is graded A+ to F on five factors, and every grade is a percentile against its own sector, so a bank is compared with banks and a software company with software companies. The 0–10 LensScore ranks the weighted result across the whole universe. A 7.5 means the company's report card is better than about 75% of the companies we grade.",
+      "body": "Each company is graded A+ to F on five factors, and every grade is a percentile against its own industry, so a bank is compared with banks and a chipmaker with chipmakers (when fewer than 15 industry peers are graded, its sector is used instead). The 0–10 LensScore ranks the weighted result across about 1,000 of the largest US-listed companies, a fixed list rebuilt weekly from SEC data. A 7.5 means the company's report card is better than about 75% of the companies we grade.",
       "points": [
-        "Value (20%): what you pay for each dollar of earnings, sales, cash flow and book value, compared with sector peers. Cheaper than peers grades higher.",
+        "Value (20%): what you pay for each dollar of earnings, sales and free cash flow, and the whole company's value against its operating profit (book value for banks and property companies), compared with industry peers. Cash flow and enterprise value count most. Cheaper than peers grades higher.",
         "Growth (20%): how fast revenue and earnings per share have grown over recent years, using SEC-reported figures where we have them.",
-        "Profitability (25%): margins and returns on equity and assets. This weighs most because durable profits are what compound over time.",
-        "Financial health (15%): debt against equity, the ability to pay short-term bills, and interest coverage. Weak health is what turns a bad year into a crisis.",
-        "Momentum (20%): price performance over 3, 6 and 12 months against peers. It tells you what the market is doing, not why.",
+        "Profitability (25%): margins, return on equity and return on invested capital (after-tax operating profit over the debt and equity the business uses). This weighs most because durable profits are what compound over time.",
+        "Financial health (15%): debt against equity, the ability to pay short-term bills, and interest coverage; for banks and insurers, equity against assets. Weak health is what turns a bad year into a crisis.",
+        "Momentum (20%): price performance over 3, 6 and 12 months against the S&P 500, and distance from the 52-week high, compared with peers. It tells you what the market is doing, not why.",
         "Caps: one failing grade (an F in value or profitability, D- or lower in health, D or lower in growth or momentum) holds the score at 6.8 or below, and two hold it at 5.0, so a cheap price cannot hide a broken balance sheet."
       ],
       "formula": "LensScore = rank of (25% Profitability + 20% Value + 20% Growth + 20% Momentum + 15% Health) across all graded companies, held down by caps when a grade is failing",
@@ -819,14 +819,14 @@
           "why": "The grades separate the quality of the business from the price you pay for it. Here quality is strong and the price is the concern."
         },
         {
-          "q": "Why is each grade compared with the company's own sector?",
+          "q": "Why is each grade compared with the company's own industry?",
           "options": [
             "To make every company look good",
             "Because normal margins and valuations differ a lot between industries",
             "Because the sector decides the score alone"
           ],
           "answer": 1,
-          "why": "A 10% margin is excellent for a grocer and weak for a software company. Sector percentiles compare like with like."
+          "why": "A 10% margin is excellent for a grocer and weak for a software company. Industry percentiles compare like with like."
         },
         {
           "q": "A stock is cheap (A in Value) but has an F in Financial health. What happens to its LensScore?",

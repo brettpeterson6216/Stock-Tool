@@ -57,6 +57,7 @@ function storePayload(ticker, payload) {
    filings. Analyst ratings and estimates need a licensed feed the site does
    not have, so the report card does not show them. */
 const secUniverse = require("../lib/sec-universe");
+const industryGroups = require("../lib/industry-groups");
 const secFilings = require("../lib/sec-filings");
 const prices = require("../lib/prices");
 function streetView(co) {
@@ -77,6 +78,7 @@ async function gradeTicker(ticker, research) {
     ticker,
     name: co.name || research.company || ticker,
     sector: co.sector,
+    group: industryGroups.groupFor(co.sic, co.sector),
     metric: co.metric,
     price: co.price,
     marketCap: Number(co.metric.marketCapitalization) > 0 ? co.metric.marketCapitalization * 1e6 : null,
@@ -84,7 +86,7 @@ async function gradeTicker(ticker, research) {
   graded.industry = co.industry || null;
   graded.street = streetView(co);
   graded.secOverrides = [];
-  graded.source = `SEC filings for every company, ranked within sector; prices from ${prices.sourceLabel()}.`;
+  graded.source = `SEC filings for every company, ranked within its industry or sector; prices from ${prices.sourceLabel()}.`;
   graded.asOf = new Date().toISOString();
   return graded;
 }
@@ -257,6 +259,48 @@ router.get("/lens-history/:ticker", async (req, res) => {
     res.status(503).json({ error: "Score history is unavailable right now." });
   }
 });
+/* Everything about how the LensScore is made, for /methodology: every
+   metric and weight, the caps, the peer rules, the universe, the data
+   sources, the live test results and the change log. Read from the code that
+   grades, so the page cannot drift from what the grades actually do. */
+const LensBacktest = require("../lib/lens-backtest");
+const universeMembers = require("../lib/universe-members");
+const METHOD_LOG = [
+  { date: "2026-11-06", version: "3.0.0", change: "Fixed universe of about 1,000 of the largest US-listed companies by public float, rebuilt weekly from SEC data; stocks people open are graded against it but no longer join it. Industry peer groups (when at least 15 are graded) before sector. Forward P/E removed (SEC filings carry no estimates). Free cash flow and EV/EBITDA weigh 1.5x in Value, PEG 0.75x. ROIC is now after-tax operating profit over debt plus equity minus cash. Beta left Financial health; banks and insurers are judged on equity to assets. Weekly point-in-time backtest published." },
+  { date: "2026-10-20", version: "2.0.0", change: "Grades built from SEC filings and licensed prices for every company, replacing a personal-use data feed." },
+];
+router.get("/lens-method", async (_req, res) => {
+  try {
+    const bt = await LensBacktest.load().catch(() => null);
+    const lb = await LensHistory.leaders().catch(() => null);
+    res.setHeader("Cache-Control", "public, max-age=600");
+    res.json({
+      version: LensFactors.VERSION,
+      weights: LensFactors.WEIGHTS,
+      factors: LensFactors.FACTORS.map(f => ({ key: f.key, label: f.label, question: f.question,
+        metrics: f.metrics.map(m => ({ key: m.k, label: m.label, better: m.dir > 0 ? "higher" : "lower", weight: m.w || 1, only: m.only || null, skip: m.skip || null, why: m.why })) })),
+      caps: [
+        "One failing grade (Value or Profitability under the 13th percentile, Health under the 20th, Growth or Momentum under the 27th) holds the score at 6.8 or below.",
+        "Two failing grades hold it at 5.0 or below.",
+        "Weak profits together with a weak balance sheet hold it at 4.0 or below.",
+        "Negative shareholders' equity holds it at 4.5 or below.",
+      ],
+      peers: { minIndustry: industryGroups.MIN_INDUSTRY_PEERS, minSector: 8, groups: industryGroups.GROUPS.map(([key, label, sector]) => ({ key, label, sector: LensFactors.SECTOR_NAMES[sector] || sector })) },
+      universe: { ...universeMembers.status(), graded: universeGrades.current().rows.length, target: universeMembers.SIZE },
+      sources: [
+        { name: "SEC EDGAR", use: "Every company figure: revenue, profit, cash flow, balance sheet, share count, industry code. Refreshed when a company files a 10-Q or 10-K, and at least every 30 days." },
+        { name: prices.sourceLabel(), use: "Daily closes for prices, valuation ratios, momentum and the S&P 500 benchmark (SPY). Topped up every trading day." },
+      ],
+      backtest: bt,
+      backtestStatus: LensBacktest.status(),
+      liveRecord: lb && lb.trackRecord ? { since: lb.historyStarts, record: lb.trackRecord } : null,
+      log: METHOD_LOG,
+    });
+  } catch (e) {
+    res.status(503).json({ error: "Method details are unavailable right now." });
+  }
+});
+
 /* Grades for a list of tickers (watchlists, the dashboard). Read from the
    graded peer universe, so it is cheap and does not count as an analysis.
    Companies outside the universe come back as null. */

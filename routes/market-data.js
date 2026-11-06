@@ -333,10 +333,27 @@ function screenerRow(ticker, base) {
    gate's cache, so a stock page for any of them answers from cache instead of
    spending the shared per-minute quota (live audit 2026-10-06: a burst of
    page loads ran it out and metrics/analyst answered 503 for niche names). */
+/* The graded universe (lib/universe-members.js): ~1,000 companies by public
+   float from live SEC data, plus the popular list above. Built weekly; every
+   6 hours its prices are topped up in batches of 100 (a handful of calls)
+   and its rows refreshed, so every LensScore ranks against the same set. */
+const universeMembers = require("../lib/universe-members");
+const POPULAR = () => [...new Set([...SCREENER_TICKERS, ...require("../lib/acquisition-tickers").ACQUISITION_TICKERS])].filter(t => !SCREENER_ETFS.has(t));
+universeMembers.setFallback(POPULAR);
+function gradedUniverse() { return universeMembers.list().filter(t => !SCREENER_ETFS.has(t)); }
+async function warmUniverse() {
+  await universeMembers.ensureLoaded().catch(() => null);
+  const list = gradedUniverse();
+  peers.setMembers(list);
+  await prices.topUpMany(list, "background").catch(e => console.warn("[universe] batch top-up failed:", String(e.message || e).slice(0, 120)));
+  startEnrichment(list);
+}
 if (process.env.NODE_ENV === "production") {
-  const warm = () => startEnrichment([...new Set(SCREENER_TICKERS)].filter(t => !SCREENER_ETFS.has(t)));
-  setTimeout(warm, 20 * 1000).unref();
-  setInterval(warm, 6 * 3600 * 1000).unref();
+  setTimeout(() => { warmUniverse(); }, 20 * 1000).unref();
+  setInterval(() => { warmUniverse(); }, 6 * 3600 * 1000).unref();
+  /* The public test of the method (lib/lens-backtest.js): weekly, starting a
+     few hours after boot so the universe has filled first. */
+  require("../lib/lens-backtest").start(() => gradedUniverse());
 }
 
 router.get("/screener", requirePro, async (req, res) => {
@@ -344,7 +361,7 @@ router.get("/screener", requirePro, async (req, res) => {
     res.setHeader("X-Screener-Enriching", _enrichRunning ? "1" : "0");
     return res.json(_screenerCache.data);
   }
-  const universe = [...new Set(SCREENER_TICKERS)].filter(t => !SCREENER_ETFS.has(t));
+  const universe = gradedUniverse();
   startEnrichment(universe);
   const rows = universe.map(t => screenerRow(t, null)).filter(r => r.price > 0);
   if (!rows.length) return res.status(503).json({ error: "Screener data is warming up. Try again in a minute." });
@@ -507,7 +524,7 @@ router.get("/market/snapshot", (req, res) => {
 router.get("/market/movers", (req, res) => {
   const requestedType = String(req.query.type || "gainers");
   const type = ["gainers", "losers", "active"].includes(requestedType) ? requestedType : "gainers";
-  startEnrichment([...new Set(SCREENER_TICKERS)].filter(t => !SCREENER_ETFS.has(t)));
+  startEnrichment(gradedUniverse());
   const rows = [..._enrich.entries()]
     .map(([symbol, e]) => ({ symbol, name: e.name || symbol, price: e.price, chgPct: e.change1D, cap: e.marketCap || 0, asOf: e.asOf ? new Date(e.asOf * 1000).toISOString().slice(0, 10) : null }))
     .filter(r => Number.isFinite(r.price) && r.price > 0 && Number.isFinite(r.chgPct));

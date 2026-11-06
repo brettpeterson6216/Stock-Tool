@@ -206,7 +206,7 @@
       foot.className = "il-foot";
       foot.innerHTML =
         "<span>\u00a9 " + new Date().getFullYear() + " ImpliedLens. Research, not investment advice.</span>" +
-        '<a href="/data-sources">Data sources</a><a href="/pricing" data-show="upgrade">Pricing</a><a href="/learn">Learn</a>' +
+        '<a href="/methodology">How the score works</a><a href="/data-sources">Data sources</a><a href="/pricing" data-show="upgrade">Pricing</a><a href="/learn">Learn</a>' +
         '<a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/support">Support</a>' +
         '<a class="il-foot-credit" href="https://logo.dev" target="_blank" rel="noopener" hidden>Logos provided by Logo.dev</a>';
       /* Logo.dev's free plan asks for this credit wherever its logos appear. */
