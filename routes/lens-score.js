@@ -167,6 +167,7 @@ function cardGrades(g) {
   if (g.status !== "graded") return { status: g.status, reason: g.reason || null };
   return {
     status: g.status, version: g.version, score: g.score, label: g.label, tone: g.tone, sectorName: g.sectorName,
+    basis: g.basis, groupName: g.groupName, peerCount: g.peerCount,
     rank: g.rank, verdict: g.verdict, caps: g.caps,
     factors: g.factors.map(f => ({ key: f.key, label: f.label, grade: f.grade, percentile: f.percentile, tone: f.tone })),
     strengths: g.strengths.slice(0, 3), watch: g.watch.slice(0, 3),
