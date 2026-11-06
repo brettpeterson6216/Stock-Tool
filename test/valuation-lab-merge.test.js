@@ -104,8 +104,8 @@ test("one launcher tile, on the dashboard and in the workspace", () => {
   assert.ok(panel, "the dashboard tool panel was not found");
   assert.doesNotMatch(panel[1], /section=dcf/,
     "the dashboard still sends people to a separate Valuation Lab tile");
-  assert.match(panel[1], /section=projection/,
-    "the dashboard lost its link into the lab");
+  assert.match(panel[1], /href="\/projection"/,
+    "the dashboard lost its link into the Projection Lab");
 });
 
 test("the switch is styled, not left as two bare buttons", () => {

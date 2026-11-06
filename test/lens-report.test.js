@@ -39,13 +39,15 @@ test("losses, cash burn and dilution are warning signs", () => {
   for (const k of ["loss", "burn", "dilution"]) assert.ok(keys.includes(k), k);
 });
 
-test("the report's valuation matches the Valuation tab's defaults", () => {
+test("the report's valuation matches the Projection Lab's starting point", () => {
   const f = A.fundamentals(growing);
   const bars = Array.from({ length: 260 }, (_, i) => ({ time: 1.7e9 + i * 86400, close: 100 + i * 0.1 }));
   const p = A.priceFacts(bars, { regularMarketPrice: 126 });
   const v = A.valuation(f, p, 30, V);
-  const d = V.defaults({ margin: 0.25, pe: 30, growth1y: f.growth1y / 100, growth3y: null });
-  const g = V.impliedGrowth({ price: 126, revenue: f.revenue, shares: 10, years: 5, margin: d.base.margin, exitPE: d.base.exitPE, required: 0.1 });
+  // The lab's own inputs: P/E from price over last-12-month EPS, recent quarters for growth.
+  const eps = f.netIncome / f.shares;
+  const d = V.defaults({ margin: f.netIncome / f.revenue, pe: 126 / eps, growth1y: f.growth1y / 100, growth3y: f.growth3y !== null ? f.growth3y / 100 : null, quarters: f.series });
+  const g = V.impliedGrowth({ price: 126, revenue: f.revenue, shares: f.shares, years: 5, margin: d.base.margin, exitPE: d.base.exitPE, shareChange: d.shareChange, required: 0.1 });
   assert.ok(Math.abs(v.implied - g) < 1e-12);
   assert.ok(v.verdict && ["rich", "full", "fair", "cheap"].includes(v.verdict.key));
 });

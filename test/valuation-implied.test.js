@@ -26,7 +26,8 @@ test("projection refuses incomplete inputs instead of inventing numbers", () => 
 test("default cases bracket the base and mark unprofitable companies", () => {
   const d = V.defaults({ growth3y: 0.4, margin: 0.3, pe: 30 });
   assert.ok(d.bear.growth < d.base.growth && d.base.growth < d.bull.growth);
-  assert.ok(d.base.growth <= 0.3);
+  assert.ok(d.base.growth <= 0.45, "starting growth is capped at 45%");
+  assert.ok(d.base.growthEnd < d.base.growth, "and fades");
   assert.equal(d.unprofitable, false);
   const loss = V.defaults({ growth1y: 0.2, margin: -0.05, pe: null });
   assert.equal(loss.unprofitable, true);
@@ -62,4 +63,24 @@ test("impossible inputs are refused with a reason, never Infinity", () => {
   assert.equal(V.validate(i), null);
   const shrinking = V.project({ ...i, growth: -0.2 });
   assert.ok(shrinking && Number.isFinite(shrinking.valueToday), "negative growth stays usable");
+});
+
+test("recent quarters lead the growth seed; an acquisition jump is named, not used", () => {
+  const q = [["2024-09-30", 265.7, 236], ["2024-12-31", 332.2, 236], ["2025-03-31", 329.3, 236], ["2025-06-30", 739.3, 260.2], ["2025-09-30", 725.1, 257.8],
+    ["2025-12-31", 721.6, 258.8], ["2026-03-31", 782.6, 259.8], ["2026-06-30", 817.9, 256.9], ["2026-09-30", 847.2, 254.9]]
+    .map(([end, r, sh]) => ({ end, revenue: r * 1e6, netIncome: r * 1e5, shares: sh * 1e6 }));
+  const d = V.defaults({ price: 32.22, pe: 25.9, margin: 0.1, growth1y: 0.49, growth3y: 0.45, quarters: q });
+  assert.equal(d.base.growth, 0.135, "the last two quarters, not the acquisition-inflated year");
+  assert.match(d.notes[0], /acquisition/);
+  assert.match(d.notes[0], /Jun 2025/);
+  assert.equal(d.shareChange, -0.01);
+});
+
+test("growth fades in a straight line to the final-year rate", () => {
+  const out = V.project({ price: 10, revenue: 100, shares: 10, years: 5, growth: 0.4, growthEnd: 0.04, margin: 0.1, exitPE: 20 });
+  assert.deepEqual(out.growth.map(g => Math.round(g * 1000) / 1000), [0.4, 0.31, 0.22, 0.13, 0.04]);
+  assert.equal(out.pricePath.length, 5);
+  assert.ok(Math.abs(out.pricePath[4] - out.futurePrice) < 1e-9);
+  const w = V.weighted({ bear: { ...out, futurePrice: 5 }, base: { ...out, futurePrice: 10 }, bull: { ...out, futurePrice: 20 } }, { bear: 0.25, base: 0.5, bull: 0.25 }, 10);
+  assert.equal(w.futurePrice, 11.25);
 });

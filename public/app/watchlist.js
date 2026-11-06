@@ -41,14 +41,14 @@
       '<p class="note">Older theses and positions from the classic workspace are <a href="/?view=tool&section=workspace">here</a>.</p>';
     IL.plate(IL.$("#sv-hero"), "ledger", "right 30%");
   }
-  var SAVE_TYPE = { implied: "Valuation", valuation: "Valuation Lab (classic)", projection: "Projection (classic)", dcf: "DCF (classic)", compare: "Comparison", note: "Note", lensscore: "LensToolkit", price: "Analysis" };
+  var SAVE_TYPE = { implied: "Projection Lab", valuation: "Valuation Lab (classic)", projection: "Projection (classic)", dcf: "DCF (classic)", compare: "Comparison", note: "Note", lensscore: "LensToolkit", price: "Analysis" };
   var SAVE_GROUP = [
     ["Valuations", ["implied", "valuation", "projection", "dcf"]],
     ["Comparisons", ["compare"]],
     ["Notes and analyses", ["note", "lensscore", "price"]],
   ];
   function saveHref(s) {
-    if (s.type === "implied") return "/research/" + encodeURIComponent(s.ticker) + "/valuation?save=" + s.id;
+    if (s.type === "implied") return "/research/" + encodeURIComponent(s.ticker) + "/projection?save=" + s.id;
     if (s.type === "compare" && s.ticker) return "/compare?t=" + encodeURIComponent(s.ticker);
     return "/?view=tool&section=reports";
   }

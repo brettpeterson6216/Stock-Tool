@@ -68,6 +68,7 @@
     /* Quarter-on-year-ago growth for the last two quarters: is growth speeding up? */
     var yoy = function (i) { var a = q[q.length - 1 - i], b = q[q.length - 5 - i]; return a && b ? pct(num(a.revenue), num(b.revenue)) : null; };
     f.qGrowth = yoy(0); f.qGrowthPrev = yoy(1);
+    f.series = q.map(function (x) { return { end: x.end, revenue: num(x.revenue), netIncome: num(x.netIncome), shares: num(x.shares) }; });
     return f;
   }
 
@@ -107,14 +108,18 @@
   function valuation(f, p, pe, V) {
     V = V || (root.IL && root.IL.valuation);
     if (!f || !p || !V || !(f.revenue > 0) || !(f.shares > 0)) return null;
+    /* The same inputs the Projection Lab starts from, so the overview's
+       "what the price implies" and the lab agree until someone edits. */
+    var eps = f.netIncome !== null && f.shares > 0 ? f.netIncome / f.shares : null;
     var ctx = {
       price: p.price, revenue: f.revenue, shares: f.shares,
       margin: f.netIncome !== null ? f.netIncome / f.revenue : null,
-      pe: pe, growth1y: f.growth1y !== null ? f.growth1y / 100 : null, growth3y: f.growth3y !== null ? f.growth3y / 100 : null,
+      pe: eps > 0 ? p.price / eps : pe, growth1y: f.growth1y !== null ? f.growth1y / 100 : null, growth3y: f.growth3y !== null ? f.growth3y / 100 : null,
+      quarters: f.series || null,
     };
     var d = V.defaults(ctx);
-    var implied = V.impliedGrowth({ price: ctx.price, revenue: ctx.revenue, shares: ctx.shares, years: 5, margin: d.base.margin, exitPE: d.base.exitPE, shareChange: 0, required: d.required });
-    var delivered = ctx.growth3y !== null ? ctx.growth3y : ctx.growth1y;
+    var implied = V.impliedGrowth({ price: ctx.price, revenue: ctx.revenue, shares: ctx.shares, years: 5, margin: d.base.margin, exitPE: d.base.exitPE, shareChange: d.shareChange, required: d.required });
+    var delivered = d.history && d.history.recent !== null ? d.history.recent : ctx.growth3y !== null ? ctx.growth3y : ctx.growth1y;
     var verdict = null;
     if (implied !== null && delivered !== null) {
       var gap = (implied - delivered) * 100;

@@ -272,12 +272,12 @@ let liteHomeCache;
 
 /* The rebuilt stock page. /research is the search landing; /research/NVDA is
    the Overview and /research/NVDA/financials etc. the other tabs. */
-const RESEARCH_TABS = new Set(["overview", "financials", "valuation", "earnings", "ownership", "filings"]);
+const RESEARCH_TABS = new Set(["overview", "financials", "projection", "earnings", "ownership", "filings"]);
 const researchPage = path.join(__dirname, "public", "app", "research.html");
 /* A shared /research/NVDA link is what people post, so the HTML that comes
    back without running any script names the stock: title, description,
    canonical and social tags (audit F06). The app takes over from there. */
-const RESEARCH_TAB_LABEL = { financials: "Financials", valuation: "Valuation", earnings: "Earnings", ownership: "Ownership", filings: "SEC filings" };
+const RESEARCH_TAB_LABEL = { financials: "Financials", projection: "Projection Lab", earnings: "Earnings", ownership: "Ownership", filings: "SEC filings" };
 function escAttr(v) { return String(v).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
 function sendResearchForTicker(res, ticker, tab) {
   const name = tickerIndex.nameFor(ticker) || "";
@@ -323,6 +323,8 @@ app.get(["/research", "/research/:ticker", "/research/:ticker/:tab"], (req, res)
     const clean = String(t).trim().toUpperCase();
     if (!/^[A-Z0-9.^-]{1,15}$/.test(clean)) return sendPage(res, path.join(__dirname, "public", "app", "not-found.html"), 404);
     const tab = req.params.tab ? String(req.params.tab).toLowerCase() : null;
+    /* The Valuation tab became the Projection Lab; old links keep working. */
+    if (tab === "valuation") return res.redirect(301, `/research/${encodeURIComponent(clean)}/projection${req.url.includes("?") ? req.url.slice(req.url.indexOf("?")) : ""}`);
     if (tab && !RESEARCH_TABS.has(tab)) return res.redirect(302, `/research/${encodeURIComponent(clean)}`);
     if (clean !== t || tab === "overview") {
       return res.redirect(301, `/research/${encodeURIComponent(clean)}${tab && tab !== "overview" ? "/" + tab : ""}`);
@@ -333,6 +335,13 @@ app.get(["/research", "/research/:ticker", "/research/:ticker/:tab"], (req, res)
 });
 
 app.get("/compare", (_req, res) => sendPage(res, path.join(__dirname, "public", "app", "compare.html")));
+/* The Projection Lab: pick a company, or go straight to one. */
+app.get("/projection", (_req, res) => sendPage(res, researchPage));
+app.get("/projection/:ticker", (req, res) => {
+  const clean = String(req.params.ticker || "").trim().toUpperCase();
+  if (!/^[A-Z0-9.^-]{1,15}$/.test(clean)) return res.redirect(302, "/projection");
+  return res.redirect(301, `/research/${encodeURIComponent(clean)}/projection`);
+});
 /* One-click unsubscribe from the weekly grade email. GET from the link in
    the email; POST from mail providers' one-click button (RFC 8058). */
 const weeklyDigest = require("./lib/weekly-digest");
@@ -366,6 +375,7 @@ const LEGACY_SECTION_TAB = {
   analyze: "", reports: "", "lens-score": "", advmetrics: "",
   financials: "financials", earnings: "earnings", calls: "earnings",
   secfilings: "filings", institutional: "ownership",
+  projection: "projection", valuation: "projection",
 };
 function legacyStockRedirect(query) {
   if (query.view !== "tool") return null;
@@ -379,7 +389,7 @@ function legacyStockRedirect(query) {
   }
   if (!Object.prototype.hasOwnProperty.call(LEGACY_SECTION_TAB, section)) return null;
   const sym = String(query.symbol || query.ticker || "").trim().toUpperCase();
-  if (!sym) return section === "analyze" ? "/research" : null;
+  if (!sym) return section === "analyze" ? "/research" : section === "projection" || section === "valuation" ? "/projection" : null;
   if (!/^[A-Z0-9.^-]{1,15}$/.test(sym)) return "/research";
   const tab = LEGACY_SECTION_TAB[section];
   return `/research/${encodeURIComponent(sym)}${tab ? "/" + tab : ""}`;

@@ -36,7 +36,7 @@
       '<div class="dh hero-band card prime" id="dh"><div class="stack" style="gap:10px"><h1 class="display">' + h(greet()) + (name ? ', <em>' + h(name) + '.</em>' : ".") + '</h1><p class="muted" id="dh-sum">Here is what changed on your stocks.</p></div>' +
         '</div>' +
       '<nav class="grid-3 rl-tools d-tools" aria-label="Tools">' +
-        tile("/research", "globe", "62% 40%", "Research a stock", "A plain-English report card, the financials and what the price assumes.") +
+        tile("/projection", "globe", "62% 40%", "Projection Lab", "What a price already assumes, and bear, base and bull cases from real filings.") +
         tile("/screener", "ledger", "60% 40%", "Screener", "Filter the <span data-graded>~280</span> US stocks we grade by grade, value, size and momentum.") +
         tile("/compare", "atlas", "52% 70%", "Compare", "Up to four stocks side by side, with the best in each row marked.") +
         tile("/lens-score", "engraved", "70% 70%", "LensToolkit", "Trend, timing, buy zones and alerts for any stock.") +

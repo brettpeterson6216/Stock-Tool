@@ -1360,6 +1360,8 @@ test("old app links to a stock open the rebuilt page on the matching tab", async
     ["/?view=tool&section=analyze", "/research"],
     ["/?view=tool&section=screener", "/screener"],
     ["/?view=tool&section=workspace&workspace_tab=watchlist", "/watchlist"],
+    ["/?view=tool&section=projection&symbol=AAPL", "/research/AAPL/projection"],
+    ["/?view=tool&section=projection", "/projection"],
   ];
   for (const [from, to] of cases) {
     const res = await req(from);
@@ -1367,10 +1369,23 @@ test("old app links to a stock open the rebuilt page on the matching tab", async
     assert.equal(res.headers.get("location"), to, from);
   }
   // Tools that have not been rebuilt stay in the original app.
-  for (const keep of ["/?view=tool&section=projection&symbol=AAPL", "/?view=tool&section=workspace"]) {
+  for (const keep of ["/?view=tool&section=dcf&symbol=AAPL", "/?view=tool&section=workspace"]) {
     const res = await req(keep);
     assert.equal(res.status, 200, keep);
   }
+});
+
+test("the Projection Lab is a page of its own, and the old Valuation tab address forwards to it", async () => {
+  const lab = await req("/projection");
+  assert.equal(lab.status, 200);
+  const one = await req("/projection/amd");
+  assert.equal(one.status, 301);
+  assert.equal(one.headers.get("location"), "/research/AMD/projection");
+  const old = await req("/research/AMD/valuation?save=4");
+  assert.equal(old.status, 301);
+  assert.equal(old.headers.get("location"), "/research/AMD/projection?save=4");
+  const tab = await req("/research/AMD/projection");
+  assert.equal(tab.status, 200);
 });
 
 test("signed-in members get the rebuilt dashboard on plain / and can still reach the app", async () => {

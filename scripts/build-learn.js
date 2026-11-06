@@ -178,7 +178,7 @@ ${quizHtml(l)}
       <h2 id="lxl-try-title">Try it now</h2>
       <p>${esc(l.tryIt)}</p>
       <div class="lxl-try-actions">
-        <a href="/?view=tool&amp;section=${encodeURIComponent(l.tool)}" class="lxl-btn lxl-btn-gold">${esc(l.toolLabel)} →</a>
+        <a href="${l.tool === "projection" ? "/projection" : "/?view=tool&amp;section=" + encodeURIComponent(l.tool)}" class="lxl-btn lxl-btn-gold">${esc(l.toolLabel)} →</a>
         <button type="button" class="lxl-btn lxl-btn-ghost" id="lxl-complete" hidden>Mark lesson complete</button>
       </div>
     </section>

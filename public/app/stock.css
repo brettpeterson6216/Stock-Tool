@@ -234,3 +234,45 @@
 .sh.plate{min-height:168px}
 .callout[hidden]{display:none}
 .val-err{border:1px solid color-mix(in srgb,var(--loss) 45%,var(--line));color:var(--text)}
+
+/* ── Projection Lab ─────────────────────────────────────────────────────── */
+.pj-expected{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 28px;padding:12px 20px;border-top:1px solid var(--line);font-size:14px}
+.pj-expected:empty{display:none}
+.pj-expected .card-sub{flex-basis:100%}
+.pj-expected b{font-size:18px}
+.pj-chart{padding:4px 12px 8px}
+.pj-chart svg{width:100%;height:auto;display:block;overflow:visible}
+.pj-grid{stroke:var(--line);stroke-width:1}
+.pj-now{stroke:var(--text3);stroke-width:1;stroke-dasharray:4 4}
+.pj-ax{fill:var(--text3);font:500 11.5px var(--num);font-variant-numeric:tabular-nums}
+.pj-line{fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.pj-line.pj-base{stroke:var(--gold);stroke-width:2.5}
+.pj-line.pj-bull{stroke:var(--text)}
+.pj-line.pj-bear{stroke:var(--text3)}
+.pj-dot{stroke:var(--surface);stroke-width:1.5}
+.pj-dot.pj-base{fill:var(--gold)}
+.pj-dot.pj-bull{fill:var(--text)}
+.pj-dot.pj-bear{fill:var(--text3)}
+.pj-end{font:650 12px var(--sans)}
+.pj-end.pj-base{fill:var(--gold-text)}
+.pj-end.pj-bull{fill:var(--text)}
+.pj-end.pj-bear{fill:var(--text2)}
+.pj-endv{fill:var(--text2);font:600 12.5px var(--num);font-variant-numeric:tabular-nums}
+.pj-notes{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:13.5px;color:var(--text2);line-height:1.55;max-width:78ch}
+#pj-years button{white-space:nowrap}
+.pj-how .muted{font-size:13.5px;line-height:1.55}
+.pj-legend{display:flex;align-items:center;gap:8px;padding:2px 8px 6px}
+.pj-key-now{display:inline-block;width:22px;border-top:1px dashed var(--text3)}
+@media (max-width:640px){
+  .val-tbl{font-size:12.5px}
+  .val-tbl th,.val-tbl td{padding:8px 4px}
+  .val-tbl th:first-child,.val-tbl td:first-child{padding-left:12px;white-space:normal;min-width:96px;max-width:120px}
+  .val-tbl th:last-child,.val-tbl td:last-child{padding-right:12px}
+  .val-tbl .val-cell{gap:2px}
+  .val-tbl .val-cell .input{width:52px;height:32px;padding:0 6px;font-size:13px}
+  .val-tbl .val-cell .faint{font-size:11px}
+  .val-tbl .tip{display:none}
+  .val-tbl tr.val-out td{font-size:12.5px}
+  .val-tbl tr.val-out td span.num[style]{display:block}
+}
+#val-cases thead th:last-child{padding-right:48px}

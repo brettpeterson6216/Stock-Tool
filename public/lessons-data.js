@@ -647,7 +647,7 @@
       "closing": "This is the question ImpliedLens is named after. Every tool on the site is built to help you answer it: what does the price imply, and is the business likely to beat it?",
       "tool": "projection",
       "toolLabel": "Open the Projection Lab",
-      "tryIt": "In the Projection Lab, adjust the Base case until the modeled value equals today's price. Write down the growth rate you needed. Is it realistic?",
+      "tryIt": "Open the Projection Lab for any company and read the number at the top: the growth today's price needs. Compare it with the growth the company is delivering. Is it realistic?",
       "quiz": [
         {
           "q": "What does reverse valuation solve for?",

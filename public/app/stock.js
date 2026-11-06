@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    The stock page: /research/:ticker[/tab]
 
-   Overview · Financials · Valuation · Earnings · Ownership · Filings
+   Overview · Financials · Projection Lab · Earnings · Ownership · Filings
 
    Every tab is drawn from the existing APIs. What a visitor cannot see is
    replaced with a clear gate (free account or Pro), never a blank panel.
@@ -13,7 +13,7 @@
   var TABS = [
     { key: "overview", label: "Overview" },
     { key: "financials", label: "Financials" },
-    { key: "valuation", label: "Valuation" },
+    { key: "projection", label: "Projection Lab" },
     { key: "earnings", label: "Earnings" },
     { key: "ownership", label: "Ownership" },
     { key: "filings", label: "Filings" },
@@ -33,9 +33,10 @@
     var parts = location.pathname.replace(/\/+$/, "").split("/").filter(Boolean);
     var t = parts[1] ? decodeURIComponent(parts[1]).toUpperCase() : null;
     var tab = parts[2] ? parts[2].toLowerCase() : "overview";
+    if (tab === "valuation") tab = "projection";      // the tab's old address keeps working
     if (!TABS.some(function (x) { return x.key === tab; })) tab = "overview";
     if (t && !/^[A-Z0-9.^-]{1,15}$/.test(t)) t = null;
-    return { t: t, tab: tab };
+    return { t: t, tab: tab, lab: parts[0] === "projection" };
   }
 
   /* ── Data, fetched once per page and shared by the tabs ─────────────── */
@@ -133,6 +134,30 @@
     return '<a class="card lift tile" href="' + href + '"><span class="tile-art" style="--plate:url(' + IL.plateSrc(plate) + ');--plate-pos:' + pos + '" aria-hidden="true"></span>' +
       '<span class="tile-body"><span class="card-t">' + title + ' <span class="tile-go">' + IL.icon("arrow", 14) + '</span></span><span class="card-sub">' + sub + "</span></span></a>";
   }
+  /* /projection: the Projection Lab's front door. Pick a company; the lab
+     opens on its own page with its filings already loaded. */
+  function renderProjectionLanding() {
+    document.title = "Projection Lab · ImpliedLens";
+    var popular = ["NVDA", "AMD", "AAPL", "MSFT", "AMZN", "META", "TSLA", "CELH", "COST", "PLTR"];
+    main().innerHTML =
+      '<section class="rl-hero pj-landing">' +
+        IL.eyebrow("Projection Lab") +
+        '<h1 class="display">What does the price already assume?</h1>' +
+        '<p class="muted">Pick a company. The lab loads its revenue, margins and share count from SEC filings, solves for the growth today\u2019s price needs, and builds bear, base and bull cases you can change line by line.</p>' +
+        '<div class="il-search rl-search" role="search"><label class="il-search-box">' + IL.icon("search", 18) +
+          '<input id="pj-q" type="search" autocomplete="off" spellcheck="false" placeholder="Company name or ticker, e.g. AMD or Celsius" aria-label="Search a company to project" role="combobox" aria-expanded="false" aria-controls="pj-sugg"></label>' +
+          '<div class="il-sugg" id="pj-sugg" role="listbox" hidden></div></div>' +
+        '<div class="row wrap rl-pop"><span class="faint">Try:</span>' + popular.map(function (t) { return '<a class="tag" href="/research/' + t + '/projection">' + t + "</a>"; }).join("") + "</div>" +
+      "</section>" +
+      '<div class="grid-3 pj-how">' +
+        '<section class="card"><h2 class="card-t">1. What the price implies</h2><p class="muted">The yearly revenue growth that, at today\u2019s price, earns your required return. Compare it with what the company is actually delivering.</p></section>' +
+        '<section class="card"><h2 class="card-t">2. Three cases from real numbers</h2><p class="muted">Growth starts from recent quarters and fades toward 4%. Acquisitions and one-off share changes are spotted and left out, and every starting number says where it came from.</p></section>' +
+        '<section class="card"><h2 class="card-t">3. Your odds, one answer</h2><p class="muted">Weight the cases by how likely you think each is, see the expected yearly return, then save the version or share it as an image.</p></section>' +
+      "</div>";
+    IL.plate(IL.$(".rl-hero"), "engraved", "70% 60%");
+    IL.wireSearch(IL.$("#pj-q"), IL.$("#pj-sugg"), function (t) { location.href = "/research/" + encodeURIComponent(t) + "/projection"; });
+  }
+
   function renderLanding() {
     document.title = "Research a stock · ImpliedLens";
     var popular = ["NVDA", "AAPL", "MSFT", "AMZN", "GOOGL", "META", "TSLA", "COST", "JPM", "LLY", "AVGO", "NFLX"];
@@ -150,7 +175,7 @@
         tile("/compare", "atlas", "52% 70%", "Compare", "Up to four stocks side by side, with the best in each row marked.") +
         tile("/screener", "ledger", "60% 40%", "Screener", "Filter the <span data-graded>~280</span> US stocks we grade by grade, value, size and momentum.") +
         tile("/lens-score", "dial", "75% 45%", "LensToolkit", "Trend, timing, buy zones and alerts for any stock.") +
-        tile("/?view=tool&section=projection", "engraved", "70% 70%", "Valuation Lab", "Pro: a year-by-year operating model and DCF, with saved versions.") +
+        tile("/projection", "engraved", "70% 70%", "Projection Lab", "Bear, base and bull cases from any company\u2019s filings, and what its price already assumes.") +
       "</div>" +
       '<div class="section-h"><h2 class="section-t">Top-rated in each <em>sector</em></h2><span class="card-sub">Highest LensScore among the companies we grade</span></div>' +
       '<div class="card flush" id="rl-leaders" data-w="expand,csv" data-w-title="Top-rated by sector"><div style="padding:20px">' + sk(16) + "</div></div>" +
@@ -222,7 +247,7 @@
         '<div class="sh-actions">' +
           '<button class="btn" type="button" id="act-watch" aria-pressed="false">' + IL.icon("star") + '<span>Watch</span></button>' +
           '<button class="btn" type="button" id="act-alert">' + IL.icon("bell") + "<span>Alert</span></button>" +
-          '<a class="btn primary" href="/research/' + h(S.t) + '/valuation" data-tab="valuation">Build a valuation</a>' +
+          '<a class="btn primary" href="/research/' + h(S.t) + '/projection" data-tab="projection">Open the Projection Lab</a>' +
         "</div>" +
       "</section>" +
       '<nav class="tabs" aria-label="Stock sections">' + TABS.map(function (t) {
@@ -326,7 +351,7 @@
     if (push) history.pushState({ tab: tab }, "", "/research/" + S.t + (tab === "overview" ? "" : "/" + tab));
     var box = IL.$("#tab");
     box.innerHTML = "";
-    ({ overview: tabOverview, financials: tabFinancials, valuation: tabValuation, earnings: tabEarnings, ownership: tabOwnership, filings: tabFilings }[tab])(box);
+    ({ overview: tabOverview, financials: tabFinancials, projection: tabProjection, earnings: tabEarnings, ownership: tabOwnership, filings: tabFilings }[tab])(box);
     if (push) {
       var tabs = IL.$(".tabs");
       if (tabs && tabs.getBoundingClientRect().top < 0) window.scrollTo({ top: tabs.offsetTop - 70 });
@@ -416,7 +441,7 @@
         '<div><h3 class="lr-sub bad">Warning signs</h3>' + list(bad, "bad", cov.statements ? "No warning signs in the checks we ran." : notRun) + "</div>" +
       "</div>" +
       (gated ? '<p class="lr-gate">' + IL.icon("lock", 14) + ' <span>Sales, margin, cash-flow and dilution checks need a free account. <a href="' + IL.signupHref() + '">Create one</a> · no card.</span></p>' : "") +
-      '<div class="lr-foot"><a class="link" href="/research/' + h(S.t) + '/valuation" data-tab="valuation">Test the price yourself →</a><button class="link" type="button" id="lr-share">Share this report</button></div>';
+      '<div class="lr-foot"><a class="link" href="/research/' + h(S.t) + '/projection" data-tab="projection">Test the price in the Projection Lab →</a><button class="link" type="button" id="lr-share">Share this report</button></div>';
     var sh = IL.$("#lr-share"); if (sh) sh.addEventListener("click", function () { shareCard(inp, fl); });
   }
 
@@ -878,7 +903,7 @@
     var meta = S.quote ? S.quote.meta : {}, name = IL.$("#sh-name") ? IL.$("#sh-name").textContent : S.t;
     var exRaw = String(meta.fullExchangeName || meta.exchangeName || "").trim(), ex = EXCHANGE[exRaw.toLowerCase()] || exRaw.toUpperCase();
     K.plate(plate, W, H);
-    K.brand("VALUATION  ·  " + new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }).toUpperCase());
+    K.brand("PROJECTION LAB  ·  " + new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }).toUpperCase());
     box([ex, meta.sector].filter(Boolean).join("  ·  ").toUpperCase(), 48, 76, 400, 16, font(500, 12, sans), C.t2, "left", 1.2);
     var tpx = K.fit(S.t, 700, sans, 72, 52, 392, -1.5);
     box(S.t, 48, 94, 392, 80, font(700, tpx, sans), C.text, "left", -1.5);
@@ -892,25 +917,25 @@
       var main = F.spct(d.implied * 100), r = box(main, 48, 306, 392, 70, font(600, 60, nums), C.gold);
       x.font = font(500, 20, nums); x.fillStyle = C.t2; x.textAlign = "left"; x.fillText("/yr", 48 + r.w + 6, r.base);
     }
-    box("Revenue growth a year for five years, at a " + F.pct(d.M.required * 100, 0) + " return", 48, 380, 392, 18, font(400, 14, sans), C.t3);
+    box("Revenue growth a year for " + d.M.years + " years, at a " + F.pct(d.M.required * 100, 0) + " return", 48, 380, 392, 18, font(400, 14, sans), C.t3);
     var dl = box("Delivered ", 48, 414, 120, 26, font(500, 18, sans), C.t2);
     box(d.past === null ? K.DASH : F.spct(d.past * 100) + "/yr", 48 + dl.w + 4, 412, 200, 28, font(600, 24, nums), C.text);
     box("Reported · " + d.pastLabel, 48, 446, 392, 16, font(400, 13, sans), C.t3);
-    box("Base case: " + F.pct(d.M.base.margin * 100, 0) + " net margin, " + F.mult(d.M.base.exitPE) + " P/E in year five", 48, 476, 392, 16, font(400, 13, sans), C.t3);
+    box("Base case: " + F.pct(d.M.base.margin * 100, 0) + " net margin, " + F.mult(d.M.base.exitPE) + " P/E in year " + d.M.years, 48, 476, 392, 16, font(400, 13, sans), C.t3);
 
-    box("MY FIVE-YEAR CASES", 840, 96, 312, 18, font(600, 13, sans), C.t2, "left", 1.6);
+    box("MY " + (d.M.years === 10 ? "TEN" : d.M.years === 3 ? "THREE" : "FIVE") + "-YEAR CASES", 840, 96, 312, 18, font(600, 13, sans), C.t2, "left", 1.6);
     var rows = [["bear", "Bear case", C.loss], ["base", "Base case", C.text], ["bull", "Bull case", C.gain]];
     rows.forEach(function (rw, i) {
       var y = 132 + i * 128, o = d.outs[rw[0]], m = d.M[rw[0]];
       if (i) { x.fillStyle = C.rule; x.fillRect(840, y - 14, 312, 1); }
       box(rw[1], 840, y, 160, 20, font(600, 15, sans), rw[2]);
-      box(F.spct(m.growth * 100, 0) + " growth · " + F.pct(m.margin * 100, 0) + " margin · " + F.mult(m.exitPE), 840, y + 24, 312, 16, font(400, 13, sans), C.t3);
+      box(F.spct(m.growth * 100, 0) + (m.growthEnd != null && Math.abs(m.growthEnd - m.growth) > 0.004 ? "\u2192" + F.pct(m.growthEnd * 100, 0) : "") + " growth · " + F.pct(m.margin * 100, 0) + " margin · " + F.mult(m.exitPE), 840, y + 24, 312, 16, font(400, 13, sans), C.t3);
       box(o ? F.price(o.futurePrice) : K.DASH, 840, y + 46, 200, 40, font(600, 32, nums), C.text);
       if (o) box(F.spct(o.annualReturn * 100) + "/yr", 952, y + 54, 200, 28, font(600, 22, nums), o.annualReturn >= 0 ? C.gain : C.loss, "right");
-      box("price in five years", 840, y + 88, 200, 14, font(400, 12, sans), C.t3);
+      box("price in " + d.M.years + " years", 840, y + 88, 200, 14, font(400, 12, sans), C.t3);
       box("yearly return", 952, y + 88, 200, 14, font(400, 12, sans), C.t3, "right");
     });
-    K.footer("impliedlens.com/research/" + S.t + "/valuation");
+    K.footer("impliedlens.com/research/" + S.t + "/projection");
     return c;
   }
   function roundRect(x, X, Y, w, hh, r) {
@@ -969,8 +994,8 @@
     var f = g.factors || [];
     var checks = [];
     var valueF = f.filter(function (x) { return x.key === "value"; })[0];
-    if (valueF && /^[C-F]/.test(valueF.grade || "")) checks.push({ text: "Is the price already assuming the growth?", tab: "valuation" });
-    else checks.push({ text: "What does today’s price assume?", tab: "valuation" });
+    if (valueF && /^[C-F]/.test(valueF.grade || "")) checks.push({ text: "Is the price already assuming the growth?", tab: "projection" });
+    else checks.push({ text: "What does today’s price assume?", tab: "projection" });
     var ne = nextEarnings();
     if (ne && ne.date) checks.push({ text: "Read the last release before " + nextEarningsText(ne), tab: "earnings" });
     if (g.watch && g.watch[0]) checks.push({ text: "Watch: " + String(g.watch[0].text || "").replace(/\.$/, ""), anchor: "report" });
@@ -1257,7 +1282,7 @@
   }
   function downloadCsv() {
     if (!IL.user) { location.href = IL.signupHref(); return; }
-    if (!IL.isPro()) { IL.dialog('<h2>CSV downloads are part of Pro</h2><p class="muted">Pro lets you download every statement, plus unlimited lookups, the Valuation Lab, alerts and every tab.</p><div class="row" style="justify-content:flex-end"><button class="btn ghost" data-close type="button">Not now</button><a class="btn primary" href="/pricing">Start the free trial</a></div>'); return; }
+    if (!IL.isPro()) { IL.dialog('<h2>CSV downloads are part of Pro</h2><p class="muted">Pro lets you download every statement, plus 10-year projections, unlimited lookups, alerts and every tab.</p><div class="row" style="justify-content:flex-end"><button class="btn ghost" data-close type="button">Not now</button><a class="btn primary" href="/pricing">Start the free trial</a></div>'); return; }
     if (!lastTables || !lastTables.tables) return;
     var lines = [["", ].concat(lastTables.heads)];
     lastTables.tables.forEach(function (t) {
@@ -1272,166 +1297,249 @@
   }
 
   /* ═════════════════════════════════════════════════════════════════════
-     Valuation — what the price implies
+     Projection Lab — what the price implies, and what each case is worth.
+     One model for the whole site (public/app/valuation.js): the overview's
+     "what the price implies" line and the share card read the same numbers.
      ═════════════════════════════════════════════════════════════════════ */
-  function tabValuation(box) {
+  var CASES = ["bear", "base", "bull"], CASE_LABEL = { bear: "Bear case", base: "Base case", bull: "Bull case" };
+
+  /* Saved models from before fading growth and horizons (v1) become v2. */
+  function migrateModel(m, def) {
+    if (!m || !m.base) return null;
+    var out = JSON.parse(JSON.stringify(m));
+    CASES.forEach(function (c) { if (out[c] && out[c].growthEnd == null) out[c].growthEnd = out[c].growth; });
+    if (!out.weights) out.weights = JSON.parse(JSON.stringify(def.weights));
+    if (!out.years) out.years = 5;
+    if (out.shareChange == null) out.shareChange = def.shareChange;
+    if (out.required == null) out.required = def.required;
+    return out;
+  }
+
+  function tabProjection(box) {
     box.innerHTML = '<section class="card">' + sk(240) + "</section>";
+    /* Nothing is computed until the company's filings and price are both in:
+       a projection drawn from stand-in numbers looks real and is not. */
     Promise.all([D.hist(), D.quote()]).then(function (all) {
       var res = all[0];
-      if (res.gate) { box.innerHTML = IL.gate(res.gate, "Create a free account to value " + S.t, { center: true, why: "See what growth today’s price is assuming, and build bear, base and bull cases from the company’s real numbers. Free, no card needed." }); return; }
+      if (res.gate) { box.innerHTML = IL.gate(res.gate, "Create a free account to open the Projection Lab for " + S.t, { center: true, why: "See what growth today’s price is assuming, then build bear, base and bull cases from the company’s real numbers. Free, no card needed." }); return; }
       var q = quarterly(res.data), p = priceFacts();
       var rev = sumLast(q, "revenue", 4), ni = sumLast(q, "netIncome", 4);
       var shares = q.length ? N(q[q.length - 1].shares) : null;
       if (!res.ok || !p || !rev || !shares) {
-        box.innerHTML = '<div class="gate center"><div class="gate-t">Not enough data to value ' + h(S.t) + ' here</div><div class="gate-s">This needs four quarters of revenue and a share count from SEC filings. Funds and foreign listings usually do not have them.</div><a class="btn" href="/?view=tool&section=projection&symbol=' + h(S.t) + '">Open the Valuation Lab</a></div>';
+        box.innerHTML = '<div class="gate center"><div class="gate-t">Not enough data to project ' + h(S.t) + '</div><div class="gate-s">The Projection Lab needs four quarters of revenue and a share count from SEC filings. Funds and foreign listings usually do not have them.</div></div>';
         return;
       }
+      var eps = ni !== null ? ni / shares : null;
       var ctx = {
         price: p.price, revenue: rev, shares: shares, netIncome: ni,
         margin: ni !== null ? ni / rev : null,
-        pe: N(p.meta.trailingPE),
+        pe: eps > 0 ? p.price / eps : null,
         growth1y: growth(rev, sumLast(q, "revenue", 4, 4)) / 100,
         growth3y: (function () { var old = sumLast(q, "revenue", 4, 12); return old ? IL.valuation.cagr(old, rev, 3) : null; })(),
+        quarters: q.map(function (x) { return { end: x.end, revenue: N(x.revenue), netIncome: N(x.netIncome), shares: N(x.shares) }; }),
+        asOf: q.length ? q[q.length - 1].end : null,
       };
       if (!isFinite(ctx.growth1y)) ctx.growth1y = null;
-      var key = "il-val-" + S.t, saved = null;
+      var key = "il-proj-" + S.t, saved = null;
       try { saved = JSON.parse(localStorage.getItem(key) || "null"); } catch (_) {}
       var def = IL.valuation.defaults(ctx);
-      var M = saved && saved.v === 1 ? saved.m : def;
-      renderValuation(box, ctx, M, def, key);
+      var M = (saved && saved.v === 2 && migrateModel(saved.m, def)) || JSON.parse(JSON.stringify(stripNotes(def)));
+      renderProjection(box, ctx, M, def, key);
     });
   }
+  function stripNotes(d) { var o = {}; Object.keys(d).forEach(function (k) { if (k !== "notes" && k !== "history") o[k] = d[k]; }); return o; }
 
-  function renderValuation(box, ctx, M, def, key) {
+  function renderProjection(box, ctx, M, def, key) {
     var V = IL.valuation;
-    var cases = ["bear", "base", "bull"], label = { bear: "Bear case", base: "Base case", bull: "Bull case" };
+    if (!IL.isPro() && M.years > 5) M.years = 5;
     function pctIn(v) { return (Math.round(v * 1000) / 10).toString(); }
+    var N_ = function () { return M.years; };
+    var horizons = [3, 5, 10];
     box.innerHTML =
-      '<section class="card prime val-hero hero-band plate" id="val-hero" data-w="share" data-w-title="your valuation" style="--plate:url(/share/ledger-v1.webp);--plate-pos:right 40%"></section>' +
+      '<section class="card prime val-hero hero-band plate" id="val-hero" data-w="share" data-w-title="your projection" style="--plate:url(/share/ledger-v1.webp);--plate-pos:right 40%"></section>' +
       '<p class="callout val-err" id="val-err" role="alert" hidden></p>' +
-      '<div class="section-h"><div><h2 class="section-t">Valuation</h2><p class="card-sub">Five years out. Start from what the company has done; change any number.</p></div><div class="row wrap"><select class="input val-versions" id="val-versions" aria-label="Saved versions"><option value="">Saved versions</option></select><button class="btn sm" type="button" id="val-save">Save version</button><button class="btn sm ghost" type="button" id="val-reset">Reset</button></div></div>' +
-      '<section class="card flush" id="val-cases" data-w="csv" data-w-title="Valuation cases"><div class="tbl-wrap"><table class="tbl val-tbl"><thead><tr><th></th>' + cases.map(function (c) { return '<th class="val-' + c + '">' + label[c] + "</th>"; }).join("") + "</tr></thead><tbody>" +
-        valRow("growth", "Revenue growth per year", "%", "How fast sales grow each year for the next five years.") +
-        valRow("margin", "Net profit margin", "%", "Share of revenue kept as profit in year five. " + (ctx.margin !== null ? "Last 12 months: " + F.pct(ctx.margin * 100) + "." : "")) +
-        valRow("exitPE", "P/E in five years", "×", "What investors pay for each $1 of earnings in year five. Fast growers usually get higher multiples; mature companies lower. " + (ctx.pe ? "Today: " + F.mult(ctx.pe) + "." : "")) +
-        '<tr class="val-out"><td>Price in five years</td>' + cases.map(function (c) { return '<td id="o-fp-' + c + '"></td>'; }).join("") + "</tr>" +
-        '<tr class="val-out"><td>Yearly return from today ' + IL.tip("The compound yearly return if you buy at today’s price and the case plays out. Dividends are not included.") + "</td>" + cases.map(function (c) { return '<td id="o-ar-' + c + '"></td>'; }).join("") + "</tr>" +
-        '<tr class="val-out"><td>Worth today at your return ' + IL.tip("The year-five price discounted back at the yearly return you require. If this is above today’s price, the case beats your hurdle.") + "</td>" + cases.map(function (c) { return '<td id="o-vt-' + c + '"></td>'; }).join("") + "</tr>" +
+      '<div class="section-h"><div><h2 class="section-t">Projection Lab</h2><p class="card-sub">Bear, base and bull cases from the company’s own filings. Change any number; everything recalculates.</p></div>' +
+        '<div class="row wrap"><div class="seg" role="group" aria-label="Years ahead" id="pj-years">' + horizons.map(function (n) { return '<button type="button" data-years="' + n + '" aria-pressed="' + (M.years === n) + '">' + n + " years" + (n === 10 && !IL.isPro() ? ' <span class="tag gold" style="margin-left:4px">Pro</span>' : "") + "</button>"; }).join("") + "</div>" +
+        '<select class="input val-versions" id="val-versions" aria-label="Saved versions"><option value="">Saved versions</option></select><button class="btn sm" type="button" id="val-save">Save version</button><button class="btn sm ghost" type="button" id="val-reset">Reset</button></div></div>' +
+      '<section class="card flush" id="val-cases" data-w="csv" data-w-title="Projection cases"><div class="tbl-wrap"><table class="tbl val-tbl"><thead><tr><th></th>' + CASES.map(function (c) { return '<th class="val-' + c + '">' + CASE_LABEL[c] + "</th>"; }).join("") + "</tr></thead><tbody>" +
+        valRow("growth", "Revenue growth, first year", "%", "How fast sales grow next year." + (ctx.growth1y !== null ? " Last 12 months: " + F.spct(ctx.growth1y * 100) + "." : "")) +
+        valRow("growthEnd", "Revenue growth, final year", "%", "Growth moves in a straight line from the first-year rate to this one. Few companies keep growing fast for long; most settle at 2–6%.") +
+        valRow("margin", "Net profit margin, final year", "%", "Share of revenue kept as profit by the final year. It moves in a straight line from today’s. " + (ctx.margin !== null ? "Last 12 months: " + F.pct(ctx.margin * 100) + "." : "")) +
+        valRow("exitPE", "P/E in the final year", "×", "What investors pay for each $1 of earnings at the end. Fast growers usually get higher multiples; mature companies lower. " + (ctx.pe ? "Today: " + F.mult(ctx.pe) + "." : "")) +
+        '<tr class="val-out"><td id="o-fp-h">Price in ' + M.years + " years</td>" + CASES.map(function (c) { return '<td id="o-fp-' + c + '"></td>'; }).join("") + "</tr>" +
+        '<tr class="val-out"><td>Yearly return from today ' + IL.tip("The compound yearly return if you buy at today’s price and the case plays out. Dividends are not included.") + "</td>" + CASES.map(function (c) { return '<td id="o-ar-' + c + '"></td>'; }).join("") + "</tr>" +
+        '<tr class="val-out"><td>Worth today at your return ' + IL.tip("The final-year price discounted back at the yearly return you require. If this is above today’s price, the case beats your hurdle.") + "</td>" + CASES.map(function (c) { return '<td id="o-vt-' + c + '"></td>'; }).join("") + "</tr>" +
+        "<tr><td>How likely you think it is " + IL.tip("Your own odds for each case. They are used to blend the three outcomes into one expected value below. They do not have to add up to 100; they are scaled.") + "</td>" + CASES.map(function (c) { return '<td><span class="val-cell"><input class="input num val-in" data-w-case="' + c + '" inputmode="decimal" aria-label="' + h(CASE_LABEL[c]) + ' likelihood" value="' + Math.round(M.weights[c] * 100) + '"><span class="faint">%</span></span></td>'; }).join("") + "</tr>" +
       "</tbody></table></div>" +
+      '<div class="pj-expected" id="pj-expected"></div>' +
       '<div class="val-foot"><label class="field" style="flex-direction:row;align-items:center;gap:10px">Return you require <input class="input num val-in" style="width:84px" id="v-req" inputmode="decimal" value="' + pctIn(M.required) + '"> %</label>' +
-        '<label class="field" style="flex-direction:row;align-items:center;gap:10px">Share count change per year ' + IL.tip("Negative if the company buys back shares; positive if it issues new ones (for example to pay staff).") + ' <input class="input num val-in" style="width:84px" id="v-sh" inputmode="decimal" value="' + pctIn(M.shareChange) + '"> %</label></div></section>' +
-      '<section class="card flush" id="val-years" data-w="expand,csv" data-w-title="Year by year"><div class="card-h"><h3 class="card-t">Year by year</h3><div class="seg" role="group" aria-label="Case" id="val-yr-seg"><button type="button" data-yr="bear" aria-pressed="false">Bear</button><button type="button" data-yr="base" aria-pressed="true">Base</button><button type="button" data-yr="bull" aria-pressed="false">Bull</button></div></div><div class="tbl-wrap"><table class="tbl" id="val-yr"></table></div><p class="note" style="padding:10px 20px 14px">The margin moves in a straight line from today\u2019s to the year-five target. \u201cPrice at the exit P/E\u201d shows what each year\u2019s earnings would be worth at that multiple.</p></section>' +
-      '<section class="card flush" id="val-whatif" data-w="expand,csv" data-w-title="What if"><div class="card-h"><h3 class="card-t">What if? Yearly return from today ' + IL.tip("Base case, with revenue growth and the year-five P/E changed. Green beats the return you require; amber makes money but less than that; red loses money.") + '</h3><span class="card-sub">Base-case margin, rows = revenue growth, columns = P/E in five years</span></div><div class="tbl-wrap"><table class="tbl val-sens" id="val-sens"></table></div></section>' +
+        '<label class="field" style="flex-direction:row;align-items:center;gap:10px">Share count change per year ' + IL.tip("Negative if the company buys back shares; positive if it issues new ones (for example to pay staff or buy a company).") + ' <input class="input num val-in" style="width:84px" id="v-sh" inputmode="decimal" value="' + pctIn(M.shareChange) + '"> %</label></div></section>' +
+      '<section class="card flush" id="pj-chart-card" data-w="expand" data-w-title="Price path"><div class="card-h"><h3 class="card-t">Where each case takes the price</h3><span class="card-sub">Each year’s earnings at the final-year P/E, against today’s price</span></div><div class="pj-chart" id="pj-chart"></div></section>' +
+      '<section class="card" id="pj-seeds"><h3 class="card-t">Where the starting numbers come from</h3><ul class="pj-notes">' + def.notes.map(function (n) { return "<li>" + h(n) + "</li>"; }).join("") + "</ul>" +
+        '<p class="note">From SEC filings' + (ctx.asOf ? " through the quarter to " + F.date(ctx.asOf) : "") + '. Bear and bull start from the same history: bear grows at 60% of the base rate, keeps 85% of the margin and gets a 20% lower P/E; bull the reverse. <a class="link" href="/learn/priced-in">How to use this</a></p></section>' +
+      '<section class="card flush" id="val-years" data-w="expand,csv" data-w-title="Year by year"><div class="card-h"><h3 class="card-t">Year by year</h3><div class="seg" role="group" aria-label="Case" id="val-yr-seg"><button type="button" data-yr="bear" aria-pressed="false">Bear</button><button type="button" data-yr="base" aria-pressed="true">Base</button><button type="button" data-yr="bull" aria-pressed="false">Bull</button></div></div><div class="tbl-wrap"><table class="tbl" id="val-yr"></table></div><p class="note" style="padding:10px 20px 14px">Growth and the margin each move in a straight line from the first year to the last. “Price at the final P/E” shows what each year’s earnings would be worth at that multiple.</p></section>' +
+      '<section class="card flush" id="val-whatif" data-w="expand,csv" data-w-title="What if"><div class="card-h"><h3 class="card-t">What if? Yearly return from today ' + IL.tip("Base case, with first-year growth and the final-year P/E changed. Green beats the return you require; amber makes money but less than that; red loses money.") + '</h3><span class="card-sub">Base-case margin and fade; rows = first-year growth, columns = final-year P/E</span></div><div class="tbl-wrap"><table class="tbl val-sens" id="val-sens"></table></div></section>' +
       '<div class="grid-2">' +
         '<section class="card"><h3 class="card-t">Starting point</h3><div>' +
           '<div class="stat"><span class="k">Price</span><span class="v">' + F.price(ctx.price) + "</span></div>" +
           '<div class="stat"><span class="k">Revenue, last 12 months</span><span class="v">' + F.money(ctx.revenue) + "</span></div>" +
           '<div class="stat"><span class="k">Net margin, last 12 months</span><span class="v">' + (ctx.margin !== null ? F.pct(ctx.margin * 100) : "—") + "</span></div>" +
+          '<div class="stat"><span class="k">P/E, last 12 months</span><span class="v">' + (ctx.pe ? F.mult(ctx.pe) : "—") + "</span></div>" +
           '<div class="stat"><span class="k">Revenue growth, last year</span><span class="v ' + F.cls(ctx.growth1y) + '">' + (ctx.growth1y !== null ? F.spct(ctx.growth1y * 100) : "—") + "</span></div>" +
+          '<div class="stat"><span class="k">Revenue growth, last two quarters</span><span class="v ' + F.cls(def.history.recent) + '">' + (def.history.recent !== null ? F.spct(def.history.recent * 100) : "—") + "</span></div>" +
           '<div class="stat"><span class="k">Revenue growth, 3-year average</span><span class="v ' + F.cls(ctx.growth3y) + '">' + (ctx.growth3y !== null ? F.spct(ctx.growth3y * 100) : "—") + "</span></div>" +
           '<div class="stat"><span class="k">Diluted shares</span><span class="v">' + F.count(ctx.shares) + "</span></div>" +
         "</div></section>" +
         '<section class="card"><h3 class="card-t">How to read this</h3><p class="muted" style="font-size:13.5px">A stock price is a bet on the future. Instead of guessing a “fair value”, start with what the price already assumes, then ask whether the company can beat it. If the growth it needs is well above anything it has done, the stock is priced for perfection. If it is below, the market may be too gloomy.</p>' +
-          '<p class="muted" style="font-size:13.5px">Want a discounted-cash-flow model with reinvestment and a cost of capital? The classic DCF model is still available.</p>' +
-          '<a class="card-foot" href="/?view=tool&section=projection&symbol=' + h(S.t) + '">Open the classic DCF model →</a></section>' +
+          '<p class="muted" style="font-size:13.5px">This is a model of your assumptions, not a price target. Want a discounted-cash-flow model with reinvestment and a cost of capital instead? The classic DCF is still available.</p>' +
+          '<a class="card-foot" href="/?view=tool&section=dcf&symbol=' + h(S.t) + '">Open the classic DCF model →</a></section>' +
       "</div>";
 
     function valRow(field, text, unit, tip) {
-      return "<tr><td>" + h(text) + " " + IL.tip(tip) + "</td>" + cases.map(function (c) {
+      return "<tr><td>" + h(text) + " " + IL.tip(tip) + "</td>" + CASES.map(function (c) {
         var v = M[c][field];
-        return '<td><span class="val-cell"><input class="input num val-in" data-case="' + c + '" data-field="' + field + '" inputmode="decimal" aria-label="' + h(label[c] + " " + text) + '" value="' + (unit === "%" ? pctIn(v) : String(v)) + '"><span class="faint">' + unit + "</span></span></td>";
+        return '<td><span class="val-cell"><input class="input num val-in" data-case="' + c + '" data-field="' + field + '" inputmode="decimal" aria-label="' + h(CASE_LABEL[c] + " " + text) + '" value="' + (unit === "%" ? pctIn(v) : String(v)) + '"><span class="faint">' + unit + "</span></span></td>";
       }).join("") + "</tr>";
     }
-
+    function inputs(c, over) {
+      var x = M[c], o = over || {};
+      return { price: ctx.price, revenue: ctx.revenue, shares: ctx.shares, years: M.years, growth: o.growth != null ? o.growth : x.growth, growthEnd: x.growthEnd,
+        margin: x.margin, margin0: ctx.margin !== null && ctx.margin > 0 ? ctx.margin : x.margin, exitPE: o.exitPE != null ? o.exitPE : x.exitPE, shareChange: M.shareChange, required: M.required };
+    }
     function read() {
       box.querySelectorAll("[data-case]").forEach(function (inp) {
         var c = inp.getAttribute("data-case"), f = inp.getAttribute("data-field");
         var n = Number(String(inp.value).replace(/[%x×,\s]/g, ""));
-        if (!isFinite(n)) return;
+        if (!isFinite(n) || String(inp.value).trim() === "") return;
         M[c][f] = f === "exitPE" ? n : n / 100;
       });
+      box.querySelectorAll("[data-w-case]").forEach(function (inp) {
+        var n = Number(String(inp.value).replace(/[%,\s]/g, ""));
+        if (isFinite(n) && n >= 0) M.weights[inp.getAttribute("data-w-case")] = n / 100;
+      });
       var r = Number(IL.$("#v-req").value), s = Number(IL.$("#v-sh").value);
-      if (isFinite(r)) M.required = r / 100;
-      if (isFinite(s)) M.shareChange = s / 100;
+      if (isFinite(r) && IL.$("#v-req").value.trim() !== "") M.required = r / 100;
+      if (isFinite(s) && IL.$("#v-sh").value.trim() !== "") M.shareChange = s / 100;
     }
     function problem() {
-      for (var k = 0; k < cases.length; k++) {
-        var c = cases[k];
-        var bad = V.validate({ price: ctx.price, revenue: ctx.revenue, shares: ctx.shares, years: 5, growth: M[c].growth, margin: M[c].margin, exitPE: M[c].exitPE, shareChange: M.shareChange, required: M.required });
-        if (bad) return (bad.field === "shareChange" || bad.field === "required" ? "" : label[c] + ": ") + bad.message;
+      for (var k = 0; k < CASES.length; k++) {
+        var bad = V.validate(inputs(CASES[k]));
+        if (bad) return (bad.field === "shareChange" || bad.field === "required" ? "" : CASE_LABEL[CASES[k]] + ": ") + bad.message;
       }
+      var w = M.weights.bear + M.weights.base + M.weights.bull;
+      if (!(w > 0)) return "Give at least one case a likelihood above zero.";
       return null;
     }
+    var outs = {};
     function compute() {
       var msg = problem(), err = IL.$("#val-err");
       if (err) { err.hidden = !msg; err.textContent = msg || ""; }
-      cases.forEach(function (c) {
-        var out = V.project({ price: ctx.price, revenue: ctx.revenue, shares: ctx.shares, years: 5, growth: M[c].growth, margin: M[c].margin, exitPE: M[c].exitPE, shareChange: M.shareChange, required: M.required });
+      IL.$("#o-fp-h").textContent = "Price in " + M.years + " years";
+      CASES.forEach(function (c) {
+        var out = outs[c] = V.project(inputs(c));
         IL.$("#o-fp-" + c).innerHTML = out ? '<b class="num">' + F.price(out.futurePrice) + "</b>" : "—";
         IL.$("#o-ar-" + c).innerHTML = out ? '<b class="num ' + F.cls(out.annualReturn) + '">' + F.spct(out.annualReturn * 100) + "</b>" : "—";
         IL.$("#o-vt-" + c).innerHTML = out ? '<span class="num">' + F.price(out.valueToday) + '</span> <span class="num ' + F.cls(out.upside) + '" style="font-size:12px">' + F.spct(out.upside * 100, 0) + "</span>" : "—";
       });
-      hero();
-      years();
-      sensitivity();
-      try { localStorage.setItem(key, JSON.stringify({ v: 1, m: M })); } catch (_) {}
+      var ex = outs.base && outs.bear && outs.bull ? V.weighted(outs, M.weights, ctx.price) : null, wsum = M.weights.bear + M.weights.base + M.weights.bull;
+      IL.$("#pj-expected").innerHTML = ex
+        ? '<span class="card-sub">Weighted by your odds (' + CASES.map(function (c) { return Math.round(M.weights[c] / wsum * 100) + "% " + c; }).join(", ") + ")</span>" +
+          '<span><b class="num">' + F.price(ex.futurePrice) + '</b> <span class="faint">in ' + M.years + ' years</span></span><span><b class="num ' + F.cls(ex.annualReturn) + '">' + F.spct(ex.annualReturn * 100) + '</b> <span class="faint">a year from ' + F.price(ctx.price) + "</span></span>"
+        : "";
+      hero(); chart(); years(); sensitivity();
+      try { localStorage.setItem(key, JSON.stringify({ v: 2, m: M })); } catch (_) {}
+    }
+
+    /* The price path for each case, as smooth curves through each year’s
+       value (monotone, so a curve never overshoots its own points). */
+    function chart() {
+      var el = IL.$("#pj-chart"); if (!el) return;
+      if (!outs.base || !outs.bear || !outs.bull) { el.innerHTML = '<div class="empty">Fix the inputs above to draw the cases.</div>'; return; }
+      var n = M.years, W = Math.max(320, Math.round(el.clientWidth || 720)), H = W < 560 ? 240 : 300, L = W < 560 ? 52 : 64, R = W < 560 ? 84 : 108, T = 18, B = 34;
+      var series = CASES.map(function (c) { return { c: c, pts: [ctx.price].concat(outs[c].pricePath) }; });
+      var all = series.reduce(function (a, s) { return a.concat(s.pts); }, []);
+      var lo = Math.min.apply(null, all), hi = Math.max.apply(null, all);
+      lo = Math.max(0, lo - (hi - lo) * 0.08); hi = hi + (hi - lo) * 0.06;
+      var step = niceStep((hi - lo) / 4), y0 = Math.floor(lo / step) * step, y1 = Math.ceil(hi / step) * step;
+      var X = function (i) { return L + (W - L - R) * i / n; }, Y = function (v) { return T + (H - T - B) * (1 - (v - y0) / (y1 - y0)); };
+      var ticks = []; for (var v = y0; v <= y1 + step / 2; v += step) ticks.push(v);
+      var year0 = new Date().getUTCFullYear();
+      var labelEvery = n > 5 ? 2 : 1;
+      var svg = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Projected price path for the bear, base and bull cases over ' + n + ' years">' +
+        ticks.map(function (t) { return '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(t) + '" y2="' + Y(t) + '" class="pj-grid"/><text x="' + (L - 10) + '" y="' + (Y(t) + 4) + '" class="pj-ax" text-anchor="end">' + h(axisPrice(t)) + "</text>"; }).join("") +
+        Array.from({ length: n + 1 }, function (_, i) { return i % labelEvery && i !== n ? "" : '<text x="' + X(i) + '" y="' + (H - 10) + '" class="pj-ax" text-anchor="middle">' + (i === 0 ? "Today" : year0 + i) + "</text>"; }).join("") +
+        '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(ctx.price) + '" y2="' + Y(ctx.price) + '" class="pj-now"/>' +
+        series.map(function (s) {
+          return '<path d="' + smooth(s.pts.map(function (v, i) { return [X(i), Y(v)]; })) + '" class="pj-line pj-' + s.c + '"/>' +
+            s.pts.map(function (v, i) { return i ? '<circle cx="' + X(i) + '" cy="' + Y(v) + '" r="' + (s.c === "base" ? 3 : 2.25) + '" class="pj-dot pj-' + s.c + '"><title>' + CASE_LABEL[s.c] + ", " + (year0 + i) + ": " + F.price(v) + "</title></circle>" : ""; }).join("");
+        }).join("") +
+        endLabels(series.map(function (s) { return { c: s.c, y: Y(s.pts[n]), v: s.pts[n] }; }), W - R + 10, T + 6, H - B) +
+        "</svg>" +
+        '<p class="note pj-legend"><span class="pj-key pj-key-now"></span>Today\u2019s price, ' + h(F.price(ctx.price)) + ". Hover a point for its value.</p>";
+      el.innerHTML = svg;
+    }
+    function endLabels(items, x, top, bottom) {
+      items.sort(function (a, b) { return a.y - b.y; });
+      for (var i = 1; i < items.length; i++) if (items[i].y - items[i - 1].y < 30) items[i].y = items[i - 1].y + 30;
+      var over = items[items.length - 1].y - bottom; if (over > 0) items.forEach(function (it) { it.y -= over; });
+      if (items[0].y < top) { var d = top - items[0].y; items.forEach(function (it) { it.y += d; }); }
+      return items.map(function (it) { return '<text x="' + x + '" y="' + (it.y - 2) + '" class="pj-end pj-' + it.c + '">' + (it.c === "base" ? "Base" : it.c === "bear" ? "Bear" : "Bull") + '</text><text x="' + x + '" y="' + (it.y + 13) + '" class="pj-endv">' + h(F.price(it.v)) + "</text>"; }).join("");
     }
     var yrCase = "base";
     function years() {
-      var c = M[yrCase], m0 = ctx.margin !== null ? ctx.margin : c.margin, rows = [];
-      var sh = ctx.shares, rev = ctx.revenue;
-      rows.push({ y: "Today", rev: rev, g: null, m: m0, ni: rev * m0, sh: sh });
-      for (var y = 1; y <= 5; y++) {
-        rev = rev * (1 + c.growth); sh = sh * (1 + M.shareChange);
-        var m = m0 + (c.margin - m0) * y / 5;
-        rows.push({ y: "Year " + y, rev: rev, g: c.growth, m: m, ni: rev * m, sh: sh });
-      }
-      var cols = rows.map(function (r) { return r; });
-      var line = function (label, fn, cls) { return "<tr" + (cls ? ' class="' + cls + '"' : "") + "><td>" + label + "</td>" + cols.map(function (r, i) { return "<td>" + fn(r, i) + "</td>"; }).join("") + "</tr>"; };
-      IL.$("#val-yr").innerHTML = "<thead><tr><th></th>" + cols.map(function (r) { return "<th>" + r.y + "</th>"; }).join("") + "</tr></thead><tbody>" +
+      var c = M[yrCase], o = outs[yrCase], t = IL.$("#val-yr"); if (!t) return;
+      if (!o) { t.innerHTML = ""; return; }
+      var m0 = ctx.margin !== null && ctx.margin > 0 ? ctx.margin : c.margin, year0 = new Date().getUTCFullYear();
+      var rows = [{ y: "Today", rev: ctx.revenue, g: null, m: ctx.margin !== null ? ctx.margin : m0, ni: ctx.netIncome, sh: ctx.shares, eps: ctx.netIncome !== null ? ctx.netIncome / ctx.shares : null, px: null }];
+      for (var i = 0; i < o.years; i++) rows.push({ y: String(year0 + i + 1), rev: o.revenue[i], g: o.growth[i], m: o.margin[i], ni: o.revenue[i] * o.margin[i], sh: o.shares[i], eps: o.eps[i], px: o.pricePath[i] });
+      var line = function (label, fn, cls) { return "<tr" + (cls ? ' class="' + cls + '"' : "") + "><td>" + label + "</td>" + rows.map(function (r, i) { return "<td>" + fn(r, i) + "</td>"; }).join("") + "</tr>"; };
+      t.innerHTML = "<thead><tr><th></th>" + rows.map(function (r) { return "<th>" + r.y + "</th>"; }).join("") + "</tr></thead><tbody>" +
         line("Revenue", function (r) { return F.money(r.rev); }, "em") +
         line("Growth", function (r) { return r.g === null ? "" : F.spct(r.g * 100); }) +
-        line("Net margin", function (r) { return F.pct(r.m * 100); }) +
-        line("Net income", function (r) { return F.money(r.ni); }) +
+        line("Net margin", function (r) { return r.m === null ? "—" : F.pct(r.m * 100); }) +
+        line("Net income", function (r) { return r.ni === null ? "—" : F.money(r.ni); }) +
         line("Diluted shares", function (r) { return F.count(r.sh); }) +
-        line("Earnings per share", function (r) { return F.eps(r.ni / r.sh); }, "em") +
-        line("Price at the exit P/E", function (r, i) { return i === 0 ? '<span class="faint">' + F.price(ctx.price) + " now</span>" : F.price(r.ni / r.sh * c.exitPE); }) +
+        line("Earnings per share", function (r) { return r.eps === null ? "—" : F.eps(r.eps); }, "em") +
+        line("Price at the final P/E", function (r, i) { return i === 0 ? '<span class="faint">' + F.price(ctx.price) + " now</span>" : F.price(r.px); }) +
         "</tbody>";
     }
     function sensitivity() {
       var b = M.base, gs = [-0.08, -0.04, 0, 0.04, 0.08].map(function (d) { return b.growth + d; }), pes = [0.6, 0.8, 1, 1.2, 1.4].map(function (k) { return Math.max(3, Math.round(b.exitPE * k)); });
-      IL.$("#val-sens").innerHTML = "<thead><tr><th>Growth \u2193 / P/E \u2192</th>" + pes.map(function (pe) { return "<th>" + pe + "\u00d7</th>"; }).join("") + "</tr></thead><tbody>" +
+      IL.$("#val-sens").innerHTML = "<thead><tr><th>First-year growth ↓ / final P/E →</th>" + pes.map(function (pe) { return "<th>" + pe + "×</th>"; }).join("") + "</tr></thead><tbody>" +
         gs.map(function (g, gi) {
-          return "<tr><td" + (gi === 2 ? ' class="em"' : "") + ">" + F.spct(g * 100) + " a year</td>" + pes.map(function (pe, pi) {
-            var out = V.project({ price: ctx.price, revenue: ctx.revenue, shares: ctx.shares, years: 5, growth: g, margin: b.margin, exitPE: pe, shareChange: M.shareChange, required: M.required });
+          return "<tr><td" + (gi === 2 ? ' class="em"' : "") + ">" + F.spct(g * 100) + "</td>" + pes.map(function (pe, pi) {
+            var out = V.project(inputs("base", { growth: g, exitPE: pe }));
             var r = out ? out.annualReturn : null;
             var tone = r === null ? "" : r >= M.required ? "s-good" : r >= 0 ? "s-mid" : "s-bad";
-            return '<td class="' + tone + (gi === 2 && pi === 2 ? " s-base" : "") + '">' + (r === null ? "\u2014" : F.spct(r * 100, 0)) + "</td>";
+            return '<td class="' + tone + (gi === 2 && pi === 2 ? " s-base" : "") + '">' + (r === null ? "—" : F.spct(r * 100, 0)) + "</td>";
           }).join("") + "</tr>";
         }).join("") + "</tbody>";
     }
+    function implied() {
+      return V.impliedGrowth({ price: ctx.price, revenue: ctx.revenue, shares: ctx.shares, years: M.years, margin: M.base.margin, exitPE: M.base.exitPE, shareChange: M.shareChange, required: M.required });
+    }
+    function delivered() {
+      var r = def.history.recent;
+      if (r !== null) return { v: r, label: "last two quarters" };
+      return ctx.growth3y !== null ? { v: ctx.growth3y, label: "3 years" } : { v: ctx.growth1y, label: "last year" };
+    }
     function hero() {
-      var m = M.base.margin, pe = M.base.exitPE;
-      var g = V.impliedGrowth({ price: ctx.price, revenue: ctx.revenue, shares: ctx.shares, years: 5, margin: m, exitPE: pe, shareChange: M.shareChange, required: M.required });
-      var past = ctx.growth3y !== null ? ctx.growth3y : ctx.growth1y;
-      var verdict = "", tone = "";
-      if (g !== null && past !== null) {
-        var gap = g - past;
-        if (gap > 0.05) { verdict = "The price asks for faster growth than the company has delivered."; tone = "bad"; }
-        else if (gap < -0.05) { verdict = "The price asks for slower growth than the company has delivered."; tone = "good"; }
-        else { verdict = "The price asks for roughly the growth the company has delivered."; tone = "gold"; }
-        tone = "";      // a reading, not a gain or a loss: shown neutral (rulebook 3)
+      var m = M.base.margin, pe = M.base.exitPE, g = implied(), past = delivered();
+      var verdict = "";
+      if (g !== null && past.v !== null) {
+        var gap = g - past.v;
+        verdict = gap > 0.05 ? "The price asks for faster growth than the company is delivering." : gap < -0.05 ? "The price asks for slower growth than the company is delivering." : "The price asks for roughly the growth the company is delivering.";
       }
       IL.$("#val-hero").innerHTML =
-        '<div class="val-h"><div><span class="card-sub">What the price implies ' + IL.tip("Solved backwards from today’s price: the yearly revenue growth that, with the base-case margin and P/E, earns exactly your required return.") + "</span>" +
+        '<div class="val-h"><div><span class="card-sub">What the price implies ' + IL.tip("Solved backwards from today’s price: the steady yearly revenue growth that, with the base-case margin and final P/E, earns exactly your required return.") + "</span>" +
           '<div class="val-big num">' + (g === null ? "—" : F.spct(g * 100)) + '<span class="val-unit">revenue growth a year</span></div>' +
-          '<p class="muted val-sent">At ' + F.price(ctx.price) + ", " + h(S.t) + " earns a " + F.pct(M.required * 100, 0) + " yearly return if revenue grows about " + (g === null ? "—" : F.pct(g * 100)) + " a year for five years, it keeps a " + F.pct(m * 100) + " net margin, and investors still pay " + F.mult(pe) + " earnings in year five.</p></div>" +
+          '<p class="muted val-sent">At ' + F.price(ctx.price) + ", " + h(S.t) + " earns a " + F.pct(M.required * 100, 0) + " yearly return if revenue grows about " + (g === null ? "—" : F.pct(g * 100)) + " a year for " + M.years + " years, it keeps a " + F.pct(m * 100) + " net margin, and investors still pay " + F.mult(pe) + " earnings at the end.</p></div>" +
           '<div class="val-cmp">' +
             '<div><span class="card-sub">Priced in</span><span class="num val-mid">' + (g === null ? "—" : F.spct(g * 100)) + "</span></div>" +
-            '<div><span class="card-sub">Delivered, ' + (ctx.growth3y !== null ? "3 years" : "last year") + '</span><span class="num val-mid ' + F.cls(past) + '">' + (past === null ? "—" : F.spct(past * 100)) + "</span></div>" +
-            (verdict ? '<span class="tag ' + tone + '" style="white-space:normal">' + h(verdict) + "</span>" : "") +
+            '<div><span class="card-sub">Delivering, ' + past.label + '</span><span class="num val-mid ' + F.cls(past.v) + '">' + (past.v === null ? "—" : F.spct(past.v * 100)) + "</span></div>" +
+            (verdict ? '<span class="tag" style="white-space:normal">' + h(verdict) + "</span>" : "") +
           "</div></div>" +
-        (def.unprofitable ? '<p class="callout">' + IL.icon("info") + "<span><b>Not profitable yet.</b> The margin here is a target for year five, not today’s figure.</span></p>" : "");
+        (def.unprofitable ? '<p class="callout">' + IL.icon("info") + "<span><b>Not profitable yet.</b> The margin here is a target for the final year, not today’s figure.</span></p>" : "");
     }
     if (!box.__valWired) {
       box.__valWired = true;
@@ -1440,15 +1548,12 @@
     box.__read = read; box.__compute = compute;
     IL.widgetShare["val-hero"] = function () {
       var msg = problem(); if (msg) { IL.toast("Fix the inputs first: " + msg); return; }
-      var outs = {};
-      cases.forEach(function (c) { outs[c] = V.project({ price: ctx.price, revenue: ctx.revenue, shares: ctx.shares, years: 5, growth: M[c].growth, margin: M[c].margin, exitPE: M[c].exitPE, shareChange: M.shareChange, required: M.required }); });
-      var g = V.impliedGrowth({ price: ctx.price, revenue: ctx.revenue, shares: ctx.shares, years: 5, margin: M.base.margin, exitPE: M.base.exitPE, shareChange: M.shareChange, required: M.required });
-      var past = ctx.growth3y !== null ? ctx.growth3y : ctx.growth1y;
-      var d = { implied: g, past: past, pastLabel: ctx.growth3y !== null ? "3-year annual rate" : "last 12 months", price: ctx.price, M: M, outs: outs };
-      var fr = function (o) { return o ? F.spct(o.annualReturn * 100) + "/yr" : "\u2014"; };
+      var g = implied(), past = delivered();
+      var d = { implied: g, past: past.v, pastLabel: past.label, price: ctx.price, M: M, outs: outs };
+      var fr = function (o) { return o ? F.spct(o.annualReturn * 100) + "/yr" : "—"; };
       IL.shareImage({
-        title: "Share your " + S.t + " valuation", file: S.t + "-valuation",
-        text: S.t + ": the price implies " + (g === null ? "\u2014" : F.spct(g * 100)) + " a year revenue growth" + (past !== null ? "; it has delivered " + F.spct(past * 100) + "." : ".") + " My five-year cases: bear " + fr(outs.bear) + ", base " + fr(outs.base) + ", bull " + fr(outs.bull) + ". " + location.origin + "/research/" + S.t + "/valuation",
+        title: "Share your " + S.t + " projection", file: S.t + "-projection",
+        text: S.t + ": the price implies " + (g === null ? "—" : F.spct(g * 100)) + " a year revenue growth" + (past.v !== null ? "; it is delivering " + F.spct(past.v * 100) + "." : ".") + " My " + M.years + "-year cases: bear " + fr(outs.bear) + ", base " + fr(outs.base) + ", bull " + fr(outs.bull) + ". " + location.origin + "/research/" + S.t + "/projection",
         styles: ["engraved", "atlas", "globe", "ledger"],
         render: function (style, plate) { return drawValuationCard(d, plate); }
       });
@@ -1460,33 +1565,48 @@
       IL.$$("#val-yr-seg [data-yr]").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
       years();
     });
+    if (!box.__pjResize) { box.__pjResize = true; var rt; window.addEventListener("resize", function () { clearTimeout(rt); rt = setTimeout(function () { if (box.__chart) box.__chart(); }, 150); }); }
+    box.__chart = chart;
+    IL.$("#pj-years").addEventListener("click", function (e) {
+      var b = e.target.closest("[data-years]"); if (!b) return;
+      var n = Number(b.getAttribute("data-years"));
+      if (n > 5 && !IL.isPro()) {
+        IL.dialog('<h2>10-year projections are part of Pro</h2><p class="muted">Pro adds the 10-year horizon, CSV downloads, unlimited lookups, alerts and every tab.</p><div class="row" style="justify-content:flex-end"><button class="btn ghost" data-close type="button">Not now</button><a class="btn primary" href="/pricing" data-checkout="monthly">Start the free trial</a></div>');
+        return;
+      }
+      M.years = n;
+      IL.$$("#pj-years [data-years]").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+      compute();
+    });
     var versions = [];
     function loadVersions(selectId) {
+      if (!IL.user) { var s0 = IL.$("#val-versions"); if (s0) s0.innerHTML = '<option value="">No saved versions</option>'; return; }
       IL.api("/api/saves", { fresh: true }).then(function (res) {
         versions = (res.ok && Array.isArray(res.data) ? res.data : []).filter(function (x) { return x.type === "implied" && x.ticker === S.t && x.data && x.data.m; });
         var sel = IL.$("#val-versions"); if (!sel) return;
         sel.innerHTML = '<option value="">' + (versions.length ? "Saved versions (" + versions.length + ")" : "No saved versions") + "</option>" +
-          versions.map(function (v) { return '<option value="' + v.id + '">' + h(v.label || "Version") + " \u00b7 " + h(F.date(v.created_at, { year: undefined })) + "</option>"; }).join("");
+          versions.map(function (v) { return '<option value="' + v.id + '">' + h(v.label || "Version") + " · " + h(F.date(v.created_at, { year: undefined })) + "</option>"; }).join("");
         if (selectId) sel.value = String(selectId);
         var want = new URLSearchParams(location.search).get("save");
         if (want && !box.__loadedSave) { box.__loadedSave = true; var hit = versions.filter(function (v) { return String(v.id) === want; })[0]; if (hit) useVersion(hit); }
       });
     }
     function useVersion(v) {
-      M = JSON.parse(JSON.stringify(v.data.m));
-      renderValuation(box, ctx, M, def, key);
-      IL.toast("Loaded \u201c" + (v.label || "version") + "\u201d");
+      var m = migrateModel(v.data.m, def); if (!m) return;
+      renderProjection(box, ctx, m, def, key);
+      IL.toast("Loaded “" + (v.label || "version") + "”");
     }
     IL.$("#val-versions").addEventListener("change", function (e) {
       var v = versions.filter(function (x) { return String(x.id) === e.target.value; })[0];
       if (v) useVersion(v);
     });
     IL.$("#val-save").addEventListener("click", function () {
-      IL.dialog('<h2>Save this version</h2><label class="field">Name<input class="input" id="vs-label" maxlength="80" value="' + h("Base " + F.spct(M.base.growth * 100, 0) + " growth, " + M.base.exitPE + "\u00d7 exit") + '"></label><p class="note" id="vs-err"></p><div class="row" style="justify-content:flex-end"><button class="btn ghost" type="button" data-close>Cancel</button><button class="btn primary" type="button" id="vs-go">Save</button></div>', function (d) {
+      if (!IL.user) { location.href = IL.signupHref(); return; }
+      IL.dialog('<h2>Save this version</h2><label class="field">Name<input class="input" id="vs-label" maxlength="80" value="' + h("Base " + F.spct(M.base.growth * 100, 0) + " fading to " + F.pct(M.base.growthEnd * 100, 0) + ", " + M.base.exitPE + "×, " + M.years + "y") + '"></label><p class="note" id="vs-err"></p><div class="row" style="justify-content:flex-end"><button class="btn ghost" type="button" data-close>Cancel</button><button class="btn primary" type="button" id="vs-go">Save</button></div>', function (d) {
         d.querySelector("#vs-go").addEventListener("click", function () {
-          IL.api("/api/saves", { method: "POST", body: { ticker: S.t, type: "implied", label: d.querySelector("#vs-label").value, data: { v: 1, m: M, price: ctx.price } } }).then(function (res) {
+          IL.api("/api/saves", { method: "POST", body: { ticker: S.t, type: "implied", label: d.querySelector("#vs-label").value, data: { v: 2, m: M, price: ctx.price } } }).then(function (res) {
             if (!res.ok) { d.querySelector("#vs-err").textContent = (res.data && res.data.error) || "Could not save."; return; }
-            d.close(); IL.toast("Saved. Find it on your Watchlist page too."); loadVersions(res.data.id);
+            d.close(); IL.toast("Saved. Find it on your Saved page too."); loadVersions(res.data.id);
           });
         });
       });
@@ -1494,10 +1614,33 @@
     loadVersions();
     IL.$("#val-reset").addEventListener("click", function () {
       try { localStorage.removeItem(key); } catch (_) {}
-      M = JSON.parse(JSON.stringify(def));
-      renderValuation(box, ctx, M, def, key);
+      renderProjection(box, ctx, JSON.parse(JSON.stringify(stripNotes(def))), def, key);
     });
     compute();
+  }
+  function axisPrice(v) {
+    if (v === 0) return "$0";
+    return v >= 1000 ? "$" + Math.round(v).toLocaleString("en-US") : v >= 10 ? "$" + (Math.round(v * 10) / 10).toString() : "$" + (Math.round(v * 100) / 100).toString();
+  }
+  function niceStep(raw) {
+    var p = Math.pow(10, Math.floor(Math.log10(Math.max(raw, 1e-9)))), f = raw / p;
+    return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * p;
+  }
+  /* Monotone cubic path (Fritsch–Carlson): smooth, and never bends past the
+     points it joins, so a curve cannot invent a peak the model does not have. */
+  function smooth(pts) {
+    var n = pts.length; if (n < 2) return "";
+    var dx = [], dy = [], m = [], t = [];
+    for (var i = 0; i < n - 1; i++) { dx.push(pts[i + 1][0] - pts[i][0]); dy.push(pts[i + 1][1] - pts[i][1]); m.push(dy[i] / dx[i]); }
+    t.push(m[0]);
+    for (var j = 1; j < n - 1; j++) t.push(m[j - 1] * m[j] <= 0 ? 0 : 3 * (dx[j - 1] + dx[j]) / ((2 * dx[j] + dx[j - 1]) / m[j - 1] + (dx[j] + 2 * dx[j - 1]) / m[j]));
+    t.push(m[n - 2]);
+    var d = "M" + pts[0][0].toFixed(1) + "," + pts[0][1].toFixed(1);
+    for (var k = 0; k < n - 1; k++) {
+      var h3 = dx[k] / 3;
+      d += "C" + (pts[k][0] + h3).toFixed(1) + "," + (pts[k][1] + t[k] * h3).toFixed(1) + " " + (pts[k + 1][0] - h3).toFixed(1) + "," + (pts[k + 1][1] - t[k + 1] * h3).toFixed(1) + " " + pts[k + 1][0].toFixed(1) + "," + pts[k + 1][1].toFixed(1);
+    }
+    return d;
   }
 
   /* ═════════════════════════════════════════════════════════════════════
@@ -1697,7 +1840,9 @@
   function boot() {
     IL.shell("research");
     var p = parsePath();
+    if (!p.t && p.lab) { renderProjectionLanding(); return; }
     if (!p.t) { renderLanding(); return; }
+    if (/\/valuation\/?$/.test(location.pathname)) history.replaceState(null, "", location.pathname.replace(/valuation\/?$/, "projection") + location.search);
     S.t = p.t; S.tab = p.tab;
     renderFrame();
     IL.me();
