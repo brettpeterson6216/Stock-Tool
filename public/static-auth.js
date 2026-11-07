@@ -92,7 +92,7 @@
     });
 
     nav.querySelectorAll(".il-static-account").forEach(function (el) {
-      el.href = signedIn ? "/?view=tool&section=reports" : "/login";
+      el.href = signedIn ? "/saved" : "/login";
       el.setAttribute("aria-label", signedIn ? "Open saved research" : "Log in");
     });
 
@@ -143,7 +143,7 @@
     if (!account) {
       account = document.createElement("a");
       account.className = "btn-nav-outline il-global-account";
-      account.href = "/?view=tool&section=reports";
+      account.href = "/account";
       actions.appendChild(account);
     }
     /* The app paints the plan as a gold pill (.nav-acct-badge); these pages
@@ -290,17 +290,17 @@
       '</form>' +
       '<nav aria-label="Mobile product navigation">' +
         '<a href="/"><span aria-hidden="true">⌂</span>Home</a>' +
-        '<a href="/?view=tool&amp;section=analyze"><span aria-hidden="true">⌁</span>Research</a>' +
+        '<a href="/research"><span aria-hidden="true">⌁</span>Research</a>' +
         '<a href="/lens-score"><span aria-hidden="true">◎</span>LensScore</a>' +
-        '<a href="/?view=tool&amp;section=projection"><span aria-hidden="true">↗</span>Scenarios</a>' +
-        '<a href="/?view=tool&amp;section=compare"><span aria-hidden="true">⇄</span>Compare</a>' +
-        '<a href="/?view=tool&amp;section=workspace&amp;workspace_tab=watchlist"><span aria-hidden="true">◇</span>Watchlists</a>' +
+        '<a href="/projection"><span aria-hidden="true">↗</span>Scenarios</a>' +
+        '<a href="/compare"><span aria-hidden="true">⇄</span>Compare</a>' +
+        '<a href="/watchlist"><span aria-hidden="true">◇</span>Watchlists</a>' +
         '<a href="/blog"><span aria-hidden="true">ⓘ</span>Learn</a>' +
-        '<a href="/?pricing=1"><span aria-hidden="true">◇</span>Pricing</a>' +
+        '<a href="/pricing"><span aria-hidden="true">◇</span>Pricing</a>' +
         '<a href="/about"><span aria-hidden="true">ⓘ</span>About</a>' +
         '<a class="lp-guest-link" href="/login"><span aria-hidden="true">→</span>Log in</a>' +
         '<a class="lp-guest-link" href="/signup?source=mobile_free"><span aria-hidden="true">＋</span>Sign up free</a>' +
-        '<a class="lp-account-link" href="/?view=tool&amp;section=reports"><span aria-hidden="true">◉</span>Account</a>' +
+        '<a class="lp-account-link" href="/account"><span aria-hidden="true">◉</span>Account</a>' +
       '</nav>' +
     '</div>';
   nav.insertAdjacentElement("afterend", drawer);

@@ -186,7 +186,7 @@ input::-webkit-search-cancel-button{display:none}
         '<button class="avatar" part="member" id="avatar" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="menu" aria-label="Account menu"></button>' +
         '<div class="menu" id="menu" role="menu" hidden>' +
           '<div class="head" id="mhead"></div>' +
-          '<a role="menuitem" href="/?account=1">Account settings</a>' +
+          '<a role="menuitem" href="/account">Account settings</a>' +
           '<button role="menuitem" type="button" id="billing">See Pro plans</button>' +
           "<hr>" +
           '<button role="menuitem" type="button" id="logout">Log out</button>' +

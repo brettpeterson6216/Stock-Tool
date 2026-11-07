@@ -11,12 +11,6 @@ test("Finnhub industries map onto the screener's sector filter", () => {
   for (const [ind, want] of Object.entries(cases)) assert.equal(T.sectorFromIndustry(ind), want, ind);
 });
 
-test("every sector the screener can assign has a filter option", () => {
-  const html = require("node:fs").readFileSync(require("node:path").join(__dirname, "..", "index.html"), "utf8");
-  for (const s of ["Tech", "Comm.", "Health", "Finance", "Staples", "Energy", "Materials", "Industrials", "Cons.Disc", "Real Est.", "Utilities"])
-    assert.ok(html.includes(`<option value="${s}">`), s);
-});
-
 test("RSI is 100 on a straight rise and near 50 on a zigzag", () => {
   assert.equal(T.rsi14(Array.from({ length: 30 }, (_, i) => 100 + i)), 100);
   const zig = Array.from({ length: 60 }, (_, i) => 100 + (i % 2 ? 1 : -1));

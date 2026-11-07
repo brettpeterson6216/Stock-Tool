@@ -31,11 +31,8 @@ test("grade filters compare letter grades in order", () => {
   assert.ok(F.gradeAtLeast(null, ""));
 });
 
-test("the screener ships grade filters and the leaderboard is wired", () => {
+test("the leaderboard and grade history are wired", () => {
   const fs = require("node:fs"), path = require("node:path");
-  const html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
-  for (const id of ["scr-ls", "scr-g-value", "scr-g-momentum"]) assert.match(html, new RegExp(`id="${id}"`));
-  assert.match(html, /data-sort="lensScore"/);
   const lab = fs.readFileSync(path.join(__dirname, "..", "labs", "lens-score", "index.html"), "utf8");
   assert.match(lab, /data-view="leaders"/); assert.match(lab, /id="rc-history-chart"/);
   const route = fs.readFileSync(path.join(__dirname, "..", "routes", "lens-score.js"), "utf8");

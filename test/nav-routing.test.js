@@ -65,19 +65,3 @@ test("the pricing page says what it costs and where the money goes", () => {
   assert.match(html, /<title>Pricing — ImpliedLens<\/title>/);
 });
 
-test("the watchlist tab lands on the watchlist, without racing the render", () => {
-  const ws = read("public", "workspace-system.js");
-  const fn = ws.slice(ws.indexOf("window.openWorkspaceWatchlist"), ws.indexOf("window.openPortfolioGuide"));
-  assert.doesNotMatch(fn, /const tab = document\.querySelector/,
-    "the tab is still grabbed synchronously, before navGoTo has rendered it");
-  assert.match(fn, /clickWorkspaceTab\("watchlist"\)/, "the watchlist tab is not clicked at all");
-  assert.match(ws, /function clickWorkspaceTab/, "no retrying click helper");
-});
-
-test("the rail has exactly one heading, and it is the one that changes", () => {
-  const html = read("index.html");
-  const rail = html.slice(html.indexOf('class="sb-group-pad"') - 900, html.indexOf('data-sec="analyze"'));
-  assert.doesNotMatch(rail, /<div class="prime-side-section">/,
-    "the static heading is back — it says Research tools on every tab, including Watchlists");
-  assert.match(rail, /<div class="sb-group-label">/, "the rail lost its heading entirely");
-});

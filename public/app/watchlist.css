@@ -20,3 +20,10 @@
 .wl-digest[hidden]{display:none}
 .wl-digest input{accent-color:var(--gold);width:18px;height:18px;margin-top:2px;flex:none}
 .wl-digest>span{display:flex;flex-direction:column;gap:2px;font-size:13.5px}
+/* Theses on /saved */
+.th-list .th-row{align-items:flex-start;padding:14px 20px}
+.th-list .th-main{min-width:0;flex:1}
+.th-list .th-main>a{display:inline;color:var(--text)}
+.th-text{margin:6px 0 0;font-size:14px;line-height:1.55;color:var(--text);white-space:pre-wrap;max-width:75ch}
+.th-list-line{margin:4px 0 0;font-size:13px;line-height:1.5;color:var(--text2);max-width:75ch}
+@media (max-width:640px){.th-list .th-row{flex-direction:column}}

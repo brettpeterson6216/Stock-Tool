@@ -15,7 +15,7 @@
     t = String(t || "").trim().toUpperCase().replace(/[^A-Z0-9.\-^]/g, "").slice(0, 12);
     if (!t) { var i = $("landing-search"); if (i) i.focus(); return; }
     if (typeof window.heroLoadTicker === "function") window.heroLoadTicker(t);
-    else window.location.href = "/?view=tool&section=analyze&symbol=" + encodeURIComponent(t);
+    else window.location.href = "/research/" + encodeURIComponent(t);
   }
 
   function wireSearch() {
@@ -139,7 +139,7 @@
     setText("lx-comp-risk", ten(comps.risk)); setBar("lx-bar-risk", comps.risk);
     list("lx-demo-strengths", s.strengths, "No standout strengths on the current evidence.");
     list("lx-demo-concerns", (s.concerns || []).concat(s.caps || []).map(function (c) { return typeof c === "string" ? c : (c && (c.reason || c.label)) || ""; }).filter(Boolean), "No active warnings on the current evidence.");
-    var open = $("lx-demo-open"); if (open) open.href = "/?view=tool&section=analyze&symbol=" + encodeURIComponent(t);
+    var open = $("lx-demo-open"); if (open) open.href = "/research/" + encodeURIComponent(t);
     setText("lx-demo-asof", (d.servedStale ? "Most recent read · " : "Live data · ") + new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" }) + " · Educational research, not a recommendation.");
   }
 
@@ -184,7 +184,7 @@
     setText("lx-demo-score", "–");
     var dial = $("lx-dial"); if (dial) dial.style.setProperty("--lx-score", "0");
     list("lx-demo-strengths", [], "–"); list("lx-demo-concerns", [], "–");
-    var open = $("lx-demo-open"); if (open) open.href = "/?view=tool&section=analyze&symbol=" + encodeURIComponent(t);
+    var open = $("lx-demo-open"); if (open) open.href = "/research/" + encodeURIComponent(t);
   }
 
   function load(t) {

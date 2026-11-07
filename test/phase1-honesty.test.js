@@ -24,7 +24,7 @@ test("pricing and marketing copy do not sell features the data feeds cannot deli
 });
 
 test("no page still teaches the retired LensValue / LensSetup model", () => {
-  const files = ["public/lessons-data.js", "public/learn.html", "index.html", "public/data-sources.html", "public/product-system.js", "public/learn/lens-score.html", "public/learn/site-tour.html"];
+  const files = ["public/lessons-data.js", "public/learn.html", "index.html", "public/data-sources.html", "public/learn/lens-score.html", "public/learn/site-tour.html"];
   for (const f of files) assert.doesNotMatch(read(f), /LensValue|LensSetup|Golden Lens/, f);
   const L = require("../public/lessons-data.js").bySlug["lens-score"];
   assert.match(L.title, /five grades/);
@@ -48,18 +48,6 @@ test("next earnings picks the first future date and labels the session", () => {
   assert.equal(n.date, "2026-10-29"); assert.equal(n.when, "after the close"); assert.equal(n.days, 21); assert.equal(n.epsEstimate, 1.5);
   assert.equal(nextEarnings({ earningsCalendar: [] }), null);
   assert.equal(nextEarnings(null), null);
-});
-
-test("stock page loads the report card, alert button and CSV export", () => {
-  const html = read("index.html");
-  assert.match(html, /src="\/stock-report-card\.js/);
-  assert.match(html, /src="\/csv-export\.js/);
-  assert.match(read("public/app-legacy.js"), /window\.ILStockCard\?\.load\(ticker\)/);
-  const card = read("public/stock-report-card.js");
-  assert.match(card, /\/api\/lens-score\/\$\{encodeURIComponent\(ticker\)\}\?card=1/);
-  assert.match(card, /X-CSRF-Token/);
-  assert.match(card, /\/api\/lens-grades\?tickers=/);
-  assert.match(read("labs/lens-score/index.html"), /src="\/csv-export\.js/);
 });
 
 test("CSV export guards against spreadsheet formulas and quotes properly", () => {

@@ -20,12 +20,8 @@ test("every mobile menu row is a real destination", () => {
   const rows = [...menu.matchAll(/<a class="il-mm-item[^"]*" href="([^"]+)"/g)].map(m => m[1]);
   assert.ok(rows.length >= 18, `only ${rows.length} rows`);
   for (const href of rows) assert.ok(href === "#" || href.startsWith("/"), href);
-  for (const sec of [...menu.matchAll(/data-mm-sec="([a-z]+)"/g)].map(m => m[1])) {
-    // Call Research and Wealth Planner build their own sections at load.
-    const built = fs.readdirSync(P("public")).filter(f => f.endsWith(".js"))
-      .some(f => fs.readFileSync(P("public", f), "utf8").includes('"sec-' + sec + '"') || fs.readFileSync(P("public", f), "utf8").includes("sec-" + sec + "'"));
-    assert.ok(new RegExp('id="sec-' + sec + '"').test(html) || built, `menu points at a missing section: ${sec}`);
-  }
+  // Section rows of the retired app become real navigations (home-lite.js).
+  assert.match(fs.readFileSync(P("public", "home-lite.js"), "utf8"), /function toSection\(id\)[\s\S]*?go\(PAGES\[id\] \|\| "\/research"\)/);
   for (const hook of ["data-mm-account", "data-mm-feedback", "data-mm-logout", "data-mm-market", "data-mm-lensscore"]) {
     assert.match(menu, new RegExp(hook), hook + " row is missing");
     assert.match(siteNav, new RegExp(hook), hook + " has no handler");
@@ -37,17 +33,9 @@ test("the header is solid and phone fields cannot trigger iOS zoom", () => {
   assert.match(v5, /:is\(input:not\(\[type="checkbox"\]\)[^)]*\)[^{]*\{ font-size: 16px !important; \}/, "phone inputs can be under 16px again");
 });
 
-test("account settings has no emoji, shouting labels or unlabeled fields", () => {
-  const modal = html.slice(html.indexOf('id="acct-modal-bg"'), html.indexOf('class="il-acct-foot"'));
-  assert.doesNotMatch(modal, /text-transform:uppercase|💳|⭐|✦/);
-  for (const id of ["am-new-username", "am-cur-pw", "am-new-pw", "am-confirm-pw"]) assert.match(modal, new RegExp('for="' + id + '"'), id + " has no label");
-});
-
 test("the research pages have a phone layout pass", () => {
   for (const sel of [".ilr-ohlc", ".risk-grid", ".il-trust-grid", ".earn-table", ".il-research-hero", ".sec-filing-desc", ".dp-card-val", "#app-stats-footer", ".plab2-exp-v"]) {
     assert.ok(v5.includes(sel), `no phone rule for ${sel}`);
   }
-  const legacy = fs.readFileSync(P("public", "app-legacy.js"), "utf8");
-  assert.match(legacy, /function centerMobileTab\(\)/, "the phone section strip no longer keeps the current tab in view");
   assert.doesNotMatch(html, /color:rgba\(237,232,224,\.2\d\)/, "near-invisible text is back");
 });

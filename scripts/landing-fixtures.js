@@ -139,6 +139,7 @@ module.exports = function route(path, user) {
   if (p.startsWith("/api/lens-score/")) return ok(lens);
   if (p.startsWith("/api/fundamentals/history/")) return need("account") || ok(hist());
   if (p.startsWith("/api/financials/")) return need("account") || ok(annual());
+  if (p.startsWith("/api/estimates/")) return need("pro") || ok({ ticker: p.split("/")[3], suggestedWACC: 10.4, estimatesAvailable: false });
   if (p.startsWith("/api/funds/")) return ok(funds);
   if (p.startsWith("/api/news/")) return ok(news);
   if (/^\/api\/calls\/[^/]+\/.+/.test(p)) return need("pro") || ok({ paragraphs: ["NVIDIA reported record revenue of $96.2 billion for the second quarter.", "Data Center revenue was a record, up strongly from a year ago."] });
@@ -151,6 +152,9 @@ module.exports = function route(path, user) {
   if (p.startsWith("/api/lens-leaders")) return ok(leaders);
   if (p.startsWith("/api/search")) return ok(search);
   if (p.startsWith("/api/workspace/watchlist")) return need("account") || ok(["NVDA","AAPL","MSFT","PLTR","COST"].map((t,i) => ({ id:i+1, ticker: t, note: i===0?"Buy more under $180 if data-center growth holds":"", target_price: i===0?180:(i===2?150:null) })));
+  if (p === "/api/workspace/theses") return need("account") || ok([{ id: 1, ticker: "COST", status: "owned", conviction: 4, thesis: "Membership fees compound; renewal rate above 90% gives pricing power.", catalysts: ["Fee increase", "International openings"], risks: ["Valuation above 50x earnings"], sell_conditions: ["Renewal rate below 88%"], target_price: 1100, bear_price: 780, review_date: "2026-11-01" }]);
+  if (p === "/api/workspace/positions") return need("account") || ok([{ id: 1, ticker: "COST", shares: 12, cost_basis: 812.5, notes: "Core holding" }, { id: 2, ticker: "NVDA", shares: 40, cost_basis: 121.1, notes: "" }]);
+  if (p.startsWith("/api/market/risk-free")) return ok({ rate: 0.0386, asOf: "2026-10-30", source: "FRED DTB3" });
   if (p.startsWith("/api/market/snapshot")) return ok({ quotes: (q.get("tickers")||"").split(",").map((t,i) => ({ symbol: t, name: t + " INC", price: 100 + i * 37.3, chgPct: (i % 2 ? -1 : 1) * (0.4 + i), asOf: "2026-10-30" })) });
   if (p.startsWith("/api/market/landing-summary")) { const ser=(b,d)=>Array.from({length:30},(_,i)=>+(b*(1+d*i/30+Math.sin(i/3)*0.01)).toFixed(2)); return ok({ window:"1M", indexes:[{symbol:"^GSPC",name:"S&P 500 (SPY)",price:684.2,changePct:0.42,closes:ser(660,0.035)},{symbol:"^IXIC",name:"Nasdaq (QQQ)",price:612.8,changePct:0.87,closes:ser(580,0.05)},{symbol:"^DJI",name:"Dow Jones (DIA)",price:471.3,changePct:-0.18,closes:ser(468,0.006)}], sectors:[{symbol:"XLK",name:"Technology",changePct:1.12},{symbol:"XLC",name:"Comm. Services",changePct:0.64},{symbol:"XLI",name:"Industrials",changePct:-0.21},{symbol:"XLF",name:"Financials",changePct:0.33},{symbol:"XLE",name:"Energy",changePct:-0.92},{symbol:"XLRE",name:"Real Estate",changePct:0.08}], breadth:67, advancing:4, measured:6, asOf:"2026-11-02T19:00:00Z" }); }
   if (p.startsWith("/api/market/movers")) return ok([["REGN",13.3],["SMCI",7.1],["PLTR",5.2],["TSLA",4.4],["AMD",3.9],["MU",3.1]].map(([s,c]) => ({ symbol: s, name: s + " CORP", price: 100, chgPct: q.get("type")==="losers" ? -c : c, asOf: "2026-10-30" })));

@@ -47,29 +47,6 @@ test("the wordmark is one word in the markup, on every page", () => {
    app bar -- for as long as they existed. They were invisible to every check
    because they only render once you sign in, and they were three different
    typefaces at three different sizes besides. */
-test("the app shell's brand marks use the canonical wordmark", () => {
-  const html = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
-  for (const brand of ["prime-dash-brand", "prime-sidebar-brand", "prime-mobile-brand", "prime-mobile-appbar"]) {
-    const region = html.slice(html.indexOf(brand), html.indexOf(brand) + 900);
-    assert.match(
-      region,
-      /<span class="il-wordmark">Implied<span class="il-wordmark-b">Lens<\/span><\/span>/,
-      `.${brand} does not use the canonical wordmark span`
-    );
-  }
-  // And the premium layer has to undo lens-prime-shared's uppercase for them,
-  // or the markup is one word and the render is two -- the original bug.
-  for (const sel of [".prime-dash-brand .il-wordmark", ".prime-sidebar-brand .il-wordmark",
-                     ".prime-mobile-brand .il-wordmark", ".prime-mobile-appbar a .il-wordmark"]) {
-    assert.ok(premium.includes(sel), `${sel} is not covered by the premium wordmark rules`);
-  }
-  const block = premium.slice(premium.indexOf(".prime-dash-brand .il-wordmark"));
-  assert.match(block.slice(0, 700), /text-transform: none !important/);
-  assert.match(block.slice(0, 700), /font-family: "Plus Jakarta Sans", var\(--rp-sans\) !important/);
-  /* Same weight as the nav renders, or the five marks do not match on screen. */
-  assert.match(block.slice(0, 700), /font-weight: 600 !important/);
-});
-
 test("nothing uppercases the wordmark back into two words", () => {
   // The premium layer is the last word on this site (build-styles.js declares
   // `premium` before `heritage`, which inverts !important order). So the reset

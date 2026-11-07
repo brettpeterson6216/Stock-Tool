@@ -5,7 +5,6 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { buildFacts } = require("./helpers/synthetic-facts");
 const { buildQuarterlyHistory, attachPrices, calendarLabel } = require("../lib/fundamentals-history");
-const G = require("../public/growth-math.js");
 
 const close = (a, b, tol = 1e-6) => Math.abs(a - b) <= tol * Math.max(1, Math.abs(b));
 const SPLIT = [{ date: Date.parse("2024-06-10T00:00:00Z") / 1000, ratio: 10 }];
@@ -62,49 +61,6 @@ test("prices attach to the close on or before each quarter end", () => {
   attachPrices(copy, [{ time: t("2025-06-27"), close: 50 }, { time: t("2025-07-03"), close: 99 }]);
   assert.equal(copy.at(-1).price, 50);
   assert.equal(copy[0].price, null);
-});
-
-test("TTM, per-share, margin and valuation series", () => {
-  const priced = rows.map(r => ({ ...r, price: 100 }));
-  const rev = G.series(priced, "revenue", "ttm", 0);
-  assert.equal(rev.length, 39, "the first three quarters have no TTM value");
-  const i = priced.length - 1;
-  const ttmRev = [0, 1, 2, 3].reduce((s, k) => s + trueRev(i - k), 0);
-  assert.ok(close(rev.at(-1).value, ttmRev));
-  const nm = G.series(priced, "netMargin", "ttm", 0).at(-1).value;
-  assert.ok(close(nm, 20), "net margin 20%");
-  const ttmEps = [0, 1, 2, 3].reduce((s, k) => s + trueRev(i - k) * 0.2 / trueShares(i - k), 0);
-  assert.ok(close(G.series(priced, "pe", "q", 0).at(-1).value, 100 / ttmEps, 1e-3), "P/E is always trailing");
-  assert.equal(G.series(priced, "revenue", "q", 3).length, 13, "3 years = 13 quarters of bars");
-});
-
-test("summary numbers and the plain-English read", () => {
-  const pts = G.series(rows, "revenue", "ttm", 5);
-  const st = G.stats(pts, "revenue");
-  assert.ok(close(st.cagr, (Math.pow(1.03, 4) - 1) * 100, 1e-6), "CAGR of 3% a quarter");
-  assert.ok(close(st.yoy, (Math.pow(1.03, 4) - 1) * 100, 1e-6));
-  const text = G.read(rows, "revenue", "ttm", 5, "Synthetic");
-  assert.match(text, /^Revenue went from \$[\d.]+B to \$[\d.]+B \(trailing twelve months\)/);
-  assert.match(G.read(rows, "shares", "ttm", 5, "Synthetic"), /bought back stock/);
-});
-
-test("formatting", () => {
-  assert.equal(G.format(1.234e9, "revenue"), "$1.2B");
-  assert.equal(G.format(-5.5e8, "netIncome"), "−$550M");
-  assert.equal(G.format(2.5, "eps"), "$2.50");
-  assert.equal(G.format(24.44, "grossMargin"), "24.4%");
-  assert.equal(G.format(31.2, "pe"), "31.2×");
-  assert.equal(G.changeText(-1.5, "grossMargin"), "−1.5 pts");
-});
-
-test("the growth section is wired into the Financials tab", () => {
-  const html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
-  assert.match(html, /src="\/growth-math\.js/);
-  assert.match(html, /src="\/growth-charts\.js/);
-  const app = fs.readFileSync(path.join(__dirname, "..", "public", "app-legacy.js"), "utf8");
-  assert.match(app, /ILGrowth\.load\(ticker\)/);
-  const route = fs.readFileSync(path.join(__dirname, "..", "routes", "financials.js"), "utf8");
-  assert.match(route, /router\.get\("\/fundamentals\/history\/:ticker", requireAccount/);
 });
 
 test("the site bar grows by the status-bar inset on notched phones", () => {

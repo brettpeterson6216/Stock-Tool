@@ -7,7 +7,8 @@
    and its alerts. Below: every alert.
 
    /saved is the other half, kept apart on purpose: the work you saved
-   (valuations, comparisons, notes), not the companies you follow.
+   (valuations, comparisons, notes), your theses and your positions, not the
+   companies you follow.
    ═══════════════════════════════════════════════════════════════════════════ */
 (function () {
   "use strict";
@@ -36,9 +37,12 @@
   function savedShell() {
     document.getElementById("main").innerHTML =
       '<div class="dh hero-band card prime" id="sv-hero"><div class="stack" style="gap:10px">' + IL.eyebrow("Saved") + '<h1 class="display">Your saved <em>work.</em></h1>' +
-        '<p class="muted">The valuations, comparisons and notes you kept, newest first. The companies you follow are on your <a href="/watchlist">Watchlist</a>.</p></div></div>' +
+        '<p class="muted">The valuations, comparisons, theses and positions you keep. The companies you follow are on your <a href="/watchlist">Watchlist</a>.</p></div></div>' +
       '<div id="sv-box">' + '<section class="card"><div style="padding:4px">' + sk(80) + "</div></section></div>" +
-      '<p class="note">Older theses and positions from the classic workspace are <a href="/?view=tool&section=workspace">here</a>.</p>';
+      '<div class="section-h" id="theses"><div><h2 class="section-t">Theses</h2><span class="card-sub">Why you own or watch a company, what would prove you wrong, and when to check again</span></div><button class="btn sm" type="button" data-thesis-new>New thesis</button></div>' +
+      '<div id="th-box"><section class="card"><div style="padding:4px">' + sk(60) + "</div></section></div>" +
+      '<div class="section-h" id="positions"><div><h2 class="section-t">Positions</h2><span class="card-sub">What you hold and what you paid</span></div><button class="btn sm" type="button" data-pos-new>Add position</button></div>' +
+      '<div id="pos-box"><section class="card"><div style="padding:4px">' + sk(60) + "</div></section></div>";
     IL.plate(IL.$("#sv-hero"), "ledger", "right 30%");
   }
   var SAVE_TYPE = { implied: "Projection Lab", valuation: "Valuation Lab (classic)", projection: "Projection (classic)", dcf: "DCF (classic)", compare: "Comparison", note: "Note", lensscore: "LensToolkit", price: "Analysis" };
@@ -50,7 +54,27 @@
   function saveHref(s) {
     if (s.type === "implied") return "/research/" + encodeURIComponent(s.ticker) + "/projection?save=" + s.id;
     if (s.type === "compare" && s.ticker) return "/compare?t=" + encodeURIComponent(s.ticker);
-    return "/?view=tool&section=reports";
+    return "#save-" + s.id;
+  }
+  /* Saves from the classic app have no page of their own any more: show the
+     numbers they hold, so nothing anyone kept is lost. */
+  var savesById = {};
+  function flat(obj, prefix, out, depth) {
+    Object.keys(obj || {}).forEach(function (k) {
+      var v = obj[k], name = (prefix ? prefix + " · " : "") + k.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/_/g, " ");
+      if (v === null || v === undefined || v === "") return;
+      if (Array.isArray(v)) { if (v.length && v.length <= 12 && v.every(function (x) { return typeof x !== "object"; })) out.push([name, v.join(", ")]); return; }
+      if (typeof v === "object") { if (depth < 2) flat(v, name, out, depth + 1); return; }
+      out.push([name, typeof v === "number" ? (Math.abs(v) >= 1e6 ? F.money(v) : String(Math.round(v * 10000) / 10000)) : String(v).slice(0, 400)]);
+    });
+    return out;
+  }
+  function viewSave(id) {
+    var s = savesById[id]; if (!s) return;
+    var rows = flat(s.data, "", [], 0).slice(0, 80);
+    IL.dialog('<h2>' + h(s.ticker) + " · " + h(s.label || SAVE_TYPE[s.type] || "Saved") + '</h2><p class="muted">' + h(SAVE_TYPE[s.type] || s.type) + ", saved " + h(F.date(s.created_at)) + ". Saved in the classic app, which has been replaced; these are the numbers it kept.</p>" +
+      (rows.length ? '<div class="tbl-wrap" style="max-height:50vh;overflow:auto"><table class="tbl"><tbody>' + rows.map(function (r) { return "<tr><td>" + h(r[0]) + '</td><td class="num">' + h(r[1]) + "</td></tr>"; }).join("") + "</tbody></table></div>" : '<p class="muted">This save holds no numbers.</p>') +
+      '<div class="row" style="justify-content:flex-end"><button class="btn ghost" type="button" data-close>Close</button>' + (s.ticker ? '<a class="btn primary" href="/research/' + encodeURIComponent(s.ticker) + '/projection">Open ' + h(s.ticker) + " in the Projection Lab</a>" : "") + "</div>");
   }
   function savedRows(list) {
     return '<ul class="mini">' + list.map(function (s) {
@@ -145,10 +169,11 @@
       var box = IL.$("#sv-box"); if (!box) return;
       var list = res.ok && Array.isArray(res.data) ? res.data : [];
       if (!list.length) {
-        box.innerHTML = '<section class="card"><div class="dash-empty"><p><b>Nothing saved yet.</b> Save a valuation from any stock’s Valuation tab, or a set of companies from Compare, and it appears here.</p><div class="row wrap"><a class="btn" href="/research/NVDA/valuation">Value a stock</a><a class="btn ghost" href="/compare">Compare stocks</a></div></div></section>';
+        box.innerHTML = '<section class="card"><div class="dash-empty"><p><b>Nothing saved yet.</b> Save a projection from any stock’s Projection Lab, or a set of companies from Compare, and it appears here.</p><div class="row wrap"><a class="btn" href="/projection">Open the Projection Lab</a><a class="btn ghost" href="/compare">Compare stocks</a></div></div></section>';
         return;
       }
       var known = {};
+      savesById = {}; list.forEach(function (x) { savesById[x.id] = x; });
       box.innerHTML = SAVE_GROUP.map(function (g) {
         var rows = list.filter(function (s) { return g[1].indexOf(s.type) >= 0; });
         rows.forEach(function (s) { known[s.id] = 1; });
@@ -159,6 +184,84 @@
       })();
       return;
 
+    });
+  }
+
+  /* ── Theses and positions (they lived in the classic workspace) ───────── */
+  var theses = [], positions = [];
+  var STATUS = { watching: "Watching", owned: "Owned", passed: "Passed", review: "Under review" };
+  function lines(a) { return (Array.isArray(a) ? a : []).filter(Boolean); }
+  function today() { return new Date().toISOString().slice(0, 10); }
+  function loadTheses() {
+    return IL.api("/api/workspace/theses", { fresh: true }).then(function (res) {
+      var box = IL.$("#th-box"); if (!box) return;
+      theses = res.ok && Array.isArray(res.data) ? res.data : [];
+      if (!theses.length) { box.innerHTML = '<section class="card"><p class="muted" style="margin:0">No theses yet. Write down why you would buy a company, the risks, and what would make you sell, with a date to check again. You get an email the week a review is due.</p></section>'; return; }
+      box.innerHTML = '<section class="card flush"><ul class="mini th-list">' + theses.map(function (t) {
+        var due = t.review_date && t.review_date <= today();
+        var bits = [["Catalysts", lines(t.catalysts)], ["Risks", lines(t.risks)], ["Would sell if", lines(t.sell_conditions)]].filter(function (b) { return b[1].length; });
+        return '<li class="th-row"><div class="th-main"><a href="/research/' + encodeURIComponent(t.ticker) + '"><b>' + h(t.ticker) + "</b></a> " +
+          '<span class="tag">' + h(STATUS[t.status] || t.status) + '</span> <span class="faint">conviction ' + t.conviction + "/5" +
+          (t.target_price != null ? " · target " + F.price(t.target_price) : "") + (t.bear_price != null ? " · bear " + F.price(t.bear_price) : "") + "</span>" +
+          (t.review_date ? ' <span class="' + (due ? "down" : "faint") + '">· review ' + (due ? "due " : "") + h(F.date(t.review_date)) + "</span>" : "") +
+          (t.thesis ? '<p class="th-text">' + h(t.thesis) + "</p>" : "") +
+          bits.map(function (b) { return '<p class="th-list-line"><span class="faint">' + b[0] + ":</span> " + b[1].map(h).join("; ") + "</p>"; }).join("") +
+          '</div><div class="row"><button class="btn sm ghost" type="button" data-thesis-edit="' + h(t.ticker) + '">Edit</button><button class="btn sm ghost" type="button" data-thesis-del="' + h(t.ticker) + '">Delete</button></div></li>';
+      }).join("") + "</ul></section>";
+    });
+  }
+  function thesisDialog(t) {
+    t = t || { status: "watching", conviction: 3 };
+    var ta = function (id, label, v, hint) { return '<label class="field">' + label + (hint ? ' <span class="faint">' + hint + "</span>" : "") + '<textarea class="input" id="' + id + '" rows="3">' + h(v || "") + "</textarea></label>"; };
+    IL.dialog('<h2>' + (t.ticker ? h(t.ticker) + " thesis" : "New thesis") + "</h2>" +
+      (t.ticker ? "" : '<label class="field">Ticker<input class="input" id="th-t" maxlength="12" autocomplete="off" placeholder="e.g. NVDA"></label>') +
+      '<div class="row wrap" style="gap:12px"><label class="field">Status<select class="input" id="th-s">' + Object.keys(STATUS).map(function (k) { return '<option value="' + k + '"' + (t.status === k ? " selected" : "") + ">" + STATUS[k] + "</option>"; }).join("") + "</select></label>" +
+        '<label class="field">Conviction<select class="input" id="th-c">' + [1, 2, 3, 4, 5].map(function (n) { return "<option" + (Number(t.conviction) === n ? " selected" : "") + ">" + n + "</option>"; }).join("") + "</select></label>" +
+        '<label class="field">Review on<input class="input" type="date" id="th-r" value="' + h(t.review_date || "") + '"></label></div>' +
+      ta("th-x", "Why", t.thesis) + ta("th-cat", "Catalysts", lines(t.catalysts).join("\n"), "one per line") + ta("th-risk", "Risks", lines(t.risks).join("\n"), "one per line") + ta("th-sell", "Would sell if", lines(t.sell_conditions).join("\n"), "one per line") +
+      '<div class="row wrap" style="gap:12px"><label class="field">Target price<input class="input num" id="th-tp" inputmode="decimal" value="' + (t.target_price != null ? t.target_price : "") + '"></label><label class="field">Bear price<input class="input num" id="th-bp" inputmode="decimal" value="' + (t.bear_price != null ? t.bear_price : "") + '"></label></div>' +
+      '<p class="note" id="th-err"></p><div class="row" style="justify-content:flex-end"><button class="btn ghost" type="button" data-close>Cancel</button><button class="btn primary" type="button" id="th-go">Save</button></div>', function (d) {
+      d.querySelector("#th-go").addEventListener("click", function () {
+        var tk = t.ticker || String(d.querySelector("#th-t").value || "").trim().toUpperCase();
+        if (!/^[A-Z0-9.\-]{1,12}$/.test(tk)) { d.querySelector("#th-err").textContent = "Enter a ticker."; return; }
+        var split = function (id) { return d.querySelector(id).value.split("\n").map(function (x) { return x.trim(); }).filter(Boolean); };
+        var num = function (id) { var v = d.querySelector(id).value.trim(); return v === "" ? null : Number(v); };
+        IL.api("/api/workspace/theses/" + encodeURIComponent(tk), { method: "PUT", body: { status: d.querySelector("#th-s").value, conviction: Number(d.querySelector("#th-c").value), review_date: d.querySelector("#th-r").value || null,
+          thesis: d.querySelector("#th-x").value, catalysts: split("#th-cat"), risks: split("#th-risk"), sell_conditions: split("#th-sell"), target_price: num("#th-tp"), bear_price: num("#th-bp") } }).then(function (res) {
+          if (!res.ok) { d.querySelector("#th-err").textContent = (res.data && res.data.error) || "Could not save."; return; }
+          d.close(); IL.toast("Thesis saved"); loadTheses();
+        });
+      });
+    });
+  }
+  function loadPositions() {
+    return IL.api("/api/workspace/positions", { fresh: true }).then(function (res) {
+      var box = IL.$("#pos-box"); if (!box) return;
+      positions = res.ok && Array.isArray(res.data) ? res.data : [];
+      if (!positions.length) { box.innerHTML = '<section class="card"><p class="muted" style="margin:0">No positions yet. Add what you hold and what you paid to keep it next to your research.</p></section>'; return; }
+      var total = positions.reduce(function (a, p) { return a + p.shares * p.cost_basis; }, 0);
+      box.innerHTML = '<section class="card flush"><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Company</th><th class="num">Shares</th><th class="num">Cost per share</th><th class="num">Cost</th><th class="num">Share of cost</th><th style="text-align:left">Notes</th><th></th></tr></thead><tbody>' +
+        positions.map(function (p) {
+          var cost = p.shares * p.cost_basis;
+          return '<tr><td><a href="/research/' + encodeURIComponent(p.ticker) + '"><b>' + h(p.ticker) + "</b></a></td><td class=\"num\">" + F.num(p.shares, p.shares % 1 ? 4 : 0) + '</td><td class="num">' + F.price(p.cost_basis) + '</td><td class="num">' + F.money(cost) + '</td><td class="num">' + (total > 0 ? F.pct(cost / total * 100, 0) : "—") + "</td><td style=\"text-align:left\">" + h(p.notes || "") + '</td><td><div class="row"><button class="btn sm ghost" type="button" data-pos-edit="' + h(p.ticker) + '">Edit</button><button class="btn sm ghost" type="button" data-pos-del="' + h(p.ticker) + '">Delete</button></div></td></tr>';
+        }).join("") + "</tbody></table></div></section>";
+    });
+  }
+  function positionDialog(p) {
+    p = p || {};
+    IL.dialog('<h2>' + (p.ticker ? h(p.ticker) + " position" : "Add a position") + "</h2>" +
+      (p.ticker ? "" : '<label class="field">Ticker<input class="input" id="ps-t" maxlength="12" autocomplete="off" placeholder="e.g. AAPL"></label>') +
+      '<div class="row wrap" style="gap:12px"><label class="field">Shares<input class="input num" id="ps-n" inputmode="decimal" value="' + (p.shares != null ? p.shares : "") + '"></label><label class="field">Cost per share<input class="input num" id="ps-c" inputmode="decimal" value="' + (p.cost_basis != null ? p.cost_basis : "") + '"></label></div>' +
+      '<label class="field">Notes<input class="input" id="ps-x" maxlength="1000" value="' + h(p.notes || "") + '"></label>' +
+      '<p class="note" id="ps-err"></p><div class="row" style="justify-content:flex-end"><button class="btn ghost" type="button" data-close>Cancel</button><button class="btn primary" type="button" id="ps-go">Save</button></div>', function (d) {
+      d.querySelector("#ps-go").addEventListener("click", function () {
+        var tk = p.ticker || String(d.querySelector("#ps-t").value || "").trim().toUpperCase();
+        if (!/^[A-Z0-9.\-]{1,12}$/.test(tk)) { d.querySelector("#ps-err").textContent = "Enter a ticker."; return; }
+        IL.api("/api/workspace/positions/" + encodeURIComponent(tk), { method: "PUT", body: { shares: Number(d.querySelector("#ps-n").value), cost_basis: Number(d.querySelector("#ps-c").value), sector: p.sector || "", notes: d.querySelector("#ps-x").value } }).then(function (res) {
+          if (!res.ok) { d.querySelector("#ps-err").textContent = (res.data && res.data.error) || "Could not save."; return; }
+          d.close(); IL.toast("Position saved"); loadPositions();
+        });
+      });
     });
   }
 
@@ -202,6 +305,23 @@
         IL.api("/api/alerts/" + b.getAttribute("data-del-alert"), { method: "DELETE" }).then(function (res) { if (res.ok) { IL.toast("Alert deleted"); loadAlerts(); } });
         return;
       }
+      if ((b = e.target.closest("[data-thesis-new]"))) { thesisDialog(null); return; }
+      if ((b = e.target.closest("[data-thesis-edit]"))) { var tt = b.getAttribute("data-thesis-edit"); thesisDialog(theses.filter(function (x) { return x.ticker === tt; })[0]); return; }
+      if ((b = e.target.closest("[data-thesis-del]"))) {
+        var td = b.getAttribute("data-thesis-del");
+        if (!window.confirm("Delete your " + td + " thesis? This cannot be undone.")) return;
+        IL.api("/api/workspace/theses/" + encodeURIComponent(td), { method: "DELETE" }).then(function (res) { if (res.ok) { IL.toast("Thesis deleted"); loadTheses(); } });
+        return;
+      }
+      if ((b = e.target.closest("[data-pos-new]"))) { positionDialog(null); return; }
+      if ((b = e.target.closest("[data-pos-edit]"))) { var pt = b.getAttribute("data-pos-edit"); positionDialog(positions.filter(function (x) { return x.ticker === pt; })[0]); return; }
+      if ((b = e.target.closest("[data-pos-del]"))) {
+        var pd = b.getAttribute("data-pos-del");
+        if (!window.confirm("Delete your " + pd + " position? This cannot be undone.")) return;
+        IL.api("/api/workspace/positions/" + encodeURIComponent(pd), { method: "DELETE" }).then(function (res) { if (res.ok) { IL.toast("Position deleted"); loadPositions(); } });
+        return;
+      }
+      if ((b = e.target.closest('a[href^="#save-"]'))) { e.preventDefault(); viewSave(b.getAttribute("href").slice(6)); return; }
       if ((b = e.target.closest("[data-del-save]"))) {
         if (!window.confirm("Delete this saved item? This cannot be undone.")) return;
         IL.api("/api/saves/" + b.getAttribute("data-del-save"), { method: "DELETE" }).then(function (res) { if (res.ok) { IL.toast("Deleted"); loadSaves(); } });
@@ -217,7 +337,13 @@
           IL.gate("login", "Create a free account to save your work", { why: "Free accounts keep the valuations you build and the companies you compare, so you can come back to them." });
         return;
       }
-      if (SAVED) { savedShell(); wire(); loadSaves(); return; }
+      if (SAVED) {
+        savedShell(); wire(); loadSaves();
+        Promise.all([loadTheses(), loadPositions()]).then(function () {
+          var at = location.hash && IL.$(location.hash); if (at) at.scrollIntoView({ block: "start" });
+        });
+        return;
+      }
       if (!u) {
         document.getElementById("main").innerHTML = '<div class="dh"><div><h1 class="dh-t">Watchlist</h1><p class="muted">Follow companies, note why, set a target price and get an email when it’s reached.</p></div></div>' +
           IL.gate("login", "Create a free account to keep a watchlist", { why: "Free accounts keep a watchlist with notes and target prices, see grade changes on the dashboard and get 3 email alerts. No card needed.", center: true });

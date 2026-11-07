@@ -501,6 +501,13 @@ router.get("/quote/:ticker", checkAnalysisLimit, async (req, res) => {
 // ============================================================
 //  Home-dashboard analyst signals (free — key stays server-side)
 // ============================================================
+/* The cash rate used for Sharpe and Sortino on stock pages. Public. */
+router.get("/market/risk-free", async (_req, res) => {
+  const v = await require("../lib/risk-free").current();
+  res.set("Cache-Control", "public, max-age=3600");
+  res.json(v);
+});
+
 router.get("/market/analyst-signals", (_req, res) => {
   // Analyst ratings need a licensed feed the site does not have.
   res.json({ available: false, buy: 0, hold: 0, sell: 0 });

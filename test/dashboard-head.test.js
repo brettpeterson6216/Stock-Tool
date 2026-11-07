@@ -46,7 +46,3 @@ test("the market note is clipped at every width, not only on narrow screens", ()
 
 // 5,514.97 sitting above an axis that reads 0% to 16% looks like a value off
 // that axis. The label has always been in the markup; a compact pass hid it.
-test("the S&P price says what it is", () => {
-  assert.doesNotMatch(rp(), /\.ihm-quote-label \{[^}]*display:\s*none/s, "the price is unlabelled again");
-  assert.match(read("index.html"), /class="ihm-quote-label">S&amp;P 500 · today</, "the label markup is gone");
-});

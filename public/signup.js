@@ -108,10 +108,9 @@
     if (submitting) return;
     clearAlert();
 
-    const username = document.getElementById("username").value.trim();
     const email = document.getElementById("email").value.trim();
     const password = pwInput.value;
-    if (!username || !email || !password) {
+    if (!email || !password) {
       showAlert("Please fill out every field.");
       return;
     }
@@ -127,7 +126,7 @@
       const response = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, email, password, analytics }),
+        body: JSON.stringify({ email, password, analytics }),
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || "Signup failed.");

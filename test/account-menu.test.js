@@ -23,7 +23,7 @@ const PAGES = ["index.html", ...glob(P("public")).filter(f => f.endsWith(".html"
                "labs/lens-score/index.html"];
 
 const withMenu = PAGES.filter(p => fs.readFileSync(P(p), "utf8").includes("nav-acct-menu"));
-const legacy = fs.readFileSync(P("public", "app-legacy.js"), "utf8");
+const legacy = "";
 
 test("the menu is on every page that has the header", () => {
   assert.ok(withMenu.length >= 13, `only ${withMenu.length} pages carry the account menu`);
@@ -100,41 +100,3 @@ test("billing and log out reach a real endpoint from a static page", () => {
   assert.match(logout, /X-CSRF-Token/, "the logout POST carries no CSRF token");
 });
 
-test("the hand-off from a static page lands somewhere, not on a blank dashboard", () => {
-  assert.match(siteNav, /\?account=1/, "Account settings has no destination from a static page");
-  assert.match(siteNav, /\?review=1/, "Leave a review has no destination from a static page");
-  assert.match(legacy, /intent\.get\('account'\)/, "the app ignores ?account=1, so the hand-off dead-ends");
-  assert.match(legacy, /intent\.get\('review'\)/, "the app ignores ?review=1, so the hand-off dead-ends");
-});
-
-test("every item in the menu has somewhere to go", () => {
-  const html = fs.readFileSync(P(withMenu[0]), "utf8");
-  const menu = html.slice(html.indexOf('id="nav-acct-menu"'), html.indexOf("</div>", html.indexOf('id="nav-acct-logout"')));
-  // Only the anchors are items; the container and the header block are not.
-  const ids = [...menu.matchAll(/<a\b[^>]*id="(nav-acct-[a-z]+)"/g)].map(m => m[1]);
-  assert.ok(ids.length >= 4, `menu has only ${ids.length} items`);
-
-  for (const id of ids) {
-    const wired = legacy.includes(`getElementById('${id}')`) || legacy.includes(`getElementById("${id}")`);
-    const isMailto = new RegExp(`id="${id}"[^>]*href="mailto:`).test(menu)
-                  || new RegExp(`href="mailto:[^"]*"[^>]*id="${id}"`).test(menu);
-    const inNav = fs.readFileSync(P("public", "app-navigation.js"), "utf8").includes(id);
-    assert.ok(wired || isMailto || inNav,
-      `${id} is in the menu on ${withMenu.length} pages but nothing listens for it — clicking it does nothing`);
-  }
-});
-
-test("Subscription reaches the billing portal, and says so when it cannot", () => {
-  assert.match(legacy, /nav-acct-billing/, "the Subscription item is still unwired");
-  assert.match(legacy, /\/api\/stripe\/portal/, "Subscription does not call the billing portal");
-  // The original fault was silence. A failure has to surface.
-  const handler = legacy.slice(legacy.indexOf("nav-acct-billing"), legacy.indexOf("nav-acct-feedback"));
-  assert.match(handler, /toast\(/, "a failed portal call is silent, which is the bug it replaced");
-  assert.match(handler, /showUpgradeModal/, "a free member is sent to a Stripe error instead of the upgrade view");
-});
-
-test("Leave a review opens the prompt the product already builds", () => {
-  const ps = fs.readFileSync(P("public", "product-system.js"), "utf8");
-  assert.match(ps, /window\.ilOpenFeedback\s*=/, "the feedback prompt has no external opener");
-  assert.match(legacy, /ilOpenFeedback/, "the menu item does not call it");
-});

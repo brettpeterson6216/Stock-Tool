@@ -13,7 +13,7 @@ const { renderProductTemplate } = require("../lib/product-template");
 const indexHtml = renderProductTemplate(
   fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8")
 );
-const html = `${indexHtml}\n${fs.readFileSync(path.join(__dirname, "..", "public", "app-navigation.js"), "utf8")}\n${fs.readFileSync(path.join(__dirname, "..", "public", "app-legacy.js"), "utf8")}`;
+const html = `${indexHtml}\n${fs.readFileSync(path.join(__dirname, "..", "public", "app-navigation.js"), "utf8")}`;
 const authSource = fs.readFileSync(path.join(__dirname, "..", "routes", "auth.js"), "utf8");
 const billingSource = fs.readFileSync(path.join(__dirname, "..", "routes", "billing.js"), "utf8");
 const planSource = fs.readFileSync(path.join(__dirname, "..", "lib", "plan.js"), "utf8");
@@ -71,12 +71,3 @@ test("discount-code sales work through Stripe Checkout without replacing the tri
   assert.match(billingSource, /verifyStripeCatalog/, "checkout no longer verifies the Stripe catalog before charging");
 });
 
-test("protected sections wait for authoritative auth state before gating", () => {
-  assert.match(html, /window\.IL_AUTH_READY = new Promise/);
-  assert.match(html, /authReady: false/);
-  assert.match(html, /\(PRO_SECTIONS\.includes\(id\) \|\| ACCOUNT_SECTIONS\.includes\(id\)\) && !S\.authReady/);
-  assert.match(html, /window\.IL_AUTH_READY\?\.then/);
-  assert.match(html, /if \(limitCounter && pro\) limitCounter\.style\.display = 'none'/);
-  assert.match(html, /if \(window\.IL_AUTH_READY\) await window\.IL_AUTH_READY/);
-  assert.match(html, /refreshAuthStateForAccess/);
-});

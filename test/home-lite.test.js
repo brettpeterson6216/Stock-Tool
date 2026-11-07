@@ -2,7 +2,7 @@
 const test = require("node:test");
 const assert = require("node:assert");
 const path = require("path");
-const { wantsLite, liteHtml, isPlainHomeQuery } = require("../lib/home-lite");
+const { liteHtml } = require("../lib/home-lite");
 const { readStamped } = require("../lib/asset-stamp");
 
 const full = readStamped(path.join(__dirname, "..", "index.html"));
@@ -12,37 +12,28 @@ function scripts(html) {
   return [...html.matchAll(/<script\b[^>]*\bsrc="([^"]+)"/g)].map(m => m[1].split("?")[0]);
 }
 
-test("only a signed-out visitor on the plain home page gets the lite copy", () => {
-  assert.equal(wantsLite({ method: "GET", query: {}, session: {} }), true);
-  assert.equal(wantsLite({ method: "GET", query: { utm_source: "x", ref: "bio" }, session: {} }), true);
-  assert.equal(wantsLite({ method: "GET", query: {}, session: { userId: 7 } }), false);
-  for (const k of ["view", "section", "ticker", "symbol", "pricing", "market", "workspace_tab"]) {
-    assert.equal(isPlainHomeQuery({ [k]: "1" }), false, k);
-  }
-});
-
-test("the lite copy holds back the app and nothing the landing page uses", () => {
-  assert.ok(lite, "markers found");
-  const heavy = scripts(lite);
-  for (const gone of ["/app-legacy.js", "/vendor/chart.umd.min.js",
-    "/vendor/lightweight-charts.standalone.production.js", "/projection-lab.js", "/workspace-system.js"]) {
-    assert.ok(!heavy.includes(gone), `${gone} still loads`);
-    assert.ok(scripts(full).includes(gone), `${gone} missing from the full page`);
+test("the landing page loads only its own scripts; the retired app is gone", () => {
+  assert.ok(lite);
+  const loaded = scripts(lite);
+  for (const gone of ["/app-legacy.js", "/vendor/chart.umd.min.js", "/vendor/lightweight-charts.standalone.production.js",
+    "/projection-lab.js", "/workspace-system.js", "/home-member.js", "/index-chart.js"]) {
+    assert.ok(!loaded.includes(gone), `${gone} still loads`);
   }
   for (const kept of ["/theme-bootstrap.js", "/app-navigation.js", "/ticker-search.js", "/landing-demo.js",
     "/landing-market.js", "/il-ribbon.js", "/il-icons.js", "/site-nav.js", "/home-lite.js"]) {
-    assert.ok(heavy.includes(kept), `${kept} should still load`);
+    assert.ok(loaded.includes(kept), `${kept} should still load`);
   }
 });
 
-test("held-back URLs match the full page exactly, so the prefetch is a cache hit", () => {
-  const attr = lite.match(/id="il-home-lite" data-bundle="([^"]*)"/)[1];
-  const list = JSON.parse(attr.replace(/&quot;/g, '"').replace(/&lt;/g, "<").replace(/&amp;/g, "&"));
-  const fullSrcs = [...full.matchAll(/<script\b[^>]*\bsrc="([^"]+)"/g)].map(m => m[1]);
-  assert.ok(list.length >= 15);
-  for (const href of list) assert.ok(fullSrcs.includes(href), href);
+test("any app bundle block left in a template is still held back", () => {
+  const out = liteHtml("<html><body><!-- il:app-bundle --><script defer src=\"/a.js\"></script><!-- /il:app-bundle --><p>x</p></body></html>");
+  assert.ok(!/src="\/a\.js"/.test(out));
+  assert.match(out, /home-lite\.js/);
 });
 
-test("a template without markers serves the full page", () => {
-  assert.equal(liteHtml("<html><body><script src=/a.js></script></body></html>"), null);
+test("the landing page's routes into the retired app go to the pages that replaced it", () => {
+  const src = require("node:fs").readFileSync(path.join(__dirname, "..", "public", "home-lite.js"), "utf8");
+  assert.doesNotMatch(src, /go\("\/\?view=tool/);
+  assert.match(src, /screener: "\/screener"/);
+  assert.match(src, /reports: "\/saved"/);
 });

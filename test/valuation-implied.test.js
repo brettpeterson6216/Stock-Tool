@@ -84,3 +84,54 @@ test("growth fades in a straight line to the final-year rate", () => {
   const w = V.weighted({ bear: { ...out, futurePrice: 5 }, base: { ...out, futurePrice: 10 }, bull: { ...out, futurePrice: 20 } }, { bear: 0.25, base: 0.5, bull: 0.25 }, 10);
   assert.equal(w.futurePrice, 11.25);
 });
+
+test("P/E history uses trailing four-quarter EPS at each quarter end, and needs enough of it", () => {
+  const day = d => Date.parse(d + "T16:00:00Z") / 1000;
+  const bars = [];
+  for (let t = day("2023-01-02"); t < day("2025-01-01"); t += 7 * 86400) bars.push({ time: t, close: t < day("2024-01-01") ? 40 : 80 });
+  const ends = ["2023-03-31", "2023-06-30", "2023-09-30", "2023-12-31", "2024-03-31", "2024-06-30", "2024-09-30", "2024-12-31"];
+  const q = ends.map(end => ({ end, eps: 1 }));        // $4 a year of earnings
+  const h = V.peHistory(q, bars);
+  assert.equal(h.points.length, 5);                     // the first full four quarters end 2023-12-31
+  assert.equal(h.points[0].pe, 10);                     // $40 / $4
+  assert.equal(h.points[1].pe, 20);                     // $80 / $4
+  assert.equal(h.median, 20);
+  assert.equal(h.low, 10);
+  assert.equal(h.since, "2023-12-31");
+  assert.equal(V.peHistory(q.slice(0, 4), bars), null, "under five quarters is no history");
+  assert.equal(V.peHistory(q.map(x => ({ ...x, eps: -1 })), bars), null, "losses have no P/E");
+});
+
+test("DCF: present value of each year's free cash flow, a growing perpetuity, plus net cash", () => {
+  const o = { revenuePath: [100, 100], fcfMargin0: 0.1, fcfMargin: 0.1, rate: 0.1, terminal: 0, netCash: 50, shares: 10, price: 15 };
+  const out = V.dcf(o);
+  // 10/1.1 + 10/1.21 + (10/0.1)/1.21 + 50
+  const want = 10 / 1.1 + 10 / 1.21 + 100 / 1.21 + 50;
+  assert.ok(Math.abs(out.equity - want) < 1e-9);
+  assert.ok(Math.abs(out.value - want / 10) < 1e-9);
+  assert.ok(Math.abs(out.terminalShare - (100 / 1.21) / (want - 50)) < 1e-9);
+  const m = V.impliedFcfMargin(o);
+  assert.ok(Math.abs(V.dcf({ ...o, fcfMargin: m }).value - 15) < 1e-6, "the implied margin prices the stock exactly");
+});
+
+test("DCF refuses a discount rate at or below the growth that follows", () => {
+  const o = { revenuePath: [100], fcfMargin0: 0.1, fcfMargin: 0.1, rate: 0.03, terminal: 0.025, netCash: 0, shares: 1, price: 1 };
+  assert.equal(V.dcf(o), null);
+  assert.match(V.dcfProblem(o), /at least 1 point above/);
+  assert.match(V.dcfProblem({ ...o, rate: 0.09, terminal: 0.08 }), /between −3% and 5%/);
+});
+
+test("risk stats: Sharpe and Sortino above cash, and a historical 1-in-20 bad day", () => {
+  // 250 days alternating +2% / −1%, so 249 returns
+  const closes = [100];
+  for (let i = 0; i < 249; i++) closes.push(closes[i] * (i % 2 ? 0.99 : 1.02));
+  const s = V.riskStats(closes, 0);
+  const r = closes.slice(1).map((c, i) => c / closes[i] - 1);
+  const mean = r.reduce((a, b) => a + b, 0) / r.length;
+  const sd = Math.sqrt(r.reduce((a, b) => a + (b - mean) ** 2, 0) / (r.length - 1));
+  assert.ok(Math.abs(s.sharpe - mean / sd * Math.sqrt(252)) < 1e-9);
+  assert.ok(s.sortino > s.sharpe, "only the falls count as risk");
+  assert.ok(Math.abs(s.var95 - 0.01) < 1e-9 && Math.abs(s.cvar95 - 0.01) < 1e-9);
+  assert.ok(V.riskStats(closes, 0.05).sharpe < s.sharpe, "a higher cash rate lowers it");
+  assert.equal(V.riskStats(closes.slice(0, 50), 0), null, "needs about six months of days");
+});

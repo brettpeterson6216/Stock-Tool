@@ -267,7 +267,7 @@ app.use("/api",         logoRouter);         // /api/logo/:ticker
 // ============================================================
 //  Static HTML pages
 // ============================================================
-const { wantsLite, liteHtml, isPlainHomeQuery } = require("./lib/home-lite");
+const { liteHtml } = require("./lib/home-lite");
 let liteHomeCache;
 
 /* The rebuilt stock page. /research is the search landing; /research/NVDA is
@@ -365,57 +365,66 @@ app.get("/watchlist", (_req, res) => sendPage(res, path.join(__dirname, "public"
 /* Saved work has its own place: valuations, comparisons and notes you kept.
    The watchlist is the companies you follow. Same script, two pages. */
 app.get("/saved", (_req, res) => sendPage(res, path.join(__dirname, "public", "app", "saved.html")));
+app.get("/account", (_req, res) => sendPage(res, path.join(__dirname, "public", "app", "account.html")));
 app.get(["/methodology", "/method"], (_req, res) => sendPage(res, path.join(__dirname, "public", "app", "methodology.html")));
 
-/* Old single-page-app links to a stock (?view=tool&section=analyze&symbol=X
-   and friends) now open the rebuilt stock page on the matching tab. Sections
-   that have not been rebuilt yet (watchlist, screener, Valuation Lab, compare)
-   still open in the original app. */
+/* The original single-page app (/?view=tool&section=…, /?view=home, ?pricing=1,
+   ?market=1) has been retired. Every link into it now opens the page that
+   replaced it, so old bookmarks, emails and posts keep working. */
 const LEGACY_SECTION_TAB = {
-  analyze: "", reports: "", "lens-score": "", advmetrics: "",
+  analyze: "", reports: "", "lens-score": "", advmetrics: "", function: "",
   financials: "financials", earnings: "earnings", calls: "earnings",
   secfilings: "filings", institutional: "ownership",
-  projection: "projection", valuation: "projection",
+  projection: "projection", valuation: "projection", dcf: "projection#pj-dcf",
 };
-function legacyStockRedirect(query) {
-  if (query.view !== "tool") return null;
-  if (!query.section && !query.symbol && !query.ticker) return null;
-  const section = String(query.section || "analyze").toLowerCase();
-  if (section === "screener") return "/screener";
-  if (section === "workspace" && String(query.workspace_tab || "") === "watchlist") return "/watchlist";
+const LEGACY_PAGE = {
+  screener: "/screener", compare: "/compare", education: "/learn", adveducation: "/learn",
+  wealth: "/compound-calculator", reports: "/saved", workspace: "/saved", market: "/",
+};
+const LEGACY_KEYS = ["view", "section", "symbol", "ticker", "pricing", "market", "workspace_tab", "resume_analysis", "lesson", "account", "review"];
+function legacyRedirect(query) {
+  if (!LEGACY_KEYS.some(k => Object.prototype.hasOwnProperty.call(query, k))) return null;
+  if (query.pricing) return "/pricing";
+  if (query.account) return "/account";
+  if (query.review) return "/account#feedback";
+  const section = String(query.section || "").toLowerCase().replace(/[^a-z-]/g, "");
+  const sym = String(query.symbol || query.ticker || "").trim().toUpperCase();
+  if (sym && !/^[A-Z0-9.^,-]{1,60}$/.test(sym)) return "/research";
   if (section === "compare") {
-    const list = String(query.symbol || query.ticker || query.t || "").toUpperCase().split(",").filter(t => /^[A-Z0-9.^-]{1,15}$/.test(t)).slice(0, 4);
+    const list = sym.split(",").filter(t => /^[A-Z0-9.^-]{1,15}$/.test(t)).slice(0, 4);
     return "/compare" + (list.length ? "?t=" + list.join(",") : "");
   }
-  if (!Object.prototype.hasOwnProperty.call(LEGACY_SECTION_TAB, section)) return null;
-  const sym = String(query.symbol || query.ticker || "").trim().toUpperCase();
-  if (!sym) return section === "analyze" ? "/research" : section === "projection" || section === "valuation" ? "/projection" : null;
-  if (!/^[A-Z0-9.^-]{1,15}$/.test(sym)) return "/research";
-  const tab = LEGACY_SECTION_TAB[section];
-  return `/research/${encodeURIComponent(sym)}${tab ? "/" + tab : ""}`;
+  if (section === "workspace") {
+    const tab = String(query.workspace_tab || "");
+    return tab === "watchlist" ? "/watchlist" : tab === "positions" ? "/saved#positions" : "/saved#theses";
+  }
+  if (section === "education") {
+    const lesson = String(query.lesson || "").toLowerCase();
+    return /^[a-z0-9-]{1,40}$/.test(lesson) && fs.existsSync(path.join(__dirname, "public", "learn", lesson + ".html")) ? "/learn/" + lesson : "/learn";
+  }
+  if (sym && Object.prototype.hasOwnProperty.call(LEGACY_SECTION_TAB, section || "analyze")) {
+    const one = sym.split(",")[0];
+    const tab = LEGACY_SECTION_TAB[section || "analyze"];
+    return `/research/${encodeURIComponent(one)}${tab ? "/" + tab : ""}`;
+  }
+  if (section === "projection" || section === "valuation" || section === "dcf") return "/projection";
+  if (section === "analyze" || section === "lens-score" || section === "advmetrics" || section === "function") return "/research";
+  if (LEGACY_PAGE[section]) return LEGACY_PAGE[section];
+  if (sym) return `/research/${encodeURIComponent(sym.split(",")[0])}`;
+  return "/";
 }
 
 app.get("/", (req, res) => {
-  const moved = legacyStockRedirect(req.query || {});
-  if (moved) return res.redirect(302, moved);
-  /* Signed-in members get the rebuilt dashboard on plain "/". The original
-     app (and its home view) stays reachable at /?view=home and /?view=tool. */
-  if (req.session && req.session.userId && isPlainHomeQuery(req.query)) {
-    res.setHeader("Vary", "Cookie");
-    return sendPage(res, path.join(__dirname, "public", "app", "home.html"));
-  }
-  const indexPath = path.join(__dirname, "index.html");
-  /* The same URL serves two documents depending on the session cookie, so no
-     shared cache may hand one visitor's copy to another. */
+  const q = req.query || {};
+  const moved = legacyRedirect(q);
+  if (moved) return res.redirect(301, moved);
+  /* Members get their dashboard; everyone else the landing page. */
   res.setHeader("Vary", "Cookie");
-  if (wantsLite(req)) {
-    if (liteHomeCache === undefined) liteHomeCache = liteHtml(readStamped(indexPath));
-    if (liteHomeCache) {
-      res.setHeader("Cache-Control", "no-cache, must-revalidate");
-      return res.type("html").send(liteHomeCache);
-    }
-  }
-  return sendPage(res, indexPath);
+  if (req.session && req.session.userId) return sendPage(res, path.join(__dirname, "public", "app", "home.html"));
+  if (liteHomeCache === undefined) liteHomeCache = liteHtml(readStamped(path.join(__dirname, "index.html")));
+  res.setHeader("Cache-Control", "no-cache, must-revalidate");
+  if (liteHomeCache) return res.type("html").send(liteHomeCache);
+  return sendPage(res, path.join(__dirname, "index.html"));
 });
 
 app.get(["/login",  "/login.html"],  (req, res) => sendPage(res, path.join(__dirname, "public", "login.html")));
@@ -720,7 +729,7 @@ async function runReviewDigests() {
       const result = await sendEmail({
         to: u.email,
         subject: `ImpliedLens: ${due.rows.length} thesis review${due.rows.length === 1 ? "" : "s"} due this week`,
-        html: `<div style="font-family:Arial,sans-serif;max-width:560px"><h2 style="color:#9A6A18">Your reviews are due</h2><p>You set these review dates when you saved each thesis. Check the evidence before changing a position — not the price.</p><ul>${items}</ul><p><a href="${process.env.APP_URL || "https://impliedlens.com"}/?view=tool&section=workspace" style="color:#9A6A18;font-weight:bold">Open your workspace →</a></p><p style="color:#999;font-size:12px">Not investment advice. You receive this because a saved thesis has a review date this week.</p></div>`,
+        html: `<div style="font-family:Arial,sans-serif;max-width:560px"><h2 style="color:#9A6A18">Your reviews are due</h2><p>You set these review dates when you saved each thesis. Check the evidence before changing a position — not the price.</p><ul>${items}</ul><p><a href="${process.env.APP_URL || "https://impliedlens.com"}/saved#theses" style="color:#9A6A18;font-weight:bold">Open your theses →</a></p><p style="color:#999;font-size:12px">Not investment advice. You receive this because a saved thesis has a review date this week.</p></div>`,
       });
       if (!result?.sent && !result?.simulated) {
         await db.execute({ sql: "DELETE FROM lifecycle_email_log WHERE user_id=? AND email_type='review_digest_auto' AND reference_key=?", args: [u.id, monday] }).catch(() => {});

@@ -44,16 +44,14 @@ body.il-lens-page .rc-rank { display: inline-flex; padding: 5px 12px; border-rad
 body.il-lens-page .rc-verdict { margin: 12px 0 0; font-size: 18px; line-height: 1.5; color: var(--ink); max-width: 62ch; }
 body.il-lens-page .rc-cap { margin: 10px 0 0; font-size: 13px; color: var(--ink-soft); padding: 8px 12px; border-radius: 10px; background: color-mix(in srgb, var(--rc-d) 9%, transparent); border-left: 3px solid var(--rc-d); }
 body.il-lens-page .rc-mini { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+/* Factor grades as plain type: the grade in its tone, the factor name quiet. */
 body.il-lens-page .rc-mini-chip {
-  display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px 6px 6px; border-radius: 12px; cursor: pointer;
-  background: var(--surface-2); border: 1px solid var(--line); color: var(--ink-soft); font-size: 13px; font-weight: 600;
-  transition: border-color 160ms ease, transform 160ms ease;
+  display: inline-flex; align-items: baseline; gap: 6px; padding: 4px 2px; margin-right: 10px; cursor: pointer;
+  background: none; border: 0; border-bottom: 1px solid transparent; border-radius: 0; color: var(--ink-soft); font-size: 13px; font-weight: 500;
+  transition: border-color 160ms ease, color 160ms ease;
 }
-body.il-lens-page .rc-mini-chip:hover { border-color: color-mix(in srgb, var(--tone) 60%, transparent); transform: translateY(-1px); }
-body.il-lens-page .rc-mini-chip b {
-  min-width: 34px; height: 28px; display: grid; place-items: center; border-radius: 8px; font-family: var(--rc-num); font-size: 15px;
-  color: var(--tone); background: color-mix(in srgb, var(--tone) 15%, transparent);
-}
+body.il-lens-page .rc-mini-chip:hover { color: var(--ink); border-bottom-color: color-mix(in srgb, var(--tone) 60%, transparent); }
+body.il-lens-page .rc-mini-chip b { font-family: var(--rc-num); font-size: 16px; font-weight: 600; color: var(--tone); }
 body.il-lens-page .rc-hero-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-top: 12px; border-top: 1px solid var(--line); color: var(--ink-faint); font-size: 12px; flex-wrap: wrap; }
 body.il-lens-page .rc-foot-actions { display: inline-flex; align-items: center; gap: 12px; }
 body.il-lens-page .rc-save { padding: 8px 14px; border-radius: 10px; border: 1px solid var(--line-strong); background: transparent; color: var(--ink); font-weight: 600; font-size: 13px !important; cursor: pointer; }
@@ -147,7 +145,7 @@ body.il-lens-page .rc-p-link { font-size: 14px !important; }
 body.il-lens-page .rc-p-link strong { font-size: 14px; }
 body.il-lens-page .rc-p-link span { color: var(--ink-faint); font-size: 12px; max-width: 26ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 body.il-lens-page .rc-p-link:not(:disabled):hover strong { color: var(--gold-bright); }
-body.il-lens-page .rc-chip { display: inline-grid; place-items: center; min-width: 34px; height: 26px; padding: 0 6px; border-radius: 7px; font-family: var(--rc-num); font-weight: 700; font-size: 13px; color: var(--tone); background: color-mix(in srgb, var(--tone) 14%, transparent); }
+body.il-lens-page .rc-chip { display: inline-block; min-width: 2.2em; font-family: var(--rc-num); font-weight: 600; font-size: 14px; color: var(--tone); }
 body.il-lens-page .rc-peer-foot { margin: 12px 0 0; color: var(--ink-faint); font-size: 12px; }
 
 /* ── responsive ───────────────────────────────────────────────────────── */

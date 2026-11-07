@@ -226,7 +226,7 @@ function renderPage(ticker, q, facts) {
 
   const canonicalUrl = `${APP_URL}/stock/${ticker}`;
   const analyzeUrl   = `/?ticker=${ticker}&source=stock_landing`;
-  const signupNext   = `/?view=tool&section=analyze&ticker=${ticker}&resume_analysis=1&source=stock_landing_signup`;
+  const signupNext   = `/research/${ticker}?source=stock_landing_signup`;
   const signupUrl    = `/signup?next=${encodeURIComponent(signupNext)}&source=stock_landing&ticker=${encodeURIComponent(ticker)}`;
   const landingContextJson = JSON.stringify({
     ticker,

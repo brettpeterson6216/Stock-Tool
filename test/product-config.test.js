@@ -224,30 +224,6 @@ test("an unreachable price still reports what was expected of it", async () => {
    the catalog, and a second copy is exactly how a stale annual price once
    outlived a catalog change: nothing failed when they disagreed, the page just quoted a number
    Stripe was not charging. This test is the thing that fails instead. */
-test("app-legacy's fallback prices still equal the catalog", () => {
-  const fs = require("node:fs");
-  const path = require("node:path");
-  const source = fs.readFileSync(
-    path.join(__dirname, "..", "public", "app-legacy.js"), "utf8"
-  );
-
-  const read = (label) => {
-    const m = source.match(
-      new RegExp("var\\s+" + label + "\\s*=\\s*\\(p && p\\." + label +
-                 "[^)]*\\)\\s*\\|\\|\\s*(\\d+)")
-    );
-    assert.ok(m, `could not find the ${label} fallback in app-legacy.js`);
-    return Number(m[1]);
-  };
-
-  assert.equal(read("monthly"), PRODUCT_CONFIG.pricing.monthly.unitAmountCents);
-  assert.equal(read("annual"), PRODUCT_CONFIG.pricing.annual.unitAmountCents);
-
-  const trial = source.match(/return \(cfg && cfg\.trial && cfg\.trial\.days\) \|\| (\d+)/);
-  assert.ok(trial, "could not find the trial-days fallback in app-legacy.js");
-  assert.equal(Number(trial[1]), PRODUCT_CONFIG.trial.days);
-});
-
 test("the catalog check reports whether each price is live or test mode", async () => {
   clearStripeCatalogVerifierCache();
   const stripe = { prices: { retrieve: async (id) => ({

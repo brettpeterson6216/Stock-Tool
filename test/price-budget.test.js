@@ -112,15 +112,6 @@ test("alerts share the quota: the more stocks watched, the less often each is ch
   for (const n of [5, 20, 60]) assert.ok(n * (390 / min(alertMaxAgeMs(n))) <= 71, String(n));
 });
 
-test("home tiles ask for previews; the chart someone opened does not", () => {
-  const fs = require("fs"), path = require("path");
-  const route = fs.readFileSync(path.join(__dirname, "..", "routes/market-data.js"), "utf8");
-  assert.match(route, /preview: req\.query\.preview === "1"/);
-  for (const f of ["public/home-member.js", "public/tool-launch.js"]) {
-    assert.match(fs.readFileSync(path.join(__dirname, "..", f), "utf8"), /range=1d&preview=1/, f);
-  }
-});
-
 test("the graded universe tops up 100 stocks per call, not one call each", () => withKey(async () => {
   T._reset();
   T._setClock(() => at("2026-11-05T23:00:00Z"));   // Thursday evening, Thursday's bar published

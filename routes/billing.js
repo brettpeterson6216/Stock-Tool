@@ -69,12 +69,10 @@ router.post("/stripe/create-checkout", validateCsrf, async (req, res) => {
     });
     const user     = userRow.rows[0];
     if (!user)     return res.status(404).json({ error: "User not found." });
-    if (!user.email_verified) {
-      return res.status(403).json({
-        error: "Please verify your email before starting a trial. Check your inbox or resend from account settings.",
-        requiresEmailVerification: true,
-      });
-    }
+    /* The trial no longer waits for email verification: Stripe checkout
+       takes a card, which is the real check, and a second inbox round-trip
+       right before paying was where people left. Verification still runs in
+       the background for account recovery and email alerts. */
 
     if (!stripe) return res.status(503).json({ error: "Payments not configured yet." });
 

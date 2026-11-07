@@ -396,7 +396,7 @@
     if (kind === "pro") {
       return '<div class="gate' + center + '"><span class="gate-ico">' + IL.icon("lock") + '</span>' +
         '<div class="gate-t">' + IL.h(what || "This is part of Pro") + "</div>" +
-        '<div class="gate-s">' + IL.h(opts.why || "Pro unlocks every tab, unlimited lookups, alerts and the Valuation Lab. $7.99 a month after a 30-day free trial; cancel any time.") + "</div>" +
+        '<div class="gate-s">' + IL.h(opts.why || "Pro unlocks every tab, unlimited lookups, alerts, 10-year projections and the cash-flow model. $7.99 a month after a 30-day free trial. A card is required to start; nothing is charged for 30 days, and you can cancel any time.") + "</div>" +
         /* Straight to checkout (site bar, data-checkout); the plans page is
            one link away for anyone who wants to compare first. */
         '<div class="row wrap"><a class="btn primary" href="/pricing" data-checkout="monthly">Start the 30-day free trial</a><a class="btn ghost" href="/pricing">Compare plans</a></div></div>';

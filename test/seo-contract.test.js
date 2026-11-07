@@ -260,7 +260,7 @@ test("static assets still resolve with the directory redirect off", async () => 
   const base = `http://127.0.0.1:${server.address().port}`;
   try {
     for (const asset of ["/robots.txt", "/sitemap.xml", "/favicon.ico",
-                         "/vendor/fonts/tabler-icons.woff2", "/app-legacy.js"]) {
+                         "/vendor/fonts/tabler-icons.woff2", "/app/core.js"]) {
       const res = await fetch(base + asset, { redirect: "manual" });
       assert.equal(res.status, 200, `${asset} stopped resolving`);
     }

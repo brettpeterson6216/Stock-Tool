@@ -50,6 +50,7 @@
     lens: function () { return get("lens", "/api/lens-score/" + S.t + "?card=1"); },
     hist: function () { return get("hist", "/api/fundamentals/history/" + S.t).then(function (r) { S.histRes = r; return r; }); },
     annual: function () { return get("annual", "/api/financials/" + S.t); },
+    est: function () { return get("est", "/api/estimates/" + S.t); },
     funds: function () { return get("funds", "/api/funds/" + S.t); },
     news: function () { return get("news", "/api/news/" + S.t); },
     calls: function () { return get("calls", "/api/calls/" + S.t); },
@@ -979,10 +980,55 @@
       '<div class="stat"><span class="k">Worst drop from a high ' + IL.tip("The largest fall from a peak to a later low over the past year (maximum drawdown).") + '</span><span class="v down">' + F.spct(p.drawdown) + "</span></div>" +
       '<div class="stat"><span class="k">Worst single day</span><span class="v down">' + F.spct(p.worstDay) + "</span></div>" +
       (beta !== null ? '<div class="stat"><span class="k">Beta ' + IL.tip("How much the stock tends to move when the whole market moves 1%. Above 1 means it swings more than the market.") + '</span><span class="v">' + F.num(beta, 2) + "</span></div>" : "") +
-      "</div>";
+      "</div>" +
+      '<div id="ov-risk-pro" class="risk-pro">' + (IL.isPro() ? "" : '<p class="note" style="margin-top:12px">Sharpe, Sortino and value at risk come with <a class="link" href="/pricing">Pro</a>.</p>') + "</div>";
+    if (IL.isPro()) paintRiskPro(p);
+  }
+  function paintRiskPro(p) {
+    var bars = S.quote && S.quote.bars ? S.quote.bars : [];
+    var closes = bars.slice(IL.windowStart(bars, IL.YEAR_DAYS)).map(function (b) { return b.close; });
+    IL.api("/api/market/risk-free").then(function (res) {
+      var el = IL.$("#ov-risk-pro"); if (!el) return;
+      var rf = res.ok && res.data && isFinite(res.data.rate) ? res.data : { rate: 0.039, asOf: null, source: "fallback" };
+      var st = IL.valuation && IL.valuation.riskStats(closes, rf.rate);
+      if (!st) { el.innerHTML = ""; return; }
+      var cash = F.pct(rf.rate * 100, 2) + (rf.asOf ? ", the 3-month Treasury bill yield on " + F.date(rf.asOf) : ", about the 3-month Treasury bill yield");
+      var word = function (v) { return v === null ? "" : v >= 1 ? "good" : v >= 0.5 ? "fair" : v >= 0 ? "poor" : "below cash"; };
+      el.innerHTML =
+        '<div class="stat"><span class="k">Return per unit of risk (Sharpe) ' + IL.tip("The past year’s return above cash (" + cash + "), divided by its volatility. Above 1 is good; below 0 means cash did better.") + '</span><span class="v">' + (st.sharpe === null ? "—" : F.num(st.sharpe, 2)) + ' <span class="faint" style="font-size:12px">' + word(st.sharpe) + "</span></span></div>" +
+        '<div class="stat"><span class="k">Counting only falls (Sortino) ' + IL.tip("Like Sharpe, but only days that did worse than cash count as risk, so big up days are not penalised. Usually higher than Sharpe.") + '</span><span class="v">' + (st.sortino === null ? "—" : F.num(st.sortino, 2)) + "</span></div>" +
+        '<div class="stat"><span class="k">A bad day, 1 in 20 (95% VaR) ' + IL.tip("On the worst 5% of the past year’s " + st.days + " trading days, the stock fell at least this much. Taken from the actual days, not a bell-curve estimate.") + '</span><span class="v down">' + F.spct(-st.var95 * 100) + "</span></div>" +
+        '<div class="stat"><span class="k">Average of those days (CVaR) ' + IL.tip("The average fall on that worst 5% of days, also called expected shortfall. It shows how deep the bad days go.") + '</span><span class="v down">' + F.spct(-st.cvar95 * 100) + "</span></div>";
+    });
+  }
+
+  /* The stock's P/E against its own history, under the grades: the Value
+     grade compares with peers, this with the stock itself. */
+  function peAnchor() {
+    if (!S.quote || !S.quote.bars || !IL.valuation) return Promise.resolve(null);
+    return D.hist().then(function (res) {
+      if (!res || !res.ok || !res.data) return null;
+      var q = quarterly(res.data).map(function (x) { return { end: x.end, eps: N(x.eps), price: N(x.price) }; });
+      var hist = IL.valuation.peHistory(q, S.quote.bars);
+      if (!hist) return null;
+      var last4 = q.slice(-4).map(function (x) { return x.eps; });
+      var ttm = last4.length === 4 && last4.every(function (v) { return v !== null; }) ? last4.reduce(function (a, b) { return a + b; }, 0) : null;
+      var p = priceFacts();
+      if (!(ttm > 0) || !p) return null;
+      var now = p.price / ttm, r = now / hist.median;
+      return { now: now, median: hist.median, low: hist.low, high: hist.high, since: hist.since, word: r > 1.15 ? "above" : r < 0.87 ? "below" : "near" };
+    }).catch(function () { return null; });
+  }
+  function paintPeAnchor() {
+    peAnchor().then(function (a) {
+      var el = IL.$("#rc-pe"); if (!el || !a) return;
+      el.hidden = false;
+      el.innerHTML = "<b>Against its own past:</b> P/E <b class=\"num\">" + F.mult(a.now) + "</b> today, " + a.word + " its usual level (<span class=\"num\">" + F.mult(a.low) + "\u2013" + F.mult(a.high) + "</span> since " + h(F.date(a.since, { day: undefined })) + ", median <span class=\"num\">" + F.mult(a.median) + "</span>). " + IL.tip("At each quarter end over the last five years: the share price divided by the four quarters of diluted earnings per share filed with the SEC up to then. The Value grade compares the stock with its peers; this compares it with its own past.");
+    });
   }
 
   function paintReportCard() {
+    setTimeout(paintPeAnchor, 0);
     var box = IL.$("#ov-rc"); if (!box) return;
     var res = S.lensRes, g = S.lens && S.lens.grades;
     if (res && res.gate) { box.innerHTML = '<h2 class="card-t">LensScore</h2>' + IL.gate(res.gate); return; }
@@ -1008,6 +1054,7 @@
         return '<div class="grade"><span>' + h(FACTOR_LABEL[x.key] || x.label) + '</span><div class="bar"><i style="width:' + IL.gradeFill(x.grade) + "%;background:" + IL.gradeTone(x.grade) + '"></i></div><span class="g">' + IL.gchip(x.grade) + "</span></div>";
       }).join("") + "</div>" +
       (g.verdict ? '<p class="rc-verdict">' + h(g.verdict) + "</p>" : "") +
+      '<p class="rc-anchor" id="rc-pe" hidden></p>' +
       '<div class="rc-next"><span class="rc-next-h">What to check next</span>' + checks.slice(0, 3).map(function (c) {
         return '<a href="/research/' + h(S.t) + (c.tab ? "/" + c.tab : "") + '" data-tab="' + (c.tab || "overview") + '"' + (c.anchor ? ' data-anchor="' + c.anchor + '"' : "") + "><span>" + h(c.text) + "</span>" + IL.icon("arrow", 14) + "</a>";
       }).join("") + "</div>" +
@@ -1334,6 +1381,7 @@
         price: p.price, revenue: rev, shares: shares, netIncome: ni,
         margin: ni !== null ? ni / rev : null,
         pe: eps > 0 ? p.price / eps : null,
+        fcf: sumLast(q, "freeCashFlow", 4),
         growth1y: growth(rev, sumLast(q, "revenue", 4, 4)) / 100,
         growth3y: (function () { var old = sumLast(q, "revenue", 4, 12); return old ? IL.valuation.cagr(old, rev, 3) : null; })(),
         quarters: q.map(function (x) { return { end: x.end, revenue: N(x.revenue), netIncome: N(x.netIncome), shares: N(x.shares) }; }),
@@ -1379,20 +1427,22 @@
         '<p class="note">From SEC filings' + (ctx.asOf ? " through the quarter to " + F.date(ctx.asOf) : "") + '. Bear and bull start from the same history: bear grows at 60% of the base rate, keeps 85% of the margin and gets a 20% lower P/E; bull the reverse. <a class="link" href="/learn/priced-in">How to use this</a></p></section>' +
       '<section class="card flush" id="val-years" data-w="expand,csv" data-w-title="Year by year"><div class="card-h"><h3 class="card-t">Year by year</h3><div class="seg" role="group" aria-label="Case" id="val-yr-seg"><button type="button" data-yr="bear" aria-pressed="false">Bear</button><button type="button" data-yr="base" aria-pressed="true">Base</button><button type="button" data-yr="bull" aria-pressed="false">Bull</button></div></div><div class="tbl-wrap"><table class="tbl" id="val-yr"></table></div><p class="note" style="padding:10px 20px 14px">Growth and the margin each move in a straight line from the first year to the last. “Price at the final P/E” shows what each year’s earnings would be worth at that multiple.</p></section>' +
       '<section class="card flush" id="val-whatif" data-w="expand,csv" data-w-title="What if"><div class="card-h"><h3 class="card-t">What if? Yearly return from today ' + IL.tip("Base case, with first-year growth and the final-year P/E changed. Green beats the return you require; amber makes money but less than that; red loses money.") + '</h3><span class="card-sub">Base-case margin and fade; rows = first-year growth, columns = final-year P/E</span></div><div class="tbl-wrap"><table class="tbl val-sens" id="val-sens"></table></div></section>' +
+      '<section class="card flush" id="pj-dcf" data-w="expand,csv" data-w-title="Cash-flow value"><div class="card-h"><div><h3 class="card-t">Intrinsic value: discounted cash flow ' + IL.tip("A second way to value the same cases: the cash each one would leave for shareholders, year by year and after the final year, discounted back to today at the return investors demand for the risk.") + '</h3><span class="card-sub">Each case’s free cash flow, discounted back to today</span></div>' + (IL.isPro() ? "" : '<span class="tag gold">Pro</span>') + "</div>" +
+        '<div id="pj-dcf-body">' + (IL.isPro() ? '<div style="padding:16px 20px">' + sk(160) + "</div>" : IL.gate("pro", "The cash-flow (DCF) model is part of Pro", { why: "Value each case by the cash it leaves for shareholders, see the free-cash-flow margin today’s price needs, and test the discount rate against long-run growth. $7.99 a month after a 30-day free trial; a card is required to start, and you can cancel any time." })) + "</div></section>" +
       '<div class="grid-2">' +
         '<section class="card"><h3 class="card-t">Starting point</h3><div>' +
           '<div class="stat"><span class="k">Price</span><span class="v">' + F.price(ctx.price) + "</span></div>" +
           '<div class="stat"><span class="k">Revenue, last 12 months</span><span class="v">' + F.money(ctx.revenue) + "</span></div>" +
           '<div class="stat"><span class="k">Net margin, last 12 months</span><span class="v">' + (ctx.margin !== null ? F.pct(ctx.margin * 100) : "—") + "</span></div>" +
           '<div class="stat"><span class="k">P/E, last 12 months</span><span class="v">' + (ctx.pe ? F.mult(ctx.pe) : "—") + "</span></div>" +
+          '<div class="stat" id="pj-pe-hist" hidden></div>' +
           '<div class="stat"><span class="k">Revenue growth, last year</span><span class="v ' + F.cls(ctx.growth1y) + '">' + (ctx.growth1y !== null ? F.spct(ctx.growth1y * 100) : "—") + "</span></div>" +
           '<div class="stat"><span class="k">Revenue growth, last two quarters</span><span class="v ' + F.cls(def.history.recent) + '">' + (def.history.recent !== null ? F.spct(def.history.recent * 100) : "—") + "</span></div>" +
           '<div class="stat"><span class="k">Revenue growth, 3-year average</span><span class="v ' + F.cls(ctx.growth3y) + '">' + (ctx.growth3y !== null ? F.spct(ctx.growth3y * 100) : "—") + "</span></div>" +
           '<div class="stat"><span class="k">Diluted shares</span><span class="v">' + F.count(ctx.shares) + "</span></div>" +
         "</div></section>" +
         '<section class="card"><h3 class="card-t">How to read this</h3><p class="muted" style="font-size:13.5px">A stock price is a bet on the future. Instead of guessing a “fair value”, start with what the price already assumes, then ask whether the company can beat it. If the growth it needs is well above anything it has done, the stock is priced for perfection. If it is below, the market may be too gloomy.</p>' +
-          '<p class="muted" style="font-size:13.5px">This is a model of your assumptions, not a price target. Want a discounted-cash-flow model with reinvestment and a cost of capital instead? The classic DCF is still available.</p>' +
-          '<a class="card-foot" href="/?view=tool&section=dcf&symbol=' + h(S.t) + '">Open the classic DCF model →</a></section>' +
+          '<p class="muted" style="font-size:13.5px">This is a model of your assumptions, not a price target. The cash-flow value above checks the same cases a second way: by the cash they leave for shareholders rather than the multiple investors pay at the end.</p></section>' +
       "</div>";
 
     function valRow(field, text, unit, tip) {
@@ -1417,6 +1467,16 @@
         var n = Number(String(inp.value).replace(/[%,\s]/g, ""));
         if (isFinite(n) && n >= 0) M.weights[inp.getAttribute("data-w-case")] = n / 100;
       });
+      if (M.dcf) {
+        box.querySelectorAll("[data-dcf-case]").forEach(function (inp) {
+          var n = Number(String(inp.value).replace(/[%,\s]/g, ""));
+          if (isFinite(n) && String(inp.value).trim() !== "") M.dcf.fcf[inp.getAttribute("data-dcf-case")] = n / 100;
+        });
+        [["#v-rate", "rate", 100], ["#v-tg", "terminal", 100], ["#v-nc", "netCash", 1e-9]].forEach(function (f) {
+          var el = IL.$(f[0]); if (!el || String(el.value).trim() === "") return;
+          var n = Number(String(el.value).replace(/[%$,\s]/g, "")); if (isFinite(n)) M.dcf[f[1]] = n / f[2];
+        });
+      }
       var r = Number(IL.$("#v-req").value), s = Number(IL.$("#v-sh").value);
       if (isFinite(r) && IL.$("#v-req").value.trim() !== "") M.required = r / 100;
       if (isFinite(s) && IL.$("#v-sh").value.trim() !== "") M.shareChange = s / 100;
@@ -1446,7 +1506,7 @@
         ? '<span class="card-sub">Weighted by your odds (' + CASES.map(function (c) { return Math.round(M.weights[c] / wsum * 100) + "% " + c; }).join(", ") + ")</span>" +
           '<span><b class="num">' + F.price(ex.futurePrice) + '</b> <span class="faint">in ' + M.years + ' years</span></span><span><b class="num ' + F.cls(ex.annualReturn) + '">' + F.spct(ex.annualReturn * 100) + '</b> <span class="faint">a year from ' + F.price(ctx.price) + "</span></span>"
         : "";
-      hero(); chart(); years(); sensitivity();
+      hero(); chart(); years(); sensitivity(); paintDcf();
       try { localStorage.setItem(key, JSON.stringify({ v: 2, m: M })); } catch (_) {}
     }
 
@@ -1515,6 +1575,91 @@
           }).join("") + "</tr>";
         }).join("") + "</tbody>";
     }
+    /* ── Cash-flow value (Pro) ─────────────────────────────────────────── */
+    var fcfMargin0 = ctx.fcf !== null && ctx.revenue > 0 ? ctx.fcf / ctx.revenue : null;
+    function dcfIn(c, over) {
+      var o = over || {};
+      return { revenuePath: outs[c] ? outs[c].revenue : [], fcfMargin0: fcfMargin0 !== null ? fcfMargin0 : M.dcf.fcf[c], fcfMargin: o.fcfMargin != null ? o.fcfMargin : M.dcf.fcf[c],
+        rate: o.rate != null ? o.rate : M.dcf.rate, terminal: o.terminal != null ? o.terminal : M.dcf.terminal, netCash: M.dcf.netCash, shares: ctx.shares, price: ctx.price };
+    }
+    function dcfRow(text, tip) {
+      return "<tr><td>" + h(text) + " " + IL.tip(tip) + "</td>" + CASES.map(function (c) {
+        return '<td><span class="val-cell"><input class="input num val-in" data-dcf-case="' + c + '" inputmode="decimal" aria-label="' + h(CASE_LABEL[c] + " " + text) + '" value="' + pctIn(M.dcf.fcf[c]) + '"><span class="faint">%</span></span></td>';
+      }).join("") + "</tr>";
+    }
+    function buildDcf() {
+      var body = IL.$("#pj-dcf-body"); if (!body || !M.dcf) return;
+      var nc = M.dcf.netCash || 0;
+      body.innerHTML =
+        '<div class="pj-dcf-head" id="pj-dcf-implied"></div>' +
+        '<p class="callout val-err" id="pj-dcf-err" role="alert" hidden></p>' +
+        '<div class="tbl-wrap"><table class="tbl val-tbl"><thead><tr><th></th>' + CASES.map(function (c) { return '<th class="val-' + c + '">' + CASE_LABEL[c] + "</th>"; }).join("") + "</tr></thead><tbody>" +
+          dcfRow("Free-cash-flow margin, final year", "Operating cash flow minus capital spending, as a share of revenue, in the final year. It moves in a straight line from today’s." + (fcfMargin0 !== null ? " Last 12 months: " + F.pct(fcfMargin0 * 100) + "." : "") + " Mature companies often turn most of their net profit into free cash; heavy spenders less.") +
+          '<tr class="val-out"><td>Value per share ' + IL.tip("Free cash flow for each year of the case and for every year after it (growing at the rate below), discounted back to today, plus net cash, divided by today’s diluted shares.") + "</td>" + CASES.map(function (c) { return '<td id="d-v-' + c + '"></td>'; }).join("") + "</tr>" +
+          '<tr class="val-out"><td>Against today’s price</td>' + CASES.map(function (c) { return '<td id="d-u-' + c + '"></td>'; }).join("") + "</tr>" +
+          "<tr><td>Share of value from after year " + M.years + " " + IL.tip("How much of the value comes from cash flows beyond the projection. Above about 75%, the answer rests mostly on the long-run assumptions, so treat it with care.") + "</td>" + CASES.map(function (c) { return '<td id="d-t-' + c + '"></td>'; }).join("") + "</tr>" +
+        "</tbody></table></div>" +
+        '<div class="val-foot">' +
+          '<label class="field" style="flex-direction:row;align-items:center;gap:10px">Discount rate ' + IL.tip(ctx.wacc ? "Suggested from the stock’s beta and debt: a cost of equity of 4.3% plus about 5 points times its risk, blended with after-tax debt. Many investors simply use 8–10%." : "The yearly return investors demand for the risk. Many use 8–10%; riskier companies more.") + ' <input class="input num val-in" style="width:84px" id="v-rate" inputmode="decimal" value="' + pctIn(M.dcf.rate) + '"> %</label>' +
+          '<label class="field" style="flex-direction:row;align-items:center;gap:10px">Growth after year ' + M.years + " " + IL.tip("Free cash flow grows at this rate for ever after the final year. Keep it at or below long-run economic growth, about 2–3%.") + ' <input class="input num val-in" style="width:84px" id="v-tg" inputmode="decimal" value="' + pctIn(M.dcf.terminal) + '"> %</label>' +
+          '<label class="field" style="flex-direction:row;align-items:center;gap:10px">Net cash, $B ' + IL.tip("Cash and short-term investments less long-term debt" + (ctx.netCashAsOf ? ", from the " + ctx.netCashAsOf + " annual report" : "") + ". Negative means net debt. Edit it if the company has raised or repaid debt since.") + ' <input class="input num val-in" style="width:96px" id="v-nc" inputmode="decimal" value="' + (Math.round(nc / 1e7) / 100) + '"></label>' +
+        "</div>" +
+        '<div class="card-h" style="border-top:1px solid var(--line)"><h4 class="card-t" style="font-size:14px">Base-case value per share as the two long-run inputs change</h4><span class="card-sub">Rows = discount rate, columns = growth after year ' + M.years + "</span></div>" +
+        '<div class="tbl-wrap"><table class="tbl val-sens" id="pj-dcf-sens"></table></div>' +
+        '<p class="note" style="padding:10px 20px 14px">Revenue for each year comes from the cases above. Value is per share outstanding today; buybacks and dilution are left out, so stock-based pay shows up only through the margin you choose. Free cash flow from SEC filings' + (ctx.asOf ? " through " + F.date(ctx.asOf) : "") + ".</p>";
+      box.__dcfReady = true;
+      paintDcf();
+    }
+    function paintDcf() {
+      if (!box.__dcfReady || !M.dcf || !IL.$("#d-v-base")) return;
+      var outsD = {}, msg = null;
+      CASES.forEach(function (c) {
+        var i = dcfIn(c); outsD[c] = V.dcf(i);
+        if (!outsD[c] && !msg) { var why = V.dcfProblem(i) || "Check the inputs."; msg = (/free-cash-flow margin/.test(why) ? CASE_LABEL[c] + ": " : "") + why; }
+        var o = outsD[c];
+        IL.$("#d-v-" + c).innerHTML = o ? '<b class="num">' + (o.value > 0 ? F.price(o.value) : "below zero") + "</b>" : "—";
+        IL.$("#d-u-" + c).innerHTML = o && o.value > 0 ? '<b class="num ' + F.cls(o.upside) + '">' + F.spct(o.upside * 100, 0) + "</b>" : "—";
+        IL.$("#d-t-" + c).innerHTML = o && o.terminalShare !== null ? '<span class="num' + (o.terminalShare > 0.75 ? " down" : "") + '">' + F.pct(o.terminalShare * 100, 0) + "</span>" : "—";
+      });
+      var err = IL.$("#pj-dcf-err"); if (err) { err.hidden = !msg; err.textContent = msg || ""; }
+      var im = outs.base ? V.impliedFcfMargin(dcfIn("base")) : null, head = IL.$("#pj-dcf-implied");
+      if (head && im !== null && (im <= 0 || im > 1)) {
+        head.innerHTML = '<span class="card-sub">Priced in, cash flow</span><span class="num val-mid">' + (im <= 0 ? "0%" : "over 100%") + '</span><p class="muted">' + (im <= 0
+          ? "Net cash alone is worth more than today’s price, before any free cash flow."
+          : "No free-cash-flow margin on the base case’s revenue gets to " + F.price(ctx.price) + " at a " + F.pct(M.dcf.rate * 100) + " discount rate: the price assumes more revenue than this case gives.") + "</p>";
+      } else if (head) head.innerHTML = im === null ? "" :
+        '<span class="card-sub">Priced in, cash flow</span><span class="num val-mid">' + F.pct(im * 100) + '</span><p class="muted">At ' + F.price(ctx.price) + ", the base case’s revenue needs a free-cash-flow margin of about <b>" + F.pct(im * 100) + "</b> by year " + M.years + " to be worth the price at a " + F.pct(M.dcf.rate * 100) + " discount rate" + (fcfMargin0 !== null ? "; the last 12 months ran at " + F.pct(fcfMargin0 * 100) + "." : ".") + " Your base case uses " + F.pct(M.dcf.fcf.base * 100) + ".</p>";
+      var t = IL.$("#pj-dcf-sens"); if (!t) return;
+      var rates = [-0.02, -0.01, 0, 0.01, 0.02].map(function (d) { return Math.round((M.dcf.rate + d) * 1000) / 1000; });
+      var tgs = [-0.01, -0.005, 0, 0.005, 0.01].map(function (d) { return Math.round((M.dcf.terminal + d) * 1000) / 1000; });
+      t.innerHTML = "<thead><tr><th>Discount rate ↓ / growth after →</th>" + tgs.map(function (g) { return "<th>" + F.pct(g * 100, 1) + "</th>"; }).join("") + "</tr></thead><tbody>" +
+        rates.map(function (r, ri) {
+          return "<tr><td" + (ri === 2 ? ' class="em"' : "") + ">" + F.pct(r * 100, 1) + "</td>" + tgs.map(function (g, gi) {
+            var o = outs.base ? V.dcf(dcfIn("base", { rate: r, terminal: g })) : null;
+            var tone = !o ? "" : o.value >= ctx.price ? "s-good" : o.value >= ctx.price * 0.8 ? "s-mid" : "s-bad";
+            return '<td class="' + tone + (ri === 2 && gi === 2 ? " s-base" : "") + '">' + (!o ? "—" : o.value > 0 ? F.price(o.value) : "&lt; $0") + "</td>";
+          }).join("") + "</tr>";
+        }).join("") + "</tbody>";
+    }
+    function loadDcf() {
+      if (!IL.isPro()) return;
+      Promise.all([D.annual(), D.est()]).then(function (all) {
+        var fin = all[0], est = all[1];
+        var r = fin && fin.ok && fin.data && fin.data.quoteSummary && fin.data.quoteSummary.result && fin.data.quoteSummary.result[0];
+        var bal = r && r.balanceSheetHistory ? (r.balanceSheetHistory.balanceSheetStatements || []).slice() : [];
+        bal.sort(function (a, b) { return ((a.endDate && a.endDate.raw) || 0) - ((b.endDate && b.endDate.raw) || 0); });
+        var last = bal[bal.length - 1], v = function (k) { return last && last[k] && isFinite(last[k].raw) ? Number(last[k].raw) : 0; };
+        if (last) { ctx.netCash = v("cash") + v("shortTermInvestments") - v("longTermDebt"); ctx.netCashAsOf = last.endDate && last.endDate.fmt; }
+        ctx.wacc = est && est.ok && est.data && isFinite(est.data.suggestedWACC) && est.data.suggestedWACC > 0 ? est.data.suggestedWACC : null;
+        if (!M.dcf) {
+          var ratio = ctx.fcf !== null && ctx.fcf > 0 && ctx.netIncome > 0 ? Math.min(1.5, Math.max(0.6, ctx.fcf / ctx.netIncome)) : 1;
+          M.dcf = { rate: ctx.wacc ? ctx.wacc / 100 : 0.09, terminal: 0.025, netCash: ctx.netCash || 0, fcf: {} };
+          CASES.forEach(function (c) { M.dcf.fcf[c] = Math.round(M[c].margin * ratio * 1000) / 1000; });
+        }
+        buildDcf();
+        if (location.hash === "#pj-dcf") { var sec = IL.$("#pj-dcf"); if (sec) sec.scrollIntoView({ block: "start" }); }
+      });
+    }
     function implied() {
       return V.impliedGrowth({ price: ctx.price, revenue: ctx.revenue, shares: ctx.shares, years: M.years, margin: M.base.margin, exitPE: M.base.exitPE, shareChange: M.shareChange, required: M.required });
     }
@@ -1581,6 +1726,7 @@
       M.years = n;
       IL.$$("#pj-years [data-years]").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
       compute();
+      if (box.__dcfReady) buildDcf();
     });
     var versions = [];
     function loadVersions(selectId) {
@@ -1621,6 +1767,12 @@
       renderProjection(box, ctx, JSON.parse(JSON.stringify(stripNotes(def))), def, key);
     });
     compute();
+    loadDcf();
+    peAnchor().then(function (a) {
+      var el = IL.$("#pj-pe-hist"); if (!el || !a) return;
+      el.hidden = false;
+      el.innerHTML = '<span class="k">P/E, its own median since ' + h(F.date(a.since, { day: undefined })) + '</span><span class="v">' + F.mult(a.median) + ' <span class="faint" style="font-size:12px">(' + F.mult(a.low) + "\u2013" + F.mult(a.high) + ")</span></span>";
+    });
   }
   function axisPrice(v) {
     if (v === 0) return "$0";

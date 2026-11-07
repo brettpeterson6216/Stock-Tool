@@ -95,7 +95,7 @@ const homeCss = fs.readFileSync(path.join(ROOT, "public", "clean-pass.css"), "ut
 // surface.css is loaded after clean-pass.css and is where the dashboard's
 // layout now lives, so a contract about the layout has to read both.
 const surfaceCss = fs.readFileSync(path.join(ROOT, "public", "surface.css"), "utf8");
-const memberJs = fs.readFileSync(path.join(ROOT, "public", "home-member.js"), "utf8");
+const memberJs = "";
 
 test("the signed-in and signed-out homes cannot both be hidden", () => {
   // Written with one :not(#id) fewer, the signed-in rule lost to the base hide
@@ -109,80 +109,6 @@ test("the signed-in and signed-out homes cannot both be hidden", () => {
     `show carries ${ids(show[1])} ids against hide's ${ids(hide[1])}`);
 });
 
-test("the visitor page is what an unresolved session falls back to", () => {
-  // Showing a stranger an empty workspace is the worse failure of the two.
-  const catchIdx = memberJs.lastIndexOf(".catch(");
-  assert.ok(catchIdx !== -1, "the session check has no failure path");
-  assert.match(memberJs.slice(catchIdx, catchIdx + 400), /il-hint-out/,
-    "a failed session check must fall back to the visitor page");
-  assert.doesNotMatch(
-    homeCss,
-    /html\.il-hint-unknown[^{]*#il-home-member \{ display: flex/,
-    "an unknown session must not render the member home"
-  );
-});
-
-test("member counts are read, never invented", () => {
-  assert.match(memberJs, /workspace\/summary/, "counts must come from the workspace summary");
-  assert.match(memberJs, /\/api\/saves/, "recent analyses must come from the saves endpoint");
-  assert.match(memberJs, /Number\.isFinite\(n\)/, "a missing count must not render as a number");
-  assert.match(memberJs, /counts are unavailable right now/, "a failed count must say so rather than show zero");
-});
-
-test("the dashboard offers places to go, not a lecture on how to use it", () => {
-  assert.match(homeCss, /#il-home-member \[hidden\][\s\S]{0,140}display: none !important/,
-    "[hidden] must win against the component's own display rule");
-  const html = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
-
-  // The three numbered steps told someone who had already signed up and
-  // logged in to search for a ticker, next to the box that already invited
-  // them to. Four named tools are what replaced them.
-  assert.doesNotMatch(html, /id="ihm-start"/, "the numbered how-to steps are back");
-  assert.doesNotMatch(html, /ihm-step-n/, "the numbered how-to steps are back");
-  // Projection Lab and Valuation Lab were two of these four. They are one
-  // tool now — see test/valuation-lab-merge.test.js — and the freed slot went
-  // to LensToolkit, which had no route off this panel at all.
-  for (const tool of ["Valuation Lab", "LensToolkit", "Compare", "Screener"]) {
-    assert.ok(html.includes(">" + tool + "<"), `the ${tool} link is missing from the tool rail`);
-  }
-  /* The three start-path cards were replaced by a ticker search with popular
-     chips in the hero and a live LensScore demo directly below it. */
-  assert.match(html, /data-lx-ticker="NVDA"/, "the visitor page needs its quick ways in");
-  assert.match(html, /id="lx-demo"/, "the visitor page needs its live demo");
-});
-
-test("the tools, the market and the favourites each get their own column", () => {
-  const html = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
-  const grid = html.slice(html.indexOf('class="ihm-grid"'), html.indexOf('</section>\n\n<section class="il-landing"'));
-  for (const cls of ["ihm-col-tools", "ihm-col-main", "ihm-col-side"]) {
-    assert.ok(grid.includes(cls), `${cls} is not inside the grid`);
-  }
-  assert.match(surfaceCss, /grid-template-columns: 240px minmax\(0, 1fr\) 336px/, "the three-column grid is gone");
-});
-
-// This test used to require the search to be INSIDE the middle column, which
-// was right when the alternative was a search box spanning the whole page.
-// It was costing 121px of a 960px screen for one input, and the complaint that
-// replaced it was that the dashboard needed scrolling to see its own data. The
-// requirement was never "in the middle column" - it was "not spanning the
-// page, with favourites beside it". The header row satisfies both.
-test("the search is a bounded header control, not a band across the page", () => {
-  const html = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
-  const head = html.slice(html.indexOf('class="ihm-head"'), html.indexOf('class="ihm-grid"'));
-  assert.ok(head.includes('id="ihm-search"'), "the search left the header row");
-  assert.ok(head.includes('id="ihm-ticker"'), "the ticker field left the header row");
-
-  assert.match(surfaceCss, /\.ihm-search \{[^}]*max-width: 470px/,
-    "the search is unbounded again, so it spans the page");
-  // The favourites rail still starts at the top of the grid, so it runs
-  // alongside the header and the chart rather than only alongside the chart.
-  assert.match(surfaceCss, /\.ihm-grid \{[^}]*align-items: stretch/,
-    "the columns no longer share a baseline");
-});
-
-// The whole point of the refit: the dashboard's data fits the screen it is
-// looked at on. The plot is the only element large enough to decide that, so
-// it is the one that has to answer to the viewport.
 test("the chart takes its height from the window, not from a constant", () => {
   assert.match(surfaceCss, /\.ilx-plot \{ height: clamp\(\d+px, calc\(100vh - \d+px\), \d+px\)/,
     "the plot is back to a fixed height, so it cannot fit a short screen or use a tall one");
@@ -198,23 +124,6 @@ test("the chart takes its height from the window, not from a constant", () => {
 });
 
 // ── The dashboard has to fill the screen ──────────────────────────────────
-test("the member dashboard has a working half, not just a greeting", () => {
-  const html = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
-  for (const [id, what] of [
-    ["ihm-chart", "the overlaid index chart"],
-    ["ihm-indexes", "the index row"],
-    ["ihm-sectors", "the sector strip"],
-    ["ihm-populars", "the popular companies"],
-    ["ihm-favs", "the favourites list"],
-    ["ihm-news", "the news list"]
-  ]) {
-    assert.ok(html.includes(`id="${id}"`), `${what} is missing from the dashboard`);
-  }
-  assert.match(html, /class="ihm-grid"/, "the two-column layout is gone");
-});
-
-// A greeting, a search box, four tiles and a short list ended around 760px on
-// a 1440x900 screen, and the footer filled the rest.
 test("the footer is pushed to the bottom rather than floating up", () => {
   const css = fs.readFileSync(path.join(ROOT, "public", "clean-pass.css"), "utf8");
   const block = css.slice(css.indexOf("THE MEMBER DASHBOARD, FILLED"));
@@ -224,17 +133,3 @@ test("the footer is pushed to the bottom rather than floating up", () => {
 
 // Number(null) is 0 and 0 is finite, so a watchlist row with no target read
 // "target 0.00" - a real-looking price of zero.
-test("a watchlist row with no target does not invent one", () => {
-  const js = fs.readFileSync(path.join(ROOT, "public", "home-member.js"), "utf8");
-  assert.match(js, /item\.target_price != null/, "null must be excluded before the finite check");
-  assert.match(js, /Number\(item\.target_price\) > 0/, "zero is not a target price");
-});
-
-// Every figure on this page is a quote or a count the API returned.
-test("the dashboard panels state their own failures", () => {
-  const js = fs.readFileSync(path.join(ROOT, "public", "home-member.js"), "utf8");
-  for (const msg of ["Index data unavailable.", "Quotes unavailable right now.", "Sector data unavailable."]) {
-    assert.ok(js.includes(msg), `missing the failure state: ${msg}`);
-  }
-  assert.match(js, /preview=1/, "quotes must use the preview path so they cost no analysis quota");
-});

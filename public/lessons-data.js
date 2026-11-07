@@ -534,7 +534,7 @@
       "warning": "A very low P/E often means the market expects earnings to fall, as at the peak of a cycle or before a disruption. Ask why it is cheap before concluding that it is.",
       "closing": "Use multiples to frame questions, not to answer them. If a stock looks cheap, your job is to find the reason the market disagrees and decide whether the market is right.",
       "tool": "dcf",
-      "toolLabel": "Open the Valuation Lab",
+      "toolLabel": "Open the cash-flow model",
       "tryIt": "Compare the P/E of NVDA and INTC. Then look at each company's revenue growth. Does the gap in multiples look justified?",
       "quiz": [
         {
@@ -591,7 +591,7 @@
       "closing": "Treat the output as a map of assumptions. The valuable question is not 'what is it worth?' but 'what would I have to believe for today's price to make sense, and do I believe it?'",
       "tool": "dcf",
       "toolLabel": "Build a valuation",
-      "tryIt": "In the Valuation Lab, change the discount rate by one percentage point in each direction and note how much the per-share value moves.",
+      "tryIt": "In the Projection Lab’s cash-flow section, change the discount rate by one percentage point in each direction and note how much the per-share value moves. The grid underneath shows every combination at once.",
       "quiz": [
         {
           "q": "What happens to a DCF value when the discount rate rises?",
@@ -1017,8 +1017,8 @@
       "example": "You bought at $100; it is now $60 and the thesis is broken. Holding 'until it gets back to $100' is anchoring. The only relevant question is whether you would buy it today at $60. If not, the money is better elsewhere.",
       "warning": "Feeling certain is not evidence. The moments you are most sure are usually the moments the crowd agrees with you, which is when prices already reflect it.",
       "closing": "Keep a decision journal: what you did, why, and what you expected. Reading it a year later is the most humbling and useful investing education there is.",
-      "tool": "reports",
-      "toolLabel": "Start a decision journal",
+      "tool": "thesis",
+      "toolLabel": "Write a thesis",
       "tryIt": "For a stock you own or like, write the strongest bear case you can in three sentences.",
       "quiz": [
         {

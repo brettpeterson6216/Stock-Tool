@@ -76,6 +76,20 @@ const authLimiter = rateLimit({
 const EMAIL_RE    = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const USERNAME_RE = /^[a-zA-Z0-9_.\-]{3,32}$/;
 
+/* Pure: a valid username from an email address ("Jane.Doe+x@mail.com" → "jane.doe"). */
+function usernameFromEmail(email) {
+  const local = String(email || "").split("@")[0].split("+")[0].toLowerCase().replace(/[^a-z0-9_.\-]/g, "").replace(/^[._-]+|[._-]+$/g, "").slice(0, 24);
+  return local.length >= 3 ? local : (local + "investor").slice(0, 24);
+}
+async function freeUsername(base) {
+  for (let i = 0; i < 20; i += 1) {
+    const candidate = `${base.slice(0, 24)}${Math.floor(1000 + Math.random() * 9000)}`;
+    const r = await db.execute({ sql: "SELECT id FROM users WHERE LOWER(username) = LOWER(?) LIMIT 1", args: [candidate] });
+    if (!r.rows.length) return candidate;
+  }
+  return `${base.slice(0, 20)}${Date.now().toString(36)}`;
+}
+
 function validateSignup({ username, email, password }) {
   const errors = [];
   if (!username || !USERNAME_RE.test(username))
@@ -95,16 +109,23 @@ function validateSignup({ username, email, password }) {
 router.post("/auth/signup",           authLimiter, async (req, res) => {
   try {
     const body = req.body || {};
-    const username = String(body.username || "").trim().toLowerCase();
     const email    = String(body.email    || "").trim().toLowerCase();
     const password = String(body.password || "");
     const acquisition = analyticsContext(body);
+    /* Sign-up asks only for an email and a password. A username, when one is
+       not given, is made from the email's name part (it is only used as an
+       alternative way to log in), with a number added if it is taken. */
+    const chosen = String(body.username || "").trim().toLowerCase();
+    let username = chosen || usernameFromEmail(email);
 
     const errors = validateSignup({ username, email, password });
     if (errors.length) return res.status(400).json({ error: errors.join(" ") });
 
     const byUser  = await db.execute({ sql: "SELECT id FROM users WHERE LOWER(username) = LOWER(?) LIMIT 1", args: [username] });
-    if (byUser.rows.length) return res.status(409).json({ error: "That username is already taken." });
+    if (byUser.rows.length) {
+      if (chosen) return res.status(409).json({ error: "That username is already taken." });
+      username = await freeUsername(username);
+    }
 
     const byEmail = await db.execute({ sql: "SELECT id FROM users WHERE email = ? LIMIT 1", args: [email] });
     if (byEmail.rows.length) return res.status(409).json({ error: "An account with that email already exists." });
@@ -725,3 +746,4 @@ router.post("/auth/resend-verification", resendVerifLimiter, validateCsrf, async
 });
 
 module.exports = router;
+module.exports._usernameFromEmail = usernameFromEmail;

@@ -197,7 +197,110 @@
     };
   }
 
-  var api = { project: project, impliedGrowth: impliedGrowth, weighted: weighted, cagr: cagr, defaults: defaults, history: history, validate: validate, growthIn: growthIn };
+  /* Pure: the stock's own P/E at each quarter end — price at that date
+     over the four quarters of diluted EPS reported up to it. A Value grade
+     says cheap or dear against peers; this says cheap or dear against the
+     stock's own history, so a whole sector priced high does not pass as
+     "cheap". Last five years by default. quarters: [{ end, eps, price? }]
+     (price is the history API's close at the quarter end; without it the
+     bars are used); bars: [{ time (s), close }]. */
+  function peHistory(quarters, bars, years) {
+    var q = (quarters || []).filter(function (x) { return x && x.end; });
+    var b = (bars || []).filter(function (x) { return x && finite(x.close) && x.close > 0; });
+    if (q.length < 5) return null;
+    function closeOn(day) {
+      if (b.length < 60) return null;
+      var t = Date.parse(day + "T23:59:59Z") / 1000, hit = null;
+      if (t < b[0].time) return null;
+      for (var i = 0; i < b.length; i++) { if (b[i].time <= t) hit = b[i].close; else break; }
+      return hit;
+    }
+    var cutoff = Date.parse(q[q.length - 1].end) - (years || 5) * 365.25 * 86400000;
+    var pts = [];
+    for (var k = 3; k < q.length; k++) {
+      if (Date.parse(q[k].end) <= cutoff) continue;
+      var e = [q[k], q[k - 1], q[k - 2], q[k - 3]].map(function (x) { return x.eps; });
+      if (!e.every(finite)) continue;
+      var ttm = e.reduce(function (s, x) { return s + x; }, 0);
+      if (!(ttm > 0)) continue;
+      var px = finite(q[k].price) && q[k].price > 0 ? q[k].price : closeOn(q[k].end);
+      if (px) pts.push({ end: q[k].end, pe: px / ttm });
+    }
+    if (pts.length < 4) return null;
+    var v = pts.map(function (p) { return p.pe; }).sort(function (x, y) { return x - y; });
+    var mid = Math.floor(v.length / 2), med = v.length % 2 ? v[mid] : (v[mid - 1] + v[mid]) / 2;
+    return { points: pts, median: med, low: v[0], high: v[v.length - 1], since: pts[0].end };
+  }
+
+
+  /* Discounted cash flow on a case's revenue path.
+     o: { revenuePath: [year 1..n], fcfMargin0 (today), fcfMargin (final
+     year), rate (discount rate), terminal (growth after year n), netCash
+     (cash and investments less debt), shares, price }
+     Free cash flow each year is revenue times a margin moving in a straight
+     line from today's to the final year's; after year n it grows at
+     `terminal` for ever (Gordon growth). Value per share is the present value
+     of all of it, plus net cash, over today's diluted shares. */
+  function dcfProblem(o) {
+    if (!o || !Array.isArray(o.revenuePath) || !o.revenuePath.length || !o.revenuePath.every(function (v) { return finite(v) && v > 0; })) return "The cases above need to be valid first.";
+    if (!(o.shares > 0) || !(o.price > 0)) return "A price and share count are needed.";
+    if (!finite(o.fcfMargin) || !finite(o.fcfMargin0)) return "Enter a free-cash-flow margin for each case.";
+    if (!(finite(o.rate) && o.rate > 0 && o.rate < 0.3)) return "The discount rate must be between 0% and 30%.";
+    if (!(finite(o.terminal) && o.terminal >= -0.03 && o.terminal <= 0.05)) return "Growth after the final year must be between −3% and 5%; no company outgrows the economy for ever.";
+    if (!(o.rate - o.terminal >= 0.01)) return "The discount rate must be at least 1 point above the growth after the final year, or the value is infinite.";
+    if (o.netCash != null && !finite(o.netCash)) return "Net cash must be a number.";
+    return null;
+  }
+  function dcf(o) {
+    if (dcfProblem(o)) return null;
+    var n = o.revenuePath.length, fcf = [], pv = [], sum = 0;
+    for (var i = 0; i < n; i++) {
+      var m = n === 1 ? o.fcfMargin : o.fcfMargin0 + (o.fcfMargin - o.fcfMargin0) * (i + 1) / n;
+      var f = o.revenuePath[i] * m, d = Math.pow(1 + o.rate, i + 1);
+      fcf.push(f); pv.push(f / d); sum += f / d;
+    }
+    var tv = fcf[n - 1] * (1 + o.terminal) / (o.rate - o.terminal), pvTv = tv / Math.pow(1 + o.rate, n);
+    var ops = sum + pvTv, equity = ops + (o.netCash || 0), value = equity / o.shares;
+    var out = { fcf: fcf, pv: pv, sumPv: sum, terminalValue: tv, pvTerminal: pvTv, terminalShare: ops > 0 ? pvTv / ops : null, equity: equity, value: value, upside: value / o.price - 1 };
+    return [value, sum, pvTv].every(finite) ? out : null;
+  }
+  /* The final-year free-cash-flow margin at which the DCF value equals
+     today's price. Value is linear in that margin, so two runs solve it. */
+  function impliedFcfMargin(o) {
+    var a = dcf(Object.assign({}, o, { fcfMargin: 0 })), b = dcf(Object.assign({}, o, { fcfMargin: 0.1 }));
+    if (!a || !b || b.value === a.value) return null;
+    var m = (o.price - a.value) / ((b.value - a.value) / 0.1);
+    return finite(m) ? Math.round(m * 1e6) / 1e6 : null;
+  }
+
+  /* Pure: risk-adjusted figures from a year of daily closes.
+     closes: oldest first. rf: yearly cash rate (0.039 = 3.9%).
+     Sharpe: yearly return above cash per unit of yearly volatility.
+     Sortino: the same, with only the falls below cash counted as risk.
+     VaR 95%: the daily loss exceeded on 1 day in 20 (historical, not a
+     normal-curve guess); CVaR: the average loss on those days. */
+  function riskStats(closes, rf) {
+    var c = (closes || []).filter(function (x) { return finite(x) && x > 0; });
+    if (c.length < 120) return null;
+    var r = [];
+    for (var i = 1; i < c.length; i++) r.push(c[i] / c[i - 1] - 1);
+    var n = r.length, rfD = (finite(rf) ? rf : 0) / 252;
+    var mean = r.reduce(function (s, x) { return s + x; }, 0) / n;
+    var sd = Math.sqrt(r.reduce(function (s, x) { return s + (x - mean) * (x - mean); }, 0) / (n - 1));
+    var down = Math.sqrt(r.reduce(function (s, x) { var d = Math.min(0, x - rfD); return s + d * d; }, 0) / n);
+    var sorted = r.slice().sort(function (a, b) { return a - b; });
+    var k = Math.max(1, Math.floor(n * 0.05)), tail = sorted.slice(0, k);
+    var out = {
+      sharpe: sd > 0 ? (mean - rfD) / sd * Math.sqrt(252) : null,
+      sortino: down > 0 ? (mean - rfD) / down * Math.sqrt(252) : null,
+      var95: -sorted[k - 1],
+      cvar95: -tail.reduce(function (s, x) { return s + x; }, 0) / k,
+      days: n,
+    };
+    return out;
+  }
+
+  var api = { riskStats: riskStats, dcf: dcf, dcfProblem: dcfProblem, impliedFcfMargin: impliedFcfMargin, peHistory: peHistory, project: project, impliedGrowth: impliedGrowth, weighted: weighted, cagr: cagr, defaults: defaults, history: history, validate: validate, growthIn: growthIn };
   if (typeof module === "object" && module.exports) module.exports = api;
   else { root.IL = root.IL || {}; root.IL.valuation = api; }
 })(typeof window !== "undefined" ? window : globalThis);

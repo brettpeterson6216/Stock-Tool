@@ -249,7 +249,7 @@ router.post("/workspace/review-reminder", validateCsrf, async (req, res) => {
     const result = await sendEmail({
       to: email,
       subject: `ImpliedLens review list: ${reviewResult.rows.length} decision${reviewResult.rows.length === 1 ? "" : "s"} due`,
-      html: `<h2>Your upcoming investment reviews</h2><p>Review the evidence, thesis, and sell conditions before changing a position.</p><ul>${rows}</ul><p><a href="${html(process.env.APP_URL || "https://www.impliedlens.com")}/?view=tool&section=workspace">Open your workspace</a></p>`,
+      html: `<h2>Your upcoming investment reviews</h2><p>Review the evidence, thesis, and sell conditions before changing a position.</p><ul>${rows}</ul><p><a href="${html(process.env.APP_URL || "https://www.impliedlens.com")}/saved#theses">Open your theses</a></p>`,
     });
     if (!result?.sent && !result?.simulated) {
       await db.execute({ sql: "DELETE FROM lifecycle_email_log WHERE user_id=? AND email_type='review_digest' AND reference_key=?", args: [req.session.userId, referenceKey] });

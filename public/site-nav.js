@@ -352,8 +352,8 @@
        the app. Rather than build second copies here that would drift, hand the
        page to the app with the intent in the URL; app-legacy.js opens the right
        one on arrival. */
-    on("nav-acct-settings", function (e) { e.preventDefault(); closeAcct(); location.href = "/?account=1"; });
-    on("nav-acct-feedback", function (e) { e.preventDefault(); closeAcct(); location.href = "/?review=1"; });
+    on("nav-acct-settings", function (e) { e.preventDefault(); closeAcct(); location.href = "/account"; });
+    on("nav-acct-feedback", function (e) { e.preventDefault(); closeAcct(); location.href = "/account#feedback"; });
     on("nav-acct-support", function () { closeAcct(); });   // a real mailto in the markup
 
     /* Billing goes to the same Stripe portal the app uses. Anyone without a

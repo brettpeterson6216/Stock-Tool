@@ -45,6 +45,9 @@
   try {
     var hint = JSON.parse(localStorage.getItem("il-auth-hint") || "null");
     var fresh = hint && typeof hint.in === "boolean" && (Date.now() - (hint.at || 0)) < 864e5;
+    /* The landing page is only ever served to signed-out visitors (members
+       get their dashboard at "/"), so a stale "signed in" hint is wrong here. */
+    if (document.documentElement.hasAttribute("data-guest-page")) { hint = { in: false }; fresh = true; }
     document.documentElement.classList.add(
       fresh ? (hint.in ? "il-hint-in" : "il-hint-out") : "il-hint-unknown"
     );

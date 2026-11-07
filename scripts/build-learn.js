@@ -17,6 +17,15 @@
 */
 "use strict";
 
+/* Where each lesson's "Try it now" button goes. The lessons were written
+   against the original app's sections; these are the pages that replaced them. */
+const TOOL_HREF = {
+  analyze: "/research", financials: "/research/AAPL/financials", earnings: "/research/AAPL/earnings",
+  advmetrics: "/research/AAPL", "lens-score": "/methodology", projection: "/projection",
+  dcf: "/research/AAPL/projection#pj-dcf", reports: "/saved", thesis: "/saved#theses",
+};
+function toolHref(l) { return TOOL_HREF[l.tool] || "/research"; }
+
 const fs = require("fs");
 const path = require("path");
 
@@ -178,7 +187,7 @@ ${quizHtml(l)}
       <h2 id="lxl-try-title">Try it now</h2>
       <p>${esc(l.tryIt)}</p>
       <div class="lxl-try-actions">
-        <a href="${l.tool === "projection" ? "/projection" : "/?view=tool&amp;section=" + encodeURIComponent(l.tool)}" class="lxl-btn lxl-btn-gold">${esc(l.toolLabel)} →</a>
+        <a href="${toolHref(l)}" class="lxl-btn lxl-btn-gold">${esc(l.toolLabel)} →</a>
         <button type="button" class="lxl-btn lxl-btn-ghost" id="lxl-complete" hidden>Mark lesson complete</button>
       </div>
     </section>

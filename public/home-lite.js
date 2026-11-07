@@ -1,9 +1,8 @@
-/* Signed-out home page without the application (see lib/home-lite.js).
+/* The landing page's routes out (see lib/home-lite.js).
 
-   The landing page itself needs none of the app. What does need it is the
-   handful of in-page routes into the app - the nav tabs, the mobile menu, the
-   nav search - which on the full page switch views without a reload. Here
-   they become real navigations to URLs that get the full page.
+   The nav tabs, mobile menu and nav search were written for the retired
+   single-page app, where they switched views without a reload. Here they
+   become real navigations to the pages that replaced it.
 
    When a visitor reaches for search or a stock, the rebuilt research page's
    few files are prefetched so the first move into the app is quick. */
@@ -13,9 +12,12 @@
   document.documentElement.setAttribute("data-il-lite", "1");
 
   function go(url) { window.location.href = url; }
+  /* Sections of the retired app, and the pages that replaced them. */
+  var PAGES = { screener: "/screener", workspace: "/watchlist", watchlist: "/watchlist", reports: "/saved", education: "/learn", adveducation: "/learn",
+    compare: "/compare", projection: "/projection", valuation: "/projection", dcf: "/projection", wealth: "/compound-calculator" };
   function toSection(id) {
-    id = String(id || "analyze").replace(/[^a-z]/gi, "") || "analyze";
-    go("/?view=tool&section=" + encodeURIComponent(id));
+    id = String(id || "").replace(/[^a-z-]/gi, "").toLowerCase();
+    go(PAGES[id] || "/research");
   }
   function toTicker(t) {
     t = String(t || "").trim().toUpperCase().replace(/[^A-Z0-9.\-^]/g, "").slice(0, 12);
@@ -28,14 +30,15 @@
     toSection(id === "adveducation" ? "education" : id);
   };
   window.openSection = function (id) { toSection(id); };
-  window.showMarketPage = function () { go("/?market=1"); };
+  window.showMarketPage = function () { go("/"); };
   window.heroLoadTicker = toTicker;
   window.mobileTickerGo = function () {
     var el = document.getElementById("mmenu-ticker");
     toTicker(el && el.value);
   };
   // Without navSearchGo, site-nav.js lets the nav search form submit natively
-  // to /?view=tool&section=analyze&symbol=…, which is the full page.
+  // to /?view=tool&section=analyze&symbol=…, which the server redirects to the
+  // stock's research page.
   try { delete window.navSearchGo; } catch (e) { window.navSearchGo = undefined; }
   if (typeof window._setMobileNav !== "function") window._setMobileNav = function () {};
 
@@ -67,7 +70,7 @@
     });
   }
   function intent(e) {
-    var a = e.target && e.target.closest && e.target.closest('a[href^="/research"], a[href*="view=tool"], #nav-search, #landing-search, [data-lx-ticker], #lx-demo-open, il-top');
+    var a = e.target && e.target.closest && e.target.closest('a[href^="/research"], #nav-search, #landing-search, [data-lx-ticker], #lx-demo-open, il-top');
     if (a) warm();
   }
   document.addEventListener("pointerover", intent, { passive: true });

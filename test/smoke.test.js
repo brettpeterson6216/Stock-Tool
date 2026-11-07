@@ -122,41 +122,29 @@ after(async () => {
 // ═══════════════════════════════════════════════════════════════
 //  1. CSRF protection
 // ═══════════════════════════════════════════════════════════════
-test("GET / serves the homepage with a successful status", async () => {
+test("GET / serves the landing page, and nothing of the retired app", async () => {
   const res = await req("/");
   assert.equal(res.status, 200);
   const html = await res.text();
-  const appSource = `${html}\n${fs.readFileSync(path.join(__dirname, "..", "public", "app-navigation.js"), "utf8")}\n${fs.readFileSync(path.join(__dirname, "..", "public", "app-legacy.js"), "utf8")}`;
   assert.match(html, /ImpliedLens/);
   assert.match(html, /\d+ company analyses a day/, "the free plan states its templated daily limit");
-  assert.match(appSource, /function startGuestSignup/);
-  assert.match(appSource, /analysis_resumed_after_auth/);
-  assert.match(appSource, /function openBillingPortal/);
-  assert.match(appSource, /ImpliedLensMath\.annualizedVolatility\(c,252\)\*100/);
-  assert.match(appSource, /const _initialParams = new URLSearchParams\(window\.location\.search\)/);
-  assert.match(appSource, /!document\.getElementById\('sec-' \+ id\)/);
-  assert.match(appSource, /const activeSection = new URLSearchParams\(window\.location\.search\)\.get\('section'\)/);
-  assert.match(html, /Build an AI Portfolio Guide you can actually understand/);
-  assert.match(html, /Illustrative AAPL workspace/);
-  assert.match(appSource, /function setPricingPeriod\(period\)/);
-  assert.match(html, /id="mbn-workspace"/);
   assert.match(html, /aria-label="Home"/);
   assert.match(html, /viewport-fit=cover/);
   assert.match(html, /\/bundles\/(?:site-[a-f0-9]+|landing-lite)\.css\?v=[\w.-]+/);
   assert.match(legacyCss, /input,select,textarea\{font-size:16px!important\}/);
-  assert.match(legacyCss, /#main-nav\[data-view="tool"\] #nav-ticker-bar\{display:none!important\}/);
   assert.match(legacyCss, /\.nav-acct-wrap,\.nav-acct-btn\{min-width:0;max-width:100%\}/);
-  assert.match(legacyCss, /\.nav-acct-menu\{right:0;min-width:min\(220px,calc\(100vw - 1\.5rem\)\)/);
-  assert.match(html, /workspace-system\.js\?v=[\w.-]+/);
   // The page's own styles arrive as one bundle; the site shell's small
   // stylesheet comes first so its cascade layer is declared first.
   assert.equal((html.match(/rel="stylesheet"/g) || []).length, 2);
   assert.ok(html.indexOf('href="/app/shell.css') > -1 && html.indexOf('href="/app/shell.css') < html.indexOf('href="/bundles/'));
   assert.match(html, /<il-top id="il-top"><template shadowrootmode="open">/);
   assert.match(html, /data-k="home" aria-current="page">Home<\/a>/);
-  assert.match(appSource, /__initialWorkspaceTab/);
   assert.match(res.headers.get("cache-control"), /no-cache/);
+  // The retired app: no markup, no scripts, no pitch for features that went with it.
+  assert.doesNotMatch(html, /app-legacy\.js|id="view-tool"|id="il-home-member"|AI Portfolio Guide|home-member\.js/);
+  assert.match(html, /<html lang="en" data-guest-page/, "only visitors get this page, so a stale signed-in hint is ignored");
 });
+
 
 test("Public brand and acquisition pages are available", async () => {
   for (const [path, marker] of [["/research-process", "Research the business"], ["/compound-calculator", "Compound Interest Scenario Calculator"]]) {
@@ -536,8 +524,6 @@ test("homepage executable scripts are external and CSP blocks inline script bloc
   // A signed-out visitor on "/" gets the lite copy (lib/home-lite.js); the app
   // itself is on every URL that asks for it.
   assert.match(html, /src="\/home-lite\.js/);
-  const app = await (await req("/?view=tool")).text();
-  assert.match(app, /src="\/app-legacy\.js/);
 
   const csp = res.headers.get("content-security-policy") || "";
   const scriptSource = csp.split(";").find(part => part.trim().startsWith("script-src ")) || "";
@@ -1127,17 +1113,28 @@ test("/api/auth/me returns email_verified field", async () => {
   assert.ok("email_verified" in body.user, "/auth/me should include email_verified");
 });
 
-test("Checkout is blocked for unverified email", async () => {
+test("Checkout does not wait for email verification (the card is the check)", async () => {
   const { cookie, csrfToken } = await makeSession("verif_block1", "verifblock1@test.com");
   const res = await req("/api/stripe/create-checkout", {
     method: "POST",
     headers: { cookie, "X-CSRF-Token": csrfToken },
     body: { annual: false },
   });
-  // 503 if Stripe not configured, 403 if email unverified — we want 403
-  assert.equal(res.status, 403, "Checkout should be blocked for unverified email");
+  // Stripe is not configured in tests, so it stops there (503), not at verification.
+  assert.notEqual(res.status, 403, "an unverified email must not block the trial");
   const body = await res.json();
-  assert.ok(body.requiresEmailVerification, "Response should set requiresEmailVerification flag");
+  assert.ok(!body.requiresEmailVerification);
+});
+
+test("sign-up needs only an email and a password", async () => {
+  const res = await req("/api/auth/signup", { method: "POST", body: { email: "Jane.Doe+promo@example.com", password: "correct-horse-9" } });
+  assert.equal(res.status, 201);
+  const body = await res.json();
+  assert.match(body.user.username, /^jane\.doe\d*$/);
+  const again = await req("/api/auth/signup", { method: "POST", body: { email: "jane.doe@example.org", password: "correct-horse-9" } });
+  assert.equal(again.status, 201, "a taken name gets a number, not an error");
+  const b2 = await again.json();
+  assert.match(b2.user.username, /^jane\.doe\d{4}$/);
 });
 
 test("Checkout rejects requests without a CSRF token", async () => {
@@ -1362,17 +1359,24 @@ test("old app links to a stock open the rebuilt page on the matching tab", async
     ["/?view=tool&section=workspace&workspace_tab=watchlist", "/watchlist"],
     ["/?view=tool&section=projection&symbol=AAPL", "/research/AAPL/projection"],
     ["/?view=tool&section=projection", "/projection"],
+    // The rest of the retired app: every section has a page now.
+    ["/?view=tool&section=dcf&symbol=AAPL", "/research/AAPL/projection#pj-dcf"],
+    ["/?view=tool&section=workspace", "/saved#theses"],
+    ["/?view=tool&section=reports", "/saved"],
+    ["/?view=tool&section=education", "/learn"],
+    ["/?view=tool&section=wealth", "/compound-calculator"],
+    ["/?view=tool", "/"],
+    ["/?view=home&market=1", "/"],
+    ["/?pricing=1", "/pricing"],
+    ["/?symbol=tsla", "/research/TSLA"],
   ];
   for (const [from, to] of cases) {
     const res = await req(from);
-    assert.equal(res.status, 302, from);
+    assert.equal(res.status, 301, from);
     assert.equal(res.headers.get("location"), to, from);
   }
-  // Tools that have not been rebuilt stay in the original app.
-  for (const keep of ["/?view=tool&section=dcf&symbol=AAPL", "/?view=tool&section=workspace"]) {
-    const res = await req(keep);
-    assert.equal(res.status, 200, keep);
-  }
+  // Arrival-only query keys keep the landing page.
+  assert.equal((await req("/?utm_source=x&upgraded=1")).status, 200);
 });
 
 test("the Projection Lab is a page of its own, and the old Valuation tab address forwards to it", async () => {
@@ -1388,13 +1392,13 @@ test("the Projection Lab is a page of its own, and the old Valuation tab address
   assert.equal(tab.status, 200);
 });
 
-test("signed-in members get the rebuilt dashboard on plain / and can still reach the app", async () => {
+test("signed-in members get their dashboard on /, whatever the query", async () => {
   const { cookie } = await makeSession("dash_member", "dash_member@test.com");
   const home = await req("/", { headers: { cookie } });
   assert.equal(home.status, 200);
   assert.match(await home.text(), /src="\/app\/home\.js\?v=/);
-  const app = await req("/?view=home", { headers: { cookie } });
-  assert.match(await app.text(), /src="\/app-legacy\.js/);
+  const arrived = await req("/?upgraded=1", { headers: { cookie } });
+  assert.match(await arrived.text(), /src="\/app\/home\.js\?v=/);
   // Visitors keep the landing page.
   const guest = await (await req("/")).text();
   assert.doesNotMatch(guest, /\/app\/home\.js/);
@@ -1405,7 +1409,7 @@ test("Compare is its own page and old compare links open it", async () => {
   assert.equal(res.status, 200);
   assert.match(await res.text(), /src="\/app\/compare\.js\?v=/);
   const old = await req("/?view=tool&section=compare&symbol=nvda");
-  assert.equal(old.status, 302);
+  assert.equal(old.status, 301);
   assert.equal(old.headers.get("location"), "/compare?t=NVDA");
 });
 
@@ -1486,6 +1490,23 @@ test("trial buttons go straight to checkout, not through the old app", async () 
   assert.doesNotMatch(html, /href="\/\?pricing=1"/);
   const shell = require("node:fs").readFileSync(require("node:path").join(__dirname, "..", "public", "app", "shell.js"), "utf8");
   assert.match(shell, /\/api\/stripe\/create-checkout/);
-  const { isPlainHomeQuery } = require("../lib/home-lite");
-  assert.ok(isPlainHomeQuery({ upgraded: "1" }) && isPlainHomeQuery({ verif: "ok" }) && isPlainHomeQuery({ checkout: "cancelled" }));
+});
+
+test("account settings are a page of their own, and the old hand-offs open it", async () => {
+  assert.equal((await req("/account")).status, 200);
+  for (const [from, to] of [["/?account=1", "/account"], ["/?review=1", "/account#feedback"]]) {
+    const res = await req(from);
+    assert.equal(res.status, 301, from);
+    assert.equal(res.headers.get("location"), to, from);
+  }
+  const shell = fs.readFileSync(path.join(__dirname, "..", "public", "app", "shell.js"), "utf8");
+  assert.match(shell, /href="\/account">Account settings/);
+});
+
+test("the cash rate for Sharpe and Sortino is public and states its source", async () => {
+  const res = await req("/api/market/risk-free");
+  assert.equal(res.status, 200);
+  const body = await res.json();
+  assert.ok(body.rate > 0 && body.rate < 0.2);
+  assert.ok(body.source);
 });

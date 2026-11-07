@@ -287,19 +287,9 @@ footer{
 
     <form id="signup-form" autocomplete="on" novalidate>
       <div class="field">
-        <label for="username">Username</label>
-        <input id="username" name="username" type="text"
-               autocomplete="username" required autofocus
-               minlength="3" maxlength="32"
-               pattern="[a-zA-Z0-9_.\-]{3,32}"
-               placeholder="yourhandle">
-        <div class="field-hint">3–32 chars. Letters, numbers, _ . -</div>
-      </div>
-
-      <div class="field">
         <label for="email">Email</label>
         <input id="email" name="email" type="email"
-               autocomplete="email" required
+               autocomplete="email" required autofocus
                placeholder="you@example.com">
       </div>
 
