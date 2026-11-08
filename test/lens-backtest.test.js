@@ -53,3 +53,16 @@ test("the timing study walks forward and reports per-date correlations", () => {
     assert.ok(typeof st.scorers[k].verdict[63] === "string");
   }
 });
+
+test("the job stops before memory runs out instead of taking the site down", async () => {
+  const B = require("../lib/lens-backtest");
+  const prices = require("../lib/prices");
+  const orig = prices.dailyCloses;
+  const day = i => new Date(Date.UTC(2023, 0, 2) + i * 864e5).toISOString().slice(0, 10);
+  prices.dailyCloses = async () => Array.from({ length: 900 }, (_, i) => ({ day: day(i), close: 100 + i * 0.1 }));
+  const logs = [];
+  try {
+    await assert.rejects(B.run({ tickers: ["AAA", "BBB"], log: m => logs.push(m), heap: () => 0.99 }), /stopped at 0 companies for memory/);
+    assert.ok(logs.some(l => /stopping early at 0 companies/.test(l)));
+  } finally { prices.dailyCloses = orig; }
+});
