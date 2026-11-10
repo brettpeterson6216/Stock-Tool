@@ -11,7 +11,8 @@
 .cmp-add{flex:1 1 240px;max-width:340px}
 .cmp-presets .tag{border:0;cursor:pointer;font:inherit;font-size:12px;font-weight:600}
 .cmp-presets .tag:hover{background:var(--hover);color:var(--text)}
-.cmp-legend{display:flex;gap:18px;flex-wrap:wrap;font-size:13px}
+.cmp-legend{display:flex;gap:6px 18px;flex-wrap:wrap;font-size:13px;min-height:20px}
+.cmp-key b{min-width:4.2em;font-variant-numeric:tabular-nums}
 .cmp-key{display:inline-flex;align-items:center;gap:6px;font-weight:600}
 .cmp-chart{height:300px;margin:0 -6px}
 .cmp-tbl{table-layout:fixed;min-width:640px}

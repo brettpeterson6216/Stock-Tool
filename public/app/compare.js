@@ -10,8 +10,13 @@
   var IL = window.IL, F = IL.fmt, h = IL.h, A = function () { return IL.analysis; };
   var MAX = 4;
   /* Series colours tell the lines apart. None is green or red, which mean
-     gain and loss everywhere else on the site. */
-  var COLORS = ["#E5B65A", "#6EA8FE", "#C9CDD3", "#B39DEB"];
+     gain and loss everywhere else on the site. They are theme tokens
+     (lens.css), checked for colour-blind separation and 3:1 contrast against
+     the card in each theme, and they follow the company, not its rank. */
+  var SERIES = ["--chart-brand", "--chart-s2", "--chart-s3", "--chart-s4"];
+  function dot(i, cls) { return '<i' + (cls ? ' class="' + cls + '"' : "") + ' style="background:var(' + SERIES[i] + ')"></i>'; }
+  /* The share image is always drawn on a dark plate, so it keeps the dark set. */
+  var SHARE_COLORS = ["#E5B65A", "#2F7FE0", "#D55181", "#B39DEB"];
   var PRESETS = [
     { label: "Chip makers", t: ["NVDA", "AMD", "AVGO", "INTC"] },
     { label: "Big tech", t: ["AAPL", "MSFT", "GOOGL", "AMZN"] },
@@ -19,7 +24,7 @@
     { label: "Banks", t: ["JPM", "BAC", "WFC"] },
     { label: "Streaming", t: ["NFLX", "DIS", "SPOT"] },
   ];
-  var tickers = [], data = {}, chart = null;
+  var tickers = [], data = {}, chart = null, shown = null;
 
   function readUrl() {
     var q = new URLSearchParams(location.search).get("t") || "";
@@ -98,10 +103,10 @@
   function render() {
     var main = document.getElementById("main");
     main.innerHTML =
-      '<div class="cmp-head hero-band card prime" id="cmp-hero"><div class="stack" style="gap:10px">' + IL.eyebrow("Compare", "research") + '<h1 class="display">Side by side, <em>honestly.</em></h1><p class="muted">Up to four companies side by side: grades, what each price assumes, growth, margins and risk.</p></div></div>' +
+      '<div class="cmp-head hero-band card prime" id="cmp-hero"><div class="stack" style="gap:10px">' + IL.eyebrow("Compare", "research") + '<h1 class="display">Compare companies</h1><p class="muted">Up to four companies side by side: grades, what each price assumes, growth, margins and risk.</p></div></div>' +
       '<div class="cmp-pick card">' +
         '<div class="cmp-chips" id="cmp-chips">' + tickers.map(function (t, i) {
-          return '<span class="cmp-chip"><i style="background:' + COLORS[i] + '"></i><a href="/research/' + h(t) + '">' + h(t) + '</a><button type="button" data-rm="' + h(t) + '" aria-label="Remove ' + h(t) + '">×</button></span>';
+          return '<span class="cmp-chip">' + dot(i) + '<a href="/research/' + h(t) + '">' + h(t) + '</a><button type="button" data-rm="' + h(t) + '" aria-label="Remove ' + h(t) + '">×</button></span>';
         }).join("") +
         (tickers.length < MAX ? '<div class="il-search cmp-add" role="search"><label class="il-search-box">' + IL.icon("search") + '<input id="cmp-q" type="search" autocomplete="off" placeholder="' + (tickers.length ? "Add a company" : "Add a company or ticker") + '" aria-label="Add a company to compare" role="combobox" aria-expanded="false" aria-controls="cmp-sugg"></label><div class="il-sugg" id="cmp-sugg" role="listbox" hidden></div></div>' : "") +
         "</div>" +
@@ -109,12 +114,12 @@
       "</div>" +
       (tickers.length < 2
         ? '<div class="gate center"><div class="gate-t">Pick at least two companies</div><div class="gate-s">Search above, or try one of the groups. Tip: compare a company with its closest rivals, not with the whole market.</div></div>'
-        : '<section class="card"><div class="card-h"><h2 class="card-t">Performance, past year</h2><span class="card-sub">Rebased to 0% a year ago</span></div><div class="cmp-legend" id="cmp-legend"></div><div class="cmp-chart" id="cmp-chart"></div></section>' +
-          '<section class="card flush" id="cmp-table" data-w="share,expand,csv" data-w-title="the comparison"><div class="tbl-wrap"><table class="tbl cmp-tbl" id="cmp-tbl"><tbody><tr><td>' + '<span class="sk" style="height:200px"></span>' + "</td></tr></tbody></table></div></section>" +
+        : '<section class="card"><div class="card-h"><h2 class="card-t">Performance, past year</h2><span class="card-sub" id="cmp-when">Change since a year ago</span></div><div class="cmp-legend" id="cmp-legend" aria-live="off"></div><div class="cmp-chart" id="cmp-chart"></div></section>' +
+          '<section class="card flush" id="cmp-table" data-w="share,expand,csv" data-w-title="the comparison"><div class="card-h"><h2 class="card-t">Side by side</h2></div><div class="tbl-wrap"><table class="tbl cmp-tbl" id="cmp-tbl"><tbody><tr><td>' + '<span class="sk" style="height:200px"></span>' + "</td></tr></tbody></table></div></section>" +
           '<div class="grid-2" id="cmp-flags"></div>' +
           '<p class="note">Best value in each row is marked. Grades compare each company with its own sector. Figures from SEC filings and a year of prices; not investment advice.</p>');
     IL.wireSearchPick(IL.$("#cmp-q"), IL.$("#cmp-sugg"), add);
-    IL.plate(IL.$("#cmp-hero"), "dial", "right 40%");
+    IL.plate(IL.$("#cmp-hero"), "globe", "right 30%");
     writeUrl();
     if (tickers.length >= 2) Promise.all(tickers.map(load)).then(paint);
   }
@@ -139,7 +144,7 @@
     if (gate) { tbl.parentNode.innerHTML = '<div style="padding:16px">' + IL.gate(gate.quoteRes.gate) + "</div>"; return; }
     var histGate = list.filter(function (d) { return d.histRes.gate; })[0];
     var head = "<thead><tr><th></th>" + list.map(function (d, i) {
-      return '<th><a class="cmp-th" href="/research/' + h(d.t) + '"><b><i style="background:' + COLORS[i] + '"></i>' + h(d.t) + '</b><span>' + h(IL.cleanName(d.name)) + "</span></a></th>";
+      return '<th><a class="cmp-th" href="/research/' + h(d.t) + '"><b>' + dot(i) + h(d.t) + '</b><span>' + h(IL.cleanName(d.name)) + "</span></a></th>";
     }).join("") + "</tr></thead>";
     var body = GROUPS.map(function (gr) {
       var rows = gr.rows.map(function (r) {
@@ -163,7 +168,7 @@
     IL.$("#cmp-flags").className = list.length === 3 ? "grid-3" : "grid-2";
     IL.$("#cmp-flags").innerHTML = list.map(function (d, i) {
       var good = d.flags.filter(function (x) { return x.tone === "good"; }), bad = d.flags.filter(function (x) { return x.tone === "bad"; });
-      return '<section class="card"><div class="card-h"><h3 class="card-t"><i class="cmp-dot" style="background:' + COLORS[i] + '"></i>' + h(d.t) + ' <span class="muted" style="font-weight:500">' + h(IL.cleanName(d.name)) + '</span></h3><span class="card-sub">' + (d.f ? '<span class="up">' + good.length + ' working</span> · <span class="down">' + bad.length + " warning" + (bad.length === 1 ? "" : "s") + "</span>" : "Report-card points only") + "</span></div>" +
+      return '<section class="card"><div class="card-h"><h3 class="card-t">' + dot(i, "cmp-dot") + h(d.t) + ' <span class="muted" style="font-weight:500">' + h(IL.cleanName(d.name)) + '</span></h3><span class="card-sub">' + (d.f ? '<span class="up">' + good.length + ' working</span> · <span class="down">' + bad.length + " warning" + (bad.length === 1 ? "" : "s") + "</span>" : "Report-card points only") + "</span></div>" +
         (d.f ? "" : '<p class="note">Sales, margin, cash-flow and dilution checks did not run' + (d.histRes && d.histRes.gate ? ': they need a free account.' : ': SEC filings aren’t available for this company.') + "</p>") +
         '<ul class="lr-flags good">' + good.slice(0, 3).map(function (x) { return '<li><span class="lr-ico" aria-hidden="true"></span><div><b>' + h(x.title) + "</b><span>" + h(x.detail) + "</span></div></li>"; }).join("") + "</ul>" +
         '<ul class="lr-flags bad">' + bad.slice(0, 3).map(function (x) { return '<li><span class="lr-ico" aria-hidden="true"></span><div><b>' + h(x.title) + "</b><span>" + h(x.detail) + "</span></div></li>"; }).join("") + "</ul>" +
@@ -195,7 +200,7 @@
     var keys = ["value", "growth", "profitability", "health", "momentum"], short = { value: "Val", growth: "Gro", profitability: "Pro", health: "Hea", momentum: "Mom" };
     list.forEach(function (d, i) {
       var X = 48 + i * (cw + gap);
-      x.fillStyle = COLORS[i]; x.fillRect(X, 146, 28, 3);
+      x.fillStyle = SHARE_COLORS[i]; x.fillRect(X, 146, 28, 3);
       box(d.t, X, 158, cw, 34, font(700, 30, sans), C.text);
       box(K.ellipsize(d.name, font(500, 14, sans), cw), X, 194, cw, 18, font(500, 14, sans), C.t2);
       box("LENSSCORE", X, 228, cw, 14, font(600, 11, sans), C.t3, "left", 1.6);
@@ -221,35 +226,67 @@
     return c;
   }
 
+  /* One line per company, each rebased to 0% at the start of the same year
+     every "past year" figure on the page uses. The legend above the plot is
+     also the readout: it shows each company's change to the latest close, and
+     to the date under the pointer (or finger) while one is over the plot. */
   function drawChart(list) {
     var el = IL.$("#cmp-chart"), L = window.LightweightCharts;
     if (!el || !L) return;
+    shown = list;
+    if (chart) { try { chart.remove(); } catch (e) {} chart = null; }
     el.innerHTML = "";
     var css = function (n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); };
+    var pctAxis = function (v) { return (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(0) + "%"; };
     chart = L.createChart(el, {
       autoSize: true,
-      layout: { background: { type: "solid", color: "transparent" }, textColor: css("--text3"), fontFamily: "IBM Plex Sans, Inter, sans-serif", fontSize: 11 },
+      layout: { background: { type: "solid", color: "transparent" }, textColor: css("--text3"), fontFamily: "IBM Plex Sans, Inter, sans-serif", fontSize: 11, attributionLogo: false },
       grid: { vertLines: { visible: false }, horzLines: { color: css("--chart-grid") } },
       rightPriceScale: { borderVisible: false }, timeScale: { borderVisible: false, fixLeftEdge: true, fixRightEdge: true },
-      localization: { priceFormatter: function (v) { return (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(0) + "%"; } },
-      crosshair: { mode: 0 },
+      localization: { priceFormatter: pctAxis },
+      crosshair: { mode: 0, vertLine: { color: css("--line3"), width: 1, style: 0, labelVisible: false }, horzLine: { visible: false, labelVisible: false } },
       handleScroll: false, handleScale: false,
     });
-    var legend = [];
+    var lines = [];
     list.forEach(function (d, i) {
       if (!d.series || !d.series.bars.length) return;
       var bars = d.series.bars;
       var year = bars.slice(IL.windowStart(bars, IL.YEAR_DAYS));      // same year as every "past year" figure
       if (!year.length) return;
-      var base = year[0].close;
-      var s = chart.addSeries(L.LineSeries, { color: COLORS[i], lineWidth: 2.5, lineType: 2, priceLineVisible: false, lastValueVisible: true, crosshairMarkerRadius: 3 });
-      s.setData(year.map(function (b) { return { time: b.time, value: (b.close / base - 1) * 100 }; }));
-      var last = (year[year.length - 1].close / base - 1) * 100;
-      legend.push('<span class="cmp-key"><i style="background:' + COLORS[i] + '"></i>' + h(d.t) + ' <b class="num ' + F.cls(last) + '">' + F.spct(last) + "</b></span>");
+      var base = year[0].close, col = css(SERIES[i]);
+      var s = chart.addSeries(L.LineSeries, { color: col, lineWidth: 2, lineType: 2, priceLineVisible: false, lastValueVisible: false, crosshairMarkerRadius: 4, crosshairMarkerBorderColor: css("--surface"), crosshairMarkerBorderWidth: 2 });
+      var at = {};
+      s.setData(year.map(function (b) { var v = (b.close / base - 1) * 100; at[b.time] = v; return { time: b.time, value: v }; }));
+      lines.push({ i: i, t: d.t, s: s, at: at, last: (year[year.length - 1].close / base - 1) * 100 });
     });
+    if (lines.length) lines[0].s.createPriceLine({ price: 0, color: css("--line3"), lineWidth: 1, lineStyle: 0, axisLabelVisible: false });
     chart.timeScale().fitContent();
-    IL.$("#cmp-legend").innerHTML = legend.join("");
+    var legend = IL.$("#cmp-legend"), when = IL.$("#cmp-when");
+    function show(time) {
+      var on = time !== null && time !== undefined;
+      if (when) when.textContent = on ? "Change from a year ago to " + new Date(time * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "America/New_York" }) : "Change since a year ago";
+      legend.innerHTML = lines.map(function (ln) {
+        var v = on ? (isFinite(ln.at[time]) ? ln.at[time] : null) : ln.last;
+        return '<span class="cmp-key">' + dot(ln.i) + h(ln.t) + ' <b class="num ' + (v === null ? "" : F.cls(v)) + '">' + (v === null ? "—" : F.spct(v)) + "</b></span>";
+      }).join("");
+    }
+    show(null);
+    chart.subscribeCrosshairMove(function (p) {
+      var off = !p || p.time === undefined || (p.point && (p.point.x < 0 || p.point.y < 0));
+      show(off ? null : p.time);
+    });
+    /* A finger does not hover: a tap or a drag across the plot reads that day. */
+    el.onpointerdown = el.onpointermove = function (e) {
+      if (e.pointerType === "mouse" || !chart || !lines.length) return;
+      var t = chart.timeScale().coordinateToTime(e.clientX - el.getBoundingClientRect().left);
+      var ln = lines.filter(function (x) { return isFinite(x.at[t]); })[0];
+      if (t === null || !ln) return;
+      chart.setCrosshairPosition(ln.at[t], t, ln.s);
+      show(t);
+    };
   }
+  /* The lines are painted on a canvas, so a theme switch has to redraw them. */
+  document.addEventListener("il:theme", function () { if (shown && IL.$("#cmp-chart")) drawChart(shown); });
 
   function boot() {
     IL.shell("compare");

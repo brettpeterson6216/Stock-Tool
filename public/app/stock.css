@@ -21,11 +21,12 @@
 
 /* ── Overview grid ──────────────────────────────────────────────────────── */
 .ov{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:var(--s5);align-items:start}
-.ov-main{display:flex;flex-direction:column;gap:var(--s5);min-width:0}
+.ov-main,.ov-pair{display:flex;flex-direction:column;gap:var(--s5);min-width:0}
+.ov-pair>.card{flex:1 1 auto}
 /* One column: the LensScore report card leads, right under the stock's
    header, instead of several screens down (audit F10). */
 @media (max-width:1080px){.ov{grid-template-columns:1fr}.ov-main{display:contents}#ov-rc{order:-1}}
-@media (max-width:760px){.ov,.ov-main{gap:var(--s4)}}
+@media (max-width:760px){.ov,.ov-main,.ov-pair{gap:var(--s4)}}
 
 /* Key numbers: 4 across, the range spans two */
 .kv .kv-wide{grid-column:span 2}
@@ -56,8 +57,9 @@
   .pc-canvas{height:260px}
   .pc-bar>.seg{width:100%}
   .pc-bar>.seg button{flex:1;padding:0 4px}
-  .pc-tools{width:100%;justify-content:space-between;flex-wrap:nowrap}
-  .pc-legend{display:none}
+  .pc-tools{width:100%;justify-content:space-between;flex-wrap:wrap}
+  .pc-legend{order:3;width:100%}
+  .pc-legend:empty{display:none}
 }
 
 /* ── Report card aside ──────────────────────────────────────────────────── */
@@ -108,7 +110,6 @@
 .fin .tbl th.sticky,.fin .tbl td.sticky{min-width:210px}
 .fin .tbl tr.em td{color:var(--text)}
 .fin .tbl td.sub{font-size:12.5px}
-.fin-chart svg{overflow:visible}
 @media (max-width:760px){.fin .tbl th.sticky,.fin .tbl td.sticky{min-width:150px;max-width:170px;white-space:normal}#fin-body{gap:var(--s4)}}
 
 /* ── Valuation ──────────────────────────────────────────────────────────── */
@@ -117,10 +118,10 @@
 .val-big{font-size:44px;font-weight:600;letter-spacing:-.02em;line-height:1.1;margin:6px 0 8px;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
 .val-unit{font:500 15px var(--sans);color:var(--text2);letter-spacing:0}
 .val-sent{font-size:14px;line-height:1.6;max-width:620px}
-.val-cmp{display:flex;flex-direction:column;gap:12px;padding-left:var(--s6);border-left:1px solid var(--line)}
+.val-cmp{display:flex;flex-direction:column;gap:12px;padding-left:var(--s6);padding-right:36px;border-left:1px solid var(--line)}
 .val-cmp>div{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
 .val-mid{font-size:22px;font-weight:600}
-@media (max-width:900px){.val-h{grid-template-columns:1fr;gap:var(--s4)}.val-cmp{padding-left:0;border-left:0;border-top:1px solid var(--line);padding-top:14px}.val-big{font-size:36px}}
+@media (max-width:900px){.val-h{grid-template-columns:1fr;gap:var(--s4)}.val-cmp{padding-left:0;padding-right:0;border-left:0;border-top:1px solid var(--line);padding-top:14px}.val-big{font-size:36px}}
 .val-tbl td,.val-tbl th{vertical-align:middle}
 .val-tbl th.val-bear,.val-tbl th.val-base,.val-tbl th.val-bull{color:var(--text)}   /* case names, not gains or losses */
 .val-cell{display:inline-flex;align-items:center;gap:6px;justify-content:flex-end}
@@ -157,8 +158,18 @@
 #tab>.section-h{margin-top:var(--s2);margin-bottom:calc(-1 * var(--s2))}
 .tbl td.sub.up,.tbl td.up{color:var(--gain)}
 .tbl td.sub.down,.tbl td.down{color:var(--loss)}
-.bars-x{display:flex;margin-top:4px}
-.bars-x span{flex:1;text-align:center;font:500 11px var(--num);color:var(--text3);white-space:nowrap;overflow:hidden}
+/* Period bar charts: drawn at the element's own width by stock.js. */
+.bc{touch-action:pan-y;border-radius:6px;outline-offset:4px;cursor:default}
+.bc svg{display:block;width:100%;height:auto}
+.bc-grid{stroke:var(--chart-grid);stroke-width:1}
+.bc-zero{stroke:var(--line3);stroke-width:1}
+.bc-ax{fill:var(--text3);font:500 11.5px var(--num)}
+.bc-band{fill:var(--hover);opacity:0;pointer-events:none}
+.bc-read{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 16px;margin:-4px 0 10px;font-size:13px;color:var(--text2);min-height:20px}
+.bc-read b{font-weight:600;color:var(--text)}
+.bc-read strong{font-weight:600;color:var(--text)}
+.bc-val{display:inline-flex;align-items:baseline;gap:6px;white-space:nowrap}
+.bc-val i{display:inline-block;width:10px;height:10px;border-radius:2px;align-self:center;flex:none}
 @media (max-width:760px){#tab{gap:var(--s4)}}
 .rel-body[hidden],.il-sugg[hidden],.il-menu[hidden]{display:none}
 .rl-tools .card{color:var(--text);gap:4px;transition:border-color .15s}
@@ -243,14 +254,18 @@
 .pj-chart{padding:4px 12px 8px}
 .pj-chart svg{width:100%;height:auto;display:block;overflow:visible}
 .pj-grid{stroke:var(--line);stroke-width:1}
-.pj-now{stroke:var(--text3);stroke-width:1;stroke-dasharray:4 4}
+.pj-now{stroke:color-mix(in srgb,var(--text3) 65%,var(--surface));stroke-width:1;stroke-dasharray:2 5}
+.pj-guide{stroke:var(--line3);stroke-width:1}
+.pj-chart svg:focus{outline:none}
+.pj-chart svg:focus-visible{outline:2px solid var(--gold-text);outline-offset:2px;border-radius:6px}
 .pj-ax{fill:var(--text3);font:500 11.5px var(--num);font-variant-numeric:tabular-nums}
 .pj-line{fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
-.pj-line.pj-base{stroke:var(--gold);stroke-width:2.5}
+.pj-line.pj-base{stroke:var(--chart-brand);stroke-width:2.5}
 .pj-line.pj-bull{stroke:var(--text)}
 .pj-line.pj-bear{stroke:var(--text3)}
-.pj-dot{stroke:var(--surface);stroke-width:1.5}
-.pj-dot.pj-base{fill:var(--gold)}
+.pj-dot{stroke:var(--surface);stroke-width:2;transition:r .12s ease}
+.pj-dot.on{r:5.5px}
+.pj-dot.pj-base{fill:var(--chart-brand)}
 .pj-dot.pj-bull{fill:var(--text)}
 .pj-dot.pj-bear{fill:var(--text3)}
 .pj-end{font:650 12px var(--sans)}
@@ -261,8 +276,14 @@
 .pj-notes{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:13.5px;color:var(--text2);line-height:1.55;max-width:78ch}
 #pj-years button{white-space:nowrap}
 .pj-how .muted{font-size:13.5px;line-height:1.55}
-.pj-legend{display:flex;align-items:center;gap:8px;padding:2px 8px 6px}
-.pj-key-now{display:inline-block;width:22px;border-top:1px dashed var(--text3)}
+.pj-legend{display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;padding:4px 8px 8px;min-height:30px}
+.pj-k{display:inline-flex;align-items:center;gap:6px;color:var(--text2);white-space:nowrap}
+.pj-k b,.pj-when{color:var(--text);font-weight:600}
+.pj-sw{display:inline-block;width:16px;height:0;border-top:2px solid var(--text3);flex:none}
+.pj-sw.pj-base{border-top:2.5px solid var(--chart-brand)}
+.pj-sw.pj-bull{border-top-color:var(--text)}
+.pj-sw.pj-sw-now{border-top:1px dashed var(--text3)}
+.pj-hint{color:var(--text3)}
 @media (max-width:640px){
   .val-tbl{font-size:12.5px}
   .val-tbl th,.val-tbl td{padding:8px 4px}

@@ -23,7 +23,7 @@
   --gain:#17804F; --gain-soft:rgba(23,128,79,.12);
   --loss:#C23B33; --loss-soft:rgba(194,59,51,.11);
   --blue:#2F6FD6; --grade-b:#3E9A66; --amber:#A86A00; --amber-soft:rgba(168,106,0,.12);
-  --chart-line:#16181B; --chart-grid:#ECE9E3;
+  --chart-line:#16181B; --chart-grid:#ECE9E3; --chart-brand:#B5831A; --chart-s2:#2F6FD6; --chart-s3:#D14B8F; --chart-s4:#6B2FA0;
   --shadow:0 12px 32px rgba(20,18,12,.12), 0 2px 6px rgba(20,18,12,.06);
   color-scheme:light;
 }
@@ -35,7 +35,7 @@ html[data-theme="dark"]{
   --gain:#4CC38A; --gain-soft:rgba(76,195,138,.14);
   --loss:#F07B7B; --loss-soft:rgba(240,123,123,.14);
   --blue:#6EA8FE; --grade-b:#8FD0A4; --amber:#E5B65A; --amber-soft:rgba(229,182,90,.14);
-  --chart-line:#EDEEF0; --chart-grid:#1E2125;
+  --chart-line:#EDEEF0; --chart-grid:#1E2125; --chart-brand:#E5B65A; --chart-s2:#2F7FE0; --chart-s3:#D55181; --chart-s4:#B39DEB;
   --shadow:0 16px 40px rgba(0,0,0,.45), 0 2px 8px rgba(0,0,0,.3);
   color-scheme:dark;
 }

@@ -379,9 +379,13 @@
           '<section class="card prime lr" aria-label="Lens Report" id="ov-lr" data-w="share,expand" data-w-title="The Lens Report"><div class="lr-h"><h2 class="card-t">The Lens Report</h2></div>' + sk(90) + "</section>" +
           '<section class="card pc" aria-label="Price chart" id="ov-chart"></section>' +
           '<section class="kv" aria-label="Key numbers" id="ov-kv">' + Array(8).join('<div><span class="k">' + sk(10, "60%") + '</span><span class="v">' + sk(16, "50%") + "</span></div>") + "</section>" +
-          '<div class="grid-3">' +
-            '<section class="card" id="ov-q" data-w="expand" data-w-title="Latest quarter"><h2 class="card-t">Latest quarter</h2>' + sk(60) + "</section>" +
-            '<section class="card" id="ov-f" data-w="expand" data-w-title="Famous investors"><h2 class="card-t">Famous investors</h2>' + sk(60) + "</section>" +
+          /* Two short cards share a column beside the long risk card, so none
+             of the three is stretched to stand half empty. */
+          '<div class="grid-2">' +
+            '<div class="ov-pair">' +
+              '<section class="card" id="ov-q" data-w="expand" data-w-title="Latest quarter"><h2 class="card-t">Latest quarter</h2>' + sk(60) + "</section>" +
+              '<section class="card" id="ov-f" data-w="expand" data-w-title="Famous investors"><h2 class="card-t">Famous investors</h2>' + sk(60) + "</section>" +
+            "</div>" +
             '<section class="card" id="ov-r" data-w="expand" data-w-title="Risk"><h2 class="card-t">How risky has it been?</h2>' + sk(60) + "</section>" +
           "</div>" +
         "</div>" +
@@ -1234,10 +1238,10 @@
         ];
         var heads = cols.map(function (c) { return c.label; });
         lastTables = { heads: heads, tables: tables, name: "quarterly" };
-        body.innerHTML = finChart(cols.map(function (c) { return { label: c.label, a: N(c.revenue), b: N(c.netIncome) }; }), "Revenue", "Net income") +
+        body.innerHTML = finChart(cols.map(function (c) { return { label: c.label, a: N(c.revenue), b: N(c.netIncome) }; }), "Revenue", "Net income", "Each quarter") +
           tables.map(function (t) { return finTable(t, heads); }).join("") +
           '<p class="note">' + h(res.data.calendar || "") + (q.some(function (c) { return c.derived && c.derived.length; }) ? " Fourth-quarter and some cash-flow figures are worked out from year-to-date totals in the filings." : "") + "</p>";
-        scrollTablesRight(body);
+        scrollTablesRight(body); barMount(body);
       });
     } else {
       D.annual().then(function (res) {
@@ -1286,10 +1290,10 @@
           ] },
         ];
         lastTables = { heads: heads, tables: tables, name: "annual" };
-        body.innerHTML = finChart(inc.map(function (x, i) { return { label: heads[i], a: rev[i], b: ni[i] }; }), "Revenue", "Net income") +
+        body.innerHTML = finChart(inc.map(function (x, i) { return { label: heads[i], a: rev[i], b: ni[i] }; }), "Revenue", "Net income", "Each fiscal year") +
           tables.map(function (t) { return finTable(t, heads); }).join("") +
           '<p class="note">Fiscal years are labelled by the calendar year they end in. Source: ' + h((res.data.impliedLens && res.data.impliedLens.source) || "SEC EDGAR") + ".</p>";
-        scrollTablesRight(body);
+        scrollTablesRight(body); barMount(body);
       });
     }
   }
@@ -1308,24 +1312,100 @@
           r.v.map(function (v) { var n = N(v); return '<td class="' + (r.sub ? "sub " : "") + (r.color && n !== null ? F.cls(n) : n !== null && n < 0 && !r.flow ? "down" : "") + '">' + r.f(v) + "</td>"; }).join("") + "</tr>";
       }).join("") + "</tbody></table></div></section>";
   }
-  function finChart(points, aLabel, bLabel) {
-    var pts = points.filter(function (p) { return p.a !== null; });
-    if (pts.length < 2) return "";
-    var W = 760, H = 170, pad = 10, n = pts.length;
-    var max = Math.max.apply(null, pts.map(function (p) { return Math.max(p.a || 0, p.b || 0); }));
-    var min = Math.min(0, Math.min.apply(null, pts.map(function (p) { return Math.min(p.a || 0, p.b || 0); })));
-    var span = max - min || 1, zero = pad + (max / span) * (H - pad * 2);
-    var slot = W / n, bw = Math.min(26, slot * 0.32);
-    var y = function (v) { return pad + ((max - v) / span) * (H - pad * 2); };
-    var bars = pts.map(function (p, i) {
-      var x = i * slot + slot / 2;
-      var a = '<rect x="' + (x - bw - 1).toFixed(1) + '" y="' + Math.min(y(p.a), zero).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + Math.max(1, Math.abs(zero - y(p.a))).toFixed(1) + '" rx="3" fill="var(--text3)"><title>' + h(p.label + " " + aLabel + ": " + F.money(p.a)) + "</title></rect>";
-      var b = p.b === null ? "" : '<rect x="' + (x + 1).toFixed(1) + '" y="' + Math.min(y(p.b), zero).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + Math.max(1, Math.abs(zero - y(p.b))).toFixed(1) + '" rx="3" fill="' + (p.b < 0 ? "var(--loss)" : "var(--gold)") + '"><title>' + h(p.label + " " + bLabel + ": " + F.money(p.b)) + "</title></rect>";
-      return a + b;
-    }).join("");
-    var labels = '<div class="bars-x" aria-hidden="true">' + pts.map(function (p, i) { return "<span>" + ((n <= 8 || i % 2 === (n - 1) % 2) ? h(p.label.replace(/^FY /, "")) : "") + "</span>"; }).join("") + "</div>";
-    return '<section class="card fin-chart"><div class="card-h"><h3 class="card-t">' + h(aLabel) + " and " + h(bLabel.toLowerCase()) + '</h3><span class="row" style="gap:14px;font-size:12.5px"><span class="pc-key"><i style="background:var(--text3)"></i>' + h(aLabel) + '</span><span class="pc-key"><i style="background:var(--gold)"></i>' + h(bLabel) + "</span></span></div>" +
-      '<svg viewBox="0 0 ' + W + " " + H + '" width="100%" preserveAspectRatio="none" style="height:170px" role="img" aria-label="' + h(aLabel + " and " + bLabel + " by period") + '"><line x1="0" x2="' + W + '" y1="' + zero.toFixed(1) + '" y2="' + zero.toFixed(1) + '" stroke="var(--line2)"/>' + bars + "</svg>" + labels + "</section>";
+  /* ── Period bar charts (financials, earnings) ─────────────────────────
+     One renderer. It draws at the element's real width, so bars are never
+     stretched; it carries a value axis, period labels that thin out rather
+     than clip, and a readout that follows the pointer, a tap or the arrow
+     keys. The readout names each series, so it doubles as the key. */
+  var BARS = {}, barSeq = 0, barsBound = false;
+  function axisMoney(v) {
+    var a = Math.abs(v), sgn = v < 0 ? "\u2212" : "";
+    if (a === 0) return "$0";
+    var u = a >= 1e12 ? [1e12, "T"] : a >= 1e9 ? [1e9, "B"] : a >= 1e6 ? [1e6, "M"] : a >= 1e3 ? [1e3, "K"] : [1, ""];
+    return sgn + "$" + String(Math.round(a / u[0] * 100) / 100) + u[1];
+  }
+  function axisEps(v, step) {
+    return (v < 0 ? "\u2212" : "") + "$" + Math.abs(v).toFixed(step >= 1 && step % 1 === 0 ? 0 : 2);
+  }
+  function barCard(spec) {
+    if (spec.pts.length < 2) return "";
+    var id = "bc" + (++barSeq);
+    BARS[id] = spec;
+    return '<section class="card fin-chart"><div class="card-h"><h3 class="card-t">' + h(spec.title) + "</h3>" + (spec.sub ? '<span class="card-sub">' + h(spec.sub) + "</span>" : "") + "</div>" +
+      '<p class="bc-read" id="' + id + '-r" aria-live="polite"></p>' +
+      '<div class="bc" data-bc="' + id + '" tabindex="0" role="img" aria-label="' + h(spec.title + ", " + spec.pts[0].label + " to " + spec.pts[spec.pts.length - 1].label + ". Left and right arrow keys read each period.") + '"></div></section>';
+  }
+  function barDraw(el) {
+    var id = el.getAttribute("data-bc"), spec = BARS[id]; if (!spec) return;
+    var pts = spec.pts, n = pts.length, S = spec.series.length;
+    var W = Math.max(260, Math.round(el.clientWidth || 640)), H = W < 520 ? 190 : 220, T = 8, B = 26, R = 2;
+    var vals = [];
+    pts.forEach(function (p) { p.v.forEach(function (v) { if (v !== null) vals.push(v); }); });
+    var hi = Math.max(0, Math.max.apply(null, vals)), lo = Math.min(0, Math.min.apply(null, vals));
+    var step = niceStep((hi - lo || 1) / 4), y1 = Math.ceil(hi / step - 1e-9) * step, y0 = Math.floor(lo / step + 1e-9) * step;
+    if (y1 === y0) y1 = y0 + step;
+    var ticks = []; for (var v = y0; v <= y1 + step / 2; v += step) ticks.push(Math.abs(v) < step / 1e6 ? 0 : v);
+    var tl = ticks.map(function (t) { return spec.axis(t, step); });
+    var L = Math.max.apply(null, tl.map(function (t) { return t.length; })) * 6.6 + 14;
+    /* Leave room on the right for the last period's label, which is always shown. */
+    R = Math.max(R, Math.ceil(pts[n - 1].short.length * 3.3 - (W - L - R) / n / 2));
+    var slot = (W - L - R) / n, gap = 2;
+    var bw = Math.max(2, Math.min(24, S > 1 ? (slot * 0.72 - gap * (S - 1)) / S : slot * 0.56));
+    var Y = function (val) { return T + (H - T - B) * (1 - (val - y0) / (y1 - y0)); }, zero = Y(0);
+    var lw = Math.max.apply(null, pts.map(function (p) { return p.short.length; })) * 6.3 + 14, every = Math.max(1, Math.ceil(lw / slot));
+    /* Rounded at the data end, square on the baseline. */
+    function bar(x, val, color) {
+      var hgt = Math.max(1, Math.abs(zero - Y(val))), r = Math.min(4, bw / 2, hgt), up = val >= 0, e = up ? zero - hgt : zero + hgt, k = up ? r : -r;
+      return '<path d="M' + x.toFixed(1) + "," + zero.toFixed(1) + "V" + (e + k).toFixed(1) + "Q" + x.toFixed(1) + "," + e.toFixed(1) + " " + (x + r).toFixed(1) + "," + e.toFixed(1) + "H" + (x + bw - r).toFixed(1) + "Q" + (x + bw).toFixed(1) + "," + e.toFixed(1) + " " + (x + bw).toFixed(1) + "," + (e + k).toFixed(1) + "V" + zero.toFixed(1) + 'Z" fill="' + color + '"/>';
+    }
+    var total = bw * S + gap * (S - 1);
+    el.innerHTML = '<svg viewBox="0 0 ' + W + " " + H + '" aria-hidden="true">' +
+      '<rect class="bc-band" x="' + L.toFixed(1) + '" y="' + T + '" width="' + slot.toFixed(1) + '" height="' + (H - T - B) + '" rx="4"/>' +
+      ticks.map(function (t, i) { return '<line class="' + (t === 0 ? "bc-zero" : "bc-grid") + '" x1="' + L.toFixed(1) + '" x2="' + (W - R) + '" y1="' + Y(t).toFixed(1) + '" y2="' + Y(t).toFixed(1) + '"/><text class="bc-ax" x="' + (L - 8).toFixed(1) + '" y="' + Y(t).toFixed(1) + '" dy=".32em" text-anchor="end">' + h(tl[i]) + "</text>"; }).join("") +
+      pts.map(function (p, i) {
+        var x = L + slot * i + (slot - total) / 2;
+        return p.v.map(function (val, k) { return val === null ? "" : bar(x + k * (bw + gap), val, val < 0 && spec.series[k].neg ? "var(--loss)" : spec.series[k].color); }).join("") +
+          ((n - 1 - i) % every === 0 ? '<text class="bc-ax" x="' + (L + slot * (i + 0.5)).toFixed(1) + '" y="' + (H - 8) + '" text-anchor="middle">' + h(p.short) + "</text>" : "");
+      }).join("") + "</svg>";
+    var band = el.querySelector(".bc-band"), read = document.getElementById(id + "-r");
+    function show(i, on) {
+      el.__i = i; el.__on = on;
+      var p = pts[i];
+      if (read) read.innerHTML = "<b>" + h(p.label) + "</b>" + spec.series.map(function (sr, k) {
+        return '<span class="bc-val">' + (S > 1 ? '<i style="background:' + sr.color + '"></i>' + h(sr.label) + " " : "") + '<strong class="num">' + (p.v[k] === null ? "\u2014" : h(sr.fmt(p.v[k]))) + "</strong></span>";
+      }).join("");
+      band.setAttribute("x", (L + slot * i).toFixed(1));
+      band.style.opacity = on ? 1 : 0;
+    }
+    el.__geo = { L: L, W: W, slot: slot, n: n, show: show };
+    show(el.__on && el.__i < n ? el.__i : n - 1, !!el.__on && el.__i < n);
+    if (el.__bound) return;
+    el.__bound = true;
+    var at = function (e) { var g = el.__geo, r = el.getBoundingClientRect(); return Math.max(0, Math.min(g.n - 1, Math.floor(((e.clientX - r.left) * g.W / (r.width || g.W) - g.L) / g.slot))); };
+    el.addEventListener("pointermove", function (e) { el.__geo.show(at(e), true); });
+    el.addEventListener("pointerdown", function (e) { el.__geo.show(at(e), true); });
+    el.addEventListener("pointerleave", function (e) { if (e.pointerType === "mouse") el.__geo.show(el.__geo.n - 1, false); });
+    el.addEventListener("keydown", function (e) {
+      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+      e.preventDefault();
+      var g = el.__geo; g.show(Math.max(0, Math.min(g.n - 1, el.__i + (e.key === "ArrowLeft" ? -1 : 1))), true);
+    });
+    el.addEventListener("blur", function () { el.__geo.show(el.__geo.n - 1, false); });
+  }
+  function barMount(root) {
+    Object.keys(BARS).forEach(function (id) { if (!document.querySelector('[data-bc="' + id + '"]')) delete BARS[id]; });
+    IL.$$("[data-bc]", root).forEach(barDraw);
+    if (barsBound) return;
+    barsBound = true;
+    var t;
+    window.addEventListener("resize", function () { clearTimeout(t); t = setTimeout(function () { IL.$$("[data-bc]").forEach(barDraw); }, 150); });
+  }
+  function finChart(points, aLabel, bLabel, sub) {
+    return barCard({
+      title: aLabel + " and " + bLabel.toLowerCase(), sub: sub, axis: axisMoney,
+      series: [{ label: aLabel, color: "var(--text3)", fmt: F.money }, { label: bLabel, color: "var(--chart-brand)", fmt: F.money, neg: true }],
+      pts: points.filter(function (p) { return p.a !== null; }).map(function (p) { return { label: p.label, short: p.label.replace(/^FY /, ""), v: [p.a, p.b] }; }),
+    });
   }
   function downloadCsv() {
     if (!IL.user) { location.href = IL.signupHref(); return; }
@@ -1404,7 +1484,7 @@
     var N_ = function () { return M.years; };
     var horizons = [3, 5, 10];
     box.innerHTML =
-      '<section class="card prime val-hero hero-band plate" id="val-hero" data-w="share" data-w-title="your projection" style="--plate:url(/share/ledger-v1.webp);--plate-pos:right 40%"></section>' +
+      '<section class="card prime val-hero" id="val-hero" data-w="share" data-w-title="your projection"></section>' +
       '<p class="callout val-err" id="val-err" role="alert" hidden></p>' +
       '<div class="section-h"><div><h2 class="section-t">Projection Lab</h2><p class="card-sub">Bear, base and bull cases from the company’s own filings. Change any number; everything recalculates.</p></div>' +
         '<div class="row wrap"><div class="seg" role="group" aria-label="Years ahead" id="pj-years">' + horizons.map(function (n) { return '<button type="button" data-years="' + n + '" aria-pressed="' + (M.years === n) + '">' + n + " years" + (n === 10 && !IL.isPro() ? ' <span class="tag gold" style="margin-left:4px">Pro</span>' : "") + "</button>"; }).join("") + "</div>" +
@@ -1511,11 +1591,13 @@
     }
 
     /* The price path for each case, as smooth curves through each year’s
-       value (monotone, so a curve never overshoots its own points). */
+       value (monotone, so a curve never overshoots its own points). The row
+       under the plot is both the legend and the readout: point at, tap or
+       arrow-key to a year and it lists every case's price for that year. */
     function chart() {
       var el = IL.$("#pj-chart"); if (!el) return;
-      if (!outs.base || !outs.bear || !outs.bull) { el.innerHTML = '<div class="empty">Fix the inputs above to draw the cases.</div>'; return; }
-      var n = M.years, W = Math.max(320, Math.round(el.clientWidth || 720)), H = W < 560 ? 240 : 300, L = W < 560 ? 52 : 64, R = W < 560 ? 84 : 108, T = 18, B = 34;
+      if (!outs.base || !outs.bear || !outs.bull) { el.innerHTML = '<div class="empty">Fix the inputs above to draw the cases.</div>'; el.__pj = null; return; }
+      var n = M.years, W = Math.max(320, Math.round(el.clientWidth || 720)), H = W < 560 ? 240 : W < 900 ? 300 : 340, L = W < 560 ? 52 : 64, R = W < 560 ? 84 : 108, T = 18, B = 34;
       var series = CASES.map(function (c) { return { c: c, pts: [ctx.price].concat(outs[c].pricePath) }; });
       var all = series.reduce(function (a, s) { return a.concat(s.pts); }, []);
       var lo = Math.min.apply(null, all), hi = Math.max.apply(null, all);
@@ -1525,18 +1607,56 @@
       var ticks = []; for (var v = y0; v <= y1 + step / 2; v += step) ticks.push(v);
       var year0 = new Date().getUTCFullYear();
       var labelEvery = n > 5 ? 2 : 1;
-      var svg = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Projected price path for the bear, base and bull cases over ' + n + ' years">' +
+      var svg = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" tabindex="0" aria-label="Projected price path for the bear, base and bull cases over ' + n + ' years. Left and right arrow keys read each year.">' +
         ticks.map(function (t) { return '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(t) + '" y2="' + Y(t) + '" class="pj-grid"/><text x="' + (L - 10) + '" y="' + (Y(t) + 4) + '" class="pj-ax" text-anchor="end">' + h(axisPrice(t)) + "</text>"; }).join("") +
         Array.from({ length: n + 1 }, function (_, i) { return i % labelEvery && i !== n ? "" : '<text x="' + X(i) + '" y="' + (H - 10) + '" class="pj-ax" text-anchor="middle">' + (i === 0 ? "Today" : year0 + i) + "</text>"; }).join("") +
         '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(ctx.price) + '" y2="' + Y(ctx.price) + '" class="pj-now"/>' +
+        '<line x1="0" x2="0" y1="' + T + '" y2="' + (H - B) + '" class="pj-guide" visibility="hidden"/>' +
         series.map(function (s) {
           return '<path d="' + smooth(s.pts.map(function (v, i) { return [X(i), Y(v)]; })) + '" class="pj-line pj-' + s.c + '"/>' +
-            s.pts.map(function (v, i) { return i ? '<circle cx="' + X(i) + '" cy="' + Y(v) + '" r="' + (s.c === "base" ? 3 : 2.25) + '" class="pj-dot pj-' + s.c + '"><title>' + CASE_LABEL[s.c] + ", " + (year0 + i) + ": " + F.price(v) + "</title></circle>" : ""; }).join("");
+            s.pts.map(function (v, i) { return i ? '<circle cx="' + X(i) + '" cy="' + Y(v) + '" r="' + (s.c === "base" ? 3.5 : 3) + '" data-i="' + i + '" class="pj-dot pj-' + s.c + '"/>' : ""; }).join("");
         }).join("") +
         endLabels(series.map(function (s) { return { c: s.c, y: Y(s.pts[n]), v: s.pts[n] }; }), W - R + 10, T + 6, H - B) +
         "</svg>" +
-        '<p class="note pj-legend"><span class="pj-key pj-key-now"></span>Today\u2019s price, ' + h(F.price(ctx.price)) + ". Hover a point for its value.</p>";
+        '<p class="note pj-legend" id="pj-read" aria-live="polite"></p>';
       el.innerHTML = svg;
+      el.__pj = { n: n, W: W, L: L, R: R, X: X, year0: year0, series: series };
+      readYear(el, null);
+      if (el.__pjWired) return;
+      el.__pjWired = true;
+      var yearAt = function (e) {
+        var st = el.__pj, g = el.querySelector("svg"); if (!st || !g) return null;
+        var r = g.getBoundingClientRect(), x = (e.clientX - r.left) * st.W / r.width, col = (st.W - st.L - st.R) / st.n;
+        if (x < st.L - col / 2 || x > st.W - st.R + col / 2) return null;
+        return Math.max(0, Math.min(st.n, Math.round((x - st.L) / col)));
+      };
+      el.addEventListener("pointermove", function (e) { if (e.target.closest("svg")) readYear(el, yearAt(e)); });
+      el.addEventListener("pointerdown", function (e) { if (e.target.closest("svg")) readYear(el, yearAt(e)); });
+      el.addEventListener("pointerleave", function (e) { if (e.pointerType === "mouse") readYear(el, null); });
+      el.addEventListener("focusin", function (e) { if (e.target.closest("svg") && el.__pj && el.__pjAt === null && e.target.matches(":focus-visible")) readYear(el, el.__pj.n); });
+      el.addEventListener("focusout", function () { readYear(el, null); });
+      el.addEventListener("keydown", function (e) {
+        var st = el.__pj; if (!st || !e.target.closest("svg")) return;
+        var i = el.__pjAt === null ? st.n : el.__pjAt;
+        if (e.key === "ArrowLeft") i = Math.max(0, i - 1); else if (e.key === "ArrowRight") i = Math.min(st.n, i + 1);
+        else if (e.key === "Home") i = 0; else if (e.key === "End") i = st.n; else if (e.key === "Escape") i = null; else return;
+        e.preventDefault(); readYear(el, i);
+      });
+    }
+    function readYear(el, i) {
+      var st = el.__pj, out = el.querySelector("#pj-read"), guide = el.querySelector(".pj-guide"); if (!st || !out) return;
+      if (el.__pjAt === i && out.firstChild) return;
+      el.__pjAt = i;
+      if (guide) {
+        if (i === null) guide.setAttribute("visibility", "hidden");
+        else { guide.setAttribute("x1", st.X(i)); guide.setAttribute("x2", st.X(i)); guide.setAttribute("visibility", "visible"); }
+      }
+      IL.$$(".pj-dot", el).forEach(function (d) { d.classList.toggle("on", i !== null && +d.getAttribute("data-i") === i); });
+      var touch = window.matchMedia && window.matchMedia("(hover: none)").matches;
+      out.innerHTML = (i === null ? "" : '<b class="pj-when">' + (i === 0 ? "Today" : st.year0 + i) + "</b>") +
+        st.series.map(function (s) { return '<span class="pj-k"><i class="pj-sw pj-' + s.c + '"></i>' + (s.c === "base" ? "Base" : s.c === "bear" ? "Bear" : "Bull") + (i === null ? "" : ' <b class="num">' + h(F.price(s.pts[i])) + "</b>") + "</span>"; }).join("") +
+        '<span class="pj-k"><i class="pj-sw pj-sw-now"></i>Today\u2019s price <b class="num">' + h(F.price(ctx.price)) + "</b></span>" +
+        (i === null ? '<span class="pj-hint">' + (touch ? "Tap a year to read each case." : "Point at a year to read each case.") + "</span>" : "");
     }
     function endLabels(items, x, top, bottom) {
       items.sort(function (a, b) { return a.y - b.y; });
@@ -1843,8 +1963,9 @@
       trend.innerHTML = '<h2 class="card-t">Trend</h2><div class="big-num num">' + ups + " of " + tot + '</div><span class="card-sub">quarters with revenue up on a year earlier' + (accel === null ? "." : Math.abs(accel) < 1 ? ". Growth held steady last quarter." : ". Growth " + (accel > 0 ? "sped up" : "slowed") + " by " + F.num(Math.abs(accel), 0) + " percentage points last quarter.") + "</span>";
       var cols = q.slice(-12);
       chart.innerHTML = '<div class="grid-2">' +
-        finChart(cols.map(function (c) { return { label: c.label, a: N(c.revenue), b: N(c.netIncome) }; }), "Revenue", "Net income") +
+        finChart(cols.map(function (c) { return { label: c.label, a: N(c.revenue), b: N(c.netIncome) }; }), "Revenue", "Net income", "Each quarter") +
         epsChart(cols) + "</div>";
+      barMount(chart);
     });
     D.calls().then(function (res) {
       var box2 = IL.$("#e-rel"); if (!box2) return;
@@ -1882,19 +2003,11 @@
     });
   }
   function epsChart(cols) {
-    var pts = cols.map(function (c) { return { label: c.label, v: N(c.eps) }; }).filter(function (p) { return p.v !== null; });
-    if (pts.length < 2) return "";
-    var W = 760, H = 170, pad = 10, n = pts.length;
-    var max = Math.max(0, Math.max.apply(null, pts.map(function (p) { return p.v; })));
-    var min = Math.min(0, Math.min.apply(null, pts.map(function (p) { return p.v; })));
-    var span = max - min || 1, zero = pad + (max / span) * (H - pad * 2), slot = W / n, bw = Math.min(30, slot * 0.5);
-    var y = function (v) { return pad + ((max - v) / span) * (H - pad * 2); };
-    return '<section class="card fin-chart"><div class="card-h"><h3 class="card-t">Earnings per share</h3><span class="card-sub">Diluted, each quarter</span></div><svg viewBox="0 0 ' + W + " " + H + '" width="100%" preserveAspectRatio="none" style="height:170px" role="img" aria-label="Earnings per share by quarter"><line x1="0" x2="' + W + '" y1="' + zero.toFixed(1) + '" y2="' + zero.toFixed(1) + '" stroke="var(--line2)"/>' +
-      pts.map(function (p, i) {
-        var x = i * slot + slot / 2;
-        return '<rect x="' + (x - bw / 2).toFixed(1) + '" y="' + Math.min(y(p.v), zero).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + Math.max(1, Math.abs(zero - y(p.v))).toFixed(1) + '" rx="3" fill="' + (p.v < 0 ? "var(--loss)" : "var(--gold)") + '"><title>' + h(p.label + ": " + F.eps(p.v)) + "</title></rect>" +
-          "";
-      }).join("") + '</svg><div class="bars-x" aria-hidden="true">' + pts.map(function (p, i) { return "<span>" + ((n <= 8 || i % 2 === (n - 1) % 2) ? h(p.label) : "") + "</span>"; }).join("") + "</div></section>";
+    return barCard({
+      title: "Earnings per share", sub: "Diluted, each quarter", axis: axisEps,
+      series: [{ label: "Earnings per share", color: "var(--chart-brand)", fmt: F.eps, neg: true }],
+      pts: cols.map(function (c) { return { label: c.label, short: c.label, v: [N(c.eps)] }; }).filter(function (p) { return p.v[0] !== null; }),
+    });
   }
 
   /* ═════════════════════════════════════════════════════════════════════

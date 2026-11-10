@@ -226,7 +226,7 @@
     if (!lessons.length) { box.innerHTML = '<h2 class="card-t">Keep learning</h2><a class="card-foot" href="/learn">Open the Academy →</a>'; return; }
     var pct = Math.round(done.length / lessons.length * 100);
     box.innerHTML = '<h2 class="card-t">Keep learning</h2><span class="card-sub">' + done.length + " of " + lessons.length + " lessons done</span>" +
-      '<div class="rep-bar"><i style="width:' + Math.max(2, pct) + '%;background:var(--gold)"></i></div>' +
+      '<div class="rep-bar"><i style="width:' + Math.max(2, pct) + '%;background:var(--chart-brand)"></i></div>' +
       (next ? '<div><span class="faint" style="font-size:12.5px">Next · ' + h(next.minutes || "") + ' min</span><div style="font-weight:650;margin-top:2px">' + h(next.title) + '</div><p class="muted" style="font-size:13px;margin-top:4px">' + h(next.summary || "") + "</p></div>" +
         '<a class="card-foot" href="/learn/' + h(next.slug) + '">' + (done.length ? "Continue" : "Start") + " →</a>"
         : '<p class="muted">You finished every lesson. Put it to work: compare two companies you own.</p><a class="card-foot" href="/compare">Compare stocks →</a>');

@@ -25,6 +25,17 @@
   ];
 
   function css(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+  /* A token colour at a given opacity, whatever form the token is written in. */
+  function alpha(color, a) {
+    var m = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(color);
+    if (m) {
+      var x = m[1].length === 3 ? m[1].replace(/./g, "$&$&") : m[1];
+      return "rgba(" + parseInt(x.slice(0, 2), 16) + "," + parseInt(x.slice(2, 4), 16) + "," + parseInt(x.slice(4, 6), 16) + "," + a + ")";
+    }
+    m = /^rgba?\(\s*([\d.]+)[\s,]+([\d.]+)[\s,]+([\d.]+)/i.exec(color);
+    return m ? "rgba(" + m[1] + "," + m[2] + "," + m[3] + "," + a + ")" : color;
+  }
+  IL.alpha = alpha;
 
   function seriesFrom(json) {
     var r = json && json.chart && json.chart.result && json.chart.result[0];
@@ -130,7 +141,7 @@
       canvas.innerHTML = "";
       chart = L.createChart(canvas, {
         autoSize: true,
-        layout: { background: { type: "solid", color: "transparent" }, textColor: css("--text3"), fontFamily: "IBM Plex Sans, Inter, sans-serif", fontSize: 11, attributionLogo: true, panes: { separatorColor: css("--line"), enableResize: false } },
+        layout: { background: { type: "solid", color: "transparent" }, textColor: css("--text3"), fontFamily: "IBM Plex Sans, Inter, sans-serif", fontSize: 11, attributionLogo: false, panes: { separatorColor: css("--line"), enableResize: false } },
         grid: { vertLines: { visible: false }, horzLines: { color: css("--chart-grid") } },
         rightPriceScale: { borderVisible: false, scaleMargins: { top: 0.08, bottom: 0.2 } },
         timeScale: { borderVisible: false, rightOffset: 2, fixLeftEdge: true, fixRightEdge: true, lockVisibleTimeRangeOnResize: true },
@@ -177,9 +188,7 @@
       var all = current.bars, view = visibleBars(all, r);
       clearSeries();
       if (!view.length) return;
-      var up = view[view.length - 1].close >= view[0].close;
-      var lineColor = css("--chart-line");
-      var gold = css("--gold");
+      var brand = css("--chart-brand") || css("--gold");
       if (state.type === "candles") {
         main = chart.addSeries(L.CandlestickSeries, {
           upColor: css("--gain"), downColor: css("--loss"), wickUpColor: css("--gain"), wickDownColor: css("--loss"), borderVisible: false,
@@ -187,13 +196,14 @@
         });
         main.setData(view.map(function (b) { return { time: b.time, open: b.open, high: b.high, low: b.low, close: b.close }; }));
       } else {
-        /* The brand line: gold, smoothed, with a gold wash and a pulsing
-           last-price dot. Up or down shows in the header, not the fill. */
+        /* The brand line: gold, smoothed, over one flat tint (rulebook 4: no
+           gradients on data). Up or down shows in the header, not the fill. */
+        var wash = alpha(brand, 0.09);
         main = chart.addSeries(L.AreaSeries, {
-          lineColor: gold, lineWidth: 2.5, lineType: 2,
-          topColor: "rgba(229,182,90,0.30)", bottomColor: "rgba(229,182,90,0)",
+          lineColor: brand, lineWidth: 2, lineType: 2,
+          topColor: wash, bottomColor: wash,
           priceLineVisible: false, lastValueVisible: true, crosshairMarkerRadius: 5,
-          crosshairMarkerBorderColor: css("--surface"), crosshairMarkerBackgroundColor: gold,
+          crosshairMarkerBorderColor: css("--surface"), crosshairMarkerBackgroundColor: brand,
           lastPriceAnimation: r.intraday ? 1 : 0,
         });
         main.setData(view.map(function (b) { return { time: b.time, value: b.close }; }));
@@ -211,10 +221,14 @@
       if (state.show.volume) {
         vol = chart.addSeries(L.HistogramSeries, { priceScaleId: "vol", priceFormat: { type: "volume" }, priceLineVisible: false, lastValueVisible: false });
         chart.priceScale("vol").applyOptions({ scaleMargins: { top: 0.84, bottom: 0 }, visible: false });
-        var gs = css("--gain"), ls = css("--loss");
+        /* Candles colour volume by the day's direction, like the candles
+           themselves. The line view keeps it neutral: colour there would be a
+           second, unlabelled encoding under a single gold line. */
+        var candles = state.type === "candles";
+        var gs = alpha(css("--gain"), 0.4), ls = alpha(css("--loss"), 0.4), ns = alpha(css("--text3"), 0.32);
         vol.setData(view.map(function (b, i) {
           var prev = i ? view[i - 1].close : b.open;
-          return { time: b.time, value: b.volume, color: (b.close >= prev ? gs : ls) + "55" };
+          return { time: b.time, value: b.volume, color: candles ? (b.close >= prev ? gs : ls) : ns };
         }));
       }
       if (state.show.rsi && !r.intraday) {
@@ -235,6 +249,19 @@
       chart.timeScale().fitContent();
       header(view, null);
       legend(r);
+      source(r);
+    }
+
+    /* What the bars are and where they came from. Written on every draw, so it
+       stays right when a range comes from the cache or the chart type changes. */
+    function source(r) {
+      var note = root.querySelector("#pc-note"), pv = current && current.provenance;
+      if (!note) return;
+      var unit = state.type === "candles" ? "bars" : "closes";
+      var what = r.intraday ? "Intraday " + (state.type === "candles" ? "bars" : "prices") + ", times in Eastern Time."
+        : (r.monthly ? "Monthly " : r.weekly ? "Weekly " : "Daily ") + unit + ".";
+      note.innerHTML = IL.h("Prices: " + ((pv && pv.source) || "market data") + ". " + what + " Delayed at least 15 minutes during market hours.") +
+        ' <a href="https://www.tradingview.com/" target="_blank" rel="noopener">Charting by TradingView</a>';
     }
 
     function legend(r) {
@@ -272,7 +299,6 @@
     function load() {
       var r = spec();
       var key = r.fetch;
-      var note = root.querySelector("#pc-note");
       if (store[key]) { current = store[key]; build(); draw(); return Promise.resolve(); }
       return IL.api("/api/quote/" + encodeURIComponent(ticker) + "?range=" + key).then(function (res) {
         if (!res.ok) {
@@ -288,10 +314,6 @@
         if (!chart) build();
         if (!chart) { canvas.innerHTML = '<div class="empty">The chart library did not load. Refresh to try again.</div>'; return; }
         draw();
-        var pv = current.provenance;
-        if (note && pv) {
-          note.textContent = "Prices: " + (pv.source || "market data") + (pv.fallback ? "" : "") + ". " + (r.intraday ? "Intraday bars, times in Eastern Time." : "Daily closes.") + " Delayed at least 15 minutes during market hours.";
-        }
       });
     }
 
