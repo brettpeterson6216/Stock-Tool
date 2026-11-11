@@ -437,9 +437,17 @@
     }
 
     /* ── The loop ───────────────────────────────────────────────────────── */
-    function request() { if (!raf && !dead) raf = requestAnimationFrame(frame); }
+    /* Frames come from requestAnimationFrame, which a browser pauses for a page
+       it is not showing (a background tab, an embedded preview). A timer
+       stands behind it so the chart and its readouts are still filled in. */
+    var late = 0;
+    function request() {
+      if (raf || dead) return;
+      raf = requestAnimationFrame(frame);
+      late = setTimeout(function () { if (raf) { cancelAnimationFrame(raf); frame(performance.now()); } }, 250);
+    }
     function frame(now) {
-      raf = 0; if (dead) return;
+      raf = 0; clearTimeout(late); if (dead) return;
       var dt = lastT ? Math.min(64, now - lastT) : 16, again = false;
       lastT = now;
       if (anim) {
@@ -591,7 +599,7 @@
       view: viewInfo,
       val: function (id, i) { var s = D.series.filter(function (x) { return x.id === id; })[0]; return s ? val(s, i) : NaN; },
       redraw: request,
-      destroy: function () { dead = true; cancelAnimationFrame(raf); if (ro) ro.disconnect(); document.removeEventListener("il:theme", onTheme); clearTimeout(press); clearTimeout(hintT); host.innerHTML = ""; host.classList.remove("ilc", "grab"); },
+      destroy: function () { dead = true; cancelAnimationFrame(raf); clearTimeout(late); if (ro) ro.disconnect(); document.removeEventListener("il:theme", onTheme); clearTimeout(press); clearTimeout(hintT); host.innerHTML = ""; host.classList.remove("ilc", "grab"); },
     };
   };
 })();
