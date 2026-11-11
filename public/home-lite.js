@@ -51,7 +51,7 @@
     ["/app/lens.css", "style"], ["/app/stock.css", "style"],
     ["/app/core.js", "script"], ["/app/stock.js", "script"], ["/app/chart.js", "script"],
     ["/app/analysis.js", "script"], ["/app/valuation.js", "script"],
-    ["/vendor/lightweight-charts.standalone.production.js", "script"],
+    ["/app/ilchart.js", "script"],
   ];
   function frugal() {
     var c = navigator.connection;

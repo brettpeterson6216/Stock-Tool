@@ -31,7 +31,6 @@ test("registry covers every current public data source and named operating servi
     "render",
     "resend",
     "anthropic",
-    "tradingview-lightweight-charts",
     "jsdelivr",
     "cdnjs",
   ];
@@ -112,7 +111,7 @@ test("actual route and library integrations named by the registry remain present
 test("lookup and HTML helpers resolve aliases without reflecting untrusted input", () => {
   assert.equal(providerName("SEC EDGAR XBRL"), "SEC EDGAR");
   assert.match(providerSummary("Marketstack"), /^Marketstack:/);
-  assert.equal(renderProviderNameHtml("TradingView"), "TradingView Lightweight Charts");
+  assert.equal(renderProviderNameHtml("Claude"), "Anthropic (Claude)");
   assert.match(renderProviderSummaryHtml("stripe"), /Stripe:/);
 
   const attack = '<img src=x onerror="alert(1)">';

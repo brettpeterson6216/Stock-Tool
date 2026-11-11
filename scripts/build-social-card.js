@@ -1,13 +1,13 @@
 /* The Open Graph / Twitter card: public/social-card.png, 1200x630.
 
    This is its own script rather than part of build-brand.js because the chart
-   on it is not drawn — it is rendered by the site's own charting engine.
-   public/vendor/lightweight-charts.standalone.production.js is loaded here and
-   configured the way public/hero-chart.js configures it (candlesticks, the
-   30-day average, the gold last-price line), then given 92 real daily AAPL
+   on it is not drawn by hand. It is rendered at build time with Lightweight
+   Charts (scripts/vendor/, a build tool only: nothing from it is served to
+   the site, whose own charts are drawn by public/app/ilchart.js). It shows
+   candlesticks, the 30-day average and the gold last-price line for 92 real daily AAPL
    bars from brand/social-card-data.json. A card for a stock research tool
    should not show a hand-drawn squiggle standing in for a chart; this one
-   shows the product's actual output on actual market data, including the real
+   shows a real rendered chart of actual market data, including the real
    gap down on 2026-07-31 and the recovery after it.
 
    Run:  node scripts/build-social-card.js
@@ -37,7 +37,7 @@ function buildHtml() {
   const last = rows[rows.length - 1][4];
   const prev = rows[rows.length - 2][4];
   const chg = ((last - prev) / prev) * 100;
-  const lwc = fs.readFileSync(P("public", "vendor", "lightweight-charts.standalone.production.js"), "utf8");
+  const lwc = fs.readFileSync(P("scripts", "vendor", "lightweight-charts.standalone.production.js"), "utf8");
 
   return `<!doctype html><meta charset="utf-8">
 <style>

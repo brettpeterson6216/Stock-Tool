@@ -24,7 +24,7 @@
     { label: "Banks", t: ["JPM", "BAC", "WFC"] },
     { label: "Streaming", t: ["NFLX", "DIS", "SPOT"] },
   ];
-  var tickers = [], data = {}, chart = null, shown = null;
+  var tickers = [], data = {}, chart = null;
 
   function readUrl() {
     var q = new URLSearchParams(location.search).get("t") || "";
@@ -114,7 +114,7 @@
       "</div>" +
       (tickers.length < 2
         ? '<div class="gate center"><div class="gate-t">Pick at least two companies</div><div class="gate-s">Search above, or try one of the groups. Tip: compare a company with its closest rivals, not with the whole market.</div></div>'
-        : '<section class="card"><div class="card-h"><h2 class="card-t">Performance, past year</h2><span class="card-sub" id="cmp-when">Change since a year ago</span></div><div class="cmp-legend" id="cmp-legend" aria-live="off"></div><div class="cmp-chart" id="cmp-chart"></div></section>' +
+        : '<section class="card"><div class="card-h"><h2 class="card-t">Performance, past year</h2><span class="card-sub" id="cmp-when">Change since a year ago</span></div><div class="cmp-legend" id="cmp-legend" aria-live="off"></div><div class="cmp-chart" id="cmp-chart"></div><p class="note cmp-how">Drag to move through two years. Scroll or pinch to zoom. Double-click or double-tap to reset.</p></section>' +
           '<section class="card flush" id="cmp-table" data-w="share,expand,csv" data-w-title="the comparison"><div class="card-h"><h2 class="card-t">Side by side</h2></div><div class="tbl-wrap"><table class="tbl cmp-tbl" id="cmp-tbl"><tbody><tr><td>' + '<span class="sk" style="height:200px"></span>' + "</td></tr></tbody></table></div></section>" +
           '<div class="grid-2" id="cmp-flags"></div>' +
           '<p class="note">Best value in each row is marked. Grades compare each company with its own sector. Figures from SEC filings and a year of prices; not investment advice.</p>');
@@ -226,67 +226,53 @@
     return c;
   }
 
-  /* One line per company, each rebased to 0% at the start of the same year
-     every "past year" figure on the page uses. The legend above the plot is
-     also the readout: it shows each company's change to the latest close, and
-     to the date under the pointer (or finger) while one is over the plot. */
+  /* One line per company on the site's own chart engine, each rebased to 0%
+     at the first day in view. It opens on the same year every "past year"
+     figure on the page uses, so the legend matches the table; drag back
+     through two years or zoom, and the lines rebase to wherever the view
+     starts. The legend above the plot is also the readout: each company's
+     change to the day being read, or to the latest day in view. */
+  function dayKey(t) { return new Date((t - 5 * 3600) * 1000).toISOString().slice(0, 10); }
+  function fmtDay(t) { return new Date(t * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "America/New_York" }); }
   function drawChart(list) {
-    var el = IL.$("#cmp-chart"), L = window.LightweightCharts;
-    if (!el || !L) return;
-    shown = list;
-    if (chart) { try { chart.remove(); } catch (e) {} chart = null; }
-    el.innerHTML = "";
-    var css = function (n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); };
-    var pctAxis = function (v) { return (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(0) + "%"; };
-    chart = L.createChart(el, {
-      autoSize: true,
-      layout: { background: { type: "solid", color: "transparent" }, textColor: css("--text3"), fontFamily: "IBM Plex Sans, Inter, sans-serif", fontSize: 11, attributionLogo: false },
-      grid: { vertLines: { visible: false }, horzLines: { color: css("--chart-grid") } },
-      rightPriceScale: { borderVisible: false }, timeScale: { borderVisible: false, fixLeftEdge: true, fixRightEdge: true },
-      localization: { priceFormatter: pctAxis },
-      crosshair: { mode: 0, vertLine: { color: css("--line3"), width: 1, style: 0, labelVisible: false }, horzLine: { visible: false, labelVisible: false } },
-      handleScroll: false, handleScale: false,
-    });
-    var lines = [];
+    var el = IL.$("#cmp-chart");
+    if (!el || !IL.Chart) return;
+    if (chart) { chart.destroy(); chart = null; }
+    /* Companies can trade on different days (a holiday abroad, a recent
+       listing), so the time axis is every day any of them traded. */
+    var days = {}, withBars = list.filter(function (d) { return d.series && d.series.bars.length; });
+    withBars.forEach(function (d) { d.series.bars.forEach(function (b) { var k = dayKey(b.time); if (!(k in days)) days[k] = b.time; }); });
+    var keys = Object.keys(days).sort(), at = {}, times = keys.map(function (k, n) { at[k] = n; return days[k]; });
+    if (!times.length) { el.innerHTML = '<div class="empty">Price history is unavailable right now.</div>'; IL.$("#cmp-legend").innerHTML = ""; return; }
+    var start = times.length - 1, lines = [];
     list.forEach(function (d, i) {
       if (!d.series || !d.series.bars.length) return;
-      var bars = d.series.bars;
-      var year = bars.slice(IL.windowStart(bars, IL.YEAR_DAYS));      // same year as every "past year" figure
-      if (!year.length) return;
-      var base = year[0].close, col = css(SERIES[i]);
-      var s = chart.addSeries(L.LineSeries, { color: col, lineWidth: 2, lineType: 2, priceLineVisible: false, lastValueVisible: false, crosshairMarkerRadius: 4, crosshairMarkerBorderColor: css("--surface"), crosshairMarkerBorderWidth: 2 });
-      var at = {};
-      s.setData(year.map(function (b) { var v = (b.close / base - 1) * 100; at[b.time] = v; return { time: b.time, value: v }; }));
-      lines.push({ i: i, t: d.t, s: s, at: at, last: (year[year.length - 1].close / base - 1) * 100 });
+      var bars = d.series.bars, v = new Array(times.length).fill(NaN);
+      bars.forEach(function (b) { v[at[dayKey(b.time)]] = b.close; });
+      start = Math.min(start, at[dayKey(bars[IL.windowStart(bars, IL.YEAR_DAYS)].time)]);   // same year as every "past year" figure
+      lines.push({ i: i, t: d.t, id: d.t, kind: "line", v: v, color: SERIES[i], width: 2, marker: true });
     });
-    if (lines.length) lines[0].s.createPriceLine({ price: 0, color: css("--line3"), lineWidth: 1, lineStyle: 0, axisLabelVisible: false });
-    chart.timeScale().fitContent();
-    var legend = IL.$("#cmp-legend"), when = IL.$("#cmp-when");
-    function show(time) {
-      var on = time !== null && time !== undefined;
-      if (when) when.textContent = on ? "Change from a year ago to " + new Date(time * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "America/New_York" }) : "Change since a year ago";
+    var legend = IL.$("#cmp-legend"), when = IL.$("#cmp-when"), view = null, reading = null;
+    var pctAxis = function (v) { return (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(Math.abs(v) < 10 && v % 1 ? 1 : 0) + "%"; };
+    function show() {
+      if (!view) return;
+      var to = reading === null ? view.i1 : reading;
+      if (when) when.textContent = reading !== null ? "Change from " + fmtDay(times[view.i0]) + " to " + fmtDay(times[reading])
+        : view.atHome ? "Change since a year ago" : "Change since " + fmtDay(times[view.i0]);
       legend.innerHTML = lines.map(function (ln) {
-        var v = on ? (isFinite(ln.at[time]) ? ln.at[time] : null) : ln.last;
-        return '<span class="cmp-key">' + dot(ln.i) + h(ln.t) + ' <b class="num ' + (v === null ? "" : F.cls(v)) + '">' + (v === null ? "—" : F.spct(v)) + "</b></span>";
+        /* A company that did not trade on the day being read shows its last close before it. */
+        var v = NaN; for (var k = to; k >= view.i0 && !isFinite(v); k--) v = chart.val(ln.id, k);
+        return '<span class="cmp-key">' + dot(ln.i) + h(ln.t) + ' <b class="num ' + (isFinite(v) ? F.cls(v) : "") + '">' + (isFinite(v) ? F.spct(v) : "—") + "</b></span>";
       }).join("");
     }
-    show(null);
-    chart.subscribeCrosshairMove(function (p) {
-      var off = !p || p.time === undefined || (p.point && (p.point.x < 0 || p.point.y < 0));
-      show(off ? null : p.time);
+    chart = IL.Chart(el, {
+      label: "Share price change for " + lines.map(function (l) { return l.t; }).join(", ") + ". Arrow keys read each day; plus and minus zoom; zero resets.",
+      onView: function (v) { view = v; show(); },
+      onCross: function (i) { reading = i; show(); },
+      describe: function (i) { return fmtDay(times[i]) + ": " + lines.map(function (ln) { var v = chart.val(ln.id, i); return ln.t + " " + (isFinite(v) ? F.spct(v) : "no trade"); }).join(", "); },
     });
-    /* A finger does not hover: a tap or a drag across the plot reads that day. */
-    el.onpointerdown = el.onpointermove = function (e) {
-      if (e.pointerType === "mouse" || !chart || !lines.length) return;
-      var t = chart.timeScale().coordinateToTime(e.clientX - el.getBoundingClientRect().left);
-      var ln = lines.filter(function (x) { return isFinite(x.at[t]); })[0];
-      if (t === null || !ln) return;
-      chart.setCrosshairPosition(ln.at[t], t, ln.s);
-      show(t);
-    };
+    chart.set({ times: times, series: lines, rebase: true, fmtY: pctAxis, fmtTime: fmtDay, lines: [{ value: 0, color: "--line3", fit: true }] }, { show: start });
   }
-  /* The lines are painted on a canvas, so a theme switch has to redraw them. */
-  document.addEventListener("il:theme", function () { if (shown && IL.$("#cmp-chart")) drawChart(shown); });
 
   function boot() {
     IL.shell("compare");
