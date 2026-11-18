@@ -28,11 +28,11 @@
    Custom properties inherit into the shadow root. */
 il-top,il-tabbar{
   --sh-ground:#F7F5EF;--sh-surface:#FFFFFF;--sh-raised:#F0EEE9;--sh-line:#E4E0D7;--sh-line2:#D6D1C6;
-  --sh-text:#16171A;--sh-text2:#4E535B;--sh-text3:#7A7F87;--sh-gold:#C9952F;--sh-gold-text:#8E6414;--sh-gold-soft:rgba(201,149,47,.12);--sh-gold-ink:#17130A;
+  --sh-text:#16171A;--sh-text2:#4E535B;--sh-text3:#7A7F87;--sh-gold:#C9952F;--sh-ring:#B5831A;--sh-gold-text:#8E6414;--sh-gold-soft:rgba(201,149,47,.12);--sh-gold-ink:#17130A;
   --sh-shadow:0 12px 32px -12px rgba(30,24,10,.25)}
 html[data-theme="dark"] il-top,html[data-theme="dark"] il-tabbar{
   --sh-ground:#0E0F11;--sh-surface:#15171A;--sh-raised:#1F2328;--sh-line:#22262B;--sh-line2:#33383E;
-  --sh-text:#EDEEF0;--sh-text2:#A3A9B1;--sh-text3:#7D848D;--sh-gold:#E5B65A;--sh-gold-text:#E5B65A;--sh-gold-soft:rgba(229,182,90,.12);--sh-gold-ink:#17130A;
+  --sh-text:#EDEEF0;--sh-text2:#A3A9B1;--sh-text3:#7D848D;--sh-gold:#E5B65A;--sh-gold-text:#E5B65A;--sh-ring:#E5B65A;--sh-gold-soft:rgba(229,182,90,.12);--sh-gold-ink:#17130A;
   --sh-shadow:0 16px 40px -16px rgba(0,0,0,.8)}
 
 /* ── What the bar shows for each account, from the first frame ─────────────

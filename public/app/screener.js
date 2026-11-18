@@ -179,7 +179,7 @@
     var sectors = rows.map(function (r) { return r.sector; }).filter(function (s, i, a) { return s && a.indexOf(s) === i; }).sort();
     IL.$("#sc-body").innerHTML = filtersHtml(sectors) +
       '<section class="card flush"><div class="tbl-wrap"><table class="tbl sc-tbl" id="sc-tbl"></table></div></section>' +
-      '<p class="note">Grades compare each company with its own sector, from SEC filings and a year of prices. Prices are daily closes. Not investment advice.</p>';
+      '<p class="note">Grades compare each company with its own sector, from SEC filings and a year of prices. Prices are daily closes: the largest companies and your watchlist are updated every evening, the rest about once a week, and “Day” is shown only for stocks at the latest close. Not investment advice.</p>';
     markPreset();
     paintTable();
   }

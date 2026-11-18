@@ -335,8 +335,11 @@ function screenerRow(ticker, base) {
    page loads ran it out and metrics/analyst answered 503 for niche names). */
 /* The graded universe (lib/universe-members.js): ~1,000 companies by public
    float from live SEC data, plus the popular list above. Built weekly; every
-   6 hours its prices are topped up in batches of 100 (a handful of calls)
-   and its rows refreshed, so every LensScore ranks against the same set. */
+   6 hours the companies that are due get new prices (lib/prices.js: about
+   once a week each on Marketstack Basic, the largest DAILY_LARGEST every
+   evening for the movers card) and their rows are refreshed, so every
+   LensScore ranks against the same set. */
+const DAILY_LARGEST = Math.max(12, Number(process.env.PRICE_DAILY_LARGEST || 60));
 const universeMembers = require("../lib/universe-members");
 const POPULAR = () => [...new Set([...SCREENER_TICKERS, ...require("../lib/acquisition-tickers").ACQUISITION_TICKERS])].filter(t => !SCREENER_ETFS.has(t));
 universeMembers.setFallback(POPULAR);
@@ -353,6 +356,7 @@ async function warmUniverse() {
   await universeMembers.ensureLoaded().catch(() => null);
   const list = gradedUniverse();
   peers.setMembers(list);
+  prices.keepDaily(list.slice(0, DAILY_LARGEST), 2 * 24 * 3600 * 1000);
   await prices.topUpMany(list, "background").catch(e => console.warn("[universe] batch top-up failed:", String(e.message || e).slice(0, 120)));
   startEnrichment(list);
 }
@@ -373,6 +377,11 @@ router.get("/screener", requirePro, async (req, res) => {
   startEnrichment(universe);
   const rows = universe.map(t => screenerRow(t, null)).filter(r => r.price > 0);
   if (!rows.length) return res.status(503).json({ error: "Screener data is warming up. Try again in a minute." });
+  /* Most rows are refreshed about weekly (lib/prices.js), so a row's last
+     daily move can be several days old. "Day" is only shown for rows at the
+     newest close; the others show their price as of their own date. */
+  const newest = rows.reduce((m, r) => (r.asOf && r.asOf > m ? r.asOf : m), 0);
+  rows.forEach(r => { if (r.asOf && r.asOf < newest - 6 * 3600) r.change1D = null; });
   _screenerCache = { data: rows, ts: Date.now() };
   res.setHeader("X-Screener-Enriching", _enrichRunning ? "1" : "0");
   res.json(rows);
@@ -526,6 +535,7 @@ router.get("/market/analyst-signals", (_req, res) => {
 router.get("/market/snapshot", (req, res) => {
   const tickers = [...new Set(String(req.query.tickers || "").split(",").map(t => normalizeTicker(t)).filter(Boolean))].slice(0, 40);
   if (!tickers.length) return res.status(400).json({ error: "Pass tickers=AAPL,MSFT." });
+  prices.keepDaily(tickers);      // watchlisted stocks stay at the latest close
   const missing = tickers.filter(t => !Number.isFinite((_enrich.get(t) || {}).price));
   if (missing.length) startEnrichment(missing.slice(0, 20));
   res.setHeader("Cache-Control", "private, max-age=60");
@@ -543,9 +553,10 @@ router.get("/market/movers", (req, res) => {
   const rows = [..._enrich.entries()]
     .map(([symbol, e]) => ({ symbol, name: e.name || symbol, price: e.price, chgPct: e.change1D, cap: e.marketCap || 0, asOf: e.asOf ? new Date(e.asOf * 1000).toISOString().slice(0, 10) : null }))
     .filter(r => Number.isFinite(r.price) && r.price > 0 && Number.isFinite(r.chgPct));
-  /* The universe refreshes half its companies each evening (lib/prices.js),
-     so compare only companies whose latest close is the newest one: a
-     two-day-old move must not sit beside yesterday's. */
+  /* Most of the universe is refreshed about weekly; the largest companies
+     and watchlisted stocks every evening (lib/prices.js keepDaily). Compare
+     only companies whose latest close is the newest one: an older move must
+     not sit beside yesterday's. */
   const newest = rows.reduce((m, r) => (r.asOf && r.asOf > m ? r.asOf : m), "");
   const fresh = rows.filter(r => r.asOf === newest);
   if (fresh.length >= 12) rows.splice(0, rows.length, ...fresh);

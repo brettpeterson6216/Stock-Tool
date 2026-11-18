@@ -23,7 +23,7 @@
   --gain:#17804F; --gain-soft:rgba(23,128,79,.12);
   --loss:#C23B33; --loss-soft:rgba(194,59,51,.11);
   --blue:#2F6FD6; --grade-b:#3E9A66; --amber:#A86A00; --amber-soft:rgba(168,106,0,.12);
-  --chart-line:#16181B; --chart-grid:#ECE9E3; --chart-brand:#B5831A; --chart-s2:#2F6FD6; --chart-s3:#D14B8F; --chart-s4:#6B2FA0;
+  --chart-line:#16181B; --chart-grid:#ECE9E3; --chart-brand:#B5831A; --ring:#B5831A; --chart-s2:#2F6FD6; --chart-s3:#D14B8F; --chart-s4:#6B2FA0;
   --shadow:0 12px 32px rgba(20,18,12,.12), 0 2px 6px rgba(20,18,12,.06);
   color-scheme:light;
 }
@@ -35,7 +35,7 @@ html[data-theme="dark"]{
   --gain:#4CC38A; --gain-soft:rgba(76,195,138,.14);
   --loss:#F07B7B; --loss-soft:rgba(240,123,123,.14);
   --blue:#6EA8FE; --grade-b:#8FD0A4; --amber:#E5B65A; --amber-soft:rgba(229,182,90,.14);
-  --chart-line:#EDEEF0; --chart-grid:#1E2125; --chart-brand:#E5B65A; --chart-s2:#2F7FE0; --chart-s3:#D55181; --chart-s4:#B39DEB;
+  --chart-line:#EDEEF0; --chart-grid:#1E2125; --chart-brand:#E5B65A; --ring:#E5B65A; --chart-s2:#2F7FE0; --chart-s3:#D55181; --chart-s4:#B39DEB;
   --shadow:0 16px 40px rgba(0,0,0,.45), 0 2px 8px rgba(0,0,0,.3);
   color-scheme:dark;
 }
@@ -207,7 +207,7 @@ dialog.il-dialog::backdrop{background:rgba(5,6,8,.55)}
 .field{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--text2)}
 .input{height:38px;border:1px solid var(--line2);border-radius:var(--r-md);background:var(--ground);color:var(--text);padding:0 12px;font:500 14px var(--sans);width:100%}
 .input.num{font-family:var(--num)}
-.input:focus{outline:none;border-color:var(--line3);box-shadow:0 0 0 3px var(--gold-soft)}
+.input:focus{outline:none;border-color:var(--ring);box-shadow:inset 0 0 0 1px var(--ring)}
 select.input{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--text3) 50%),linear-gradient(135deg,var(--text3) 50%,transparent 50%);background-position:calc(100% - 16px) 16px,calc(100% - 11px) 16px;background-size:5px 5px;background-repeat:no-repeat;padding-right:30px}
 
 /* ── Footer ─────────────────────────────────────────────────────────────── */
@@ -376,9 +376,11 @@ body.il-app{background:var(--ground)}
    drawn inside the shell and styled there. */
 .il-search{position:relative;flex:1 1 280px;max-width:440px;min-width:0}
 .il-search-box{display:flex;align-items:center;gap:8px;height:38px;padding:0 10px 0 12px;border:1px solid var(--line2);border-radius:var(--r-md);background:var(--surface);color:var(--text3)}
-.il-search-box:focus-within{border-color:var(--line3);box-shadow:0 0 0 3px var(--gold-soft)}
+.il-search-box:focus-within{border-color:var(--ring);box-shadow:inset 0 0 0 1px var(--ring);color:var(--text2)}
+.il-search-box input:focus,.il-search-box input:focus-visible{outline:none}
 .il-search input{flex:1;min-width:0;border:0;background:transparent;color:var(--text);font:inherit;outline:none}
 .il-search input::placeholder{color:var(--text3)}
+.il-search input::-webkit-search-cancel-button{display:none}
 .il-sugg{position:absolute;left:0;right:0;top:calc(100% + 6px);background:var(--surface);border:1px solid var(--line2);border-radius:var(--r-lg);box-shadow:var(--shadow);padding:6px;z-index:60;max-height:min(420px,70vh);overflow:auto}
 .il-sugg[hidden]{display:none}
 .il-sugg-item{display:flex;align-items:center;gap:12px;width:100%;padding:9px 10px;border-radius:var(--r-sm);border:0;background:transparent;text-align:left;cursor:pointer;color:var(--text)}

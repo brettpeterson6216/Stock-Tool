@@ -288,7 +288,17 @@
   function wireSearch(input, list, onPick) {
     if (!input || !list) return;
     var pick = function (sym) { if (onPick) { input.value = ""; close(); onPick(String(sym || "").trim().toUpperCase()); } else IL.go(sym); };
-    var items = [], sel = -1, seq = 0, timer = null;
+    /* Suggestions belong to the text they were fetched for: Enter uses them
+       only when they match the box, otherwise it asks for the current text
+       first (typing "amd" fast and pressing Enter picks AMD, not the first
+       hit for "a"). An exact symbol wins unless a row was arrowed to. */
+    var items = [], itemsFor = null, sel = -1, moved = false, seq = 0, timer = null;
+    function best(q) {
+      if (moved && items[sel]) return items[sel].symbol;
+      var Q = q.toUpperCase();
+      for (var i = 0; i < items.length; i++) if (String(items[i].symbol).toUpperCase() === Q) return items[i].symbol;
+      return items[0] ? items[0].symbol : q;
+    }
     function close() { list.hidden = true; input.setAttribute("aria-expanded", "false"); sel = -1; }
     function paint() {
       if (!items.length) {
@@ -302,23 +312,30 @@
       list.hidden = false; input.setAttribute("aria-expanded", "true");
       if (sel >= 0) input.setAttribute("aria-activedescendant", "il-sugg-" + sel); else input.removeAttribute("aria-activedescendant");
     }
-    function query() {
+    function query(then) {
       var q = input.value.trim();
       if (!q) { close(); return; }
       var my = ++seq;
       IL.api("/api/search?q=" + encodeURIComponent(q)).then(function (res) {
         if (my !== seq) return;
+        if (!res.ok && then) { then(null); return; }
         items = (res.data && res.data.results ? res.data.results : []).slice(0, 8);
-        sel = items.length ? 0 : -1;
-        paint();
+        itemsFor = q; sel = items.length ? 0 : -1; moved = false;
+        if (then) then(q); else paint();
       });
     }
-    input.addEventListener("input", function () { clearTimeout(timer); timer = setTimeout(query, 110); });
+    function enter() {
+      var q = input.value.trim(); if (!q) return;
+      clearTimeout(timer);
+      if (itemsFor === q) { pick(best(q)); return; }
+      query(function (got) { pick(got ? best(got) : q); });
+    }
+    input.addEventListener("input", function () { clearTimeout(timer); moved = false; timer = setTimeout(function () { query(); }, 110); });
     input.addEventListener("focus", function () { if (input.value.trim()) query(); });
     input.addEventListener("keydown", function (e) {
-      if (e.key === "ArrowDown" && items.length) { e.preventDefault(); sel = (sel + 1) % items.length; paint(); }
-      else if (e.key === "ArrowUp" && items.length) { e.preventDefault(); sel = (sel - 1 + items.length) % items.length; paint(); }
-      else if (e.key === "Enter") { e.preventDefault(); pick(sel >= 0 && items[sel] ? items[sel].symbol : input.value); }
+      if (e.key === "ArrowDown" && items.length) { e.preventDefault(); sel = (sel + 1) % items.length; moved = true; paint(); }
+      else if (e.key === "ArrowUp" && items.length) { e.preventDefault(); sel = (sel - 1 + items.length) % items.length; moved = true; paint(); }
+      else if (e.key === "Enter") { e.preventDefault(); if (!e.isComposing) enter(); }
       else if (e.key === "Escape") { close(); input.blur(); }
     });
     list.addEventListener("mousedown", function (e) { e.preventDefault(); });

@@ -79,7 +79,8 @@ svg{display:block}
 
 .search{position:relative;flex:1 1 260px;max-width:420px;min-width:0}
 .box{display:flex;align-items:center;gap:8px;height:38px;margin:0;padding:0 10px 0 12px;border:1px solid var(--sh-line2);border-radius:10px;background:var(--sh-surface);color:var(--sh-text3);cursor:text}
-.box:focus-within{border-color:var(--sh-gold);box-shadow:0 0 0 3px var(--sh-gold-soft)}
+.box:focus-within{border-color:var(--sh-ring,var(--sh-gold));box-shadow:inset 0 0 0 1px var(--sh-ring,var(--sh-gold));color:var(--sh-text2)}
+.box input:focus,.box input:focus-visible{outline:none}
 .box svg{flex:none}
 input{flex:1;min-width:0;height:auto;margin:0;padding:0;border:0;background:transparent;color:var(--sh-text);font:inherit;font-size:14px;outline:none;box-shadow:none;-webkit-appearance:none;appearance:none}
 input::placeholder{color:var(--sh-text3);opacity:1}
@@ -255,8 +256,19 @@ input::-webkit-search-cancel-button{display:none}
     sym = String(sym || "").trim().toUpperCase();
     if (sym) location.href = "/research/" + encodeURIComponent(sym);
   }
+  /* Suggestions belong to the text they were fetched for. Enter only uses
+     them when they match what is in the box now; otherwise it asks for the
+     current text first, so "amd" typed fast and entered opens AMD, not the
+     first result for "a". An exact symbol wins unless a row was picked with
+     the arrow keys. */
+  function best(items, q, sel, moved) {
+    if (moved && items[sel]) return items[sel].symbol;
+    var Q = q.toUpperCase();
+    for (var i = 0; i < items.length; i++) if (String(items[i].symbol).toUpperCase() === Q) return items[i].symbol;
+    return items[0] ? items[0].symbol : q;
+  }
   function wireSearch(input, list) {
-    var items = [], sel = -1, seq = 0, timer = null;
+    var items = [], itemsFor = null, sel = -1, moved = false, seq = 0, timer = null;
     function close() { list.hidden = true; input.setAttribute("aria-expanded", "false"); input.removeAttribute("aria-activedescendant"); sel = -1; }
     function paint() {
       list.innerHTML = items.length
@@ -268,19 +280,30 @@ input::-webkit-search-cancel-button{display:none}
       list.hidden = false; input.setAttribute("aria-expanded", "true");
       if (sel >= 0) input.setAttribute("aria-activedescendant", "sugg-" + sel); else input.removeAttribute("aria-activedescendant");
     }
-    function query() {
+    function query(then) {
       var q = input.value.trim(); if (!q) { close(); return; }
       var my = ++seq;
       fetch("/api/search?q=" + encodeURIComponent(q), { credentials: "same-origin", headers: { Accept: "application/json" } })
         .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
-        .then(function (j) { if (my !== seq) return; items = (j && j.results ? j.results : []).slice(0, 8); sel = items.length ? 0 : -1; paint(); });
+        .then(function (j) {
+          if (my !== seq) return;
+          if (!j && then) { then(null); return; }
+          items = (j && j.results ? j.results : []).slice(0, 8); itemsFor = q; sel = items.length ? 0 : -1; moved = false;
+          if (then) then(q); else paint();
+        });
     }
-    input.addEventListener("input", function () { clearTimeout(timer); timer = setTimeout(query, 110); });
+    function enter() {
+      var q = input.value.trim(); if (!q) return;
+      clearTimeout(timer);
+      if (itemsFor === q) { goTicker(best(items, q, sel, moved)); return; }
+      query(function (got) { goTicker(got ? best(items, got, sel, moved) : q); });
+    }
+    input.addEventListener("input", function () { clearTimeout(timer); moved = false; timer = setTimeout(function () { query(); }, 110); });
     input.addEventListener("focus", function () { if (input.value.trim()) query(); });
     input.addEventListener("keydown", function (e) {
-      if (e.key === "ArrowDown" && items.length) { e.preventDefault(); sel = (sel + 1) % items.length; paint(); }
-      else if (e.key === "ArrowUp" && items.length) { e.preventDefault(); sel = (sel - 1 + items.length) % items.length; paint(); }
-      else if (e.key === "Enter") { e.preventDefault(); goTicker(sel >= 0 && items[sel] ? items[sel].symbol : input.value); }
+      if (e.key === "ArrowDown" && items.length) { e.preventDefault(); sel = (sel + 1) % items.length; moved = true; paint(); }
+      else if (e.key === "ArrowUp" && items.length) { e.preventDefault(); sel = (sel - 1 + items.length) % items.length; moved = true; paint(); }
+      else if (e.key === "Enter") { e.preventDefault(); if (!e.isComposing) enter(); }
       else if (e.key === "Escape") { close(); input.blur(); }
     });
     list.addEventListener("mousedown", function (e) { e.preventDefault(); });
