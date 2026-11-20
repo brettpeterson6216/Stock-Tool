@@ -388,6 +388,7 @@
             "</div>" +
             '<section class="card" id="ov-r" data-w="expand" data-w-title="Risk"><h2 class="card-t">How risky has it been?</h2>' + sk(60) + "</section>" +
           "</div>" +
+          '<section class="card tech" id="ov-t" data-w="expand" data-w-title="Technical snapshot"><h2 class="card-t">Technical snapshot</h2>' + sk(120) + "</section>" +
         "</div>" +
         '<aside class="card prime rc" aria-label="LensScore report card" id="ov-rc" data-w="share,expand" data-w-title="LensScore">' + sk(220) + "</aside>" +
       "</div>" +
@@ -403,6 +404,7 @@
     IL.widgets(box);
     paintKeyNumbers();
     paintRisk();
+    paintTechnical();
     D.lens().then(function () { paintReportCard(); paintKeyNumbers(); paintReport(); paintPeers(); paintLensReport(); });
     D.hist().then(paintLensReport);
     paintLatestQuarter();
@@ -1004,6 +1006,97 @@
         '<div class="stat"><span class="k">A bad day, 1 in 20 (95% VaR) ' + IL.tip("On the worst 5% of the past year’s " + st.days + " trading days, the stock fell at least this much. Taken from the actual days, not a bell-curve estimate.") + '</span><span class="v down">' + F.spct(-st.var95 * 100) + "</span></div>" +
         '<div class="stat"><span class="k">Average of those days (CVaR) ' + IL.tip("The average fall on that worst 5% of days, also called expected shortfall. It shows how deep the bad days go.") + '</span><span class="v down">' + F.spct(-st.cvar95 * 100) + "</span></div>";
     });
+  }
+
+  /* ── Technical snapshot: trend, momentum, volatility and volume ─────────
+     From the same two years of daily closes as the chart, plus the S&P 500
+     (SPY) for relative strength. Each line says what the number is and what
+     it usually means; none of it is a buy or sell call. */
+  var spyBars = null;
+  function paintTechnical() {
+    var box = IL.$("#ov-t"); if (!box) return;
+    var bars = S.quote && S.quote.bars ? S.quote.bars : [], I = IL.ind;
+    var head = '<div class="card-h"><h2 class="card-t">Technical snapshot</h2><span class="card-sub">Daily closes' + (bars.length ? " to " + F.date(bars[bars.length - 1].time * 1000) : "") + "</span></div>";
+    if (!I || bars.length < 60) { box.innerHTML = head + '<p class="muted">Needs at least three months of price history.</p>'; return; }
+    var n = bars.length, last = bars[n - 1], px = last.close, L = I.last;
+    function at(series) { return series[n - 1]; }
+    function since(i) { return F.date(bars[i].time * 1000); }
+    function row(k, tip, v, cls, note) {
+      return '<div class="t-row"><span class="k">' + k + (tip ? " " + IL.tip(tip) : "") + '</span><span class="v num ' + (cls || "") + '">' + v + "</span>" + (note ? '<span class="n">' + note + "</span>" : "") + "</div>";
+    }
+    function vsAvg(len) {
+      var m = at(I.sma(bars, len)); if (!isFinite(m)) return row(len + "-day average", null, "—");
+      var d = (px / m - 1) * 100;
+      return row("Price vs " + len + "-day average", null, F.spct(d), F.cls(d), F.price(m));
+    }
+    /* Trend */
+    var s50 = I.sma(bars, 50), s200 = I.sma(bars, 200), cross = null;
+    for (var i = n - 1; i > 0; i--) {
+      if (!isFinite(s50[i - 1]) || !isFinite(s200[i - 1])) break;
+      if ((s50[i] > s200[i]) !== (s50[i - 1] > s200[i - 1])) { cross = { i: i, up: s50[i] > s200[i] }; break; }
+    }
+    var crossTxt = !isFinite(at(s200)) ? "—" : at(s50) > at(s200) ? "Above" : "Below";
+    var crossNote = cross ? (cross.up ? "Golden cross on " : "Death cross on ") + since(cross.i) : isFinite(at(s200)) ? "No cross in the last two years" : "";
+    var ax = I.adx(bars, 14), adxV = at(ax.adx);
+    var trendWord = !isFinite(adxV) ? "" : adxV >= 25 ? (at(ax.plusDI) > at(ax.minusDI) ? "Trending, buyers lead" : "Trending, sellers lead") : adxV < 20 ? "Sideways, no clear trend" : "A weak trend";
+    var yr = bars.slice(IL.windowStart(bars, IL.YEAR_DAYS)), hiI = 0, loI = 0;
+    yr.forEach(function (b, k) { if (b.high > yr[hiI].high) hiI = k; if (b.low < yr[loI].low) loI = k; });
+    var offHi = (px / yr[hiI].high - 1) * 100, offLo = (px / yr[loI].low - 1) * 100;
+    /* Momentum */
+    var rs = at(I.rsi(bars, 14)), rsWord = !isFinite(rs) ? "" : rs >= 70 ? "Overbought: has risen fast" : rs <= 30 ? "Oversold: has fallen fast" : rs >= 55 ? "Buyers have the edge" : rs <= 45 ? "Sellers have the edge" : "Balanced";
+    var m = I.macd(bars), mi = n - 1, mCross = null;
+    for (i = n - 1; i > 0; i--) { if (!isFinite(m.hist[i - 1])) break; if ((m.hist[i] >= 0) !== (m.hist[i - 1] >= 0)) { mCross = i; break; } }
+    var macdTxt = !isFinite(m.hist[mi]) ? "—" : m.hist[mi] >= 0 ? "Above its signal" : "Below its signal";
+    var macdNote = mCross ? "Crossed " + (m.hist[mi] >= 0 ? "up" : "down") + " on " + since(mCross) + (Math.abs(m.hist[mi]) > Math.abs(m.hist[mi - 1] || 0) ? ", gap widening" : ", gap narrowing") : "";
+    var st = I.stochastic(bars), stK = at(st.k);
+    function ret(days) { var j = IL.windowStart(bars, days); return bars[j] && bars[j].close > 0 ? (px / bars[j].close - 1) * 100 : NaN; }
+    var r1 = ret(30), r3 = ret(91), r6 = ret(182), r12 = IL.yearReturn(bars);
+    /* Volatility and volume */
+    var atrV = at(I.atr(bars, 14)), hv20 = I.histVol(bars, 20), hv252 = I.histVol(bars, Math.min(252, n - 1));
+    var bb = I.bollinger(bars, 20, 2), pb = at(bb.pctB), widths = bb.width.slice(-126).filter(isFinite);
+    var wNow = at(bb.width), squeeze = widths.length > 60 && wNow <= widths.slice().sort(function (a, b) { return a - b; })[Math.floor(widths.length * 0.1)];
+    var v50 = I.smaOf(bars.map(function (b) { return b.volume || 0; }), 50), rvol = v50[n - 1] ? (last.volume || 0) / v50[n - 1] : NaN;
+    var ob = I.obv(bars), obvUp = ob[n - 1] > ob[Math.max(0, n - 21)], pxUp = px > bars[Math.max(0, n - 21)].close;
+    var obvNote = obvUp === pxUp ? (obvUp ? "Volume confirms the rise" : "Volume confirms the fall") : obvUp ? "Rising while the price fell: buying underneath" : "Falling while the price rose: the rise is thin";
+
+    function relRow(label, days, own) {
+      if (!spyBars || !isFinite(own)) return row(label, null, isFinite(own) ? F.spct(own) : "—", F.cls(own));
+      var j = IL.windowStart(spyBars, days), sp = spyBars[j] && spyBars[j].close > 0 ? (spyBars[spyBars.length - 1].close / spyBars[j].close - 1) * 100 : NaN;
+      var diff = own - sp;
+      return row(label, null, F.spct(own), F.cls(own), isFinite(sp) ? (diff >= 0 ? "Beat" : "Lagged") + " the S&P 500 by " + F.num(Math.abs(diff), 1) + " points" : "");
+    }
+
+    box.innerHTML = head +
+      '<div class="t-grid">' +
+        '<div class="t-col"><h3 class="t-h">Trend</h3>' +
+          vsAvg(20) + vsAvg(50) + vsAvg(200) +
+          row("50-day vs 200-day average", "When the 50-day average crosses above the 200-day it is called a golden cross; below, a death cross. Both are slow, widely watched trend signals.", crossTxt, "", crossNote) +
+          row("Trend strength (ADX 14)", "Average Directional Index: how strong the trend is, whatever its direction. Above 25 is trending, below 20 sideways.", isFinite(adxV) ? F.num(adxV, 0) : "—", "", trendWord) +
+          row("From the 52-week high", null, F.spct(offHi), F.cls(offHi), F.price(yr[hiI].high) + " on " + F.date(yr[hiI].time * 1000)) +
+          row("From the 52-week low", null, F.spct(offLo), F.cls(offLo), F.price(yr[loI].low) + " on " + F.date(yr[loI].time * 1000)) +
+        "</div>" +
+        '<div class="t-col"><h3 class="t-h">Momentum</h3>' +
+          row("RSI 14", "Relative Strength Index, 0–100. Above 70 has risen fast (overbought), below 30 has fallen fast (oversold).", isFinite(rs) ? F.num(rs, 0) : "—", "", rsWord) +
+          row("MACD (12, 26, 9)", "The gap between the 12-day and 26-day exponential averages against its 9-day signal line. Above the signal means momentum is turning up.", macdTxt, "", macdNote) +
+          row("Stochastic %K", "Where today’s close sits in the last 14 days’ high-to-low range, smoothed. Above 80 is near the top of the range, below 20 near the bottom.", isFinite(stK) ? F.num(stK, 0) : "—", "", !isFinite(stK) ? "" : stK >= 80 ? "Near the top of its range" : stK <= 20 ? "Near the bottom of its range" : "Mid-range") +
+          relRow("1 month", 30, r1) + relRow("3 months", 91, r3) + relRow("6 months", 182, r6) + relRow("1 year", IL.YEAR_DAYS, r12) +
+        "</div>" +
+        '<div class="t-col"><h3 class="t-h">Volatility and volume</h3>' +
+          row("Daily range (ATR 14)", "Average True Range: how far the price typically moves in a day, including gaps. Often used to set stop-losses.", isFinite(atrV) ? F.price(atrV) : "—", "", isFinite(atrV) ? F.pct(atrV / px * 100) + " of the price" : "") +
+          row("Volatility, last 20 days", "Annualised standard deviation of daily returns over the last month, against the past year.", isFinite(hv20) ? F.pct(hv20, 0) : "—", "", isFinite(hv252) ? (hv20 > hv252 * 1.2 ? "Higher than its year (" : hv20 < hv252 * 0.8 ? "Calmer than its year (" : "In line with its year (") + F.pct(hv252, 0) + ")" : "") +
+          row("Bollinger position", "Where the close sits in its Bollinger Bands: 0% at the lower band, 100% at the upper. A narrow band (a squeeze) often comes before a bigger move.", isFinite(pb) ? F.pct(pb * 100, 0) : "—", "", squeeze ? "Bands are unusually narrow (a squeeze)" : !isFinite(pb) ? "" : pb > 1 ? "Closed above the upper band" : pb < 0 ? "Closed below the lower band" : "") +
+          row("Volume vs 50-day average", "The last session’s volume against its 50-day average. Above 1.5× is heavy trading.", isFinite(rvol) ? F.num(rvol, 2) + "×" : "—", "", isFinite(rvol) ? (rvol >= 1.5 ? "Heavy trading" : rvol <= 0.6 ? "Light trading" : "Normal trading") : "") +
+          row("On-balance volume, 1 month", "A running total of volume, added on up days and taken away on down days. It shows whether volume is backing the price move.", obvUp ? "Rising" : "Falling", "", obvNote) +
+        "</div>" +
+      "</div>" +
+      '<p class="note">Indicators describe what the price has done; they do not predict it. Add any of them to the chart above with <b>Indicators</b>.</p>';
+    if (!spyBars && S.t !== "SPY") {
+      IL.api("/api/quote/SPY?range=2y").then(function (res) {
+        if (!res.ok) return;
+        var sb = IL.seriesFrom(res.data); if (!sb || !sb.bars.length) return;
+        spyBars = sb.bars; paintTechnical();
+      });
+    }
   }
 
   /* The stock's P/E against its own history, under the grades: the Value

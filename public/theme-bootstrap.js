@@ -21,6 +21,22 @@
     document.documentElement.setAttribute("data-theme", "dark");
   }
 
+  /* ── phones: no zooming in on taps and typing ────────────────────────────
+     iOS Safari zooms the page when a text field with text smaller than 16px
+     gets focus, and a quick second tap on a button zooms too. On touch
+     screens every text field gets at least 16px text, and double-tap zoom is
+     turned off (touch-action: manipulation). Pinch-to-zoom still works: the
+     viewport is not locked, so people who need larger text can still zoom.
+     Done here because every page loads this script in its <head>. */
+  try {
+    var touchCss = document.createElement("style");
+    touchCss.id = "il-touch";
+    touchCss.textContent =
+      "html{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}" +
+      "@media (pointer:coarse){input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not([type=button]):not([type=submit]),select,textarea{font-size:max(16px,1em)!important}}";
+    document.head.appendChild(touchCss);
+  } catch (e) { /* styling only */ }
+
   window.syncBrowserChrome = function () {
     var dark = document.documentElement.getAttribute("data-theme") === "dark";
     var color = document.querySelector('meta[name="theme-color"]');

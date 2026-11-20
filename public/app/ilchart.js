@@ -19,8 +19,12 @@
      ch.show(i0, { animate: true });      // from bar i0 to the latest bar; becomes "home"
      ch.val(id, i);  ch.view();  ch.destroy();
 
-   Series: { id, kind: "line" | "area" | "candles" | "hist", v: [], o, h, l,
-             pane, color, width, smooth, tag, marker, auto, colors(i), fmt }
+   Series: { id, kind: "line" | "area" | "candles" | "hist" | "bars" | "band",
+             v: [], o, h, l, lo (band), pane, color, width, dash, smooth, tag,
+             marker, auto, colors(i), fmt }
+     hist  volume-style bars along the bottom of a pane, scaled to the window
+     bars  signed bars from zero on the pane's own scale (MACD histogram)
+     band  a fill between v (upper) and lo (lower), e.g. Bollinger Bands
    ═══════════════════════════════════════════════════════════════════════════ */
 (function () {
   "use strict";
@@ -220,8 +224,9 @@
         if (paneOf(s) !== pane.id) return;
         if (s.kind === "hist") { hist = true; return; }
         if (s.auto === false) return;
+        if (s.kind === "bars") { if (0 < lo) lo = 0; if (0 > hi) hi = 0; }
         for (var i = i0; i <= i1; i++) {
-          var a = s.kind === "candles" ? s.l[i] : val(s, i), b = s.kind === "candles" ? s.h[i] : a;
+          var a = s.kind === "candles" ? s.l[i] : s.kind === "band" ? s.lo[i] : val(s, i), b = s.kind === "candles" ? s.h[i] : val(s, i);
           if (fin(a) && a < lo) lo = a;
           if (fin(b) && b > hi) hi = b;
         }
@@ -312,10 +317,19 @@
           var y = px(Y(p.id, l.value));
           ctx.strokeStyle = col(l.color || "--line3"); ctx.setLineDash(l.dash || []); ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(plotW, y); ctx.stroke(); ctx.setLineDash([]);
         });
+        D.series.forEach(function (s) { if (paneOf(s) === p.id && s.kind === "band") drawBand(s, p.id, a, b, xs); });
         D.series.forEach(function (s) { if (paneOf(s) === p.id && s.kind === "hist") drawHist(s, r, i0, i1, xs, barW); });
+        D.series.forEach(function (s) { if (paneOf(s) === p.id && s.kind === "bars") drawBars(s, p.id, i0, i1, xs, barW); });
         D.series.forEach(function (s) { if (paneOf(s) === p.id && (s.kind === "line" || s.kind === "area")) drawLine(s, p.id, r, a, b, xs); });
         D.series.forEach(function (s) { if (paneOf(s) === p.id && s.kind === "candles") drawCandles(s, p.id, i0, i1, xs, barW); });
-        if (p.label) { ctx.fillStyle = T.t3; ctx.font = "500 10.5px " + FONT; ctx.textAlign = "left"; ctx.textBaseline = "top"; ctx.fillText(p.label, 8, r.y + 6); }
+        if (p.label) {
+          /* A pane's label may be a function of the bar being read (or the last one in view). */
+          var lab = typeof p.label === "function" ? p.label(cross && cross.i >= i0 && cross.i <= i1 ? cross.i : i1) : p.label;
+          ctx.font = "500 10.5px " + FONT; ctx.textAlign = "left"; ctx.textBaseline = "top";
+          var lw = ctx.measureText(lab).width;
+          ctx.fillStyle = rgba(T.surface, 0.82); ctx.fillRect(4, r.y + 3, lw + 8, 16);
+          ctx.fillStyle = T.t2; ctx.fillText(lab, 8, r.y + 6);
+        }
         ctx.restore();
       });
 
@@ -346,8 +360,38 @@
         else if (s.smooth === false) { ctx.moveTo(xs[run[0]], ys[run[0]]); for (var k = run[0] + 1; k <= run[1]; k++) ctx.lineTo(xs[k], ys[k]); }
         else trace(ctx, xs, ys, run[0], run[1]);
         ctx.lineWidth = s.width || 2; ctx.lineJoin = "round"; ctx.lineCap = "round"; ctx.strokeStyle = c;
+        if (s.dash) ctx.setLineDash(s.dash);
         if (run[1] === run[0]) { ctx.fillStyle = c; ctx.fill(); } else ctx.stroke();
+        ctx.setLineDash([]);
       });
+    }
+    /* A fill between two lines (upper v, lower lo), one run per stretch with data. */
+    function drawBand(s, id, a, b, xs) {
+      var c = col(s.color), up = [], dn = [], i;
+      function flush() {
+        if (up.length > 1) {
+          ctx.beginPath(); ctx.moveTo(up[0][0], up[0][1]);
+          for (var k = 1; k < up.length; k++) ctx.lineTo(up[k][0], up[k][1]);
+          for (k = dn.length - 1; k >= 0; k--) ctx.lineTo(dn[k][0], dn[k][1]);
+          ctx.closePath(); ctx.fillStyle = rgba(c, s.wash || 0.08); ctx.fill();
+        }
+        up = []; dn = [];
+      }
+      for (i = a; i <= b; i++) {
+        var hi = val(s, i), lo = s.lo[i];
+        if (fin(hi) && fin(lo)) { up.push([xs[i], Y(id, hi)]); dn.push([xs[i], Y(id, lo)]); } else flush();
+      }
+      flush();
+    }
+    /* Signed bars from zero on the pane's scale, in whole device pixels. */
+    function drawBars(s, id, i0, i1, xs, barW) {
+      var q = 1 / dpr, bw = barW * dpr, w = Math.max(1, Math.floor(bw * 0.7)), y0 = Math.round(Y(id, 0) * dpr);
+      for (var i = i0; i <= i1; i++) {
+        var v = val(s, i); if (!fin(v)) continue;
+        var y = Math.round(Y(id, v) * dpr);
+        ctx.fillStyle = s.colors ? col(s.colors(i)) : col(s.color);
+        ctx.fillRect((Math.round(xs[i] * dpr) - Math.floor(w / 2)) * q, Math.min(y, y0) * q, w * q, Math.max(1, Math.abs(y - y0)) * q);
+      }
     }
     /* Candles and volume bars are laid out in whole device pixels, so they
        stay sharp on every screen. */

@@ -39,6 +39,9 @@ html[data-theme="dark"] il-top,html[data-theme="dark"] il-tabbar{
    The bar's markup carries every state; these hide what does not apply.
    They only ever hide (display:none), so the bar's own layout rules,
    including its phone layout, stay in charge of everything shown. */
+/* Phones, signed out: Log in and Sign up need the room, so the theme switch
+   is shown once signed in. */
+@media (max-width:480px){html.il-guest il-top::part(theme),html.il-auth-pending il-top::part(theme){display:none}}
 html:not(.il-guest):not(.il-auth-pending) il-top::part(guest),
 html:not(.il-free) il-top::part(free),
 html:not(.il-pro) il-top::part(pro),

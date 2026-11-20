@@ -85,6 +85,10 @@ svg{display:block}
 input{flex:1;min-width:0;height:auto;margin:0;padding:0;border:0;background:transparent;color:var(--sh-text);font:inherit;font-size:14px;outline:none;box-shadow:none;-webkit-appearance:none;appearance:none}
 input::placeholder{color:var(--sh-text3);opacity:1}
 input::-webkit-search-cancel-button{display:none}
+/* Phones: 16px text in the search field, or iOS zooms the page when it gets
+   focus; no double-tap zoom on the bar's links and buttons. */
+@media (pointer:coarse){input{font-size:16px}}
+a,button,label{touch-action:manipulation}
 .kbd{font-weight:600;font-size:11px;line-height:1.4;color:var(--sh-text3);border:1px solid var(--sh-line2);border-radius:5px;padding:0 6px}
 
 .acct{margin-left:auto;display:flex;align-items:center;gap:10px;flex:none;position:relative}
@@ -129,8 +133,10 @@ input::-webkit-search-cancel-button{display:none}
 
 @media (max-width:1023px){   /* tablets and phones: tab bar at the bottom, search gets the room */
   .in{gap:12px;padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px))}
-  .nav,.word,.kbd,.plan,.acct .ghost{display:none}
-  @media (max-width:480px){.acct [part="free"]{display:none}.acct{gap:8px}}   /* phones: Pro plans are in the account menu; search keeps its room */
+  .nav,.word,.kbd,.plan{display:none}
+  /* Returning visitors need Log in on phones too: a plain text button beside Sign up. */
+  .acct .ghost{border-color:transparent;padding:0 8px}
+  @media (max-width:480px){.acct [part="free"]{display:none}.acct{gap:6px}.long{display:none}.acct .btn{padding:0 10px}.acct .ghost{padding:0 6px}}   /* phones: Pro plans are in the account menu; search keeps its room */
   .search{max-width:none}
 }`;
 
@@ -179,11 +185,11 @@ input::-webkit-search-cancel-button{display:none}
         /* A real switch: sun on the left, moon on the right, the gold knob
            sits over the current theme. The page's CSS moves the knob from
            the first frame (::part(knob)); the script keeps aria-checked. */
-        '<button class="theme" id="theme" type="button" role="switch" aria-checked="false" aria-label="Dark mode" title="Light / dark">' +
+        '<button class="theme" id="theme" part="theme" type="button" role="switch" aria-checked="false" aria-label="Dark mode" title="Light / dark">' +
           '<span class="sw"><span class="sw-i sw-sun">' + SUN + '</span><span class="sw-i sw-moon">' + MOON + '</span><span class="sw-knob" part="knob"></span></span>' +
         "</button>" +
         '<a class="btn ghost" part="guest" id="login" href="/login">Log in</a>' +
-        '<a class="btn gold" part="guest" id="signup" href="/signup">Sign up free</a>' +
+        '<a class="btn gold" part="guest" id="signup" href="/signup">Sign up<span class="long"> free</span></a>' +
         '<button class="avatar" part="member" id="avatar" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="menu" aria-label="Account menu"></button>' +
         '<div class="menu" id="menu" role="menu" hidden>' +
           '<div class="head" id="mhead"></div>' +

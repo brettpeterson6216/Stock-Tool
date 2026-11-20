@@ -102,7 +102,31 @@
     for (var i = 0; i < points.length; i++) out[at + i] = points[i].value;
     return out;
   }
-  function vol(v) { return v >= 1e9 ? (v / 1e9).toFixed(2) + "B" : v >= 1e6 ? (v / 1e6).toFixed(1) + "M" : v >= 1e3 ? (v / 1e3).toFixed(0) + "K" : String(Math.round(v)); }
+  function vol(v) { var a = Math.abs(v), s = v < 0 ? "−" : ""; return s + (a >= 1e9 ? (a / 1e9).toFixed(2) + "B" : a >= 1e6 ? (a / 1e6).toFixed(1) + "M" : a >= 1e3 ? (a / 1e3).toFixed(0) + "K" : String(Math.round(a))); }
+  function n2(v) { return isFinite(v) ? v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "—"; }
+  function n0(v) { return isFinite(v) ? v.toFixed(0) : "—"; }
+
+  /* ── Indicators ─────────────────────────────────────────────────────────
+     Overlays sit on the price and use daily bars (their names say "day").
+     Panes sit below the price and work on any bars except intraday. Each has
+     a one-line explanation for someone who has never seen it. The maths is
+     in indicators.js (IL.ind), tested on its own. */
+  var OVERLAYS = [
+    { k: "ma20", label: "20-day average", color: "--chart-s3", tip: "Average close over the last 20 trading days (about a month). Short-term trend: price above it is climbing faster than its recent norm." },
+    { k: "ma50", label: "50-day average", color: "--text2", tip: "Average close over the last 50 trading days. Price above it is a sign of a short-term uptrend." },
+    { k: "ma200", label: "200-day average", color: "--blue", tip: "Average close over roughly the last year. Many investors treat price above it as a long-term uptrend; the 50-day crossing above it is called a golden cross, below it a death cross." },
+    { k: "ema9", label: "9-day EMA", color: "--chart-s4", tip: "Exponential moving average: like an average, but recent days count more, so it turns sooner. Traders use the 9-day for very short-term direction." },
+    { k: "ema21", label: "21-day EMA", color: "--chart-s4", dash: [5, 4], tip: "Exponential average over about a month of trading. Pullbacks to it in an uptrend are a common place traders look for entries." },
+    { k: "bb", label: "Bollinger Bands (20, 2)", color: "--text3", tip: "A band two standard deviations either side of the 20-day average. It widens when the price swings more and narrows when it is calm; a close outside the band is unusual." },
+  ];
+  var PANES = [
+    { k: "rsi", label: "RSI (14)", tip: "Relative Strength Index, 0–100: how strong recent gains are against recent losses. Above 70 has risen fast (overbought); below 30 has fallen fast (oversold)." },
+    { k: "macd", label: "MACD (12, 26, 9)", tip: "The gap between a 12-day and a 26-day exponential average, with a 9-day signal line. The bars show the gap minus the signal: growing bars mean momentum is building in that direction." },
+    { k: "stoch", label: "Stochastic (14, 3, 3)", tip: "Where the close sits within the last 14 days' high–low range, 0–100, smoothed. Above 80 is near the top of its range, below 20 near the bottom." },
+    { k: "atr", label: "ATR (14)", tip: "Average True Range: how far the price typically moves in a day, in dollars, including gaps between days. Useful for sizing a stop-loss or a position." },
+    { k: "adx", label: "ADX (14)", tip: "Average Directional Index: how strong the trend is, not its direction. Above 25 is a trending market, below 20 a sideways one. +DI above −DI means buyers lead." },
+    { k: "obv", label: "On-balance volume", tip: "A running total of volume, added on up days and taken away on down days. Rising OBV while the price is flat can mean buyers are quietly accumulating." },
+  ];
 
   IL.PriceChart = function (root, opts) {
     opts = opts || {};
@@ -110,7 +134,7 @@
     var store = {};          // fetch key → {bars, meta}
     var state = {
       range: opts.range || "1Y", type: "area",
-      show: { ma50: true, ma200: true, volume: true, rsi: false },
+      show: { ma50: true, ma200: true, volume: true },
     };
     try {
       var saved = JSON.parse(localStorage.getItem("il-chart") || "null");
@@ -130,10 +154,12 @@
           '<div class="seg" role="group" aria-label="Chart type"><button type="button" data-type="area" aria-pressed="' + (state.type === "area") + '">Line</button><button type="button" data-type="candles" aria-pressed="' + (state.type === "candles") + '">Candles</button></div>' +
           '<div class="pc-ind"><button type="button" class="btn sm" id="pc-ind-btn" aria-haspopup="true" aria-expanded="false">Indicators</button>' +
             '<div class="il-menu pc-ind-menu" id="pc-ind-menu" hidden>' +
-              ind("ma50", "50-day average", "Average closing price over the last 50 trading days. Price above it is a sign of a short-term uptrend.") +
-              ind("ma200", "200-day average", "Average close over roughly the last year. Many investors treat price above it as a long-term uptrend.") +
+              '<div class="pc-ind-h">On the price</div>' +
+              OVERLAYS.map(function (o) { return ind(o.k, o.label, o.tip, o.color, o.dash); }).join("") +
               ind("volume", "Volume", "Shares traded each day. Big moves on heavy volume carry more weight.") +
-              ind("rsi", "RSI (14)", "Relative Strength Index. Above 70 means it has risen fast (overbought); below 30 means it has fallen fast (oversold).") +
+              '<div class="pc-ind-h">Below the chart</div>' +
+              PANES.map(function (o) { return ind(o.k, o.label, o.tip); }).join("") +
+              '<button type="button" class="pc-ind-clear" id="pc-ind-clear">Clear indicators</button>' +
             "</div></div>" +
         "</div>" +
       "</div>" +
@@ -141,8 +167,9 @@
       '<div class="pc-canvas" id="pc-canvas"><div class="pc-loading"><span class="sk" style="height:100%"></span></div></div>' +
       '<p class="note pc-note" id="pc-note"></p>';
 
-    function ind(key, label, tip) {
-      return '<label class="pc-check"><input type="checkbox" data-ind="' + key + '"' + (state.show[key] ? " checked" : "") + "><span>" + label + "</span>" + IL.tip(tip) + "</label>";
+    function ind(key, label, tip, color, dash) {
+      var sw = color ? '<i class="pc-sw' + (dash ? " dash" : "") + '" style="--sw:var(' + color + ')"></i>' : "";
+      return '<label class="pc-check"><input type="checkbox" data-ind="' + key + '"' + (state.show[key] ? " checked" : "") + "><span>" + sw + label + "</span>" + IL.tip(tip) + "</label>";
     }
 
     var canvas = root.querySelector("#pc-canvas");
@@ -194,8 +221,19 @@
         series.push({ id: "vol", kind: "hist", v: all.map(function (b) { return b.volume; }),
           colors: function (i) { return !candles ? ns : all[i].close >= (i ? all[i - 1].close : all[i].open) ? gs : ls; } });
       }
-      if (daily && state.show.ma200) series.push({ id: "ma200", kind: "line", v: aligned(sma(all, 200), all), color: "--blue", width: 1.5 });
-      if (daily && state.show.ma50) series.push({ id: "ma50", kind: "line", v: aligned(sma(all, 50), all), color: "--text2", width: 1.5 });
+      var I = IL.ind, phone = root.clientWidth < 560, PH = phone ? 78 : 92;
+      if (daily && I) {
+        if (state.show.bb) {
+          var bb = I.bollinger(all, 20, 2);
+          series.push({ id: "bb", kind: "band", v: bb.upper, lo: bb.lower, color: "--text3", wash: 0.08 });
+          series.push({ id: "bbu", kind: "line", v: bb.upper, color: "--text3", width: 1 }, { id: "bbl", kind: "line", v: bb.lower, color: "--text3", width: 1 });
+        }
+        if (state.show.ma200) series.push({ id: "ma200", kind: "line", v: I.sma(all, 200), color: "--blue", width: 1.5 });
+        if (state.show.ma50) series.push({ id: "ma50", kind: "line", v: I.sma(all, 50), color: "--text2", width: 1.5 });
+        if (state.show.ma20) series.push({ id: "ma20", kind: "line", v: I.sma(all, 20), color: "--chart-s3", width: 1.5 });
+        if (state.show.ema21) series.push({ id: "ema21", kind: "line", v: I.ema(all, 21), color: "--chart-s4", width: 1.5, dash: [5, 4] });
+        if (state.show.ema9) series.push({ id: "ema9", kind: "line", v: I.ema(all, 9), color: "--chart-s4", width: 1.5 });
+      }
       if (candles) {
         series.push({ id: "px", kind: "candles", v: close, tag: true, fmt: IL.fmt.price,
           o: all.map(function (b) { return b.open; }), h: all.map(function (b) { return b.high; }), l: all.map(function (b) { return b.low; }) });
@@ -204,13 +242,51 @@
            data). Up or down shows in the header, not the fill. */
         series.push({ id: "px", kind: "area", v: close, color: css("--chart-brand") ? "--chart-brand" : "--gold", width: 2, wash: 0.09, tag: true, marker: true, fmt: IL.fmt.price });
       }
-      var rsiOn = state.show.rsi && !r.intraday;
-      if (rsiOn) {
-        panes.push({ id: "rsi", height: 92, min: 0, max: 100, ticks: [30, 70], label: "RSI 14", fmt: function (v) { return v.toFixed(0); } });
-        series.push({ id: "rsi", pane: "rsi", kind: "line", v: aligned(rsi(all, 14), all), color: "--text2", width: 1.5, tag: true, fmt: function (v) { return v.toFixed(0); } });
+      var paneOn = !r.intraday && I, pct0 = function (v) { return v.toFixed(0); };
+      if (paneOn && state.show.rsi) {
+        var rs = I.rsi(all, 14);
+        panes.push({ id: "rsi", height: PH, min: 0, max: 100, ticks: [30, 70], fmt: pct0, label: function (i) { return "RSI 14  " + n0(rs[i]); } });
+        series.push({ id: "rsi", pane: "rsi", kind: "line", v: rs, color: "--text2", width: 1.5, tag: true, fmt: pct0 });
         lines.push({ pane: "rsi", value: 70, dash: [3, 3] }, { pane: "rsi", value: 30, dash: [3, 3] });
       }
-      canvas.classList.toggle("pc-rsi", rsiOn);
+      if (paneOn && state.show.macd) {
+        var m = I.macd(all), gp = alpha(css("--gain"), 0.55), lp = alpha(css("--loss"), 0.55);
+        panes.push({ id: "macd", height: PH, fmt: function (v) { return v.toFixed(Math.abs(v) < 1 ? 2 : 1); },
+          label: function (i) { return "MACD 12, 26, 9  " + n2(m.macd[i]) + "  signal " + n2(m.signal[i]) + "  bars " + n2(m.hist[i]); } });
+        series.push({ id: "macdh", pane: "macd", kind: "bars", v: m.hist, colors: function (i) { return m.hist[i] >= 0 ? gp : lp; } });
+        series.push({ id: "macd", pane: "macd", kind: "line", v: m.macd, color: "--text", width: 1.5 });
+        series.push({ id: "macds", pane: "macd", kind: "line", v: m.signal, color: "--chart-s3", width: 1.25 });
+        lines.push({ pane: "macd", value: 0 });
+      }
+      if (paneOn && state.show.stoch) {
+        var st = I.stochastic(all);
+        panes.push({ id: "stoch", height: PH, min: 0, max: 100, ticks: [20, 80], fmt: pct0, label: function (i) { return "Stochastic 14, 3, 3  %K " + n0(st.k[i]) + "  %D " + n0(st.d[i]); } });
+        series.push({ id: "stk", pane: "stoch", kind: "line", v: st.k, color: "--text", width: 1.5, tag: true, fmt: pct0 });
+        series.push({ id: "std", pane: "stoch", kind: "line", v: st.d, color: "--chart-s3", width: 1.25, dash: [4, 3] });
+        lines.push({ pane: "stoch", value: 80, dash: [3, 3] }, { pane: "stoch", value: 20, dash: [3, 3] });
+      }
+      if (paneOn && state.show.atr) {
+        var at14 = I.atr(all, 14);
+        panes.push({ id: "atr", height: PH, fmt: function (v) { return "$" + n2(v); },
+          label: function (i) { return "ATR 14  $" + n2(at14[i]) + (all[i] && all[i].close ? "  (" + (at14[i] / all[i].close * 100).toFixed(1) + "% of price)" : ""); } });
+        series.push({ id: "atr", pane: "atr", kind: "line", v: at14, color: "--text2", width: 1.5 });
+      }
+      if (paneOn && state.show.adx) {
+        var ax = I.adx(all, 14);
+        panes.push({ id: "adx", height: PH, min: 0, max: 70, ticks: [20, 40], fmt: pct0,
+          label: function (i) { return "ADX 14  " + n0(ax.adx[i]) + "  +DI " + n0(ax.plusDI[i]) + "  −DI " + n0(ax.minusDI[i]); } });
+        series.push({ id: "adx", pane: "adx", kind: "line", v: ax.adx, color: "--text", width: 1.75, tag: true, fmt: pct0 });
+        series.push({ id: "pdi", pane: "adx", kind: "line", v: ax.plusDI, color: "--chart-s2", width: 1.1 });
+        series.push({ id: "mdi", pane: "adx", kind: "line", v: ax.minusDI, color: "--chart-s3", width: 1.1 });
+        lines.push({ pane: "adx", value: 25, dash: [3, 3] });
+      }
+      if (paneOn && state.show.obv) {
+        var ob = I.obv(all);
+        panes.push({ id: "obv", height: PH, fmt: function (v) { return vol(v); }, label: function (i) { return "On-balance volume  " + vol(ob[i]); } });
+        series.push({ id: "obv", pane: "obv", kind: "line", v: ob, color: "--text2", width: 1.5 });
+      }
+      /* The chart grows with each pane, so the price keeps its height. */
+      canvas.style.height = ((phone ? 280 : 360) + panes.reduce(function (t, p) { return t + p.height + 1; }, 0)) + "px";
       var same = keep && drawn === current;
       drawn = current; at = null;
       chart.set({ times: all.map(function (b) { return b.time; }), series: series, panes: panes, lines: lines,
@@ -236,12 +312,15 @@
     function legend() {
       var el = root.querySelector("#pc-legend"), r = spec();
       var daily = !!(r.days || r.ytd), parts = [];
-      function key(id, color, label) {
-        var v = at !== null && chart ? chart.val(id, at) : NaN;
-        parts.push('<span class="pc-key"><i style="background:var(' + color + ')"></i>' + label + (isFinite(v) ? ' <b class="num">' + IL.fmt.price(v) + "</b>" : "") + "</span>");
-      }
-      if (daily && state.show.ma50) key("ma50", "--text2", "50-day avg");
-      if (daily && state.show.ma200) key("ma200", "--blue", "200-day avg");
+      if (daily) OVERLAYS.forEach(function (o) {
+        if (!state.show[o.k]) return;
+        var v = NaN, txt = "";
+        if (at !== null && chart) {
+          if (o.k === "bb") { var u = chart.val("bbu", at), l = chart.val("bbl", at); if (isFinite(u) && isFinite(l)) txt = IL.fmt.price(l) + "–" + IL.fmt.price(u); }
+          else { v = chart.val(o.k, at); if (isFinite(v)) txt = IL.fmt.price(v); }
+        }
+        parts.push('<span class="pc-key"><i class="pc-sw' + (o.dash ? " dash" : "") + '" style="--sw:var(' + o.color + ')"></i>' + o.label.replace(" average", " avg") + (txt ? ' <b class="num">' + txt + "</b>" : "") + "</span>");
+      });
       el.innerHTML = parts.join("");
     }
 
@@ -324,6 +403,12 @@
         root.querySelector("#pc-ind-btn").setAttribute("aria-expanded", String(!m.hidden));
         e.stopPropagation();
       }
+    });
+    root.addEventListener("click", function (e) {
+      if (!e.target.closest("#pc-ind-clear")) return;
+      Object.keys(state.show).forEach(function (k) { state.show[k] = k === "volume" ? state.show[k] : false; });
+      root.querySelectorAll("[data-ind]").forEach(function (x) { x.checked = !!state.show[x.getAttribute("data-ind")]; });
+      persist(); draw(true);
     });
     root.addEventListener("change", function (e) {
       var k = e.target.getAttribute && e.target.getAttribute("data-ind");
